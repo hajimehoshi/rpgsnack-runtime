@@ -12,34 +12,46 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package game
 
 import (
+	"image/color"
+
 	"github.com/hajimehoshi/ebiten"
 
-	"github.com/hajimehoshi/tsugunai/internal/game"
+	"github.com/hajimehoshi/tsugunai/internal/font"
 )
 
-var theGame *game.Game
+const (
+	tileSize  = 16
+	tileXNum  = 10
+	tileYNum  = 10
+	textScale = 2
+	mapScale  = 3
+)
 
-func update(screen *ebiten.Image) error {
-	if err := theGame.Update(); err != nil {
-		return err
-	}
-	if ebiten.IsRunningSlowly() {
-		return nil
-	}
-	if err := theGame.Draw(screen); err != nil {
+type Game struct {
+}
+
+func New() *Game {
+	return &Game{}
+}
+
+func (g *Game) Update() error {
+	return nil
+}
+
+func (g *Game) Draw(screen *ebiten.Image) error {
+	if err := font.DrawText(screen, "償いの時計 Clock of Atonement", 0, 0, textScale, color.White); err != nil {
 		return err
 	}
 	return nil
 }
 
-func main() {
-	theGame = game.New()
-	w, h := theGame.Size()
-	title := theGame.Title()
-	if err := ebiten.Run(update, w, h, 1, title); err != nil {
-		panic(err)
-	}
+func (g *Game) Title() string {
+	return "Clock of Atonement"
+}
+
+func (g *Game) Size() (int, int) {
+	return tileXNum * tileSize * mapScale, tileYNum * tileSize * mapScale
 }
