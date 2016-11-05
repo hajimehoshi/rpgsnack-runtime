@@ -29,7 +29,7 @@ type mapScene struct {
 
 func newMapScene() (*mapScene, error) {
 	// TODO: The image should be loaded asyncly.
-	tilesImage, err := assets.LoadImage("tiles.png", ebiten.FilterNearest)
+	tilesImage, err := assets.LoadImage("images/tiles.png", ebiten.FilterNearest)
 	if err != nil {
 		return nil, err
 	}

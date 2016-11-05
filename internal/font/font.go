@@ -25,7 +25,7 @@ import (
 var mplusImage *ebiten.Image
 
 func init() {
-	img, err := assets.LoadImage("mplus.png", ebiten.FilterNearest)
+	img, err := assets.LoadImage("images/mplus.png", ebiten.FilterNearest)
 	if err != nil {
 		panic(err)
 	}
