@@ -15,16 +15,19 @@
 package game
 
 import (
+	"encoding/json"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/tsugunai/internal/assets"
+	"github.com/hajimehoshi/tsugunai/internal/data"
 	"github.com/hajimehoshi/tsugunai/internal/font"
 )
 
 type mapScene struct {
 	tilesImage *ebiten.Image
+	currentMap *data.Map
 }
 
 func newMapScene() (*mapScene, error) {
@@ -33,8 +36,14 @@ func newMapScene() (*mapScene, error) {
 	if err != nil {
 		return nil, err
 	}
+	mapDataBytes := assets.MustAsset("data/map0.json")
+	var mapData *data.Map
+	if err := json.Unmarshal(mapDataBytes, &mapData); err != nil {
+		return nil, err
+	}
 	return &mapScene{
 		tilesImage: tilesImage,
+		currentMap: mapData,
 	}, nil
 }
 
@@ -42,9 +51,33 @@ func (m *mapScene) Update(sceneManager *sceneManager) error {
 	return nil
 }
 
+type tilesImageParts struct {
+	room *data.Room
+}
+
+func (t *tilesImageParts) Len() int {
+	return tileXNum * tileYNum
+}
+
+func (t *tilesImageParts) Src(index int) (int, int, int, int) {
+	tile := t.room.Tiles[index]
+	x := tile % 8 * tileSize
+	y := tile / 8 * tileSize
+	return x, y, x + tileSize, y + tileSize
+}
+
+func (t *tilesImageParts) Dst(index int) (int, int, int, int) {
+	x := index % tileXNum * tileSize
+	y := index / tileXNum * tileSize
+	return x, y, x + tileSize, y + tileSize
+}
+
 func (m *mapScene) Draw(screen *ebiten.Image) error {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(tileScale, tileScale)
+	op.ImageParts = &tilesImageParts{
+		room: m.currentMap.Rooms[0],
+	}
 	if err := screen.DrawImage(m.tilesImage, op); err != nil {
 		return err
 	}

@@ -12,27 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:generate go-bindata -nocompress -pkg=assets images data
-//go:generate gofmt -s -w .
+package data
 
-package assets
+type Map struct {
+	Name  string  `json:"name"`
+	Rooms []*Room `json:"rooms"`
+}
 
-import (
-	"bytes"
-	"image/png"
-
-	"github.com/hajimehoshi/ebiten"
-)
-
-func LoadImage(path string, filter ebiten.Filter) (*ebiten.Image, error) {
-	bin := MustAsset(path)
-	img, err := png.Decode(bytes.NewReader(bin))
-	if err != nil {
-		return nil, err
-	}
-	eimg, err := ebiten.NewImageFromImage(img, filter)
-	if err != nil {
-		return nil, err
-	}
-	return eimg, nil
+type Room struct {
+	Tiles []int `json:"tiles"`
 }

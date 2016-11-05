@@ -3,6 +3,7 @@
 // images/characters.png
 // images/mplus.png
 // images/tiles.png
+// data/map0.json
 // DO NOT EDIT!
 
 package assets
@@ -98,6 +99,70 @@ func imagesTilesPng() (*asset, error) {
 	return a, nil
 }
 
+var _dataMap0Json = []byte(`{
+  "name": "Sample Map",
+  "rooms": [
+    {
+      "tiles": [
+        58, 58, 58, 58, 58, 58, 58, 58, 58, 58,
+        58, 58, 58, 58, 58, 58, 58, 58, 58, 58,
+        58, 58, 58, 58, 58, 58, 58, 58, 58, 58,
+        58, 58, 58, 58, 58, 58, 58, 58, 58, 58,
+        58, 58, 58, 58, 58, 58, 58, 58, 58, 58,
+        58, 58, 58, 58, 58, 58, 58, 58, 58, 58,
+        58, 58, 58, 58, 58, 58, 58, 58, 58, 58,
+        58, 58, 58, 58, 58, 58, 58, 58, 58, 58,
+        58, 58, 58, 58, 58, 58, 58, 58, 58, 58,
+        58, 58, 58, 58, 58, 58, 58, 58, 58, 58
+      ]
+    },
+    {
+      "tiles": [
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+      ]
+    },
+    {
+      "tiles": [
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+      ]
+    }
+  ]
+}
+`)
+
+func dataMap0JsonBytes() ([]byte, error) {
+	return _dataMap0Json, nil
+}
+
+func dataMap0Json() (*asset, error) {
+	bytes, err := dataMap0JsonBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "data/map0.json", size: 1395, mode: os.FileMode(420), modTime: time.Unix(1478365483, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
 // Asset loads and returns the asset for the given name.
 // It returns an error if the asset could not be found or
 // could not be loaded.
@@ -153,6 +218,7 @@ var _bindata = map[string]func() (*asset, error){
 	"images/characters.png": imagesCharactersPng,
 	"images/mplus.png":      imagesMplusPng,
 	"images/tiles.png":      imagesTilesPng,
+	"data/map0.json":        dataMap0Json,
 }
 
 // AssetDir returns the file names below a certain
@@ -196,6 +262,9 @@ type bintree struct {
 }
 
 var _bintree = &bintree{nil, map[string]*bintree{
+	"data": {nil, map[string]*bintree{
+		"map0.json": {dataMap0Json, map[string]*bintree{}},
+	}},
 	"images": {nil, map[string]*bintree{
 		"characters.png": {imagesCharactersPng, map[string]*bintree{}},
 		"mplus.png":      {imagesMplusPng, map[string]*bintree{}},
