@@ -40,10 +40,10 @@ func init() {
 }
 
 const (
-	charHalfWidth  = 6
-	charFullWidth  = 12
-	charHeight     = 12
-	charLineHeight = 16
+	charHalfWidth = 6
+	charFullWidth = 12
+	charHeight    = 12
+	lineHeight    = 16
 )
 
 type textImageParts struct {
@@ -57,9 +57,12 @@ func (t *textImageParts) Len() int {
 func (t *textImageParts) Src(index int) (int, int, int, int) {
 	r := t.runes[index]
 	x := int(r%256) * charFullWidth
-	y := int(r/256) * charLineHeight
+	y := int(r/256) * lineHeight
 	w := charHalfWidth
-	h := charLineHeight
+	h := lineHeight
+	if r == '\n' {
+		return 0, 0, 0, 0
+	}
 	if 0x100 <= r {
 		w = charFullWidth
 	}
@@ -70,8 +73,13 @@ func (t *textImageParts) Dst(index int) (int, int, int, int) {
 	x := 0
 	y := 0
 	w := charFullWidth
-	h := charLineHeight
+	h := lineHeight
 	for i := 0; i < index; i++ {
+		if t.runes[i] == '\n' {
+			x = 0
+			y += lineHeight
+			continue
+		}
 		if t.runes[i] < 0x100 {
 			x += charHalfWidth
 			continue

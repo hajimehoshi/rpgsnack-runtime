@@ -42,7 +42,7 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) error {
-	if err := font.DrawText(screen, "償いの時計 Clock of Atonement", 0, 0, textScale, color.White); err != nil {
+	if err := font.DrawText(screen, "償いの時計\nClock of Atonement", 0, 0, textScale, color.White); err != nil {
 		return err
 	}
 	return nil
