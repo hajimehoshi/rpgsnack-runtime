@@ -23,21 +23,23 @@ import (
 )
 
 func update(screen *ebiten.Image) error {
-	if err := font.DrawText(screen, "償いの時計 Clock of Atonement", 0, 0, color.White); err != nil {
+	if err := font.DrawText(screen, "償いの時計 Clock of Atonement", 0, 0, textScale, color.White); err != nil {
 		return err
 	}
 	return nil
 }
 
 const (
-	tileSize = 16
-	tileXNum = 10
-	tileYNum = 10
+	tileSize  = 16
+	tileXNum  = 10
+	tileYNum  = 10
+	textScale = 2
+	mapScale  = 3
 )
 
 func main() {
 	const title = "Clock of Atonement"
-	if err := ebiten.Run(update, tileXNum * tileSize, tileYNum * tileSize, 2, title); err != nil {
+	if err := ebiten.Run(update, tileXNum*tileSize*mapScale, tileYNum*tileSize*mapScale, 1, title); err != nil {
 		panic(err)
 	}
 }

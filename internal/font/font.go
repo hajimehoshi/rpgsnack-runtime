@@ -84,8 +84,9 @@ func (t *textImageParts) Dst(index int) (int, int, int, int) {
 	return x, y, x + w, y + h
 }
 
-func DrawText(screen *ebiten.Image, text string, x, y int, color color.Color) error {
+func DrawText(screen *ebiten.Image, text string, x, y int, scale int, color color.Color) error {
 	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Scale(float64(scale), float64(scale))
 	op.GeoM.Translate(float64(x), float64(y))
 	r, g, b, a := color.RGBA()
 	op.ColorM.Scale(float64(r>>8), float64(g>>8), float64(b>>8), float64(a>>8))
