@@ -12,7 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:generate go-bindata -nocompress -pkg=assets mplus.png
+//go:generate go-bindata -nocompress -pkg=assets characters.png mplus.png tiles.png
 //go:generate gofmt -s -w .
 
 package assets
+
+import (
+	"bytes"
+	"image/png"
+
+	"github.com/hajimehoshi/ebiten"
+)
+
+func LoadImage(path string, filter ebiten.Filter) (*ebiten.Image, error) {
+	bin := MustAsset(path)
+	img, err := png.Decode(bytes.NewReader(bin))
+	if err != nil {
+		return nil, err
+	}
+	eimg, err := ebiten.NewImageFromImage(img, filter)
+	if err != nil {
+		return nil, err
+	}
+	return eimg, nil
+}

@@ -19,12 +19,13 @@ import (
 )
 
 type scene interface {
-	Update() error
+	Update(sceneManager *sceneManager) error
 	Draw(screen *ebiten.Image) error
 }
 
 type sceneManager struct {
 	current scene
+	next    scene
 }
 
 func newSceneManager(initScene scene) *sceneManager {
@@ -34,7 +35,11 @@ func newSceneManager(initScene scene) *sceneManager {
 }
 
 func (s *sceneManager) Update() error {
-	if err := s.current.Update(); err != nil {
+	if s.next != nil {
+		s.current = s.next
+		s.next = nil
+	}
+	if err := s.current.Update(s); err != nil {
 		return err
 	}
 	return nil
@@ -45,4 +50,8 @@ func (s *sceneManager) Draw(screen *ebiten.Image) error {
 		return err
 	}
 	return nil
+}
+
+func (s *sceneManager) GoTo(next scene) {
+	s.next = next
 }

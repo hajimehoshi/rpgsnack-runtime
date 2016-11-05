@@ -15,9 +15,7 @@
 package font
 
 import (
-	"bytes"
 	"image/color"
-	"image/png"
 
 	"github.com/hajimehoshi/ebiten"
 
@@ -27,16 +25,11 @@ import (
 var mplusImage *ebiten.Image
 
 func init() {
-	bin := assets.MustAsset("mplus.png")
-	img, err := png.Decode(bytes.NewReader(bin))
+	img, err := assets.LoadImage("mplus.png", ebiten.FilterNearest)
 	if err != nil {
 		panic(err)
 	}
-	eimg, err := ebiten.NewImageFromImage(img, ebiten.FilterNearest)
-	if err != nil {
-		panic(err)
-	}
-	mplusImage = eimg
+	mplusImage = img
 }
 
 const (

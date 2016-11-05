@@ -25,7 +25,7 @@ const (
 	tileXNum  = 10
 	tileYNum  = 10
 	textScale = 2
-	mapScale  = 3
+	tileScale = 3
 )
 
 type Game struct {
@@ -53,5 +53,5 @@ func (g *Game) Title() string {
 }
 
 func (g *Game) Size() (int, int) {
-	return tileXNum * tileSize * mapScale, tileYNum * tileSize * mapScale
+	return tileXNum * tileSize * tileScale, tileYNum * tileSize * tileScale
 }
