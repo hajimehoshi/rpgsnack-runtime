@@ -21,7 +21,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten"
 
-	"github.com/hajimehoshi/tsugunai/internal/font/assets"
+	"github.com/hajimehoshi/tsugunai/internal/assets"
 )
 
 var mplusImage *ebiten.Image
