@@ -21,11 +21,12 @@ import (
 )
 
 const (
-	tileSize  = 16
-	tileXNum  = 10
-	tileYNum  = 10
-	textScale = 2
-	tileScale = 3
+	tileSize      = 16
+	characterSize = 16
+	tileXNum      = 10
+	tileYNum      = 10
+	textScale     = 2
+	tileScale     = 3
 )
 
 type Game struct {

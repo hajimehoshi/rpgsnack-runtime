@@ -26,13 +26,18 @@ import (
 )
 
 type mapScene struct {
-	tilesImage *ebiten.Image
-	currentMap *data.Map
+	tilesImage      *ebiten.Image
+	charactersImage *ebiten.Image
+	currentMap      *data.Map
 }
 
 func newMapScene() (*mapScene, error) {
 	// TODO: The image should be loaded asyncly.
 	tilesImage, err := assets.LoadImage("images/tiles.png", ebiten.FilterNearest)
+	if err != nil {
+		return nil, err
+	}
+	charactersImage, err := assets.LoadImage("images/characters.png", ebiten.FilterNearest)
 	if err != nil {
 		return nil, err
 	}
@@ -42,8 +47,9 @@ func newMapScene() (*mapScene, error) {
 		return nil, err
 	}
 	return &mapScene{
-		tilesImage: tilesImage,
-		currentMap: mapData,
+		tilesImage:      tilesImage,
+		charactersImage: charactersImage,
+		currentMap:      mapData,
 	}, nil
 }
 
@@ -72,6 +78,23 @@ func (t *tilesImageParts) Dst(index int) (int, int, int, int) {
 	return x, y, x + tileSize, y + tileSize
 }
 
+type charactersImageParts struct {
+}
+
+func (c *charactersImageParts) Len() int {
+	return 1
+}
+
+func (c *charactersImageParts) Src(index int) (int, int, int, int) {
+	x := characterSize
+	y := characterSize * 2
+	return x, y, x + characterSize, y + characterSize
+}
+
+func (c *charactersImageParts) Dst(index int) (int, int, int, int) {
+	return 0, 0, characterSize, characterSize
+}
+
 func (m *mapScene) Draw(screen *ebiten.Image) error {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(tileScale, tileScale)
@@ -79,6 +102,12 @@ func (m *mapScene) Draw(screen *ebiten.Image) error {
 		room: m.currentMap.Rooms[0],
 	}
 	if err := screen.DrawImage(m.tilesImage, op); err != nil {
+		return err
+	}
+	op = &ebiten.DrawImageOptions{}
+	op.GeoM.Scale(tileScale, tileScale)
+	op.ImageParts = &charactersImageParts{}
+	if err := screen.DrawImage(m.charactersImage, op); err != nil {
 		return err
 	}
 	if err := font.DrawText(screen, "文字の大きさはこれくらい。", 0, 0, textScale, color.White); err != nil {
