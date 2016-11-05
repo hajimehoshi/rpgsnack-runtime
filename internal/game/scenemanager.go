@@ -18,37 +18,31 @@ import (
 	"github.com/hajimehoshi/ebiten"
 )
 
-const (
-	tileSize  = 16
-	tileXNum  = 10
-	tileYNum  = 10
-	textScale = 2
-	mapScale  = 3
-)
-
-type Game struct {
-	sceneManager *sceneManager
+type scene interface {
+	Update() error
+	Draw(screen *ebiten.Image) error
 }
 
-func New() *Game {
-	initScene := &titleScene{}
-	return &Game{
-		sceneManager: newSceneManager(initScene),
+type sceneManager struct {
+	current scene
+}
+
+func newSceneManager(initScene scene) *sceneManager {
+	return &sceneManager{
+		current: initScene,
 	}
 }
 
-func (g *Game) Update() error {
-	return g.sceneManager.Update()
+func (s *sceneManager) Update() error {
+	if err := s.current.Update(); err != nil {
+		return err
+	}
+	return nil
 }
 
-func (g *Game) Draw(screen *ebiten.Image) error {
-	return g.sceneManager.Draw(screen)
-}
-
-func (g *Game) Title() string {
-	return "Clock of Atonement"
-}
-
-func (g *Game) Size() (int, int) {
-	return tileXNum * tileSize * mapScale, tileYNum * tileSize * mapScale
+func (s *sceneManager) Draw(screen *ebiten.Image) error {
+	if err := s.current.Draw(screen); err != nil {
+		return err
+	}
+	return nil
 }

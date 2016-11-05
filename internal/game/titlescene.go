@@ -15,40 +15,23 @@
 package game
 
 import (
+	"image/color"
+
 	"github.com/hajimehoshi/ebiten"
+
+	"github.com/hajimehoshi/tsugunai/internal/font"
 )
 
-const (
-	tileSize  = 16
-	tileXNum  = 10
-	tileYNum  = 10
-	textScale = 2
-	mapScale  = 3
-)
-
-type Game struct {
-	sceneManager *sceneManager
+type titleScene struct {
 }
 
-func New() *Game {
-	initScene := &titleScene{}
-	return &Game{
-		sceneManager: newSceneManager(initScene),
+func (t *titleScene) Update() error {
+	return nil
+}
+
+func (t *titleScene) Draw(screen *ebiten.Image) error {
+	if err := font.DrawText(screen, "償いの時計\nClock of Atonement", 0, 0, textScale, color.White); err != nil {
+		return err
 	}
-}
-
-func (g *Game) Update() error {
-	return g.sceneManager.Update()
-}
-
-func (g *Game) Draw(screen *ebiten.Image) error {
-	return g.sceneManager.Draw(screen)
-}
-
-func (g *Game) Title() string {
-	return "Clock of Atonement"
-}
-
-func (g *Game) Size() (int, int) {
-	return tileXNum * tileSize * mapScale, tileYNum * tileSize * mapScale
+	return nil
 }
