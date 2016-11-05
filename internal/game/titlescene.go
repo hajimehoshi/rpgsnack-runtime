@@ -20,12 +20,17 @@ import (
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/tsugunai/internal/font"
+	"github.com/hajimehoshi/tsugunai/internal/input"
 )
 
 type titleScene struct {
 }
 
 func (t *titleScene) Update() error {
+	if input.Triggered() {
+		x, y := input.Position()
+		println(x, y)
+	}
 	return nil
 }
 

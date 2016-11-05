@@ -12,46 +12,48 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package game
+package input
 
 import (
 	"github.com/hajimehoshi/ebiten"
-
-	"github.com/hajimehoshi/tsugunai/internal/input"
 )
 
-const (
-	tileSize  = 16
-	tileXNum  = 10
-	tileYNum  = 10
-	textScale = 2
-	mapScale  = 3
-)
+var theInput = &input{}
 
-type Game struct {
-	sceneManager *sceneManager
+type input struct {
+	pressCount int
+	x          int
+	y          int
 }
 
-func New() *Game {
-	initScene := &titleScene{}
-	return &Game{
-		sceneManager: newSceneManager(initScene),
+func Update() {
+	theInput.Update()
+}
+
+func Triggered() bool {
+	return theInput.Triggered()
+}
+
+func Position() (int, int) {
+	return theInput.Position()
+}
+
+func (i *input) Update() {
+	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+		i.pressCount++
+		i.x, i.y = ebiten.CursorPosition()
+		return
 	}
+	// TODO: Handle touch events
+	i.pressCount = 0
+	i.x = 0
+	i.y = 0
 }
 
-func (g *Game) Update() error {
-	input.Update()
-	return g.sceneManager.Update()
+func (i *input) Triggered() bool {
+	return i.pressCount == 1
 }
 
-func (g *Game) Draw(screen *ebiten.Image) error {
-	return g.sceneManager.Draw(screen)
-}
-
-func (g *Game) Title() string {
-	return "Clock of Atonement"
-}
-
-func (g *Game) Size() (int, int) {
-	return tileXNum * tileSize * mapScale, tileYNum * tileSize * mapScale
+func (i *input) Position() (int, int) {
+	return i.x, i.y
 }
