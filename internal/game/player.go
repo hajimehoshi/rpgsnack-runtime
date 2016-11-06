@@ -20,10 +20,13 @@ import (
 	"github.com/hajimehoshi/tsugunai/internal/assets"
 )
 
+const playerMaxMoveCount = 4
+
 type player struct {
 	x               int
 	y               int
 	path            []dir
+	moveCount       int
 	charactersImage *ebiten.Image
 }
 
@@ -65,21 +68,28 @@ func (p *player) move(x, y int) {
 		return
 	}
 	p.path = calcPath(passable, p.x, p.y, x, y)
+	p.moveCount = playerMaxMoveCount
 }
 
 func (p *player) update() error {
 	if len(p.path) > 0 {
-		switch p.path[0] {
-		case dirLeft:
-			p.x--
-		case dirRight:
-			p.x++
-		case dirUp:
-			p.y--
-		case dirDown:
-			p.y++
+		if p.moveCount > 0 {
+			p.moveCount--
 		}
-		p.path = p.path[1:]
+		if p.moveCount == 0 {
+			switch p.path[0] {
+			case dirLeft:
+				p.x--
+			case dirRight:
+				p.x++
+			case dirUp:
+				p.y--
+			case dirDown:
+				p.y++
+			}
+			p.path = p.path[1:]
+			p.moveCount = playerMaxMoveCount
+		}
 	}
 	return nil
 }
@@ -106,6 +116,22 @@ func (c *charactersImageParts) Dst(index int) (int, int, int, int) {
 
 func (p *player) draw(screen *ebiten.Image) error {
 	op := &ebiten.DrawImageOptions{}
+	if p.isMoving() {
+		dx := 0
+		dy := 0
+		d := (playerMaxMoveCount - p.moveCount) * tileSize / playerMaxMoveCount
+		switch p.path[0] {
+		case dirLeft:
+			dx -= d
+		case dirRight:
+			dx += d
+		case dirUp:
+			dy -= d
+		case dirDown:
+			dy += d
+		}
+		op.GeoM.Translate(float64(dx), float64(dy))
+	}
 	op.GeoM.Scale(tileScale, tileScale)
 	op.ImageParts = &charactersImageParts{p}
 	if err := screen.DrawImage(p.charactersImage, op); err != nil {
