@@ -23,12 +23,13 @@ import (
 	"github.com/hajimehoshi/tsugunai/internal/assets"
 	"github.com/hajimehoshi/tsugunai/internal/data"
 	"github.com/hajimehoshi/tsugunai/internal/font"
+	"github.com/hajimehoshi/tsugunai/internal/input"
 )
 
 type mapScene struct {
-	tilesImage      *ebiten.Image
-	charactersImage *ebiten.Image
-	currentMap      *data.Map
+	tilesImage *ebiten.Image
+	currentMap *data.Map
+	player     *player
 }
 
 func newMapScene() (*mapScene, error) {
@@ -37,23 +38,32 @@ func newMapScene() (*mapScene, error) {
 	if err != nil {
 		return nil, err
 	}
-	charactersImage, err := assets.LoadImage("images/characters.png", ebiten.FilterNearest)
-	if err != nil {
-		return nil, err
-	}
 	mapDataBytes := assets.MustAsset("data/map0.json")
 	var mapData *data.Map
 	if err := json.Unmarshal(mapDataBytes, &mapData); err != nil {
 		return nil, err
 	}
+	player, err := newPlayer()
+	if err != nil {
+		return nil, err
+	}
 	return &mapScene{
-		tilesImage:      tilesImage,
-		charactersImage: charactersImage,
-		currentMap:      mapData,
+		tilesImage: tilesImage,
+		currentMap: mapData,
+		player:     player,
 	}, nil
 }
 
 func (m *mapScene) Update(sceneManager *sceneManager) error {
+	if input.Triggered() {
+		x, y := input.Position()
+		tx := x / tileSize / tileScale
+		ty := y / tileSize / tileScale
+		m.player.move(tx, ty)
+	}
+	if err := m.player.update(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -78,23 +88,6 @@ func (t *tilesImageParts) Dst(index int) (int, int, int, int) {
 	return x, y, x + tileSize, y + tileSize
 }
 
-type charactersImageParts struct {
-}
-
-func (c *charactersImageParts) Len() int {
-	return 1
-}
-
-func (c *charactersImageParts) Src(index int) (int, int, int, int) {
-	x := characterSize
-	y := characterSize * 2
-	return x, y, x + characterSize, y + characterSize
-}
-
-func (c *charactersImageParts) Dst(index int) (int, int, int, int) {
-	return 0, 0, characterSize, characterSize
-}
-
 func (m *mapScene) Draw(screen *ebiten.Image) error {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(tileScale, tileScale)
@@ -104,10 +97,7 @@ func (m *mapScene) Draw(screen *ebiten.Image) error {
 	if err := screen.DrawImage(m.tilesImage, op); err != nil {
 		return err
 	}
-	op = &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(tileScale, tileScale)
-	op.ImageParts = &charactersImageParts{}
-	if err := screen.DrawImage(m.charactersImage, op); err != nil {
+	if err := m.player.draw(screen); err != nil {
 		return err
 	}
 	if err := font.DrawText(screen, "文字の大きさはこれくらい。", 0, 0, textScale, color.White); err != nil {
