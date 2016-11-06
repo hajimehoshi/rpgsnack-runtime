@@ -56,10 +56,12 @@ func newMapScene() (*mapScene, error) {
 
 func (m *mapScene) Update(sceneManager *sceneManager) error {
 	if input.Triggered() {
-		x, y := input.Position()
-		tx := x / tileSize / tileScale
-		ty := y / tileSize / tileScale
-		m.player.move(tx, ty)
+		if !m.player.isMoving() {
+			x, y := input.Position()
+			tx := x / tileSize / tileScale
+			ty := y / tileSize / tileScale
+			m.player.move(tx, ty)
+		}
 	}
 	if err := m.player.update(); err != nil {
 		return err

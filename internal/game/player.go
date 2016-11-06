@@ -23,8 +23,7 @@ import (
 type player struct {
 	x               int
 	y               int
-	nextX           int
-	nextY           int
+	path            []dir
 	charactersImage *ebiten.Image
 }
 
@@ -34,23 +33,53 @@ func newPlayer() (*player, error) {
 		return nil, err
 	}
 	return &player{
-		x:               0,
-		y:               0,
-		nextX:           0,
-		nextY:           0,
 		charactersImage: charactersImage,
 	}, nil
 }
 
+func (p *player) isMoving() bool {
+	return len(p.path) > 0
+}
+
+func passable(x, y int) bool {
+	if x < 0 {
+		return false
+	}
+	if y < 0 {
+		return false
+	}
+	if tileXNum <= x {
+		return false
+	}
+	if tileYNum <= y {
+		return false
+	}
+	return true
+}
+
 func (p *player) move(x, y int) {
-	p.nextX = x
-	p.nextY = y
+	if p.isMoving() {
+		panic("not reach")
+	}
+	if p.x == x && p.y == y {
+		return
+	}
+	p.path = calcPath(passable, p.x, p.y, x, y)
 }
 
 func (p *player) update() error {
-	if p.x != p.nextX || p.y != p.nextY {
-		p.x = p.nextX
-		p.y = p.nextY
+	if len(p.path) > 0 {
+		switch p.path[0] {
+		case dirLeft:
+			p.x--
+		case dirRight:
+			p.x++
+		case dirUp:
+			p.y--
+		case dirDown:
+			p.y++
+		}
+		p.path = p.path[1:]
 	}
 	return nil
 }
