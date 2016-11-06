@@ -66,7 +66,7 @@ func (t *tilesImageParts) Len() int {
 }
 
 func (t *tilesImageParts) Src(index int) (int, int, int, int) {
-	tile := t.room.Tiles[index]
+	tile := t.room.Tiles[0][index]
 	x := tile % 8 * tileSize
 	y := tile / 8 * tileSize
 	return x, y, x + tileSize, y + tileSize

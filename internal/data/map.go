@@ -20,5 +20,5 @@ type Map struct {
 }
 
 type Room struct {
-	Tiles []int `json:"tiles"`
+	Tiles [][]int `json:"tiles"`
 }
