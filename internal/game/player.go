@@ -27,6 +27,7 @@ type player struct {
 	y               int
 	path            []dir
 	moveCount       int
+	dir             dir
 	charactersImage *ebiten.Image
 }
 
@@ -36,6 +37,7 @@ func newPlayer() (*player, error) {
 		return nil, err
 	}
 	return &player{
+		dir:             dirDown,
 		charactersImage: charactersImage,
 	}, nil
 }
@@ -77,7 +79,8 @@ func (p *player) update() error {
 			p.moveCount--
 		}
 		if p.moveCount == 0 {
-			switch p.path[0] {
+			d := p.path[0]
+			switch d {
 			case dirLeft:
 				p.x--
 			case dirRight:
@@ -87,6 +90,7 @@ func (p *player) update() error {
 			case dirDown:
 				p.y++
 			}
+			p.dir = d
 			p.path = p.path[1:]
 			if len(p.path) > 0 {
 				p.moveCount = playerMaxMoveCount
@@ -106,7 +110,16 @@ func (c *charactersImageParts) Len() int {
 
 func (c *charactersImageParts) Src(index int) (int, int, int, int) {
 	x := characterSize
-	y := characterSize * 2
+	y := 0
+	switch c.player.dir {
+	case dirUp:
+	case dirRight:
+		y += characterSize
+	case dirDown:
+		y += 2 * characterSize
+	case dirLeft:
+		y += 3 * characterSize
+	}
 	return x, y, x + characterSize, y + characterSize
 }
 
