@@ -88,7 +88,9 @@ func (p *player) update() error {
 				p.y++
 			}
 			p.path = p.path[1:]
-			p.moveCount = playerMaxMoveCount
+			if len(p.path) > 0 {
+				p.moveCount = playerMaxMoveCount
+			}
 		}
 	}
 	return nil
