@@ -20,7 +20,15 @@ import (
 	"github.com/hajimehoshi/tsugunai/internal/assets"
 )
 
-const playerMaxMoveCount = 4
+type attitude int
+
+const (
+	attitudeLeft attitude = iota
+	attitudeMiddle
+	attitudeRight
+)
+
+const playerMaxMoveCount = 8
 
 type player struct {
 	x               int
@@ -28,6 +36,8 @@ type player struct {
 	path            []dir
 	moveCount       int
 	dir             dir
+	attitude        attitude
+	prevAttitude    attitude
 	charactersImage *ebiten.Image
 }
 
@@ -38,6 +48,8 @@ func newPlayer() (*player, error) {
 	}
 	return &player{
 		dir:             dirDown,
+		attitude:        attitudeMiddle,
+		prevAttitude:    attitudeMiddle,
 		charactersImage: charactersImage,
 	}, nil
 }
@@ -76,6 +88,14 @@ func (p *player) move(x, y int) {
 func (p *player) update() error {
 	if len(p.path) > 0 {
 		if p.moveCount > 0 {
+			p.dir = p.path[0]
+			if p.moveCount >= playerMaxMoveCount/2 {
+				p.attitude = attitudeMiddle
+			} else if p.prevAttitude == attitudeLeft {
+				p.attitude = attitudeRight
+			} else {
+				p.attitude = attitudeLeft
+			}
 			p.moveCount--
 		}
 		if p.moveCount == 0 {
@@ -91,6 +111,8 @@ func (p *player) update() error {
 				p.y++
 			}
 			p.dir = d
+			p.prevAttitude = p.attitude
+			p.attitude = attitudeMiddle
 			p.path = p.path[1:]
 			if len(p.path) > 0 {
 				p.moveCount = playerMaxMoveCount
@@ -109,8 +131,15 @@ func (c *charactersImageParts) Len() int {
 }
 
 func (c *charactersImageParts) Src(index int) (int, int, int, int) {
-	x := characterSize
+	x := 0
 	y := 0
+	switch c.player.attitude {
+	case attitudeLeft:
+	case attitudeMiddle:
+		x += characterSize
+	case attitudeRight:
+		x += 2 * characterSize
+	}
 	switch c.player.dir {
 	case dirUp:
 	case dirRight:
