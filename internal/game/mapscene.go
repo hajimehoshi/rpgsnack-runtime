@@ -16,6 +16,7 @@ package game
 
 import (
 	"encoding/json"
+	"fmt"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten"
@@ -127,7 +128,8 @@ func (m *mapScene) Draw(screen *ebiten.Image) error {
 	if err := m.player.draw(screen); err != nil {
 		return err
 	}
-	if err := font.DrawText(screen, "文字の大きさはこれくらい。", 0, 0, textScale, color.White); err != nil {
+	msg := fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS())
+	if err := font.DrawText(screen, msg, 0, 0, textScale, color.White); err != nil {
 		return err
 	}
 	return nil
