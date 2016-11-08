@@ -58,23 +58,7 @@ func (p *player) isMoving() bool {
 	return len(p.path) > 0
 }
 
-func passable(x, y int) bool {
-	if x < 0 {
-		return false
-	}
-	if y < 0 {
-		return false
-	}
-	if tileXNum <= x {
-		return false
-	}
-	if tileYNum <= y {
-		return false
-	}
-	return true
-}
-
-func (p *player) move(x, y int) {
+func (p *player) move(passable func(x, y int) bool, x, y int) {
 	if p.isMoving() {
 		panic("not reach")
 	}

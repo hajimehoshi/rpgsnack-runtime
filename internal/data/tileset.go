@@ -17,7 +17,9 @@ package data
 type PassageType int
 
 const (
-	PassageTypeBatsu PassageType = iota
+	PassageTypeBlock PassageType = iota
+	PassageTypePassable
+	PassageTypeWall
 )
 
 type TileSet struct {

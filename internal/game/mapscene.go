@@ -55,13 +55,35 @@ func newMapScene() (*mapScene, error) {
 	}, nil
 }
 
+func (m *mapScene) passable(x, y int) bool {
+	if x < 0 {
+		return false
+	}
+	if y < 0 {
+		return false
+	}
+	if tileXNum <= x {
+		return false
+	}
+	if tileYNum <= y {
+		return false
+	}
+	tileSet := tileSets[m.currentMap.TileSetID]
+	// TODO: Consider the other layer.
+	tile := m.currentMap.Rooms[0].Tiles[0][y*tileXNum+x]
+	if tileSet.PassageTypes[tile] != data.PassageTypePassable {
+		return false
+	}
+	return true
+}
+
 func (m *mapScene) Update(sceneManager *sceneManager) error {
 	if input.Triggered() {
 		if !m.player.isMoving() {
 			x, y := input.Position()
 			tx := x / tileSize / tileScale
 			ty := y / tileSize / tileScale
-			m.player.move(tx, ty)
+			m.player.move(m.passable, tx, ty)
 		}
 	}
 	if err := m.player.update(); err != nil {
@@ -79,6 +101,7 @@ func (t *tilesImageParts) Len() int {
 }
 
 func (t *tilesImageParts) Src(index int) (int, int, int, int) {
+	// TODO: 8 is a magic number and should be replaced.
 	tile := t.room.Tiles[0][index]
 	x := tile % 8 * tileSize
 	y := tile / 8 * tileSize
