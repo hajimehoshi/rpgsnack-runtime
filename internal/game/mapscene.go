@@ -33,14 +33,15 @@ type mapScene struct {
 }
 
 func newMapScene() (*mapScene, error) {
-	// TODO: The image should be loaded asyncly.
-	tilesImage, err := assets.LoadImage("images/tiles.png", ebiten.FilterNearest)
-	if err != nil {
-		return nil, err
-	}
 	mapDataBytes := assets.MustAsset("data/map0.json")
 	var mapData *data.Map
 	if err := json.Unmarshal(mapDataBytes, &mapData); err != nil {
+		return nil, err
+	}
+	// TODO: The image should be loaded asyncly.
+	tileSet := tileSets[mapData.TileSetID]
+	tilesImage, err := assets.LoadImage("images/"+tileSet.Image, ebiten.FilterNearest)
+	if err != nil {
 		return nil, err
 	}
 	player, err := newPlayer()

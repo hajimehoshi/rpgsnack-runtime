@@ -36,7 +36,11 @@ func update(screen *ebiten.Image) error {
 }
 
 func main() {
-	theGame = game.New()
+	g, err := game.New()
+	if err != nil {
+		panic(err)
+	}
+	theGame = g
 	w, h := theGame.Size()
 	title := theGame.Title()
 	if err := ebiten.Run(update, w, h, 1, title); err != nil {

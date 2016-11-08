@@ -14,12 +14,14 @@
 
 package data
 
-type Map struct {
-	Name      string  `json:"name"`
-	TileSetID int     `json:"tileSetId"`
-	Rooms     []*Room `json:"rooms"`
-}
+type PassageType int
 
-type Room struct {
-	Tiles [][]int `json:"tiles"`
+const (
+	PassageTypeBatsu PassageType = iota
+)
+
+type TileSet struct {
+	Name         string        `json:"name"`
+	Image        string        `json:"image"`
+	PassageTypes []PassageType `json:"passageTypes"`
 }

@@ -15,8 +15,12 @@
 package game
 
 import (
+	"encoding/json"
+
 	"github.com/hajimehoshi/ebiten"
 
+	"github.com/hajimehoshi/tsugunai/internal/assets"
+	"github.com/hajimehoshi/tsugunai/internal/data"
 	"github.com/hajimehoshi/tsugunai/internal/input"
 )
 
@@ -29,15 +33,25 @@ const (
 	tileScale     = 3
 )
 
+// TODO: This variable should belong to a struct.
+var (
+	tileSets []*data.TileSet
+)
+
 type Game struct {
 	sceneManager *sceneManager
 }
 
-func New() *Game {
+func New() (*Game, error) {
 	initScene := &titleScene{}
-	return &Game{
+	game := &Game{
 		sceneManager: newSceneManager(initScene),
 	}
+	mapDataBytes := assets.MustAsset("data/tilesets.json")
+	if err := json.Unmarshal(mapDataBytes, &tileSets); err != nil {
+		return nil, err
+	}
+	return game, nil
 }
 
 func (g *Game) Update() error {

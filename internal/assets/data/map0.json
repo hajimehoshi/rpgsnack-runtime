@@ -1,5 +1,6 @@
 {
   "name": "Sample Map",
+  "tileSetId": 0,
   "rooms": [
     {
       "tiles": [
