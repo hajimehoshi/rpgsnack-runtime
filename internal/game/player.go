@@ -41,12 +41,14 @@ type player struct {
 	charactersImage *ebiten.Image
 }
 
-func newPlayer() (*player, error) {
+func newPlayer(x, y int) (*player, error) {
 	charactersImage, err := assets.LoadImage("images/characters.png", ebiten.FilterNearest)
 	if err != nil {
 		return nil, err
 	}
 	return &player{
+		x:               x,
+		y:               y,
 		dir:             dirDown,
 		attitude:        attitudeMiddle,
 		prevAttitude:    attitudeMiddle,

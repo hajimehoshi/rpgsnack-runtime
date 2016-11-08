@@ -45,7 +45,7 @@ func newMapScene() (*mapScene, error) {
 	if err != nil {
 		return nil, err
 	}
-	player, err := newPlayer()
+	player, err := newPlayer(0, 2)
 	if err != nil {
 		return nil, err
 	}
