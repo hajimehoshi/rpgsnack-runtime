@@ -15,6 +15,10 @@
 package main
 
 import (
+	"flag"
+	"os"
+	"runtime/pprof"
+
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/tsugunai/internal/game"
@@ -35,7 +39,20 @@ func update(screen *ebiten.Image) error {
 	return nil
 }
 
+var cpuProfile = flag.String("cpuprofile", "", "write cpu profile to file")
+
 func main() {
+	flag.Parse()
+	if *cpuProfile != "" {
+		f, err := os.Create(*cpuProfile)
+		if err != nil {
+			panic(err)
+		}
+		if err := pprof.StartCPUProfile(f); err != nil {
+			panic(err)
+		}
+		defer pprof.StopCPUProfile()
+	}
 	g, err := game.New()
 	if err != nil {
 		panic(err)
