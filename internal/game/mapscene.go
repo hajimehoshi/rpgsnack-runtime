@@ -27,9 +27,10 @@ import (
 )
 
 type mapScene struct {
-	tilesImage *ebiten.Image
-	currentMap *data.Map
-	player     *player
+	tilesImage    *ebiten.Image
+	currentRoomID int
+	currentMap    *data.Map
+	player        *player
 }
 
 func newMapScene() (*mapScene, error) {
@@ -70,7 +71,7 @@ func (m *mapScene) passable(x, y int) bool {
 	}
 	tileSet := tileSets[m.currentMap.TileSetID]
 	// TODO: Consider the other layer.
-	tile := m.currentMap.Rooms[0].Tiles[0][y*tileXNum+x]
+	tile := m.currentMap.Rooms[m.currentRoomID].Tiles[0][y*tileXNum+x]
 	if tileSet.PassageTypes[tile] != data.PassageTypePassable {
 		return false
 	}
@@ -118,7 +119,7 @@ func (m *mapScene) Draw(screen *ebiten.Image) error {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(tileScale, tileScale)
 	op.ImageParts = &tilesImageParts{
-		room: m.currentMap.Rooms[0],
+		room: m.currentMap.Rooms[m.currentRoomID],
 	}
 	if err := screen.DrawImage(m.tilesImage, op); err != nil {
 		return err
