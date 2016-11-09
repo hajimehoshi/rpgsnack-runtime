@@ -174,7 +174,7 @@ var _dataTilesetsJson = []byte(`[
     "name": "normal",
     "images": [
       "tiles_bottom.png",
-      "tilse_top.png"
+      "tiles_top.png"
     ],
     "passageTypes": [
       [
@@ -204,7 +204,7 @@ func dataTilesetsJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "data/tilesets.json", size: 420, mode: os.FileMode(420), modTime: time.Unix(1478659831, 0)}
+	info := bindataFileInfo{name: "data/tilesets.json", size: 420, mode: os.FileMode(420), modTime: time.Unix(1478660107, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

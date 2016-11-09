@@ -28,10 +28,11 @@ import (
 )
 
 type mapScene struct {
-	tilesImage    *ebiten.Image
-	currentRoomID int
-	currentMap    *data.Map
-	player        *player
+	tilesBottomImage *ebiten.Image
+	tilesTopImage    *ebiten.Image
+	currentRoomID    int
+	currentMap       *data.Map
+	player           *player
 }
 
 func newMapScene() (*mapScene, error) {
@@ -42,7 +43,11 @@ func newMapScene() (*mapScene, error) {
 	}
 	// TODO: The image should be loaded asyncly.
 	tileSet := tileSets[mapData.TileSetID]
-	tilesImage, err := assets.LoadImage("images/"+tileSet.Images[0], ebiten.FilterNearest)
+	tilesBottomImage, err := assets.LoadImage("images/"+tileSet.Images[0], ebiten.FilterNearest)
+	if err != nil {
+		return nil, err
+	}
+	tilesTopImage, err := assets.LoadImage("images/"+tileSet.Images[1], ebiten.FilterNearest)
 	if err != nil {
 		return nil, err
 	}
@@ -51,9 +56,10 @@ func newMapScene() (*mapScene, error) {
 		return nil, err
 	}
 	return &mapScene{
-		tilesImage: tilesImage,
-		currentMap: mapData,
-		player:     player,
+		tilesBottomImage: tilesBottomImage,
+		tilesTopImage:    tilesTopImage,
+		currentMap:       mapData,
+		player:           player,
 	}, nil
 }
 
@@ -123,7 +129,7 @@ func (m *mapScene) Draw(screen *ebiten.Image) error {
 	op.ImageParts = &tilesImageParts{
 		room: m.currentMap.Rooms[m.currentRoomID],
 	}
-	if err := screen.DrawImage(m.tilesImage, op); err != nil {
+	if err := screen.DrawImage(m.tilesBottomImage, op); err != nil {
 		return err
 	}
 	if err := m.player.draw(screen); err != nil {

@@ -3,7 +3,7 @@
     "name": "normal",
     "images": [
       "tiles_bottom.png",
-      "tilse_top.png"
+      "tiles_top.png"
     ],
     "passageTypes": [
       [
