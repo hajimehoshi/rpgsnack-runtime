@@ -23,7 +23,7 @@ const (
 )
 
 type TileSet struct {
-	Name         string        `json:"name"`
-	Image        string        `json:"image"`
-	PassageTypes []PassageType `json:"passageTypes"`
+	Name         string          `json:"name"`
+	Images       []string        `json:"images"`
+	PassageTypes [][]PassageType `json:"passageTypes"`
 }

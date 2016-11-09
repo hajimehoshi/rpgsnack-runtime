@@ -42,7 +42,7 @@ func newMapScene() (*mapScene, error) {
 	}
 	// TODO: The image should be loaded asyncly.
 	tileSet := tileSets[mapData.TileSetID]
-	tilesImage, err := assets.LoadImage("images/"+tileSet.Image, ebiten.FilterNearest)
+	tilesImage, err := assets.LoadImage("images/"+tileSet.Images[0], ebiten.FilterNearest)
 	if err != nil {
 		return nil, err
 	}
@@ -71,10 +71,11 @@ func (m *mapScene) passable(x, y int) bool {
 		return false
 	}
 	tileSet := tileSets[m.currentMap.TileSetID]
-	// TODO: Consider the other layer.
-	tile := m.currentMap.Rooms[m.currentRoomID].Tiles[0][y*tileXNum+x]
-	if tileSet.PassageTypes[tile] != data.PassageTypePassable {
-		return false
+	for _, layer := range []int{1, 0} {
+		tile := m.currentMap.Rooms[m.currentRoomID].Tiles[layer][y*tileXNum+x]
+		if tileSet.PassageTypes[layer][tile] != data.PassageTypePassable {
+			return false
+		}
 	}
 	return true
 }
