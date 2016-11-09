@@ -129,12 +129,12 @@ var _dataMap0Json = []byte(`{
           1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
           1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
           1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+          24, 29, 1, 27, 34, 1, 1, 1, 1, 1,
+          4, 5, 1, 3, 5, 1, 1, 1, 1, 1,
           1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-          1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-          1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-          1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-          1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-          1, 1, 1, 1, 1, 1, 1, 1, 1, 1
+          1, 1, 25, 1, 1, 1, 1, 1, 1, 1,
+          1, 1, 26, 1, 1, 1, 1, 1, 1, 1,
+          2, 2, 35, 2, 2, 2, 2, 2, 2, 2
         ],
         [
           0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -164,7 +164,7 @@ func dataMap0Json() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "data/map0.json", size: 939, mode: os.FileMode(420), modTime: time.Unix(1478659809, 0)}
+	info := bindataFileInfo{name: "data/map0.json", size: 946, mode: os.FileMode(420), modTime: time.Unix(1478706328, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -181,10 +181,12 @@ var _dataTilesetsJson = []byte(`[
         0, 1, 0, 0, 0, 0, 0, 1,
         0, 0, 0, 1, 1, 1, 0, 1,
         0, 0, 0, 0, 0, 0, 1, 1,
+        0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0
       ],
       [
         1, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0
@@ -204,7 +206,7 @@ func dataTilesetsJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "data/tilesets.json", size: 420, mode: os.FileMode(420), modTime: time.Unix(1478660107, 0)}
+	info := bindataFileInfo{name: "data/tilesets.json", size: 484, mode: os.FileMode(420), modTime: time.Unix(1478704325, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
