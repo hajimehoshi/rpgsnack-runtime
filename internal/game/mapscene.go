@@ -51,7 +51,7 @@ func newMapScene() (*mapScene, error) {
 	if err != nil {
 		return nil, err
 	}
-	player, err := newPlayer(0, 2)
+	player, err := newPlayer(1, 2)
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +102,8 @@ func (m *mapScene) Update(sceneManager *sceneManager) error {
 }
 
 type tilesImageParts struct {
-	room *data.Room
+	room  *data.Room
+	layer int
 }
 
 func (t *tilesImageParts) Len() int {
@@ -111,7 +112,7 @@ func (t *tilesImageParts) Len() int {
 
 func (t *tilesImageParts) Src(index int) (int, int, int, int) {
 	// TODO: 8 is a magic number and should be replaced.
-	tile := t.room.Tiles[0][index]
+	tile := t.room.Tiles[t.layer][index]
 	x := tile % 8 * tileSize
 	y := tile / 8 * tileSize
 	return x, y, x + tileSize, y + tileSize
@@ -127,9 +128,17 @@ func (m *mapScene) Draw(screen *ebiten.Image) error {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(tileScale, tileScale)
 	op.ImageParts = &tilesImageParts{
-		room: m.currentMap.Rooms[m.currentRoomID],
+		room:  m.currentMap.Rooms[m.currentRoomID],
+		layer: 0,
 	}
 	if err := screen.DrawImage(m.tilesBottomImage, op); err != nil {
+		return err
+	}
+	op.ImageParts = &tilesImageParts{
+		room:  m.currentMap.Rooms[m.currentRoomID],
+		layer: 1,
+	}
+	if err := screen.DrawImage(m.tilesTopImage, op); err != nil {
 		return err
 	}
 	if err := m.player.draw(screen); err != nil {
