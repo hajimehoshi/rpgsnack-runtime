@@ -28,7 +28,7 @@ const (
 	attitudeRight
 )
 
-const playerMaxMoveCount = 8
+const playerMaxMoveCount = 4
 
 type player struct {
 	x               int
