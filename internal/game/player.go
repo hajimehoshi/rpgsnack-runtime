@@ -42,7 +42,7 @@ type player struct {
 }
 
 func newPlayer(x, y int) (*player, error) {
-	charactersImage, err := assets.LoadImage("images/characters.png", ebiten.FilterNearest)
+	charactersImage, err := assets.LoadImage("images/characters0.png", ebiten.FilterNearest)
 	if err != nil {
 		return nil, err
 	}
