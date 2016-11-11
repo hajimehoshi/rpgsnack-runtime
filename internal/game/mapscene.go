@@ -30,6 +30,7 @@ import (
 type mapScene struct {
 	tilesBottomImage *ebiten.Image
 	tilesTopImage    *ebiten.Image
+	markerImage      *ebiten.Image
 	currentRoomID    int
 	currentMap       *data.Map
 	player           *player
@@ -51,6 +52,10 @@ func newMapScene() (*mapScene, error) {
 	if err != nil {
 		return nil, err
 	}
+	markerImage, err := assets.LoadImage("images/marker.png", ebiten.FilterNearest)
+	if err != nil {
+		return nil, err
+	}
 	player, err := newPlayer(1, 2)
 	if err != nil {
 		return nil, err
@@ -58,6 +63,7 @@ func newMapScene() (*mapScene, error) {
 	return &mapScene{
 		tilesBottomImage: tilesBottomImage,
 		tilesTopImage:    tilesTopImage,
+		markerImage:      markerImage,
 		currentMap:       mapData,
 		player:           player,
 	}, nil
@@ -177,6 +183,15 @@ func (m *mapScene) Draw(screen *ebiten.Image) error {
 	}
 	if err := screen.DrawImage(m.tilesTopImage, op); err != nil {
 		return err
+	}
+	if m.player.isMoving() {
+		x, y := m.player.moveDst()
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(float64(x*tileSize), float64(y*tileSize))
+		op.GeoM.Scale(tileScale, tileScale)
+		if err := screen.DrawImage(m.markerImage, op); err != nil {
+			return err
+		}
 	}
 	msg := fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS())
 	if err := font.DrawText(screen, msg, 0, 0, textScale, color.White); err != nil {
