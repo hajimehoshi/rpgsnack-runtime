@@ -223,7 +223,7 @@ func dataTilesetsJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "data/tilesets.json", size: 452, mode: os.FileMode(420), modTime: time.Unix(1478833083, 0)}
+	info := bindataFileInfo{name: "data/tilesets.json", size: 452, mode: os.FileMode(420), modTime: time.Unix(1478834413, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

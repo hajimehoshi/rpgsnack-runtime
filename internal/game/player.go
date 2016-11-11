@@ -33,8 +33,6 @@ const playerMaxMoveCount = 4
 type player struct {
 	x               int
 	y               int
-	moveDstX        int
-	moveDstY        int
 	path            []dir
 	moveCount       int
 	dir             dir
@@ -62,24 +60,16 @@ func (p *player) isMoving() bool {
 	return len(p.path) > 0
 }
 
-func (p *player) move(passable func(x, y int) bool, x, y int) {
+func (p *player) move(passable func(x, y int) bool, x, y int) bool {
 	if p.isMoving() {
 		panic("not reach")
 	}
 	if p.x == x && p.y == y {
-		return
+		return false
 	}
 	p.path = calcPath(passable, p.x, p.y, x, y)
 	p.moveCount = playerMaxMoveCount
-	p.moveDstX = x
-	p.moveDstY = y
-}
-
-func (p *player) moveDst() (int, int) {
-	if !p.isMoving() {
-		panic("not reach")
-	}
-	return p.moveDstX, p.moveDstY
+	return true
 }
 
 func (p *player) update() error {

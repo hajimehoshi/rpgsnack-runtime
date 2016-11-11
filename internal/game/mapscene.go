@@ -34,6 +34,8 @@ type mapScene struct {
 	currentRoomID    int
 	currentMap       *data.Map
 	player           *player
+	moveDstX         int
+	moveDstY         int
 }
 
 func newMapScene() (*mapScene, error) {
@@ -111,6 +113,8 @@ func (m *mapScene) Update(sceneManager *sceneManager) error {
 			tx := x / tileSize / tileScale
 			ty := y / tileSize / tileScale
 			m.player.move(m.passable, tx, ty)
+			m.moveDstX = tx
+			m.moveDstY = ty
 		}
 	}
 	if err := m.player.update(); err != nil {
@@ -185,7 +189,7 @@ func (m *mapScene) Draw(screen *ebiten.Image) error {
 		return err
 	}
 	if m.player.isMoving() {
-		x, y := m.player.moveDst()
+		x, y := m.moveDstX, m.moveDstY
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(x*tileSize), float64(y*tileSize))
 		op.GeoM.Scale(tileScale, tileScale)
