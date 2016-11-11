@@ -77,13 +77,25 @@ func (m *mapScene) passable(x, y int) bool {
 		return false
 	}
 	tileSet := tileSets[m.currentMap.TileSetID]
-	for _, layer := range []int{1, 0} {
-		tile := m.currentMap.Rooms[m.currentRoomID].Tiles[layer][y*tileXNum+x]
-		if tileSet.PassageTypes[layer][tile] != data.PassageTypePassable {
-			return false
-		}
+	layer := 1
+	tile := m.currentMap.Rooms[m.currentRoomID].Tiles[layer][y*tileXNum+x]
+	switch tileSet.PassageTypes[layer][tile] {
+	case data.PassageTypeBlock:
+		return false
+	case data.PassageTypePassable:
+		return true
+	case data.PassageTypeWall:
+		panic("not implemented")
+	case data.PassageTypeOver:
+	default:
+		panic("not reach")
 	}
-	return true
+	layer = 0
+	tile = m.currentMap.Rooms[m.currentRoomID].Tiles[layer][y*tileXNum+x]
+	if tileSet.PassageTypes[layer][tile] == data.PassageTypePassable {
+		return true
+	}
+	return false
 }
 
 func (m *mapScene) Update(sceneManager *sceneManager) error {
@@ -102,8 +114,10 @@ func (m *mapScene) Update(sceneManager *sceneManager) error {
 }
 
 type tilesImageParts struct {
-	room  *data.Room
-	layer int
+	room     *data.Room
+	tileSet  *data.TileSet
+	layer    int
+	overOnly bool
 }
 
 func (t *tilesImageParts) Len() int {
@@ -111,8 +125,17 @@ func (t *tilesImageParts) Len() int {
 }
 
 func (t *tilesImageParts) Src(index int) (int, int, int, int) {
-	// TODO: 8 is a magic number and should be replaced.
 	tile := t.room.Tiles[t.layer][index]
+	if t.layer == 1 {
+		p := t.tileSet.PassageTypes[t.layer][tile]
+		if !t.overOnly && p == data.PassageTypeOver {
+			return 0, 0, 0, 0
+		}
+		if t.overOnly && p != data.PassageTypeOver {
+			return 0, 0, 0, 0
+		}
+	}
+	// TODO: 8 is a magic number and should be replaced.
 	x := tile % 8 * tileSize
 	y := tile / 8 * tileSize
 	return x, y, x + tileSize, y + tileSize
@@ -128,20 +151,31 @@ func (m *mapScene) Draw(screen *ebiten.Image) error {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(tileScale, tileScale)
 	op.ImageParts = &tilesImageParts{
-		room:  m.currentMap.Rooms[m.currentRoomID],
-		layer: 0,
+		room:    m.currentMap.Rooms[m.currentRoomID],
+		tileSet: tileSets[m.currentMap.TileSetID],
+		layer:   0,
 	}
 	if err := screen.DrawImage(m.tilesBottomImage, op); err != nil {
 		return err
 	}
 	op.ImageParts = &tilesImageParts{
-		room:  m.currentMap.Rooms[m.currentRoomID],
-		layer: 1,
+		room:    m.currentMap.Rooms[m.currentRoomID],
+		tileSet: tileSets[m.currentMap.TileSetID],
+		layer:   1,
 	}
 	if err := screen.DrawImage(m.tilesTopImage, op); err != nil {
 		return err
 	}
 	if err := m.player.draw(screen); err != nil {
+		return err
+	}
+	op.ImageParts = &tilesImageParts{
+		room:     m.currentMap.Rooms[m.currentRoomID],
+		tileSet:  tileSets[m.currentMap.TileSetID],
+		layer:    1,
+		overOnly: true,
+	}
+	if err := screen.DrawImage(m.tilesTopImage, op); err != nil {
 		return err
 	}
 	msg := fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS())

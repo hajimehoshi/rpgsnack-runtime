@@ -20,6 +20,7 @@ const (
 	PassageTypeBlock PassageType = iota
 	PassageTypePassable
 	PassageTypeWall
+	PassageTypeOver
 )
 
 type TileSet struct {
