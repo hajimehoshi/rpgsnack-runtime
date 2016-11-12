@@ -14,16 +14,11 @@
 
 package game
 
-type dir int
-
-const (
-	dirLeft dir = iota
-	dirRight
-	dirUp
-	dirDown
+import (
+	"github.com/hajimehoshi/tsugunai/internal/data"
 )
 
-func calcPath(passable func(x, y int) bool, startX, startY, goalX, goalY int) []dir {
+func calcPath(passable func(x, y int) bool, startX, startY, goalX, goalY int) []data.Dir {
 	type pos struct {
 		X, Y int
 	}
@@ -55,7 +50,7 @@ func calcPath(passable func(x, y int) bool, startX, startY, goalX, goalY int) []
 		current = next
 	}
 	p := pos{goalX, goalY}
-	dirs := []dir{}
+	dirs := []data.Dir{}
 	for p.X != startX || p.Y != startY {
 		parent, ok := parents[p]
 		// There is no path.
@@ -64,19 +59,19 @@ func calcPath(passable func(x, y int) bool, startX, startY, goalX, goalY int) []
 		}
 		switch {
 		case parent.X == p.X-1:
-			dirs = append(dirs, dirRight)
+			dirs = append(dirs, data.DirRight)
 		case parent.X == p.X+1:
-			dirs = append(dirs, dirLeft)
+			dirs = append(dirs, data.DirLeft)
 		case parent.Y == p.Y-1:
-			dirs = append(dirs, dirDown)
+			dirs = append(dirs, data.DirDown)
 		case parent.Y == p.Y+1:
-			dirs = append(dirs, dirUp)
+			dirs = append(dirs, data.DirUp)
 		default:
 			panic("not reach")
 		}
 		p = parent
 	}
-	path := make([]dir, len(dirs))
+	path := make([]data.Dir, len(dirs))
 	for i, d := range dirs {
 		path[len(dirs)-i-1] = d
 	}

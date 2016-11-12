@@ -18,6 +18,7 @@ import (
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/tsugunai/internal/assets"
+	"github.com/hajimehoshi/tsugunai/internal/data"
 )
 
 type attitude int
@@ -33,9 +34,9 @@ const playerMaxMoveCount = 4
 type player struct {
 	x               int
 	y               int
-	path            []dir
+	path            []data.Dir
 	moveCount       int
-	dir             dir
+	dir             data.Dir
 	attitude        attitude
 	prevAttitude    attitude
 	charactersImage *ebiten.Image
@@ -49,7 +50,7 @@ func newPlayer(x, y int) (*player, error) {
 	return &player{
 		x:               x,
 		y:               y,
-		dir:             dirDown,
+		dir:             data.DirDown,
 		attitude:        attitudeMiddle,
 		prevAttitude:    attitudeMiddle,
 		charactersImage: charactersImage,
@@ -88,13 +89,13 @@ func (p *player) update() error {
 		if p.moveCount == 0 {
 			d := p.path[0]
 			switch d {
-			case dirLeft:
+			case data.DirLeft:
 				p.x--
-			case dirRight:
+			case data.DirRight:
 				p.x++
-			case dirUp:
+			case data.DirUp:
 				p.y--
-			case dirDown:
+			case data.DirDown:
 				p.y++
 			}
 			p.dir = d
@@ -128,12 +129,12 @@ func (c *charactersImageParts) Src(index int) (int, int, int, int) {
 		x += 2 * characterSize
 	}
 	switch c.player.dir {
-	case dirUp:
-	case dirRight:
+	case data.DirUp:
+	case data.DirRight:
 		y += characterSize
-	case dirDown:
+	case data.DirDown:
 		y += 2 * characterSize
-	case dirLeft:
+	case data.DirLeft:
 		y += 3 * characterSize
 	}
 	return x, y, x + characterSize, y + characterSize
@@ -152,13 +153,13 @@ func (p *player) draw(screen *ebiten.Image) error {
 		dy := 0
 		d := (playerMaxMoveCount - p.moveCount) * tileSize / playerMaxMoveCount
 		switch p.path[0] {
-		case dirLeft:
+		case data.DirLeft:
 			dx -= d
-		case dirRight:
+		case data.DirRight:
 			dx += d
-		case dirUp:
+		case data.DirUp:
 			dy -= d
-		case dirDown:
+		case data.DirDown:
 			dy += d
 		}
 		op.GeoM.Translate(float64(dx), float64(dy))

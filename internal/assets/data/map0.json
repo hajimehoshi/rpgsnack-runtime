@@ -28,6 +28,21 @@
           0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
           0, 0, 0, 0, 24, 25, 26, 0, 0, 0
         ]
+      ],
+      "events": [
+        {
+          "id": 0,
+          "x": 8,
+          "y": 5,
+          "pages": [
+            {
+              "conditions": "",
+              "image":      "characters0.png",
+              "imageIndex": 1,
+              "dir":        1
+            }
+          ]
+        }
       ]
     }
   ]
