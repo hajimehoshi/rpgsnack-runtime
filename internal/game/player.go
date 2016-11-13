@@ -17,7 +17,6 @@ package game
 import (
 	"github.com/hajimehoshi/ebiten"
 
-	"github.com/hajimehoshi/tsugunai/internal/assets"
 	"github.com/hajimehoshi/tsugunai/internal/data"
 )
 
@@ -32,28 +31,22 @@ const (
 const playerMaxMoveCount = 4
 
 type player struct {
-	x               int
-	y               int
-	path            []data.Dir
-	moveCount       int
-	dir             data.Dir
-	attitude        attitude
-	prevAttitude    attitude
-	charactersImage *ebiten.Image
+	x            int
+	y            int
+	path         []data.Dir
+	moveCount    int
+	dir          data.Dir
+	attitude     attitude
+	prevAttitude attitude
 }
 
 func newPlayer(x, y int) (*player, error) {
-	charactersImage, err := assets.LoadImage("images/characters0.png", ebiten.FilterNearest)
-	if err != nil {
-		return nil, err
-	}
 	return &player{
-		x:               x,
-		y:               y,
-		dir:             data.DirDown,
-		attitude:        attitudeMiddle,
-		prevAttitude:    attitudeMiddle,
-		charactersImage: charactersImage,
+		x:            x,
+		y:            y,
+		dir:          data.DirDown,
+		attitude:     attitudeMiddle,
+		prevAttitude: attitudeMiddle,
 	}, nil
 }
 
@@ -166,7 +159,7 @@ func (p *player) draw(screen *ebiten.Image) error {
 	}
 	op.GeoM.Scale(tileScale, tileScale)
 	op.ImageParts = &charactersImageParts{p}
-	if err := screen.DrawImage(p.charactersImage, op); err != nil {
+	if err := screen.DrawImage(theImageCache.Get("characters0.png"), op); err != nil {
 		return err
 	}
 	return nil

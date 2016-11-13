@@ -28,15 +28,11 @@ import (
 )
 
 type mapScene struct {
-	tilesBottomImage *ebiten.Image
-	tilesTopImage    *ebiten.Image
-	markerImage      *ebiten.Image
-	charactersImage  *ebiten.Image
-	currentRoomID    int
-	currentMap       *data.Map
-	player           *player
-	moveDstX         int
-	moveDstY         int
+	currentRoomID int
+	currentMap    *data.Map
+	player        *player
+	moveDstX      int
+	moveDstY      int
 }
 
 func newMapScene() (*mapScene, error) {
@@ -45,35 +41,13 @@ func newMapScene() (*mapScene, error) {
 	if err := json.Unmarshal(mapDataBytes, &mapData); err != nil {
 		return nil, err
 	}
-	// TODO: The image should be loaded asyncly.
-	tileSet := tileSets[mapData.TileSetID]
-	tilesBottomImage, err := assets.LoadImage("images/"+tileSet.Images[0], ebiten.FilterNearest)
-	if err != nil {
-		return nil, err
-	}
-	tilesTopImage, err := assets.LoadImage("images/"+tileSet.Images[1], ebiten.FilterNearest)
-	if err != nil {
-		return nil, err
-	}
-	markerImage, err := assets.LoadImage("images/marker.png", ebiten.FilterNearest)
-	if err != nil {
-		return nil, err
-	}
-	charactersImage, err := assets.LoadImage("images/characters0.png", ebiten.FilterNearest)
-	if err != nil {
-		return nil, err
-	}
 	player, err := newPlayer(1, 2)
 	if err != nil {
 		return nil, err
 	}
 	return &mapScene{
-		tilesBottomImage: tilesBottomImage,
-		tilesTopImage:    tilesTopImage,
-		markerImage:      markerImage,
-		charactersImage:  charactersImage,
-		currentMap:       mapData,
-		player:           player,
+		currentMap: mapData,
+		player:     player,
 	}, nil
 }
 
@@ -194,22 +168,24 @@ func (c *characterImageParts) Dst(index int) (int, int, int, int) {
 }
 
 func (m *mapScene) Draw(screen *ebiten.Image) error {
+	tileset := tileSets[m.currentMap.TileSetID]
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(tileScale, tileScale)
 	op.ImageParts = &tilesImageParts{
 		room:    m.currentMap.Rooms[m.currentRoomID],
-		tileSet: tileSets[m.currentMap.TileSetID],
+		tileSet: tileset,
 		layer:   0,
 	}
-	if err := screen.DrawImage(m.tilesBottomImage, op); err != nil {
+	if err := screen.DrawImage(theImageCache.Get(tileset.Images[0]), op); err != nil {
 		return err
 	}
 	op.ImageParts = &tilesImageParts{
-		room:    m.currentMap.Rooms[m.currentRoomID],
-		tileSet: tileSets[m.currentMap.TileSetID],
-		layer:   1,
+		room:     m.currentMap.Rooms[m.currentRoomID],
+		tileSet:  tileset,
+		layer:    1,
+		overOnly: false,
 	}
-	if err := screen.DrawImage(m.tilesTopImage, op); err != nil {
+	if err := screen.DrawImage(theImageCache.Get(tileset.Images[1]), op); err != nil {
 		return err
 	}
 	if err := m.player.draw(screen); err != nil {
@@ -218,8 +194,7 @@ func (m *mapScene) Draw(screen *ebiten.Image) error {
 	room := m.currentMap.Rooms[m.currentRoomID]
 	for _, e := range room.Events {
 		page := e.Pages[0]
-		// TODO: Consider the page's condition
-		image := m.charactersImage
+		image := theImageCache.Get(page.Image)
 		imageW, imageH := image.Size()
 		charW := imageW / 4 / 3
 		charH := imageH / 2 / 4
@@ -233,7 +208,7 @@ func (m *mapScene) Draw(screen *ebiten.Image) error {
 			index:      page.ImageIndex,
 			dir:        page.Dir,
 		}
-		if err := screen.DrawImage(m.charactersImage, op); err != nil {
+		if err := screen.DrawImage(image, op); err != nil {
 			return err
 		}
 	}
@@ -245,7 +220,7 @@ func (m *mapScene) Draw(screen *ebiten.Image) error {
 		layer:    1,
 		overOnly: true,
 	}
-	if err := screen.DrawImage(m.tilesTopImage, op); err != nil {
+	if err := screen.DrawImage(theImageCache.Get(tileset.Images[1]), op); err != nil {
 		return err
 	}
 	if m.player.isMoving() {
@@ -253,7 +228,7 @@ func (m *mapScene) Draw(screen *ebiten.Image) error {
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(x*tileSize), float64(y*tileSize))
 		op.GeoM.Scale(tileScale, tileScale)
-		if err := screen.DrawImage(m.markerImage, op); err != nil {
+		if err := screen.DrawImage(theImageCache.Get("marker.png"), op); err != nil {
 			return err
 		}
 	}
