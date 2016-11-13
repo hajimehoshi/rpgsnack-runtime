@@ -39,7 +39,41 @@
               "conditions": "",
               "image":      "characters0.png",
               "imageIndex": 1,
-              "dir":        3
+              "dir":        3,
+              "commands": [
+                {
+                  "command": "show_message",
+                  "args":    ["念願のアイスソードを手に入れたぞ"]
+                },
+                {
+                  "command": "show_choices",
+                  "args":    ["$a", "そう、関係ないね", "殺してでもうばいとる", "ゆずってくれ、たのむ!"]
+                },
+                {
+                  "command": "if",
+                  "args":    ["$a == 1"],
+                  "branches": [
+                    [
+                      {
+                        "command": "show_message",
+                        "args":    ["な、何をする貴様らー!"]
+                      }
+                    ]
+                  ]
+                },
+                {
+                  "command": "if",
+                  "args":    ["$a == 2"],
+                  "branches": [
+                    [
+                      {
+                        "command": "show_message",
+                        "args":    ["だめだ!! いくら積まれてもゆずれん"]
+                      }
+                    ]
+                  ]
+                }
+              ]
             }
           ]
         }
