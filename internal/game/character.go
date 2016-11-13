@@ -82,15 +82,31 @@ func (c *character) isMoving() bool {
 	return len(c.path) > 0
 }
 
-func (c *character) move(passable func(x, y int) bool, x, y int) bool {
+func (c *character) move(passable func(x, y int) bool, x, y int, player bool) bool {
 	if c.isMoving() {
 		panic("not reach")
 	}
 	if c.x == x && c.y == y {
 		return false
 	}
-	c.path = calcPath(passable, c.x, c.y, x, y)
-	c.moveCount = playerMaxMoveCount
+	if !passable(x, y) && player {
+		paths := make([][]data.Dir, 4)
+		paths[0] = calcPath(passable, c.x, c.y, x-1, y)
+		paths[1] = calcPath(passable, c.x, c.y, x+1, y)
+		paths[2] = calcPath(passable, c.x, c.y, x, y-1)
+		paths[3] = calcPath(passable, c.x, c.y, x, y+1)
+		c.path = nil
+		for _, path := range paths {
+			if len(path) > 0 && (len(c.path) == 0 || len(c.path) > len(path)) {
+				c.path = path
+			}
+		}
+	} else {
+		c.path = calcPath(passable, c.x, c.y, x, y)
+	}
+	if len(c.path) > 0 {
+		c.moveCount = playerMaxMoveCount
+	}
 	return true
 }
 

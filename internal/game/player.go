@@ -42,7 +42,7 @@ func newPlayer(x, y int) (*player, error) {
 }
 
 func (p *player) move(passable func(x, y int) bool, x, y int) bool {
-	return p.character.move(passable, x, y)
+	return p.character.move(passable, x, y, true)
 }
 
 func (p *player) isMoving() bool {
