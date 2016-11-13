@@ -31,6 +31,7 @@ type mapScene struct {
 	tilesBottomImage *ebiten.Image
 	tilesTopImage    *ebiten.Image
 	markerImage      *ebiten.Image
+	charactersImage  *ebiten.Image
 	currentRoomID    int
 	currentMap       *data.Map
 	player           *player
@@ -58,6 +59,10 @@ func newMapScene() (*mapScene, error) {
 	if err != nil {
 		return nil, err
 	}
+	charactersImage, err := assets.LoadImage("images/characters0.png", ebiten.FilterNearest)
+	if err != nil {
+		return nil, err
+	}
 	player, err := newPlayer(1, 2)
 	if err != nil {
 		return nil, err
@@ -66,6 +71,7 @@ func newMapScene() (*mapScene, error) {
 		tilesBottomImage: tilesBottomImage,
 		tilesTopImage:    tilesTopImage,
 		markerImage:      markerImage,
+		charactersImage:  charactersImage,
 		currentMap:       mapData,
 		player:           player,
 	}, nil
@@ -157,6 +163,36 @@ func (t *tilesImageParts) Dst(index int) (int, int, int, int) {
 	return x, y, x + tileSize, y + tileSize
 }
 
+type characterImageParts struct {
+	charWidth  int
+	charHeight int
+	index      int
+	dir        data.Dir
+}
+
+func (c *characterImageParts) Len() int {
+	return 1
+}
+
+func (c *characterImageParts) Src(index int) (int, int, int, int) {
+	x := ((c.index%4)*3 + 1) * c.charWidth
+	y := (c.index / 4) * 2 * c.charHeight
+	switch c.dir {
+	case data.DirUp:
+	case data.DirRight:
+		y += c.charHeight
+	case data.DirDown:
+		y += 2 * c.charHeight
+	case data.DirLeft:
+		y += 3 * c.charHeight
+	}
+	return x, y, x + c.charWidth, y + c.charHeight
+}
+
+func (c *characterImageParts) Dst(index int) (int, int, int, int) {
+	return 0, 0, c.charWidth, c.charHeight
+}
+
 func (m *mapScene) Draw(screen *ebiten.Image) error {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(tileScale, tileScale)
@@ -179,6 +215,30 @@ func (m *mapScene) Draw(screen *ebiten.Image) error {
 	if err := m.player.draw(screen); err != nil {
 		return err
 	}
+	room := m.currentMap.Rooms[m.currentRoomID]
+	for _, e := range room.Events {
+		page := e.Pages[0]
+		// TODO: Consider the page's condition
+		image := m.charactersImage
+		imageW, imageH := image.Size()
+		charW := imageW / 4 / 3
+		charH := imageH / 2 / 4
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(float64(e.X*tileSize+tileSize/2), float64((e.Y+1)*tileSize))
+		op.GeoM.Translate(float64(-charW/2), float64(-charH))
+		op.GeoM.Scale(tileScale, tileScale)
+		op.ImageParts = &characterImageParts{
+			charWidth:  charW,
+			charHeight: charH,
+			index:      page.ImageIndex,
+			dir:        page.Dir,
+		}
+		if err := screen.DrawImage(m.charactersImage, op); err != nil {
+			return err
+		}
+	}
+	op = &ebiten.DrawImageOptions{}
+	op.GeoM.Scale(tileScale, tileScale)
 	op.ImageParts = &tilesImageParts{
 		room:     m.currentMap.Rooms[m.currentRoomID],
 		tileSet:  tileSets[m.currentMap.TileSetID],

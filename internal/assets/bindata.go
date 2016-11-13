@@ -213,7 +213,7 @@ var _dataMap0Json = []byte(`{
               "conditions": "",
               "image":      "characters0.png",
               "imageIndex": 1,
-              "dir":        1
+              "dir":        3
             }
           ]
         }
@@ -233,7 +233,7 @@ func dataMap0Json() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "data/map0.json", size: 1304, mode: os.FileMode(420), modTime: time.Unix(1478971472, 0)}
+	info := bindataFileInfo{name: "data/map0.json", size: 1304, mode: os.FileMode(420), modTime: time.Unix(1479025298, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
