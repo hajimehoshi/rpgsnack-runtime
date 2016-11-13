@@ -51,19 +51,7 @@ func newMapScene() (*mapScene, error) {
 	}, nil
 }
 
-func (m *mapScene) passable(x, y int) bool {
-	if x < 0 {
-		return false
-	}
-	if y < 0 {
-		return false
-	}
-	if tileXNum <= x {
-		return false
-	}
-	if tileYNum <= y {
-		return false
-	}
+func (m *mapScene) passableTile(x, y int) bool {
 	tileSet := tileSets[m.currentMap.TileSetID]
 	layer := 1
 	tile := m.currentMap.Rooms[m.currentRoomID].Tiles[layer][y*tileXNum+x]
@@ -84,6 +72,32 @@ func (m *mapScene) passable(x, y int) bool {
 		return true
 	}
 	return false
+}
+
+func (m *mapScene) passable(x, y int) bool {
+	if x < 0 {
+		return false
+	}
+	if y < 0 {
+		return false
+	}
+	if tileXNum <= x {
+		return false
+	}
+	if tileYNum <= y {
+		return false
+	}
+	if !m.passableTile(x, y) {
+		return false
+	}
+	room := m.currentMap.Rooms[m.currentRoomID]
+	// TODO: Fix this when an event starts to move
+	for _, e := range room.Events {
+		if x == e.X && y == e.Y {
+			return false
+		}
+	}
+	return true
 }
 
 func (m *mapScene) Update(sceneManager *sceneManager) error {
