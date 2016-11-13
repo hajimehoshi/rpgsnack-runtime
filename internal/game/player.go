@@ -41,16 +41,16 @@ func newPlayer(x, y int) (*player, error) {
 	}, nil
 }
 
-func (p *player) move(passable func(x, y int) bool, x, y int) bool {
-	return p.character.move(passable, x, y, true)
+func (p *player) move(passable func(x, y int) bool, x, y int) {
+	p.character.move(passable, x, y, true)
 }
 
 func (p *player) isMoving() bool {
 	return p.character.isMoving()
 }
 
-func (p *player) update() error {
-	if err := p.character.update(); err != nil {
+func (p *player) update(passable func(x, y int) bool) error {
+	if err := p.character.update(passable); err != nil {
 		return err
 	}
 	return nil

@@ -82,40 +82,26 @@ func (c *character) isMoving() bool {
 	return len(c.path) > 0
 }
 
-func (c *character) move(passable func(x, y int) bool, x, y int, player bool) bool {
+func (c *character) move(passable func(x, y int) bool, x, y int, player bool) {
 	if c.isMoving() {
 		panic("not reach")
 	}
-	if c.x == x && c.y == y {
-		return false
-	}
-	if !passable(x, y) && player {
-		paths := make([][]data.Dir, 4)
-		paths[0] = calcPath(passable, c.x, c.y, x-1, y)
-		paths[1] = calcPath(passable, c.x, c.y, x+1, y)
-		paths[2] = calcPath(passable, c.x, c.y, x, y-1)
-		paths[3] = calcPath(passable, c.x, c.y, x, y+1)
-		c.path = nil
-		for _, path := range paths {
-			if len(path) > 0 && (len(c.path) == 0 || len(c.path) > len(path)) {
-				c.path = path
-			}
-		}
-	} else {
-		c.path = calcPath(passable, c.x, c.y, x, y)
-	}
+	c.path = calcPath(passable, c.x, c.y, x, y)
+	// TODO: Integrate this logic into update.
 	if len(c.path) > 0 {
+		c.dir = c.path[0]
 		c.moveCount = playerMaxMoveCount
+		if !passable(x, y) && len(c.path) == 1 {
+			c.moveCount = 0
+		}
 	}
-	return true
 }
 
-func (c *character) update() error {
+func (c *character) update(passable func(x, y int) bool) error {
 	if len(c.path) == 0 {
 		return nil
 	}
 	if c.moveCount > 0 {
-		c.dir = c.path[0]
 		if c.moveCount >= playerMaxMoveCount/2 {
 			c.attitude = attitudeMiddle
 		} else if c.prevAttitude == attitudeLeft {
@@ -126,21 +112,45 @@ func (c *character) update() error {
 		c.moveCount--
 	}
 	if c.moveCount == 0 {
-		d := c.path[0]
-		switch d {
+		nx, ny := c.x, c.y
+		switch c.path[0] {
 		case data.DirLeft:
-			c.x--
+			nx--
 		case data.DirRight:
-			c.x++
+			nx++
 		case data.DirUp:
-			c.y--
+			ny--
 		case data.DirDown:
-			c.y++
+			ny++
 		}
-		c.dir = d
+		if !passable(nx, ny) {
+			nx = c.x
+			ny = c.y
+		}
+		c.x = nx
+		c.y = ny
 		c.prevAttitude = c.attitude
 		c.attitude = attitudeMiddle
 		c.path = c.path[1:]
+		if len(c.path) > 0 {
+			c.dir = c.path[0]
+		}
+		if len(c.path) == 1 {
+			nx, ny := c.x, c.y
+			switch c.path[0] {
+			case data.DirLeft:
+				nx--
+			case data.DirRight:
+				nx++
+			case data.DirUp:
+				ny--
+			case data.DirDown:
+				ny++
+			}
+			if !passable(nx, ny) {
+				c.path = nil
+			}
+		}
 		if len(c.path) > 0 {
 			c.moveCount = playerMaxMoveCount
 		}

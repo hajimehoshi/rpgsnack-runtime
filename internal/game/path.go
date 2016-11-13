@@ -18,6 +18,8 @@ import (
 	"github.com/hajimehoshi/tsugunai/internal/data"
 )
 
+// TODO: Return not only moving but also turning
+
 func calcPath(passable func(x, y int) bool, startX, startY, goalX, goalY int) []data.Dir {
 	type pos struct {
 		X, Y int
@@ -35,7 +37,10 @@ func calcPath(passable func(x, y int) bool, startX, startY, goalX, goalY int) []
 			}
 			for _, s := range successors {
 				if !passable(s.X, s.Y) {
-					continue
+					// It's OK even if the final destination is not passable so far.
+					if s.X != goalX || s.Y != goalY {
+						continue
+					}
 				}
 				if _, ok := parents[s]; ok {
 					continue

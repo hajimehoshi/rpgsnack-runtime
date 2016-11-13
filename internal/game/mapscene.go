@@ -111,7 +111,7 @@ func (m *mapScene) Update(sceneManager *sceneManager) error {
 			m.moveDstY = ty
 		}
 	}
-	if err := m.player.update(); err != nil {
+	if err := m.player.update(m.passable); err != nil {
 		return err
 	}
 	return nil
