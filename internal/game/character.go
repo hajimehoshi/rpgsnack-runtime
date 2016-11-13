@@ -20,12 +20,24 @@ import (
 	"github.com/hajimehoshi/tsugunai/internal/data"
 )
 
+type attitude int
+
+const (
+	attitudeLeft attitude = iota
+	attitudeMiddle
+	attitudeRight
+)
+
 type character struct {
-	image      *ebiten.Image
-	imageIndex int
-	dir        data.Dir
-	x          int
-	y          int
+	image        *ebiten.Image
+	imageIndex   int
+	dir          data.Dir
+	attitude     attitude
+	prevAttitude attitude
+	x            int
+	y            int
+	moveCount    int
+	path         []data.Dir
 }
 
 type characterImageParts struct {
@@ -33,6 +45,7 @@ type characterImageParts struct {
 	charHeight int
 	index      int
 	dir        data.Dir
+	attitude   attitude
 }
 
 func (c *characterImageParts) Len() int {
@@ -40,8 +53,15 @@ func (c *characterImageParts) Len() int {
 }
 
 func (c *characterImageParts) Src(index int) (int, int, int, int) {
-	x := ((c.index%4)*3 + 1) * c.charWidth
+	x := ((c.index % 4) * 3) * c.charWidth
 	y := (c.index / 4) * 2 * c.charHeight
+	switch c.attitude {
+	case attitudeLeft:
+	case attitudeMiddle:
+		x += c.charWidth
+	case attitudeRight:
+		x += 2 * c.charHeight
+	}
 	switch c.dir {
 	case data.DirUp:
 	case data.DirRight:
@@ -58,6 +78,60 @@ func (c *characterImageParts) Dst(index int) (int, int, int, int) {
 	return 0, 0, c.charWidth, c.charHeight
 }
 
+func (c *character) isMoving() bool {
+	return len(c.path) > 0
+}
+
+func (c *character) move(passable func(x, y int) bool, x, y int) bool {
+	if c.isMoving() {
+		panic("not reach")
+	}
+	if c.x == x && c.y == y {
+		return false
+	}
+	c.path = calcPath(passable, c.x, c.y, x, y)
+	c.moveCount = playerMaxMoveCount
+	return true
+}
+
+func (c *character) update() error {
+	if len(c.path) == 0 {
+		return nil
+	}
+	if c.moveCount > 0 {
+		c.dir = c.path[0]
+		if c.moveCount >= playerMaxMoveCount/2 {
+			c.attitude = attitudeMiddle
+		} else if c.prevAttitude == attitudeLeft {
+			c.attitude = attitudeRight
+		} else {
+			c.attitude = attitudeLeft
+		}
+		c.moveCount--
+	}
+	if c.moveCount == 0 {
+		d := c.path[0]
+		switch d {
+		case data.DirLeft:
+			c.x--
+		case data.DirRight:
+			c.x++
+		case data.DirUp:
+			c.y--
+		case data.DirDown:
+			c.y++
+		}
+		c.dir = d
+		c.prevAttitude = c.attitude
+		c.attitude = attitudeMiddle
+		c.path = c.path[1:]
+		if len(c.path) > 0 {
+			c.moveCount = playerMaxMoveCount
+		}
+	}
+	return nil
+}
+
 func (c *character) draw(screen *ebiten.Image) error {
 	imageW, imageH := c.image.Size()
 	charW := imageW / 4 / 3
@@ -65,12 +139,29 @@ func (c *character) draw(screen *ebiten.Image) error {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(c.x*tileSize+tileSize/2), float64((c.y+1)*tileSize))
 	op.GeoM.Translate(float64(-charW/2), float64(-charH))
+	if c.isMoving() {
+		dx := 0
+		dy := 0
+		d := (playerMaxMoveCount - c.moveCount) * tileSize / playerMaxMoveCount
+		switch c.path[0] {
+		case data.DirLeft:
+			dx -= d
+		case data.DirRight:
+			dx += d
+		case data.DirUp:
+			dy -= d
+		case data.DirDown:
+			dy += d
+		}
+		op.GeoM.Translate(float64(dx), float64(dy))
+	}
 	op.GeoM.Scale(tileScale, tileScale)
 	op.ImageParts = &characterImageParts{
 		charWidth:  charW,
 		charHeight: charH,
 		index:      c.imageIndex,
 		dir:        c.dir,
+		attitude:   c.attitude,
 	}
 	if err := screen.DrawImage(c.image, op); err != nil {
 		return err

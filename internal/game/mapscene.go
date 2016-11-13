@@ -169,6 +169,7 @@ func (m *mapScene) Draw(screen *ebiten.Image) error {
 			image:      image,
 			imageIndex: page.ImageIndex,
 			dir:        page.Dir,
+			attitude:   attitudeMiddle,
 			x:          e.X,
 			y:          e.Y,
 		}
