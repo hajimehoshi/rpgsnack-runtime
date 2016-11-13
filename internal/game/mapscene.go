@@ -137,36 +137,6 @@ func (t *tilesImageParts) Dst(index int) (int, int, int, int) {
 	return x, y, x + tileSize, y + tileSize
 }
 
-type characterImageParts struct {
-	charWidth  int
-	charHeight int
-	index      int
-	dir        data.Dir
-}
-
-func (c *characterImageParts) Len() int {
-	return 1
-}
-
-func (c *characterImageParts) Src(index int) (int, int, int, int) {
-	x := ((c.index%4)*3 + 1) * c.charWidth
-	y := (c.index / 4) * 2 * c.charHeight
-	switch c.dir {
-	case data.DirUp:
-	case data.DirRight:
-		y += c.charHeight
-	case data.DirDown:
-		y += 2 * c.charHeight
-	case data.DirLeft:
-		y += 3 * c.charHeight
-	}
-	return x, y, x + c.charWidth, y + c.charHeight
-}
-
-func (c *characterImageParts) Dst(index int) (int, int, int, int) {
-	return 0, 0, c.charWidth, c.charHeight
-}
-
 func (m *mapScene) Draw(screen *ebiten.Image) error {
 	tileset := tileSets[m.currentMap.TileSetID]
 	op := &ebiten.DrawImageOptions{}
@@ -195,20 +165,14 @@ func (m *mapScene) Draw(screen *ebiten.Image) error {
 	for _, e := range room.Events {
 		page := e.Pages[0]
 		image := theImageCache.Get(page.Image)
-		imageW, imageH := image.Size()
-		charW := imageW / 4 / 3
-		charH := imageH / 2 / 4
-		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(float64(e.X*tileSize+tileSize/2), float64((e.Y+1)*tileSize))
-		op.GeoM.Translate(float64(-charW/2), float64(-charH))
-		op.GeoM.Scale(tileScale, tileScale)
-		op.ImageParts = &characterImageParts{
-			charWidth:  charW,
-			charHeight: charH,
-			index:      page.ImageIndex,
+		c := &character{
+			image:      image,
+			imageIndex: page.ImageIndex,
 			dir:        page.Dir,
+			x:          e.X,
+			y:          e.Y,
 		}
-		if err := screen.DrawImage(image, op); err != nil {
+		if err := c.draw(screen); err != nil {
 			return err
 		}
 	}
