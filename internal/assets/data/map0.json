@@ -36,10 +36,16 @@
           "y": 5,
           "pages": [
             {
-              "conditions": "",
+              "conditions": [""],
               "image":      "characters0.png",
               "imageIndex": 1,
               "dir":        3,
+              "dirFix":     false,
+              "walking":    false,
+              "stepping":   false,
+              "through":    false,
+              "priority":   1,
+              "trigger":    0,
               "commands": [
                 {
                   "command": "show_message",
@@ -47,24 +53,15 @@
                 },
                 {
                   "command": "show_choices",
-                  "args":    ["$a", "そう、関係ないね", "殺してでもうばいとる", "ゆずってくれ、たのむ!"]
-                },
-                {
-                  "command": "if",
-                  "args":    ["$a == 1"],
+                  "args":    ["$a", "そう、関係ないね", "殺してでもうばいとる", "ゆずってくれ、たのむ!"],
                   "branches": [
+                    [],
                     [
                       {
                         "command": "show_message",
                         "args":    ["な、何をする貴様らー!"]
                       }
-                    ]
-                  ]
-                },
-                {
-                  "command": "if",
-                  "args":    ["$a == 2"],
-                  "branches": [
+                    ],
                     [
                       {
                         "command": "show_message",

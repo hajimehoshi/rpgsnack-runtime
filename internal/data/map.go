@@ -23,6 +23,23 @@ const (
 	DirDown
 )
 
+type Priority int
+
+const (
+	PriorityBelowCharacters Priority = iota
+	PrioritySameAsCharacters
+	PriorityAboveCharacters
+)
+
+type Trigger int
+
+const (
+	TriggerActionButton Trigger = iota
+	TriggerPlayerTouch
+	TriggerEventTouch
+	TriggerAuto
+)
+
 type Map struct {
 	Name      string  `json:"name"`
 	TileSetID int     `json:"tileSetId"`
@@ -42,8 +59,14 @@ type Event struct {
 }
 
 type Page struct {
-	Condition  string `json:"condition"`
-	Image      string `json:"image"`
-	ImageIndex int    `json:"imageIndex"`
-	Dir        Dir    `json:"dir"`
+	Condition  []string `json:"condition"`
+	Image      string   `json:"image"`
+	ImageIndex int      `json:"imageIndex"`
+	Dir        Dir      `json:"dir"`
+	DirFix     bool     `json:"dirFix"`
+	Walking    bool     `json:"walking"`
+	Stepping   bool     `json:"stepping"`
+	Through    bool     `json:"through"`
+	Priority   Priority `json:"priority"`
+	Trigger    Trigger  `json:"trigger"`
 }
