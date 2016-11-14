@@ -69,4 +69,11 @@ type Page struct {
 	Through    bool     `json:"through"`
 	Priority   Priority `json:"priority"`
 	Trigger    Trigger  `json:"trigger"`
+	Commands   *Command `json:"command"`
+}
+
+type Command struct {
+	Command  string            `json:"command"`
+	Args     map[string]string `json:"args"`
+	Branches []*Command        `json:"branches"`
 }

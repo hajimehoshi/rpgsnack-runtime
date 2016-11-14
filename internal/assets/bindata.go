@@ -206,11 +206,11 @@ var _dataMap0Json = []byte(`{
       "events": [
         {
           "id": 0,
-          "x": 8,
-          "y": 5,
+          "x":  8,
+          "y":  5,
           "pages": [
             {
-              "conditions": [""],
+              "conditions": [],
               "image":      "characters0.png",
               "imageIndex": 1,
               "dir":        3,
@@ -223,23 +223,33 @@ var _dataMap0Json = []byte(`{
               "commands": [
                 {
                   "command": "show_message",
-                  "args":    ["念願のアイスソードを手に入れたぞ"]
+                  "args":    {
+                    "content": "念願のアイスソードを手に入れたぞ"
+                  }
                 },
                 {
                   "command": "show_choices",
-                  "args":    ["そう、関係ないね", "殺してでもうばいとる", "ゆずってくれ、たのむ!"],
+                  "args":    {
+                    "choice0": "そう、関係ないね",
+                    "choice1": "殺してでもうばいとる",
+                    "choice2": "ゆずってくれ、たのむ!"
+                  },
                   "branches": [
                     [],
                     [
                       {
                         "command": "show_message",
-                        "args":    ["な、何をする貴様らー!"]
+                        "args":    {
+                          "message": "な、何をする貴様らー!"
+                        }
                       }
                     ],
                     [
                       {
                         "command": "show_message",
-                        "args":    ["だめだ!! いくら積まれてもゆずれん"]
+                        "args":    {
+                          "content": "だめだ!! いくら積まれてもゆずれん"
+                        }
                       }
                     ]
                   ]
@@ -264,7 +274,7 @@ func dataMap0Json() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "data/map0.json", size: 2448, mode: os.FileMode(420), modTime: time.Unix(1479088676, 0)}
+	info := bindataFileInfo{name: "data/map0.json", size: 2738, mode: os.FileMode(420), modTime: time.Unix(1479089600, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

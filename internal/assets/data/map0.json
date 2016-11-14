@@ -32,11 +32,11 @@
       "events": [
         {
           "id": 0,
-          "x": 8,
-          "y": 5,
+          "x":  8,
+          "y":  5,
           "pages": [
             {
-              "conditions": [""],
+              "conditions": [],
               "image":      "characters0.png",
               "imageIndex": 1,
               "dir":        3,
@@ -49,23 +49,33 @@
               "commands": [
                 {
                   "command": "show_message",
-                  "args":    ["念願のアイスソードを手に入れたぞ"]
+                  "args":    {
+                    "content": "念願のアイスソードを手に入れたぞ"
+                  }
                 },
                 {
                   "command": "show_choices",
-                  "args":    ["そう、関係ないね", "殺してでもうばいとる", "ゆずってくれ、たのむ!"],
+                  "args":    {
+                    "choice0": "そう、関係ないね",
+                    "choice1": "殺してでもうばいとる",
+                    "choice2": "ゆずってくれ、たのむ!"
+                  },
                   "branches": [
                     [],
                     [
                       {
                         "command": "show_message",
-                        "args":    ["な、何をする貴様らー!"]
+                        "args":    {
+                          "message": "な、何をする貴様らー!"
+                        }
                       }
                     ],
                     [
                       {
                         "command": "show_message",
-                        "args":    ["だめだ!! いくら積まれてもゆずれん"]
+                        "args":    {
+                          "content": "だめだ!! いくら積まれてもゆずれん"
+                        }
                       }
                     ]
                   ]
