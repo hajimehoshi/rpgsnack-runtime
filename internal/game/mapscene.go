@@ -90,14 +90,21 @@ func (m *mapScene) passable(x, y int) bool {
 	if !m.passableTile(x, y) {
 		return false
 	}
-	room := m.currentMap.Rooms[m.currentRoomID]
-	// TODO: Fix this when an event starts to move
-	for _, e := range room.Events {
-		if x == e.X && y == e.Y {
-			return false
-		}
+	if m.eventAt(x, y) != nil {
+		return false
 	}
 	return true
+}
+
+func (m *mapScene) eventAt(x, y int) *data.Event {
+	// TODO: Fix this when an event starts to move
+	room := m.currentMap.Rooms[m.currentRoomID]
+	for _, e := range room.Events {
+		if e.X == x && e.Y == y {
+			return e
+		}
+	}
+	return nil
 }
 
 func (m *mapScene) Update(sceneManager *sceneManager) error {
@@ -106,9 +113,11 @@ func (m *mapScene) Update(sceneManager *sceneManager) error {
 			x, y := input.Position()
 			tx := x / tileSize / tileScale
 			ty := y / tileSize / tileScale
-			m.player.move(m.passable, tx, ty)
-			m.moveDstX = tx
-			m.moveDstY = ty
+			if m.passable(tx, ty) || m.eventAt(tx, ty) != nil {
+				m.player.move(m.passable, tx, ty)
+				m.moveDstX = tx
+				m.moveDstY = ty
+			}
 		}
 	}
 	if err := m.player.update(m.passable); err != nil {
