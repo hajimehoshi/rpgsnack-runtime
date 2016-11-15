@@ -82,7 +82,7 @@ func (c *character) isMoving() bool {
 	return len(c.path) > 0
 }
 
-func (c *character) move(passable func(x, y int) bool, x, y int, player bool) {
+func (c *character) move(sceneManager *sceneManager, passable func(x, y int) bool, x, y int, player bool) {
 	if c.isMoving() {
 		panic("not reach")
 	}
@@ -95,47 +95,21 @@ func (c *character) move(passable func(x, y int) bool, x, y int, player bool) {
 			c.moveCount = 0
 		}
 	}
-}
-
-func (c *character) update(passable func(x, y int) bool) error {
-	if len(c.path) == 0 {
-		return nil
-	}
-	if c.moveCount > 0 {
-		if c.moveCount >= playerMaxMoveCount/2 {
-			c.attitude = attitudeMiddle
-		} else if c.prevAttitude == attitudeLeft {
-			c.attitude = attitudeRight
-		} else {
-			c.attitude = attitudeLeft
+	sceneManager.pushTask(func() error {
+		if len(c.path) == 0 {
+			return taskTerminated
 		}
-		c.moveCount--
-	}
-	if c.moveCount == 0 {
-		nx, ny := c.x, c.y
-		switch c.path[0] {
-		case data.DirLeft:
-			nx--
-		case data.DirRight:
-			nx++
-		case data.DirUp:
-			ny--
-		case data.DirDown:
-			ny++
+		if c.moveCount > 0 {
+			if c.moveCount >= playerMaxMoveCount/2 {
+				c.attitude = attitudeMiddle
+			} else if c.prevAttitude == attitudeLeft {
+				c.attitude = attitudeRight
+			} else {
+				c.attitude = attitudeLeft
+			}
+			c.moveCount--
 		}
-		if !passable(nx, ny) {
-			nx = c.x
-			ny = c.y
-		}
-		c.x = nx
-		c.y = ny
-		c.prevAttitude = c.attitude
-		c.attitude = attitudeMiddle
-		c.path = c.path[1:]
-		if len(c.path) > 0 {
-			c.dir = c.path[0]
-		}
-		if len(c.path) == 1 {
+		if c.moveCount == 0 {
 			nx, ny := c.x, c.y
 			switch c.path[0] {
 			case data.DirLeft:
@@ -148,13 +122,42 @@ func (c *character) update(passable func(x, y int) bool) error {
 				ny++
 			}
 			if !passable(nx, ny) {
-				c.path = nil
+				nx = c.x
+				ny = c.y
+			}
+			c.x = nx
+			c.y = ny
+			c.prevAttitude = c.attitude
+			c.attitude = attitudeMiddle
+			c.path = c.path[1:]
+			if len(c.path) > 0 {
+				c.dir = c.path[0]
+			}
+			if len(c.path) == 1 {
+				nx, ny := c.x, c.y
+				switch c.path[0] {
+				case data.DirLeft:
+					nx--
+				case data.DirRight:
+					nx++
+				case data.DirUp:
+					ny--
+				case data.DirDown:
+					ny++
+				}
+				if !passable(nx, ny) {
+					c.path = nil
+				}
+			}
+			if len(c.path) > 0 {
+				c.moveCount = playerMaxMoveCount
 			}
 		}
-		if len(c.path) > 0 {
-			c.moveCount = playerMaxMoveCount
-		}
-	}
+		return nil
+	})
+}
+
+func (c *character) update(passable func(x, y int) bool) error {
 	return nil
 }
 

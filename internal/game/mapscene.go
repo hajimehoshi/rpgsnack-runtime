@@ -114,7 +114,7 @@ func (m *mapScene) Update(sceneManager *sceneManager) error {
 			tx := x / tileSize / tileScale
 			ty := y / tileSize / tileScale
 			if m.passable(tx, ty) || m.eventAt(tx, ty) != nil {
-				m.player.move(m.passable, tx, ty)
+				m.player.move(sceneManager, m.passable, tx, ty)
 				m.moveDstX = tx
 				m.moveDstY = ty
 			}

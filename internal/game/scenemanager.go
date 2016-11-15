@@ -26,6 +26,7 @@ type scene interface {
 type sceneManager struct {
 	current scene
 	next    scene
+	tasks   []task
 }
 
 func newSceneManager(initScene scene) *sceneManager {
@@ -34,7 +35,20 @@ func newSceneManager(initScene scene) *sceneManager {
 	}
 }
 
+func (s *sceneManager) pushTask(task task) {
+	s.tasks = append(s.tasks, task)
+}
+
 func (s *sceneManager) Update() error {
+	if len(s.tasks) > 0 {
+		t := s.tasks[0]
+		if err := t(); err == taskTerminated {
+			s.tasks = s.tasks[1:]
+		} else if err != nil {
+			return err
+		}
+		return nil
+	}
 	if s.next != nil {
 		s.current = s.next
 		s.next = nil

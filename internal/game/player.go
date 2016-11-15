@@ -41,8 +41,8 @@ func newPlayer(x, y int) (*player, error) {
 	}, nil
 }
 
-func (p *player) move(passable func(x, y int) bool, x, y int) {
-	p.character.move(passable, x, y, true)
+func (p *player) move(sceneManager *sceneManager, passable func(x, y int) bool, x, y int) {
+	p.character.move(sceneManager, passable, x, y, true)
 }
 
 func (p *player) isMoving() bool {
