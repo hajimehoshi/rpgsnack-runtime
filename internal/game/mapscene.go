@@ -35,6 +35,7 @@ type mapScene struct {
 	moveDstX      int
 	moveDstY      int
 	playerMoving  bool
+	messageWindow *messageWindow
 }
 
 func newMapScene() (*mapScene, error) {
@@ -48,8 +49,9 @@ func newMapScene() (*mapScene, error) {
 		return nil, err
 	}
 	return &mapScene{
-		currentMap: mapData,
-		player:     player,
+		currentMap:    mapData,
+		player:        player,
+		messageWindow: &messageWindow{},
 	}, nil
 }
 
@@ -111,12 +113,16 @@ func (m *mapScene) eventAt(x, y int) *data.Event {
 
 func (m *mapScene) runEvent(event *data.Event) {
 	page := event.Pages[0]
+	// TODO: Consider branches
 	for _, c := range page.Commands {
 		c := c
-		task.Push(func() error {
-			println(c.Command)
-			return task.Terminated
-		})
+		switch c.Command {
+		case "show_message":
+			task.Push(func() error {
+				m.messageWindow.show(c.Args["content"])
+				return task.Terminated
+			})
+		}
 	}
 }
 
@@ -239,6 +245,9 @@ func (m *mapScene) Draw(screen *ebiten.Image) error {
 		if err := screen.DrawImage(theImageCache.Get("marker.png"), op); err != nil {
 			return err
 		}
+	}
+	if err := m.messageWindow.draw(screen); err != nil {
+		return err
 	}
 	msg := fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS())
 	if err := font.DrawText(screen, msg, 0, 0, textScale, color.White); err != nil {
