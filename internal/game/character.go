@@ -18,6 +18,7 @@ import (
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/tsugunai/internal/data"
+	"github.com/hajimehoshi/tsugunai/internal/task"
 )
 
 type attitude int
@@ -77,12 +78,12 @@ func (c *characterImageParts) Dst(index int) (int, int, int, int) {
 	return 0, 0, c.charWidth, c.charHeight
 }
 
-func (c *character) move(sceneManager *sceneManager, passable func(x, y int) bool, x, y int, player bool) {
+func (c *character) move(passable func(x, y int) bool, x, y int, player bool) {
 	path := calcPath(passable, c.x, c.y, x, y)
 	for _, d := range path {
 		d := d
 		init := false
-		sceneManager.pushTask(func() error {
+		task.Push(func() error {
 			if !init {
 				c.dir = d
 				c.moveCount = playerMaxMoveCount
@@ -103,7 +104,7 @@ func (c *character) move(sceneManager *sceneManager, passable func(x, y int) boo
 				nx = c.x
 				ny = c.y
 				c.moveCount = 0
-				return taskTerminated
+				return task.Terminated
 			}
 			if c.moveCount > 0 {
 				if c.moveCount >= playerMaxMoveCount/2 {
@@ -120,13 +121,13 @@ func (c *character) move(sceneManager *sceneManager, passable func(x, y int) boo
 				c.y = ny
 				c.prevAttitude = c.attitude
 				c.attitude = attitudeMiddle
-				return taskTerminated
+				return task.Terminated
 			}
 			return nil
 		})
 	}
-	sceneManager.pushTask(func() error {
-		return taskTerminated
+	task.Push(func() error {
+		return task.Terminated
 	})
 }
 

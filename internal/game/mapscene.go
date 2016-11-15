@@ -25,6 +25,7 @@ import (
 	"github.com/hajimehoshi/tsugunai/internal/data"
 	"github.com/hajimehoshi/tsugunai/internal/font"
 	"github.com/hajimehoshi/tsugunai/internal/input"
+	"github.com/hajimehoshi/tsugunai/internal/task"
 )
 
 type mapScene struct {
@@ -115,12 +116,12 @@ func (m *mapScene) Update(sceneManager *sceneManager) error {
 		ty := y / tileSize / tileScale
 		if m.passable(tx, ty) || m.eventAt(tx, ty) != nil {
 			m.playerMoving = true
-			m.player.move(sceneManager, m.passable, tx, ty)
+			m.player.move(m.passable, tx, ty)
 			m.moveDstX = tx
 			m.moveDstY = ty
-			sceneManager.pushTask(func() error {
+			task.Push(func() error {
 				m.playerMoving = false
-				return taskTerminated
+				return task.Terminated
 			})
 		}
 	}

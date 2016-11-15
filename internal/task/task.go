@@ -12,12 +12,43 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package game
+package task
 
 import (
 	"errors"
 )
 
-var taskTerminated = errors.New("task terminated")
+var Terminated = errors.New("task terminated")
 
 type task func() error
+
+var theTasks = &tasks{}
+
+type tasks struct {
+	tasks []task
+}
+
+func (t *tasks) push(task task)  {
+	t.tasks = append(t.tasks, task)
+}
+
+func (t *tasks) update() (bool, error) {
+	if len(t.tasks) == 0 {
+		return false, nil
+	}
+	task := t.tasks[0]
+	if err := task(); err == Terminated {
+		t.tasks = t.tasks[1:]
+	} else if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func Push(task task) {
+	theTasks.push(task)
+}
+
+func Update() (bool, error) {
+	return theTasks.update()
+}
