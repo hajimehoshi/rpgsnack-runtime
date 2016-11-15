@@ -69,7 +69,7 @@ type Page struct {
 	Through    bool       `json:"through"`
 	Priority   Priority   `json:"priority"`
 	Trigger    Trigger    `json:"trigger"`
-	Commands   []*Command `json:"command"`
+	Commands   []*Command `json:"commands"`
 }
 
 type Command struct {

@@ -109,12 +109,24 @@ func (m *mapScene) eventAt(x, y int) *data.Event {
 	return nil
 }
 
+func (m *mapScene) runEvent(event *data.Event) {
+	page := event.Pages[0]
+	for _, c := range page.Commands {
+		c := c
+		task.Push(func() error {
+			println(c.Command)
+			return task.Terminated
+		})
+	}
+}
+
 func (m *mapScene) Update(sceneManager *sceneManager) error {
 	if input.Triggered() {
 		x, y := input.Position()
 		tx := x / tileSize / tileScale
 		ty := y / tileSize / tileScale
-		if m.passable(tx, ty) || m.eventAt(tx, ty) != nil {
+		e := m.eventAt(tx, ty)
+		if m.passable(tx, ty) || e != nil {
 			m.playerMoving = true
 			m.player.move(m.passable, tx, ty)
 			m.moveDstX = tx
@@ -123,6 +135,9 @@ func (m *mapScene) Update(sceneManager *sceneManager) error {
 				m.playerMoving = false
 				return task.Terminated
 			})
+			if e != nil && e.Pages[0].Trigger == data.TriggerActionButton {
+				m.runEvent(e)
+			}
 		}
 	}
 	if err := m.player.update(m.passable); err != nil {
