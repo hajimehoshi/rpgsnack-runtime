@@ -45,10 +45,6 @@ func (p *player) move(sceneManager *sceneManager, passable func(x, y int) bool, 
 	p.character.move(sceneManager, passable, x, y, true)
 }
 
-func (p *player) isMoving() bool {
-	return p.character.isMoving()
-}
-
 func (p *player) update(passable func(x, y int) bool) error {
 	if err := p.character.update(passable); err != nil {
 		return err

@@ -33,6 +33,7 @@ type mapScene struct {
 	player        *player
 	moveDstX      int
 	moveDstY      int
+	playerMoving  bool
 }
 
 func newMapScene() (*mapScene, error) {
@@ -109,15 +110,18 @@ func (m *mapScene) eventAt(x, y int) *data.Event {
 
 func (m *mapScene) Update(sceneManager *sceneManager) error {
 	if input.Triggered() {
-		if !m.player.isMoving() {
-			x, y := input.Position()
-			tx := x / tileSize / tileScale
-			ty := y / tileSize / tileScale
-			if m.passable(tx, ty) || m.eventAt(tx, ty) != nil {
-				m.player.move(sceneManager, m.passable, tx, ty)
-				m.moveDstX = tx
-				m.moveDstY = ty
-			}
+		x, y := input.Position()
+		tx := x / tileSize / tileScale
+		ty := y / tileSize / tileScale
+		if m.passable(tx, ty) || m.eventAt(tx, ty) != nil {
+			m.playerMoving = true
+			m.player.move(sceneManager, m.passable, tx, ty)
+			m.moveDstX = tx
+			m.moveDstY = ty
+			sceneManager.pushTask(func() error {
+				m.playerMoving = false
+				return taskTerminated
+			})
 		}
 	}
 	if err := m.player.update(m.passable); err != nil {
@@ -211,7 +215,7 @@ func (m *mapScene) Draw(screen *ebiten.Image) error {
 	if err := screen.DrawImage(theImageCache.Get(tileset.Images[1]), op); err != nil {
 		return err
 	}
-	if m.player.isMoving() {
+	if m.playerMoving {
 		x, y := m.moveDstX, m.moveDstY
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(x*tileSize), float64(y*tileSize))

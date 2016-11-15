@@ -37,7 +37,6 @@ type character struct {
 	x            int
 	y            int
 	moveCount    int
-	path         []data.Dir
 }
 
 type characterImageParts struct {
@@ -78,40 +77,19 @@ func (c *characterImageParts) Dst(index int) (int, int, int, int) {
 	return 0, 0, c.charWidth, c.charHeight
 }
 
-func (c *character) isMoving() bool {
-	return len(c.path) > 0
-}
-
 func (c *character) move(sceneManager *sceneManager, passable func(x, y int) bool, x, y int, player bool) {
-	if c.isMoving() {
-		panic("not reach")
-	}
-	c.path = calcPath(passable, c.x, c.y, x, y)
-	// TODO: Integrate this logic into update.
-	if len(c.path) > 0 {
-		c.dir = c.path[0]
-		c.moveCount = playerMaxMoveCount
-		if !passable(x, y) && len(c.path) == 1 {
-			c.moveCount = 0
-		}
-	}
-	sceneManager.pushTask(func() error {
-		if len(c.path) == 0 {
-			return taskTerminated
-		}
-		if c.moveCount > 0 {
-			if c.moveCount >= playerMaxMoveCount/2 {
-				c.attitude = attitudeMiddle
-			} else if c.prevAttitude == attitudeLeft {
-				c.attitude = attitudeRight
-			} else {
-				c.attitude = attitudeLeft
+	path := calcPath(passable, c.x, c.y, x, y)
+	for _, d := range path {
+		d := d
+		init := false
+		sceneManager.pushTask(func() error {
+			if !init {
+				c.dir = d
+				c.moveCount = playerMaxMoveCount
+				init = true
 			}
-			c.moveCount--
-		}
-		if c.moveCount == 0 {
 			nx, ny := c.x, c.y
-			switch c.path[0] {
+			switch d {
 			case data.DirLeft:
 				nx--
 			case data.DirRight:
@@ -124,36 +102,31 @@ func (c *character) move(sceneManager *sceneManager, passable func(x, y int) boo
 			if !passable(nx, ny) {
 				nx = c.x
 				ny = c.y
+				c.moveCount = 0
+				return taskTerminated
 			}
-			c.x = nx
-			c.y = ny
-			c.prevAttitude = c.attitude
-			c.attitude = attitudeMiddle
-			c.path = c.path[1:]
-			if len(c.path) > 0 {
-				c.dir = c.path[0]
-			}
-			if len(c.path) == 1 {
-				nx, ny := c.x, c.y
-				switch c.path[0] {
-				case data.DirLeft:
-					nx--
-				case data.DirRight:
-					nx++
-				case data.DirUp:
-					ny--
-				case data.DirDown:
-					ny++
+			if c.moveCount > 0 {
+				if c.moveCount >= playerMaxMoveCount/2 {
+					c.attitude = attitudeMiddle
+				} else if c.prevAttitude == attitudeLeft {
+					c.attitude = attitudeRight
+				} else {
+					c.attitude = attitudeLeft
 				}
-				if !passable(nx, ny) {
-					c.path = nil
-				}
+				c.moveCount--
 			}
-			if len(c.path) > 0 {
-				c.moveCount = playerMaxMoveCount
+			if c.moveCount == 0 {
+				c.x = nx
+				c.y = ny
+				c.prevAttitude = c.attitude
+				c.attitude = attitudeMiddle
+				return taskTerminated
 			}
-		}
-		return nil
+			return nil
+		})
+	}
+	sceneManager.pushTask(func() error {
+		return taskTerminated
 	})
 }
 
@@ -168,11 +141,11 @@ func (c *character) draw(screen *ebiten.Image) error {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(c.x*tileSize+tileSize/2), float64((c.y+1)*tileSize))
 	op.GeoM.Translate(float64(-charW/2), float64(-charH))
-	if c.isMoving() {
+	if c.moveCount > 0 {
 		dx := 0
 		dy := 0
 		d := (playerMaxMoveCount - c.moveCount) * tileSize / playerMaxMoveCount
-		switch c.path[0] {
+		switch c.dir {
 		case data.DirLeft:
 			dx -= d
 		case data.DirRight:
