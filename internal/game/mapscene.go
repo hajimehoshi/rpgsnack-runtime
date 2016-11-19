@@ -129,8 +129,8 @@ func (m *mapScene) runEvent(event *data.Event) {
 func (m *mapScene) Update(sceneManager *sceneManager) error {
 	if input.Triggered() {
 		x, y := input.Position()
-		tx := x / tileSize / tileScale
-		ty := y / tileSize / tileScale
+		tx := (x - gameMarginX) / tileSize / tileScale
+		ty := (y - gameMarginY) / tileSize / tileScale
 		e := m.eventAt(tx, ty)
 		if m.passable(tx, ty) || e != nil {
 			m.playerMoving = true
@@ -190,6 +190,7 @@ func (m *mapScene) Draw(screen *ebiten.Image) error {
 	tileset := tileSets[m.currentMap.TileSetID]
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(tileScale, tileScale)
+	op.GeoM.Translate(gameMarginX, gameMarginY)
 	op.ImageParts = &tilesImageParts{
 		room:    m.currentMap.Rooms[m.currentRoomID],
 		tileSet: tileset,
@@ -228,6 +229,7 @@ func (m *mapScene) Draw(screen *ebiten.Image) error {
 	}
 	op = &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(tileScale, tileScale)
+	op.GeoM.Translate(gameMarginX, gameMarginY)
 	op.ImageParts = &tilesImageParts{
 		room:     m.currentMap.Rooms[m.currentRoomID],
 		tileSet:  tileSets[m.currentMap.TileSetID],
@@ -242,6 +244,7 @@ func (m *mapScene) Draw(screen *ebiten.Image) error {
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(x*tileSize), float64(y*tileSize))
 		op.GeoM.Scale(tileScale, tileScale)
+		op.GeoM.Translate(gameMarginX, gameMarginY)
 		if err := screen.DrawImage(theImageCache.Get("marker.png"), op); err != nil {
 			return err
 		}

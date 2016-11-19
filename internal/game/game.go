@@ -33,6 +33,13 @@ const (
 	tileScale     = 3
 )
 
+const (
+	gameWidth   = tileXNum * tileSize * tileScale
+	gameHeight  = tileYNum * tileSize * tileScale
+	gameMarginX = 0
+	gameMarginY = 2.5 * tileSize * tileScale
+)
+
 // TODO: This variable should belong to a struct.
 var (
 	tileSets []*data.TileSet
@@ -68,5 +75,7 @@ func (g *Game) Title() string {
 }
 
 func (g *Game) Size() (int, int) {
-	return tileXNum * tileSize * tileScale, tileYNum * tileSize * tileScale
+	const w = gameWidth + 2*gameMarginX
+	const h = gameHeight + 2*gameMarginY
+	return w, h
 }
