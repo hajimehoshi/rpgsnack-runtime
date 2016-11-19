@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:generate go-bindata -nocompress -pkg=assets images data
+//go:generate go-bindata -nocompress -pkg=assets -ignore=/\. images data
 //go:generate gofmt -s -w .
 
 package assets
