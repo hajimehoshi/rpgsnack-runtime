@@ -85,6 +85,31 @@ func (t *textImageParts) Dst(index int) (int, int, int, int) {
 	return x, y, x + w, y + h
 }
 
+func MeasureSize(text string) (int, int) {
+	w := 0
+	h := lineHeight
+	cw := 0
+	for _, r := range text {
+		if r == '\n' {
+			if w < cw {
+				w = cw
+			}
+			cw = 0
+			h += lineHeight
+			continue
+		}
+		if r < 0x100 {
+			cw += charHalfWidth
+			continue
+		}
+		w += charFullWidth
+	}
+	if w < cw {
+		w = cw
+	}
+	return w, h
+}
+
 func DrawText(screen *ebiten.Image, text string, x, y int, scale int, color color.Color) error {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(float64(scale), float64(scale))

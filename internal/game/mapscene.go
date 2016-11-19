@@ -16,14 +16,14 @@ package game
 
 import (
 	"encoding/json"
-	"fmt"
-	"image/color"
+	//"fmt"
+	//"image/color"
 
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/tsugunai/internal/assets"
 	"github.com/hajimehoshi/tsugunai/internal/data"
-	"github.com/hajimehoshi/tsugunai/internal/font"
+	//"github.com/hajimehoshi/tsugunai/internal/font"
 	"github.com/hajimehoshi/tsugunai/internal/input"
 	"github.com/hajimehoshi/tsugunai/internal/task"
 )
@@ -35,7 +35,7 @@ type mapScene struct {
 	moveDstX      int
 	moveDstY      int
 	playerMoving  bool
-	messageWindow *messageWindow
+	balloon       *balloon
 	tilesImage    *ebiten.Image
 }
 
@@ -54,10 +54,10 @@ func newMapScene() (*mapScene, error) {
 		return nil, err
 	}
 	return &mapScene{
-		currentMap:    mapData,
-		player:        player,
-		messageWindow: &messageWindow{},
-		tilesImage:    tilesImage,
+		currentMap: mapData,
+		player:     player,
+		balloon:    &balloon{},
+		tilesImage: tilesImage,
 	}, nil
 }
 
@@ -125,7 +125,7 @@ func (m *mapScene) runEvent(event *data.Event) {
 		switch c.Command {
 		case "show_message":
 			task.Push(func() error {
-				m.messageWindow.show(c.Args["content"])
+				m.balloon.show(0, 0, c.Args["content"])
 				return task.Terminated
 			})
 		}
@@ -258,12 +258,12 @@ func (m *mapScene) Draw(screen *ebiten.Image) error {
 	if err := screen.DrawImage(m.tilesImage, op); err != nil {
 		return err
 	}
-	if err := m.messageWindow.draw(screen); err != nil {
+	if err := m.balloon.draw(screen); err != nil {
 		return err
 	}
-	msg := fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS())
+	/*msg := fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS())
 	if err := font.DrawText(screen, msg, 0, 0, textScale, color.White); err != nil {
 		return err
-	}
+	}*/
 	return nil
 }
