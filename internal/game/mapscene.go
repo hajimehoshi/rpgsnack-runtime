@@ -36,6 +36,7 @@ type mapScene struct {
 	moveDstY      int
 	playerMoving  bool
 	messageWindow *messageWindow
+	tilesImage    *ebiten.Image
 }
 
 func newMapScene() (*mapScene, error) {
@@ -48,10 +49,15 @@ func newMapScene() (*mapScene, error) {
 	if err != nil {
 		return nil, err
 	}
+	tilesImage, err := ebiten.NewImage(gameWidth, gameHeight, ebiten.FilterNearest)
+	if err != nil {
+		return nil, err
+	}
 	return &mapScene{
 		currentMap:    mapData,
 		player:        player,
 		messageWindow: &messageWindow{},
+		tilesImage:    tilesImage,
 	}, nil
 }
 
@@ -187,16 +193,16 @@ func (t *tilesImageParts) Dst(index int) (int, int, int, int) {
 }
 
 func (m *mapScene) Draw(screen *ebiten.Image) error {
+	m.tilesImage.Clear()
 	tileset := tileSets[m.currentMap.TileSetID]
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(tileScale, tileScale)
-	op.GeoM.Translate(gameMarginX, gameMarginY)
 	op.ImageParts = &tilesImageParts{
 		room:    m.currentMap.Rooms[m.currentRoomID],
 		tileSet: tileset,
 		layer:   0,
 	}
-	if err := screen.DrawImage(theImageCache.Get(tileset.Images[0]), op); err != nil {
+	if err := m.tilesImage.DrawImage(theImageCache.Get(tileset.Images[0]), op); err != nil {
 		return err
 	}
 	op.ImageParts = &tilesImageParts{
@@ -205,10 +211,10 @@ func (m *mapScene) Draw(screen *ebiten.Image) error {
 		layer:    1,
 		overOnly: false,
 	}
-	if err := screen.DrawImage(theImageCache.Get(tileset.Images[1]), op); err != nil {
+	if err := m.tilesImage.DrawImage(theImageCache.Get(tileset.Images[1]), op); err != nil {
 		return err
 	}
-	if err := m.player.draw(screen); err != nil {
+	if err := m.player.draw(m.tilesImage); err != nil {
 		return err
 	}
 	room := m.currentMap.Rooms[m.currentRoomID]
@@ -223,20 +229,19 @@ func (m *mapScene) Draw(screen *ebiten.Image) error {
 			x:          e.X,
 			y:          e.Y,
 		}
-		if err := c.draw(screen); err != nil {
+		if err := c.draw(m.tilesImage); err != nil {
 			return err
 		}
 	}
 	op = &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(tileScale, tileScale)
-	op.GeoM.Translate(gameMarginX, gameMarginY)
 	op.ImageParts = &tilesImageParts{
 		room:     m.currentMap.Rooms[m.currentRoomID],
 		tileSet:  tileSets[m.currentMap.TileSetID],
 		layer:    1,
 		overOnly: true,
 	}
-	if err := screen.DrawImage(theImageCache.Get(tileset.Images[1]), op); err != nil {
+	if err := m.tilesImage.DrawImage(theImageCache.Get(tileset.Images[1]), op); err != nil {
 		return err
 	}
 	if m.playerMoving {
@@ -244,10 +249,14 @@ func (m *mapScene) Draw(screen *ebiten.Image) error {
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(x*tileSize), float64(y*tileSize))
 		op.GeoM.Scale(tileScale, tileScale)
-		op.GeoM.Translate(gameMarginX, gameMarginY)
-		if err := screen.DrawImage(theImageCache.Get("marker.png"), op); err != nil {
+		if err := m.tilesImage.DrawImage(theImageCache.Get("marker.png"), op); err != nil {
 			return err
 		}
+	}
+	op = &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(gameMarginX, gameMarginY)
+	if err := screen.DrawImage(m.tilesImage, op); err != nil {
+		return err
 	}
 	if err := m.messageWindow.draw(screen); err != nil {
 		return err

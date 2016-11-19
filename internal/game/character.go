@@ -159,7 +159,6 @@ func (c *character) draw(screen *ebiten.Image) error {
 		op.GeoM.Translate(float64(dx), float64(dy))
 	}
 	op.GeoM.Scale(tileScale, tileScale)
-	op.GeoM.Translate(gameMarginX, gameMarginY)
 	op.ImageParts = &characterImageParts{
 		charWidth:  charW,
 		charHeight: charH,
