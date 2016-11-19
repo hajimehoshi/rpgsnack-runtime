@@ -41,6 +41,8 @@ func (b *balloon) size() (int, int) {
 	w, h := font.MeasureSize(b.content)
 	w = (w + 2*balloonMarginX) * textScale / tileScale
 	h = (h + 2*balloonMarginY) * textScale / tileScale
+	w = ((w + 3) / 4) * 4
+	h = ((h + 3) / 4) * 4
 	return w, h
 }
 
@@ -77,7 +79,7 @@ type balloonImageParts struct {
 
 func (b *balloonImageParts) partsNum() (int, int) {
 	width, height := b.balloon.size()
-	return ((width + 3) / 4), ((height + 3) / 4)
+	return width / 4, height / 4
 }
 
 func (b *balloonImageParts) Len() int {
@@ -126,7 +128,9 @@ func (b *balloon) draw(screen *ebiten.Image) error {
 		if err := screen.DrawImage(img, op); err != nil {
 			return err
 		}
-		if err := font.DrawText(screen, b.content, b.x+balloonMarginX, b.y+balloonMarginY, textScale, color.Black); err != nil {
+		mx := balloonMarginX * tileScale
+		my := balloonMarginY * tileScale
+		if err := font.DrawText(screen, b.content, b.x+mx, b.y+my, textScale, color.Black); err != nil {
 			return err
 		}
 	}
