@@ -50,7 +50,7 @@
                 {
                   "command": "show_message",
                   "args":    {
-                    "content": "念願のアイスソードを手に入れたぞ"
+                    "content": "念願のアイスソードを\n手に入れたぞ"
                   }
                 },
                 {

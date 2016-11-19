@@ -242,7 +242,7 @@ var _dataMap0Json = []byte(`{
                 {
                   "command": "show_message",
                   "args":    {
-                    "content": "念願のアイスソードを手に入れたぞ"
+                    "content": "念願のアイスソードを\n手に入れたぞ"
                   }
                 },
                 {
@@ -292,7 +292,7 @@ func dataMap0Json() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "data/map0.json", size: 2738, mode: os.FileMode(420), modTime: time.Unix(1479089600, 0)}
+	info := bindataFileInfo{name: "data/map0.json", size: 2740, mode: os.FileMode(420), modTime: time.Unix(1479585541, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

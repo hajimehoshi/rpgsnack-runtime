@@ -102,7 +102,7 @@ func MeasureSize(text string) (int, int) {
 			cw += charHalfWidth
 			continue
 		}
-		w += charFullWidth
+		cw += charFullWidth
 	}
 	if w < cw {
 		w = cw
