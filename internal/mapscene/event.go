@@ -48,6 +48,7 @@ func (e *event) trigger() data.Trigger {
 }
 
 func (e *event) run(mapScene *MapScene) {
+	origDir := e.character.dir
 	task.Push(func() error {
 		var dir data.Dir
 		ex, ey := e.character.x, e.character.y
@@ -73,14 +74,15 @@ func (e *event) run(mapScene *MapScene) {
 		c := c
 		switch c.Command {
 		case "show_message":
-			task.Push(func() error {
-				x := e.data.X*scene.TileSize + scene.TileSize/2
-				y := e.data.Y * scene.TileSize
-				mapScene.balloon.show(x, y, c.Args["content"])
-				return task.Terminated
-			})
+			x := e.data.X*scene.TileSize + scene.TileSize/2
+			y := e.data.Y * scene.TileSize
+			mapScene.balloon.show(x, y, c.Args["content"])
 		}
 	}
+	task.Push(func() error {
+		e.character.dir = origDir
+		return task.Terminated
+	})
 }
 
 func (e *event) draw(screen *ebiten.Image) error {
