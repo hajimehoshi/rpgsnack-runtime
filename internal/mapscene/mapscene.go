@@ -61,21 +61,8 @@ func New() (*MapScene, error) {
 		balloon:    &balloon{},
 		tilesImage: tilesImage,
 	}
-	for _, de := range mapScene.currentMap.Rooms[mapScene.currentRoomID].Events {
-		page := de.Pages[0]
-		c := &character{
-			image:      theImageCache.Get(page.Image),
-			imageIndex: page.ImageIndex,
-			dir:        page.Dir,
-			attitude:   attitudeMiddle,
-			x:          de.X,
-			y:          de.Y,
-		}
-		e := &event{
-			data:      de,
-			character: c,
-		}
-		mapScene.events = append(mapScene.events, e)
+	for _, e := range mapScene.currentMap.Rooms[mapScene.currentRoomID].Events {
+		mapScene.events = append(mapScene.events, newEvent(e))
 	}
 	return mapScene, nil
 }

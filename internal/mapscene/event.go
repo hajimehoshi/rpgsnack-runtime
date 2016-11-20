@@ -27,6 +27,22 @@ type event struct {
 	character *character
 }
 
+func newEvent(eventData *data.Event) *event {
+	page := eventData.Pages[0]
+	c := &character{
+		image:      theImageCache.Get(page.Image),
+		imageIndex: page.ImageIndex,
+		dir:        page.Dir,
+		attitude:   attitudeMiddle,
+		x:          eventData.X,
+		y:          eventData.Y,
+	}
+	return &event{
+		data:      eventData,
+		character: c,
+	}
+}
+
 func (e *event) position() (int, int) {
 	return e.character.x, e.character.y
 }
