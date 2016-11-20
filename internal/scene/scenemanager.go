@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package game
+package scene
 
 import (
 	"github.com/hajimehoshi/ebiten"
@@ -21,22 +21,22 @@ import (
 )
 
 type scene interface {
-	Update(sceneManager *sceneManager) error
+	Update(sceneManager *SceneManager) error
 	Draw(screen *ebiten.Image) error
 }
 
-type sceneManager struct {
+type SceneManager struct {
 	current scene
 	next    scene
 }
 
-func newSceneManager(initScene scene) *sceneManager {
-	return &sceneManager{
+func NewSceneManager(initScene scene) *SceneManager {
+	return &SceneManager{
 		current: initScene,
 	}
 }
 
-func (s *sceneManager) Update() error {
+func (s *SceneManager) Update() error {
 	updated, err := task.Update()
 	if err != nil {
 		return err
@@ -54,13 +54,13 @@ func (s *sceneManager) Update() error {
 	return nil
 }
 
-func (s *sceneManager) Draw(screen *ebiten.Image) error {
+func (s *SceneManager) Draw(screen *ebiten.Image) error {
 	if err := s.current.Draw(screen); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (s *sceneManager) GoTo(next scene) {
+func (s *SceneManager) GoTo(next scene) {
 	s.next = next
 }

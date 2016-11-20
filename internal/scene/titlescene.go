@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package game
+package scene
 
 import (
 	"image/color"
@@ -23,10 +23,10 @@ import (
 	"github.com/hajimehoshi/tsugunai/internal/input"
 )
 
-type titleScene struct {
+type TitleScene struct {
 }
 
-func (t *titleScene) Update(sceneManager *sceneManager) error {
+func (t *TitleScene) Update(sceneManager *SceneManager) error {
 	if input.Triggered() {
 		mapScene, err := newMapScene()
 		if err != nil {
@@ -37,7 +37,7 @@ func (t *titleScene) Update(sceneManager *sceneManager) error {
 	return nil
 }
 
-func (t *titleScene) Draw(screen *ebiten.Image) error {
+func (t *TitleScene) Draw(screen *ebiten.Image) error {
 	if err := font.DrawText(screen, "償いの時計\nClock of Atonement", 0, 0, textScale, color.White); err != nil {
 		return err
 	}

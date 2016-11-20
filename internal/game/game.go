@@ -15,48 +15,20 @@
 package game
 
 import (
-	"encoding/json"
-
 	"github.com/hajimehoshi/ebiten"
 
-	"github.com/hajimehoshi/tsugunai/internal/assets"
-	"github.com/hajimehoshi/tsugunai/internal/data"
 	"github.com/hajimehoshi/tsugunai/internal/input"
-)
-
-const (
-	tileSize      = 16
-	characterSize = 16
-	tileXNum      = 10
-	tileYNum      = 10
-	textScale     = 2
-	tileScale     = 3
-)
-
-const (
-	gameWidth   = tileXNum * tileSize * tileScale
-	gameHeight  = tileYNum * tileSize * tileScale
-	gameMarginX = 0
-	gameMarginY = 2.5 * tileSize * tileScale
-)
-
-// TODO: This variable should belong to a struct.
-var (
-	tileSets []*data.TileSet
+	"github.com/hajimehoshi/tsugunai/internal/scene"
 )
 
 type Game struct {
-	sceneManager *sceneManager
+	sceneManager *scene.SceneManager
 }
 
 func New() (*Game, error) {
-	initScene := &titleScene{}
+	initScene := &scene.TitleScene{}
 	game := &Game{
-		sceneManager: newSceneManager(initScene),
-	}
-	mapDataBytes := assets.MustAsset("data/tilesets.json")
-	if err := json.Unmarshal(mapDataBytes, &tileSets); err != nil {
-		return nil, err
+		sceneManager: scene.NewSceneManager(initScene),
 	}
 	return game, nil
 }
@@ -75,7 +47,5 @@ func (g *Game) Title() string {
 }
 
 func (g *Game) Size() (int, int) {
-	const w = gameWidth + 2*gameMarginX
-	const h = gameHeight + 2*gameMarginY
-	return w, h
+	return scene.GameSize()
 }

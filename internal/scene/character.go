@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package game
+package scene
 
 import (
 	"github.com/hajimehoshi/ebiten"
@@ -158,7 +158,6 @@ func (c *character) draw(screen *ebiten.Image) error {
 		}
 		op.GeoM.Translate(float64(dx), float64(dy))
 	}
-	op.GeoM.Scale(tileScale, tileScale)
 	op.ImageParts = &characterImageParts{
 		charWidth:  charW,
 		charHeight: charH,

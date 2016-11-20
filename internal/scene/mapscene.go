@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package game
+package scene
 
 import (
 	"encoding/json"
@@ -49,7 +49,7 @@ func newMapScene() (*mapScene, error) {
 	if err != nil {
 		return nil, err
 	}
-	tilesImage, err := ebiten.NewImage(gameWidth, gameHeight, ebiten.FilterNearest)
+	tilesImage, err := ebiten.NewImage(tileXNum * tileSize, tileYNum * tileSize, ebiten.FilterNearest)
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +134,7 @@ func (m *mapScene) runEvent(event *data.Event) {
 	}
 }
 
-func (m *mapScene) Update(sceneManager *sceneManager) error {
+func (m *mapScene) Update(sceneManager *SceneManager) error {
 	if input.Triggered() {
 		x, y := input.Position()
 		tx := (x - gameMarginX) / tileSize / tileScale
@@ -198,7 +198,6 @@ func (m *mapScene) Draw(screen *ebiten.Image) error {
 	m.tilesImage.Clear()
 	tileset := tileSets[m.currentMap.TileSetID]
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(tileScale, tileScale)
 	op.ImageParts = &tilesImageParts{
 		room:    m.currentMap.Rooms[m.currentRoomID],
 		tileSet: tileset,
@@ -236,7 +235,6 @@ func (m *mapScene) Draw(screen *ebiten.Image) error {
 		}
 	}
 	op = &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(tileScale, tileScale)
 	op.ImageParts = &tilesImageParts{
 		room:     m.currentMap.Rooms[m.currentRoomID],
 		tileSet:  tileSets[m.currentMap.TileSetID],
@@ -250,12 +248,12 @@ func (m *mapScene) Draw(screen *ebiten.Image) error {
 		x, y := m.moveDstX, m.moveDstY
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(x*tileSize), float64(y*tileSize))
-		op.GeoM.Scale(tileScale, tileScale)
 		if err := m.tilesImage.DrawImage(theImageCache.Get("marker.png"), op); err != nil {
 			return err
 		}
 	}
 	op = &ebiten.DrawImageOptions{}
+	op.GeoM.Scale(tileScale, tileScale)
 	op.GeoM.Translate(gameMarginX, gameMarginY)
 	if err := screen.DrawImage(m.tilesImage, op); err != nil {
 		return err
