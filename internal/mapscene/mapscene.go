@@ -50,7 +50,7 @@ func New() (*MapScene, error) {
 	if err != nil {
 		return nil, err
 	}
-	tilesImage, err := ebiten.NewImage(tileXNum * tileSize, tileYNum * tileSize, ebiten.FilterNearest)
+	tilesImage, err := ebiten.NewImage(scene.TileXNum*scene.TileSize, scene.TileYNum*scene.TileSize, ebiten.FilterNearest)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +65,7 @@ func New() (*MapScene, error) {
 func (m *MapScene) passableTile(x, y int) bool {
 	tileSet := tileSets[m.currentMap.TileSetID]
 	layer := 1
-	tile := m.currentMap.Rooms[m.currentRoomID].Tiles[layer][y*tileXNum+x]
+	tile := m.currentMap.Rooms[m.currentRoomID].Tiles[layer][y*scene.TileXNum+x]
 	switch tileSet.PassageTypes[layer][tile] {
 	case data.PassageTypeBlock:
 		return false
@@ -78,7 +78,7 @@ func (m *MapScene) passableTile(x, y int) bool {
 		panic("not reach")
 	}
 	layer = 0
-	tile = m.currentMap.Rooms[m.currentRoomID].Tiles[layer][y*tileXNum+x]
+	tile = m.currentMap.Rooms[m.currentRoomID].Tiles[layer][y*scene.TileXNum+x]
 	if tileSet.PassageTypes[layer][tile] == data.PassageTypePassable {
 		return true
 	}
@@ -92,10 +92,10 @@ func (m *MapScene) passable(x, y int) bool {
 	if y < 0 {
 		return false
 	}
-	if tileXNum <= x {
+	if scene.TileXNum <= x {
 		return false
 	}
-	if tileYNum <= y {
+	if scene.TileYNum <= y {
 		return false
 	}
 	if !m.passableTile(x, y) {
@@ -126,8 +126,8 @@ func (m *MapScene) runEvent(event *data.Event) {
 		switch c.Command {
 		case "show_message":
 			task.Push(func() error {
-				x := event.X*tileSize + tileSize/2
-				y := event.Y * tileSize
+				x := event.X*scene.TileSize + scene.TileSize/2
+				y := event.Y * scene.TileSize
 				m.balloon.show(x, y, c.Args["content"])
 				return task.Terminated
 			})
@@ -138,8 +138,8 @@ func (m *MapScene) runEvent(event *data.Event) {
 func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 	if input.Triggered() {
 		x, y := input.Position()
-		tx := (x - gameMarginX) / tileSize / tileScale
-		ty := (y - gameMarginY) / tileSize / tileScale
+		tx := (x - scene.GameMarginX) / scene.TileSize / scene.TileScale
+		ty := (y - scene.GameMarginY) / scene.TileSize / scene.TileScale
 		e := m.eventAt(tx, ty)
 		if m.passable(tx, ty) || e != nil {
 			m.playerMoving = true
@@ -169,7 +169,7 @@ type tilesImageParts struct {
 }
 
 func (t *tilesImageParts) Len() int {
-	return tileXNum * tileYNum
+	return scene.TileXNum * scene.TileYNum
 }
 
 func (t *tilesImageParts) Src(index int) (int, int, int, int) {
@@ -184,15 +184,15 @@ func (t *tilesImageParts) Src(index int) (int, int, int, int) {
 		}
 	}
 	// TODO: 8 is a magic number and should be replaced.
-	x := tile % 8 * tileSize
-	y := tile / 8 * tileSize
-	return x, y, x + tileSize, y + tileSize
+	x := tile % 8 * scene.TileSize
+	y := tile / 8 * scene.TileSize
+	return x, y, x + scene.TileSize, y + scene.TileSize
 }
 
 func (t *tilesImageParts) Dst(index int) (int, int, int, int) {
-	x := index % tileXNum * tileSize
-	y := index / tileXNum * tileSize
-	return x, y, x + tileSize, y + tileSize
+	x := index % scene.TileXNum * scene.TileSize
+	y := index / scene.TileXNum * scene.TileSize
+	return x, y, x + scene.TileSize, y + scene.TileSize
 }
 
 func (m *MapScene) Draw(screen *ebiten.Image) error {
@@ -248,14 +248,14 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 	if m.playerMoving {
 		x, y := m.moveDstX, m.moveDstY
 		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(float64(x*tileSize), float64(y*tileSize))
+		op.GeoM.Translate(float64(x*scene.TileSize), float64(y*scene.TileSize))
 		if err := m.tilesImage.DrawImage(theImageCache.Get("marker.png"), op); err != nil {
 			return err
 		}
 	}
 	op = &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(tileScale, tileScale)
-	op.GeoM.Translate(gameMarginX, gameMarginY)
+	op.GeoM.Scale(scene.TileScale, scene.TileScale)
+	op.GeoM.Translate(scene.GameMarginX, scene.GameMarginY)
 	if err := screen.DrawImage(m.tilesImage, op); err != nil {
 		return err
 	}

@@ -18,7 +18,6 @@ import (
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/tsugunai/internal/input"
-	"github.com/hajimehoshi/tsugunai/internal/mapscene"
 	"github.com/hajimehoshi/tsugunai/internal/scene"
 	"github.com/hajimehoshi/tsugunai/internal/titlescene"
 )
@@ -49,5 +48,9 @@ func (g *Game) Title() string {
 }
 
 func (g *Game) Size() (int, int) {
-	return mapscene.GameSize()
+	w := scene.TileXNum * scene.TileSize * scene.TileScale
+	h := scene.TileYNum * scene.TileSize * scene.TileScale
+	w += 2 * scene.GameMarginX
+	h += 2 * scene.GameMarginY
+	return w, h
 }

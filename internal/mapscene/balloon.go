@@ -21,8 +21,8 @@ import (
 
 	"github.com/hajimehoshi/tsugunai/internal/font"
 	"github.com/hajimehoshi/tsugunai/internal/input"
-	"github.com/hajimehoshi/tsugunai/internal/task"
 	"github.com/hajimehoshi/tsugunai/internal/scene"
+	"github.com/hajimehoshi/tsugunai/internal/task"
 )
 
 const (
@@ -45,8 +45,8 @@ type balloon struct {
 
 func (b *balloon) bodySize() (int, int) {
 	w, h := font.MeasureSize(b.content)
-	w = (w + 2*balloonMarginX) * scene.TextScale / tileScale
-	h = (h + 2*balloonMarginY) * scene.TextScale / tileScale
+	w = (w + 2*balloonMarginX) * scene.TextScale / scene.TileScale
+	h = (h + 2*balloonMarginY) * scene.TextScale / scene.TileScale
 	w = ((w + 3) / 4) * 4
 	h = ((h + 3) / 4) * 4
 	return w, h
@@ -59,9 +59,9 @@ func (b *balloon) show(x, y int, message string) {
 	b.arrowFlip = false
 	w, h := b.bodySize()
 	b.x = x - w/2
-	if tileXNum*tileSize < b.x+w {
+	if scene.TileXNum*scene.TileSize < b.x+w {
 		b.arrowFlip = true
-		b.x = tileXNum*tileSize - w
+		b.x = scene.TileXNum*scene.TileSize - w
 	}
 	if b.x+w < 0 {
 		b.x = 0
@@ -151,16 +151,16 @@ func (b *balloon) draw(screen *ebiten.Image) error {
 	if b.count == balloonMaxCount/2 {
 		img := theImageCache.Get("balloon.png")
 		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Scale(tileScale, tileScale)
-		op.GeoM.Translate(gameMarginX, gameMarginY)
+		op.GeoM.Scale(scene.TileScale, scene.TileScale)
+		op.GeoM.Translate(scene.GameMarginX, scene.GameMarginY)
 		op.ImageParts = &balloonImageParts{
 			balloon: b,
 		}
 		if err := screen.DrawImage(img, op); err != nil {
 			return err
 		}
-		x := (b.x+balloonMarginX)*tileScale + gameMarginX
-		y := (b.y+balloonMarginY)*tileScale + gameMarginY
+		x := (b.x+balloonMarginX)*scene.TileScale + scene.GameMarginX
+		y := (b.y+balloonMarginY)*scene.TileScale + scene.GameMarginY
 		if err := font.DrawText(screen, b.content, x, y, scene.TextScale, color.Black); err != nil {
 			return err
 		}

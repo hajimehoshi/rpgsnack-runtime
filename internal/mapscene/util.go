@@ -21,23 +21,6 @@ import (
 	"github.com/hajimehoshi/tsugunai/internal/data"
 )
 
-const (
-	tileSize      = 16
-	characterSize = 16
-	tileXNum      = 10
-	tileYNum      = 10
-	tileScale     = 3
-)
-
-const (
-	gameMarginX = 0
-	gameMarginY = 2.5 * tileSize * tileScale
-)
-
-func GameSize() (int, int) {
-	return tileXNum*tileSize*tileScale + 2*gameMarginX, tileYNum*tileSize*tileScale + 2*gameMarginY
-}
-
 // TODO: This variable should belong to a struct.
 var (
 	tileSets []*data.TileSet

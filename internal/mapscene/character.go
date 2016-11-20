@@ -18,6 +18,7 @@ import (
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/tsugunai/internal/data"
+	"github.com/hajimehoshi/tsugunai/internal/scene"
 	"github.com/hajimehoshi/tsugunai/internal/task"
 )
 
@@ -25,8 +26,8 @@ type attitude int
 
 const (
 	attitudeLeft attitude = iota
-	attitudeMiddle
 	attitudeRight
+	attitudeMiddle
 )
 
 type character struct {
@@ -140,12 +141,12 @@ func (c *character) draw(screen *ebiten.Image) error {
 	charW := imageW / 4 / 3
 	charH := imageH / 2 / 4
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(float64(c.x*tileSize+tileSize/2), float64((c.y+1)*tileSize))
+	op.GeoM.Translate(float64(c.x*scene.TileSize+scene.TileSize/2), float64((c.y+1)*scene.TileSize))
 	op.GeoM.Translate(float64(-charW/2), float64(-charH))
 	if c.moveCount > 0 {
 		dx := 0
 		dy := 0
-		d := (playerMaxMoveCount - c.moveCount) * tileSize / playerMaxMoveCount
+		d := (playerMaxMoveCount - c.moveCount) * scene.TileSize / playerMaxMoveCount
 		switch c.dir {
 		case data.DirLeft:
 			dx -= d
