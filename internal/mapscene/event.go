@@ -23,9 +23,9 @@ import (
 )
 
 type event struct {
-	data         *data.Event
-	character    *character
-	currentIndex int
+	data                *data.Event
+	character           *character
+	currentCommandIndex int
 }
 
 func newEvent(eventData *data.Event) *event {
@@ -80,23 +80,24 @@ func (e *event) run(mapScene *MapScene) {
 		}
 		page := e.data.Pages[0]
 		// TODO: Consider branches
-		if len(page.Commands) <= e.currentIndex {
+		if len(page.Commands) <= e.currentCommandIndex {
 			e.character.dir = origDir
+			e.currentCommandIndex = 0
 			return task.Terminated
 		}
-		c := page.Commands[e.currentIndex]
+		c := page.Commands[e.currentCommandIndex]
 		switch c.Command {
 		case "show_message":
 			x := e.data.X*scene.TileSize + scene.TileSize/2
 			y := e.data.Y * scene.TileSize
 			mapScene.balloon.show(taskLine, x, y, c.Args["content"])
 			taskLine.Push(func() error {
-				e.currentIndex++
+				e.currentCommandIndex++
 				return task.Terminated
 			})
 		default:
 			// Ignore unknown commands so far.
-			e.currentIndex++
+			e.currentCommandIndex++
 		}
 		return nil
 	})
