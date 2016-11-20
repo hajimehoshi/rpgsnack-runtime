@@ -114,7 +114,7 @@ func (m *MapScene) passable(x, y int) bool {
 
 func (m *MapScene) eventAt(x, y int) *event {
 	for _, e := range m.events {
-		ex, ey := e.position()
+		ex, ey := e.character.x, e.character.y
 		if ex == x && ey == y {
 			return e
 		}
@@ -122,26 +122,36 @@ func (m *MapScene) eventAt(x, y int) *event {
 	return nil
 }
 
-func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
-	if input.Triggered() {
-		x, y := input.Position()
-		tx := (x - scene.GameMarginX) / scene.TileSize / scene.TileScale
-		ty := (y - scene.GameMarginY) / scene.TileSize / scene.TileScale
-		e := m.eventAt(tx, ty)
-		if m.passable(tx, ty) || e != nil {
-			m.playerMoving = true
-			m.player.move(m.passable, tx, ty)
-			m.moveDstX = tx
-			m.moveDstY = ty
-			task.Push(func() error {
-				m.playerMoving = false
-				return task.Terminated
-			})
-			if e != nil && e.trigger() == data.TriggerActionButton {
-				e.run(m)
-			}
-		}
+func (m *MapScene) movePlayerIfNeeded() {
+	if !input.Triggered() {
+		return
 	}
+	x, y := input.Position()
+	tx := (x - scene.GameMarginX) / scene.TileSize / scene.TileScale
+	ty := (y - scene.GameMarginY) / scene.TileSize / scene.TileScale
+	e := m.eventAt(tx, ty)
+	if !m.passable(tx, ty) && e == nil {
+		return
+	}
+	m.playerMoving = true
+	m.player.move(m.passable, tx, ty)
+	m.moveDstX = tx
+	m.moveDstY = ty
+	task.Push(func() error {
+		m.playerMoving = false
+		return task.Terminated
+	})
+	if e == nil {
+		return
+	}
+	if e.trigger() != data.TriggerActionButton {
+		return
+	}
+	e.run(m)
+}
+
+func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
+	m.movePlayerIfNeeded()
 	if err := m.player.update(m.passable); err != nil {
 		return err
 	}

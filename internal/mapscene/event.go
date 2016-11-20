@@ -43,10 +43,6 @@ func newEvent(eventData *data.Event) *event {
 	}
 }
 
-func (e *event) position() (int, int) {
-	return e.character.x, e.character.y
-}
-
 func (e *event) trigger() data.Trigger {
 	return e.data.Pages[0].Trigger
 }
