@@ -22,17 +22,17 @@ var Terminated = errors.New("task terminated")
 
 type task func() error
 
-var theTasks = &tasks{}
+var theTaskLine = &TaskLine{}
 
-type tasks struct {
+type TaskLine struct {
 	tasks []task
 }
 
-func (t *tasks) push(task task)  {
+func (t *TaskLine) Push(task task) {
 	t.tasks = append(t.tasks, task)
 }
 
-func (t *tasks) update() (bool, error) {
+func (t *TaskLine) Update() (bool, error) {
 	if len(t.tasks) == 0 {
 		return false, nil
 	}
@@ -46,9 +46,9 @@ func (t *tasks) update() (bool, error) {
 }
 
 func Push(task task) {
-	theTasks.push(task)
+	theTaskLine.Push(task)
 }
 
 func Update() (bool, error) {
-	return theTasks.update()
+	return theTaskLine.Update()
 }

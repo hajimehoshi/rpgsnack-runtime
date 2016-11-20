@@ -52,7 +52,7 @@ func (b *balloon) bodySize() (int, int) {
 	return w, h
 }
 
-func (b *balloon) show(x, y int, message string) {
+func (b *balloon) show(taskLine *task.TaskLine, x, y int, message string) {
 	b.content = message
 	b.arrowX = x
 	b.arrowY = y - balloonArrowHeight
@@ -68,20 +68,20 @@ func (b *balloon) show(x, y int, message string) {
 	}
 	b.y = y - h - 4
 	b.count = balloonMaxCount
-	task.Push(func() error {
+	taskLine.Push(func() error {
 		b.count--
 		if b.count == balloonMaxCount/2 {
 			return task.Terminated
 		}
 		return nil
 	})
-	task.Push(func() error {
+	taskLine.Push(func() error {
 		if input.Triggered() {
 			return task.Terminated
 		}
 		return nil
 	})
-	task.Push(func() error {
+	taskLine.Push(func() error {
 		b.count--
 		if b.count == 0 {
 			return task.Terminated

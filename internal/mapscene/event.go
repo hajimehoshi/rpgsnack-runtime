@@ -23,8 +23,9 @@ import (
 )
 
 type event struct {
-	data      *data.Event
-	character *character
+	data         *data.Event
+	character    *character
+	currentIndex int
 }
 
 func newEvent(eventData *data.Event) *event {
@@ -68,20 +69,36 @@ func (e *event) run(mapScene *MapScene) {
 		e.character.dir = dir
 		return task.Terminated
 	})
-	page := e.data.Pages[0]
-	// TODO: Consider branches
-	for _, c := range page.Commands {
-		c := c
+	taskLine := &task.TaskLine{}
+	task.Push(func() error {
+		updated, err := taskLine.Update()
+		if err != nil {
+			return err
+		}
+		if updated {
+			return nil
+		}
+		page := e.data.Pages[0]
+		// TODO: Consider branches
+		if len(page.Commands) <= e.currentIndex {
+			e.character.dir = origDir
+			return task.Terminated
+		}
+		c := page.Commands[e.currentIndex]
 		switch c.Command {
 		case "show_message":
 			x := e.data.X*scene.TileSize + scene.TileSize/2
 			y := e.data.Y * scene.TileSize
-			mapScene.balloon.show(x, y, c.Args["content"])
+			mapScene.balloon.show(taskLine, x, y, c.Args["content"])
+			taskLine.Push(func() error {
+				e.currentIndex++
+				return task.Terminated
+			})
+		default:
+			// Ignore unknown commands so far.
+			e.currentIndex++
 		}
-	}
-	task.Push(func() error {
-		e.character.dir = origDir
-		return task.Terminated
+		return nil
 	})
 }
 
