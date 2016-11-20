@@ -38,6 +38,7 @@ type MapScene struct {
 	playerMoving  bool
 	balloon       *balloon
 	tilesImage    *ebiten.Image
+	events        []*event
 }
 
 func New() (*MapScene, error) {
@@ -54,12 +55,29 @@ func New() (*MapScene, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &MapScene{
+	mapScene := &MapScene{
 		currentMap: mapData,
 		player:     player,
 		balloon:    &balloon{},
 		tilesImage: tilesImage,
-	}, nil
+	}
+	for _, de := range mapScene.currentMap.Rooms[mapScene.currentRoomID].Events {
+		page := de.Pages[0]
+		c := &character{
+			image:      theImageCache.Get(page.Image),
+			imageIndex: page.ImageIndex,
+			dir:        page.Dir,
+			attitude:   attitudeMiddle,
+			x:          de.X,
+			y:          de.Y,
+		}
+		e := &event{
+			data:      de,
+			character: c,
+		}
+		mapScene.events = append(mapScene.events, e)
+	}
+	return mapScene, nil
 }
 
 func (m *MapScene) passableTile(x, y int) bool {
@@ -107,32 +125,14 @@ func (m *MapScene) passable(x, y int) bool {
 	return true
 }
 
-func (m *MapScene) eventAt(x, y int) *data.Event {
-	// TODO: Fix this when an event starts to move
-	room := m.currentMap.Rooms[m.currentRoomID]
-	for _, e := range room.Events {
-		if e.X == x && e.Y == y {
+func (m *MapScene) eventAt(x, y int) *event {
+	for _, e := range m.events {
+		ex, ey := e.position()
+		if ex == x && ey == y {
 			return e
 		}
 	}
 	return nil
-}
-
-func (m *MapScene) runEvent(event *data.Event) {
-	page := event.Pages[0]
-	// TODO: Consider branches
-	for _, c := range page.Commands {
-		c := c
-		switch c.Command {
-		case "show_message":
-			task.Push(func() error {
-				x := event.X*scene.TileSize + scene.TileSize/2
-				y := event.Y * scene.TileSize
-				m.balloon.show(x, y, c.Args["content"])
-				return task.Terminated
-			})
-		}
-	}
 }
 
 func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
@@ -150,8 +150,8 @@ func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 				m.playerMoving = false
 				return task.Terminated
 			})
-			if e != nil && e.Pages[0].Trigger == data.TriggerActionButton {
-				m.runEvent(e)
+			if e != nil && e.trigger() == data.TriggerActionButton {
+				e.run(m)
 			}
 		}
 	}
@@ -219,19 +219,8 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 	if err := m.player.draw(m.tilesImage); err != nil {
 		return err
 	}
-	room := m.currentMap.Rooms[m.currentRoomID]
-	for _, e := range room.Events {
-		page := e.Pages[0]
-		image := theImageCache.Get(page.Image)
-		c := &character{
-			image:      image,
-			imageIndex: page.ImageIndex,
-			dir:        page.Dir,
-			attitude:   attitudeMiddle,
-			x:          e.X,
-			y:          e.Y,
-		}
-		if err := c.draw(m.tilesImage); err != nil {
+	for _, e := range m.events {
+		if err := e.draw(m.tilesImage); err != nil {
 			return err
 		}
 	}
