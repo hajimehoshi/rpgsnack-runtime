@@ -48,6 +48,25 @@ func (e *event) trigger() data.Trigger {
 }
 
 func (e *event) run(mapScene *MapScene) {
+	task.Push(func() error {
+		var dir data.Dir
+		ex, ey := e.character.x, e.character.y
+		px, py := mapScene.player.character.x, mapScene.player.character.y
+		switch {
+		case ex > px && ey == py:
+			dir = data.DirLeft
+		case ex < px && ey == py:
+			dir = data.DirRight
+		case ex == px && ey > py:
+			dir = data.DirUp
+		case ex == px && ey < py:
+			dir = data.DirDown
+		default:
+			panic("not reach")
+		}
+		e.character.dir = dir
+		return task.Terminated
+	})
 	page := e.data.Pages[0]
 	// TODO: Consider branches
 	for _, c := range page.Commands {
