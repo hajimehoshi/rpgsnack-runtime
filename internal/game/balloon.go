@@ -134,8 +134,10 @@ func (b *balloonImageParts) Dst(index int) (int, int, int, int) {
 		x := b.balloon.arrowX
 		y := b.balloon.arrowY
 		if b.balloon.arrowFlip {
+			x -= 4
 			return x, y, x - balloonArrowWidth, y + balloonArrowHeight
 		}
+		x += 4
 		return x, y, x + balloonArrowWidth, y + balloonArrowHeight
 	}
 	w, _ := b.partsNum()
