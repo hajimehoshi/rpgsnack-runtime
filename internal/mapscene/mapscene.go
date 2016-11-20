@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package scene
+package mapscene
 
 import (
 	"encoding/json"
@@ -25,10 +25,11 @@ import (
 	"github.com/hajimehoshi/tsugunai/internal/data"
 	"github.com/hajimehoshi/tsugunai/internal/font"
 	"github.com/hajimehoshi/tsugunai/internal/input"
+	"github.com/hajimehoshi/tsugunai/internal/scene"
 	"github.com/hajimehoshi/tsugunai/internal/task"
 )
 
-type mapScene struct {
+type MapScene struct {
 	currentRoomID int
 	currentMap    *data.Map
 	player        *player
@@ -39,7 +40,7 @@ type mapScene struct {
 	tilesImage    *ebiten.Image
 }
 
-func newMapScene() (*mapScene, error) {
+func New() (*MapScene, error) {
 	mapDataBytes := assets.MustAsset("data/map0.json")
 	var mapData *data.Map
 	if err := json.Unmarshal(mapDataBytes, &mapData); err != nil {
@@ -53,7 +54,7 @@ func newMapScene() (*mapScene, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &mapScene{
+	return &MapScene{
 		currentMap: mapData,
 		player:     player,
 		balloon:    &balloon{},
@@ -61,7 +62,7 @@ func newMapScene() (*mapScene, error) {
 	}, nil
 }
 
-func (m *mapScene) passableTile(x, y int) bool {
+func (m *MapScene) passableTile(x, y int) bool {
 	tileSet := tileSets[m.currentMap.TileSetID]
 	layer := 1
 	tile := m.currentMap.Rooms[m.currentRoomID].Tiles[layer][y*tileXNum+x]
@@ -84,7 +85,7 @@ func (m *mapScene) passableTile(x, y int) bool {
 	return false
 }
 
-func (m *mapScene) passable(x, y int) bool {
+func (m *MapScene) passable(x, y int) bool {
 	if x < 0 {
 		return false
 	}
@@ -106,7 +107,7 @@ func (m *mapScene) passable(x, y int) bool {
 	return true
 }
 
-func (m *mapScene) eventAt(x, y int) *data.Event {
+func (m *MapScene) eventAt(x, y int) *data.Event {
 	// TODO: Fix this when an event starts to move
 	room := m.currentMap.Rooms[m.currentRoomID]
 	for _, e := range room.Events {
@@ -117,7 +118,7 @@ func (m *mapScene) eventAt(x, y int) *data.Event {
 	return nil
 }
 
-func (m *mapScene) runEvent(event *data.Event) {
+func (m *MapScene) runEvent(event *data.Event) {
 	page := event.Pages[0]
 	// TODO: Consider branches
 	for _, c := range page.Commands {
@@ -134,7 +135,7 @@ func (m *mapScene) runEvent(event *data.Event) {
 	}
 }
 
-func (m *mapScene) Update(sceneManager *SceneManager) error {
+func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 	if input.Triggered() {
 		x, y := input.Position()
 		tx := (x - gameMarginX) / tileSize / tileScale
@@ -194,7 +195,7 @@ func (t *tilesImageParts) Dst(index int) (int, int, int, int) {
 	return x, y, x + tileSize, y + tileSize
 }
 
-func (m *mapScene) Draw(screen *ebiten.Image) error {
+func (m *MapScene) Draw(screen *ebiten.Image) error {
 	m.tilesImage.Clear()
 	tileset := tileSets[m.currentMap.TileSetID]
 	op := &ebiten.DrawImageOptions{}
@@ -262,7 +263,7 @@ func (m *mapScene) Draw(screen *ebiten.Image) error {
 		return err
 	}
 	msg := fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS())
-	if err := font.DrawText(screen, msg, 0, 0, textScale, color.White); err != nil {
+	if err := font.DrawText(screen, msg, 0, 0, scene.TextScale, color.White); err != nil {
 		return err
 	}
 	return nil

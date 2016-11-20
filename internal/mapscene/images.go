@@ -12,34 +12,45 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package scene
+package mapscene
 
 import (
-	"image/color"
-
 	"github.com/hajimehoshi/ebiten"
 
-	"github.com/hajimehoshi/tsugunai/internal/font"
-	"github.com/hajimehoshi/tsugunai/internal/input"
+	"github.com/hajimehoshi/tsugunai/internal/assets"
 )
 
-type TitleScene struct {
-}
+var theImageCache *imageCache
 
-func (t *TitleScene) Update(sceneManager *SceneManager) error {
-	if input.Triggered() {
-		mapScene, err := newMapScene()
+func initImageCache() error {
+	theImageCache = &imageCache{
+		cache: map[string]*ebiten.Image{},
+	}
+	files, err := assets.AssetDir("images")
+	if err != nil {
+		panic(err)
+	}
+	for _, file := range files {
+		img, err := assets.LoadImage("images/"+file, ebiten.FilterNearest)
 		if err != nil {
 			return err
 		}
-		sceneManager.GoTo(mapScene)
+		theImageCache.cache[file] = img
 	}
 	return nil
 }
 
-func (t *TitleScene) Draw(screen *ebiten.Image) error {
-	if err := font.DrawText(screen, "償いの時計\nClock of Atonement", 0, 0, textScale, color.White); err != nil {
-		return err
+func init() {
+	// TODO: The image should be loaded asyncly.
+	if err := initImageCache(); err != nil {
+		panic(err)
 	}
-	return nil
+}
+
+type imageCache struct {
+	cache map[string]*ebiten.Image
+}
+
+func (i *imageCache) Get(path string) *ebiten.Image {
+	return i.cache[path]
 }

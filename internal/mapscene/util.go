@@ -12,45 +12,40 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package scene
+package mapscene
 
 import (
-	"github.com/hajimehoshi/ebiten"
+	"encoding/json"
 
 	"github.com/hajimehoshi/tsugunai/internal/assets"
+	"github.com/hajimehoshi/tsugunai/internal/data"
 )
 
-var theImageCache *imageCache
+const (
+	tileSize      = 16
+	characterSize = 16
+	tileXNum      = 10
+	tileYNum      = 10
+	tileScale     = 3
+)
 
-func initImageCache() error {
-	theImageCache = &imageCache{
-		cache: map[string]*ebiten.Image{},
-	}
-	files, err := assets.AssetDir("images")
-	if err != nil {
-		panic(err)
-	}
-	for _, file := range files {
-		img, err := assets.LoadImage("images/"+file, ebiten.FilterNearest)
-		if err != nil {
-			return err
-		}
-		theImageCache.cache[file] = img
-	}
-	return nil
+const (
+	gameMarginX = 0
+	gameMarginY = 2.5 * tileSize * tileScale
+)
+
+func GameSize() (int, int) {
+	return tileXNum*tileSize*tileScale + 2*gameMarginX, tileYNum*tileSize*tileScale + 2*gameMarginY
 }
+
+// TODO: This variable should belong to a struct.
+var (
+	tileSets []*data.TileSet
+)
 
 func init() {
-	// TODO: The image should be loaded asyncly.
-	if err := initImageCache(); err != nil {
+	mapDataBytes := assets.MustAsset("data/tilesets.json")
+	if err := json.Unmarshal(mapDataBytes, &tileSets); err != nil {
 		panic(err)
 	}
-}
-
-type imageCache struct {
-	cache map[string]*ebiten.Image
-}
-
-func (i *imageCache) Get(path string) *ebiten.Image {
-	return i.cache[path]
 }

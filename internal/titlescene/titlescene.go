@@ -12,42 +12,40 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package game
+package titlescene
 
 import (
+	"image/color"
+
 	"github.com/hajimehoshi/ebiten"
 
+	"github.com/hajimehoshi/tsugunai/internal/font"
 	"github.com/hajimehoshi/tsugunai/internal/input"
 	"github.com/hajimehoshi/tsugunai/internal/mapscene"
 	"github.com/hajimehoshi/tsugunai/internal/scene"
-	"github.com/hajimehoshi/tsugunai/internal/titlescene"
 )
 
-type Game struct {
-	sceneManager *scene.SceneManager
+type TitleScene struct {
 }
 
-func New() (*Game, error) {
-	initScene := titlescene.New()
-	game := &Game{
-		sceneManager: scene.NewSceneManager(initScene),
+func New() *TitleScene {
+	return &TitleScene{}
+}
+
+func (t *TitleScene) Update(sceneManager *scene.SceneManager) error {
+	if input.Triggered() {
+		mapScene, err := mapscene.New()
+		if err != nil {
+			return err
+		}
+		sceneManager.GoTo(mapScene)
 	}
-	return game, nil
+	return nil
 }
 
-func (g *Game) Update() error {
-	input.Update()
-	return g.sceneManager.Update()
-}
-
-func (g *Game) Draw(screen *ebiten.Image) error {
-	return g.sceneManager.Draw(screen)
-}
-
-func (g *Game) Title() string {
-	return "Clock of Atonement"
-}
-
-func (g *Game) Size() (int, int) {
-	return mapscene.GameSize()
+func (t *TitleScene) Draw(screen *ebiten.Image) error {
+	if err := font.DrawText(screen, "償いの時計\nClock of Atonement", 0, 0, scene.TextScale, color.White); err != nil {
+		return err
+	}
+	return nil
 }

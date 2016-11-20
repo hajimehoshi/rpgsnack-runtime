@@ -20,6 +20,10 @@ import (
 	"github.com/hajimehoshi/tsugunai/internal/task"
 )
 
+const (
+	TextScale = 2
+)
+
 type scene interface {
 	Update(sceneManager *SceneManager) error
 	Draw(screen *ebiten.Image) error

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package scene
+package mapscene
 
 import (
 	"image/color"
@@ -22,6 +22,7 @@ import (
 	"github.com/hajimehoshi/tsugunai/internal/font"
 	"github.com/hajimehoshi/tsugunai/internal/input"
 	"github.com/hajimehoshi/tsugunai/internal/task"
+	"github.com/hajimehoshi/tsugunai/internal/scene"
 )
 
 const (
@@ -44,8 +45,8 @@ type balloon struct {
 
 func (b *balloon) bodySize() (int, int) {
 	w, h := font.MeasureSize(b.content)
-	w = (w + 2*balloonMarginX) * textScale / tileScale
-	h = (h + 2*balloonMarginY) * textScale / tileScale
+	w = (w + 2*balloonMarginX) * scene.TextScale / tileScale
+	h = (h + 2*balloonMarginY) * scene.TextScale / tileScale
 	w = ((w + 3) / 4) * 4
 	h = ((h + 3) / 4) * 4
 	return w, h
@@ -160,7 +161,7 @@ func (b *balloon) draw(screen *ebiten.Image) error {
 		}
 		x := (b.x+balloonMarginX)*tileScale + gameMarginX
 		y := (b.y+balloonMarginY)*tileScale + gameMarginY
-		if err := font.DrawText(screen, b.content, x, y, textScale, color.Black); err != nil {
+		if err := font.DrawText(screen, b.content, x, y, scene.TextScale, color.Black); err != nil {
 			return err
 		}
 	}

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package scene
+package mapscene
 
 import (
 	"github.com/hajimehoshi/tsugunai/internal/data"
