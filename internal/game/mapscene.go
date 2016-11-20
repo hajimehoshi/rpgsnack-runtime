@@ -16,14 +16,14 @@ package game
 
 import (
 	"encoding/json"
-	//"fmt"
-	//"image/color"
+	"fmt"
+	"image/color"
 
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/tsugunai/internal/assets"
 	"github.com/hajimehoshi/tsugunai/internal/data"
-	//"github.com/hajimehoshi/tsugunai/internal/font"
+	"github.com/hajimehoshi/tsugunai/internal/font"
 	"github.com/hajimehoshi/tsugunai/internal/input"
 	"github.com/hajimehoshi/tsugunai/internal/task"
 )
@@ -125,7 +125,9 @@ func (m *mapScene) runEvent(event *data.Event) {
 		switch c.Command {
 		case "show_message":
 			task.Push(func() error {
-				m.balloon.show(0, 0, c.Args["content"])
+				x := event.X*tileSize + tileSize/2
+				y := event.Y * tileSize
+				m.balloon.show(x, y, c.Args["content"])
 				return task.Terminated
 			})
 		}
@@ -261,9 +263,9 @@ func (m *mapScene) Draw(screen *ebiten.Image) error {
 	if err := m.balloon.draw(screen); err != nil {
 		return err
 	}
-	/*msg := fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS())
+	msg := fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS())
 	if err := font.DrawText(screen, msg, 0, 0, textScale, color.White); err != nil {
 		return err
-	}*/
+	}
 	return nil
 }

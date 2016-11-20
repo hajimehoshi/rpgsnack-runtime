@@ -25,19 +25,24 @@ import (
 )
 
 const (
-	balloonMarginX  = 4
-	balloonMarginY  = 4
-	balloonMaxCount = 20
+	balloonMarginX     = 4
+	balloonMarginY     = 4
+	balloonMaxCount    = 20
+	balloonArrowWidth  = 6
+	balloonArrowHeight = 5
 )
 
 type balloon struct {
-	x       int
-	y       int
-	content string
-	count   int
+	x         int
+	y         int
+	arrowX    int
+	arrowY    int
+	arrowFlip bool
+	content   string
+	count     int
 }
 
-func (b *balloon) size() (int, int) {
+func (b *balloon) bodySize() (int, int) {
 	w, h := font.MeasureSize(b.content)
 	w = (w + 2*balloonMarginX) * textScale / tileScale
 	h = (h + 2*balloonMarginY) * textScale / tileScale
@@ -48,8 +53,19 @@ func (b *balloon) size() (int, int) {
 
 func (b *balloon) show(x, y int, message string) {
 	b.content = message
-	b.x = x
-	b.y = y
+	b.arrowX = x
+	b.arrowY = y - balloonArrowHeight
+	b.arrowFlip = false
+	w, h := b.bodySize()
+	b.x = x - w/2
+	if tileXNum*tileSize < b.x+w {
+		b.arrowFlip = true
+		b.x = tileXNum*tileSize - w
+	}
+	if b.x+w < 0 {
+		b.x = 0
+	}
+	b.y = y - h - 4
 	b.count = balloonMaxCount
 	task.Push(func() error {
 		b.count--
@@ -78,16 +94,19 @@ type balloonImageParts struct {
 }
 
 func (b *balloonImageParts) partsNum() (int, int) {
-	width, height := b.balloon.size()
+	width, height := b.balloon.bodySize()
 	return width / 4, height / 4
 }
 
 func (b *balloonImageParts) Len() int {
 	w, h := b.partsNum()
-	return w * h
+	return w*h + 1
 }
 
 func (b *balloonImageParts) Src(index int) (int, int, int, int) {
+	if index == b.Len()-1 {
+		return 12, 0, 12 + balloonArrowWidth, balloonArrowHeight
+	}
 	w, h := b.partsNum()
 	x := index % w
 	y := index / w
@@ -111,10 +130,18 @@ func (b *balloonImageParts) Src(index int) (int, int, int, int) {
 }
 
 func (b *balloonImageParts) Dst(index int) (int, int, int, int) {
+	if index == b.Len()-1 {
+		x := b.balloon.arrowX
+		y := b.balloon.arrowY
+		if b.balloon.arrowFlip {
+			return x, y, x - balloonArrowWidth, y + balloonArrowHeight
+		}
+		return x, y, x + balloonArrowWidth, y + balloonArrowHeight
+	}
 	w, _ := b.partsNum()
-	x := index % w
-	y := index / w
-	return x * 4, y * 4, x*4 + 4, y*4 + 4
+	x := b.balloon.x + (index%w)*4
+	y := b.balloon.y + (index/w)*4
+	return x, y, x + 4, y + 4
 }
 
 func (b *balloon) draw(screen *ebiten.Image) error {
@@ -122,15 +149,16 @@ func (b *balloon) draw(screen *ebiten.Image) error {
 		img := theImageCache.Get("balloon.png")
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Scale(tileScale, tileScale)
+		op.GeoM.Translate(gameMarginX, gameMarginY)
 		op.ImageParts = &balloonImageParts{
 			balloon: b,
 		}
 		if err := screen.DrawImage(img, op); err != nil {
 			return err
 		}
-		mx := balloonMarginX * tileScale
-		my := balloonMarginY * tileScale
-		if err := font.DrawText(screen, b.content, b.x+mx, b.y+my, textScale, color.Black); err != nil {
+		x := (b.x+balloonMarginX)*tileScale + gameMarginX
+		y := (b.y+balloonMarginY)*tileScale + gameMarginY
+		if err := font.DrawText(screen, b.content, x, y, textScale, color.Black); err != nil {
 			return err
 		}
 	}
