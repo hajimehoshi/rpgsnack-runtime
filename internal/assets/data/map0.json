@@ -50,6 +50,12 @@
                 {
                   "command": "show_message",
                   "args":    {
+                    "content": "イベントのテストです。"
+                  }
+                },
+                {
+                  "command": "show_message",
+                  "args":    {
                     "content": "念願のアイスソードを\n手に入れたぞ"
                   }
                 },

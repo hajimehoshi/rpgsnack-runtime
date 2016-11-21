@@ -70,27 +70,41 @@ func (e *event) run(mapScene *MapScene) {
 		return task.Terminated
 	})
 	taskLine := &task.TaskLine{}
+	terminated := false
 	task.Push(func() error {
-		updated, err := taskLine.Update()
-		if err != nil {
-			return err
+		if terminated {
+			return task.Terminated
 		}
-		if updated {
+		if updated, err := taskLine.Update(); err != nil {
+			return err
+		} else if updated {
 			return nil
 		}
 		page := e.data.Pages[0]
 		// TODO: Consider branches
 		if len(page.Commands) <= e.currentCommandIndex {
-			e.character.dir = origDir
-			e.currentCommandIndex = 0
-			return task.Terminated
+			if mapScene.balloon.isShown() {
+				mapScene.balloon.close(taskLine)
+			}
+			taskLine.Push(func() error {
+				e.character.dir = origDir
+				e.currentCommandIndex = 0
+				terminated = true
+				return task.Terminated
+			})
+			return nil
 		}
 		c := page.Commands[e.currentCommandIndex]
 		switch c.Command {
 		case "show_message":
 			x := e.data.X*scene.TileSize + scene.TileSize/2
 			y := e.data.Y * scene.TileSize
-			mapScene.balloon.show(taskLine, x, y, c.Args["content"])
+			mapScene.balloon.showWithArrow(taskLine, x, y, c.Args["content"])
+			taskLine.Push(func() error {
+				e.currentCommandIndex++
+				return task.Terminated
+			})
+		case "show_choices":
 			taskLine.Push(func() error {
 				e.currentCommandIndex++
 				return task.Terminated

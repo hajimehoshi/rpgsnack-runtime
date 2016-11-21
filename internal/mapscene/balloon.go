@@ -36,29 +36,35 @@ const (
 type balloon struct {
 	x         int
 	y         int
+	width     int
+	height    int
+	hasArrow  bool
 	arrowX    int
 	arrowY    int
 	arrowFlip bool
 	content   string
 	count     int
+	maxCount  int
 }
 
-func (b *balloon) bodySize() (int, int) {
+func (b *balloon) isShown() bool {
+	return b.count == balloonMaxCount/2
+}
+
+func (b *balloon) showWithArrow(taskLine *task.TaskLine, arrowX, arrowY int, message string) {
+	b.content = message
+	b.hasArrow = true
+	b.arrowX = arrowX
+	b.arrowY = arrowY - balloonArrowHeight
+	b.arrowFlip = false
 	w, h := font.MeasureSize(b.content)
 	w = (w + 2*balloonMarginX) * scene.TextScale / scene.TileScale
 	h = (h + 2*balloonMarginY) * scene.TextScale / scene.TileScale
 	w = ((w + 3) / 4) * 4
 	h = ((h + 3) / 4) * 4
-	return w, h
-}
-
-func (b *balloon) show(taskLine *task.TaskLine, x, y int, message string) {
-	b.content = message
-	b.arrowX = x
-	b.arrowY = y - balloonArrowHeight
-	b.arrowFlip = false
-	w, h := b.bodySize()
-	b.x = x - w/2
+	b.width = w
+	b.height = h
+	b.x = arrowX - w/2
 	if scene.TileXNum*scene.TileSize < b.x+w {
 		b.arrowFlip = true
 		b.x = scene.TileXNum*scene.TileSize - w
@@ -66,21 +72,26 @@ func (b *balloon) show(taskLine *task.TaskLine, x, y int, message string) {
 	if b.x+w < 0 {
 		b.x = 0
 	}
-	b.y = y - h - 4
-	b.count = balloonMaxCount
-	taskLine.Push(func() error {
-		b.count--
-		if b.count == balloonMaxCount/2 {
-			return task.Terminated
-		}
-		return nil
-	})
+	b.y = arrowY - h - 4
+	if !b.isShown() {
+		b.count = balloonMaxCount
+		taskLine.Push(func() error {
+			b.count--
+			if b.count == balloonMaxCount/2 {
+				return task.Terminated
+			}
+			return nil
+		})
+	}
 	taskLine.Push(func() error {
 		if input.Triggered() {
 			return task.Terminated
 		}
 		return nil
 	})
+}
+
+func (b *balloon) close(taskLine *task.TaskLine) {
 	taskLine.Push(func() error {
 		b.count--
 		if b.count == 0 {
@@ -95,8 +106,7 @@ type balloonImageParts struct {
 }
 
 func (b *balloonImageParts) partsNum() (int, int) {
-	width, height := b.balloon.bodySize()
-	return width / 4, height / 4
+	return b.balloon.width / 4, b.balloon.height / 4
 }
 
 func (b *balloonImageParts) Len() int {
@@ -106,6 +116,9 @@ func (b *balloonImageParts) Len() int {
 
 func (b *balloonImageParts) Src(index int) (int, int, int, int) {
 	if index == b.Len()-1 {
+		if !b.balloon.hasArrow {
+			return 0, 0, 0, 0
+		}
 		return 12, 0, 12 + balloonArrowWidth, balloonArrowHeight
 	}
 	w, h := b.partsNum()
@@ -132,6 +145,9 @@ func (b *balloonImageParts) Src(index int) (int, int, int, int) {
 
 func (b *balloonImageParts) Dst(index int) (int, int, int, int) {
 	if index == b.Len()-1 {
+		if !b.balloon.hasArrow {
+			return 0, 0, 0, 0
+		}
 		x := b.balloon.arrowX
 		y := b.balloon.arrowY
 		if b.balloon.arrowFlip {
