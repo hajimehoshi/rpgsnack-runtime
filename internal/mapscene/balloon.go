@@ -52,31 +52,31 @@ func (b *balloon) isShown() bool {
 }
 
 func (b *balloon) showWithArrow(taskLine *task.TaskLine, arrowX, arrowY int, message string) {
-	b.content = message
-	b.hasArrow = true
-	b.arrowX = arrowX
-	b.arrowY = arrowY - balloonArrowHeight
-	b.arrowFlip = false
-	w, h := font.MeasureSize(b.content)
-	w = (w + 2*balloonMarginX) * scene.TextScale / scene.TileScale
-	h = (h + 2*balloonMarginY) * scene.TextScale / scene.TileScale
-	w = ((w + 3) / 4) * 4
-	h = ((h + 3) / 4) * 4
-	b.width = w
-	b.height = h
-	b.x = arrowX - w/2
-	if scene.TileXNum*scene.TileSize < b.x+w {
-		b.arrowFlip = true
-		b.x = scene.TileXNum*scene.TileSize - w
-	}
-	if b.x+w < 0 {
-		b.x = 0
-	}
-	b.y = arrowY - h - 4
 	if b.isShown() {
 		b.close(taskLine)
 	}
 	taskLine.Push(func() error {
+		b.content = message
+		b.hasArrow = true
+		b.arrowX = arrowX
+		b.arrowY = arrowY - balloonArrowHeight
+		b.arrowFlip = false
+		w, h := font.MeasureSize(b.content)
+		w = (w + 2*balloonMarginX) * scene.TextScale / scene.TileScale
+		h = (h + 2*balloonMarginY) * scene.TextScale / scene.TileScale
+		w = ((w + 3) / 4) * 4
+		h = ((h + 3) / 4) * 4
+		b.width = w
+		b.height = h
+		b.x = arrowX - w/2
+		if scene.TileXNum*scene.TileSize < b.x+w {
+			b.arrowFlip = true
+			b.x = scene.TileXNum*scene.TileSize - w
+		}
+		if b.x+w < 0 {
+			b.x = 0
+		}
+		b.y = arrowY - h - 4
 		b.count = balloonMaxCount
 		return task.Terminated
 	})
