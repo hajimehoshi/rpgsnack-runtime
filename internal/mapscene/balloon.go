@@ -178,9 +178,16 @@ func (b *balloon) draw(screen *ebiten.Image) error {
 			rate = float64(b.count) / float64(balloonMaxCount/2)
 		}
 		if rate != 1.0 {
-			op.GeoM.Translate(-float64(b.arrowX), -float64(b.arrowY))
+			dx := float64(b.arrowX)
+			dy := float64(b.arrowY) + balloonArrowHeight
+			if b.arrowFlip {
+				dx -= balloonArrowWidth
+			} else {
+				dx += balloonArrowWidth
+			}
+			op.GeoM.Translate(-dx, -dy)
 			op.GeoM.Scale(rate, rate)
-			op.GeoM.Translate(float64(b.arrowX), float64(b.arrowY))
+			op.GeoM.Translate(dx, dy)
 		}
 		op.GeoM.Scale(scene.TileScale, scene.TileScale)
 		op.GeoM.Translate(scene.GameMarginX, scene.GameMarginY)
