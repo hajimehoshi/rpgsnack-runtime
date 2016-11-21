@@ -28,7 +28,7 @@ import (
 const (
 	balloonMarginX     = 4
 	balloonMarginY     = 4
-	balloonMaxCount    = 20
+	balloonMaxCount    = 8
 	balloonArrowWidth  = 6
 	balloonArrowHeight = 5
 )
@@ -73,16 +73,20 @@ func (b *balloon) showWithArrow(taskLine *task.TaskLine, arrowX, arrowY int, mes
 		b.x = 0
 	}
 	b.y = arrowY - h - 4
-	if !b.isShown() {
-		b.count = balloonMaxCount
-		taskLine.Push(func() error {
-			b.count--
-			if b.count == balloonMaxCount/2 {
-				return task.Terminated
-			}
-			return nil
-		})
+	if b.isShown() {
+		b.close(taskLine)
 	}
+	taskLine.Push(func() error {
+		b.count = balloonMaxCount
+		return task.Terminated
+	})
+	taskLine.Push(func() error {
+		b.count--
+		if b.count == balloonMaxCount/2 {
+			return task.Terminated
+		}
+		return nil
+	})
 	taskLine.Push(func() error {
 		if input.Triggered() {
 			return task.Terminated
@@ -164,9 +168,20 @@ func (b *balloonImageParts) Dst(index int) (int, int, int, int) {
 }
 
 func (b *balloon) draw(screen *ebiten.Image) error {
-	if b.count == balloonMaxCount/2 {
+	if b.count > 0 {
 		img := theImageCache.Get("balloon.png")
 		op := &ebiten.DrawImageOptions{}
+		rate := 1.0
+		if balloonMaxCount/2 < b.count {
+			rate = 1 - float64(b.count-balloonMaxCount/2)/float64(balloonMaxCount/2)
+		} else if balloonMaxCount/2 > b.count {
+			rate = float64(b.count) / float64(balloonMaxCount/2)
+		}
+		if rate != 1.0 {
+			op.GeoM.Translate(-float64(b.arrowX), -float64(b.arrowY))
+			op.GeoM.Scale(rate, rate)
+			op.GeoM.Translate(float64(b.arrowX), float64(b.arrowY))
+		}
 		op.GeoM.Scale(scene.TileScale, scene.TileScale)
 		op.GeoM.Translate(scene.GameMarginX, scene.GameMarginY)
 		op.ImageParts = &balloonImageParts{
@@ -175,6 +190,8 @@ func (b *balloon) draw(screen *ebiten.Image) error {
 		if err := screen.DrawImage(img, op); err != nil {
 			return err
 		}
+	}
+	if b.count == balloonMaxCount/2 {
 		x := (b.x+balloonMarginX)*scene.TileScale + scene.GameMarginX
 		y := (b.y+balloonMarginY)*scene.TileScale + scene.GameMarginY
 		if err := font.DrawText(screen, b.content, x, y, scene.TextScale, color.Black); err != nil {
