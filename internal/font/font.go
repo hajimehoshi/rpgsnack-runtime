@@ -33,10 +33,11 @@ func init() {
 }
 
 const (
-	charHalfWidth = 6
-	charFullWidth = 12
-	charHeight    = 12
-	lineHeight    = 16
+	charHalfWidth       = 6
+	charFullWidth       = 12
+	charHeight          = 12
+	lineHeight          = 16
+	renderingLineHeight = 18
 )
 
 type textImageParts struct {
@@ -64,13 +65,11 @@ func (t *textImageParts) Src(index int) (int, int, int, int) {
 
 func (t *textImageParts) Dst(index int) (int, int, int, int) {
 	x := 0
-	y := 0
-	w := charFullWidth
-	h := lineHeight
+	y := (renderingLineHeight - lineHeight) / 2
 	for i := 0; i < index; i++ {
 		if t.runes[i] == '\n' {
 			x = 0
-			y += lineHeight
+			y += renderingLineHeight
 			continue
 		}
 		if t.runes[i] < 0x100 {
@@ -79,6 +78,8 @@ func (t *textImageParts) Dst(index int) (int, int, int, int) {
 		}
 		x += charFullWidth
 	}
+	w := charFullWidth
+	h := lineHeight
 	if t.runes[index] < 0x100 {
 		w = charHalfWidth
 	}
@@ -87,7 +88,7 @@ func (t *textImageParts) Dst(index int) (int, int, int, int) {
 
 func MeasureSize(text string) (int, int) {
 	w := 0
-	h := lineHeight
+	h := renderingLineHeight
 	cw := 0
 	for _, r := range text {
 		if r == '\n' {
@@ -95,7 +96,7 @@ func MeasureSize(text string) (int, int) {
 				w = cw
 			}
 			cw = 0
-			h += lineHeight
+			h += renderingLineHeight
 			continue
 		}
 		if r < 0x100 {

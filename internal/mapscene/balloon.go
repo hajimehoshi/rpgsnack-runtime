@@ -155,6 +155,7 @@ func (b *balloonImageParts) Dst(index int) (int, int, int, int) {
 		x := b.balloon.arrowX
 		y := b.balloon.arrowY
 		if b.balloon.arrowFlip {
+			// TODO: 4 is an arbitrary number. Define a const.
 			x -= 4
 			return x, y, x - balloonArrowWidth, y + balloonArrowHeight
 		}
@@ -181,9 +182,9 @@ func (b *balloon) draw(screen *ebiten.Image) error {
 			dx := float64(b.arrowX)
 			dy := float64(b.arrowY) + balloonArrowHeight
 			if b.arrowFlip {
-				dx -= balloonArrowWidth
+				dx -= 4
 			} else {
-				dx += balloonArrowWidth
+				dx += 4
 			}
 			op.GeoM.Translate(-dx, -dy)
 			op.GeoM.Scale(rate, rate)
