@@ -105,39 +105,7 @@ func (e *event) run(taskLine *task.TaskLine, mapScene *MapScene) {
 		c := page.Commands[e.currentCommandIndex]
 		switch c.Command {
 		case "show_message":
-			x := e.data.X*scene.TileSize + scene.TileSize/2
-			y := e.data.Y * scene.TileSize
-			// TODO: Better variable name
-			subTaskLines := make([]*task.TaskLine, len(mapScene.balloons))
-			for i, b := range mapScene.balloons {
-				subTaskLines[i] = &task.TaskLine{}
-				b.close(subTaskLines[i])
-			}
-			subTaskLine.Push(task.Parallel(subTaskLines...))
-			subTaskLine2 := &task.TaskLine{}
-			subTaskLine.Push(func() error {
-				mapScene.balloons = []*balloon{newBalloonWithArrow(x, y, c.Args["content"])}
-				mapScene.balloons[0].open(subTaskLine2)
-				return task.Terminated
-			})
-			subTaskLine.Push(func() error {
-				if updated, err := subTaskLine2.Update(); err != nil {
-					return err
-				} else if updated {
-					return nil
-				}
-				return task.Terminated
-			})
-			subTaskLine.Push(func() error {
-				if input.Triggered() {
-					return task.Terminated
-				}
-				return nil
-			})
-			subTaskLine.Push(func() error {
-				e.currentCommandIndex++
-				return task.Terminated
-			})
+			e.showMessage(subTaskLine, mapScene, c.Args["content"])
 		case "show_choices":
 			i := 0
 			choices := []string{}
@@ -149,36 +117,76 @@ func (e *event) run(taskLine *task.TaskLine, mapScene *MapScene) {
 				choices = append(choices, choice)
 				i++
 			}
-			const height = 20
-			dy := scene.TileYNum*scene.TileSize + scene.GameMarginBottom/scene.TileScale - len(choices)*height
-			// TODO: Better variable names
-			subTaskLines := make([]*task.TaskLine, len(choices))
-			for i, choice := range choices {
-				x := 0
-				y := i*height + dy
-				width := scene.TileXNum * scene.TileSize
-				// TODO: Show balloons as parallel
-				b := newBalloon(x, y, width, height, choice)
-				mapScene.balloons = append(mapScene.balloons, b)
-				subTaskLines[i] = &task.TaskLine{}
-				b.open(subTaskLines[i])
-			}
-			subTaskLine.Push(task.Parallel(subTaskLines...))
-			subTaskLine.Push(func() error {
-				if input.Triggered() {
-					return task.Terminated
-				}
-				return nil
-			})
-			subTaskLine.Push(func() error {
-				e.currentCommandIndex++
-				return task.Terminated
-			})
+			e.showChoices(subTaskLine, mapScene, choices)
 		default:
 			// Ignore unknown commands so far.
 			e.currentCommandIndex++
 		}
 		return nil
+	})
+}
+
+func (e *event) showMessage(taskLine *task.TaskLine, mapScene *MapScene, content string) {
+	x := e.data.X*scene.TileSize + scene.TileSize/2
+	y := e.data.Y * scene.TileSize
+	// TODO: Better variable name
+	subTaskLines := make([]*task.TaskLine, len(mapScene.balloons))
+	for i, b := range mapScene.balloons {
+		subTaskLines[i] = &task.TaskLine{}
+		b.close(subTaskLines[i])
+	}
+	taskLine.Push(task.Parallel(subTaskLines...))
+	subTaskLine2 := &task.TaskLine{}
+	taskLine.Push(func() error {
+		mapScene.balloons = []*balloon{newBalloonWithArrow(x, y, content)}
+		mapScene.balloons[0].open(subTaskLine2)
+		return task.Terminated
+	})
+	taskLine.Push(func() error {
+		if updated, err := subTaskLine2.Update(); err != nil {
+			return err
+		} else if updated {
+			return nil
+		}
+		return task.Terminated
+	})
+	taskLine.Push(func() error {
+		if input.Triggered() {
+			return task.Terminated
+		}
+		return nil
+	})
+	taskLine.Push(func() error {
+		e.currentCommandIndex++
+		return task.Terminated
+	})
+}
+
+func (e *event) showChoices(taskLine *task.TaskLine, mapScene *MapScene, choices []string) {
+	const height = 20
+	dy := scene.TileYNum*scene.TileSize + scene.GameMarginBottom/scene.TileScale - len(choices)*height
+	// TODO: Better variable names
+	subTaskLines := make([]*task.TaskLine, len(choices))
+	for i, choice := range choices {
+		x := 0
+		y := i*height + dy
+		width := scene.TileXNum * scene.TileSize
+		// TODO: Show balloons as parallel
+		b := newBalloon(x, y, width, height, choice)
+		mapScene.balloons = append(mapScene.balloons, b)
+		subTaskLines[i] = &task.TaskLine{}
+		b.open(subTaskLines[i])
+	}
+	taskLine.Push(task.Parallel(subTaskLines...))
+	taskLine.Push(func() error {
+		if input.Triggered() {
+			return task.Terminated
+		}
+		return nil
+	})
+	taskLine.Push(func() error {
+		e.currentCommandIndex++
+		return task.Terminated
 	})
 }
 
