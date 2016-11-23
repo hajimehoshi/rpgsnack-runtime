@@ -83,7 +83,7 @@ func (e *event) run(taskLine *task.TaskLine) {
 
 func (e *event) goOn(sub *task.TaskLine) error {
 	if e.commandIndex.isTerminated() {
-		sub.Push(task.CreateTaskLazily(func() task.Task {
+		sub.Push(task.CreateTaskLazily(func() (task.Task, error) {
 			sub := []*task.TaskLine{}
 			for _, b := range e.mapScene.balloons {
 				if b == nil {
@@ -94,7 +94,7 @@ func (e *event) goOn(sub *task.TaskLine) error {
 				b.close(t)
 				// mapScene.balloons will be cleared later.
 			}
-			return task.Parallel(sub...)
+			return task.Parallel(sub...), nil
 		}))
 		sub.PushFunc(func() error {
 			e.mapScene.balloons = nil
@@ -138,7 +138,7 @@ func (e *event) goOn(sub *task.TaskLine) error {
 }
 
 func (e *event) showMessage(taskLine *task.TaskLine, content string, position data.ShowMessagePosition) {
-	taskLine.Push(task.CreateTaskLazily(func() task.Task {
+	taskLine.Push(task.CreateTaskLazily(func() (task.Task, error) {
 		sub := []*task.TaskLine{}
 		for _, b := range e.mapScene.balloons {
 			if b == nil {
@@ -153,9 +153,9 @@ func (e *event) showMessage(taskLine *task.TaskLine, content string, position da
 				return task.Terminated
 			})
 		}
-		return task.Parallel(sub...)
+		return task.Parallel(sub...), nil
 	}))
-	taskLine.Push(task.CreateTaskLazily(func() task.Task {
+	taskLine.Push(task.CreateTaskLazily(func() (task.Task, error) {
 		sub := &task.TaskLine{}
 		var b *balloon
 		switch position {
@@ -166,12 +166,11 @@ func (e *event) showMessage(taskLine *task.TaskLine, content string, position da
 		case data.ShowMessagePositionCenter:
 			b = newBalloonCenter(content)
 		default:
-			// TODO: Return error here
-			panic(fmt.Sprintf("not implemented position: %s", string(position)))
+			return nil, fmt.Errorf("not implemented position: %s", string(position))
 		}
 		e.mapScene.balloons = []*balloon{b}
 		e.mapScene.balloons[0].open(sub)
-		return sub.ToTask()
+		return sub.ToTask(), nil
 	}))
 	taskLine.PushFunc(func() error {
 		if input.Triggered() {
@@ -186,7 +185,7 @@ func (e *event) showChoices(taskLine *task.TaskLine, choices []string) {
 	const ymax = scene.TileYNum*scene.TileSize + (scene.GameMarginTop+scene.GameMarginBottom)/scene.TileScale
 	ymin := ymax - len(choices)*height
 	balloons := []*balloon{}
-	taskLine.Push(task.CreateTaskLazily(func() task.Task {
+	taskLine.Push(task.CreateTaskLazily(func() (task.Task, error) {
 		sub := []*task.TaskLine{}
 		for i, choice := range choices {
 			x := 0
@@ -199,7 +198,7 @@ func (e *event) showChoices(taskLine *task.TaskLine, choices []string) {
 			b.open(t)
 			balloons = append(balloons, b)
 		}
-		return task.Parallel(sub...)
+		return task.Parallel(sub...), nil
 	}))
 	taskLine.PushFunc(func() error {
 		if !input.Triggered() {
@@ -213,7 +212,7 @@ func (e *event) showChoices(taskLine *task.TaskLine, choices []string) {
 		e.chosenIndex = (y - ymin) / height
 		return task.Terminated
 	})
-	taskLine.Push(task.CreateTaskLazily(func() task.Task {
+	taskLine.Push(task.CreateTaskLazily(func() (task.Task, error) {
 		sub := []*task.TaskLine{}
 		for i, b := range balloons {
 			b := b
@@ -228,7 +227,7 @@ func (e *event) showChoices(taskLine *task.TaskLine, choices []string) {
 				return task.Terminated
 			})
 		}
-		return task.Parallel(sub...)
+		return task.Parallel(sub...), nil
 	}))
 	taskLine.Push(task.Sleep(30))
 }
