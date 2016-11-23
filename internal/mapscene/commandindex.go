@@ -35,7 +35,7 @@ func (c *commandIndex) isTerminated() bool {
 	return len(c.commands) == 0
 }
 
-func (c *commandIndex) unindentCommandIndexIfNeeded() {
+func (c *commandIndex) unindentIfNeeded() {
 loop:
 	for 0 < len(c.commands) {
 		branch := c.page.Commands
@@ -71,11 +71,11 @@ func (c *commandIndex) command() *data.Command {
 
 func (c *commandIndex) advance() {
 	c.commands[len(c.commands)-1]++
-	c.unindentCommandIndexIfNeeded()
+	c.unindentIfNeeded()
 }
 
 func (c *commandIndex) choose(branchIndex int) {
 	c.branches = append(c.branches, branchIndex)
 	c.commands = append(c.commands, 0)
-	c.unindentCommandIndexIfNeeded()
+	c.unindentIfNeeded()
 }
