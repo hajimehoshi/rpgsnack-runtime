@@ -87,7 +87,7 @@ func (e *event) run(taskLine *task.TaskLine, mapScene *MapScene) {
 		// TODO: Consider branches
 		if len(page.Commands) <= e.currentCommandIndex {
 			for _, b := range mapScene.balloons {
-				b.close(taskLine)
+				b.close(subTaskLine)
 			}
 			subTaskLine.Push(func() error {
 				mapScene.balloons = nil
@@ -104,7 +104,7 @@ func (e *event) run(taskLine *task.TaskLine, mapScene *MapScene) {
 			x := e.data.X*scene.TileSize + scene.TileSize/2
 			y := e.data.Y * scene.TileSize
 			for _, b := range mapScene.balloons {
-				b.close(taskLine)
+				b.close(subTaskLine)
 			}
 			subTaskLine2 := &task.TaskLine{}
 			subTaskLine.Push(func() error {
