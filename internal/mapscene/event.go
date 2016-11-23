@@ -89,8 +89,8 @@ func (e *event) run(mapScene *MapScene) {
 			for _, b := range mapScene.balloons {
 				b.close(taskLine)
 			}
-			mapScene.balloons = nil
 			taskLine.Push(func() error {
+				mapScene.balloons = nil
 				e.character.dir = origDir
 				e.currentCommandIndex = 0
 				terminated = true
@@ -106,8 +106,8 @@ func (e *event) run(mapScene *MapScene) {
 			for _, b := range mapScene.balloons {
 				b.close(taskLine)
 			}
-			mapScene.balloons = nil
-			mapScene.balloons = append(mapScene.balloons, newBalloonWithArrow(taskLine, x, y, c.Args["content"]))
+			b := newBalloonWithArrow(taskLine, x, y, c.Args["content"])
+			mapScene.balloons = []*balloon{b}
 			taskLine.Push(func() error {
 				if input.Triggered() {
 					return task.Terminated
