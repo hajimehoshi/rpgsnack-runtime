@@ -137,6 +137,7 @@ func (e *event) showMessage(taskLine *task.TaskLine, mapScene *MapScene, content
 	// TODO: Better variable name
 	subTaskLines := []*task.TaskLine{}
 	for _, b := range mapScene.balloons {
+		b := b
 		t := &task.TaskLine{}
 		subTaskLines = append(subTaskLines, t)
 		b.close(t)
@@ -209,6 +210,7 @@ func (e *event) showChoices(taskLine *task.TaskLine, mapScene *MapScene, choices
 		if closing == nil {
 			sub := []*task.TaskLine{}
 			for i, b := range balloons {
+				b := b
 				if i == e.chosenIndex {
 					continue
 				}
