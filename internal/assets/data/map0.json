@@ -85,6 +85,12 @@
                       }
                     ]
                   ]
+                },
+                {
+                  "command": "show_message",
+                  "args":    {
+                    "content": "選択肢合流後のイベント"
+                  }
                 }
               ]
             }
