@@ -47,7 +47,7 @@ type balloon struct {
 	maxCount  int
 }
 
-func newBalloon(taskLine *task.TaskLine, x, y, width, height int, content string) *balloon {
+func newBalloon(x, y, width, height int, content string) *balloon {
 	b := &balloon{
 		content: content,
 		x:       x,
@@ -56,17 +56,10 @@ func newBalloon(taskLine *task.TaskLine, x, y, width, height int, content string
 		height:  ((height + 3) / 4) * 4,
 		count:   balloonMaxCount,
 	}
-	taskLine.Push(func() error {
-		b.count--
-		if b.count == balloonMaxCount/2 {
-			return task.Terminated
-		}
-		return nil
-	})
 	return b
 }
 
-func newBalloonWithArrow(taskLine *task.TaskLine, arrowX, arrowY int, content string) *balloon {
+func newBalloonWithArrow(arrowX, arrowY int, content string) *balloon {
 	b := &balloon{
 		content:  content,
 		hasArrow: true,
@@ -90,6 +83,10 @@ func newBalloonWithArrow(taskLine *task.TaskLine, arrowX, arrowY int, content st
 		b.x = 0
 	}
 	b.y = arrowY - h - 4
+	return b
+}
+
+func (b *balloon) open(taskLine *task.TaskLine) {
 	taskLine.Push(func() error {
 		b.count--
 		if b.count == balloonMaxCount/2 {
@@ -97,7 +94,6 @@ func newBalloonWithArrow(taskLine *task.TaskLine, arrowX, arrowY int, content st
 		}
 		return nil
 	})
-	return b
 }
 
 func (b *balloon) close(taskLine *task.TaskLine) {

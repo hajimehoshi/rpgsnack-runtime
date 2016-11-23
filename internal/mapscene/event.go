@@ -106,8 +106,20 @@ func (e *event) run(mapScene *MapScene) {
 			for _, b := range mapScene.balloons {
 				b.close(taskLine)
 			}
-			b := newBalloonWithArrow(taskLine, x, y, c.Args["content"])
-			mapScene.balloons = []*balloon{b}
+			subTaskLine := &task.TaskLine{}
+			taskLine.Push(func() error {
+				mapScene.balloons = []*balloon{newBalloonWithArrow(x, y, c.Args["content"])}
+				mapScene.balloons[0].open(subTaskLine)
+				return task.Terminated
+			})
+			taskLine.Push(func() error {
+				if updated, err := subTaskLine.Update(); err != nil {
+					return err
+				} else if updated {
+					return nil
+				}
+				return task.Terminated
+			})
 			taskLine.Push(func() error {
 				if input.Triggered() {
 					return task.Terminated
@@ -136,7 +148,9 @@ func (e *event) run(mapScene *MapScene) {
 				y := i*height + dy
 				width := scene.TileXNum * scene.TileSize
 				// TODO: Show balloons as parallel
-				mapScene.balloons = append(mapScene.balloons, newBalloon(taskLine, x, y, width, height, choice))
+				b := newBalloon(x, y, width, height, choice)
+				mapScene.balloons = append(mapScene.balloons, b)
+				b.open(taskLine)
 			}
 			taskLine.Push(func() error {
 				if input.Triggered() {
