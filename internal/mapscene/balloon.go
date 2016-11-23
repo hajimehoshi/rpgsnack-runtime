@@ -98,6 +98,10 @@ func (b *balloon) open(taskLine *task.TaskLine) {
 
 func (b *balloon) close(taskLine *task.TaskLine) {
 	taskLine.PushFunc(func() error {
+		if b.count == 0 {
+			// TODO: not reach?
+			return task.Terminated
+		}
 		b.count--
 		if b.count == 0 {
 			return task.Terminated

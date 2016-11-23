@@ -90,9 +90,13 @@ func (e *event) run(taskLine *task.TaskLine, mapScene *MapScene) {
 			// TODO: Better variable name
 			subTaskLines := []*task.TaskLine{}
 			for _, b := range mapScene.balloons {
+				if b == nil {
+					continue
+				}
 				t := &task.TaskLine{}
 				subTaskLines = append(subTaskLines, t)
 				b.close(t)
+				// mapScene.balloons will be cleared later.
 			}
 			subTaskLine.Push(task.Parallel(subTaskLines...))
 			subTaskLine.PushFunc(func() error {
@@ -121,8 +125,7 @@ func (e *event) run(taskLine *task.TaskLine, mapScene *MapScene) {
 			}
 			e.showChoices(subTaskLine, mapScene, choices)
 		default:
-			// Ignore unknown commands so far.
-			e.currentCommandIndex++
+			panic("not reach")
 		}
 		return nil
 	})
@@ -137,6 +140,10 @@ func (e *event) showMessage(taskLine *task.TaskLine, mapScene *MapScene, content
 		t := &task.TaskLine{}
 		subTaskLines = append(subTaskLines, t)
 		b.close(t)
+		t.PushFunc(func() error {
+			mapScene.removeBalloon(b)
+			return task.Terminated
+		})
 	}
 	taskLine.Push(task.Parallel(subTaskLines...))
 	sub := &task.TaskLine{}
@@ -195,9 +202,29 @@ func (e *event) showChoices(taskLine *task.TaskLine, mapScene *MapScene, choices
 			return nil
 		}
 		e.chosenIndex = (y - ymin) / height
-		println(e.chosenIndex)
 		return task.Terminated
 	})
+	var closing task.Task
+	taskLine.PushFunc(func() error {
+		if closing == nil {
+			sub := []*task.TaskLine{}
+			for i, b := range balloons {
+				if i == e.chosenIndex {
+					continue
+				}
+				t := &task.TaskLine{}
+				sub = append(sub, t)
+				b.close(t)
+				t.PushFunc(func() error {
+					mapScene.removeBalloon(b)
+					return task.Terminated
+				})
+			}
+			closing = task.Parallel(sub...)
+		}
+		return closing.Update()
+	})
+	taskLine.Push(task.Sleep(30))
 	taskLine.PushFunc(func() error {
 		e.currentCommandIndex++
 		return task.Terminated

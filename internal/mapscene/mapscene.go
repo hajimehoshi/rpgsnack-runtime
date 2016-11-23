@@ -157,6 +157,19 @@ func (m *MapScene) Update(taskLine *task.TaskLine, sceneManager *scene.SceneMana
 	return nil
 }
 
+func (m *MapScene) removeBalloon(balloon *balloon) {
+	index := -1
+	for i, b := range m.balloons {
+		if b == balloon {
+			index = i
+			break
+		}
+	}
+	if index != -1 {
+		m.balloons[index] = nil
+	}
+}
+
 type tilesImageParts struct {
 	room     *data.Room
 	tileSet  *data.TileSet
@@ -245,6 +258,9 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 		return err
 	}
 	for _, b := range m.balloons {
+		if b == nil {
+			continue
+		}
 		if err := b.draw(screen); err != nil {
 			return err
 		}

@@ -24,6 +24,17 @@ type Task interface {
 	Update() error
 }
 
+func Sleep(frames int) Task {
+	c := frames
+	return taskFunc(func() error {
+		c--
+		if c == 0 {
+			return Terminated
+		}
+		return nil
+	})
+}
+
 type taskFunc func() error
 
 func (t taskFunc) Update() error {
