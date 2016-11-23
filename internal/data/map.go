@@ -77,3 +77,12 @@ type Command struct {
 	Args     map[string]string `json:"args"`
 	Branches [][]*Command      `json:"branches"`
 }
+
+type ShowMessagePosition string
+
+const (
+	ShowMessagePositionSelf   ShowMessagePosition = "self"
+	ShowMessagePositionPlayer ShowMessagePosition = "player"
+	ShowMessagePositionEvent  ShowMessagePosition = "event"
+	ShowMessagePositionCenter                     = "center"
+)

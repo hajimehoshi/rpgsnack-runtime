@@ -106,7 +106,11 @@ func (e *event) goOn(sub *task.TaskLine) error {
 	c := e.commandIndex.command()
 	switch c.Command {
 	case "show_message":
-		e.showMessage(sub, c.Args["content"])
+		position := data.ShowMessagePositionSelf
+		if c.Args["position"] != "" {
+			position = data.ShowMessagePosition(c.Args["position"])
+		}
+		e.showMessage(sub, c.Args["content"], position)
 		sub.PushFunc(func() error {
 			e.commandIndex.advance()
 			return task.Terminated
@@ -133,9 +137,7 @@ func (e *event) goOn(sub *task.TaskLine) error {
 	return nil
 }
 
-func (e *event) showMessage(taskLine *task.TaskLine, content string) {
-	x := e.data.X*scene.TileSize + scene.TileSize/2 + scene.GameMarginX/scene.TileScale
-	y := e.data.Y*scene.TileSize + scene.GameMarginTop/scene.TileScale
+func (e *event) showMessage(taskLine *task.TaskLine, content string, position data.ShowMessagePosition) {
 	taskLine.Push(task.CreateTaskLazily(func() task.Task {
 		sub := []*task.TaskLine{}
 		for _, b := range e.mapScene.balloons {
@@ -155,7 +157,19 @@ func (e *event) showMessage(taskLine *task.TaskLine, content string) {
 	}))
 	taskLine.Push(task.CreateTaskLazily(func() task.Task {
 		sub := &task.TaskLine{}
-		e.mapScene.balloons = []*balloon{newBalloonWithArrow(x, y, content)}
+		var b *balloon
+		switch position {
+		case data.ShowMessagePositionSelf:
+			x := e.data.X*scene.TileSize + scene.TileSize/2 + scene.GameMarginX/scene.TileScale
+			y := e.data.Y*scene.TileSize + scene.GameMarginTop/scene.TileScale
+			b = newBalloonWithArrow(x, y, content)
+		case data.ShowMessagePositionCenter:
+			b = newBalloonCenter(content)
+		default:
+			// TODO: Return error here
+			panic(fmt.Sprintf("not implemented position: %s", string(position)))
+		}
+		e.mapScene.balloons = []*balloon{b}
 		e.mapScene.balloons[0].open(sub)
 		return sub.ToTask()
 	}))

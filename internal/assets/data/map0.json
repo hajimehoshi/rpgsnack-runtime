@@ -86,7 +86,8 @@
                       {
                         "command": "show_message",
                         "args":    {
-                          "content": "ホークは、今までの経緯を説明した"
+                          "content":  "ホークは、今までの経緯を説明した",
+                          "position": "center"
                         }
                       },
                       {

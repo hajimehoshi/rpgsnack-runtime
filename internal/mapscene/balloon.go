@@ -59,6 +59,32 @@ func newBalloon(x, y, width, height int, content string) *balloon {
 	return b
 }
 
+func balloonSizeFromContent(content string) (int, int) {
+	w, h := font.MeasureSize(content)
+	w = (w + 2*balloonMarginX) * scene.TextScale / scene.TileScale
+	h = (h + 2*balloonMarginY) * scene.TextScale / scene.TileScale
+	w = ((w + 3) / 4) * 4
+	h = ((h + 3) / 4) * 4
+	return w, h
+}
+
+func newBalloonCenter(content string) *balloon {
+	sw := scene.TileXNum*scene.TileSize + scene.GameMarginX/scene.TileScale
+	sh := scene.TileYNum*scene.TileSize + scene.GameMarginTop/scene.TileScale
+	w, h := balloonSizeFromContent(content)
+	x := (sw - w) / 2
+	y := (sh - h) / 2
+	b := &balloon{
+		content: content,
+		x:       x,
+		y:       y,
+		width:   w,
+		height:  h,
+		count:   balloonMaxCount,
+	}
+	return b
+}
+
 func newBalloonWithArrow(arrowX, arrowY int, content string) *balloon {
 	b := &balloon{
 		content:  content,
@@ -67,11 +93,7 @@ func newBalloonWithArrow(arrowX, arrowY int, content string) *balloon {
 		arrowY:   arrowY - balloonArrowHeight,
 		count:    balloonMaxCount,
 	}
-	w, h := font.MeasureSize(b.content)
-	w = (w + 2*balloonMarginX) * scene.TextScale / scene.TileScale
-	h = (h + 2*balloonMarginY) * scene.TextScale / scene.TileScale
-	w = ((w + 3) / 4) * 4
-	h = ((h + 3) / 4) * 4
+	w, h := balloonSizeFromContent(content)
 	b.width = w
 	b.height = h
 	b.x = arrowX - w/2
