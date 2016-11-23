@@ -81,7 +81,7 @@ func (e *event) run(taskLine *task.TaskLine) {
 	taskLine.Push(task.Sub(e.goOn))
 }
 
-func (e *event) adjustCommandIndex() {
+func (e *event) unindentCommandIndexIfNeeded() {
 	page := e.data.Pages[0]
 loop:
 	for 0 < len(e.currentCommandIndex) {
@@ -142,7 +142,7 @@ func (e *event) goOn(sub *task.TaskLine) error {
 		e.showMessage(sub, c.Args["content"])
 		sub.PushFunc(func() error {
 			e.currentCommandIndex[len(e.currentCommandIndex)-1]++
-			e.adjustCommandIndex()
+			e.unindentCommandIndexIfNeeded()
 			return task.Terminated
 		})
 	case "show_choices":
@@ -160,7 +160,7 @@ func (e *event) goOn(sub *task.TaskLine) error {
 		sub.PushFunc(func() error {
 			e.currentBranchIndex = append(e.currentBranchIndex, e.chosenIndex)
 			e.currentCommandIndex = append(e.currentCommandIndex, 0)
-			e.adjustCommandIndex()
+			e.unindentCommandIndexIfNeeded()
 			return task.Terminated
 		})
 	default:
