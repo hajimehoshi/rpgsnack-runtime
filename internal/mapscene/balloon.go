@@ -20,7 +20,6 @@ import (
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/tsugunai/internal/font"
-	"github.com/hajimehoshi/tsugunai/internal/input"
 	"github.com/hajimehoshi/tsugunai/internal/scene"
 	"github.com/hajimehoshi/tsugunai/internal/task"
 )
@@ -47,14 +46,8 @@ type balloon struct {
 	maxCount  int
 }
 
-func (b *balloon) isShown() bool {
-	return b.count == balloonMaxCount/2
-}
-
-func (b *balloon) showWithArrow(taskLine *task.TaskLine, arrowX, arrowY int, message string) {
-	if b.isShown() {
-		b.close(taskLine)
-	}
+func newBalloonWithArrow(taskLine *task.TaskLine, arrowX, arrowY int, message string) *balloon {
+	b := &balloon{}
 	taskLine.Push(func() error {
 		b.content = message
 		b.hasArrow = true
@@ -87,12 +80,7 @@ func (b *balloon) showWithArrow(taskLine *task.TaskLine, arrowX, arrowY int, mes
 		}
 		return nil
 	})
-	taskLine.Push(func() error {
-		if input.Triggered() {
-			return task.Terminated
-		}
-		return nil
-	})
+	return b
 }
 
 func (b *balloon) close(taskLine *task.TaskLine) {

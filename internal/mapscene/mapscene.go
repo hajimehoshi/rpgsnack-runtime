@@ -58,7 +58,6 @@ func New() (*MapScene, error) {
 	mapScene := &MapScene{
 		currentMap: mapData,
 		player:     player,
-		balloon:    &balloon{},
 		tilesImage: tilesImage,
 	}
 	for _, e := range mapScene.currentMap.Rooms[mapScene.currentRoomID].Events {
@@ -245,8 +244,10 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 	if err := screen.DrawImage(m.tilesImage, op); err != nil {
 		return err
 	}
-	if err := m.balloon.draw(screen); err != nil {
-		return err
+	if m.balloon != nil {
+		if err := m.balloon.draw(screen); err != nil {
+			return err
+		}
 	}
 	msg := fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS())
 	if err := font.DrawText(screen, msg, 0, 0, scene.TextScale, color.White); err != nil {

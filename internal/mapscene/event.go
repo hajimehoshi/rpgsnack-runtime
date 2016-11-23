@@ -18,6 +18,7 @@ import (
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/tsugunai/internal/data"
+	"github.com/hajimehoshi/tsugunai/internal/input"
 	"github.com/hajimehoshi/tsugunai/internal/scene"
 	"github.com/hajimehoshi/tsugunai/internal/task"
 )
@@ -83,8 +84,9 @@ func (e *event) run(mapScene *MapScene) {
 		page := e.data.Pages[0]
 		// TODO: Consider branches
 		if len(page.Commands) <= e.currentCommandIndex {
-			if mapScene.balloon.isShown() {
+			if mapScene.balloon != nil {
 				mapScene.balloon.close(taskLine)
+				mapScene.balloon = nil
 			}
 			taskLine.Push(func() error {
 				e.character.dir = origDir
@@ -99,7 +101,17 @@ func (e *event) run(mapScene *MapScene) {
 		case "show_message":
 			x := e.data.X*scene.TileSize + scene.TileSize/2
 			y := e.data.Y * scene.TileSize
-			mapScene.balloon.showWithArrow(taskLine, x, y, c.Args["content"])
+			if mapScene.balloon != nil {
+				mapScene.balloon.close(taskLine)
+				mapScene.balloon = nil
+			}
+			mapScene.balloon = newBalloonWithArrow(taskLine, x, y, c.Args["content"])
+			taskLine.Push(func() error {
+				if input.Triggered() {
+					return task.Terminated
+				}
+				return nil
+			})
 			taskLine.Push(func() error {
 				e.currentCommandIndex++
 				return task.Terminated
