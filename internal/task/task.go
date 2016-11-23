@@ -35,6 +35,19 @@ func Sleep(frames int) Task {
 	})
 }
 
+func CreateTaskLazily(create func() Task) Task {
+	var task Task
+	return taskFunc(func() error {
+		if task == nil {
+			task = create()
+		}
+		if task == nil {
+			panic("not reach")
+		}
+		return task.Update()
+	})
+}
+
 type taskFunc func() error
 
 func (t taskFunc) Update() error {
