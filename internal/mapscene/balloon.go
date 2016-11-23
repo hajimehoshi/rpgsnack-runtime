@@ -25,6 +25,7 @@ import (
 )
 
 const (
+	// TODO: Rename this to balloonUnitSize
 	balloonMarginX     = 4
 	balloonMarginY     = 4
 	balloonMaxCount    = 8
@@ -46,33 +47,49 @@ type balloon struct {
 	maxCount  int
 }
 
-func newBalloonWithArrow(taskLine *task.TaskLine, arrowX, arrowY int, message string) *balloon {
-	b := &balloon{}
+func newBalloon(taskLine *task.TaskLine, x, y, width, height int, content string) *balloon {
+	b := &balloon{
+		content: content,
+		x:       x,
+		y:       y,
+		width:   ((width + 3) / 4) * 4,
+		height:  ((height + 3) / 4) * 4,
+		count:   balloonMaxCount,
+	}
 	taskLine.Push(func() error {
-		b.content = message
-		b.hasArrow = true
-		b.arrowX = arrowX
-		b.arrowY = arrowY - balloonArrowHeight
-		b.arrowFlip = false
-		w, h := font.MeasureSize(b.content)
-		w = (w + 2*balloonMarginX) * scene.TextScale / scene.TileScale
-		h = (h + 2*balloonMarginY) * scene.TextScale / scene.TileScale
-		w = ((w + 3) / 4) * 4
-		h = ((h + 3) / 4) * 4
-		b.width = w
-		b.height = h
-		b.x = arrowX - w/2
-		if scene.TileXNum*scene.TileSize < b.x+w {
-			b.arrowFlip = true
-			b.x = scene.TileXNum*scene.TileSize - w
+		b.count--
+		if b.count == balloonMaxCount/2 {
+			return task.Terminated
 		}
-		if b.x+w < 0 {
-			b.x = 0
-		}
-		b.y = arrowY - h - 4
-		b.count = balloonMaxCount
-		return task.Terminated
+		return nil
 	})
+	return b
+}
+
+func newBalloonWithArrow(taskLine *task.TaskLine, arrowX, arrowY int, content string) *balloon {
+	b := &balloon{
+		content:  content,
+		hasArrow: true,
+		arrowX:   arrowX,
+		arrowY:   arrowY - balloonArrowHeight,
+		count:    balloonMaxCount,
+	}
+	w, h := font.MeasureSize(b.content)
+	w = (w + 2*balloonMarginX) * scene.TextScale / scene.TileScale
+	h = (h + 2*balloonMarginY) * scene.TextScale / scene.TileScale
+	w = ((w + 3) / 4) * 4
+	h = ((h + 3) / 4) * 4
+	b.width = w
+	b.height = h
+	b.x = arrowX - w/2
+	if scene.TileXNum*scene.TileSize < b.x+w {
+		b.arrowFlip = true
+		b.x = scene.TileXNum*scene.TileSize - w
+	}
+	if b.x+w < 0 {
+		b.x = 0
+	}
+	b.y = arrowY - h - 4
 	taskLine.Push(func() error {
 		b.count--
 		if b.count == balloonMaxCount/2 {
@@ -167,12 +184,16 @@ func (b *balloon) draw(screen *ebiten.Image) error {
 			rate = float64(b.count) / float64(balloonMaxCount/2)
 		}
 		if rate != 1.0 {
-			dx := float64(b.arrowX)
-			dy := float64(b.arrowY) + balloonArrowHeight
-			if b.arrowFlip {
-				dx -= 4
-			} else {
-				dx += 4
+			dx := float64(b.x + b.width/2)
+			dy := float64(b.y + b.height/2)
+			if b.hasArrow {
+				dx = float64(b.arrowX)
+				dy = float64(b.arrowY) + balloonArrowHeight
+				if b.arrowFlip {
+					dx -= 4
+				} else {
+					dx += 4
+				}
 			}
 			op.GeoM.Translate(-dx, -dy)
 			op.GeoM.Scale(rate, rate)

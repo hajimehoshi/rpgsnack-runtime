@@ -15,6 +15,8 @@
 package mapscene
 
 import (
+	"fmt"
+
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/tsugunai/internal/data"
@@ -84,10 +86,10 @@ func (e *event) run(mapScene *MapScene) {
 		page := e.data.Pages[0]
 		// TODO: Consider branches
 		if len(page.Commands) <= e.currentCommandIndex {
-			if mapScene.balloon != nil {
-				mapScene.balloon.close(taskLine)
-				mapScene.balloon = nil
+			for _, b := range mapScene.balloons {
+				b.close(taskLine)
 			}
+			mapScene.balloons = nil
 			taskLine.Push(func() error {
 				e.character.dir = origDir
 				e.currentCommandIndex = 0
@@ -101,11 +103,11 @@ func (e *event) run(mapScene *MapScene) {
 		case "show_message":
 			x := e.data.X*scene.TileSize + scene.TileSize/2
 			y := e.data.Y * scene.TileSize
-			if mapScene.balloon != nil {
-				mapScene.balloon.close(taskLine)
-				mapScene.balloon = nil
+			for _, b := range mapScene.balloons {
+				b.close(taskLine)
 			}
-			mapScene.balloon = newBalloonWithArrow(taskLine, x, y, c.Args["content"])
+			mapScene.balloons = nil
+			mapScene.balloons = append(mapScene.balloons, newBalloonWithArrow(taskLine, x, y, c.Args["content"]))
 			taskLine.Push(func() error {
 				if input.Triggered() {
 					return task.Terminated
@@ -117,6 +119,31 @@ func (e *event) run(mapScene *MapScene) {
 				return task.Terminated
 			})
 		case "show_choices":
+			i := 0
+			choices := []string{}
+			for {
+				choice, ok := c.Args[fmt.Sprintf("choice%d", i)]
+				if !ok {
+					break
+				}
+				choices = append(choices, choice)
+				i++
+			}
+			const height = 20
+			dy := scene.TileYNum*scene.TileSize + scene.GameMarginY/scene.TileScale - len(choices)*height
+			for i, choice := range choices {
+				x := 0
+				y := i*height + dy
+				width := scene.TileXNum * scene.TileSize
+				// TODO: Show balloons as parallel
+				mapScene.balloons = append(mapScene.balloons, newBalloon(taskLine, x, y, width, height, choice))
+			}
+			taskLine.Push(func() error {
+				if input.Triggered() {
+					return task.Terminated
+				}
+				return nil
+			})
 			taskLine.Push(func() error {
 				e.currentCommandIndex++
 				return task.Terminated

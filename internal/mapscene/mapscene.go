@@ -36,7 +36,7 @@ type MapScene struct {
 	moveDstX      int
 	moveDstY      int
 	playerMoving  bool
-	balloon       *balloon
+	balloons      []*balloon
 	tilesImage    *ebiten.Image
 	events        []*event
 }
@@ -244,8 +244,8 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 	if err := screen.DrawImage(m.tilesImage, op); err != nil {
 		return err
 	}
-	if m.balloon != nil {
-		if err := m.balloon.draw(screen); err != nil {
+	for _, b := range m.balloons {
+		if err := b.draw(screen); err != nil {
 			return err
 		}
 	}
