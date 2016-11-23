@@ -20,7 +20,15 @@ import (
 
 var Terminated = errors.New("task terminated")
 
-type Task func() error
+type Task interface {
+	Update() error
+}
+
+type taskFunc func() error
+
+func (t taskFunc) Update() error {
+	return t()
+}
 
 type TaskLine struct {
 	tasks []Task
@@ -30,12 +38,16 @@ func (t *TaskLine) Push(task Task) {
 	t.tasks = append(t.tasks, task)
 }
 
+func (t *TaskLine) PushFunc(task func() error) {
+	t.tasks = append(t.tasks, taskFunc(task))
+}
+
 func (t *TaskLine) Update() (bool, error) {
 	if len(t.tasks) == 0 {
 		return false, nil
 	}
 	task := t.tasks[0]
-	if err := task(); err == Terminated {
+	if err := task.Update(); err == Terminated {
 		t.tasks = t.tasks[1:]
 	} else if err != nil {
 		return false, err
@@ -44,7 +56,7 @@ func (t *TaskLine) Update() (bool, error) {
 }
 
 func Parallel(taskLines ...*TaskLine) Task {
-	return func() error {
+	return taskFunc(func() error {
 		done := []int{}
 		for i, t := range taskLines {
 			if t == nil {
@@ -65,5 +77,5 @@ func Parallel(taskLines ...*TaskLine) Task {
 			}
 		}
 		return Terminated
-	}
+	})
 }

@@ -84,7 +84,7 @@ func (c *character) move(taskLine *task.TaskLine, passable func(x, y int) bool, 
 	for _, d := range path {
 		d := d
 		init := false
-		taskLine.Push(func() error {
+		taskLine.PushFunc(func() error {
 			if !init {
 				c.dir = d
 				c.moveCount = playerMaxMoveCount
@@ -127,9 +127,6 @@ func (c *character) move(taskLine *task.TaskLine, passable func(x, y int) bool, 
 			return nil
 		})
 	}
-	taskLine.Push(func() error {
-		return task.Terminated
-	})
 }
 
 func (c *character) update(passable func(x, y int) bool) error {

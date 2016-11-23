@@ -136,7 +136,7 @@ func (m *MapScene) movePlayerIfNeeded(taskLine *task.TaskLine) {
 	m.player.move(taskLine, m.passable, tx, ty)
 	m.moveDstX = tx
 	m.moveDstY = ty
-	taskLine.Push(func() error {
+	taskLine.PushFunc(func() error {
 		m.playerMoving = false
 		return task.Terminated
 	})

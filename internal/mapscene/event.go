@@ -53,7 +53,7 @@ func (e *event) trigger() data.Trigger {
 
 func (e *event) run(taskLine *task.TaskLine, mapScene *MapScene) {
 	origDir := e.character.dir
-	taskLine.Push(func() error {
+	taskLine.PushFunc(func() error {
 		var dir data.Dir
 		ex, ey := e.character.x, e.character.y
 		px, py := mapScene.player.character.x, mapScene.player.character.y
@@ -74,7 +74,7 @@ func (e *event) run(taskLine *task.TaskLine, mapScene *MapScene) {
 	})
 	subTaskLine := &task.TaskLine{}
 	terminated := false
-	taskLine.Push(func() error {
+	taskLine.PushFunc(func() error {
 		if terminated {
 			return task.Terminated
 		}
@@ -93,7 +93,7 @@ func (e *event) run(taskLine *task.TaskLine, mapScene *MapScene) {
 				b.close(subTaskLines[i])
 			}
 			subTaskLine.Push(task.Parallel(subTaskLines...))
-			subTaskLine.Push(func() error {
+			subTaskLine.PushFunc(func() error {
 				mapScene.balloons = nil
 				e.character.dir = origDir
 				e.currentCommandIndex = 0
@@ -137,12 +137,12 @@ func (e *event) showMessage(taskLine *task.TaskLine, mapScene *MapScene, content
 	}
 	taskLine.Push(task.Parallel(subTaskLines...))
 	subTaskLine2 := &task.TaskLine{}
-	taskLine.Push(func() error {
+	taskLine.PushFunc(func() error {
 		mapScene.balloons = []*balloon{newBalloonWithArrow(x, y, content)}
 		mapScene.balloons[0].open(subTaskLine2)
 		return task.Terminated
 	})
-	taskLine.Push(func() error {
+	taskLine.PushFunc(func() error {
 		if updated, err := subTaskLine2.Update(); err != nil {
 			return err
 		} else if updated {
@@ -150,13 +150,13 @@ func (e *event) showMessage(taskLine *task.TaskLine, mapScene *MapScene, content
 		}
 		return task.Terminated
 	})
-	taskLine.Push(func() error {
+	taskLine.PushFunc(func() error {
 		if input.Triggered() {
 			return task.Terminated
 		}
 		return nil
 	})
-	taskLine.Push(func() error {
+	taskLine.PushFunc(func() error {
 		e.currentCommandIndex++
 		return task.Terminated
 	})
@@ -178,13 +178,13 @@ func (e *event) showChoices(taskLine *task.TaskLine, mapScene *MapScene, choices
 		b.open(subTaskLines[i])
 	}
 	taskLine.Push(task.Parallel(subTaskLines...))
-	taskLine.Push(func() error {
+	taskLine.PushFunc(func() error {
 		if input.Triggered() {
 			return task.Terminated
 		}
 		return nil
 	})
-	taskLine.Push(func() error {
+	taskLine.PushFunc(func() error {
 		e.currentCommandIndex++
 		return task.Terminated
 	})

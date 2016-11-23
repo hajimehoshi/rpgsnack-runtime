@@ -87,7 +87,7 @@ func newBalloonWithArrow(arrowX, arrowY int, content string) *balloon {
 }
 
 func (b *balloon) open(taskLine *task.TaskLine) {
-	taskLine.Push(func() error {
+	taskLine.PushFunc(func() error {
 		b.count--
 		if b.count == balloonMaxCount/2 {
 			return task.Terminated
@@ -97,7 +97,7 @@ func (b *balloon) open(taskLine *task.TaskLine) {
 }
 
 func (b *balloon) close(taskLine *task.TaskLine) {
-	taskLine.Push(func() error {
+	taskLine.PushFunc(func() error {
 		b.count--
 		if b.count == 0 {
 			return task.Terminated
