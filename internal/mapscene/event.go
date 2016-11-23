@@ -29,6 +29,7 @@ type event struct {
 	data                *data.Event
 	character           *character
 	currentCommandIndex int
+	chosenIndex         int
 }
 
 func newEvent(eventData *data.Event) *event {
@@ -128,8 +129,8 @@ func (e *event) run(taskLine *task.TaskLine, mapScene *MapScene) {
 }
 
 func (e *event) showMessage(taskLine *task.TaskLine, mapScene *MapScene, content string) {
-	x := e.data.X*scene.TileSize + scene.TileSize/2
-	y := e.data.Y * scene.TileSize
+	x := e.data.X*scene.TileSize + scene.TileSize/2 + scene.GameMarginX/scene.TileScale
+	y := e.data.Y*scene.TileSize + scene.GameMarginTop/scene.TileScale
 	// TODO: Better variable name
 	subTaskLines := []*task.TaskLine{}
 	for _, b := range mapScene.balloons {
@@ -166,12 +167,14 @@ func (e *event) showMessage(taskLine *task.TaskLine, mapScene *MapScene, content
 
 func (e *event) showChoices(taskLine *task.TaskLine, mapScene *MapScene, choices []string) {
 	const height = 20
-	dy := scene.TileYNum*scene.TileSize + scene.GameMarginBottom/scene.TileScale - len(choices)*height
+	const ymax = scene.TileYNum*scene.TileSize + (scene.GameMarginTop+scene.GameMarginBottom)/scene.TileScale
+	ymin := ymax - len(choices)*height
 	// TODO: Better variable names
 	subTaskLines := []*task.TaskLine{}
+	balloons := []*balloon{}
 	for i, choice := range choices {
 		x := 0
-		y := i*height + dy
+		y := i*height + ymin
 		width := scene.TileXNum * scene.TileSize
 		// TODO: Show balloons as parallel
 		b := newBalloon(x, y, width, height, choice)
@@ -179,13 +182,21 @@ func (e *event) showChoices(taskLine *task.TaskLine, mapScene *MapScene, choices
 		t := &task.TaskLine{}
 		subTaskLines = append(subTaskLines, t)
 		b.open(t)
+		balloons = append(balloons, b)
 	}
 	taskLine.Push(task.Parallel(subTaskLines...))
 	taskLine.PushFunc(func() error {
-		if input.Triggered() {
-			return task.Terminated
+		if !input.Triggered() {
+			return nil
 		}
-		return nil
+		_, y := input.Position()
+		y /= scene.TileScale
+		if y < ymin || ymax <= y {
+			return nil
+		}
+		e.chosenIndex = (y - ymin) / height
+		println(e.chosenIndex)
+		return task.Terminated
 	})
 	taskLine.PushFunc(func() error {
 		e.currentCommandIndex++

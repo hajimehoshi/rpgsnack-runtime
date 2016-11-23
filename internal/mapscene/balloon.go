@@ -196,7 +196,6 @@ func (b *balloon) draw(screen *ebiten.Image) error {
 			op.GeoM.Translate(dx, dy)
 		}
 		op.GeoM.Scale(scene.TileScale, scene.TileScale)
-		op.GeoM.Translate(scene.GameMarginX, scene.GameMarginTop)
 		op.ImageParts = &balloonImageParts{
 			balloon: b,
 		}
@@ -205,8 +204,8 @@ func (b *balloon) draw(screen *ebiten.Image) error {
 		}
 	}
 	if b.count == balloonMaxCount/2 {
-		x := (b.x+balloonMarginX)*scene.TileScale + scene.GameMarginX
-		y := (b.y+balloonMarginY)*scene.TileScale + scene.GameMarginTop
+		x := (b.x + balloonMarginX) * scene.TileScale
+		y := (b.y + balloonMarginY) * scene.TileScale
 		if err := font.DrawText(screen, b.content, x, y, scene.TextScale, color.Black); err != nil {
 			return err
 		}
