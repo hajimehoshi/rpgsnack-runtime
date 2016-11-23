@@ -51,6 +51,6 @@ func (g *Game) Size() (int, int) {
 	w := scene.TileXNum * scene.TileSize * scene.TileScale
 	h := scene.TileYNum * scene.TileSize * scene.TileScale
 	w += 2 * scene.GameMarginX
-	h += 2 * scene.GameMarginY
+	h += scene.GameMarginTop + scene.GameMarginBottom
 	return w, h
 }

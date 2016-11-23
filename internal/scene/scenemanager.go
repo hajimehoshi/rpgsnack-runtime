@@ -21,13 +21,14 @@ import (
 )
 
 const (
-	TileSize    = 16
-	TileXNum    = 10
-	TileYNum    = 10
-	TileScale   = 3
-	GameMarginX = 0
-	GameMarginY = 2.5 * TileSize * TileScale
-	TextScale   = 2
+	TileSize         = 16
+	TileXNum         = 10
+	TileYNum         = 10
+	TileScale        = 3
+	GameMarginX      = 0
+	GameMarginTop    = 2 * TileSize * TileScale
+	GameMarginBottom = 3 * TileSize * TileScale
+	TextScale        = 2
 )
 
 type scene interface {

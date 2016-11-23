@@ -150,7 +150,7 @@ func (e *event) run(taskLine *task.TaskLine, mapScene *MapScene) {
 				i++
 			}
 			const height = 20
-			dy := scene.TileYNum*scene.TileSize + scene.GameMarginY/scene.TileScale - len(choices)*height
+			dy := scene.TileYNum*scene.TileSize + scene.GameMarginBottom/scene.TileScale - len(choices)*height
 			// TODO: Better variable names
 			subTaskLines := make([]*task.TaskLine, len(choices))
 			for i, choice := range choices {

@@ -127,7 +127,7 @@ func (m *MapScene) movePlayerIfNeeded(taskLine *task.TaskLine) {
 	}
 	x, y := input.Position()
 	tx := (x - scene.GameMarginX) / scene.TileSize / scene.TileScale
-	ty := (y - scene.GameMarginY) / scene.TileSize / scene.TileScale
+	ty := (y - scene.GameMarginTop) / scene.TileSize / scene.TileScale
 	e := m.eventAt(tx, ty)
 	if !m.passable(tx, ty) && e == nil {
 		return
@@ -240,7 +240,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 	}
 	op = &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(scene.TileScale, scene.TileScale)
-	op.GeoM.Translate(scene.GameMarginX, scene.GameMarginY)
+	op.GeoM.Translate(scene.GameMarginX, scene.GameMarginTop)
 	if err := screen.DrawImage(m.tilesImage, op); err != nil {
 		return err
 	}
