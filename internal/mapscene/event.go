@@ -30,7 +30,8 @@ type event struct {
 	mapScene            *MapScene
 	character           *character
 	origDir             data.Dir
-	currentCommandIndex int
+	currentCommandIndex []int
+	currentBranchIndex  []int
 	chosenIndex         int
 }
 
@@ -74,14 +75,41 @@ func (e *event) run(taskLine *task.TaskLine) {
 			panic("not reach")
 		}
 		e.character.dir = dir
+		e.currentCommandIndex = []int{0}
 		return task.Terminated
 	})
 	taskLine.Push(task.Sub(e.goOn))
 }
 
+func (e *event) adjustCommandIndex() {
+	page := e.data.Pages[0]
+loop:
+	for 0 < len(e.currentCommandIndex) {
+		branch := page.Commands
+		for i := 0; i < len(e.currentCommandIndex); i++ {
+			if len(branch) <= e.currentCommandIndex[i] {
+				e.currentCommandIndex = e.currentCommandIndex[:i]
+				if len(e.currentCommandIndex) > 0 {
+					e.currentCommandIndex[len(e.currentCommandIndex)-1]++
+				}
+				if i > 0 {
+					e.currentBranchIndex = e.currentBranchIndex[:i-1]
+				}
+				continue loop
+			}
+			if i < len(e.currentCommandIndex)-1 {
+				command := branch[e.currentCommandIndex[i]]
+				branch = command.Branches[e.currentBranchIndex[i]]
+				continue
+			}
+		}
+		return
+	}
+}
+
 func (e *event) goOn(sub *task.TaskLine) error {
 	page := e.data.Pages[0]
-	if len(page.Commands) <= e.currentCommandIndex {
+	if len(e.currentCommandIndex) == 0 {
 		sub.Push(task.CreateTaskLazily(func() task.Task {
 			sub := []*task.TaskLine{}
 			for _, b := range e.mapScene.balloons {
@@ -98,17 +126,23 @@ func (e *event) goOn(sub *task.TaskLine) error {
 		sub.PushFunc(func() error {
 			e.mapScene.balloons = nil
 			e.character.dir = e.origDir
-			e.currentCommandIndex = 0
 			return task.Terminated
 		})
 		return task.Terminated
 	}
-	c := page.Commands[e.currentCommandIndex]
+	branch := page.Commands
+	for i, bi := range e.currentBranchIndex {
+		command := branch[e.currentCommandIndex[i]]
+		branch = command.Branches[bi]
+	}
+	x := e.currentCommandIndex[len(e.currentCommandIndex)-1]
+	c := branch[x]
 	switch c.Command {
 	case "show_message":
 		e.showMessage(sub, c.Args["content"])
 		sub.PushFunc(func() error {
-			e.currentCommandIndex++
+			e.currentCommandIndex[len(e.currentCommandIndex)-1]++
+			e.adjustCommandIndex()
 			return task.Terminated
 		})
 	case "show_choices":
@@ -123,9 +157,10 @@ func (e *event) goOn(sub *task.TaskLine) error {
 			i++
 		}
 		e.showChoices(sub, choices)
-		// TODO: Consider branches
 		sub.PushFunc(func() error {
-			e.currentCommandIndex++
+			e.currentBranchIndex = append(e.currentBranchIndex, e.chosenIndex)
+			e.currentCommandIndex = append(e.currentCommandIndex, 0)
+			e.adjustCommandIndex()
 			return task.Terminated
 		})
 	default:
@@ -140,6 +175,9 @@ func (e *event) showMessage(taskLine *task.TaskLine, content string) {
 	taskLine.Push(task.CreateTaskLazily(func() task.Task {
 		sub := []*task.TaskLine{}
 		for _, b := range e.mapScene.balloons {
+			if b == nil {
+				continue
+			}
 			b := b
 			t := &task.TaskLine{}
 			sub = append(sub, t)
