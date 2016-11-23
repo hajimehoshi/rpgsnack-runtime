@@ -79,6 +79,10 @@ func (t *TaskLine) Update() (bool, error) {
 	return true, nil
 }
 
+func (t *TaskLine) ToTask() Task {
+	return Parallel(t)
+}
+
 func Parallel(taskLines ...*TaskLine) Task {
 	return taskFunc(func() error {
 		done := []int{}

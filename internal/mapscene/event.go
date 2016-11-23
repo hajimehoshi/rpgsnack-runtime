@@ -85,7 +85,6 @@ func (e *event) run(taskLine *task.TaskLine, mapScene *MapScene) {
 			return nil
 		}
 		page := e.data.Pages[0]
-		// TODO: Consider branches
 		if len(page.Commands) <= e.currentCommandIndex {
 			subTaskLine.Push(task.CreateTaskLazily(func() task.Task {
 				sub := []*task.TaskLine{}
@@ -113,6 +112,10 @@ func (e *event) run(taskLine *task.TaskLine, mapScene *MapScene) {
 		switch c.Command {
 		case "show_message":
 			e.showMessage(subTaskLine, mapScene, c.Args["content"])
+			subTaskLine.PushFunc(func() error {
+				e.currentCommandIndex++
+				return task.Terminated
+			})
 		case "show_choices":
 			i := 0
 			choices := []string{}
@@ -125,8 +128,13 @@ func (e *event) run(taskLine *task.TaskLine, mapScene *MapScene) {
 				i++
 			}
 			e.showChoices(subTaskLine, mapScene, choices)
+			// TODO: Consider branches
+			subTaskLine.PushFunc(func() error {
+				e.currentCommandIndex++
+				return task.Terminated
+			})
 		default:
-			panic("not reach")
+			return fmt.Errorf("command not implemented: %s", c.Command)
 		}
 		return nil
 	})
@@ -149,29 +157,17 @@ func (e *event) showMessage(taskLine *task.TaskLine, mapScene *MapScene, content
 		}
 		return task.Parallel(sub...)
 	}))
-	sub := &task.TaskLine{}
-	taskLine.PushFunc(func() error {
+	taskLine.Push(task.CreateTaskLazily(func() task.Task {
+		sub := &task.TaskLine{}
 		mapScene.balloons = []*balloon{newBalloonWithArrow(x, y, content)}
 		mapScene.balloons[0].open(sub)
-		return task.Terminated
-	})
-	taskLine.PushFunc(func() error {
-		if updated, err := sub.Update(); err != nil {
-			return err
-		} else if updated {
-			return nil
-		}
-		return task.Terminated
-	})
+		return sub.ToTask()
+	}))
 	taskLine.PushFunc(func() error {
 		if input.Triggered() {
 			return task.Terminated
 		}
 		return nil
-	})
-	taskLine.PushFunc(func() error {
-		e.currentCommandIndex++
-		return task.Terminated
 	})
 }
 
@@ -186,7 +182,6 @@ func (e *event) showChoices(taskLine *task.TaskLine, mapScene *MapScene, choices
 			x := 0
 			y := i*height + ymin
 			width := scene.TileXNum * scene.TileSize
-			// TODO: Show balloons as parallel
 			b := newBalloon(x, y, width, height, choice)
 			mapScene.balloons = append(mapScene.balloons, b)
 			t := &task.TaskLine{}
@@ -226,10 +221,6 @@ func (e *event) showChoices(taskLine *task.TaskLine, mapScene *MapScene, choices
 		return task.Parallel(sub...)
 	}))
 	taskLine.Push(task.Sleep(30))
-	taskLine.PushFunc(func() error {
-		e.currentCommandIndex++
-		return task.Terminated
-	})
 }
 
 func (e *event) draw(screen *ebiten.Image) error {
