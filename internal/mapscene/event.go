@@ -87,10 +87,11 @@ func (e *event) run(taskLine *task.TaskLine, mapScene *MapScene) {
 		// TODO: Consider branches
 		if len(page.Commands) <= e.currentCommandIndex {
 			// TODO: Better variable name
-			subTaskLines := make([]*task.TaskLine, len(mapScene.balloons))
-			for i, b := range mapScene.balloons {
-				subTaskLines[i] = &task.TaskLine{}
-				b.close(subTaskLines[i])
+			subTaskLines := []*task.TaskLine{}
+			for _, b := range mapScene.balloons {
+				t := &task.TaskLine{}
+				subTaskLines = append(subTaskLines, t)
+				b.close(t)
 			}
 			subTaskLine.Push(task.Parallel(subTaskLines...))
 			subTaskLine.PushFunc(func() error {
@@ -130,20 +131,21 @@ func (e *event) showMessage(taskLine *task.TaskLine, mapScene *MapScene, content
 	x := e.data.X*scene.TileSize + scene.TileSize/2
 	y := e.data.Y * scene.TileSize
 	// TODO: Better variable name
-	subTaskLines := make([]*task.TaskLine, len(mapScene.balloons))
-	for i, b := range mapScene.balloons {
-		subTaskLines[i] = &task.TaskLine{}
-		b.close(subTaskLines[i])
+	subTaskLines := []*task.TaskLine{}
+	for _, b := range mapScene.balloons {
+		t := &task.TaskLine{}
+		subTaskLines = append(subTaskLines, t)
+		b.close(t)
 	}
 	taskLine.Push(task.Parallel(subTaskLines...))
-	subTaskLine2 := &task.TaskLine{}
+	sub := &task.TaskLine{}
 	taskLine.PushFunc(func() error {
 		mapScene.balloons = []*balloon{newBalloonWithArrow(x, y, content)}
-		mapScene.balloons[0].open(subTaskLine2)
+		mapScene.balloons[0].open(sub)
 		return task.Terminated
 	})
 	taskLine.PushFunc(func() error {
-		if updated, err := subTaskLine2.Update(); err != nil {
+		if updated, err := sub.Update(); err != nil {
 			return err
 		} else if updated {
 			return nil
@@ -166,7 +168,7 @@ func (e *event) showChoices(taskLine *task.TaskLine, mapScene *MapScene, choices
 	const height = 20
 	dy := scene.TileYNum*scene.TileSize + scene.GameMarginBottom/scene.TileScale - len(choices)*height
 	// TODO: Better variable names
-	subTaskLines := make([]*task.TaskLine, len(choices))
+	subTaskLines := []*task.TaskLine{}
 	for i, choice := range choices {
 		x := 0
 		y := i*height + dy
@@ -174,8 +176,9 @@ func (e *event) showChoices(taskLine *task.TaskLine, mapScene *MapScene, choices
 		// TODO: Show balloons as parallel
 		b := newBalloon(x, y, width, height, choice)
 		mapScene.balloons = append(mapScene.balloons, b)
-		subTaskLines[i] = &task.TaskLine{}
-		b.open(subTaskLines[i])
+		t := &task.TaskLine{}
+		subTaskLines = append(subTaskLines, t)
+		b.open(t)
 	}
 	taskLine.Push(task.Parallel(subTaskLines...))
 	taskLine.PushFunc(func() error {
