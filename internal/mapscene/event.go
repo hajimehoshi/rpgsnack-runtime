@@ -26,13 +26,12 @@ import (
 )
 
 type event struct {
-	data                *data.Event
-	mapScene            *MapScene
-	character           *character
-	origDir             data.Dir
-	currentCommandIndex []int
-	currentBranchIndex  []int
-	chosenIndex         int
+	data         *data.Event
+	mapScene     *MapScene
+	character    *character
+	origDir      data.Dir
+	commandIndex *commandIndex
+	chosenIndex  int
 }
 
 func newEvent(eventData *data.Event, mapScene *MapScene) *event {
@@ -75,41 +74,15 @@ func (e *event) run(taskLine *task.TaskLine) {
 			panic("not reach")
 		}
 		e.character.dir = dir
-		e.currentCommandIndex = []int{0}
+		page := e.data.Pages[0]
+		e.commandIndex = newCommandIndex(page)
 		return task.Terminated
 	})
 	taskLine.Push(task.Sub(e.goOn))
 }
 
-func (e *event) unindentCommandIndexIfNeeded() {
-	page := e.data.Pages[0]
-loop:
-	for 0 < len(e.currentCommandIndex) {
-		branch := page.Commands
-		for i := 0; i < len(e.currentCommandIndex); i++ {
-			if len(branch) <= e.currentCommandIndex[i] {
-				e.currentCommandIndex = e.currentCommandIndex[:i]
-				if len(e.currentCommandIndex) > 0 {
-					e.currentCommandIndex[len(e.currentCommandIndex)-1]++
-				}
-				if i > 0 {
-					e.currentBranchIndex = e.currentBranchIndex[:i-1]
-				}
-				continue loop
-			}
-			if i < len(e.currentCommandIndex)-1 {
-				command := branch[e.currentCommandIndex[i]]
-				branch = command.Branches[e.currentBranchIndex[i]]
-				continue
-			}
-		}
-		return
-	}
-}
-
 func (e *event) goOn(sub *task.TaskLine) error {
-	page := e.data.Pages[0]
-	if len(e.currentCommandIndex) == 0 {
+	if e.commandIndex.isTerminated() {
 		sub.Push(task.CreateTaskLazily(func() task.Task {
 			sub := []*task.TaskLine{}
 			for _, b := range e.mapScene.balloons {
@@ -130,19 +103,12 @@ func (e *event) goOn(sub *task.TaskLine) error {
 		})
 		return task.Terminated
 	}
-	branch := page.Commands
-	for i, bi := range e.currentBranchIndex {
-		command := branch[e.currentCommandIndex[i]]
-		branch = command.Branches[bi]
-	}
-	x := e.currentCommandIndex[len(e.currentCommandIndex)-1]
-	c := branch[x]
+	c := e.commandIndex.command()
 	switch c.Command {
 	case "show_message":
 		e.showMessage(sub, c.Args["content"])
 		sub.PushFunc(func() error {
-			e.currentCommandIndex[len(e.currentCommandIndex)-1]++
-			e.unindentCommandIndexIfNeeded()
+			e.commandIndex.advance()
 			return task.Terminated
 		})
 	case "show_choices":
@@ -158,9 +124,7 @@ func (e *event) goOn(sub *task.TaskLine) error {
 		}
 		e.showChoices(sub, choices)
 		sub.PushFunc(func() error {
-			e.currentBranchIndex = append(e.currentBranchIndex, e.chosenIndex)
-			e.currentCommandIndex = append(e.currentCommandIndex, 0)
-			e.unindentCommandIndexIfNeeded()
+			e.commandIndex.choose(e.chosenIndex)
 			return task.Terminated
 		})
 	default:
