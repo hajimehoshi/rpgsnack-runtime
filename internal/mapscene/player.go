@@ -18,6 +18,7 @@ import (
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/tsugunai/internal/data"
+	"github.com/hajimehoshi/tsugunai/internal/task"
 )
 
 const playerMaxMoveCount = 4
@@ -41,8 +42,8 @@ func newPlayer(x, y int) (*player, error) {
 	}, nil
 }
 
-func (p *player) move(passable func(x, y int) bool, x, y int) {
-	p.character.move(passable, x, y, true)
+func (p *player) move(taskLine *task.TaskLine, passable func(x, y int) bool, x, y int) {
+	p.character.move(taskLine, passable, x, y, true)
 }
 
 func (p *player) update(passable func(x, y int) bool) error {

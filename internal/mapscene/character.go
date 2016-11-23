@@ -79,12 +79,12 @@ func (c *characterImageParts) Dst(index int) (int, int, int, int) {
 	return 0, 0, c.charWidth, c.charHeight
 }
 
-func (c *character) move(passable func(x, y int) bool, x, y int, player bool) {
+func (c *character) move(taskLine *task.TaskLine, passable func(x, y int) bool, x, y int, player bool) {
 	path := calcPath(passable, c.x, c.y, x, y)
 	for _, d := range path {
 		d := d
 		init := false
-		task.Push(func() error {
+		taskLine.Push(func() error {
 			if !init {
 				c.dir = d
 				c.moveCount = playerMaxMoveCount
@@ -127,7 +127,7 @@ func (c *character) move(passable func(x, y int) bool, x, y int, player bool) {
 			return nil
 		})
 	}
-	task.Push(func() error {
+	taskLine.Push(func() error {
 		return task.Terminated
 	})
 }

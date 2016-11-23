@@ -31,34 +31,34 @@ const (
 )
 
 type scene interface {
-	Update(sceneManager *SceneManager) error
+	Update(taskLine *task.TaskLine, sceneManager *SceneManager) error
 	Draw(screen *ebiten.Image) error
 }
 
 type SceneManager struct {
-	current scene
-	next    scene
+	current  scene
+	next     scene
+	taskLine *task.TaskLine
 }
 
 func NewSceneManager(initScene scene) *SceneManager {
 	return &SceneManager{
-		current: initScene,
+		current:  initScene,
+		taskLine: &task.TaskLine{},
 	}
 }
 
 func (s *SceneManager) Update() error {
-	updated, err := task.Update()
-	if err != nil {
+	if updated, err := s.taskLine.Update(); err != nil {
 		return err
-	}
-	if updated {
+	} else if updated {
 		return nil
 	}
 	if s.next != nil {
 		s.current = s.next
 		s.next = nil
 	}
-	if err := s.current.Update(s); err != nil {
+	if err := s.current.Update(s.taskLine, s); err != nil {
 		return err
 	}
 	return nil

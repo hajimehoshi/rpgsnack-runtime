@@ -51,9 +51,9 @@ func (e *event) trigger() data.Trigger {
 	return e.data.Pages[0].Trigger
 }
 
-func (e *event) run(mapScene *MapScene) {
+func (e *event) run(taskLine *task.TaskLine, mapScene *MapScene) {
 	origDir := e.character.dir
-	task.Push(func() error {
+	taskLine.Push(func() error {
 		var dir data.Dir
 		ex, ey := e.character.x, e.character.y
 		px, py := mapScene.player.character.x, mapScene.player.character.y
@@ -72,13 +72,13 @@ func (e *event) run(mapScene *MapScene) {
 		e.character.dir = dir
 		return task.Terminated
 	})
-	taskLine := &task.TaskLine{}
+	subTaskLine := &task.TaskLine{}
 	terminated := false
-	task.Push(func() error {
+	taskLine.Push(func() error {
 		if terminated {
 			return task.Terminated
 		}
-		if updated, err := taskLine.Update(); err != nil {
+		if updated, err := subTaskLine.Update(); err != nil {
 			return err
 		} else if updated {
 			return nil
@@ -89,7 +89,7 @@ func (e *event) run(mapScene *MapScene) {
 			for _, b := range mapScene.balloons {
 				b.close(taskLine)
 			}
-			taskLine.Push(func() error {
+			subTaskLine.Push(func() error {
 				mapScene.balloons = nil
 				e.character.dir = origDir
 				e.currentCommandIndex = 0
@@ -106,27 +106,27 @@ func (e *event) run(mapScene *MapScene) {
 			for _, b := range mapScene.balloons {
 				b.close(taskLine)
 			}
-			subTaskLine := &task.TaskLine{}
-			taskLine.Push(func() error {
+			subTaskLine2 := &task.TaskLine{}
+			subTaskLine.Push(func() error {
 				mapScene.balloons = []*balloon{newBalloonWithArrow(x, y, c.Args["content"])}
-				mapScene.balloons[0].open(subTaskLine)
+				mapScene.balloons[0].open(subTaskLine2)
 				return task.Terminated
 			})
-			taskLine.Push(func() error {
-				if updated, err := subTaskLine.Update(); err != nil {
+			subTaskLine.Push(func() error {
+				if updated, err := subTaskLine2.Update(); err != nil {
 					return err
 				} else if updated {
 					return nil
 				}
 				return task.Terminated
 			})
-			taskLine.Push(func() error {
+			subTaskLine.Push(func() error {
 				if input.Triggered() {
 					return task.Terminated
 				}
 				return nil
 			})
-			taskLine.Push(func() error {
+			subTaskLine.Push(func() error {
 				e.currentCommandIndex++
 				return task.Terminated
 			})
@@ -150,15 +150,15 @@ func (e *event) run(mapScene *MapScene) {
 				// TODO: Show balloons as parallel
 				b := newBalloon(x, y, width, height, choice)
 				mapScene.balloons = append(mapScene.balloons, b)
-				b.open(taskLine)
+				b.open(subTaskLine)
 			}
-			taskLine.Push(func() error {
+			subTaskLine.Push(func() error {
 				if input.Triggered() {
 					return task.Terminated
 				}
 				return nil
 			})
-			taskLine.Push(func() error {
+			subTaskLine.Push(func() error {
 				e.currentCommandIndex++
 				return task.Terminated
 			})

@@ -23,6 +23,7 @@ import (
 	"github.com/hajimehoshi/tsugunai/internal/input"
 	"github.com/hajimehoshi/tsugunai/internal/mapscene"
 	"github.com/hajimehoshi/tsugunai/internal/scene"
+	"github.com/hajimehoshi/tsugunai/internal/task"
 )
 
 type TitleScene struct {
@@ -32,7 +33,7 @@ func New() *TitleScene {
 	return &TitleScene{}
 }
 
-func (t *TitleScene) Update(sceneManager *scene.SceneManager) error {
+func (t *TitleScene) Update(taskLine *task.TaskLine, sceneManager *scene.SceneManager) error {
 	if input.Triggered() {
 		mapScene, err := mapscene.New()
 		if err != nil {

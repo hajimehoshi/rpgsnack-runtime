@@ -121,7 +121,7 @@ func (m *MapScene) eventAt(x, y int) *event {
 	return nil
 }
 
-func (m *MapScene) movePlayerIfNeeded() {
+func (m *MapScene) movePlayerIfNeeded(taskLine *task.TaskLine) {
 	if !input.Triggered() {
 		return
 	}
@@ -133,10 +133,10 @@ func (m *MapScene) movePlayerIfNeeded() {
 		return
 	}
 	m.playerMoving = true
-	m.player.move(m.passable, tx, ty)
+	m.player.move(taskLine, m.passable, tx, ty)
 	m.moveDstX = tx
 	m.moveDstY = ty
-	task.Push(func() error {
+	taskLine.Push(func() error {
 		m.playerMoving = false
 		return task.Terminated
 	})
@@ -146,11 +146,11 @@ func (m *MapScene) movePlayerIfNeeded() {
 	if e.trigger() != data.TriggerActionButton {
 		return
 	}
-	e.run(m)
+	e.run(taskLine, m)
 }
 
-func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
-	m.movePlayerIfNeeded()
+func (m *MapScene) Update(taskLine *task.TaskLine, sceneManager *scene.SceneManager) error {
+	m.movePlayerIfNeeded(taskLine)
 	if err := m.player.update(m.passable); err != nil {
 		return err
 	}

@@ -22,8 +22,6 @@ var Terminated = errors.New("task terminated")
 
 type task func() error
 
-var theTaskLine = &TaskLine{}
-
 type TaskLine struct {
 	tasks []task
 }
@@ -43,12 +41,4 @@ func (t *TaskLine) Update() (bool, error) {
 		return false, err
 	}
 	return true, nil
-}
-
-func Push(task task) {
-	theTaskLine.Push(task)
-}
-
-func Update() (bool, error) {
-	return theTaskLine.Update()
 }
