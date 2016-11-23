@@ -27,12 +27,14 @@ import (
 
 type event struct {
 	data                *data.Event
+	mapScene            *MapScene
 	character           *character
+	origDir             data.Dir
 	currentCommandIndex int
 	chosenIndex         int
 }
 
-func newEvent(eventData *data.Event) *event {
+func newEvent(eventData *data.Event, mapScene *MapScene) *event {
 	page := eventData.Pages[0]
 	c := &character{
 		image:      theImageCache.Get(page.Image),
@@ -44,6 +46,7 @@ func newEvent(eventData *data.Event) *event {
 	}
 	return &event{
 		data:      eventData,
+		mapScene:  mapScene,
 		character: c,
 	}
 }
@@ -52,12 +55,12 @@ func (e *event) trigger() data.Trigger {
 	return e.data.Pages[0].Trigger
 }
 
-func (e *event) run(taskLine *task.TaskLine, mapScene *MapScene) {
-	origDir := e.character.dir
+func (e *event) run(taskLine *task.TaskLine) {
 	taskLine.PushFunc(func() error {
+		e.origDir = e.character.dir
 		var dir data.Dir
 		ex, ey := e.character.x, e.character.y
-		px, py := mapScene.player.character.x, mapScene.player.character.y
+		px, py := e.mapScene.player.character.x, e.mapScene.player.character.y
 		switch {
 		case ex > px && ey == py:
 			dir = data.DirLeft
@@ -73,85 +76,76 @@ func (e *event) run(taskLine *task.TaskLine, mapScene *MapScene) {
 		e.character.dir = dir
 		return task.Terminated
 	})
-	subTaskLine := &task.TaskLine{}
-	terminated := false
-	taskLine.PushFunc(func() error {
-		if terminated {
-			return task.Terminated
-		}
-		if updated, err := subTaskLine.Update(); err != nil {
-			return err
-		} else if updated {
-			return nil
-		}
-		page := e.data.Pages[0]
-		if len(page.Commands) <= e.currentCommandIndex {
-			subTaskLine.Push(task.CreateTaskLazily(func() task.Task {
-				sub := []*task.TaskLine{}
-				for _, b := range mapScene.balloons {
-					if b == nil {
-						continue
-					}
-					t := &task.TaskLine{}
-					sub = append(sub, t)
-					b.close(t)
-					// mapScene.balloons will be cleared later.
-				}
-				return task.Parallel(sub...)
-			}))
-			subTaskLine.PushFunc(func() error {
-				mapScene.balloons = nil
-				e.character.dir = origDir
-				e.currentCommandIndex = 0
-				terminated = true
-				return task.Terminated
-			})
-			return nil
-		}
-		c := page.Commands[e.currentCommandIndex]
-		switch c.Command {
-		case "show_message":
-			e.showMessage(subTaskLine, mapScene, c.Args["content"])
-			subTaskLine.PushFunc(func() error {
-				e.currentCommandIndex++
-				return task.Terminated
-			})
-		case "show_choices":
-			i := 0
-			choices := []string{}
-			for {
-				choice, ok := c.Args[fmt.Sprintf("choice%d", i)]
-				if !ok {
-					break
-				}
-				choices = append(choices, choice)
-				i++
-			}
-			e.showChoices(subTaskLine, mapScene, choices)
-			// TODO: Consider branches
-			subTaskLine.PushFunc(func() error {
-				e.currentCommandIndex++
-				return task.Terminated
-			})
-		default:
-			return fmt.Errorf("command not implemented: %s", c.Command)
-		}
-		return nil
-	})
+	taskLine.Push(task.Sub(e.goOn))
 }
 
-func (e *event) showMessage(taskLine *task.TaskLine, mapScene *MapScene, content string) {
+func (e *event) goOn(sub *task.TaskLine) error {
+	page := e.data.Pages[0]
+	if len(page.Commands) <= e.currentCommandIndex {
+		sub.Push(task.CreateTaskLazily(func() task.Task {
+			sub := []*task.TaskLine{}
+			for _, b := range e.mapScene.balloons {
+				if b == nil {
+					continue
+				}
+				t := &task.TaskLine{}
+				sub = append(sub, t)
+				b.close(t)
+				// mapScene.balloons will be cleared later.
+			}
+			return task.Parallel(sub...)
+		}))
+		sub.PushFunc(func() error {
+			e.mapScene.balloons = nil
+			e.character.dir = e.origDir
+			e.currentCommandIndex = 0
+			return task.Terminated
+		})
+		return task.Terminated
+	}
+	c := page.Commands[e.currentCommandIndex]
+	switch c.Command {
+	case "show_message":
+		e.showMessage(sub, c.Args["content"])
+		sub.PushFunc(func() error {
+			e.currentCommandIndex++
+			return task.Terminated
+		})
+	case "show_choices":
+		i := 0
+		choices := []string{}
+		for {
+			choice, ok := c.Args[fmt.Sprintf("choice%d", i)]
+			if !ok {
+				break
+			}
+			choices = append(choices, choice)
+			i++
+		}
+		e.showChoices(sub, choices)
+		// TODO: Consider branches
+		sub.PushFunc(func() error {
+			e.currentCommandIndex++
+			return task.Terminated
+		})
+	default:
+		return fmt.Errorf("command not implemented: %s", c.Command)
+	}
+	return nil
+}
+
+func (e *event) showMessage(taskLine *task.TaskLine, content string) {
 	x := e.data.X*scene.TileSize + scene.TileSize/2 + scene.GameMarginX/scene.TileScale
 	y := e.data.Y*scene.TileSize + scene.GameMarginTop/scene.TileScale
 	taskLine.Push(task.CreateTaskLazily(func() task.Task {
 		sub := []*task.TaskLine{}
-		for _, b := range mapScene.balloons {
+		for _, b := range e.mapScene.balloons {
 			b := b
 			t := &task.TaskLine{}
 			sub = append(sub, t)
 			b.close(t)
 			t.PushFunc(func() error {
-				mapScene.removeBalloon(b)
+				e.mapScene.removeBalloon(b)
 				return task.Terminated
 			})
 		}
@@ -159,8 +153,8 @@ func (e *event) showMessage(taskLine *task.TaskLine, mapScene *MapScene, content
 	}))
 	taskLine.Push(task.CreateTaskLazily(func() task.Task {
 		sub := &task.TaskLine{}
-		mapScene.balloons = []*balloon{newBalloonWithArrow(x, y, content)}
-		mapScene.balloons[0].open(sub)
+		e.mapScene.balloons = []*balloon{newBalloonWithArrow(x, y, content)}
+		e.mapScene.balloons[0].open(sub)
 		return sub.ToTask()
 	}))
 	taskLine.PushFunc(func() error {
@@ -171,7 +165,7 @@ func (e *event) showMessage(taskLine *task.TaskLine, mapScene *MapScene, content
 	})
 }
 
-func (e *event) showChoices(taskLine *task.TaskLine, mapScene *MapScene, choices []string) {
+func (e *event) showChoices(taskLine *task.TaskLine, choices []string) {
 	const height = 20
 	const ymax = scene.TileYNum*scene.TileSize + (scene.GameMarginTop+scene.GameMarginBottom)/scene.TileScale
 	ymin := ymax - len(choices)*height
@@ -183,7 +177,7 @@ func (e *event) showChoices(taskLine *task.TaskLine, mapScene *MapScene, choices
 			y := i*height + ymin
 			width := scene.TileXNum * scene.TileSize
 			b := newBalloon(x, y, width, height, choice)
-			mapScene.balloons = append(mapScene.balloons, b)
+			e.mapScene.balloons = append(e.mapScene.balloons, b)
 			t := &task.TaskLine{}
 			sub = append(sub, t)
 			b.open(t)
@@ -214,7 +208,7 @@ func (e *event) showChoices(taskLine *task.TaskLine, mapScene *MapScene, choices
 			sub = append(sub, t)
 			b.close(t)
 			t.PushFunc(func() error {
-				mapScene.removeBalloon(b)
+				e.mapScene.removeBalloon(b)
 				return task.Terminated
 			})
 		}

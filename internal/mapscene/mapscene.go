@@ -61,7 +61,7 @@ func New() (*MapScene, error) {
 		tilesImage: tilesImage,
 	}
 	for _, e := range mapScene.currentMap.Rooms[mapScene.currentRoomID].Events {
-		mapScene.events = append(mapScene.events, newEvent(e))
+		mapScene.events = append(mapScene.events, newEvent(e, mapScene))
 	}
 	return mapScene, nil
 }
@@ -146,7 +146,7 @@ func (m *MapScene) movePlayerIfNeeded(taskLine *task.TaskLine) {
 	if e.trigger() != data.TriggerActionButton {
 		return
 	}
-	e.run(taskLine, m)
+	e.run(taskLine)
 }
 
 func (m *MapScene) Update(taskLine *task.TaskLine, sceneManager *scene.SceneManager) error {

@@ -48,6 +48,27 @@ func CreateTaskLazily(create func() Task) Task {
 	})
 }
 
+func Sub(f func(sub *TaskLine) error) Task {
+	sub := &TaskLine{}
+	terminated := false
+	return taskFunc(func() error {
+		if updated, err := sub.Update(); err != nil {
+			return err
+		} else if updated {
+			return nil
+		}
+		if terminated {
+			return Terminated
+		}
+		if err := f(sub); err == Terminated {
+			terminated = true
+		} else if err != nil {
+			return err
+		}
+		return nil
+	})
+}
+
 type taskFunc func() error
 
 func (t taskFunc) Update() error {
