@@ -20,13 +20,13 @@ import (
 
 var Terminated = errors.New("task terminated")
 
-type task func() error
+type Task func() error
 
 type TaskLine struct {
-	tasks []task
+	tasks []Task
 }
 
-func (t *TaskLine) Push(task task) {
+func (t *TaskLine) Push(task Task) {
 	t.tasks = append(t.tasks, task)
 }
 
@@ -41,4 +41,29 @@ func (t *TaskLine) Update() (bool, error) {
 		return false, err
 	}
 	return true, nil
+}
+
+func Parallel(taskLines ...*TaskLine) Task {
+	return func() error {
+		done := []int{}
+		for i, t := range taskLines {
+			if t == nil {
+				continue
+			}
+			if updated, err := t.Update(); err != nil {
+				return err
+			} else if !updated {
+				done = append(done, i)
+			}
+		}
+		for _, i := range done {
+			taskLines[i] = nil
+		}
+		for _, t := range taskLines {
+			if t != nil {
+				return nil
+			}
+		}
+		return Terminated
+	}
 }

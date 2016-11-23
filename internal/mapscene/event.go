@@ -86,9 +86,13 @@ func (e *event) run(taskLine *task.TaskLine, mapScene *MapScene) {
 		page := e.data.Pages[0]
 		// TODO: Consider branches
 		if len(page.Commands) <= e.currentCommandIndex {
-			for _, b := range mapScene.balloons {
-				b.close(subTaskLine)
+			// TODO: Better variable name
+			subTaskLines := make([]*task.TaskLine, len(mapScene.balloons))
+			for i, b := range mapScene.balloons {
+				subTaskLines[i] = &task.TaskLine{}
+				b.close(subTaskLines[i])
 			}
+			subTaskLine.Push(task.Parallel(subTaskLines...))
 			subTaskLine.Push(func() error {
 				mapScene.balloons = nil
 				e.character.dir = origDir
@@ -103,9 +107,13 @@ func (e *event) run(taskLine *task.TaskLine, mapScene *MapScene) {
 		case "show_message":
 			x := e.data.X*scene.TileSize + scene.TileSize/2
 			y := e.data.Y * scene.TileSize
-			for _, b := range mapScene.balloons {
-				b.close(subTaskLine)
+			// TODO: Better variable name
+			subTaskLines := make([]*task.TaskLine, len(mapScene.balloons))
+			for i, b := range mapScene.balloons {
+				subTaskLines[i] = &task.TaskLine{}
+				b.close(subTaskLines[i])
 			}
+			subTaskLine.Push(task.Parallel(subTaskLines...))
 			subTaskLine2 := &task.TaskLine{}
 			subTaskLine.Push(func() error {
 				mapScene.balloons = []*balloon{newBalloonWithArrow(x, y, c.Args["content"])}
@@ -143,6 +151,8 @@ func (e *event) run(taskLine *task.TaskLine, mapScene *MapScene) {
 			}
 			const height = 20
 			dy := scene.TileYNum*scene.TileSize + scene.GameMarginY/scene.TileScale - len(choices)*height
+			// TODO: Better variable names
+			subTaskLines := make([]*task.TaskLine, len(choices))
 			for i, choice := range choices {
 				x := 0
 				y := i*height + dy
@@ -150,8 +160,10 @@ func (e *event) run(taskLine *task.TaskLine, mapScene *MapScene) {
 				// TODO: Show balloons as parallel
 				b := newBalloon(x, y, width, height, choice)
 				mapScene.balloons = append(mapScene.balloons, b)
-				b.open(subTaskLine)
+				subTaskLines[i] = &task.TaskLine{}
+				b.open(subTaskLines[i])
 			}
+			subTaskLine.Push(task.Parallel(subTaskLines...))
 			subTaskLine.Push(func() error {
 				if input.Triggered() {
 					return task.Terminated
