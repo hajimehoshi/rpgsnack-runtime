@@ -49,7 +49,9 @@ func Sub(f func(sub *TaskLine) error) Task {
 		}
 		if err := f(sub); err == Terminated {
 			terminated = true
-			// TODO: return Terminated when |sub| is empty?
+			if len(sub.tasks) == 0 {
+				return Terminated
+			}
 		} else if err != nil {
 			return err
 		}
