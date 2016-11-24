@@ -35,23 +35,6 @@ func Sleep(frames int) Task {
 	})
 }
 
-func CreateTaskLazily(create func() (Task, error)) Task {
-	var task Task
-	return taskFunc(func() error {
-		if task == nil {
-			var err error
-			task, err = create()
-			if err != nil {
-				return err
-			}
-		}
-		if task == nil {
-			panic("not reach")
-		}
-		return task.Update()
-	})
-}
-
 func Sub(f func(sub *TaskLine) error) Task {
 	sub := &TaskLine{}
 	terminated := false
@@ -66,6 +49,7 @@ func Sub(f func(sub *TaskLine) error) Task {
 		}
 		if err := f(sub); err == Terminated {
 			terminated = true
+			// TODO: return Terminated when |sub| is empty?
 		} else if err != nil {
 			return err
 		}
