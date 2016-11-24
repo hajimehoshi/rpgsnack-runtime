@@ -240,19 +240,19 @@ var _dataMap0Json = []byte(`{
               "trigger":    0,
               "commands": [
                 {
-                  "command": "show_message",
+                  "name": "show_message",
                   "args":    {
                     "content": "イベントのテストです。"
                   }
                 },
                 {
-                  "command": "show_message",
+                  "name": "show_message",
                   "args":    {
                     "content": "念願のアイスソードを\n手に入れたぞ"
                   }
                 },
                 {
-                  "command": "show_choices",
+                  "name": "show_choices",
                   "args":    {
                     "choice0": "そう、関係ないね",
                     "choice1": "殺してでもうばいとる",
@@ -262,35 +262,49 @@ var _dataMap0Json = []byte(`{
                     [],
                     [
                       {
-                        "command": "show_message",
-                        "args":    {
+                        "name": "show_message",
+                        "args": {
                           "content": "な、何をする貴様らー!"
+                        }
+                      },
+                      {
+                        "name": "set_switch",
+                        "args": {
+                          "number": "0",
+                          "value":  "true"
+                        }
+                      },
+                      {
+                        "name": "show_message",
+                        "args": {
+                          "content":  "殺害した",
+                          "position": "center"
                         }
                       }
                     ],
                     [
                       {
-                        "command": "show_message",
-                        "args":    {
+                        "name": "show_message",
+                        "args": {
                           "content": "だめだ!! いくら積まれてもゆずれん"
                         }
                       },
                       {
-                        "command": "show_message",
-                        "args":    {
+                        "name": "show_message",
+                        "args": {
                           "content":  "ホークは、今までの経緯を説明した",
                           "position": "center"
                         }
                       },
                       {
-                        "command": "show_message",
-                        "args":    {
+                        "name": "show_message",
+                        "args": {
                           "content": "そういわれてもなー\nこの剣を手に入れるのには\n相当苦労もしたし…"
                         }
                       },
                       {
-                        "command": "show_message",
-                        "args":    {
+                        "name": "show_message",
+                        "args": {
                           "content": "では、俺も一緒に行くというのはどうだ?\nそのフレイムタイラントに\n会って考えよう"
                         }
                       }
@@ -298,8 +312,8 @@ var _dataMap0Json = []byte(`{
                   ]
                 },
                 {
-                  "command": "show_message",
-                  "args":    {
+                  "name": "show_message",
+                  "args": {
                     "content": "選択肢合流後のイベント"
                   }
                 }
@@ -323,7 +337,7 @@ func dataMap0Json() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "data/map0.json", size: 4056, mode: os.FileMode(420), modTime: time.Unix(1479920381, 0)}
+	info := bindataFileInfo{name: "data/map0.json", size: 4508, mode: os.FileMode(420), modTime: time.Unix(1480008711, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

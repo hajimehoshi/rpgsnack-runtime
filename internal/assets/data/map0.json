@@ -48,19 +48,19 @@
               "trigger":    0,
               "commands": [
                 {
-                  "command": "show_message",
+                  "name": "show_message",
                   "args":    {
                     "content": "イベントのテストです。"
                   }
                 },
                 {
-                  "command": "show_message",
+                  "name": "show_message",
                   "args":    {
                     "content": "念願のアイスソードを\n手に入れたぞ"
                   }
                 },
                 {
-                  "command": "show_choices",
+                  "name": "show_choices",
                   "args":    {
                     "choice0": "そう、関係ないね",
                     "choice1": "殺してでもうばいとる",
@@ -70,35 +70,49 @@
                     [],
                     [
                       {
-                        "command": "show_message",
-                        "args":    {
+                        "name": "show_message",
+                        "args": {
                           "content": "な、何をする貴様らー!"
+                        }
+                      },
+                      {
+                        "name": "set_switch",
+                        "args": {
+                          "number": "0",
+                          "value":  "true"
+                        }
+                      },
+                      {
+                        "name": "show_message",
+                        "args": {
+                          "content":  "殺害した",
+                          "position": "center"
                         }
                       }
                     ],
                     [
                       {
-                        "command": "show_message",
-                        "args":    {
+                        "name": "show_message",
+                        "args": {
                           "content": "だめだ!! いくら積まれてもゆずれん"
                         }
                       },
                       {
-                        "command": "show_message",
-                        "args":    {
+                        "name": "show_message",
+                        "args": {
                           "content":  "ホークは、今までの経緯を説明した",
                           "position": "center"
                         }
                       },
                       {
-                        "command": "show_message",
-                        "args":    {
+                        "name": "show_message",
+                        "args": {
                           "content": "そういわれてもなー\nこの剣を手に入れるのには\n相当苦労もしたし…"
                         }
                       },
                       {
-                        "command": "show_message",
-                        "args":    {
+                        "name": "show_message",
+                        "args": {
                           "content": "では、俺も一緒に行くというのはどうだ?\nそのフレイムタイラントに\n会って考えよう"
                         }
                       }
@@ -106,8 +120,8 @@
                   ]
                 },
                 {
-                  "command": "show_message",
-                  "args":    {
+                  "name": "show_message",
+                  "args": {
                     "content": "選択肢合流後のイベント"
                   }
                 }

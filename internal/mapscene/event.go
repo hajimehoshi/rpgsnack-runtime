@@ -105,8 +105,8 @@ func (e *event) goOn(sub *task.TaskLine) error {
 		return task.Terminated
 	}
 	c := e.commandIndex.command()
-	switch c.Command {
-	case "show_message":
+	switch c.Name {
+	case data.CommandNameShowMessage:
 		position := data.ShowMessagePositionSelf
 		if c.Args["position"] != "" {
 			position = data.ShowMessagePosition(c.Args["position"])
@@ -116,7 +116,7 @@ func (e *event) goOn(sub *task.TaskLine) error {
 			e.commandIndex.advance()
 			return task.Terminated
 		})
-	case "show_choices":
+	case data.CommandNameShowChoices:
 		i := 0
 		choices := []string{}
 		for {
@@ -132,8 +132,14 @@ func (e *event) goOn(sub *task.TaskLine) error {
 			e.commandIndex.choose(e.chosenIndex)
 			return task.Terminated
 		})
+	case data.CommandNameSetSwitch:
+		// not implemented
+		sub.PushFunc(func() error {
+			e.commandIndex.advance()
+			return task.Terminated
+		})
 	default:
-		return fmt.Errorf("command not implemented: %s", c.Command)
+		return fmt.Errorf("command not implemented: %s", c.Name)
 	}
 	return nil
 }
