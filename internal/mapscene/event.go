@@ -366,9 +366,27 @@ func (e *event) setSwitch(taskLine *task.TaskLine, number int, value bool) {
 }
 
 func (e *event) move(taskLine *task.TaskLine, x, y int) {
+	count := 0
+	const maxCount = 30
+	taskLine.PushFunc(func() error {
+		count++
+		e.mapScene.fadingRate = float64(count) / maxCount
+		if count == maxCount {
+			return task.Terminated
+		}
+		return nil
+	})
 	taskLine.PushFunc(func() error {
 		e.mapScene.player.moveImmediately(x, y)
 		return task.Terminated
+	})
+	taskLine.PushFunc(func() error {
+		count--
+		e.mapScene.fadingRate = float64(count) / maxCount
+		if count == 0 {
+			return task.Terminated
+		}
+		return nil
 	})
 }
 

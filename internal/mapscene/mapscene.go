@@ -38,8 +38,10 @@ type MapScene struct {
 	playerMoving  bool
 	balloons      []*balloon
 	tilesImage    *ebiten.Image
+	emptyImage    *ebiten.Image
 	events        []*event
 	switches      []bool
+	fadingRate    float64
 }
 
 func New() (*MapScene, error) {
@@ -56,10 +58,15 @@ func New() (*MapScene, error) {
 	if err != nil {
 		return nil, err
 	}
+	emptyImage, err := ebiten.NewImage(16, 16, ebiten.FilterNearest)
+	if err != nil {
+		return nil, err
+	}
 	mapScene := &MapScene{
 		currentMap: mapData,
 		player:     player,
 		tilesImage: tilesImage,
+		emptyImage: emptyImage,
 	}
 	for _, e := range mapScene.currentMap.Rooms[mapScene.currentRoomID].Events {
 		event, err := newEvent(e, mapScene)
@@ -275,6 +282,18 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 	op.GeoM.Translate(scene.GameMarginX, scene.GameMarginTop)
 	if err := screen.DrawImage(m.tilesImage, op); err != nil {
 		return err
+	}
+	if 0 < m.fadingRate {
+		w, h := scene.TileXNum*scene.TileSize, scene.TileYNum*scene.TileSize
+		ew, eh := m.emptyImage.Size()
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Scale(float64(w)/float64(ew), float64(h)/float64(eh))
+		op.GeoM.Scale(scene.TileScale, scene.TileScale)
+		op.GeoM.Translate(scene.GameMarginX, scene.GameMarginTop)
+		op.ColorM.Translate(0, 0, 0, m.fadingRate)
+		if err := screen.DrawImage(m.emptyImage, op); err != nil {
+			return err
+		}
 	}
 	for _, b := range m.balloons {
 		if b == nil {
