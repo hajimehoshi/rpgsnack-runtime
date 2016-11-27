@@ -142,11 +142,13 @@ func (m *MapScene) movePlayerIfNeeded(taskLine *task.TaskLine) error {
 	tx := (x - scene.GameMarginX) / scene.TileSize / scene.TileScale
 	ty := (y - scene.GameMarginTop) / scene.TileSize / scene.TileScale
 	e := m.eventAt(tx, ty)
-	if !m.passable(tx, ty) && e == nil {
-		return nil
-	}
-	if e != nil && !e.isRunnable() {
-		return nil
+	if !m.passable(tx, ty) {
+		if e == nil {
+			return nil
+		}
+		if !e.isRunnable() {
+			return nil
+		}
 	}
 	m.playerMoving = true
 	m.player.move(taskLine, m.passable, tx, ty)
