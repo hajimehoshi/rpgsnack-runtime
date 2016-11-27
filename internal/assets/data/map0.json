@@ -167,6 +167,25 @@
                   "args":    {
                     "content": "向き固定のテスト。"
                   }
+                },
+                {
+                  "name": "show_message",
+                  "args":    {
+                    "content": "場所移動のテスト。"
+                  }
+                },
+                {
+                  "name": "move",
+                  "args":    {
+                    "x": "1",
+                    "y": "2"
+                  }
+                },
+                {
+                  "name": "show_message",
+                  "args":    {
+                    "content": "場所移動後のテスト。"
+                  }
                 }
               ]
             }

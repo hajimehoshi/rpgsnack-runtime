@@ -48,6 +48,7 @@ const (
 	CommandNameShowMessage CommandName = "show_message"
 	CommandNameShowChoices             = "show_choices"
 	CommandNameSetSwitch               = "set_switch"
+	CommandNameMove                    = "move"
 )
 
 type ShowMessagePosition string

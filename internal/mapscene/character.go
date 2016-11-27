@@ -129,6 +129,11 @@ func (c *character) move(taskLine *task.TaskLine, passable func(x, y int) bool, 
 	}
 }
 
+func (c *character) moveImmediately(x, y int) {
+	c.x = x
+	c.y = y
+}
+
 func (c *character) update(passable func(x, y int) bool) error {
 	return nil
 }

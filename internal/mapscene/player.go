@@ -47,6 +47,10 @@ func (p *player) move(taskLine *task.TaskLine, passable func(x, y int) bool, x, 
 	p.character.move(taskLine, passable, x, y, true)
 }
 
+func (p *player) moveImmediately(x, y int) {
+	p.character.moveImmediately(x, y)
+}
+
 func (p *player) update(passable func(x, y int) bool) error {
 	if err := p.character.update(passable); err != nil {
 		return err

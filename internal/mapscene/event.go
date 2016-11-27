@@ -237,6 +237,20 @@ func (e *event) goOn(sub *task.TaskLine) error {
 			e.commandIndex.advance()
 			return task.Terminated
 		})
+	case data.CommandNameMove:
+		x, err := strconv.Atoi(c.Args["x"])
+		if err != nil {
+			return err
+		}
+		y, err := strconv.Atoi(c.Args["y"])
+		if err != nil {
+			return err
+		}
+		e.move(sub, x, y)
+		sub.PushFunc(func() error {
+			e.commandIndex.advance()
+			return task.Terminated
+		})
 	default:
 		return fmt.Errorf("command not implemented: %s", c.Name)
 	}
@@ -347,6 +361,13 @@ func (e *event) setSwitch(taskLine *task.TaskLine, number int, value bool) {
 			e.mapScene.switches = append(e.mapScene.switches, zeros...)
 		}
 		e.mapScene.switches[number] = value
+		return task.Terminated
+	})
+}
+
+func (e *event) move(taskLine *task.TaskLine, x, y int) {
+	taskLine.PushFunc(func() error {
+		e.mapScene.player.moveImmediately(x, y)
 		return task.Terminated
 	})
 }
