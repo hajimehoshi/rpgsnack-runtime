@@ -104,13 +104,14 @@ page:
 	return -1, nil
 }
 
-func (e *event) trigger() data.Trigger {
-	// TODO: What if page is nil?
+func (e *event) runIfActionButtonTriggered(taskLine *task.TaskLine) {
+	if e.currentPageIndex == -1 {
+		return
+	}
 	page := e.data.Pages[e.currentPageIndex]
-	return page.Trigger
-}
-
-func (e *event) run(taskLine *task.TaskLine) {
+	if page.Trigger != data.TriggerActionButton {
+		return
+	}
 	taskLine.PushFunc(func() error {
 		e.origDir = e.character.dir
 		var dir data.Dir
