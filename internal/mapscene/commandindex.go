@@ -25,10 +25,12 @@ type commandIndex struct {
 }
 
 func newCommandIndex(page *data.Page) *commandIndex {
-	return &commandIndex{
+	c := &commandIndex{
 		commands: []int{0},
 		page:     page,
 	}
+	c.unindentIfNeeded()
+	return c
 }
 
 func (c *commandIndex) isTerminated() bool {

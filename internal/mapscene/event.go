@@ -131,6 +131,7 @@ func (e *event) runIfActionButtonTriggered(taskLine *task.TaskLine) {
 		}
 		e.character.dir = dir
 		if e.currentPageIndex == -1 {
+			e.commandIndex = nil
 			return task.Terminated
 		}
 		e.commandIndex = newCommandIndex(e.data.Pages[e.currentPageIndex])
@@ -140,6 +141,9 @@ func (e *event) runIfActionButtonTriggered(taskLine *task.TaskLine) {
 }
 
 func (e *event) goOn(sub *task.TaskLine) error {
+	if e.commandIndex == nil {
+		return task.Terminated
+	}
 	if e.commandIndex.isTerminated() {
 		sub.Push(task.Sub(func(sub *task.TaskLine) error {
 			subs := []*task.TaskLine{}
