@@ -143,6 +143,34 @@
               "commands":   []
             }
           ]
+        },
+        {
+          "id": 0,
+          "x":  7,
+          "y":  3,
+          "pages": [
+            {
+              "conditions": [],
+              "image":      "characters0.png",
+              "imageIndex": 1,
+              "attitude":   1,
+              "dir":        3,
+              "dirFix":     true,
+              "walking":    false,
+              "stepping":   true,
+              "through":    false,
+              "priority":   1,
+              "trigger":    0,
+              "commands": [
+                {
+                  "name": "show_message",
+                  "args":    {
+                    "content": "向き固定のテスト。"
+                  }
+                }
+              ]
+            }
+          ]
         }
       ]
     }

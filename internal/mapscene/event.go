@@ -79,11 +79,13 @@ func (e *event) updateCharacterIfNeeded() error {
 		return nil
 	}
 	e.currentPageIndex = i
+	e.steppingCount = 0
 	if i == -1 {
 		c := e.character
 		c.image = nil
 		c.imageIndex = 0
-		c.dir = data.Dir(0)
+		c.dirFix = false
+		c.turn(data.Dir(0))
 		c.attitude = data.AttitudeMiddle
 		return nil
 	}
@@ -91,7 +93,8 @@ func (e *event) updateCharacterIfNeeded() error {
 	c := e.character
 	c.image = theImageCache.Get(page.Image)
 	c.imageIndex = page.ImageIndex
-	c.dir = page.Dir
+	c.dirFix = page.DirFix
+	c.turn(page.Dir)
 	c.attitude = page.Attitude
 	return nil
 }
@@ -147,13 +150,14 @@ func (e *event) runIfActionButtonTriggered(taskLine *task.TaskLine) {
 		default:
 			panic("not reach")
 		}
-		e.character.dir = dir
+		e.character.turn(dir)
 		page := e.data.Pages[e.currentPageIndex]
 		if page == nil {
 			e.commandIndex = nil
 			return task.Terminated
 		}
 		e.character.attitude = page.Attitude
+		e.steppingCount = 0
 		e.commandIndex = newCommandIndex(page)
 		return task.Terminated
 	})
@@ -181,7 +185,7 @@ func (e *event) goOn(sub *task.TaskLine) error {
 		}))
 		sub.PushFunc(func() error {
 			e.mapScene.balloons = nil
-			e.character.dir = e.origDir
+			e.character.turn(e.origDir)
 			return task.Terminated
 		})
 		return task.Terminated

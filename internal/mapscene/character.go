@@ -26,11 +26,19 @@ type character struct {
 	image        *ebiten.Image
 	imageIndex   int
 	dir          data.Dir
+	dirFix       bool
 	attitude     data.Attitude
 	prevAttitude data.Attitude
 	x            int
 	y            int
 	moveCount    int
+}
+
+func (c *character) turn(dir data.Dir) {
+	if c.dirFix {
+		return
+	}
+	c.dir = dir
 }
 
 type characterImageParts struct {
@@ -78,7 +86,7 @@ func (c *character) move(taskLine *task.TaskLine, passable func(x, y int) bool, 
 		init := false
 		taskLine.PushFunc(func() error {
 			if !init {
-				c.dir = d
+				c.turn(d)
 				c.moveCount = playerMaxMoveCount
 				init = true
 			}

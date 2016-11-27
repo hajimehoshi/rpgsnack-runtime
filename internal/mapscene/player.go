@@ -34,6 +34,7 @@ func newPlayer(x, y int) (*player, error) {
 		x:            x,
 		y:            y,
 		dir:          data.DirDown,
+		dirFix:       false,
 		attitude:     data.AttitudeMiddle,
 		prevAttitude: data.AttitudeMiddle,
 	}
