@@ -14,40 +14,6 @@
 
 package data
 
-type Dir int
-
-const (
-	DirLeft Dir = iota
-	DirRight
-	DirUp
-	DirDown
-)
-
-type Attitude int
-
-const (
-	AttitudeLeft Attitude = iota
-	AttitudeMiddle
-	AttitudeRight
-)
-
-type Priority int
-
-const (
-	PriorityBelowCharacters Priority = iota
-	PrioritySameAsCharacters
-	PriorityAboveCharacters
-)
-
-type Trigger int
-
-const (
-	TriggerActionButton Trigger = iota
-	TriggerPlayerTouch
-	TriggerEventTouch
-	TriggerAuto
-)
-
 type Map struct {
 	Name      string  `json:"name"`
 	TileSetID int     `json:"tileSetId"`

@@ -36,6 +36,39 @@ type Page struct {
 	Commands   []*Command `json:"commands"`
 }
 
+type Dir int
+
+const (
+	DirLeft Dir = iota
+	DirRight
+	DirUp
+	DirDown
+)
+
+type Attitude int
+
+const (
+	AttitudeLeft Attitude = iota
+	AttitudeMiddle
+	AttitudeRight
+)
+
+type Priority int
+
+const (
+	PriorityBelowCharacters Priority = iota
+	PrioritySameAsCharacters
+	PriorityAboveCharacters
+)
+
+type Trigger string
+
+const (
+	TriggerActionButton Trigger = "action_button"
+	TriggerEventTouch           = "event_touch"
+	TriggerAuto                 = "auto"
+)
+
 type Command struct {
 	Name     CommandName       `json:"name"`
 	Args     map[string]string `json:"args"`

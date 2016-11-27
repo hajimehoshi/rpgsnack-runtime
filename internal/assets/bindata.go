@@ -238,7 +238,7 @@ var _dataMap0Json = []byte(`{
               "stepping":   true,
               "through":    false,
               "priority":   1,
-              "trigger":    0,
+              "trigger":    "action_button",
               "commands": [
                 {
                   "name": "show_message",
@@ -331,7 +331,7 @@ var _dataMap0Json = []byte(`{
               "stepping":   false,
               "through":    false,
               "priority":   0,
-              "trigger":    0,
+              "trigger":    "action_button",
               "commands":   []
             }
           ]
@@ -352,7 +352,7 @@ var _dataMap0Json = []byte(`{
               "stepping":   true,
               "through":    false,
               "priority":   1,
-              "trigger":    0,
+              "trigger":    "action_button",
               "commands": [
                 {
                   "name": "show_message",
@@ -399,7 +399,7 @@ func dataMap0Json() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "data/map0.json", size: 6282, mode: os.FileMode(420), modTime: time.Unix(1480252884, 0)}
+	info := bindataFileInfo{name: "data/map0.json", size: 6324, mode: os.FileMode(420), modTime: time.Unix(1480259795, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
