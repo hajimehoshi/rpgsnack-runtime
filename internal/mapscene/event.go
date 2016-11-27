@@ -84,7 +84,7 @@ func (e *event) updateCharacterIfNeeded() error {
 		c.image = nil
 		c.imageIndex = 0
 		c.dir = data.Dir(0)
-		c.attitude = attitudeMiddle
+		c.attitude = data.AttitudeMiddle
 		return nil
 	}
 	page := e.data.Pages[i]
@@ -92,7 +92,7 @@ func (e *event) updateCharacterIfNeeded() error {
 	c.image = theImageCache.Get(page.Image)
 	c.imageIndex = page.ImageIndex
 	c.dir = page.Dir
-	c.attitude = attitudeMiddle
+	c.attitude = page.Attitude
 	return nil
 }
 
@@ -153,7 +153,7 @@ func (e *event) runIfActionButtonTriggered(taskLine *task.TaskLine) {
 			e.commandIndex = nil
 			return task.Terminated
 		}
-		//e.character.attitude = page.ImageIndex
+		e.character.attitude = page.Attitude
 		e.commandIndex = newCommandIndex(page)
 		return task.Terminated
 	})
@@ -357,13 +357,13 @@ func (e *event) update() error {
 	}
 	switch {
 	case e.steppingCount < 30:
-		e.character.attitude = attitudeMiddle
+		e.character.attitude = data.AttitudeMiddle
 	case e.steppingCount < 60:
-		e.character.attitude = attitudeLeft
+		e.character.attitude = data.AttitudeLeft
 	case e.steppingCount < 90:
-		e.character.attitude = attitudeMiddle
+		e.character.attitude = data.AttitudeMiddle
 	default:
-		e.character.attitude = attitudeRight
+		e.character.attitude = data.AttitudeRight
 	}
 	e.steppingCount++
 	e.steppingCount %= 120

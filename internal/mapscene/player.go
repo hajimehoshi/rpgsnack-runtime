@@ -34,8 +34,8 @@ func newPlayer(x, y int) (*player, error) {
 		x:            x,
 		y:            y,
 		dir:          data.DirDown,
-		attitude:     attitudeMiddle,
-		prevAttitude: attitudeMiddle,
+		attitude:     data.AttitudeMiddle,
+		prevAttitude: data.AttitudeMiddle,
 	}
 	return &player{
 		character: c,

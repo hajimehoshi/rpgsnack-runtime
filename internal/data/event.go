@@ -25,6 +25,7 @@ type Page struct {
 	Conditions []string   `json:"conditions"`
 	Image      string     `json:"image"`
 	ImageIndex int        `json:"imageIndex"`
+	Attitude   Attitude   `json:"attitude"`
 	Dir        Dir        `json:"dir"`
 	DirFix     bool       `json:"dirFix"`
 	Walking    bool       `json:"walking"`

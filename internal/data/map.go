@@ -23,6 +23,14 @@ const (
 	DirDown
 )
 
+type Attitude int
+
+const (
+	AttitudeLeft Attitude = iota
+	AttitudeMiddle
+	AttitudeRight
+)
+
 type Priority int
 
 const (

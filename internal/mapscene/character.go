@@ -22,20 +22,12 @@ import (
 	"github.com/hajimehoshi/tsugunai/internal/task"
 )
 
-type attitude int
-
-const (
-	attitudeLeft attitude = iota
-	attitudeRight
-	attitudeMiddle
-)
-
 type character struct {
 	image        *ebiten.Image
 	imageIndex   int
 	dir          data.Dir
-	attitude     attitude
-	prevAttitude attitude
+	attitude     data.Attitude
+	prevAttitude data.Attitude
 	x            int
 	y            int
 	moveCount    int
@@ -46,7 +38,7 @@ type characterImageParts struct {
 	charHeight int
 	index      int
 	dir        data.Dir
-	attitude   attitude
+	attitude   data.Attitude
 }
 
 func (c *characterImageParts) Len() int {
@@ -57,10 +49,10 @@ func (c *characterImageParts) Src(index int) (int, int, int, int) {
 	x := ((c.index % 4) * 3) * c.charWidth
 	y := (c.index / 4) * 2 * c.charHeight
 	switch c.attitude {
-	case attitudeLeft:
-	case attitudeMiddle:
+	case data.AttitudeLeft:
+	case data.AttitudeMiddle:
 		x += c.charWidth
-	case attitudeRight:
+	case data.AttitudeRight:
 		x += 2 * c.charHeight
 	}
 	switch c.dir {
@@ -109,11 +101,11 @@ func (c *character) move(taskLine *task.TaskLine, passable func(x, y int) bool, 
 			}
 			if c.moveCount > 0 {
 				if c.moveCount >= playerMaxMoveCount/2 {
-					c.attitude = attitudeMiddle
-				} else if c.prevAttitude == attitudeLeft {
-					c.attitude = attitudeRight
+					c.attitude = data.AttitudeMiddle
+				} else if c.prevAttitude == data.AttitudeLeft {
+					c.attitude = data.AttitudeRight
 				} else {
-					c.attitude = attitudeLeft
+					c.attitude = data.AttitudeLeft
 				}
 				c.moveCount--
 			}
@@ -121,7 +113,7 @@ func (c *character) move(taskLine *task.TaskLine, passable func(x, y int) bool, 
 				c.x = nx
 				c.y = ny
 				c.prevAttitude = c.attitude
-				c.attitude = attitudeMiddle
+				c.attitude = data.AttitudeMiddle
 				return task.Terminated
 			}
 			return nil
