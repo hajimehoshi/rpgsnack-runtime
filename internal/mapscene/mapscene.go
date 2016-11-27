@@ -110,10 +110,11 @@ func (m *MapScene) passable(x, y int) bool {
 	if !m.passableTile(x, y) {
 		return false
 	}
-	if m.eventAt(x, y) != nil {
-		return false
+	e := m.eventAt(x, y)
+	if e == nil {
+		return true
 	}
-	return true
+	return e.isPassable()
 }
 
 func (m *MapScene) eventAt(x, y int) *event {
@@ -152,13 +153,13 @@ func (m *MapScene) movePlayerIfNeeded(taskLine *task.TaskLine) error {
 	return nil
 }
 
-func (m *MapScene) Update(updated bool, taskLine *task.TaskLine, sceneManager *scene.SceneManager) error {
+func (m *MapScene) Update(subTasksUpdated bool, taskLine *task.TaskLine, sceneManager *scene.SceneManager) error {
 	for _, e := range m.events {
 		if err := e.updateCharacterIfNeeded(); err != nil {
 			return err
 		}
 	}
-	if updated {
+	if subTasksUpdated {
 		return nil
 	}
 	if err := m.movePlayerIfNeeded(taskLine); err != nil {

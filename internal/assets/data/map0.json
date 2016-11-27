@@ -136,7 +136,7 @@
               "walking":    false,
               "stepping":   false,
               "through":    false,
-              "priority":   1,
+              "priority":   0,
               "trigger":    0,
               "commands":   []
             }

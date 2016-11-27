@@ -54,6 +54,14 @@ func newEvent(eventData *data.Event, mapScene *MapScene) (*event, error) {
 	return e, nil
 }
 
+func (e *event) isPassable() bool {
+	if e.currentPageIndex == -1 {
+		return true
+	}
+	page := e.data.Pages[e.currentPageIndex]
+	return page.Priority != data.PrioritySameAsCharacters
+}
+
 func (e *event) updateCharacterIfNeeded() error {
 	i, err := e.calcPageIndex()
 	if err != nil {
@@ -118,6 +126,8 @@ func (e *event) runIfActionButtonTriggered(taskLine *task.TaskLine) {
 		ex, ey := e.character.x, e.character.y
 		px, py := e.mapScene.player.character.x, e.mapScene.player.character.y
 		switch {
+		case ex == px && ey == py:
+			// The player and the event are at the same position.
 		case ex > px && ey == py:
 			dir = data.DirLeft
 		case ex < px && ey == py:

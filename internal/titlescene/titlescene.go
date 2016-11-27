@@ -33,8 +33,8 @@ func New() *TitleScene {
 	return &TitleScene{}
 }
 
-func (t *TitleScene) Update(updated bool, taskLine *task.TaskLine, sceneManager *scene.SceneManager) error {
-	if updated {
+func (t *TitleScene) Update(subTasksUpdated bool, taskLine *task.TaskLine, sceneManager *scene.SceneManager) error {
+	if subTasksUpdated {
 		return nil
 	}
 	if input.Triggered() {

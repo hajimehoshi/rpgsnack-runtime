@@ -32,8 +32,7 @@ const (
 )
 
 type scene interface {
-	// TODO: Better name for the first arg
-	Update(updated bool, taskLine *task.TaskLine, sceneManager *SceneManager) error
+	Update(subTasksUpdated bool, taskLine *task.TaskLine, sceneManager *SceneManager) error
 	Draw(screen *ebiten.Image) error
 }
 
