@@ -116,7 +116,7 @@ func DrawText(screen *ebiten.Image, text string, x, y int, scale int, color colo
 	op.GeoM.Scale(float64(scale), float64(scale))
 	op.GeoM.Translate(float64(x), float64(y))
 	r, g, b, a := color.RGBA()
-	op.ColorM.Scale(float64(r>>8), float64(g>>8), float64(b>>8), float64(a>>8))
+	op.ColorM.Scale(float64(r>>8)/255, float64(g>>8)/255, float64(b>>8)/255, float64(a>>8)/255)
 	op.ImageParts = &textImageParts{[]rune(text)}
 	if err := screen.DrawImage(mplusImage, op); err != nil {
 		return err
