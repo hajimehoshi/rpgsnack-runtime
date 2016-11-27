@@ -33,7 +33,10 @@ func New() *TitleScene {
 	return &TitleScene{}
 }
 
-func (t *TitleScene) Update(taskLine *task.TaskLine, sceneManager *scene.SceneManager) error {
+func (t *TitleScene) Update(updated bool, taskLine *task.TaskLine, sceneManager *scene.SceneManager) error {
+	if updated {
+		return nil
+	}
 	if input.Triggered() {
 		mapScene, err := mapscene.New()
 		if err != nil {

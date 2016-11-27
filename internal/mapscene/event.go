@@ -315,7 +315,8 @@ func (e *event) showChoices(taskLine *task.TaskLine, choices []string) {
 func (e *event) setSwitch(taskLine *task.TaskLine, number int, value bool) {
 	taskLine.PushFunc(func() error {
 		if len(e.mapScene.switches) < number+1 {
-			e.mapScene.switches = append(e.mapScene.switches, make([]bool, number+1-len(e.mapScene.switches))...)
+			zeros := make([]bool, number+1-len(e.mapScene.switches))
+			e.mapScene.switches = append(e.mapScene.switches, zeros...)
 		}
 		e.mapScene.switches[number] = value
 		return task.Terminated

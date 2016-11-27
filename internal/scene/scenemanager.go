@@ -32,7 +32,8 @@ const (
 )
 
 type scene interface {
-	Update(taskLine *task.TaskLine, sceneManager *SceneManager) error
+	// TODO: Better name for the first arg
+	Update(updated bool, taskLine *task.TaskLine, sceneManager *SceneManager) error
 	Draw(screen *ebiten.Image) error
 }
 
@@ -50,16 +51,17 @@ func NewSceneManager(initScene scene) *SceneManager {
 }
 
 func (s *SceneManager) Update() error {
-	if updated, err := s.taskLine.Update(); err != nil {
+	updated, err := s.taskLine.Update()
+	if err != nil {
 		return err
-	} else if updated {
-		return nil
 	}
-	if s.next != nil {
-		s.current = s.next
-		s.next = nil
+	if !updated {
+		if s.next != nil {
+			s.current = s.next
+			s.next = nil
+		}
 	}
-	if err := s.current.Update(s.taskLine, s); err != nil {
+	if err := s.current.Update(updated, s.taskLine, s); err != nil {
 		return err
 	}
 	return nil

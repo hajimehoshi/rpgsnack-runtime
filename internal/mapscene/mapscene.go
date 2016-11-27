@@ -152,11 +152,14 @@ func (m *MapScene) movePlayerIfNeeded(taskLine *task.TaskLine) error {
 	return nil
 }
 
-func (m *MapScene) Update(taskLine *task.TaskLine, sceneManager *scene.SceneManager) error {
+func (m *MapScene) Update(updated bool, taskLine *task.TaskLine, sceneManager *scene.SceneManager) error {
 	for _, e := range m.events {
 		if err := e.updateCharacterIfNeeded(); err != nil {
 			return err
 		}
+	}
+	if updated {
+		return nil
 	}
 	if err := m.movePlayerIfNeeded(taskLine); err != nil {
 		return err
