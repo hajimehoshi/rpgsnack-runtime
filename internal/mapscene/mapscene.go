@@ -145,6 +145,9 @@ func (m *MapScene) movePlayerIfNeeded(taskLine *task.TaskLine) error {
 	if !m.passable(tx, ty) && e == nil {
 		return nil
 	}
+	if e != nil && !e.isRunnable() {
+		return nil
+	}
 	m.playerMoving = true
 	m.player.move(taskLine, m.passable, tx, ty)
 	m.moveDstX = tx

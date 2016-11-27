@@ -70,6 +70,14 @@ func (e *event) isPassable() bool {
 	return page.Priority != data.PrioritySameAsCharacters
 }
 
+func (e *event) isRunnable() bool {
+	page := e.currentPage()
+	if page == nil {
+		return true
+	}
+	return len(page.Commands) > 0
+}
+
 func (e *event) updateCharacterIfNeeded() error {
 	i, err := e.calcPageIndex()
 	if err != nil {
