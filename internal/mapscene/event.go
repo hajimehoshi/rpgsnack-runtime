@@ -257,7 +257,7 @@ func (e *event) goOn(sub *task.TaskLine) error {
 	return nil
 }
 
-func (e *event) showMessage(taskLine *task.TaskLine, content string, position data.ShowMessagePosition) {
+func (e *event) removeAllBalloons(taskLine *task.TaskLine) {
 	taskLine.Push(task.Sub(func(sub *task.TaskLine) error {
 		subs := []*task.TaskLine{}
 		for _, b := range e.mapScene.balloons {
@@ -276,6 +276,10 @@ func (e *event) showMessage(taskLine *task.TaskLine, content string, position da
 		sub.Push(task.Parallel(subs...))
 		return task.Terminated
 	}))
+}
+
+func (e *event) showMessage(taskLine *task.TaskLine, content string, position data.ShowMessagePosition) {
+	e.removeAllBalloons(taskLine)
 	taskLine.Push(task.Sub(func(sub *task.TaskLine) error {
 		var b *balloon
 		switch position {
@@ -368,6 +372,7 @@ func (e *event) setSwitch(taskLine *task.TaskLine, number int, value bool) {
 func (e *event) move(taskLine *task.TaskLine, x, y int) {
 	count := 0
 	const maxCount = 30
+	e.removeAllBalloons(taskLine)
 	taskLine.PushFunc(func() error {
 		count++
 		e.mapScene.fadingRate = float64(count) / maxCount
