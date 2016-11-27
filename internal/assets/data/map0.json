@@ -42,7 +42,7 @@
               "dir":        3,
               "dirFix":     false,
               "walking":    false,
-              "stepping":   false,
+              "stepping":   true,
               "through":    false,
               "priority":   1,
               "trigger":    0,

@@ -35,6 +35,7 @@ type event struct {
 	currentPageIndex int
 	commandIndex     *commandIndex
 	chosenIndex      int
+	steppingCount    int
 }
 
 func newEvent(eventData *data.Event, mapScene *MapScene) (*event, error) {
@@ -54,11 +55,18 @@ func newEvent(eventData *data.Event, mapScene *MapScene) (*event, error) {
 	return e, nil
 }
 
-func (e *event) isPassable() bool {
+func (e *event) currentPage() *data.Page {
 	if e.currentPageIndex == -1 {
+		return nil
+	}
+	return e.data.Pages[e.currentPageIndex]
+}
+
+func (e *event) isPassable() bool {
+	page := e.currentPage()
+	if page == nil {
 		return true
 	}
-	page := e.data.Pages[e.currentPageIndex]
 	return page.Priority != data.PrioritySameAsCharacters
 }
 
@@ -113,10 +121,10 @@ page:
 }
 
 func (e *event) runIfActionButtonTriggered(taskLine *task.TaskLine) {
-	if e.currentPageIndex == -1 {
+	page := e.currentPage()
+	if page == nil {
 		return
 	}
-	page := e.data.Pages[e.currentPageIndex]
 	if page.Trigger != data.TriggerActionButton {
 		return
 	}
@@ -140,11 +148,13 @@ func (e *event) runIfActionButtonTriggered(taskLine *task.TaskLine) {
 			panic("not reach")
 		}
 		e.character.dir = dir
-		if e.currentPageIndex == -1 {
+		page := e.data.Pages[e.currentPageIndex]
+		if page == nil {
 			e.commandIndex = nil
 			return task.Terminated
 		}
-		e.commandIndex = newCommandIndex(e.data.Pages[e.currentPageIndex])
+		//e.character.attitude = page.ImageIndex
+		e.commandIndex = newCommandIndex(page)
 		return task.Terminated
 	})
 	taskLine.Push(task.Sub(e.goOn))
@@ -335,6 +345,29 @@ func (e *event) setSwitch(taskLine *task.TaskLine, number int, value bool) {
 		e.mapScene.switches[number] = value
 		return task.Terminated
 	})
+}
+
+func (e *event) update() error {
+	page := e.currentPage()
+	if page == nil {
+		return nil
+	}
+	if !page.Stepping {
+		return nil
+	}
+	switch {
+	case e.steppingCount < 30:
+		e.character.attitude = attitudeMiddle
+	case e.steppingCount < 60:
+		e.character.attitude = attitudeLeft
+	case e.steppingCount < 90:
+		e.character.attitude = attitudeMiddle
+	default:
+		e.character.attitude = attitudeRight
+	}
+	e.steppingCount++
+	e.steppingCount %= 120
+	return nil
 }
 
 func (e *event) draw(screen *ebiten.Image) error {

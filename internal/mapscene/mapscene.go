@@ -168,6 +168,11 @@ func (m *MapScene) Update(subTasksUpdated bool, taskLine *task.TaskLine, sceneMa
 	if err := m.player.update(m.passable); err != nil {
 		return err
 	}
+	for _, e := range m.events {
+		if err := e.update(); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
