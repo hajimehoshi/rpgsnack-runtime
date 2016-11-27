@@ -101,7 +101,7 @@ func newBalloonWithArrow(arrowX, arrowY int, content string) *balloon {
 		b.arrowFlip = true
 		b.x = scene.TileXNum*scene.TileSize - w
 	}
-	if b.x+w < 0 {
+	if b.x < 0 {
 		b.x = 0
 	}
 	b.y = arrowY - h - 4
