@@ -337,7 +337,7 @@ var _dataMap0Json = []byte(`{
           ]
         },
         {
-          "id": 0,
+          "id": 1,
           "x":  7,
           "y":  3,
           "pages": [
@@ -382,6 +382,55 @@ var _dataMap0Json = []byte(`{
               ]
             }
           ]
+        },
+        {
+          "id": 2,
+          "x":  0,
+          "y":  0,
+          "pages": [
+            {
+              "conditions": [],
+              "image":      "",
+              "imageIndex": 0,
+              "attitude":   0,
+              "dir":        0,
+              "dirFix":     false,
+              "walking":    false,
+              "stepping":   false,
+              "through":    false,
+              "priority":   0,
+              "trigger":    "auto",
+              "commands": [
+                {
+                  "name": "show_message",
+                  "args":    {
+                    "content": "自動イベントのテストでござい"
+                  }
+                },
+                {
+                   "name": "set_switch",
+                   "args": {
+                     "number": "1",
+                     "value":  "true"
+                   }
+                }
+              ]
+            },
+            {
+              "conditions": ["$switches[1]"],
+              "image":      "",
+              "imageIndex": 0,
+              "attitude":   0,
+              "dir":        0,
+              "dirFix":     false,
+              "walking":    false,
+              "stepping":   false,
+              "through":    false,
+              "priority":   0,
+              "trigger":    "tapped",
+              "commands":   []
+            }
+          ]
         }
       ]
     }
@@ -399,7 +448,7 @@ func dataMap0Json() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "data/map0.json", size: 6303, mode: os.FileMode(420), modTime: time.Unix(1480260933, 0)}
+	info := bindataFileInfo{name: "data/map0.json", size: 7697, mode: os.FileMode(420), modTime: time.Unix(1480265827, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

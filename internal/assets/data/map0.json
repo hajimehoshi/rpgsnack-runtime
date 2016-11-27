@@ -145,7 +145,7 @@
           ]
         },
         {
-          "id": 0,
+          "id": 1,
           "x":  7,
           "y":  3,
           "pages": [
@@ -188,6 +188,55 @@
                   }
                 }
               ]
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "x":  0,
+          "y":  0,
+          "pages": [
+            {
+              "conditions": [],
+              "image":      "",
+              "imageIndex": 0,
+              "attitude":   0,
+              "dir":        0,
+              "dirFix":     false,
+              "walking":    false,
+              "stepping":   false,
+              "through":    false,
+              "priority":   0,
+              "trigger":    "auto",
+              "commands": [
+                {
+                  "name": "show_message",
+                  "args":    {
+                    "content": "自動イベントのテストでござい"
+                  }
+                },
+                {
+                   "name": "set_switch",
+                   "args": {
+                     "number": "1",
+                     "value":  "true"
+                   }
+                }
+              ]
+            },
+            {
+              "conditions": ["$switches[1]"],
+              "image":      "",
+              "imageIndex": 0,
+              "attitude":   0,
+              "dir":        0,
+              "dirFix":     false,
+              "walking":    false,
+              "stepping":   false,
+              "through":    false,
+              "priority":   0,
+              "trigger":    "tapped",
+              "commands":   []
             }
           ]
         }

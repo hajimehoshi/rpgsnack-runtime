@@ -123,13 +123,13 @@ page:
 	return -1, nil
 }
 
-func (e *event) runIfActionButtonTriggered(taskLine *task.TaskLine) {
+func (e *event) run(taskLine *task.TaskLine, trigger data.Trigger) bool {
 	page := e.currentPage()
 	if page == nil {
-		return
+		return false
 	}
-	if page.Trigger != data.TriggerTapped {
-		return
+	if page.Trigger != trigger {
+		return false
 	}
 	taskLine.PushFunc(func() error {
 		e.origDir = e.character.dir
@@ -137,6 +137,7 @@ func (e *event) runIfActionButtonTriggered(taskLine *task.TaskLine) {
 		ex, ey := e.character.x, e.character.y
 		px, py := e.mapScene.player.character.x, e.mapScene.player.character.y
 		switch {
+		case trigger == data.TriggerAuto:
 		case ex == px && ey == py:
 			// The player and the event are at the same position.
 		case ex > px && ey == py:
@@ -162,6 +163,7 @@ func (e *event) runIfActionButtonTriggered(taskLine *task.TaskLine) {
 		return task.Terminated
 	})
 	taskLine.Push(task.Sub(e.goOn))
+	return true
 }
 
 func (e *event) goOn(sub *task.TaskLine) error {
