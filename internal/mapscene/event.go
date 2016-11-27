@@ -16,6 +16,8 @@ package mapscene
 
 import (
 	"fmt"
+	"regexp"
+	"strconv"
 
 	"github.com/hajimehoshi/ebiten"
 
@@ -26,33 +28,86 @@ import (
 )
 
 type event struct {
-	data         *data.Event
-	mapScene     *MapScene
-	character    *character
-	origDir      data.Dir
-	commandIndex *commandIndex
-	chosenIndex  int
+	data             *data.Event
+	mapScene         *MapScene
+	character        *character
+	origDir          data.Dir
+	currentPageIndex int
+	commandIndex     *commandIndex
+	chosenIndex      int
 }
 
-func newEvent(eventData *data.Event, mapScene *MapScene) *event {
-	page := eventData.Pages[0]
+func newEvent(eventData *data.Event, mapScene *MapScene) (*event, error) {
 	c := &character{
-		image:      theImageCache.Get(page.Image),
-		imageIndex: page.ImageIndex,
-		dir:        page.Dir,
-		attitude:   attitudeMiddle,
-		x:          eventData.X,
-		y:          eventData.Y,
+		x: eventData.X,
+		y: eventData.Y,
 	}
-	return &event{
-		data:      eventData,
-		mapScene:  mapScene,
-		character: c,
+	e := &event{
+		data:             eventData,
+		mapScene:         mapScene,
+		character:        c,
+		currentPageIndex: -1,
 	}
+	if err := e.updateCharacterIfNeeded(); err != nil {
+		return nil, err
+	}
+	return e, nil
+}
+
+func (e *event) updateCharacterIfNeeded() error {
+	i, err := e.calcPageIndex()
+	if err != nil {
+		return err
+	}
+	if e.currentPageIndex == i {
+		return nil
+	}
+	e.currentPageIndex = i
+	if i == -1 {
+		c := e.character
+		c.image = nil
+		c.imageIndex = 0
+		c.dir = data.Dir(0)
+		c.attitude = attitudeMiddle
+		return nil
+	}
+	page := e.data.Pages[i]
+	c := e.character
+	c.image = theImageCache.Get(page.Image)
+	c.imageIndex = page.ImageIndex
+	c.dir = page.Dir
+	c.attitude = attitudeMiddle
+	return nil
+}
+
+func (e *event) calcPageIndex() (int, error) {
+	reSwitches := regexp.MustCompile(`^\$switches\[(\d+)\]$`)
+page:
+	for i := len(e.data.Pages) - 1; i >= 0; i-- {
+		page := e.data.Pages[i]
+		for _, cond := range page.Conditions {
+			if m := reSwitches.FindStringSubmatch(cond); m != nil {
+				s, err := strconv.Atoi(m[1])
+				if err != nil {
+					return 0, err
+				}
+				if s < len(e.mapScene.switches) && e.mapScene.switches[s] {
+					continue
+				}
+			} else {
+				return 0, fmt.Errorf("invalid condition: %s", cond)
+			}
+			continue page
+		}
+		return i, nil
+	}
+	return -1, nil
 }
 
 func (e *event) trigger() data.Trigger {
-	return e.data.Pages[0].Trigger
+	// TODO: What if page is nil?
+	page := e.data.Pages[e.currentPageIndex]
+	return page.Trigger
 }
 
 func (e *event) run(taskLine *task.TaskLine) {
@@ -74,8 +129,10 @@ func (e *event) run(taskLine *task.TaskLine) {
 			panic("not reach")
 		}
 		e.character.dir = dir
-		page := e.data.Pages[0]
-		e.commandIndex = newCommandIndex(page)
+		if e.currentPageIndex == -1 {
+			return task.Terminated
+		}
+		e.commandIndex = newCommandIndex(e.data.Pages[e.currentPageIndex])
 		return task.Terminated
 	})
 	taskLine.Push(task.Sub(e.goOn))
@@ -133,7 +190,20 @@ func (e *event) goOn(sub *task.TaskLine) error {
 			return task.Terminated
 		})
 	case data.CommandNameSetSwitch:
-		// not implemented
+		number, err := strconv.Atoi(c.Args["number"])
+		if err != nil {
+			return err
+		}
+		value := false
+		switch data.SwitchValue(c.Args["value"]) {
+		case data.SwitchValueFalse:
+			value = false
+		case data.SwitchValueTrue:
+			value = true
+		default:
+			panic("not reach")
+		}
+		e.setSwitch(sub, number, value)
 		sub.PushFunc(func() error {
 			e.commandIndex.advance()
 			return task.Terminated
@@ -239,6 +309,16 @@ func (e *event) showChoices(taskLine *task.TaskLine, choices []string) {
 		return task.Terminated
 	}))
 	taskLine.Push(task.Sleep(30))
+}
+
+func (e *event) setSwitch(taskLine *task.TaskLine, number int, value bool) {
+	taskLine.PushFunc(func() error {
+		if len(e.mapScene.switches) < number+1 {
+			e.mapScene.switches = append(e.mapScene.switches, make([]bool, number+1-len(e.mapScene.switches))...)
+		}
+		e.mapScene.switches[number] = value
+		return task.Terminated
+	})
 }
 
 func (e *event) draw(screen *ebiten.Image) error {

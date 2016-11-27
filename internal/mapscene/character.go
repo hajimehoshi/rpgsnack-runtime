@@ -134,6 +134,9 @@ func (c *character) update(passable func(x, y int) bool) error {
 }
 
 func (c *character) draw(screen *ebiten.Image) error {
+	if c.image == nil {
+		return nil
+	}
 	imageW, imageH := c.image.Size()
 	charW := imageW / 4 / 3
 	charH := imageH / 2 / 4

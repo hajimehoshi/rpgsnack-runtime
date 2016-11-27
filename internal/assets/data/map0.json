@@ -126,6 +126,19 @@
                   }
                 }
               ]
+            },
+            {
+              "conditions": ["$switches[0]"],
+              "image":      "",
+              "imageIndex": 0,
+              "dir":        0,
+              "dirFix":     false,
+              "walking":    false,
+              "stepping":   false,
+              "through":    false,
+              "priority":   1,
+              "trigger":    0,
+              "commands":   []
             }
           ]
         }

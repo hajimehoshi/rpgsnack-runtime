@@ -22,7 +22,7 @@ type Event struct {
 }
 
 type Page struct {
-	Condition  []string   `json:"condition"`
+	Conditions []string   `json:"conditions"`
 	Image      string     `json:"image"`
 	ImageIndex int        `json:"imageIndex"`
 	Dir        Dir        `json:"dir"`

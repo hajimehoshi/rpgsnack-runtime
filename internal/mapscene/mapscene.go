@@ -39,6 +39,7 @@ type MapScene struct {
 	balloons      []*balloon
 	tilesImage    *ebiten.Image
 	events        []*event
+	switches      []bool
 }
 
 func New() (*MapScene, error) {
@@ -61,7 +62,11 @@ func New() (*MapScene, error) {
 		tilesImage: tilesImage,
 	}
 	for _, e := range mapScene.currentMap.Rooms[mapScene.currentRoomID].Events {
-		mapScene.events = append(mapScene.events, newEvent(e, mapScene))
+		event, err := newEvent(e, mapScene)
+		if err != nil {
+			return nil, err
+		}
+		mapScene.events = append(mapScene.events, event)
 	}
 	return mapScene, nil
 }
@@ -121,16 +126,16 @@ func (m *MapScene) eventAt(x, y int) *event {
 	return nil
 }
 
-func (m *MapScene) movePlayerIfNeeded(taskLine *task.TaskLine) {
+func (m *MapScene) movePlayerIfNeeded(taskLine *task.TaskLine) error {
 	if !input.Triggered() {
-		return
+		return nil
 	}
 	x, y := input.Position()
 	tx := (x - scene.GameMarginX) / scene.TileSize / scene.TileScale
 	ty := (y - scene.GameMarginTop) / scene.TileSize / scene.TileScale
 	e := m.eventAt(tx, ty)
 	if !m.passable(tx, ty) && e == nil {
-		return
+		return nil
 	}
 	m.playerMoving = true
 	m.player.move(taskLine, m.passable, tx, ty)
@@ -141,16 +146,24 @@ func (m *MapScene) movePlayerIfNeeded(taskLine *task.TaskLine) {
 		return task.Terminated
 	})
 	if e == nil {
-		return
+		return nil
 	}
 	if e.trigger() != data.TriggerActionButton {
-		return
+		return nil
 	}
 	e.run(taskLine)
+	return nil
 }
 
 func (m *MapScene) Update(taskLine *task.TaskLine, sceneManager *scene.SceneManager) error {
-	m.movePlayerIfNeeded(taskLine)
+	for _, e := range m.events {
+		if err := e.updateCharacterIfNeeded(); err != nil {
+			return err
+		}
+	}
+	if err := m.movePlayerIfNeeded(taskLine); err != nil {
+		return err
+	}
 	if err := m.player.update(m.passable); err != nil {
 		return err
 	}
