@@ -64,9 +64,9 @@ const (
 type Trigger string
 
 const (
-	TriggerActionButton Trigger = "action_button"
-	TriggerEventTouch           = "event_touch"
-	TriggerAuto                 = "auto"
+	TriggerTapped     Trigger = "tapped"
+	TriggerEventTouch         = "event_touch"
+	TriggerAuto               = "auto"
 )
 
 type Command struct {

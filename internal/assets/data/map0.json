@@ -46,7 +46,7 @@
               "stepping":   true,
               "through":    false,
               "priority":   1,
-              "trigger":    "action_button",
+              "trigger":    "tapped",
               "commands": [
                 {
                   "name": "show_message",
@@ -139,7 +139,7 @@
               "stepping":   false,
               "through":    false,
               "priority":   0,
-              "trigger":    "action_button",
+              "trigger":    "tapped",
               "commands":   []
             }
           ]
@@ -160,7 +160,7 @@
               "stepping":   true,
               "through":    false,
               "priority":   1,
-              "trigger":    "action_button",
+              "trigger":    "tapped",
               "commands": [
                 {
                   "name": "show_message",

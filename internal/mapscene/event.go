@@ -128,7 +128,7 @@ func (e *event) runIfActionButtonTriggered(taskLine *task.TaskLine) {
 	if page == nil {
 		return
 	}
-	if page.Trigger != data.TriggerActionButton {
+	if page.Trigger != data.TriggerTapped {
 		return
 	}
 	taskLine.PushFunc(func() error {
