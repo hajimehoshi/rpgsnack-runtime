@@ -212,7 +212,8 @@
                 {
                   "name": "show_message",
                   "args":    {
-                    "content": "自動イベントのテストでござい"
+                    "content":  "自動イベントのテストでござい",
+                    "position": "center"
                   }
                 },
                 {
