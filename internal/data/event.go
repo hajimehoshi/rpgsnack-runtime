@@ -70,9 +70,9 @@ const (
 )
 
 type Command struct {
-	Name     CommandName       `json:"name"`
-	Args     map[string]string `json:"args"`
-	Branches [][]*Command      `json:"branches"`
+	Name     CommandName            `json:"name"`
+	Args     map[string]interface{} `json:"args"`
+	Branches [][]*Command           `json:"branches"`
 }
 
 type CommandName string
@@ -91,11 +91,4 @@ const (
 	ShowMessagePositionPlayer ShowMessagePosition = "player"
 	ShowMessagePositionEvent  ShowMessagePosition = "event"
 	ShowMessagePositionCenter                     = "center"
-)
-
-type SwitchValue string
-
-const (
-	SwitchValueFalse = "false"
-	SwitchValueTrue  = "true"
 )

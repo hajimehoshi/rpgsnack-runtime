@@ -255,9 +255,7 @@ var _dataMap0Json = []byte(`{
                 {
                   "name": "show_choices",
                   "args":    {
-                    "choice0": "そう、関係ないね",
-                    "choice1": "殺してでもうばいとる",
-                    "choice2": "ゆずってくれ、たのむ!"
+                    "choices": ["そう、関係ないね", "殺してでもうばいとる", "ゆずってくれ、たのむ!"]
                   },
                   "branches": [
                     [],
@@ -271,8 +269,8 @@ var _dataMap0Json = []byte(`{
                       {
                         "name": "set_switch",
                         "args": {
-                          "number": "0",
-                          "value":  "true"
+                          "number": 0,
+                          "value":  true
                         }
                       },
                       {
@@ -369,8 +367,8 @@ var _dataMap0Json = []byte(`{
                 {
                   "name": "move",
                   "args":    {
-                    "x": "1",
-                    "y": "2"
+                    "x": 1,
+                    "y": 2
                   }
                 },
                 {
@@ -411,8 +409,8 @@ var _dataMap0Json = []byte(`{
                 {
                    "name": "set_switch",
                    "args": {
-                     "number": "1",
-                     "value":  "true"
+                     "number": 1,
+                     "value":  true
                    }
                 }
               ]
@@ -449,7 +447,7 @@ func dataMap0Json() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "data/map0.json", size: 7740, mode: os.FileMode(420), modTime: time.Unix(1480266587, 0)}
+	info := bindataFileInfo{name: "data/map0.json", size: 7668, mode: os.FileMode(420), modTime: time.Unix(1480338804, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

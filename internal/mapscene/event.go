@@ -204,24 +204,18 @@ func (e *event) goOn(sub *task.TaskLine) error {
 	switch c.Name {
 	case data.CommandNameShowMessage:
 		position := data.ShowMessagePositionSelf
-		if c.Args["position"] != "" {
-			position = data.ShowMessagePosition(c.Args["position"])
+		if c.Args["position"] != nil {
+			position = data.ShowMessagePosition(c.Args["position"].(string))
 		}
-		e.showMessage(sub, c.Args["content"], position)
+		e.showMessage(sub, c.Args["content"].(string), position)
 		sub.PushFunc(func() error {
 			e.commandIndex.advance()
 			return task.Terminated
 		})
 	case data.CommandNameShowChoices:
-		i := 0
 		choices := []string{}
-		for {
-			choice, ok := c.Args[fmt.Sprintf("choice%d", i)]
-			if !ok {
-				break
-			}
-			choices = append(choices, choice)
-			i++
+		for _, c := range c.Args["choices"].([]interface{}) {
+			choices = append(choices, c.(string))
 		}
 		e.showChoices(sub, choices)
 		sub.PushFunc(func() error {
@@ -229,33 +223,16 @@ func (e *event) goOn(sub *task.TaskLine) error {
 			return task.Terminated
 		})
 	case data.CommandNameSetSwitch:
-		number, err := strconv.Atoi(c.Args["number"])
-		if err != nil {
-			return err
-		}
-		value := false
-		switch data.SwitchValue(c.Args["value"]) {
-		case data.SwitchValueFalse:
-			value = false
-		case data.SwitchValueTrue:
-			value = true
-		default:
-			panic("not reach")
-		}
+		number := int(c.Args["number"].(float64))
+		value := c.Args["value"].(bool)
 		e.setSwitch(sub, number, value)
 		sub.PushFunc(func() error {
 			e.commandIndex.advance()
 			return task.Terminated
 		})
 	case data.CommandNameMove:
-		x, err := strconv.Atoi(c.Args["x"])
-		if err != nil {
-			return err
-		}
-		y, err := strconv.Atoi(c.Args["y"])
-		if err != nil {
-			return err
-		}
+		x := int(c.Args["x"].(float64))
+		y := int(c.Args["y"].(float64))
 		e.move(sub, x, y)
 		sub.PushFunc(func() error {
 			e.commandIndex.advance()

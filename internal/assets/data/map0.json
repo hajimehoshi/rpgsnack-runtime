@@ -63,9 +63,7 @@
                 {
                   "name": "show_choices",
                   "args":    {
-                    "choice0": "そう、関係ないね",
-                    "choice1": "殺してでもうばいとる",
-                    "choice2": "ゆずってくれ、たのむ!"
+                    "choices": ["そう、関係ないね", "殺してでもうばいとる", "ゆずってくれ、たのむ!"]
                   },
                   "branches": [
                     [],
@@ -79,8 +77,8 @@
                       {
                         "name": "set_switch",
                         "args": {
-                          "number": "0",
-                          "value":  "true"
+                          "number": 0,
+                          "value":  true
                         }
                       },
                       {
@@ -177,8 +175,8 @@
                 {
                   "name": "move",
                   "args":    {
-                    "x": "1",
-                    "y": "2"
+                    "x": 1,
+                    "y": 2
                   }
                 },
                 {
@@ -219,8 +217,8 @@
                 {
                    "name": "set_switch",
                    "args": {
-                     "number": "1",
-                     "value":  "true"
+                     "number": 1,
+                     "value":  true
                    }
                 }
               ]
