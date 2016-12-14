@@ -32,6 +32,7 @@ import (
 type MapScene struct {
 	currentRoomID int
 	currentMap    *data.Map
+	texts         *data.Texts
 	player        *player
 	moveDstX      int
 	moveDstY      int
@@ -45,9 +46,14 @@ type MapScene struct {
 }
 
 func New() (*MapScene, error) {
-	mapDataBytes := assets.MustAsset("data/map0.json")
+	mapDataJson := assets.MustAsset("data/map0.json")
 	var mapData *data.Map
-	if err := json.Unmarshal(mapDataBytes, &mapData); err != nil {
+	if err := json.Unmarshal(mapDataJson, &mapData); err != nil {
+		return nil, err
+	}
+	textsJson := assets.MustAsset("data/texts.json")
+	var texts *data.Texts
+	if err := json.Unmarshal(textsJson, &texts); err != nil {
 		return nil, err
 	}
 	player, err := newPlayer(1, 2)
@@ -64,6 +70,7 @@ func New() (*MapScene, error) {
 	}
 	mapScene := &MapScene{
 		currentMap: mapData,
+		texts:      texts,
 		player:     player,
 		tilesImage: tilesImage,
 		emptyImage: emptyImage,

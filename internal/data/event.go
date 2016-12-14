@@ -88,7 +88,7 @@ type ShowMessagePosition string
 
 const (
 	ShowMessagePositionSelf   ShowMessagePosition = "self"
-	ShowMessagePositionPlayer ShowMessagePosition = "player"
-	ShowMessagePositionEvent  ShowMessagePosition = "event"
+	ShowMessagePositionPlayer                     = "player"
+	ShowMessagePositionEvent                      = "event"
 	ShowMessagePositionCenter                     = "center"
 )

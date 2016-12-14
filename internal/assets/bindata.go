@@ -9,6 +9,7 @@
 // images/tiles_bottom.png
 // images/tiles_top.png
 // data/map0.json
+// data/texts.json
 // data/tilesets.json
 // DO NOT EDIT!
 
@@ -243,19 +244,23 @@ var _dataMap0Json = []byte(`{
                 {
                   "name": "show_message",
                   "args":    {
-                    "content": "イベントのテストです。"
+                    "content": "bffe5c73-6109-486d-b445-834847833947"
                   }
                 },
                 {
                   "name": "show_message",
                   "args":    {
-                    "content": "念願のアイスソードを\n手に入れたぞ"
+                    "content": "4fe345d6-05bc-43d7-9a79-03e40b1b6d34"
                   }
                 },
                 {
                   "name": "show_choices",
                   "args":    {
-                    "choices": ["そう、関係ないね", "殺してでもうばいとる", "ゆずってくれ、たのむ!"]
+                    "choices": [
+                      "c7beef37-b69e-4098-9b5e-ea0f2713c9ab",
+                      "6380b657-c558-447a-861c-dd0f98f62464",
+                      "c3b82b18-bd2e-481d-a4a9-f9d65bf4f170"
+                    ]
                   },
                   "branches": [
                     [],
@@ -263,7 +268,7 @@ var _dataMap0Json = []byte(`{
                       {
                         "name": "show_message",
                         "args": {
-                          "content": "な、何をする貴様らー!"
+                          "content": "b39503f3-d957-4009-bea7-b6b2ffb929a4"
                         }
                       },
                       {
@@ -276,7 +281,7 @@ var _dataMap0Json = []byte(`{
                       {
                         "name": "show_message",
                         "args": {
-                          "content":  "殺害した",
+                          "content":  "574d044b-ca90-43d6-80ba-bcb17865b57e",
                           "position": "center"
                         }
                       }
@@ -285,26 +290,26 @@ var _dataMap0Json = []byte(`{
                       {
                         "name": "show_message",
                         "args": {
-                          "content": "だめだ!! いくら積まれてもゆずれん"
+                          "content": "a91632df-e7a7-4c4c-b4e9-516fe52d8fd8"
                         }
                       },
                       {
                         "name": "show_message",
                         "args": {
-                          "content":  "ホークは、今までの経緯を説明した",
+                          "content":  "b3ad76be-571d-4eea-90cd-a4ede3abaf06",
                           "position": "center"
                         }
                       },
                       {
                         "name": "show_message",
                         "args": {
-                          "content": "そういわれてもなー\nこの剣を手に入れるのには\n相当苦労もしたし…"
+                          "content": "b315852a-9b09-4087-ad3e-b4ef6d258156"
                         }
                       },
                       {
                         "name": "show_message",
                         "args": {
-                          "content": "では、俺も一緒に行くというのはどうだ?\nそのフレイムタイラントに\n会って考えよう"
+                          "content": "a038b9c5-deec-46de-973e-a10e27ebe5ca"
                         }
                       }
                     ]
@@ -313,7 +318,7 @@ var _dataMap0Json = []byte(`{
                 {
                   "name": "show_message",
                   "args": {
-                    "content": "選択肢合流後のイベント"
+                    "content": "05dc0051-2a8d-4412-b561-9343b99a3690"
                   }
                 }
               ]
@@ -355,13 +360,13 @@ var _dataMap0Json = []byte(`{
                 {
                   "name": "show_message",
                   "args":    {
-                    "content": "向き固定のテスト。"
+                    "content": "e6796850-08a3-4f07-a316-a013d6f8c6b0"
                   }
                 },
                 {
                   "name": "show_message",
                   "args":    {
-                    "content": "場所移動のテスト。"
+                    "content": "67024f79-87c3-4368-b345-081d605ad894"
                   }
                 },
                 {
@@ -374,7 +379,7 @@ var _dataMap0Json = []byte(`{
                 {
                   "name": "show_message",
                   "args":    {
-                    "content": "場所移動後のテスト。"
+                    "content": "8ea36699-81b8-485f-914c-ca94aeefebcc"
                   }
                 }
               ]
@@ -402,7 +407,7 @@ var _dataMap0Json = []byte(`{
                 {
                   "name": "show_message",
                   "args":    {
-                    "content":  "自動イベントのテストでござい",
+                    "content":  "0a64a375-260f-4e0e-9538-ef5b64ecb501",
                     "position": "center"
                   }
                 },
@@ -447,7 +452,44 @@ func dataMap0Json() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "data/map0.json", size: 7668, mode: os.FileMode(420), modTime: time.Unix(1480338804, 0)}
+	info := bindataFileInfo{name: "data/map0.json", size: 7656, mode: os.FileMode(420), modTime: time.Unix(1481728395, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _dataTextsJson = []byte(`{
+  "und": {
+    "bffe5c73-6109-486d-b445-834847833947": "イベントのテストです。",
+    "4fe345d6-05bc-43d7-9a79-03e40b1b6d34": "念願のアイスソードを\n手に入れたぞ",
+    "c7beef37-b69e-4098-9b5e-ea0f2713c9ab": "そう、関係ないね",
+    "6380b657-c558-447a-861c-dd0f98f62464": "殺してでもうばいとる",
+    "c3b82b18-bd2e-481d-a4a9-f9d65bf4f170": "ゆずってくれ、たのむ!",
+    "b39503f3-d957-4009-bea7-b6b2ffb929a4": "な、何をする貴様らー!",
+    "574d044b-ca90-43d6-80ba-bcb17865b57e": "殺害した",
+    "a91632df-e7a7-4c4c-b4e9-516fe52d8fd8": "だめだ!! いくら積まれてもゆずれん",
+    "b3ad76be-571d-4eea-90cd-a4ede3abaf06":  "ホークは、今までの経緯を説明した",
+    "b315852a-9b09-4087-ad3e-b4ef6d258156": "そういわれてもなー\nこの剣を手に入れるのには\n相当苦労もしたし…",
+    "a038b9c5-deec-46de-973e-a10e27ebe5ca": "では、俺も一緒に行くというのはどうだ?\nそのフレイムタイラントに\n会って考えよう",
+    "05dc0051-2a8d-4412-b561-9343b99a3690": "選択肢合流後のイベント",
+    "e6796850-08a3-4f07-a316-a013d6f8c6b0": "向き固定のテスト。",
+    "67024f79-87c3-4368-b345-081d605ad894": "場所移動のテスト。",
+    "8ea36699-81b8-485f-914c-ca94aeefebcc": "場所移動後のテスト。",
+    "0a64a375-260f-4e0e-9538-ef5b64ecb501": "自動イベントのテストでござい"
+  }
+}
+`)
+
+func dataTextsJsonBytes() ([]byte, error) {
+	return _dataTextsJson, nil
+}
+
+func dataTextsJson() (*asset, error) {
+	bytes, err := dataTextsJsonBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "data/texts.json", size: 1463, mode: os.FileMode(420), modTime: time.Unix(1481728397, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -554,6 +596,7 @@ var _bindata = map[string]func() (*asset, error){
 	"images/tiles_bottom.png": imagesTiles_bottomPng,
 	"images/tiles_top.png":    imagesTiles_topPng,
 	"data/map0.json":          dataMap0Json,
+	"data/texts.json":         dataTextsJson,
 	"data/tilesets.json":      dataTilesetsJson,
 }
 
@@ -600,6 +643,7 @@ type bintree struct {
 var _bintree = &bintree{nil, map[string]*bintree{
 	"data": {nil, map[string]*bintree{
 		"map0.json":     {dataMap0Json, map[string]*bintree{}},
+		"texts.json":    {dataTextsJson, map[string]*bintree{}},
 		"tilesets.json": {dataTilesetsJson, map[string]*bintree{}},
 	}},
 	"images": {nil, map[string]*bintree{

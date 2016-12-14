@@ -20,6 +20,7 @@ import (
 	"strconv"
 
 	"github.com/hajimehoshi/ebiten"
+	"golang.org/x/text/language"
 
 	"github.com/hajimehoshi/tsugunai/internal/data"
 	"github.com/hajimehoshi/tsugunai/internal/input"
@@ -207,7 +208,12 @@ func (e *event) goOn(sub *task.TaskLine) error {
 		if c.Args["position"] != nil {
 			position = data.ShowMessagePosition(c.Args["position"].(string))
 		}
-		e.showMessage(sub, c.Args["content"].(string), position)
+		contentID, err := data.UUIDFromString(c.Args["content"].(string))
+		if err != nil {
+			return err
+		}
+		content := e.mapScene.texts.Get(language.Und, contentID)
+		e.showMessage(sub, content, position)
 		sub.PushFunc(func() error {
 			e.commandIndex.advance()
 			return task.Terminated
@@ -215,7 +221,12 @@ func (e *event) goOn(sub *task.TaskLine) error {
 	case data.CommandNameShowChoices:
 		choices := []string{}
 		for _, c := range c.Args["choices"].([]interface{}) {
-			choices = append(choices, c.(string))
+			id, err := data.UUIDFromString(c.(string))
+			if err != nil {
+				return err
+			}
+			choice := e.mapScene.texts.Get(language.Und, id)
+			choices = append(choices, choice)
 		}
 		e.showChoices(sub, choices)
 		sub.PushFunc(func() error {

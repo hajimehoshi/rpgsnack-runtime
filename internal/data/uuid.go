@@ -26,6 +26,14 @@ var (
 
 type UUID [16]uint8
 
+func UUIDFromString(str string) (UUID, error) {
+	var id UUID
+	if err := id.UnmarshalText([]uint8(str)); err != nil {
+		return UUID{}, err
+	}
+	return id, nil
+}
+
 func (u *UUID) String() string {
 	return fmt.Sprintf("%s-%s-%s-%s-%s",
 		hex.EncodeToString(u[0:4]),
