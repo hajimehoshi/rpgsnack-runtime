@@ -19,6 +19,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten"
 
+	"github.com/hajimehoshi/tsugunai/internal/data"
 	"github.com/hajimehoshi/tsugunai/internal/font"
 	"github.com/hajimehoshi/tsugunai/internal/input"
 	"github.com/hajimehoshi/tsugunai/internal/mapscene"
@@ -27,10 +28,11 @@ import (
 )
 
 type TitleScene struct {
+	gameData *data.Game
 }
 
-func New() *TitleScene {
-	return &TitleScene{}
+func New(gameData *data.Game) *TitleScene {
+	return &TitleScene{gameData}
 }
 
 func (t *TitleScene) Update(subTasksUpdated bool, taskLine *task.TaskLine, sceneManager *scene.SceneManager) error {
@@ -38,7 +40,7 @@ func (t *TitleScene) Update(subTasksUpdated bool, taskLine *task.TaskLine, scene
 		return nil
 	}
 	if input.Triggered() {
-		mapScene, err := mapscene.New()
+		mapScene, err := mapscene.New(t.gameData)
 		if err != nil {
 			return err
 		}

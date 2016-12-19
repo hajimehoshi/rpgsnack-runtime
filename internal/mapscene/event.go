@@ -212,7 +212,7 @@ func (e *event) goOn(sub *task.TaskLine) error {
 		if err != nil {
 			return err
 		}
-		content := e.mapScene.texts.Get(language.Und, contentID)
+		content := e.mapScene.gameData.Texts.Get(language.Und, contentID)
 		e.showMessage(sub, content, position)
 		sub.PushFunc(func() error {
 			e.commandIndex.advance()
@@ -225,7 +225,7 @@ func (e *event) goOn(sub *task.TaskLine) error {
 			if err != nil {
 				return err
 			}
-			choice := e.mapScene.texts.Get(language.Und, id)
+			choice := e.mapScene.gameData.Texts.Get(language.Und, id)
 			choices = append(choices, choice)
 		}
 		e.showChoices(sub, choices)

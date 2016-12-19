@@ -15,13 +15,11 @@
 package mapscene
 
 import (
-	"encoding/json"
 	"fmt"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten"
 
-	"github.com/hajimehoshi/tsugunai/internal/assets"
 	"github.com/hajimehoshi/tsugunai/internal/data"
 	"github.com/hajimehoshi/tsugunai/internal/font"
 	"github.com/hajimehoshi/tsugunai/internal/input"
@@ -30,9 +28,9 @@ import (
 )
 
 type MapScene struct {
+	gameData      *data.Game
 	currentRoomID int
 	currentMap    *data.Map
-	texts         *data.Texts
 	player        *player
 	moveDstX      int
 	moveDstY      int
@@ -45,17 +43,7 @@ type MapScene struct {
 	fadingRate    float64
 }
 
-func New() (*MapScene, error) {
-	mapDataJson := assets.MustAsset("data/map0.json")
-	var mapData *data.Map
-	if err := json.Unmarshal(mapDataJson, &mapData); err != nil {
-		return nil, err
-	}
-	textsJson := assets.MustAsset("data/texts.json")
-	var texts *data.Texts
-	if err := json.Unmarshal(textsJson, &texts); err != nil {
-		return nil, err
-	}
+func New(gameData *data.Game) (*MapScene, error) {
 	player, err := newPlayer(1, 2)
 	if err != nil {
 		return nil, err
@@ -69,8 +57,8 @@ func New() (*MapScene, error) {
 		return nil, err
 	}
 	mapScene := &MapScene{
-		currentMap: mapData,
-		texts:      texts,
+		gameData:   gameData,
+		currentMap: gameData.Maps[0],
 		player:     player,
 		tilesImage: tilesImage,
 		emptyImage: emptyImage,
@@ -86,7 +74,7 @@ func New() (*MapScene, error) {
 }
 
 func (m *MapScene) passableTile(x, y int) bool {
-	tileSet := tileSets[m.currentMap.TileSetID]
+	tileSet := m.gameData.TileSets[m.currentMap.TileSetID]
 	layer := 1
 	tile := m.currentMap.Rooms[m.currentRoomID].Tiles[layer][y*scene.TileXNum+x]
 	switch tileSet.PassageTypes[layer][tile] {
@@ -249,7 +237,7 @@ func (t *tilesImageParts) Dst(index int) (int, int, int, int) {
 
 func (m *MapScene) Draw(screen *ebiten.Image) error {
 	m.tilesImage.Clear()
-	tileset := tileSets[m.currentMap.TileSetID]
+	tileset := m.gameData.TileSets[m.currentMap.TileSetID]
 	op := &ebiten.DrawImageOptions{}
 	op.ImageParts = &tilesImageParts{
 		room:    m.currentMap.Rooms[m.currentRoomID],
@@ -279,7 +267,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 	op = &ebiten.DrawImageOptions{}
 	op.ImageParts = &tilesImageParts{
 		room:     m.currentMap.Rooms[m.currentRoomID],
-		tileSet:  tileSets[m.currentMap.TileSetID],
+		tileSet:  m.gameData.TileSets[m.currentMap.TileSetID],
 		layer:    1,
 		overOnly: true,
 	}

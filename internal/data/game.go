@@ -12,23 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package mapscene
+package data
 
-import (
-	"encoding/json"
-
-	"github.com/hajimehoshi/tsugunai/internal/assets"
-	"github.com/hajimehoshi/tsugunai/internal/data"
-)
-
-// TODO: This variable should belong to a struct.
-var (
-	tileSets []*data.TileSet
-)
-
-func init() {
-	mapDataBytes := assets.MustAsset("data/tilesets.json")
-	if err := json.Unmarshal(mapDataBytes, &tileSets); err != nil {
-		panic(err)
-	}
+type Game struct {
+	Maps     []*Map     `json:"maps"`
+	Texts    *Texts     `json:"texts"`
+	TileSets []*TileSet `json:"tileSets"`
 }

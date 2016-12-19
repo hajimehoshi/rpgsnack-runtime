@@ -15,8 +15,12 @@
 package game
 
 import (
+	"encoding/json"
+
 	"github.com/hajimehoshi/ebiten"
 
+	"github.com/hajimehoshi/tsugunai/internal/assets"
+	"github.com/hajimehoshi/tsugunai/internal/data"
 	"github.com/hajimehoshi/tsugunai/internal/input"
 	"github.com/hajimehoshi/tsugunai/internal/scene"
 	"github.com/hajimehoshi/tsugunai/internal/titlescene"
@@ -24,12 +28,34 @@ import (
 
 type Game struct {
 	sceneManager *scene.SceneManager
+	gameData     *data.Game
 }
 
 func New() (*Game, error) {
-	initScene := titlescene.New()
+	mapDataJson := assets.MustAsset("data/map0.json")
+	var mapData *data.Map
+	if err := json.Unmarshal(mapDataJson, &mapData); err != nil {
+		return nil, err
+	}
+	textsJson := assets.MustAsset("data/texts.json")
+	var texts *data.Texts
+	if err := json.Unmarshal(textsJson, &texts); err != nil {
+		return nil, err
+	}
+	tileSetsJson := assets.MustAsset("data/tilesets.json")
+	var tileSets []*data.TileSet
+	if err := json.Unmarshal(tileSetsJson, &tileSets); err != nil {
+		panic(err)
+	}
+	gameData := &data.Game{
+		Maps:     []*data.Map{mapData},
+		Texts:    texts,
+		TileSets: tileSets,
+	}
+	initScene := titlescene.New(gameData)
 	game := &Game{
 		sceneManager: scene.NewSceneManager(initScene),
+		gameData:     gameData,
 	}
 	return game, nil
 }
