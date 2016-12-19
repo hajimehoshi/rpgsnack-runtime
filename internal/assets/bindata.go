@@ -8,9 +8,7 @@
 // images/mplus.png
 // images/tiles_bottom.png
 // images/tiles_top.png
-// data/map0.json
-// data/texts.json
-// data/tilesets.json
+// data.json
 // DO NOT EDIT!
 
 package assets
@@ -191,346 +189,316 @@ func imagesTiles_topPng() (*asset, error) {
 	return a, nil
 }
 
-var _dataMap0Json = []byte(`{
-  "name": "Sample Map",
-  "tileSetId": 0,
-  "rooms": [
+var _dataJson = []byte(`{
+  "texts": {
+    "und": {
+      "bffe5c73-6109-486d-b445-834847833947": "イベントのテストです。",
+      "4fe345d6-05bc-43d7-9a79-03e40b1b6d34": "念願のアイスソードを\n手に入れたぞ",
+      "c7beef37-b69e-4098-9b5e-ea0f2713c9ab": "そう、関係ないね",
+      "6380b657-c558-447a-861c-dd0f98f62464": "殺してでもうばいとる",
+      "c3b82b18-bd2e-481d-a4a9-f9d65bf4f170": "ゆずってくれ、たのむ!",
+      "b39503f3-d957-4009-bea7-b6b2ffb929a4": "な、何をする貴様らー!",
+      "574d044b-ca90-43d6-80ba-bcb17865b57e": "殺害した",
+      "a91632df-e7a7-4c4c-b4e9-516fe52d8fd8": "だめだ!! いくら積まれてもゆずれん",
+      "b3ad76be-571d-4eea-90cd-a4ede3abaf06":  "ホークは、今までの経緯を説明した",
+      "b315852a-9b09-4087-ad3e-b4ef6d258156": "そういわれてもなー\nこの剣を手に入れるのには\n相当苦労もしたし…",
+      "a038b9c5-deec-46de-973e-a10e27ebe5ca": "では、俺も一緒に行くというのはどうだ?\nそのフレイムタイラントに\n会って考えよう",
+      "05dc0051-2a8d-4412-b561-9343b99a3690": "選択肢合流後のイベント",
+      "e6796850-08a3-4f07-a316-a013d6f8c6b0": "向き固定のテスト。",
+      "67024f79-87c3-4368-b345-081d605ad894": "場所移動のテスト。",
+      "8ea36699-81b8-485f-914c-ca94aeefebcc": "場所移動後のテスト。",
+      "0a64a375-260f-4e0e-9538-ef5b64ecb501": "自動イベントのテストでござい"
+    }
+  },
+  "maps": [
     {
-      "tiles": [
-        [
-          31, 31, 31, 31, 33, 31, 33, 31, 31, 31,
-          4, 4, 4, 4, 26, 4, 26, 4, 4, 4,
-          1, 1, 1, 1, 26, 12, 26, 23, 23,23,
-          1, 1, 1, 1, 26, 1, 30, 23, 23, 23,
-          24, 29, 1, 27, 34, 1, 4, 23, 23, 23,
-          4, 5, 1, 3, 5, 1, 1, 23, 23, 23,
-          1, 1, 1, 1, 1, 1, 1, 23, 23, 23,
-          6, 7, 25, 1, 1, 1, 1, 23, 23, 23,
-          14, 15, 26, 8, 9, 10, 1, 23, 23, 23,
-          2, 2, 35, 2, 2, 2, 2, 2, 2, 2
-        ],
-        [
-          0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-          1, 16, 0, 2, 0, 7, 0, 0, 0, 11,
-          9, 0, 8, 10, 0, 15, 0, 0, 0, 19,
-          0, 0, 0, 0, 0, 0, 0, 0, 4, 0,
-          0, 0, 0, 0, 0, 0, 0, 0, 12, 0,
-          0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-          0, 0, 0, 0, 0, 0, 0, 21, 22, 23,
-          0, 0, 0, 0, 0, 0, 0, 29, 30, 31,
-          0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-          0, 0, 0, 0, 24, 25, 26, 0, 0, 0
-        ]
-      ],
-      "events": [
+      "name": "Sample Map",
+      "tileSetId": 0,
+      "rooms": [
         {
-          "id": 0,
-          "x":  8,
-          "y":  5,
-          "pages": [
+          "tiles": [
+            [
+              31, 31, 31, 31, 33, 31, 33, 31, 31, 31,
+              4, 4, 4, 4, 26, 4, 26, 4, 4, 4,
+              1, 1, 1, 1, 26, 12, 26, 23, 23,23,
+              1, 1, 1, 1, 26, 1, 30, 23, 23, 23,
+              24, 29, 1, 27, 34, 1, 4, 23, 23, 23,
+              4, 5, 1, 3, 5, 1, 1, 23, 23, 23,
+              1, 1, 1, 1, 1, 1, 1, 23, 23, 23,
+              6, 7, 25, 1, 1, 1, 1, 23, 23, 23,
+              14, 15, 26, 8, 9, 10, 1, 23, 23, 23,
+              2, 2, 35, 2, 2, 2, 2, 2, 2, 2
+            ],
+            [
+              0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+              1, 16, 0, 2, 0, 7, 0, 0, 0, 11,
+              9, 0, 8, 10, 0, 15, 0, 0, 0, 19,
+              0, 0, 0, 0, 0, 0, 0, 0, 4, 0,
+              0, 0, 0, 0, 0, 0, 0, 0, 12, 0,
+              0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+              0, 0, 0, 0, 0, 0, 0, 21, 22, 23,
+              0, 0, 0, 0, 0, 0, 0, 29, 30, 31,
+              0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+              0, 0, 0, 0, 24, 25, 26, 0, 0, 0
+            ]
+          ],
+          "events": [
             {
-              "conditions": [],
-              "image":      "characters0.png",
-              "imageIndex": 1,
-              "attitude":   1,
-              "dir":        3,
-              "dirFix":     false,
-              "walking":    false,
-              "stepping":   true,
-              "through":    false,
-              "priority":   1,
-              "trigger":    "tapped",
-              "commands": [
+              "id": 0,
+              "x":  8,
+              "y":  5,
+              "pages": [
                 {
-                  "name": "show_message",
-                  "args":    {
-                    "content": "bffe5c73-6109-486d-b445-834847833947"
-                  }
-                },
-                {
-                  "name": "show_message",
-                  "args":    {
-                    "content": "4fe345d6-05bc-43d7-9a79-03e40b1b6d34"
-                  }
-                },
-                {
-                  "name": "show_choices",
-                  "args":    {
-                    "choices": [
-                      "c7beef37-b69e-4098-9b5e-ea0f2713c9ab",
-                      "6380b657-c558-447a-861c-dd0f98f62464",
-                      "c3b82b18-bd2e-481d-a4a9-f9d65bf4f170"
-                    ]
-                  },
-                  "branches": [
-                    [],
-                    [
-                      {
-                        "name": "show_message",
-                        "args": {
-                          "content": "b39503f3-d957-4009-bea7-b6b2ffb929a4"
-                        }
-                      },
-                      {
-                        "name": "set_switch",
-                        "args": {
-                          "number": 0,
-                          "value":  true
-                        }
-                      },
-                      {
-                        "name": "show_message",
-                        "args": {
-                          "content":  "574d044b-ca90-43d6-80ba-bcb17865b57e",
-                          "position": "center"
-                        }
+                  "conditions": [],
+                  "image":      "characters0.png",
+                  "imageIndex": 1,
+                  "attitude":   1,
+                  "dir":        3,
+                  "dirFix":     false,
+                  "walking":    false,
+                  "stepping":   true,
+                  "through":    false,
+                  "priority":   1,
+                  "trigger":    "tapped",
+                  "commands": [
+                    {
+                      "name": "show_message",
+                      "args":    {
+                        "content": "bffe5c73-6109-486d-b445-834847833947"
                       }
-                    ],
-                    [
-                      {
-                        "name": "show_message",
-                        "args": {
-                          "content": "a91632df-e7a7-4c4c-b4e9-516fe52d8fd8"
-                        }
-                      },
-                      {
-                        "name": "show_message",
-                        "args": {
-                          "content":  "b3ad76be-571d-4eea-90cd-a4ede3abaf06",
-                          "position": "center"
-                        }
-                      },
-                      {
-                        "name": "show_message",
-                        "args": {
-                          "content": "b315852a-9b09-4087-ad3e-b4ef6d258156"
-                        }
-                      },
-                      {
-                        "name": "show_message",
-                        "args": {
-                          "content": "a038b9c5-deec-46de-973e-a10e27ebe5ca"
-                        }
+                    },
+                    {
+                      "name": "show_message",
+                      "args":    {
+                        "content": "4fe345d6-05bc-43d7-9a79-03e40b1b6d34"
                       }
-                    ]
+                    },
+                    {
+                      "name": "show_choices",
+                      "args":    {
+                        "choices": [
+                          "c7beef37-b69e-4098-9b5e-ea0f2713c9ab",
+                          "6380b657-c558-447a-861c-dd0f98f62464",
+                          "c3b82b18-bd2e-481d-a4a9-f9d65bf4f170"
+                        ]
+                      },
+                      "branches": [
+                        [],
+                        [
+                          {
+                            "name": "show_message",
+                            "args": {
+                              "content": "b39503f3-d957-4009-bea7-b6b2ffb929a4"
+                            }
+                          },
+                          {
+                            "name": "set_switch",
+                            "args": {
+                              "number": 0,
+                              "value":  true
+                            }
+                          },
+                          {
+                            "name": "show_message",
+                            "args": {
+                              "content":  "574d044b-ca90-43d6-80ba-bcb17865b57e",
+                              "position": "center"
+                            }
+                          }
+                        ],
+                        [
+                          {
+                            "name": "show_message",
+                            "args": {
+                              "content": "a91632df-e7a7-4c4c-b4e9-516fe52d8fd8"
+                            }
+                          },
+                          {
+                            "name": "show_message",
+                            "args": {
+                              "content":  "b3ad76be-571d-4eea-90cd-a4ede3abaf06",
+                              "position": "center"
+                            }
+                          },
+                          {
+                            "name": "show_message",
+                            "args": {
+                              "content": "b315852a-9b09-4087-ad3e-b4ef6d258156"
+                            }
+                          },
+                          {
+                            "name": "show_message",
+                            "args": {
+                              "content": "a038b9c5-deec-46de-973e-a10e27ebe5ca"
+                            }
+                          }
+                        ]
+                      ]
+                    },
+                    {
+                      "name": "show_message",
+                      "args": {
+                        "content": "05dc0051-2a8d-4412-b561-9343b99a3690"
+                      }
+                    }
                   ]
                 },
                 {
-                  "name": "show_message",
-                  "args": {
-                    "content": "05dc0051-2a8d-4412-b561-9343b99a3690"
-                  }
+                  "conditions": ["$switches[0]"],
+                  "image":      "",
+                  "imageIndex": 0,
+                  "attitude":   0,
+                  "dir":        0,
+                  "dirFix":     false,
+                  "walking":    false,
+                  "stepping":   false,
+                  "through":    false,
+                  "priority":   0,
+                  "trigger":    "tapped",
+                  "commands":   []
                 }
               ]
             },
             {
-              "conditions": ["$switches[0]"],
-              "image":      "",
-              "imageIndex": 0,
-              "attitude":   0,
-              "dir":        0,
-              "dirFix":     false,
-              "walking":    false,
-              "stepping":   false,
-              "through":    false,
-              "priority":   0,
-              "trigger":    "tapped",
-              "commands":   []
-            }
-          ]
-        },
-        {
-          "id": 1,
-          "x":  7,
-          "y":  3,
-          "pages": [
-            {
-              "conditions": [],
-              "image":      "characters0.png",
-              "imageIndex": 1,
-              "attitude":   1,
-              "dir":        3,
-              "dirFix":     true,
-              "walking":    false,
-              "stepping":   true,
-              "through":    false,
-              "priority":   1,
-              "trigger":    "tapped",
-              "commands": [
+              "id": 1,
+              "x":  7,
+              "y":  3,
+              "pages": [
                 {
-                  "name": "show_message",
-                  "args":    {
-                    "content": "e6796850-08a3-4f07-a316-a013d6f8c6b0"
-                  }
-                },
-                {
-                  "name": "show_message",
-                  "args":    {
-                    "content": "67024f79-87c3-4368-b345-081d605ad894"
-                  }
-                },
-                {
-                  "name": "move",
-                  "args":    {
-                    "x": 1,
-                    "y": 2
-                  }
-                },
-                {
-                  "name": "show_message",
-                  "args":    {
-                    "content": "8ea36699-81b8-485f-914c-ca94aeefebcc"
-                  }
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": 2,
-          "x":  0,
-          "y":  0,
-          "pages": [
-            {
-              "conditions": [],
-              "image":      "",
-              "imageIndex": 0,
-              "attitude":   0,
-              "dir":        0,
-              "dirFix":     false,
-              "walking":    false,
-              "stepping":   false,
-              "through":    false,
-              "priority":   0,
-              "trigger":    "auto",
-              "commands": [
-                {
-                  "name": "show_message",
-                  "args":    {
-                    "content":  "0a64a375-260f-4e0e-9538-ef5b64ecb501",
-                    "position": "center"
-                  }
-                },
-                {
-                   "name": "set_switch",
-                   "args": {
-                     "number": 1,
-                     "value":  true
-                   }
+                  "conditions": [],
+                  "image":      "characters0.png",
+                  "imageIndex": 1,
+                  "attitude":   1,
+                  "dir":        3,
+                  "dirFix":     true,
+                  "walking":    false,
+                  "stepping":   true,
+                  "through":    false,
+                  "priority":   1,
+                  "trigger":    "tapped",
+                  "commands": [
+                    {
+                      "name": "show_message",
+                      "args":    {
+                        "content": "e6796850-08a3-4f07-a316-a013d6f8c6b0"
+                      }
+                    },
+                    {
+                      "name": "show_message",
+                      "args":    {
+                        "content": "67024f79-87c3-4368-b345-081d605ad894"
+                      }
+                    },
+                    {
+                      "name": "move",
+                      "args":    {
+                        "x": 1,
+                        "y": 2
+                      }
+                    },
+                    {
+                      "name": "show_message",
+                      "args":    {
+                        "content": "8ea36699-81b8-485f-914c-ca94aeefebcc"
+                      }
+                    }
+                  ]
                 }
               ]
             },
             {
-              "conditions": ["$switches[1]"],
-              "image":      "",
-              "imageIndex": 0,
-              "attitude":   0,
-              "dir":        0,
-              "dirFix":     false,
-              "walking":    false,
-              "stepping":   false,
-              "through":    false,
-              "priority":   0,
-              "trigger":    "tapped",
-              "commands":   []
+              "id": 2,
+              "x":  0,
+              "y":  0,
+              "pages": [
+                {
+                  "conditions": [],
+                  "image":      "",
+                  "imageIndex": 0,
+                  "attitude":   0,
+                  "dir":        0,
+                  "dirFix":     false,
+                  "walking":    false,
+                  "stepping":   false,
+                  "through":    false,
+                  "priority":   0,
+                  "trigger":    "auto",
+                  "commands": [
+                    {
+                      "name": "show_message",
+                      "args":    {
+                        "content":  "0a64a375-260f-4e0e-9538-ef5b64ecb501",
+                        "position": "center"
+                      }
+                    },
+                    {
+                      "name": "set_switch",
+                      "args": {
+                        "number": 1,
+                        "value":  true
+                      }
+                    }
+                  ]
+                },
+                {
+                  "conditions": ["$switches[1]"],
+                  "image":      "",
+                  "imageIndex": 0,
+                  "attitude":   0,
+                  "dir":        0,
+                  "dirFix":     false,
+                  "walking":    false,
+                  "stepping":   false,
+                  "through":    false,
+                  "priority":   0,
+                  "trigger":    "tapped",
+                  "commands":   []
+                }
+              ]
             }
           ]
         }
+      ]
+    }
+  ],
+  "tileSets": [
+    {
+      "name": "normal",
+      "images": [
+        "tiles_bottom.png",
+        "tiles_top.png"
+      ],
+      "passageTypes": [
+        [
+          0, 1, 0, 0, 0, 0, 0, 1,
+          0, 0, 0, 1, 1, 1, 0, 1,
+          0, 0, 0, 0, 0, 0, 1, 1,
+          0, 0, 0, 0, 0, 0, 0, 0,
+          0, 0, 0, 0, 0, 0, 0, 0
+        ],
+        [
+          3, 0, 0, 0, 3, 0, 0, 0,
+          0, 0, 0, 0, 0, 0, 0, 0,
+          0, 0, 0, 0, 0, 1, 0, 1,
+          0, 0, 0, 0, 0, 1, 0, 1
+        ]
       ]
     }
   ]
 }
 `)
 
-func dataMap0JsonBytes() ([]byte, error) {
-	return _dataMap0Json, nil
+func dataJsonBytes() ([]byte, error) {
+	return _dataJson, nil
 }
 
-func dataMap0Json() (*asset, error) {
-	bytes, err := dataMap0JsonBytes()
+func dataJson() (*asset, error) {
+	bytes, err := dataJsonBytes()
 	if err != nil {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "data/map0.json", size: 7656, mode: os.FileMode(420), modTime: time.Unix(1481728395, 0)}
-	a := &asset{bytes: bytes, info: info}
-	return a, nil
-}
-
-var _dataTextsJson = []byte(`{
-  "und": {
-    "bffe5c73-6109-486d-b445-834847833947": "イベントのテストです。",
-    "4fe345d6-05bc-43d7-9a79-03e40b1b6d34": "念願のアイスソードを\n手に入れたぞ",
-    "c7beef37-b69e-4098-9b5e-ea0f2713c9ab": "そう、関係ないね",
-    "6380b657-c558-447a-861c-dd0f98f62464": "殺してでもうばいとる",
-    "c3b82b18-bd2e-481d-a4a9-f9d65bf4f170": "ゆずってくれ、たのむ!",
-    "b39503f3-d957-4009-bea7-b6b2ffb929a4": "な、何をする貴様らー!",
-    "574d044b-ca90-43d6-80ba-bcb17865b57e": "殺害した",
-    "a91632df-e7a7-4c4c-b4e9-516fe52d8fd8": "だめだ!! いくら積まれてもゆずれん",
-    "b3ad76be-571d-4eea-90cd-a4ede3abaf06":  "ホークは、今までの経緯を説明した",
-    "b315852a-9b09-4087-ad3e-b4ef6d258156": "そういわれてもなー\nこの剣を手に入れるのには\n相当苦労もしたし…",
-    "a038b9c5-deec-46de-973e-a10e27ebe5ca": "では、俺も一緒に行くというのはどうだ?\nそのフレイムタイラントに\n会って考えよう",
-    "05dc0051-2a8d-4412-b561-9343b99a3690": "選択肢合流後のイベント",
-    "e6796850-08a3-4f07-a316-a013d6f8c6b0": "向き固定のテスト。",
-    "67024f79-87c3-4368-b345-081d605ad894": "場所移動のテスト。",
-    "8ea36699-81b8-485f-914c-ca94aeefebcc": "場所移動後のテスト。",
-    "0a64a375-260f-4e0e-9538-ef5b64ecb501": "自動イベントのテストでござい"
-  }
-}
-`)
-
-func dataTextsJsonBytes() ([]byte, error) {
-	return _dataTextsJson, nil
-}
-
-func dataTextsJson() (*asset, error) {
-	bytes, err := dataTextsJsonBytes()
-	if err != nil {
-		return nil, err
-	}
-
-	info := bindataFileInfo{name: "data/texts.json", size: 1463, mode: os.FileMode(420), modTime: time.Unix(1481728397, 0)}
-	a := &asset{bytes: bytes, info: info}
-	return a, nil
-}
-
-var _dataTilesetsJson = []byte(`[
-  {
-    "name": "normal",
-    "images": [
-      "tiles_bottom.png",
-      "tiles_top.png"
-    ],
-    "passageTypes": [
-      [
-        0, 1, 0, 0, 0, 0, 0, 1,
-        0, 0, 0, 1, 1, 1, 0, 1,
-        0, 0, 0, 0, 0, 0, 1, 1,
-        0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0
-      ],
-      [
-        3, 0, 0, 0, 3, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 1, 0, 1,
-        0, 0, 0, 0, 0, 1, 0, 1
-      ]
-    ]
-  }
-]
-`)
-
-func dataTilesetsJsonBytes() ([]byte, error) {
-	return _dataTilesetsJson, nil
-}
-
-func dataTilesetsJson() (*asset, error) {
-	bytes, err := dataTilesetsJsonBytes()
-	if err != nil {
-		return nil, err
-	}
-
-	info := bindataFileInfo{name: "data/tilesets.json", size: 452, mode: os.FileMode(420), modTime: time.Unix(1478834413, 0)}
+	info := bindataFileInfo{name: "data.json", size: 10693, mode: os.FileMode(420), modTime: time.Unix(1482165326, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -595,9 +563,7 @@ var _bindata = map[string]func() (*asset, error){
 	"images/mplus.png":        imagesMplusPng,
 	"images/tiles_bottom.png": imagesTiles_bottomPng,
 	"images/tiles_top.png":    imagesTiles_topPng,
-	"data/map0.json":          dataMap0Json,
-	"data/texts.json":         dataTextsJson,
-	"data/tilesets.json":      dataTilesetsJson,
+	"data.json":               dataJson,
 }
 
 // AssetDir returns the file names below a certain
@@ -641,11 +607,7 @@ type bintree struct {
 }
 
 var _bintree = &bintree{nil, map[string]*bintree{
-	"data": {nil, map[string]*bintree{
-		"map0.json":     {dataMap0Json, map[string]*bintree{}},
-		"texts.json":    {dataTextsJson, map[string]*bintree{}},
-		"tilesets.json": {dataTilesetsJson, map[string]*bintree{}},
-	}},
+	"data.json": {dataJson, map[string]*bintree{}},
 	"images": {nil, map[string]*bintree{
 		"balloon.png":      {imagesBalloonPng, map[string]*bintree{}},
 		"characters0.png":  {imagesCharacters0Png, map[string]*bintree{}},

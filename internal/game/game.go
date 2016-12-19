@@ -32,25 +32,10 @@ type Game struct {
 }
 
 func New() (*Game, error) {
-	mapDataJson := assets.MustAsset("data/map0.json")
-	var mapData *data.Map
-	if err := json.Unmarshal(mapDataJson, &mapData); err != nil {
+	gameDataJson := assets.MustAsset("data.json")
+	var gameData *data.Game
+	if err := json.Unmarshal(gameDataJson, &gameData); err != nil {
 		return nil, err
-	}
-	textsJson := assets.MustAsset("data/texts.json")
-	var texts *data.Texts
-	if err := json.Unmarshal(textsJson, &texts); err != nil {
-		return nil, err
-	}
-	tileSetsJson := assets.MustAsset("data/tilesets.json")
-	var tileSets []*data.TileSet
-	if err := json.Unmarshal(tileSetsJson, &tileSets); err != nil {
-		panic(err)
-	}
-	gameData := &data.Game{
-		Maps:     []*data.Map{mapData},
-		Texts:    texts,
-		TileSets: tileSets,
 	}
 	initScene := titlescene.New(gameData)
 	game := &Game{
