@@ -15,11 +15,8 @@
 package game
 
 import (
-	"encoding/json"
-
 	"github.com/hajimehoshi/ebiten"
 
-	"github.com/hajimehoshi/tsugunai/internal/assets"
 	"github.com/hajimehoshi/tsugunai/internal/data"
 	"github.com/hajimehoshi/tsugunai/internal/input"
 	"github.com/hajimehoshi/tsugunai/internal/scene"
@@ -32,9 +29,8 @@ type Game struct {
 }
 
 func New() (*Game, error) {
-	gameDataJson := assets.MustAsset("data.json")
-	var gameData *data.Game
-	if err := json.Unmarshal(gameDataJson, &gameData); err != nil {
+	gameData, err := data.Load("data.json")
+	if err != nil {
 		return nil, err
 	}
 	initScene := titlescene.New(gameData)

@@ -12,27 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:generate go-bindata -nocompress -pkg=assets -ignore=/\. images
-//go:generate gofmt -s -w .
-
-package assets
+package data
 
 import (
-	"bytes"
-	"image/png"
-
-	"github.com/hajimehoshi/ebiten"
+	"encoding/json"
+	"io/ioutil"
 )
 
-func LoadImage(path string, filter ebiten.Filter) (*ebiten.Image, error) {
-	bin := MustAsset(path)
-	img, err := png.Decode(bytes.NewReader(bin))
+func Load(path string) (*Game, error) {
+	dataJson, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
-	eimg, err := ebiten.NewImageFromImage(img, filter)
-	if err != nil {
+	var gameData *Game
+	if err := json.Unmarshal(dataJson, &gameData); err != nil {
 		return nil, err
 	}
-	return eimg, nil
+	return gameData, nil
 }
