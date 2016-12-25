@@ -15,6 +15,7 @@
 package data
 
 type Map struct {
+	ID        UUID    `json:"id"`
 	Name      string  `json:"name"`
 	TileSetID int     `json:"tileSetId"`
 	Rooms     []*Room `json:"rooms"`
