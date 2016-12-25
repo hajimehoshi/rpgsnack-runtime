@@ -229,7 +229,7 @@ func (e *event) goOn(sub *task.TaskLine) error {
 			return task.Terminated
 		})
 	case data.CommandNameSetSwitch:
-		number := int(c.Args["number"].(float64))
+		number := int(c.Args["id"].(float64))
 		value := c.Args["value"].(bool)
 		e.setSwitch(sub, number, value)
 		sub.PushFunc(func() error {
