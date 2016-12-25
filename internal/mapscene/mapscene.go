@@ -79,7 +79,7 @@ func (m *MapScene) tileSet(id int) (*data.TileSet, error) {
 			return t, nil
 		}
 	}
-	return nil, fmt.Errorf("mapscene: tile set not found: %s", id)
+	return nil, fmt.Errorf("mapscene: tile set not found: %d", id)
 }
 
 func (m *MapScene) passableTile(x, y int) (bool, error) {
