@@ -16,8 +16,6 @@ package mapscene
 
 import (
 	"fmt"
-	"regexp"
-	"strconv"
 
 	"github.com/hajimehoshi/ebiten"
 	"golang.org/x/text/language"
@@ -109,20 +107,17 @@ func (e *event) updateCharacterIfNeeded() error {
 }
 
 func (e *event) calcPageIndex() (int, error) {
-	reSwitches := regexp.MustCompile(`^\$switches\[(\d+)\]$`)
 page:
 	for i := len(e.data.Pages) - 1; i >= 0; i-- {
 		page := e.data.Pages[i]
 		for _, cond := range page.Conditions {
-			if m := reSwitches.FindStringSubmatch(cond); m != nil {
-				s, err := strconv.Atoi(m[1])
-				if err != nil {
-					return 0, err
-				}
+			switch cond.Type {
+			case data.ConditionTypeSwitch:
+				s := cond.ID
 				if s < len(e.mapScene.switches) && e.mapScene.switches[s] {
 					continue
 				}
-			} else {
+			default:
 				return 0, fmt.Errorf("invalid condition: %s", cond)
 			}
 			continue page

@@ -22,18 +22,18 @@ type Event struct {
 }
 
 type Page struct {
-	Conditions []string   `json:"conditions"`
-	Image      string     `json:"image"`
-	ImageIndex int        `json:"imageIndex"`
-	Attitude   Attitude   `json:"attitude"`
-	Dir        Dir        `json:"dir"`
-	DirFix     bool       `json:"dirFix"`
-	Walking    bool       `json:"walking"`
-	Stepping   bool       `json:"stepping"`
-	Through    bool       `json:"through"`
-	Priority   Priority   `json:"priority"`
-	Trigger    Trigger    `json:"trigger"`
-	Commands   []*Command `json:"commands"`
+	Conditions []*Condition `json:"conditions"`
+	Image      string       `json:"image"`
+	ImageIndex int          `json:"imageIndex"`
+	Attitude   Attitude     `json:"attitude"`
+	Dir        Dir          `json:"dir"`
+	DirFix     bool         `json:"dirFix"`
+	Walking    bool         `json:"walking"`
+	Stepping   bool         `json:"stepping"`
+	Through    bool         `json:"through"`
+	Priority   Priority     `json:"priority"`
+	Trigger    Trigger      `json:"trigger"`
+	Commands   []*Command   `json:"commands"`
 }
 
 type Dir int
@@ -91,4 +91,15 @@ const (
 	ShowMessagePositionPlayer                     = "player"
 	ShowMessagePositionEvent                      = "event"
 	ShowMessagePositionCenter                     = "center"
+)
+
+type Condition struct {
+	Type ConditionType `json:"type"`
+	ID   int           `json:"id"`
+}
+
+type ConditionType string
+
+const (
+	ConditionTypeSwitch ConditionType = "switch"
 )

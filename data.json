@@ -104,7 +104,7 @@
                           {
                             "name": "set_switch",
                             "args": {
-                              "number": 0,
+                              "number": 1,
                               "value":  true
                             }
                           },
@@ -154,7 +154,12 @@
                   ]
                 },
                 {
-                  "conditions": ["$switches[0]"],
+                  "conditions": [
+                    {
+                      "type": "switch",
+                      "id":   1
+                    }
+                  ],
                   "image":      "",
                   "imageIndex": 0,
                   "attitude":   0,
@@ -244,14 +249,19 @@
                     {
                       "name": "set_switch",
                       "args": {
-                        "number": 1,
+                        "number": 2,
                         "value":  true
                       }
                     }
                   ]
                 },
                 {
-                  "conditions": ["$switches[1]"],
+                  "conditions": [
+                    {
+                      "type": "switch",
+                      "id":   2
+                    }
+                  ],
                   "image":      "",
                   "imageIndex": 0,
                   "attitude":   0,
