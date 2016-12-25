@@ -21,9 +21,9 @@
   },
   "maps": [
     {
-      "id": "573e377a-c52d-4ea4-8c3e-255d91276ede",
+      "id": 1,
       "name": "Sample Map",
-      "tileSetId": "22a509f4-a57c-4b74-afec-da798726a539",
+      "tileSetId": 1,
       "rooms": [
         {
           "tiles": [
@@ -273,7 +273,7 @@
   ],
   "tileSets": [
     {
-      "id": "22a509f4-a57c-4b74-afec-da798726a539",
+      "id": 1,
       "name": "normal",
       "images": [
         "tiles_bottom.png",

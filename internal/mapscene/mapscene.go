@@ -73,7 +73,7 @@ func New(gameData *data.Game) (*MapScene, error) {
 	return mapScene, nil
 }
 
-func (m *MapScene) tileSet(id data.UUID) (*data.TileSet, error) {
+func (m *MapScene) tileSet(id int) (*data.TileSet, error) {
 	for _, t := range m.gameData.TileSets {
 		if t.ID == id {
 			return t, nil

@@ -24,7 +24,7 @@ const (
 )
 
 type TileSet struct {
-	ID           UUID            `json:"id"`
+	ID           int             `json:"id"`
 	Name         string          `json:"name"`
 	Images       []string        `json:"images"`
 	PassageTypes [][]PassageType `json:"passageTypes"`
