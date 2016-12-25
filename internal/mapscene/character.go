@@ -79,8 +79,11 @@ func (c *characterImageParts) Dst(index int) (int, int, int, int) {
 	return 0, 0, c.charWidth, c.charHeight
 }
 
-func (c *character) move(taskLine *task.TaskLine, passable func(x, y int) bool, x, y int, player bool) {
-	path := calcPath(passable, c.x, c.y, x, y)
+func (c *character) move(taskLine *task.TaskLine, passable func(x, y int) (bool, error), x, y int, player bool) error {
+	path, err := calcPath(passable, c.x, c.y, x, y)
+	if err != nil {
+		return err
+	}
 	for _, d := range path {
 		d := d
 		init := false
@@ -101,7 +104,11 @@ func (c *character) move(taskLine *task.TaskLine, passable func(x, y int) bool, 
 			case data.DirDown:
 				ny++
 			}
-			if !passable(nx, ny) {
+			p, err := passable(nx, ny)
+			if err != nil {
+				return err
+			}
+			if !p {
 				nx = c.x
 				ny = c.y
 				c.moveCount = 0
@@ -127,6 +134,7 @@ func (c *character) move(taskLine *task.TaskLine, passable func(x, y int) bool, 
 			return nil
 		})
 	}
+	return nil
 }
 
 func (c *character) moveImmediately(x, y int) {
@@ -134,7 +142,7 @@ func (c *character) moveImmediately(x, y int) {
 	c.y = y
 }
 
-func (c *character) update(passable func(x, y int) bool) error {
+func (c *character) update(passable func(x, y int) (bool, error)) error {
 	return nil
 }
 

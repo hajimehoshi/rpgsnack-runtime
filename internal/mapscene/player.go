@@ -43,15 +43,15 @@ func newPlayer(x, y int) (*player, error) {
 	}, nil
 }
 
-func (p *player) move(taskLine *task.TaskLine, passable func(x, y int) bool, x, y int) {
-	p.character.move(taskLine, passable, x, y, true)
+func (p *player) move(taskLine *task.TaskLine, passable func(x, y int) (bool, error), x, y int) error {
+	return p.character.move(taskLine, passable, x, y, true)
 }
 
 func (p *player) moveImmediately(x, y int) {
 	p.character.moveImmediately(x, y)
 }
 
-func (p *player) update(passable func(x, y int) bool) error {
+func (p *player) update(passable func(x, y int) (bool, error)) error {
 	if err := p.character.update(passable); err != nil {
 		return err
 	}

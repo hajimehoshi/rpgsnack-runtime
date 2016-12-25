@@ -20,7 +20,7 @@ import (
 
 // TODO: Return not only moving but also turning
 
-func calcPath(passable func(x, y int) bool, startX, startY, goalX, goalY int) []data.Dir {
+func calcPath(passable func(x, y int) (bool, error), startX, startY, goalX, goalY int) ([]data.Dir, error) {
 	type pos struct {
 		X, Y int
 	}
@@ -36,7 +36,11 @@ func calcPath(passable func(x, y int) bool, startX, startY, goalX, goalY int) []
 				{p.X, p.Y - 1},
 			}
 			for _, s := range successors {
-				if !passable(s.X, s.Y) {
+				pa, err := passable(s.X, s.Y)
+				if err != nil {
+					return nil, err
+				}
+				if !pa {
 					// It's OK even if the final destination is not passable so far.
 					if s.X != goalX || s.Y != goalY {
 						continue
@@ -60,7 +64,7 @@ func calcPath(passable func(x, y int) bool, startX, startY, goalX, goalY int) []
 		parent, ok := parents[p]
 		// There is no path.
 		if !ok {
-			return nil
+			return nil, nil
 		}
 		switch {
 		case parent.X == p.X-1:
@@ -80,5 +84,5 @@ func calcPath(passable func(x, y int) bool, startX, startY, goalX, goalY int) []
 	for i, d := range dirs {
 		path[len(dirs)-i-1] = d
 	}
-	return path
+	return path, nil
 }

@@ -23,7 +23,7 @@
     {
       "id": "573e377a-c52d-4ea4-8c3e-255d91276ede",
       "name": "Sample Map",
-      "tileSetId": 0,
+      "tileSetId": "22a509f4-a57c-4b74-afec-da798726a539",
       "rooms": [
         {
           "tiles": [

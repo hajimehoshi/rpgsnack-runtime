@@ -73,15 +73,27 @@ func New(gameData *data.Game) (*MapScene, error) {
 	return mapScene, nil
 }
 
-func (m *MapScene) passableTile(x, y int) bool {
-	tileSet := m.gameData.TileSets[m.currentMap.TileSetID]
+func (m *MapScene) tileSet(id data.UUID) (*data.TileSet, error) {
+	for _, t := range m.gameData.TileSets {
+		if t.ID == id {
+			return t, nil
+		}
+	}
+	return nil, fmt.Errorf("mapscene: tile set not found: %s", id)
+}
+
+func (m *MapScene) passableTile(x, y int) (bool, error) {
+	tileSet, err := m.tileSet(m.currentMap.TileSetID)
+	if err != nil {
+		return false, err
+	}
 	layer := 1
 	tile := m.currentMap.Rooms[m.currentRoomID].Tiles[layer][y*scene.TileXNum+x]
 	switch tileSet.PassageTypes[layer][tile] {
 	case data.PassageTypeBlock:
-		return false
+		return false, nil
 	case data.PassageTypePassable:
-		return true
+		return true, nil
 	case data.PassageTypeWall:
 		panic("not implemented")
 	case data.PassageTypeOver:
@@ -91,32 +103,36 @@ func (m *MapScene) passableTile(x, y int) bool {
 	layer = 0
 	tile = m.currentMap.Rooms[m.currentRoomID].Tiles[layer][y*scene.TileXNum+x]
 	if tileSet.PassageTypes[layer][tile] == data.PassageTypePassable {
-		return true
+		return true, nil
 	}
-	return false
+	return false, nil
 }
 
-func (m *MapScene) passable(x, y int) bool {
+func (m *MapScene) passable(x, y int) (bool, error) {
 	if x < 0 {
-		return false
+		return false, nil
 	}
 	if y < 0 {
-		return false
+		return false, nil
 	}
 	if scene.TileXNum <= x {
-		return false
+		return false, nil
 	}
 	if scene.TileYNum <= y {
-		return false
+		return false, nil
 	}
-	if !m.passableTile(x, y) {
-		return false
+	p, err := m.passableTile(x, y)
+	if err != nil {
+		return false, err
+	}
+	if !p {
+		return false, nil
 	}
 	e := m.eventAt(x, y)
 	if e == nil {
-		return true
+		return true, nil
 	}
-	return e.isPassable()
+	return e.isPassable(), nil
 }
 
 func (m *MapScene) eventAt(x, y int) *event {
@@ -137,7 +153,11 @@ func (m *MapScene) movePlayerIfNeeded(taskLine *task.TaskLine) error {
 	tx := (x - scene.GameMarginX) / scene.TileSize / scene.TileScale
 	ty := (y - scene.GameMarginTop) / scene.TileSize / scene.TileScale
 	e := m.eventAt(tx, ty)
-	if !m.passable(tx, ty) {
+	p, err := m.passable(tx, ty)
+	if err != nil {
+		return err
+	}
+	if !p {
 		if e == nil {
 			return nil
 		}
@@ -146,7 +166,9 @@ func (m *MapScene) movePlayerIfNeeded(taskLine *task.TaskLine) error {
 		}
 	}
 	m.playerMoving = true
-	m.player.move(taskLine, m.passable, tx, ty)
+	if err := m.player.move(taskLine, m.passable, tx, ty); err != nil {
+		return err
+	}
 	m.moveDstX = tx
 	m.moveDstY = ty
 	taskLine.PushFunc(func() error {
@@ -237,7 +259,10 @@ func (t *tilesImageParts) Dst(index int) (int, int, int, int) {
 
 func (m *MapScene) Draw(screen *ebiten.Image) error {
 	m.tilesImage.Clear()
-	tileset := m.gameData.TileSets[m.currentMap.TileSetID]
+	tileset, err := m.tileSet(m.currentMap.TileSetID)
+	if err != nil {
+		return err
+	}
 	op := &ebiten.DrawImageOptions{}
 	op.ImageParts = &tilesImageParts{
 		room:    m.currentMap.Rooms[m.currentRoomID],
@@ -265,9 +290,13 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 		}
 	}
 	op = &ebiten.DrawImageOptions{}
+	tileSet, err := m.tileSet(m.currentMap.TileSetID)
+	if err != nil {
+		return err
+	}
 	op.ImageParts = &tilesImageParts{
 		room:     m.currentMap.Rooms[m.currentRoomID],
-		tileSet:  m.gameData.TileSets[m.currentMap.TileSetID],
+		tileSet:  tileSet,
 		layer:    1,
 		overOnly: true,
 	}
