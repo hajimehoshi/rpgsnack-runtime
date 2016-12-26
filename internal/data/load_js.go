@@ -12,23 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// +build !js
+// +build js
 
 package data
 
-import (
-	"encoding/json"
-	"io/ioutil"
-)
-
 func Load(path string) (*Game, error) {
-	dataJson, err := ioutil.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-	var gameData *Game
-	if err := json.Unmarshal(dataJson, &gameData); err != nil {
-		return nil, err
-	}
-	return gameData, nil
+	// TODO: Implement
+	return &Game{}, nil
 }
