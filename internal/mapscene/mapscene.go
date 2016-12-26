@@ -20,6 +20,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten"
 
+	"github.com/hajimehoshi/tsugunai/internal/assets"
 	"github.com/hajimehoshi/tsugunai/internal/data"
 	"github.com/hajimehoshi/tsugunai/internal/font"
 	"github.com/hajimehoshi/tsugunai/internal/input"
@@ -269,7 +270,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 		tileSet: tileset,
 		layer:   0,
 	}
-	if err := m.tilesImage.DrawImage(theImageCache.Get(tileset.Images[0]), op); err != nil {
+	if err := m.tilesImage.DrawImage(assets.GetImage(tileset.Images[0]), op); err != nil {
 		return err
 	}
 	op.ImageParts = &tilesImageParts{
@@ -278,7 +279,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 		layer:    1,
 		overOnly: false,
 	}
-	if err := m.tilesImage.DrawImage(theImageCache.Get(tileset.Images[1]), op); err != nil {
+	if err := m.tilesImage.DrawImage(assets.GetImage(tileset.Images[1]), op); err != nil {
 		return err
 	}
 	if err := m.player.draw(m.tilesImage); err != nil {
@@ -300,14 +301,14 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 		layer:    1,
 		overOnly: true,
 	}
-	if err := m.tilesImage.DrawImage(theImageCache.Get(tileset.Images[1]), op); err != nil {
+	if err := m.tilesImage.DrawImage(assets.GetImage(tileset.Images[1]), op); err != nil {
 		return err
 	}
 	if m.playerMoving {
 		x, y := m.moveDstX, m.moveDstY
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(x*scene.TileSize), float64(y*scene.TileSize))
-		if err := m.tilesImage.DrawImage(theImageCache.Get("marker.png"), op); err != nil {
+		if err := m.tilesImage.DrawImage(assets.GetImage("marker.png"), op); err != nil {
 			return err
 		}
 	}

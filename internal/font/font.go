@@ -22,16 +22,6 @@ import (
 	"github.com/hajimehoshi/tsugunai/internal/assets"
 )
 
-var mplusImage *ebiten.Image
-
-func init() {
-	img, err := assets.LoadImage("images/mplus.png", ebiten.FilterNearest)
-	if err != nil {
-		panic(err)
-	}
-	mplusImage = img
-}
-
 const (
 	charHalfWidth       = 6
 	charFullWidth       = 12
@@ -118,6 +108,7 @@ func DrawText(screen *ebiten.Image, text string, x, y int, scale int, color colo
 	r, g, b, a := color.RGBA()
 	op.ColorM.Scale(float64(r>>8)/255, float64(g>>8)/255, float64(b>>8)/255, float64(a>>8)/255)
 	op.ImageParts = &textImageParts{[]rune(text)}
+	mplusImage := assets.GetImage("mplus.png")
 	if err := screen.DrawImage(mplusImage, op); err != nil {
 		return err
 	}

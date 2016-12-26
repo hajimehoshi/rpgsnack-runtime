@@ -17,6 +17,7 @@ package mapscene
 import (
 	"github.com/hajimehoshi/ebiten"
 
+	"github.com/hajimehoshi/tsugunai/internal/assets"
 	"github.com/hajimehoshi/tsugunai/internal/data"
 	"github.com/hajimehoshi/tsugunai/internal/task"
 )
@@ -29,7 +30,7 @@ type player struct {
 
 func newPlayer(x, y int) (*player, error) {
 	c := &character{
-		image:        theImageCache.Get("characters0.png"),
+		image:        assets.GetImage("characters0.png"),
 		imageIndex:   0,
 		x:            x,
 		y:            y,

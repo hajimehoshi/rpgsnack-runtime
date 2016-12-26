@@ -24,7 +24,7 @@ import (
 	"github.com/hajimehoshi/ebiten"
 )
 
-func LoadImage(path string, filter ebiten.Filter) (*ebiten.Image, error) {
+func loadImage(path string, filter ebiten.Filter) (*ebiten.Image, error) {
 	bin := MustAsset(path)
 	img, err := png.Decode(bytes.NewReader(bin))
 	if err != nil {
@@ -35,4 +35,43 @@ func LoadImage(path string, filter ebiten.Filter) (*ebiten.Image, error) {
 		return nil, err
 	}
 	return eimg, nil
+}
+
+var theImageCache *imageCache
+
+func initImageCache() error {
+	theImageCache = &imageCache{
+		cache: map[string]*ebiten.Image{},
+	}
+	files, err := AssetDir("images")
+	if err != nil {
+		panic(err)
+	}
+	for _, file := range files {
+		img, err := loadImage("images/"+file, ebiten.FilterNearest)
+		if err != nil {
+			return err
+		}
+		theImageCache.cache[file] = img
+	}
+	return nil
+}
+
+func init() {
+	// TODO: The image should be loaded asyncly.
+	if err := initImageCache(); err != nil {
+		panic(err)
+	}
+}
+
+type imageCache struct {
+	cache map[string]*ebiten.Image
+}
+
+func (i *imageCache) Get(path string) *ebiten.Image {
+	return i.cache[path]
+}
+
+func GetImage(path string) *ebiten.Image {
+	return theImageCache.Get(path)
 }

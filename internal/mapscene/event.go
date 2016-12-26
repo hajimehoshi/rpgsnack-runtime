@@ -20,6 +20,7 @@ import (
 	"github.com/hajimehoshi/ebiten"
 	"golang.org/x/text/language"
 
+	"github.com/hajimehoshi/tsugunai/internal/assets"
 	"github.com/hajimehoshi/tsugunai/internal/data"
 	"github.com/hajimehoshi/tsugunai/internal/input"
 	"github.com/hajimehoshi/tsugunai/internal/scene"
@@ -98,7 +99,7 @@ func (e *event) updateCharacterIfNeeded() error {
 	}
 	page := e.data.Pages[i]
 	c := e.character
-	c.image = theImageCache.Get(page.Image)
+	c.image = assets.GetImage(page.Image)
 	c.imageIndex = page.ImageIndex
 	c.dirFix = page.DirFix
 	c.turn(page.Dir)

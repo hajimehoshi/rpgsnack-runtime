@@ -19,6 +19,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten"
 
+	"github.com/hajimehoshi/tsugunai/internal/assets"
 	"github.com/hajimehoshi/tsugunai/internal/font"
 	"github.com/hajimehoshi/tsugunai/internal/scene"
 	"github.com/hajimehoshi/tsugunai/internal/task"
@@ -196,7 +197,7 @@ func (b *balloonImageParts) Dst(index int) (int, int, int, int) {
 
 func (b *balloon) draw(screen *ebiten.Image) error {
 	if b.count > 0 {
-		img := theImageCache.Get("balloon.png")
+		img := assets.GetImage("balloon.png")
 		op := &ebiten.DrawImageOptions{}
 		rate := 1.0
 		if balloonMaxCount/2 < b.count {
