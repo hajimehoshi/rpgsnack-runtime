@@ -40,10 +40,8 @@ func New() (*Game, error) {
 func (g *Game) startLoadingGameData() {
 	ch := make(chan error)
 	go func() {
-		defer func() {
-			close(ch)
-		}()
-		gameData, err := data.Load("data.json")
+		defer close(ch)
+		gameData, err := data.Load()
 		if err != nil {
 			ch <- err
 			return

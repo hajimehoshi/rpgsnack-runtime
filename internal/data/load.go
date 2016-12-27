@@ -21,8 +21,8 @@ import (
 	"io/ioutil"
 )
 
-func Load(path string) (*Game, error) {
-	dataJson, err := ioutil.ReadFile(path)
+func Load() (*Game, error) {
+	dataJson, err := ioutil.ReadFile("data.json")
 	if err != nil {
 		return nil, err
 	}

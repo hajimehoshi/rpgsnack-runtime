@@ -16,7 +16,7 @@
 
 package data
 
-func Load(path string) (*Game, error) {
+func Load() (*Game, error) {
 	// TODO: Implement
 	return &Game{}, nil
 }

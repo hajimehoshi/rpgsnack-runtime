@@ -20,7 +20,6 @@ package assets
 import (
 	"bytes"
 	"image/png"
-	"sync/atomic"
 
 	"github.com/hajimehoshi/ebiten"
 )
@@ -59,18 +58,20 @@ func init() {
 	theImageCache = &imageCache{
 		cache: map[string]*ebiten.Image{},
 	}
-	atomic.StoreInt32(&theImageCache.loading, 1)
+	ch := make(chan error)
 	go func() {
+		defer close(ch)
 		if err := initImageCache(theImageCache); err != nil {
-			panic(err)
+			ch <- err
+			return
 		}
-		atomic.StoreInt32(&theImageCache.loading, 0)
 	}()
+	theImageCache.loadingCh = ch
 }
 
 type imageCache struct {
-	cache   map[string]*ebiten.Image
-	loading int32
+	cache     map[string]*ebiten.Image
+	loadingCh chan error
 }
 
 func (i *imageCache) Get(path string) *ebiten.Image {
@@ -78,7 +79,21 @@ func (i *imageCache) Get(path string) *ebiten.Image {
 }
 
 func (i *imageCache) IsLoading() bool {
-	return atomic.LoadInt32(&i.loading) != 0
+	if i.loadingCh == nil {
+		return false
+	}
+	select {
+	case err, ok := <- i.loadingCh:
+		if err != nil {
+			panic(err)
+		}
+		if !ok {
+			i.loadingCh = nil
+			return true
+		}
+	default:
+	}
+	return true
 }
 
 func IsLoading() bool {
