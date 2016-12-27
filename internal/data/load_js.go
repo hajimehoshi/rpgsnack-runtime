@@ -16,7 +16,25 @@
 
 package data
 
+import (
+	"encoding/json"
+
+	"github.com/gopherjs/gopherjs/js"
+)
+
 func Load() (*Game, error) {
-	// TODO: Implement
-	return &Game{}, nil
+	if js.Global.Get("_data") == nil {
+		ch := make(chan struct{})
+		js.Global.Set("_dataNotify", func() {
+			close(ch)
+		})
+		<-ch
+	}
+	dataJsonStr := js.Global.Get("JSON").Call("stringify", js.Global.Get("_data"))
+	dataJson := ([]uint8)(dataJsonStr.String())
+	var gameData *Game
+	if err := json.Unmarshal(dataJson, &gameData); err != nil {
+		return nil, err
+	}
+	return gameData, nil
 }

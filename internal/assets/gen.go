@@ -83,7 +83,7 @@ func (i *imageCache) IsLoading() bool {
 		return false
 	}
 	select {
-	case err, ok := <- i.loadingCh:
+	case err, ok := <-i.loadingCh:
 		if err != nil {
 			panic(err)
 		}
