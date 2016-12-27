@@ -28,31 +28,56 @@ import (
 type Game struct {
 	sceneManager *scene.SceneManager
 	gameData     *data.Game
+	loadingCh    chan error
 }
 
 func New() (*Game, error) {
-	gameData, err := data.Load("data.json")
-	if err != nil {
-		return nil, err
-	}
-	initScene := titlescene.New(gameData)
-	game := &Game{
-		sceneManager: scene.NewSceneManager(initScene),
-		gameData:     gameData,
-	}
-	return game, nil
+	g := &Game{}
+	g.startLoadingGameData()
+	return g, nil
+}
+
+func (g *Game) startLoadingGameData() {
+	ch := make(chan error)
+	go func() {
+		defer func() {
+			close(ch)
+		}()
+		gameData, err := data.Load("data.json")
+		if err != nil {
+			ch <- err
+			return
+		}
+		g.gameData = gameData
+		initScene := titlescene.New(gameData)
+		g.sceneManager = scene.NewSceneManager(initScene)
+	}()
+	g.loadingCh = ch
 }
 
 func (g *Game) Update() error {
 	if assets.IsLoading() {
 		return nil
 	}
+	if g.loadingCh != nil {
+		select {
+		case err, ok := <-g.loadingCh:
+			if err != nil {
+				return err
+			}
+			if !ok {
+				g.loadingCh = nil
+			}
+		default:
+			return nil
+		}
+	}
 	input.Update()
 	return g.sceneManager.Update()
 }
 
 func (g *Game) Draw(screen *ebiten.Image) error {
-	if assets.IsLoading() {
+	if assets.IsLoading() || g.loadingCh != nil {
 		if err := ebitenutil.DebugPrint(screen, "Now Loading..."); err != nil {
 			return err
 		}
