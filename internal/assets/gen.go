@@ -20,6 +20,7 @@ package assets
 import (
 	"bytes"
 	"image/png"
+	"sync/atomic"
 
 	"github.com/hajimehoshi/ebiten"
 )
@@ -37,39 +38,51 @@ func loadImage(path string, filter ebiten.Filter) (*ebiten.Image, error) {
 	return eimg, nil
 }
 
-var theImageCache *imageCache
-
-func initImageCache() error {
-	theImageCache = &imageCache{
-		cache: map[string]*ebiten.Image{},
-	}
+func initImageCache(imageCache *imageCache) error {
 	files, err := AssetDir("images")
 	if err != nil {
-		panic(err)
+		return err
 	}
 	for _, file := range files {
 		img, err := loadImage("images/"+file, ebiten.FilterNearest)
 		if err != nil {
 			return err
 		}
-		theImageCache.cache[file] = img
+		imageCache.cache[file] = img
 	}
 	return nil
 }
 
+var theImageCache *imageCache
+
 func init() {
-	// TODO: The image should be loaded asyncly.
-	if err := initImageCache(); err != nil {
-		panic(err)
+	theImageCache = &imageCache{
+		cache: map[string]*ebiten.Image{},
 	}
+	atomic.StoreInt32(&theImageCache.loading, 1)
+	go func() {
+		if err := initImageCache(theImageCache); err != nil {
+			panic(err)
+		}
+		atomic.StoreInt32(&theImageCache.loading, 0)
+	}()
 }
 
 type imageCache struct {
-	cache map[string]*ebiten.Image
+	cache   map[string]*ebiten.Image
+	loading int32
 }
 
 func (i *imageCache) Get(path string) *ebiten.Image {
 	return i.cache[path]
+}
+
+func (i *imageCache) IsLoading() bool {
+	return atomic.LoadInt32(&i.loading) != 0
+}
+
+func IsLoading() bool {
+	return theImageCache.IsLoading()
 }
 
 func GetImage(path string) *ebiten.Image {

@@ -16,7 +16,9 @@ package game
 
 import (
 	"github.com/hajimehoshi/ebiten"
+	"github.com/hajimehoshi/ebiten/ebitenutil"
 
+	"github.com/hajimehoshi/tsugunai/internal/assets"
 	"github.com/hajimehoshi/tsugunai/internal/data"
 	"github.com/hajimehoshi/tsugunai/internal/input"
 	"github.com/hajimehoshi/tsugunai/internal/scene"
@@ -42,11 +44,20 @@ func New() (*Game, error) {
 }
 
 func (g *Game) Update() error {
+	if assets.IsLoading() {
+		return nil
+	}
 	input.Update()
 	return g.sceneManager.Update()
 }
 
 func (g *Game) Draw(screen *ebiten.Image) error {
+	if assets.IsLoading() {
+		if err := ebitenutil.DebugPrint(screen, "Now Loading..."); err != nil {
+			return err
+		}
+		return nil
+	}
 	return g.sceneManager.Draw(screen)
 }
 
