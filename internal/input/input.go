@@ -44,7 +44,12 @@ func (i *input) Update() {
 		i.x, i.y = ebiten.CursorPosition()
 		return
 	}
-	// TODO: Handle touch events
+	touches := ebiten.Touches()
+	if len(touches) > 0 {
+		i.pressCount++
+		i.x, i.y = touches[0].Position()
+		return
+	}
 	i.pressCount = 0
 	i.x = 0
 	i.y = 0
