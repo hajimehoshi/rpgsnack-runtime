@@ -64,7 +64,7 @@ func imagesBalloonPng() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "images/balloon.png", size: 1386, mode: os.FileMode(420), modTime: time.Unix(1479548660, 0)}
+	info := bindataFileInfo{name: "images/balloon.png", size: 1386, mode: os.FileMode(420), modTime: time.Unix(1482831679, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -81,7 +81,7 @@ func imagesCharacters0Png() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "images/characters0.png", size: 6987, mode: os.FileMode(420), modTime: time.Unix(1478890914, 0)}
+	info := bindataFileInfo{name: "images/characters0.png", size: 6987, mode: os.FileMode(420), modTime: time.Unix(1482831679, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -98,7 +98,7 @@ func imagesCharacters1Png() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "images/characters1.png", size: 8738, mode: os.FileMode(420), modTime: time.Unix(1478891179, 0)}
+	info := bindataFileInfo{name: "images/characters1.png", size: 8738, mode: os.FileMode(420), modTime: time.Unix(1482831679, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -115,7 +115,7 @@ func imagesCharacters2Png() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "images/characters2.png", size: 4083, mode: os.FileMode(420), modTime: time.Unix(1478891313, 0)}
+	info := bindataFileInfo{name: "images/characters2.png", size: 4083, mode: os.FileMode(420), modTime: time.Unix(1482831679, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -132,7 +132,7 @@ func imagesMarkerPng() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "images/marker.png", size: 1130, mode: os.FileMode(420), modTime: time.Unix(1478833478, 0)}
+	info := bindataFileInfo{name: "images/marker.png", size: 1130, mode: os.FileMode(420), modTime: time.Unix(1482831679, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -149,7 +149,7 @@ func imagesMplusPng() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "images/mplus.png", size: 232439, mode: os.FileMode(420), modTime: time.Unix(1441726462, 0)}
+	info := bindataFileInfo{name: "images/mplus.png", size: 232439, mode: os.FileMode(420), modTime: time.Unix(1482832369, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -166,7 +166,7 @@ func imagesTiles_bottomPng() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "images/tiles_bottom.png", size: 6759, mode: os.FileMode(420), modTime: time.Unix(1478704280, 0)}
+	info := bindataFileInfo{name: "images/tiles_bottom.png", size: 6759, mode: os.FileMode(420), modTime: time.Unix(1482831679, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -183,7 +183,7 @@ func imagesTiles_topPng() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "images/tiles_top.png", size: 7645, mode: os.FileMode(420), modTime: time.Unix(1478704276, 0)}
+	info := bindataFileInfo{name: "images/tiles_top.png", size: 7645, mode: os.FileMode(420), modTime: time.Unix(1482831679, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
