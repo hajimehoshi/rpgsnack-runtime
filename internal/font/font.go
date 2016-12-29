@@ -16,24 +16,20 @@ package font
 
 import (
 	"image/color"
-	"strings"
 
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/tsugunai/internal/assets"
 )
 
-var srcY = map[int]int{}
+var positions = map[rune]int{}
 
 func init() {
-	str := string(assets.MustAsset("images/mplus.txt"))
-	y := 0
-	for i, part := range strings.Split(str, ",") {
-		if part != "1" {
-			continue
-		}
-		srcY[i] = y * lineHeight
-		y++
+	b := assets.MustAsset("images/mplus_positions")
+	for i := 0; i < len(b)/4; i++ {
+		r := rune(b[4*i]) + rune(b[4*i+1])<<8
+		pos := int(b[4*i+2]) + int(b[4*i+3])<<8
+		positions[r] = pos
 	}
 }
 
@@ -55,11 +51,12 @@ func (t *textImageParts) Len() int {
 
 func (t *textImageParts) Src(index int) (int, int, int, int) {
 	r := t.runes[index]
-	x := int(r%256) * charFullWidth
-	y, ok := srcY[int(r/256)]
+	pos, ok := positions[r]
 	if !ok {
 		return 0, 0, 0, 0
 	}
+	x := pos % 256 * charFullWidth
+	y := pos / 256 * lineHeight
 	w := charHalfWidth
 	h := lineHeight
 	if r == '\n' {
