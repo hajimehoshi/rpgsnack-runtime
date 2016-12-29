@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:generate go-bindata -nocompress -pkg=assets -ignore=/\. images
+//go:generate go run tools/compact_mplus.go
+//go:generate go-bindata -nocompress -pkg=assets -ignore=(/\.|mplus\.png$) images
 //go:generate gofmt -s -w .
 
 package assets

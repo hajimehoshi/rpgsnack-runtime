@@ -16,11 +16,26 @@ package font
 
 import (
 	"image/color"
+	"strings"
 
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/tsugunai/internal/assets"
 )
+
+var srcY = map[int]int{}
+
+func init() {
+	str := string(assets.MustAsset("images/mplus.txt"))
+	y := 0
+	for i, part := range strings.Split(str, ",") {
+		if part != "1" {
+			continue
+		}
+		srcY[i] = y * lineHeight
+		y++
+	}
+}
 
 const (
 	charHalfWidth       = 6
@@ -41,7 +56,10 @@ func (t *textImageParts) Len() int {
 func (t *textImageParts) Src(index int) (int, int, int, int) {
 	r := t.runes[index]
 	x := int(r%256) * charFullWidth
-	y := int(r/256) * lineHeight
+	y, ok := srcY[int(r/256)]
+	if !ok {
+		return 0, 0, 0, 0
+	}
 	w := charHalfWidth
 	h := lineHeight
 	if r == '\n' {
@@ -108,7 +126,7 @@ func DrawText(screen *ebiten.Image, text string, x, y int, scale int, color colo
 	r, g, b, a := color.RGBA()
 	op.ColorM.Scale(float64(r>>8)/255, float64(g>>8)/255, float64(b>>8)/255, float64(a>>8)/255)
 	op.ImageParts = &textImageParts{[]rune(text)}
-	mplusImage := assets.GetImage("mplus.png")
+	mplusImage := assets.GetImage("mplus.compacted.png")
 	if err := screen.DrawImage(mplusImage, op); err != nil {
 		return err
 	}

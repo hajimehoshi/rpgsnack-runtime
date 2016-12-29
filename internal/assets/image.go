@@ -17,6 +17,7 @@ package assets
 import (
 	"bytes"
 	"image/png"
+	"strings"
 
 	"github.com/hajimehoshi/ebiten"
 )
@@ -40,6 +41,9 @@ func initImageCache(imageCache *imageCache) error {
 		return err
 	}
 	for _, file := range files {
+		if !strings.HasSuffix(file, ".png") {
+			continue
+		}
 		img, err := loadImage("images/"+file, ebiten.FilterNearest)
 		if err != nil {
 			return err
