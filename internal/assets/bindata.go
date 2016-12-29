@@ -150,7 +150,7 @@ func imagesMplusCompactedPng() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "images/mplus.compacted.png", size: 217771, mode: os.FileMode(420), modTime: time.Unix(1483034903, 0)}
+	info := bindataFileInfo{name: "images/mplus.compacted.png", size: 217771, mode: os.FileMode(420), modTime: time.Unix(1483037332, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -167,7 +167,7 @@ func imagesMplusTxt() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "images/mplus.txt", size: 512, mode: os.FileMode(420), modTime: time.Unix(1483034903, 0)}
+	info := bindataFileInfo{name: "images/mplus.txt", size: 512, mode: os.FileMode(420), modTime: time.Unix(1483037332, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

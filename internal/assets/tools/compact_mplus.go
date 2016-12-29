@@ -88,10 +88,10 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	_, height := img.Bounds().Size().X, img.Bounds().Size().Y
+	width, height := img.Bounds().Size().X, img.Bounds().Size().Y
 	lines := make([]bool, height/charHeight)
 	for j := 0; j < height; j++ {
-		for i := 0; i < height; i++ {
+		for i := 0; i < width; i++ {
 			c := img.At(i, j)
 			_, _, _, a := c.RGBA()
 			if a == 0 {
