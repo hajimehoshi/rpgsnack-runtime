@@ -17,6 +17,7 @@ package main
 import (
 	"fmt"
 	"image"
+	"image/color"
 	"image/draw"
 	"image/png"
 	"os"
@@ -49,7 +50,10 @@ func writeCompactedImage(lines []bool, origImg image.Image) error {
 		count++
 	}
 	width := origImg.Bounds().Size().X
-	img := image.NewRGBA(image.Rect(0, 0, width, count*charHeight))
+	palette := color.Palette([]color.Color{
+		color.Transparent, color.Opaque,
+	})
+	img := image.NewPaletted(image.Rect(0, 0, width, count*charHeight), palette)
 	n := 0
 	for i, line := range lines {
 		if !line {
