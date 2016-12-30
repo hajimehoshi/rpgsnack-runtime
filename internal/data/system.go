@@ -14,9 +14,13 @@
 
 package data
 
-type Game struct {
-	Maps     []*Map     `json:"maps"`
-	Texts    *Texts     `json:"texts"`
-	TileSets []*TileSet `json:"tileSets"`
-	System   *System    `json:"system"`
+type System struct {
+	InitialPosition *Position `json:"initialPosition"`
+}
+
+type Position struct {
+	MapID  int `json:"mapId"`
+	RoomID int `json:"roomId"`
+	X      int `json:"x"`
+	Y      int `json:"y"`
 }

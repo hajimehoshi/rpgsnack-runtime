@@ -45,7 +45,12 @@ type MapScene struct {
 }
 
 func New(gameData *data.Game) (*MapScene, error) {
-	player, err := newPlayer(1, 2)
+	pos := gameData.System.InitialPosition
+	x, y := 0, 0
+	if pos != nil {
+		x, y = pos.X, pos.Y
+	}
+	player, err := newPlayer(x, y)
 	if err != nil {
 		return nil, err
 	}
