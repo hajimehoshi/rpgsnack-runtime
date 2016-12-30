@@ -67,6 +67,7 @@ const (
 	TriggerTapped     Trigger = "tapped"
 	TriggerEventTouch         = "event_touch"
 	TriggerAuto               = "auto"
+	TriggerNever              = "never"
 )
 
 type Command struct {

@@ -134,6 +134,9 @@ page:
 }
 
 func (e *event) run(taskLine *task.TaskLine, trigger data.Trigger) bool {
+	if trigger == data.TriggerNever {
+		return false
+	}
 	page := e.currentPage()
 	if page == nil {
 		return false
