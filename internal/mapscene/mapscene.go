@@ -179,7 +179,7 @@ func (m *MapScene) movePlayerIfNeeded(taskLine *task.TaskLine) error {
 	if e == nil {
 		return nil
 	}
-	e.run(taskLine, data.TriggerTapped)
+	e.run(taskLine, data.TriggerTap)
 	return nil
 }
 

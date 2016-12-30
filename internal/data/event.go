@@ -64,7 +64,7 @@ const (
 type Trigger string
 
 const (
-	TriggerTapped     Trigger = "tapped"
+	TriggerTap        Trigger = "tap"
 	TriggerEventTouch         = "event_touch"
 	TriggerAuto               = "auto"
 	TriggerNever              = "never"
