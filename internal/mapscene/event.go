@@ -170,7 +170,8 @@ func (e *event) run(taskLine *task.TaskLine, trigger data.Trigger) bool {
 			e.commandIndex = nil
 			return task.Terminated
 		}
-		e.character.attitude = page.Attitude
+		// page.Attitude is ignored so far.
+		e.character.attitude = data.AttitudeMiddle
 		e.steppingCount = 0
 		e.commandIndex = newCommandIndex(page)
 		return task.Terminated
