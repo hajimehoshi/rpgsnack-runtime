@@ -64,10 +64,10 @@ const (
 type Trigger string
 
 const (
-	TriggerTap        Trigger = "tap"
-	TriggerEventTouch         = "event_touch"
-	TriggerAuto               = "auto"
-	TriggerNever              = "never"
+	TriggerPlayer Trigger = "player"
+	TriggerAuto           = "auto"
+	TriggerDirect         = "direct"
+	TriggerNever          = "never"
 )
 
 type Command struct {

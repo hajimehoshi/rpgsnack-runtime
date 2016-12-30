@@ -69,7 +69,7 @@
                   "stepping":   true,
                   "through":    false,
                   "priority":   1,
-                  "trigger":    "tapped",
+                  "trigger":    "player",
                   "commands": [
                     {
                       "name": "show_message",
@@ -169,7 +169,7 @@
                   "stepping":   false,
                   "through":    false,
                   "priority":   0,
-                  "trigger":    "tapped",
+                  "trigger":    "player",
                   "commands":   []
                 }
               ]
@@ -190,7 +190,7 @@
                   "stepping":   true,
                   "through":    false,
                   "priority":   1,
-                  "trigger":    "tapped",
+                  "trigger":    "player",
                   "commands": [
                     {
                       "name": "show_message",
@@ -271,7 +271,7 @@
                   "stepping":   false,
                   "through":    false,
                   "priority":   0,
-                  "trigger":    "tapped",
+                  "trigger":    "player",
                   "commands":   []
                 }
               ]
