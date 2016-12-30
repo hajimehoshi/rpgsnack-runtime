@@ -39,10 +39,10 @@ type Page struct {
 type Dir int
 
 const (
-	DirLeft Dir = iota
+	DirUp Dir = iota
 	DirRight
-	DirUp
 	DirDown
+	DirLeft
 )
 
 type Attitude int
