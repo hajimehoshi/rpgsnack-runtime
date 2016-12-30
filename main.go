@@ -58,9 +58,9 @@ func main() {
 		panic(err)
 	}
 	theGame = g
-	w, h := theGame.Size()
-	title := theGame.Title()
-	if err := ebiten.Run(update, w, h, 1, title); err != nil {
+	w, h := game.Size()
+	title := game.Title()
+	if err := ebiten.Run(update, w, h, game.Scale(), title); err != nil {
 		panic(err)
 	}
 }

@@ -84,11 +84,11 @@ func (g *Game) Draw(screen *ebiten.Image) error {
 	return g.sceneManager.Draw(screen)
 }
 
-func (g *Game) Title() string {
+func Title() string {
 	return "Clock of Atonement"
 }
 
-func (g *Game) Size() (int, int) {
+func Size() (int, int) {
 	w := scene.TileXNum * scene.TileSize * scene.TileScale
 	h := scene.TileYNum * scene.TileSize * scene.TileScale
 	w += 2 * scene.GameMarginX
