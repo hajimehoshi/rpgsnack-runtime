@@ -112,6 +112,10 @@ page:
 	for i := len(e.data.Pages) - 1; i >= 0; i-- {
 		page := e.data.Pages[i]
 		for _, cond := range page.Conditions {
+			// TODO: Is it OK to allow null conditions?
+			if cond == nil {
+				continue
+			}
 			switch cond.Type {
 			case data.ConditionTypeSwitch:
 				s := cond.ID
