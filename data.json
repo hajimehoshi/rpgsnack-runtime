@@ -1,4 +1,12 @@
 {
+  "system": {
+    "initialPosition": {
+      "mapId": 1,
+      "roomId": 1,
+      "x": 2,
+      "y": 2
+    }
+  },
   "texts": {
     "und": {
       "bffe5c73-6109-486d-b445-834847833947": "イベントのテストです。",
@@ -74,13 +82,15 @@
                     {
                       "name": "show_message",
                       "args":    {
-                        "content": "bffe5c73-6109-486d-b445-834847833947"
+                        "content": "bffe5c73-6109-486d-b445-834847833947",
+                        "eventId": 0
                       }
                     },
                     {
                       "name": "show_message",
                       "args":    {
-                        "content": "4fe345d6-05bc-43d7-9a79-03e40b1b6d34"
+                        "content": "4fe345d6-05bc-43d7-9a79-03e40b1b6d34",
+                        "eventId": 0
                       }
                     },
                     {
@@ -98,7 +108,8 @@
                           {
                             "name": "show_message",
                             "args": {
-                              "content": "b39503f3-d957-4009-bea7-b6b2ffb929a4"
+                              "content": "b39503f3-d957-4009-bea7-b6b2ffb929a4",
+                              "eventId": 0
                             }
                           },
                           {
@@ -112,7 +123,7 @@
                             "name": "show_message",
                             "args": {
                               "content":  "574d044b-ca90-43d6-80ba-bcb17865b57e",
-                              "position": "center"
+                              "eventId": -1
                             }
                           }
                         ],
@@ -120,26 +131,29 @@
                           {
                             "name": "show_message",
                             "args": {
-                              "content": "a91632df-e7a7-4c4c-b4e9-516fe52d8fd8"
+                              "content": "a91632df-e7a7-4c4c-b4e9-516fe52d8fd8",
+                              "eventId": 0
                             }
                           },
                           {
                             "name": "show_message",
                             "args": {
                               "content":  "b3ad76be-571d-4eea-90cd-a4ede3abaf06",
-                              "position": "center"
+                              "eventId": -1
                             }
                           },
                           {
                             "name": "show_message",
                             "args": {
-                              "content": "b315852a-9b09-4087-ad3e-b4ef6d258156"
+                              "content": "b315852a-9b09-4087-ad3e-b4ef6d258156",
+                              "eventId": 0
                             }
                           },
                           {
                             "name": "show_message",
                             "args": {
-                              "content": "a038b9c5-deec-46de-973e-a10e27ebe5ca"
+                              "content": "a038b9c5-deec-46de-973e-a10e27ebe5ca",
+                              "eventId": 0
                             }
                           }
                         ]
@@ -148,7 +162,8 @@
                     {
                       "name": "show_message",
                       "args": {
-                        "content": "05dc0051-2a8d-4412-b561-9343b99a3690"
+                        "content": "05dc0051-2a8d-4412-b561-9343b99a3690",
+                        "eventId": 0
                       }
                     }
                   ]
@@ -195,13 +210,15 @@
                     {
                       "name": "show_message",
                       "args":    {
-                        "content": "e6796850-08a3-4f07-a316-a013d6f8c6b0"
+                        "content": "e6796850-08a3-4f07-a316-a013d6f8c6b0",
+                        "eventId": 0
                       }
                     },
                     {
                       "name": "show_message",
                       "args":    {
-                        "content": "67024f79-87c3-4368-b345-081d605ad894"
+                        "content": "67024f79-87c3-4368-b345-081d605ad894",
+                        "eventId": 0
                       }
                     },
                     {
@@ -214,7 +231,8 @@
                     {
                       "name": "show_message",
                       "args":    {
-                        "content": "8ea36699-81b8-485f-914c-ca94aeefebcc"
+                        "content": "8ea36699-81b8-485f-914c-ca94aeefebcc",
+                        "eventId": 0
                       }
                     }
                   ]
@@ -242,8 +260,8 @@
                     {
                       "name": "show_message",
                       "args":    {
-                        "content":  "0a64a375-260f-4e0e-9538-ef5b64ecb501",
-                        "position": "center"
+                        "content": "0a64a375-260f-4e0e-9538-ef5b64ecb501",
+                        "eventId": -1
                       }
                     },
                     {

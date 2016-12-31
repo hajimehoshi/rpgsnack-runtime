@@ -30,6 +30,7 @@ func Load() (*Game, error) {
 		})
 		<-ch
 	}
+	println(js.Global.Get("_data"))
 	dataJsonStr := js.Global.Get("JSON").Call("stringify", js.Global.Get("_data"))
 	dataJson := ([]uint8)(dataJsonStr.String())
 	var gameData *Game

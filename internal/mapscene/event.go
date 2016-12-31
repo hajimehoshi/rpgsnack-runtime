@@ -209,16 +209,13 @@ func (e *event) goOn(sub *task.TaskLine) error {
 	c := e.commandIndex.command()
 	switch c.Name {
 	case data.CommandNameShowMessage:
-		position := data.ShowMessagePositionSelf
-		if c.Args["position"] != nil {
-			position = data.ShowMessagePosition(c.Args["position"].(string))
-		}
+		eventID := int(c.Args["eventId"].(float64))
 		contentID, err := data.UUIDFromString(c.Args["content"].(string))
 		if err != nil {
 			return err
 		}
 		content := e.mapScene.gameData.Texts.Get(language.Und, contentID)
-		e.showMessage(sub, content, position)
+		e.showMessage(sub, content, eventID)
 		sub.PushFunc(func() error {
 			e.commandIndex.advance()
 			return task.Terminated
@@ -281,20 +278,22 @@ func (e *event) removeAllBalloons(taskLine *task.TaskLine) {
 	}))
 }
 
-func (e *event) showMessage(taskLine *task.TaskLine, content string, position data.ShowMessagePosition) {
+func (e *event) showMessage(taskLine *task.TaskLine, content string, eventID int) {
 	e.removeAllBalloons(taskLine)
 	taskLine.Push(task.Sub(func(sub *task.TaskLine) error {
-		var b *balloon
-		switch position {
-		case data.ShowMessagePositionSelf:
-			x := e.data.X*scene.TileSize + scene.TileSize/2 + scene.GameMarginX/scene.TileScale
-			y := e.data.Y*scene.TileSize + scene.GameMarginTop/scene.TileScale
-			b = newBalloonWithArrow(x, y, content)
-		case data.ShowMessagePositionCenter:
-			b = newBalloonCenter(content)
+		// TODO: How to call newBalloonCenter?
+		var ch *character
+		switch eventID {
+		case -1:
+			ch = e.mapScene.player.character
+		case 0:
+			ch = e.character
 		default:
-			return fmt.Errorf("not implemented position: %s", string(position))
+			panic("not implemented")
 		}
+		x := ch.x*scene.TileSize + scene.TileSize/2 + scene.GameMarginX/scene.TileScale
+		y := ch.y*scene.TileSize + scene.GameMarginTop/scene.TileScale
+		b := newBalloonWithArrow(x, y, content)
 		e.mapScene.balloons = []*balloon{b}
 		e.mapScene.balloons[0].open(sub)
 		return task.Terminated

@@ -85,15 +85,6 @@ const (
 	CommandNameMove                    = "move"
 )
 
-type ShowMessagePosition string
-
-const (
-	ShowMessagePositionSelf   ShowMessagePosition = "self"
-	ShowMessagePositionPlayer                     = "player"
-	ShowMessagePositionEvent                      = "event"
-	ShowMessagePositionCenter                     = "center"
-)
-
 type Condition struct {
 	Type ConditionType `json:"type"`
 	ID   int           `json:"id"`
