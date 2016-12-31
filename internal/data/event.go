@@ -14,6 +14,10 @@
 
 package data
 
+const (
+	SelfSwitchNum = 4
+)
+
 type Event struct {
 	ID    int     `json:"id"`
 	X     int     `json:"x"`
@@ -79,10 +83,11 @@ type Command struct {
 type CommandName string
 
 const (
-	CommandNameShowMessage CommandName = "show_message"
-	CommandNameShowChoices             = "show_choices"
-	CommandNameSetSwitch               = "set_switch"
-	CommandNameMove                    = "move"
+	CommandNameShowMessage   CommandName = "show_message"
+	CommandNameShowChoices               = "show_choices"
+	CommandNameSetSwitch                 = "set_switch"
+	CommandNameSetSelfSwitch             = "set_self_switch"
+	CommandNameMove                      = "move"
 )
 
 type Condition struct {

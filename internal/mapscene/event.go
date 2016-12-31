@@ -36,6 +36,7 @@ type event struct {
 	commandIndex     *commandIndex
 	chosenIndex      int
 	steppingCount    int
+	selfSwitches     [data.SelfSwitchNum]bool
 }
 
 func newEvent(eventData *data.Event, mapScene *MapScene) (*event, error) {
@@ -243,6 +244,14 @@ func (e *event) goOn(sub *task.TaskLine) error {
 			e.commandIndex.advance()
 			return task.Terminated
 		})
+	case data.CommandNameSetSelfSwitch:
+		number := int(c.Args["id"].(float64))
+		value := c.Args["value"].(bool)
+		e.setSelfSwitch(sub, number, value)
+		sub.PushFunc(func() error {
+			e.commandIndex.advance()
+			return task.Terminated
+		})
 	case data.CommandNameMove:
 		x := int(c.Args["x"].(float64))
 		y := int(c.Args["y"].(float64))
@@ -367,6 +376,13 @@ func (e *event) setSwitch(taskLine *task.TaskLine, number int, value bool) {
 			e.mapScene.switches = append(e.mapScene.switches, zeros...)
 		}
 		e.mapScene.switches[number] = value
+		return task.Terminated
+	})
+}
+
+func (e *event) setSelfSwitch(taskLine *task.TaskLine, number int, value bool) {
+	taskLine.PushFunc(func() error {
+		e.selfSwitches[number] = value
 		return task.Terminated
 	})
 }
