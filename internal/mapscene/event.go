@@ -216,8 +216,13 @@ func (e *event) goOn(sub *task.TaskLine) error {
 			return task.Terminated
 		})
 	case data.CommandNameWait:
-		println("not implemented yet")
+		time := int(c.Args["time"].(float64))
+		frames := time * 6
 		sub.PushFunc(func() error {
+			if frames > 0 {
+				frames--
+				return nil
+			}
 			e.commandIndex.advance()
 			return task.Terminated
 		})
