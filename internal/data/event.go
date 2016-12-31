@@ -83,14 +83,14 @@ type Command struct {
 type CommandName string
 
 const (
-	CommandNameShowMessage   CommandName = "show_message"
+	CommandNameIf            CommandName = "if"
+	CommandNameCallEvent                 = "call_event"
+	CommandNameWait                      = "wait"
+	CommandNameShowMessage               = "show_message"
 	CommandNameShowChoices               = "show_choices"
 	CommandNameSetSwitch                 = "set_switch"
 	CommandNameSetSelfSwitch             = "set_self_switch"
 	CommandNameTransfer                  = "transfer"
-	CommandNameWait                      = "wait"
-	CommandNameIf                        = "if"
-	CommandNameCallEvent                 = "call_event"
 	CommandNameSetRoute                  = "set_route"
 	CommandNameTintScreen                = "tint_screen"
 	CommandNamePlaySE                    = "play_se"

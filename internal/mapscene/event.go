@@ -209,6 +209,24 @@ func (e *event) goOn(sub *task.TaskLine) error {
 	}
 	c := e.commandIndex.command()
 	switch c.Name {
+	case data.CommandNameIf:
+		println("not implemented yet")
+		sub.PushFunc(func() error {
+			e.commandIndex.advance()
+			return task.Terminated
+		})
+	case data.CommandNameWait:
+		println("not implemented yet")
+		sub.PushFunc(func() error {
+			e.commandIndex.advance()
+			return task.Terminated
+		})
+	case data.CommandNameCallEvent:
+		println("not implemented yet")
+		sub.PushFunc(func() error {
+			e.commandIndex.advance()
+			return task.Terminated
+		})
 	case data.CommandNameShowMessage:
 		eventID := int(c.Args["eventId"].(float64))
 		contentID, err := data.UUIDFromString(c.Args["content"].(string))
@@ -256,24 +274,6 @@ func (e *event) goOn(sub *task.TaskLine) error {
 		x := int(c.Args["x"].(float64))
 		y := int(c.Args["y"].(float64))
 		e.transfer(sub, x, y)
-		sub.PushFunc(func() error {
-			e.commandIndex.advance()
-			return task.Terminated
-		})
-	case data.CommandNameWait:
-		println("not implemented yet")
-		sub.PushFunc(func() error {
-			e.commandIndex.advance()
-			return task.Terminated
-		})
-	case data.CommandNameIf:
-		println("not implemented yet")
-		sub.PushFunc(func() error {
-			e.commandIndex.advance()
-			return task.Terminated
-		})
-	case data.CommandNameCallEvent:
-		println("not implemented yet")
 		sub.PushFunc(func() error {
 			e.commandIndex.advance()
 			return task.Terminated
