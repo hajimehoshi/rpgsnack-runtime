@@ -87,7 +87,7 @@ const (
 	CommandNameShowChoices               = "show_choices"
 	CommandNameSetSwitch                 = "set_switch"
 	CommandNameSetSelfSwitch             = "set_self_switch"
-	CommandNameMove                      = "move"
+	CommandNameTransfer                  = "transfer"
 )
 
 type Condition struct {

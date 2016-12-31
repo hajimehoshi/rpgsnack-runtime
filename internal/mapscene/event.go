@@ -252,10 +252,10 @@ func (e *event) goOn(sub *task.TaskLine) error {
 			e.commandIndex.advance()
 			return task.Terminated
 		})
-	case data.CommandNameMove:
+	case data.CommandNameTransfer:
 		x := int(c.Args["x"].(float64))
 		y := int(c.Args["y"].(float64))
-		e.move(sub, x, y)
+		e.transfer(sub, x, y)
 		sub.PushFunc(func() error {
 			e.commandIndex.advance()
 			return task.Terminated
@@ -387,7 +387,7 @@ func (e *event) setSelfSwitch(taskLine *task.TaskLine, number int, value bool) {
 	})
 }
 
-func (e *event) move(taskLine *task.TaskLine, x, y int) {
+func (e *event) transfer(taskLine *task.TaskLine, x, y int) {
 	count := 0
 	const maxCount = 30
 	e.removeAllBalloons(taskLine)
