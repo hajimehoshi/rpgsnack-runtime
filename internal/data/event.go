@@ -88,6 +88,14 @@ const (
 	CommandNameSetSwitch                 = "set_switch"
 	CommandNameSetSelfSwitch             = "set_self_switch"
 	CommandNameTransfer                  = "transfer"
+	CommandNameWait                      = "wait"
+	CommandNameIf                        = "if"
+	CommandNameCallEvent                 = "call_event"
+	CommandNameSetRoute                  = "set_route"
+	CommandNameTintScreen                = "tint_screen"
+	CommandNamePlaySE                    = "play_se"
+	CommandNamePlayBGM                   = "play_bgm"
+	CommandNameStopBGM                   = "stop_bgm"
 )
 
 type Condition struct {

@@ -260,6 +260,54 @@ func (e *event) goOn(sub *task.TaskLine) error {
 			e.commandIndex.advance()
 			return task.Terminated
 		})
+	case data.CommandNameWait:
+		println("not implemented yet")
+		sub.PushFunc(func() error {
+			e.commandIndex.advance()
+			return task.Terminated
+		})
+	case data.CommandNameIf:
+		println("not implemented yet")
+		sub.PushFunc(func() error {
+			e.commandIndex.advance()
+			return task.Terminated
+		})
+	case data.CommandNameCallEvent:
+		println("not implemented yet")
+		sub.PushFunc(func() error {
+			e.commandIndex.advance()
+			return task.Terminated
+		})
+	case data.CommandNameSetRoute:
+		println("not implemented yet")
+		sub.PushFunc(func() error {
+			e.commandIndex.advance()
+			return task.Terminated
+		})
+	case data.CommandNameTintScreen:
+		println("not implemented yet")
+		sub.PushFunc(func() error {
+			e.commandIndex.advance()
+			return task.Terminated
+		})
+	case data.CommandNamePlaySE:
+		println("not implemented yet")
+		sub.PushFunc(func() error {
+			e.commandIndex.advance()
+			return task.Terminated
+		})
+	case data.CommandNamePlayBGM:
+		println("not implemented yet")
+		sub.PushFunc(func() error {
+			e.commandIndex.advance()
+			return task.Terminated
+		})
+	case data.CommandNameStopBGM:
+		println("not implemented yet")
+		sub.PushFunc(func() error {
+			e.commandIndex.advance()
+			return task.Terminated
+		})
 	default:
 		return fmt.Errorf("command not implemented: %s", c.Name)
 	}
