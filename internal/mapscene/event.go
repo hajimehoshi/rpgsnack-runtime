@@ -103,7 +103,7 @@ func (e *event) updateCharacterIfNeeded() error {
 	c.image = assets.GetImage(page.Image)
 	c.imageIndex = page.ImageIndex
 	c.dirFix = page.DirFix
-	c.turn(page.Dir)
+	c.dir = page.Dir
 	// page.Attitude is ignored so far.
 	c.attitude = data.AttitudeMiddle
 	return nil
