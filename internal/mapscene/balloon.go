@@ -32,20 +32,22 @@ const (
 	balloonMaxCount    = 8
 	balloonArrowWidth  = 6
 	balloonArrowHeight = 5
+	balloonMinWidth    = 40
 )
 
 type balloon struct {
-	x         int
-	y         int
-	width     int
-	height    int
-	hasArrow  bool
-	arrowX    int
-	arrowY    int
-	arrowFlip bool
-	content   string
-	count     int
-	maxCount  int
+	x               int
+	y               int
+	width           int
+	height          int
+	hasArrow        bool
+	arrowX          int
+	arrowY          int
+	arrowFlip       bool
+	content         string
+	contentOffsetX  int
+	count           int
+	maxCount        int
 }
 
 func newBalloon(x, y, width, height int, content string) *balloon {
@@ -60,23 +62,30 @@ func newBalloon(x, y, width, height int, content string) *balloon {
 	return b
 }
 
-func balloonSizeFromContent(content string) (int, int) {
+func balloonSizeFromContent(content string) (int, int, int) {
+	contentOffsetX := 0
 	w, h := font.MeasureSize(content)
 	w = (w + 2*balloonMarginX) * scene.TextScale / scene.TileScale
 	h = (h + 2*balloonMarginY) * scene.TextScale / scene.TileScale
 	w = ((w + 3) / 4) * 4
 	h = ((h + 3) / 4) * 4
-	return w, h
+
+	if w < balloonMinWidth {
+		contentOffsetX = (balloonMinWidth - w) / 2
+		w = balloonMinWidth
+	}
+	return w, h, contentOffsetX
 }
 
 func newBalloonCenter(content string) *balloon {
 	sw := scene.TileXNum*scene.TileSize + scene.GameMarginX/scene.TileScale
 	sh := scene.TileYNum*scene.TileSize + scene.GameMarginTop/scene.TileScale
-	w, h := balloonSizeFromContent(content)
+	w, h, contentOffsetX := balloonSizeFromContent(content)
 	x := (sw - w) / 2
 	y := (sh - h) / 2
 	b := &balloon{
 		content: content,
+		contentOffsetX: contentOffsetX,
 		x:       x,
 		y:       y,
 		width:   w,
@@ -94,9 +103,10 @@ func newBalloonWithArrow(arrowX, arrowY int, content string) *balloon {
 		arrowY:   arrowY - balloonArrowHeight,
 		count:    balloonMaxCount,
 	}
-	w, h := balloonSizeFromContent(content)
+	w, h, contentOffsetX := balloonSizeFromContent(content)
 	b.width = w
 	b.height = h
+	b.contentOffsetX = contentOffsetX
 	b.x = arrowX - w/2
 	if scene.TileXNum*scene.TileSize < b.x+w {
 		b.arrowFlip = true
@@ -230,7 +240,7 @@ func (b *balloon) draw(screen *ebiten.Image) error {
 		}
 	}
 	if b.count == balloonMaxCount/2 {
-		x := (b.x + balloonMarginX) * scene.TileScale
+		x := (b.x + balloonMarginX + b.contentOffsetX) * scene.TileScale
 		y := (b.y + balloonMarginY) * scene.TileScale
 		if err := font.DrawText(screen, b.content, x, y, scene.TextScale, color.Black); err != nil {
 			return err
