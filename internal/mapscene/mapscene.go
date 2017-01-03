@@ -261,9 +261,65 @@ func (m *MapScene) Update(subTasksUpdated bool, taskLine *task.TaskLine, sceneMa
 	return nil
 }
 
-func (m *MapScene) openBalloon(b *balloon, taskLine *task.TaskLine) {
+func (m *MapScene) openBalloon(taskLine *task.TaskLine, b *balloon) {
 	m.balloons = []*balloon{b}
 	m.balloons[0].open(taskLine)
+}
+
+func (m *MapScene) openChoiceBalloons(taskLine *task.TaskLine, choices []string, chosenIndexSetter func(int)) {
+	const height = 20
+	const ymax = scene.TileYNum*scene.TileSize + (scene.GameMarginTop+scene.GameMarginBottom)/scene.TileScale
+	ymin := ymax - len(choices)*height
+	balloons := []*balloon{}
+	taskLine.Push(task.Sub(func(sub *task.TaskLine) error {
+		sub2 := []*task.TaskLine{}
+		for i, choice := range choices {
+			x := 0
+			y := i*height + ymin
+			width := scene.TileXNum * scene.TileSize
+			b := newBalloon(x, y, width, height, choice)
+			m.balloons = append(m.balloons, b)
+			t := &task.TaskLine{}
+			sub2 = append(sub2, t)
+			b.open(t)
+			balloons = append(balloons, b)
+		}
+		sub.Push(task.Parallel(sub2...))
+		return task.Terminated
+	}))
+	chosenIndex := 0
+	taskLine.PushFunc(func() error {
+		if !input.Triggered() {
+			return nil
+		}
+		_, y := input.Position()
+		y /= scene.TileScale
+		if y < ymin || ymax <= y {
+			return nil
+		}
+		chosenIndex = (y - ymin) / height
+		chosenIndexSetter(chosenIndex)
+		return task.Terminated
+	})
+	taskLine.Push(task.Sub(func(sub *task.TaskLine) error {
+		subs := []*task.TaskLine{}
+		for i, b := range balloons {
+			b := b
+			if i == chosenIndex {
+				continue
+			}
+			t := &task.TaskLine{}
+			subs = append(subs, t)
+			b.close(t)
+			t.PushFunc(func() error {
+				m.removeBalloon(b)
+				return task.Terminated
+			})
+		}
+		sub.Push(task.Parallel(subs...))
+		return task.Terminated
+	}))
+	taskLine.Push(task.Sleep(30))
 }
 
 func (m *MapScene) removeBalloon(balloon *balloon) {

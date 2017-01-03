@@ -370,7 +370,7 @@ func (e *event) showMessage(taskLine *task.TaskLine, content string, eventID int
 		x := ch.x*scene.TileSize + scene.TileSize/2 + scene.GameMarginX/scene.TileScale
 		y := ch.y*scene.TileSize + scene.GameMarginTop/scene.TileScale
 		b := newBalloonWithArrow(x, y, content)
-		e.mapScene.openBalloon(b, sub)
+		e.mapScene.openBalloon(sub, b)
 		return task.Terminated
 	}))
 	taskLine.PushFunc(func() error {
@@ -382,57 +382,9 @@ func (e *event) showMessage(taskLine *task.TaskLine, content string, eventID int
 }
 
 func (e *event) showChoices(taskLine *task.TaskLine, choices []string) {
-	const height = 20
-	const ymax = scene.TileYNum*scene.TileSize + (scene.GameMarginTop+scene.GameMarginBottom)/scene.TileScale
-	ymin := ymax - len(choices)*height
-	balloons := []*balloon{}
-	taskLine.Push(task.Sub(func(sub *task.TaskLine) error {
-		sub2 := []*task.TaskLine{}
-		for i, choice := range choices {
-			x := 0
-			y := i*height + ymin
-			width := scene.TileXNum * scene.TileSize
-			b := newBalloon(x, y, width, height, choice)
-			e.mapScene.balloons = append(e.mapScene.balloons, b)
-			t := &task.TaskLine{}
-			sub2 = append(sub2, t)
-			b.open(t)
-			balloons = append(balloons, b)
-		}
-		sub.Push(task.Parallel(sub2...))
-		return task.Terminated
-	}))
-	taskLine.PushFunc(func() error {
-		if !input.Triggered() {
-			return nil
-		}
-		_, y := input.Position()
-		y /= scene.TileScale
-		if y < ymin || ymax <= y {
-			return nil
-		}
-		e.chosenIndex = (y - ymin) / height
-		return task.Terminated
+	e.mapScene.openChoiceBalloons(taskLine, choices, func(index int) {
+		e.chosenIndex = index
 	})
-	taskLine.Push(task.Sub(func(sub *task.TaskLine) error {
-		subs := []*task.TaskLine{}
-		for i, b := range balloons {
-			b := b
-			if i == e.chosenIndex {
-				continue
-			}
-			t := &task.TaskLine{}
-			subs = append(subs, t)
-			b.close(t)
-			t.PushFunc(func() error {
-				e.mapScene.removeBalloon(b)
-				return task.Terminated
-			})
-		}
-		sub.Push(task.Parallel(subs...))
-		return task.Terminated
-	}))
-	taskLine.Push(task.Sleep(30))
 }
 
 func (e *event) setSwitch(taskLine *task.TaskLine, number int, value bool) {
