@@ -354,13 +354,13 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 		op.ColorM.Scale(rs, gs, bs, 1)
 		rt, gt, bt := 0.0, 0.0, 0.0
 		if m.tint.red > 0 {
-			rs = float64(m.tint.red) / 255
+			rt = float64(m.tint.red) / 255
 		}
 		if m.tint.green > 0 {
-			gs = float64(m.tint.green) / 255
+			gt = float64(m.tint.green) / 255
 		}
 		if m.tint.blue > 0 {
-			bs = float64(m.tint.blue) / 255
+			bt = float64(m.tint.blue) / 255
 		}
 		op.ColorM.Translate(rt, gt, bt, 0)
 	}
