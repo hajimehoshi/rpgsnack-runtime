@@ -28,6 +28,13 @@ import (
 	"github.com/hajimehoshi/tsugunai/internal/task"
 )
 
+type tint struct {
+	red   int
+	green int
+	blue  int
+	gray  int
+}
+
 type MapScene struct {
 	gameData      *data.Game
 	currentRoomID int
@@ -42,6 +49,7 @@ type MapScene struct {
 	events        []*event
 	switches      []bool
 	fadingRate    float64
+	tint          *tint
 }
 
 func New(gameData *data.Game) (*MapScene, error) {
@@ -229,6 +237,15 @@ func (m *MapScene) removeBalloon(balloon *balloon) {
 	}
 }
 
+func (m *MapScene) setTint(red, green, blue, gray int) {
+	m.tint = &tint{
+		red:   red,
+		green: green,
+		blue:  blue,
+		gray:  gray,
+	}
+}
+
 type tilesImageParts struct {
 	room     *data.Room
 	tileSet  *data.TileSet
@@ -320,6 +337,33 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 	op = &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(scene.TileScale, scene.TileScale)
 	op.GeoM.Translate(scene.GameMarginX, scene.GameMarginTop)
+	if m.tint != nil {
+		if m.tint.gray != 0 {
+			op.ColorM.ChangeHSV(0, float64(255-m.tint.gray)/255, 1)
+		}
+		rs, gs, bs := 1.0, 1.0, 1.0
+		if m.tint.red < 0 {
+			rs = float64(255 - -m.tint.red) / 255
+		}
+		if m.tint.green < 0 {
+			gs = float64(255 - -m.tint.green) / 255
+		}
+		if m.tint.blue < 0 {
+			bs = float64(255 - -m.tint.blue) / 255
+		}
+		op.ColorM.Scale(rs, gs, bs, 1)
+		rt, gt, bt := 0.0, 0.0, 0.0
+		if m.tint.red > 0 {
+			rs = float64(m.tint.red) / 255
+		}
+		if m.tint.green > 0 {
+			gs = float64(m.tint.green) / 255
+		}
+		if m.tint.blue > 0 {
+			bs = float64(m.tint.blue) / 255
+		}
+		op.ColorM.Translate(rt, gt, bt, 0)
+	}
 	if err := screen.DrawImage(m.tilesImage, op); err != nil {
 		return err
 	}

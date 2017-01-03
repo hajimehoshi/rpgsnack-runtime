@@ -274,8 +274,12 @@ func (e *event) goOn(sub *task.TaskLine) error {
 			return task.Terminated
 		})
 	case data.CommandNameTintScreen:
-		println("not implemented yet")
+		r := int(c.Args["red"].(float64))
+		g := int(c.Args["green"].(float64))
+		b := int(c.Args["blue"].(float64))
+		gray := int(c.Args["gray"].(float64))
 		sub.PushFunc(func() error {
+			e.mapScene.setTint(r, g, b, gray)
 			e.commandIndex.advance()
 			return task.Terminated
 		})
