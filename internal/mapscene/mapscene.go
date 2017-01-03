@@ -367,7 +367,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 	op.GeoM.Translate(scene.GameMarginX, scene.GameMarginTop)
 	if !m.tint.isZero() {
 		if m.tint.gray != 0 {
-			op.ColorM.ChangeHSV(0, float64(255-m.tint.gray)/255, 1)
+			op.ColorM.ChangeHSV(0, 1-m.tint.gray, 1)
 		}
 		rs, gs, bs := 1.0, 1.0, 1.0
 		if m.tint.red < 0 {
