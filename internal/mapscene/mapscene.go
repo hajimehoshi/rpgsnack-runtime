@@ -29,10 +29,10 @@ import (
 )
 
 type tint struct {
-	red   int
-	green int
-	blue  int
-	gray  int
+	red   float64
+	green float64
+	blue  float64
+	gray  float64
 }
 
 type MapScene struct {
@@ -237,7 +237,14 @@ func (m *MapScene) removeBalloon(balloon *balloon) {
 	}
 }
 
-func (m *MapScene) setTint(red, green, blue, gray int) {
+func (m *MapScene) getTint() (red, green, blue, gray float64) {
+	if m.tint == nil {
+		return 0, 0, 0, 0
+	}
+	return m.tint.red, m.tint.green, m.tint.blue, m.tint.gray
+}
+
+func (m *MapScene) setTint(red, green, blue, gray float64) {
 	m.tint = &tint{
 		red:   red,
 		green: green,
@@ -335,24 +342,24 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 		}
 		rs, gs, bs := 1.0, 1.0, 1.0
 		if m.tint.red < 0 {
-			rs = float64(255 - -m.tint.red) / 255
+			rs = 1 - -m.tint.red
 		}
 		if m.tint.green < 0 {
-			gs = float64(255 - -m.tint.green) / 255
+			gs = 1 - -m.tint.green
 		}
 		if m.tint.blue < 0 {
-			bs = float64(255 - -m.tint.blue) / 255
+			bs = 1 - -m.tint.blue
 		}
 		op.ColorM.Scale(rs, gs, bs, 1)
 		rt, gt, bt := 0.0, 0.0, 0.0
 		if m.tint.red > 0 {
-			rt = float64(m.tint.red) / 255
+			rt = m.tint.red
 		}
 		if m.tint.green > 0 {
-			gt = float64(m.tint.green) / 255
+			gt = m.tint.green
 		}
 		if m.tint.blue > 0 {
-			bt = float64(m.tint.blue) / 255
+			bt = m.tint.blue
 		}
 		op.ColorM.Translate(rt, gt, bt, 0)
 	}

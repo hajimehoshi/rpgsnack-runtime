@@ -226,7 +226,7 @@
                     {
                       "name": "wait",
                       "args": {
-                        "time": 10
+                        "time": 5
                       }
                     },
                     {
@@ -242,7 +242,9 @@
                         "red":   34,
                         "green": -34,
                         "blue":  -68,
-                        "gray":  170
+                        "gray":  170,
+                        "time":  10,
+                        "wait":  true
                       }
                     },
                     {
@@ -264,6 +266,17 @@
                       "args":    {
                         "content": "8ea36699-81b8-485f-914c-ca94aeefebcc",
                         "eventId": 0
+                      }
+                    },
+                    {
+                      "name": "tint_screen",
+                      "args": {
+                        "red":   0,
+                        "green": 0,
+                        "blue":  0,
+                        "gray":  0,
+                        "time":  10,
+                        "wait":  true
                       }
                     }
                   ]

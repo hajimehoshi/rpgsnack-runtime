@@ -278,11 +278,28 @@ func (e *event) goOn(sub *task.TaskLine) error {
 			return task.Terminated
 		})
 	case data.CommandNameTintScreen:
-		r := int(c.Args["red"].(float64))
-		g := int(c.Args["green"].(float64))
-		b := int(c.Args["blue"].(float64))
-		gray := int(c.Args["gray"].(float64))
+		r := c.Args["red"].(float64) / 255
+		g := c.Args["green"].(float64) / 255
+		b := c.Args["blue"].(float64) / 255
+		gray := c.Args["gray"].(float64) / 255
+		time := int(c.Args["time"].(float64))
+		maxFrames := time * 6
+		frames := maxFrames
+		origR, origG, origB, origGray := 0.0, 0.0, 0.0, 0.0
 		sub.PushFunc(func() error {
+			if frames > 0 {
+				if frames == maxFrames {
+					origR, origG, origB, origGray = e.mapScene.getTint()
+				}
+				frames--
+				rate := 1 - float64(frames)/float64(maxFrames)
+				e.mapScene.setTint(
+					origR*(1-rate)+r*rate,
+					origG*(1-rate)+g*rate,
+					origB*(1-rate)+b*rate,
+					origGray*(1-rate)+gray*rate)
+				return nil
+			}
 			e.mapScene.setTint(r, g, b, gray)
 			e.commandIndex.advance()
 			return task.Terminated
