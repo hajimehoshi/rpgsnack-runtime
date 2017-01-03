@@ -22,8 +22,6 @@ import (
 
 	"github.com/hajimehoshi/tsugunai/internal/assets"
 	"github.com/hajimehoshi/tsugunai/internal/data"
-	"github.com/hajimehoshi/tsugunai/internal/input"
-	"github.com/hajimehoshi/tsugunai/internal/scene"
 	"github.com/hajimehoshi/tsugunai/internal/task"
 )
 
@@ -356,33 +354,20 @@ func (e *event) goOn(sub *task.TaskLine) error {
 }
 
 func (e *event) showMessage(taskLine *task.TaskLine, content string, eventID int) {
-	taskLine.Push(task.Sub(func(sub *task.TaskLine) error {
-		// TODO: How to call newBalloonCenter?
-		var ch *character
-		switch eventID {
-		case -1:
-			ch = e.mapScene.player.character
-		case 0:
-			ch = e.character
-		default:
-			panic("not implemented")
-		}
-		x := ch.x*scene.TileSize + scene.TileSize/2 + scene.GameMarginX/scene.TileScale
-		y := ch.y*scene.TileSize + scene.GameMarginTop/scene.TileScale
-		b := newBalloonWithArrow(x, y, content)
-		e.mapScene.openBalloon(sub, b)
-		return task.Terminated
-	}))
-	taskLine.PushFunc(func() error {
-		if input.Triggered() {
-			return task.Terminated
-		}
-		return nil
-	})
+	var ch *character
+	switch eventID {
+	case -1:
+		ch = e.mapScene.player.character
+	case 0:
+		ch = e.character
+	default:
+		panic("not implemented")
+	}
+	e.mapScene.showMessage(taskLine, content, ch)
 }
 
 func (e *event) showChoices(taskLine *task.TaskLine, choices []string) {
-	e.mapScene.openChoiceBalloons(taskLine, choices, func(index int) {
+	e.mapScene.showChoices(taskLine, choices, func(index int) {
 		e.chosenIndex = index
 	})
 }

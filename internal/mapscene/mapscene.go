@@ -47,7 +47,7 @@ type MapScene struct {
 	moveDstX      int
 	moveDstY      int
 	playerMoving  bool
-	balloons      []*balloon
+	balloons      *balloons
 	tilesImage    *ebiten.Image
 	emptyImage    *ebiten.Image
 	events        []*event
@@ -83,6 +83,7 @@ func New(gameData *data.Game) (*MapScene, error) {
 		gameData:   gameData,
 		currentMap: gameData.Maps[0],
 		player:     player,
+		balloons:   &balloons{},
 		tilesImage: tilesImage,
 		emptyImage: emptyImage,
 		tint:       &tint{},
@@ -261,103 +262,16 @@ func (m *MapScene) Update(subTasksUpdated bool, taskLine *task.TaskLine, sceneMa
 	return nil
 }
 
-func (m *MapScene) openBalloon(taskLine *task.TaskLine, b *balloon) {
-	m.balloons = []*balloon{b}
-	m.balloons[0].open(taskLine)
+func (m *MapScene) showMessage(taskLine *task.TaskLine, content string, character *character) {
+	m.balloons.ShowMessage(taskLine, content, character)
 }
 
-func (m *MapScene) openChoiceBalloons(taskLine *task.TaskLine, choices []string, chosenIndexSetter func(int)) {
-	const height = 20
-	const ymax = scene.TileYNum*scene.TileSize + (scene.GameMarginTop+scene.GameMarginBottom)/scene.TileScale
-	ymin := ymax - len(choices)*height
-	balloons := []*balloon{}
-	taskLine.Push(task.Sub(func(sub *task.TaskLine) error {
-		sub2 := []*task.TaskLine{}
-		for i, choice := range choices {
-			x := 0
-			y := i*height + ymin
-			width := scene.TileXNum * scene.TileSize
-			b := newBalloon(x, y, width, height, choice)
-			m.balloons = append(m.balloons, b)
-			t := &task.TaskLine{}
-			sub2 = append(sub2, t)
-			b.open(t)
-			balloons = append(balloons, b)
-		}
-		sub.Push(task.Parallel(sub2...))
-		return task.Terminated
-	}))
-	chosenIndex := 0
-	taskLine.PushFunc(func() error {
-		if !input.Triggered() {
-			return nil
-		}
-		_, y := input.Position()
-		y /= scene.TileScale
-		if y < ymin || ymax <= y {
-			return nil
-		}
-		chosenIndex = (y - ymin) / height
-		chosenIndexSetter(chosenIndex)
-		return task.Terminated
-	})
-	taskLine.Push(task.Sub(func(sub *task.TaskLine) error {
-		subs := []*task.TaskLine{}
-		for i, b := range balloons {
-			b := b
-			if i == chosenIndex {
-				continue
-			}
-			t := &task.TaskLine{}
-			subs = append(subs, t)
-			b.close(t)
-			t.PushFunc(func() error {
-				m.removeBalloon(b)
-				return task.Terminated
-			})
-		}
-		sub.Push(task.Parallel(subs...))
-		return task.Terminated
-	}))
-	taskLine.Push(task.Sleep(30))
-}
-
-func (m *MapScene) removeBalloon(balloon *balloon) {
-	index := -1
-	for i, b := range m.balloons {
-		if b == balloon {
-			index = i
-			break
-		}
-	}
-	if index != -1 {
-		m.balloons[index] = nil
-	}
+func (m *MapScene) showChoices(taskLine *task.TaskLine, choices []string, chosenIndexSetter func(int)) {
+	m.balloons.ShowChoices(taskLine, choices, chosenIndexSetter)
 }
 
 func (m *MapScene) closeAllBalloons(taskLine *task.TaskLine) {
-	taskLine.Push(task.Sub(func(sub *task.TaskLine) error {
-		subs := []*task.TaskLine{}
-		for _, b := range m.balloons {
-			if b == nil {
-				continue
-			}
-			b := b
-			t := &task.TaskLine{}
-			subs = append(subs, t)
-			b.close(t)
-			t.PushFunc(func() error {
-				m.removeBalloon(b)
-				return task.Terminated
-			})
-		}
-		sub.Push(task.Parallel(subs...))
-		return task.Terminated
-	}))
-	taskLine.PushFunc(func() error {
-		m.balloons = nil
-		return task.Terminated
-	})
+	m.balloons.CloseAll(taskLine)
 }
 
 func (m *MapScene) updateTinting() {
@@ -528,13 +442,8 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 			return err
 		}
 	}
-	for _, b := range m.balloons {
-		if b == nil {
-			continue
-		}
-		if err := b.draw(screen); err != nil {
-			return err
-		}
+	if err := m.balloons.Draw(screen); err != nil {
+		return nil
 	}
 	msg := fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS())
 	if err := font.DrawText(screen, msg, 0, 0, scene.TextScale, color.White); err != nil {
