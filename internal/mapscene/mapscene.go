@@ -261,6 +261,11 @@ func (m *MapScene) Update(subTasksUpdated bool, taskLine *task.TaskLine, sceneMa
 	return nil
 }
 
+func (m *MapScene) openBalloon(b *balloon, taskLine *task.TaskLine) {
+	m.balloons = []*balloon{b}
+	m.balloons[0].open(taskLine)
+}
+
 func (m *MapScene) removeBalloon(balloon *balloon) {
 	index := -1
 	for i, b := range m.balloons {
@@ -272,6 +277,31 @@ func (m *MapScene) removeBalloon(balloon *balloon) {
 	if index != -1 {
 		m.balloons[index] = nil
 	}
+}
+
+func (m *MapScene) closeAllBalloons(taskLine *task.TaskLine) {
+	taskLine.Push(task.Sub(func(sub *task.TaskLine) error {
+		subs := []*task.TaskLine{}
+		for _, b := range m.balloons {
+			if b == nil {
+				continue
+			}
+			b := b
+			t := &task.TaskLine{}
+			subs = append(subs, t)
+			b.close(t)
+			t.PushFunc(func() error {
+				m.removeBalloon(b)
+				return task.Terminated
+			})
+		}
+		sub.Push(task.Parallel(subs...))
+		return task.Terminated
+	}))
+	taskLine.PushFunc(func() error {
+		m.balloons = nil
+		return task.Terminated
+	})
 }
 
 func (m *MapScene) updateTinting() {

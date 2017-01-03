@@ -226,10 +226,9 @@ func (e *event) goOn(sub *task.TaskLine) error {
 	if e.commandIndex == nil {
 		return task.Terminated
 	}
-	e.removeAllBalloons(sub)
+	e.mapScene.closeAllBalloons(sub)
 	if e.commandIndex.isTerminated() {
 		sub.PushFunc(func() error {
-			e.mapScene.balloons = nil
 			e.character.turn(e.origDir)
 			return task.Terminated
 		})
@@ -356,27 +355,6 @@ func (e *event) goOn(sub *task.TaskLine) error {
 	return nil
 }
 
-func (e *event) removeAllBalloons(taskLine *task.TaskLine) {
-	taskLine.Push(task.Sub(func(sub *task.TaskLine) error {
-		subs := []*task.TaskLine{}
-		for _, b := range e.mapScene.balloons {
-			if b == nil {
-				continue
-			}
-			b := b
-			t := &task.TaskLine{}
-			subs = append(subs, t)
-			b.close(t)
-			t.PushFunc(func() error {
-				e.mapScene.removeBalloon(b)
-				return task.Terminated
-			})
-		}
-		sub.Push(task.Parallel(subs...))
-		return task.Terminated
-	}))
-}
-
 func (e *event) showMessage(taskLine *task.TaskLine, content string, eventID int) {
 	taskLine.Push(task.Sub(func(sub *task.TaskLine) error {
 		// TODO: How to call newBalloonCenter?
@@ -392,8 +370,7 @@ func (e *event) showMessage(taskLine *task.TaskLine, content string, eventID int
 		x := ch.x*scene.TileSize + scene.TileSize/2 + scene.GameMarginX/scene.TileScale
 		y := ch.y*scene.TileSize + scene.GameMarginTop/scene.TileScale
 		b := newBalloonWithArrow(x, y, content)
-		e.mapScene.balloons = []*balloon{b}
-		e.mapScene.balloons[0].open(sub)
+		e.mapScene.openBalloon(b, sub)
 		return task.Terminated
 	}))
 	taskLine.PushFunc(func() error {
