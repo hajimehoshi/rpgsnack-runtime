@@ -99,13 +99,34 @@ const (
 )
 
 type Condition struct {
-	Type ConditionType `json:"type"`
-	ID   int           `json:"id"`
+	Type      ConditionType      `json:"type"`
+	ID        int                `json:"id"`
+	Comp      ConditionComp      `json:"comp"`
+	ValueType ConditionValueType `json:"valueType"`
+	Value     interface{}        `json:"value"`
 }
 
 type ConditionType string
 
 const (
 	ConditionTypeSwitch     ConditionType = "switch"
-	ConditionTypeSelfSwitch ConditionType = "self_switch"
+	ConditionTypeSelfSwitch               = "self_switch"
+	ConditionTypeVariable                 = "variable"
+)
+
+type ConditionComp string
+
+const (
+	ConditionCompEqual                ConditionComp = "="
+	ConditionCompGreaterThanOrEqualTo               = ">="
+	ConditionCompGreaterThan                        = ">"
+	ConditionCompLessThanOrEqualTo                  = "<="
+	ConditionCompLessThan                           = "<"
+)
+
+type ConditionValueType string
+
+const (
+	ConditionValueTypeConst    ConditionValueType = "const"
+	ConditionValueTypeVariable                    = "variable"
 )

@@ -174,7 +174,8 @@
                   "conditions": [
                     {
                       "type": "switch",
-                      "id":   1
+                      "id":   1,
+                      "value": true
                     }
                   ],
                   "image":      "",
@@ -239,10 +240,10 @@
                     {
                       "name": "tint_screen",
                       "args": {
-                        "red":   34,
-                        "green": -34,
-                        "blue":  -68,
-                        "gray":  170,
+                        "red":   255,
+                        "green": 0,
+                        "blue":  0,
+                        "gray":  128,
                         "time":  20,
                         "wait":  true
                       }
@@ -321,7 +322,8 @@
                   "conditions": [
                     {
                       "type": "switch",
-                      "id":   2
+                      "id":   2,
+                      "value": true
                     }
                   ],
                   "image":      "",

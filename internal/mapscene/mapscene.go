@@ -52,6 +52,7 @@ type MapScene struct {
 	emptyImage    *ebiten.Image
 	events        []*event
 	switches      []bool
+	variables     []int
 	fadingRate    float64
 	tint          *tint
 	origTint      *tint

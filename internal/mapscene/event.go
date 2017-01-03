@@ -109,31 +109,76 @@ func (e *event) updateCharacterIfNeeded() error {
 	return nil
 }
 
+func (e *event) meetsCondition(cond *data.Condition) (bool, error) {
+	// TODO: Is it OK to allow null conditions?
+	if cond == nil {
+		return true, nil
+	}
+	switch cond.Type {
+	case data.ConditionTypeSwitch:
+		id := cond.ID
+		if len(e.mapScene.switches) < id+1 {
+			zeros := make([]bool, id+1-len(e.mapScene.switches))
+			e.mapScene.switches = append(e.mapScene.switches, zeros...)
+		}
+		v := e.mapScene.switches[id]
+		rhs := cond.Value.(bool)
+		return v == rhs, nil
+	case data.ConditionTypeSelfSwitch:
+		v := e.selfSwitches[cond.ID]
+		rhs := cond.Value.(bool)
+		return v == rhs, nil
+	case data.ConditionTypeVariable:
+		id := cond.ID
+		if len(e.mapScene.variables) < id+1 {
+			zeros := make([]int, id+1-len(e.mapScene.variables))
+			e.mapScene.variables = append(e.mapScene.variables, zeros...)
+		}
+		v := e.mapScene.variables[id]
+		rhs := int(cond.Value.(float64))
+		switch cond.Comp {
+		case data.ConditionCompEqual:
+			return v == rhs, nil
+		case data.ConditionCompGreaterThanOrEqualTo:
+			return v >= rhs, nil
+		case data.ConditionCompGreaterThan:
+			return v > rhs, nil
+		case data.ConditionCompLessThanOrEqualTo:
+			return v <= rhs, nil
+		case data.ConditionCompLessThan:
+			return v < rhs, nil
+		default:
+			return false, fmt.Errorf("mapscene: invalid comp: %s", cond.Comp)
+		}
+	default:
+		return false, fmt.Errorf("mapscene: invalid condition: %s", cond)
+	}
+	return false, nil
+}
+
+func (e *event) meetsPageCondition(page *data.Page) (bool, error) {
+	for _, cond := range page.Conditions {
+		m, err := e.meetsCondition(cond)
+		if err != nil {
+			return false, err
+		}
+		if !m {
+			return false, nil
+		}
+	}
+	return true, nil
+}
+
 func (e *event) calcPageIndex() (int, error) {
-page:
 	for i := len(e.data.Pages) - 1; i >= 0; i-- {
 		page := e.data.Pages[i]
-		for _, cond := range page.Conditions {
-			// TODO: Is it OK to allow null conditions?
-			if cond == nil {
-				continue
-			}
-			switch cond.Type {
-			case data.ConditionTypeSwitch:
-				s := cond.ID
-				if s < len(e.mapScene.switches) && e.mapScene.switches[s] {
-					continue
-				}
-			case data.ConditionTypeSelfSwitch:
-				if e.selfSwitches[cond.ID] {
-					continue
-				}
-			default:
-				return 0, fmt.Errorf("invalid condition: %s", cond)
-			}
-			continue page
+		m, err := e.meetsPageCondition(page)
+		if err != nil {
+			return 0, err
 		}
-		return i, nil
+		if m {
+			return i, nil
+		}
 	}
 	return -1, nil
 }
