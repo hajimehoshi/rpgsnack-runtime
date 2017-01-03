@@ -185,9 +185,7 @@ func (e *event) goOn(sub *task.TaskLine) error {
 	if e.commandIndex == nil {
 		return task.Terminated
 	}
-
-	e.removeAllBalloons(sub);
-
+	e.removeAllBalloons(sub)
 	if e.commandIndex.isTerminated() {
 		sub.PushFunc(func() error {
 			e.mapScene.balloons = nil
