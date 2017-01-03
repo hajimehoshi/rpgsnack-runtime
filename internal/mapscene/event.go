@@ -124,6 +124,10 @@ page:
 				if s < len(e.mapScene.switches) && e.mapScene.switches[s] {
 					continue
 				}
+			case data.ConditionTypeSelfSwitch:
+				if e.selfSwitches[cond.ID] {
+					continue
+				}
 			default:
 				return 0, fmt.Errorf("invalid condition: %s", cond)
 			}

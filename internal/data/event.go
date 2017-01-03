@@ -106,5 +106,6 @@ type Condition struct {
 type ConditionType string
 
 const (
-	ConditionTypeSwitch ConditionType = "switch"
+	ConditionTypeSwitch     ConditionType = "switch"
+	ConditionTypeSelfSwitch ConditionType = "self_switch"
 )
