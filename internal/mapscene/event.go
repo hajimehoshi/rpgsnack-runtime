@@ -185,21 +185,10 @@ func (e *event) goOn(sub *task.TaskLine) error {
 	if e.commandIndex == nil {
 		return task.Terminated
 	}
+
+	e.removeAllBalloons(sub);
+
 	if e.commandIndex.isTerminated() {
-		sub.Push(task.Sub(func(sub *task.TaskLine) error {
-			subs := []*task.TaskLine{}
-			for _, b := range e.mapScene.balloons {
-				if b == nil {
-					continue
-				}
-				t := &task.TaskLine{}
-				subs = append(subs, t)
-				b.close(t)
-				// mapScene.balloons will be cleared later.
-			}
-			sub.Push(task.Parallel(subs...))
-			return task.Terminated
-		}))
 		sub.PushFunc(func() error {
 			e.mapScene.balloons = nil
 			e.character.turn(e.origDir)
@@ -341,7 +330,6 @@ func (e *event) removeAllBalloons(taskLine *task.TaskLine) {
 }
 
 func (e *event) showMessage(taskLine *task.TaskLine, content string, eventID int) {
-	e.removeAllBalloons(taskLine)
 	taskLine.Push(task.Sub(func(sub *task.TaskLine) error {
 		// TODO: How to call newBalloonCenter?
 		var ch *character
@@ -443,7 +431,6 @@ func (e *event) setSelfSwitch(taskLine *task.TaskLine, number int, value bool) {
 func (e *event) transfer(taskLine *task.TaskLine, x, y int) {
 	count := 0
 	const maxCount = 30
-	e.removeAllBalloons(taskLine)
 	taskLine.PushFunc(func() error {
 		count++
 		e.mapScene.fadingRate = float64(count) / maxCount
