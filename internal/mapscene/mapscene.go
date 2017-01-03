@@ -99,6 +99,30 @@ func New(gameData *data.Game) (*MapScene, error) {
 	return mapScene, nil
 }
 
+func (m *MapScene) switchValue(id int) bool {
+	if len(m.switches) < id+1 {
+		zeros := make([]bool, id+1-len(m.switches))
+		m.switches = append(m.switches, zeros...)
+	}
+	return m.switches[id]
+}
+
+func (m *MapScene) setSwitchValue(id int, value bool) {
+	if len(m.switches) < id+1 {
+		zeros := make([]bool, id+1-len(m.switches))
+		m.switches = append(m.switches, zeros...)
+	}
+	m.switches[id] = value
+}
+
+func (m *MapScene) variableValue(id int) int {
+	if len(m.variables) < id+1 {
+		zeros := make([]int, id+1-len(m.variables))
+		m.variables = append(m.variables, zeros...)
+	}
+	return m.variables[id]
+}
+
 func (m *MapScene) tileSet(id int) (*data.TileSet, error) {
 	for _, t := range m.gameData.TileSets {
 		if t.ID == id {

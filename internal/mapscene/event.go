@@ -117,11 +117,7 @@ func (e *event) meetsCondition(cond *data.Condition) (bool, error) {
 	switch cond.Type {
 	case data.ConditionTypeSwitch:
 		id := cond.ID
-		if len(e.mapScene.switches) < id+1 {
-			zeros := make([]bool, id+1-len(e.mapScene.switches))
-			e.mapScene.switches = append(e.mapScene.switches, zeros...)
-		}
-		v := e.mapScene.switches[id]
+		v := e.mapScene.switchValue(id)
 		rhs := cond.Value.(bool)
 		return v == rhs, nil
 	case data.ConditionTypeSelfSwitch:
@@ -130,11 +126,7 @@ func (e *event) meetsCondition(cond *data.Condition) (bool, error) {
 		return v == rhs, nil
 	case data.ConditionTypeVariable:
 		id := cond.ID
-		if len(e.mapScene.variables) < id+1 {
-			zeros := make([]int, id+1-len(e.mapScene.variables))
-			e.mapScene.variables = append(e.mapScene.variables, zeros...)
-		}
-		v := e.mapScene.variables[id]
+		v := e.mapScene.variableValue(id)
 		rhs := int(cond.Value.(float64))
 		switch cond.Comp {
 		case data.ConditionCompEqual:
@@ -468,11 +460,7 @@ func (e *event) showChoices(taskLine *task.TaskLine, choices []string) {
 
 func (e *event) setSwitch(taskLine *task.TaskLine, number int, value bool) {
 	taskLine.PushFunc(func() error {
-		if len(e.mapScene.switches) < number+1 {
-			zeros := make([]bool, number+1-len(e.mapScene.switches))
-			e.mapScene.switches = append(e.mapScene.switches, zeros...)
-		}
-		e.mapScene.switches[number] = value
+		e.mapScene.setSwitchValue(number, value)
 		return task.Terminated
 	})
 }
