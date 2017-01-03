@@ -243,7 +243,7 @@
                         "green": -34,
                         "blue":  -68,
                         "gray":  170,
-                        "time":  10,
+                        "time":  20,
                         "wait":  true
                       }
                     },
@@ -275,8 +275,8 @@
                         "green": 0,
                         "blue":  0,
                         "gray":  0,
-                        "time":  10,
-                        "wait":  true
+                        "time":  60,
+                        "wait":  false
                       }
                     }
                   ]

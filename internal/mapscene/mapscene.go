@@ -35,6 +35,10 @@ type tint struct {
 	gray  float64
 }
 
+func (t *tint) isZero() bool {
+	return t.red == 0 && t.green == 0 && t.blue == 0 && t.gray == 0
+}
+
 type MapScene struct {
 	gameData      *data.Game
 	currentRoomID int
@@ -50,6 +54,10 @@ type MapScene struct {
 	switches      []bool
 	fadingRate    float64
 	tint          *tint
+	origTint      *tint
+	targetTint    *tint
+	tintCount     int
+	tintMaxCount  int
 }
 
 func New(gameData *data.Game) (*MapScene, error) {
@@ -76,6 +84,9 @@ func New(gameData *data.Game) (*MapScene, error) {
 		player:     player,
 		tilesImage: tilesImage,
 		emptyImage: emptyImage,
+		tint:       &tint{},
+		origTint:   &tint{},
+		targetTint: &tint{},
 	}
 	for _, e := range mapScene.currentMap.Rooms[mapScene.currentRoomID].Events {
 		event, err := newEvent(e, mapScene)
@@ -202,6 +213,7 @@ func (m *MapScene) Update(subTasksUpdated bool, taskLine *task.TaskLine, sceneMa
 			return err
 		}
 	}
+	m.updateTinting()
 	if subTasksUpdated {
 		return nil
 	}
@@ -237,20 +249,34 @@ func (m *MapScene) removeBalloon(balloon *balloon) {
 	}
 }
 
-func (m *MapScene) getTint() (red, green, blue, gray float64) {
-	if m.tint == nil {
-		return 0, 0, 0, 0
+func (m *MapScene) updateTinting() {
+	if m.tintCount > 0 {
+		m.tintCount--
+		rate := 1 - float64(m.tintCount)/float64(m.tintMaxCount)
+		m.tint.red = m.origTint.red*(1-rate) + m.targetTint.red*rate
+		m.tint.green = m.origTint.green*(1-rate) + m.targetTint.green*rate
+		m.tint.blue = m.origTint.blue*(1-rate) + m.targetTint.blue*rate
+		m.tint.gray = m.origTint.gray*(1-rate) + m.targetTint.gray*rate
+		return
 	}
-	return m.tint.red, m.tint.green, m.tint.blue, m.tint.gray
+	m.tint.red = m.targetTint.red
+	m.tint.green = m.targetTint.green
+	m.tint.blue = m.targetTint.blue
+	m.tint.gray = m.targetTint.gray
 }
 
-func (m *MapScene) setTint(red, green, blue, gray float64) {
-	m.tint = &tint{
-		red:   red,
-		green: green,
-		blue:  blue,
-		gray:  gray,
-	}
+func (m *MapScene) startTint(red, green, blue, gray float64, count int) {
+	m.origTint.red = m.tint.red
+	m.origTint.green = m.tint.green
+	m.origTint.blue = m.tint.blue
+	m.origTint.gray = m.tint.gray
+	m.targetTint = &tint{red, green, blue, gray}
+	m.tintCount = count
+	m.tintMaxCount = count
+}
+
+func (m *MapScene) isChangingTint() bool {
+	return m.tintCount > 0
 }
 
 type tilesImageParts struct {
@@ -336,7 +362,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 	op = &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(scene.TileScale, scene.TileScale)
 	op.GeoM.Translate(scene.GameMarginX, scene.GameMarginTop)
-	if m.tint != nil {
+	if !m.tint.isZero() {
 		if m.tint.gray != 0 {
 			op.ColorM.ChangeHSV(0, float64(255-m.tint.gray)/255, 1)
 		}

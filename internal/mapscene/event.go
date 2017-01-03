@@ -283,24 +283,15 @@ func (e *event) goOn(sub *task.TaskLine) error {
 		b := c.Args["blue"].(float64) / 255
 		gray := c.Args["gray"].(float64) / 255
 		time := int(c.Args["time"].(float64))
-		maxFrames := time * 6
-		frames := maxFrames
-		origR, origG, origB, origGray := 0.0, 0.0, 0.0, 0.0
+		wait := c.Args["wait"].(bool)
 		sub.PushFunc(func() error {
-			if frames > 0 {
-				if frames == maxFrames {
-					origR, origG, origB, origGray = e.mapScene.getTint()
-				}
-				frames--
-				rate := 1 - float64(frames)/float64(maxFrames)
-				e.mapScene.setTint(
-					origR*(1-rate)+r*rate,
-					origG*(1-rate)+g*rate,
-					origB*(1-rate)+b*rate,
-					origGray*(1-rate)+gray*rate)
+			e.mapScene.startTint(r, g, b, gray, time*6)
+			return task.Terminated
+		})
+		sub.PushFunc(func() error {
+			if wait && e.mapScene.isChangingTint() {
 				return nil
 			}
-			e.mapScene.setTint(r, g, b, gray)
 			e.commandIndex.advance()
 			return task.Terminated
 		})
