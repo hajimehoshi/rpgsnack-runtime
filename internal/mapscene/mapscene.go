@@ -270,7 +270,10 @@ func (m *MapScene) startTint(red, green, blue, gray float64, count int) {
 	m.origTint.green = m.tint.green
 	m.origTint.blue = m.tint.blue
 	m.origTint.gray = m.tint.gray
-	m.targetTint = &tint{red, green, blue, gray}
+	m.targetTint.red = red
+	m.targetTint.green = green
+	m.targetTint.blue = blue
+	m.targetTint.gray = gray
 	m.tintCount = count
 	m.tintMaxCount = count
 }
