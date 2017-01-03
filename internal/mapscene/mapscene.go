@@ -326,14 +326,6 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 	if err := m.tilesImage.DrawImage(assets.GetImage(tileset.Images[1]), op); err != nil {
 		return err
 	}
-	if m.playerMoving {
-		x, y := m.moveDstX, m.moveDstY
-		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(float64(x*scene.TileSize), float64(y*scene.TileSize))
-		if err := m.tilesImage.DrawImage(assets.GetImage("marker.png"), op); err != nil {
-			return err
-		}
-	}
 	op = &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(scene.TileScale, scene.TileScale)
 	op.GeoM.Translate(scene.GameMarginX, scene.GameMarginTop)
@@ -366,6 +358,16 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 	}
 	if err := screen.DrawImage(m.tilesImage, op); err != nil {
 		return err
+	}
+	if m.playerMoving {
+		x, y := m.moveDstX, m.moveDstY
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(float64(x*scene.TileSize), float64(y*scene.TileSize))
+		op.GeoM.Scale(scene.TileScale, scene.TileScale)
+		op.GeoM.Translate(scene.GameMarginX, scene.GameMarginTop)
+		if err := screen.DrawImage(assets.GetImage("marker.png"), op); err != nil {
+			return err
+		}
 	}
 	if 0 < m.fadingRate {
 		w, h := scene.TileXNum*scene.TileSize, scene.TileYNum*scene.TileSize
