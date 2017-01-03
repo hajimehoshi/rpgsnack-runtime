@@ -205,11 +205,8 @@ func (e *event) goOn(sub *task.TaskLine) error {
 	case data.CommandNameWait:
 		time := int(c.Args["time"].(float64))
 		frames := time * 6
+		sub.Push(task.Sleep(frames))
 		sub.PushFunc(func() error {
-			if frames > 0 {
-				frames--
-				return nil
-			}
 			e.commandIndex.advance()
 			return task.Terminated
 		})

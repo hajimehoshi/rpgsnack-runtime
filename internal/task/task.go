@@ -27,11 +27,11 @@ type Task interface {
 func Sleep(frames int) Task {
 	c := frames
 	return taskFunc(func() error {
-		c--
-		if c == 0 {
-			return Terminated
+		if c > 0 {
+			c--
+			return nil
 		}
-		return nil
+		return Terminated
 	})
 }
 
