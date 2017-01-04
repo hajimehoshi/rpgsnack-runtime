@@ -289,17 +289,27 @@ func (e *event) goOn(sub *task.TaskLine) error {
 			return task.Terminated
 		})
 	case data.CommandNameSetSwitch:
-		number := int(c.Args["id"].(float64))
+		id := int(c.Args["id"].(float64))
 		value := c.Args["value"].(bool)
-		e.setSwitch(sub, number, value)
+		e.setSwitch(sub, id, value)
 		sub.PushFunc(func() error {
 			e.commandIndex.advance()
 			return task.Terminated
 		})
 	case data.CommandNameSetSelfSwitch:
-		number := int(c.Args["id"].(float64))
+		id := int(c.Args["id"].(float64))
 		value := c.Args["value"].(bool)
-		e.setSelfSwitch(sub, number, value)
+		e.setSelfSwitch(sub, id, value)
+		sub.PushFunc(func() error {
+			e.commandIndex.advance()
+			return task.Terminated
+		})
+	case data.CommandNameSetVariable:
+		id := int(c.Args["id"].(float64))
+		op := data.SetVariableOp(c.Args["op"].(string))
+		valueType := data.SetVariableValueType(c.Args["valueType"].(string))
+		value := c.Args["value"]
+		e.setVariable(sub, id, op, valueType, value)
 		sub.PushFunc(func() error {
 			e.commandIndex.advance()
 			return task.Terminated
@@ -380,16 +390,48 @@ func (e *event) showChoices(taskLine *task.TaskLine, choices []string) {
 	})
 }
 
-func (e *event) setSwitch(taskLine *task.TaskLine, number int, value bool) {
+func (e *event) setSwitch(taskLine *task.TaskLine, id int, value bool) {
 	taskLine.PushFunc(func() error {
-		e.mapScene.setSwitchValue(number, value)
+		e.mapScene.setSwitchValue(id, value)
 		return task.Terminated
 	})
 }
 
-func (e *event) setSelfSwitch(taskLine *task.TaskLine, number int, value bool) {
+func (e *event) setSelfSwitch(taskLine *task.TaskLine, id int, value bool) {
 	taskLine.PushFunc(func() error {
-		e.selfSwitches[number] = value
+		e.selfSwitches[id] = value
+		return task.Terminated
+	})
+}
+
+func (e *event) setVariable(taskLine *task.TaskLine, id int, op data.SetVariableOp, valueType data.SetVariableValueType, value interface{}) {
+	taskLine.PushFunc(func() error {
+		rhs := 0
+		switch valueType {
+		case data.SetVariableValueTypeConstant:
+			rhs = int(value.(float64))
+		case data.SetVariableValueTypeVariable:
+			v := int(value.(float64))
+			rhs = e.mapScene.variableValue(v)
+		case data.SetVariableValueTypeRandom:
+			panic("not implemented yet")
+		case data.SetVariableValueTypeCharacter:
+			panic("not implemented yet")
+		}
+		switch op {
+		case data.SetVariableOpAssign:
+		case data.SetVariableOpAdd:
+			rhs += e.mapScene.variableValue(id)
+		case data.SetVariableOpSub:
+			rhs -= e.mapScene.variableValue(id)
+		case data.SetVariableOpMul:
+			rhs *= e.mapScene.variableValue(id)
+		case data.SetVariableOpDiv:
+			rhs /= e.mapScene.variableValue(id)
+		case data.SetVariableOpMod:
+			rhs %= e.mapScene.variableValue(id)
+		}
+		e.mapScene.setVariableValue(id, rhs)
 		return task.Terminated
 	})
 }

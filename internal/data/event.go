@@ -90,12 +90,33 @@ const (
 	CommandNameShowChoices               = "show_choices"
 	CommandNameSetSwitch                 = "set_switch"
 	CommandNameSetSelfSwitch             = "set_self_switch"
+	CommandNameSetVariable               = "set_variable"
 	CommandNameTransfer                  = "transfer"
 	CommandNameSetRoute                  = "set_route"
 	CommandNameTintScreen                = "tint_screen"
 	CommandNamePlaySE                    = "play_se"
 	CommandNamePlayBGM                   = "play_bgm"
 	CommandNameStopBGM                   = "stop_bgm"
+)
+
+type SetVariableOp string
+
+const (
+	SetVariableOpAssign SetVariableOp = "="
+	SetVariableOpAdd                  = "+"
+	SetVariableOpSub                  = "-"
+	SetVariableOpMul                  = "*"
+	SetVariableOpDiv                  = "/"
+	SetVariableOpMod                  = "%"
+)
+
+type SetVariableValueType string
+
+const (
+	SetVariableValueTypeConstant  SetVariableValueType = "constant"
+	SetVariableValueTypeVariable                       = "variable"
+	SetVariableValueTypeRandom                         = "random"
+	SetVariableValueTypeCharacter                      = "character"
 )
 
 type Condition struct {

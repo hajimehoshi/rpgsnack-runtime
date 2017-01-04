@@ -140,6 +140,14 @@ func (m *MapScene) variableValue(id int) int {
 	return m.variables[id]
 }
 
+func (m *MapScene) setVariableValue(id int, value int) {
+	if len(m.variables) < id+1 {
+		zeros := make([]int, id+1-len(m.variables))
+		m.variables = append(m.variables, zeros...)
+	}
+	m.variables[id] = value
+}
+
 func (m *MapScene) tileSet(id int) (*data.TileSet, error) {
 	for _, t := range m.gameData.TileSets {
 		if t.ID == id {
