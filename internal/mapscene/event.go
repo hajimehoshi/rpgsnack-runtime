@@ -134,6 +134,9 @@ func (e *event) meetsCondition(cond *data.Condition) (bool, error) {
 			return false, fmt.Errorf("mapscene: invalid value type: %s", cond.ValueType)
 		}
 		switch cond.Comp {
+		case "=":
+			// TODO: This case is just a temporary hack. Remove this later.
+			fallthrough
 		case data.ConditionCompEqualTo:
 			return v == rhs, nil
 		case data.ConditionCompNotEqualTo:
@@ -244,9 +247,28 @@ func (e *event) goOn(sub *task.TaskLine) error {
 	c := e.commandIndex.command()
 	switch c.Name {
 	case data.CommandNameIf:
-		println("not implemented yet")
+		conditions := c.Args["conditions"].([]interface{})
+		cs, err := data.ConditionsFromMaps(conditions)
+		if err != nil {
+			return err
+		}
 		sub.PushFunc(func() error {
-			e.commandIndex.advance()
+			matches := true
+			for _, c := range cs {
+				m, err := e.meetsCondition(c)
+				if err != nil {
+					return err
+				}
+				if !m {
+					matches = false
+					break
+				}
+			}
+			if matches {
+				e.commandIndex.choose(0)
+			} else {
+				e.commandIndex.advance()
+			}
 			return task.Terminated
 		})
 	case data.CommandNameWait:

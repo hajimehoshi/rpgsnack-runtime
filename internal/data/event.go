@@ -14,6 +14,10 @@
 
 package data
 
+import (
+	"encoding/json"
+)
+
 const (
 	SelfSwitchNum = 4
 )
@@ -125,6 +129,18 @@ type Condition struct {
 	Comp      ConditionComp      `json:"comp"`
 	ValueType ConditionValueType `json:"valueType"`
 	Value     interface{}        `json:"value"`
+}
+
+func ConditionsFromMaps(m []interface{}) ([]*Condition, error) {
+	b, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	var c []*Condition
+	if err := json.Unmarshal(b, &c); err != nil {
+		return nil, err
+	}
+	return c, nil
 }
 
 type ConditionType string
