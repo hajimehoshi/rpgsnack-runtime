@@ -23,6 +23,8 @@ type Map struct {
 
 type Room struct {
 	ID     int      `json:"id"`
+	X      int      `json:"x"`
+	Y      int      `json:"y"`
 	Tiles  [][]int  `json:"tiles"`
 	Events []*Event `json:"events"`
 }
