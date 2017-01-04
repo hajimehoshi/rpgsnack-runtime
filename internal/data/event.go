@@ -117,7 +117,7 @@ const (
 type ConditionComp string
 
 const (
-	ConditionCompEqual                ConditionComp = "="
+	ConditionCompEqual                ConditionComp = "=="
 	ConditionCompGreaterThanOrEqualTo               = ">="
 	ConditionCompGreaterThan                        = ">"
 	ConditionCompLessThanOrEqualTo                  = "<="
