@@ -17,6 +17,9 @@ package mapscene
 import (
 	"fmt"
 	"image/color"
+	"regexp"
+	"strconv"
+	"strings"
 
 	"github.com/hajimehoshi/ebiten"
 
@@ -286,12 +289,33 @@ func (m *MapScene) Update(subTasksUpdated bool, taskLine *task.TaskLine, sceneMa
 	return nil
 }
 
+var reMessage = regexp.MustCompile(`\\([a-zA-Z])\[(\d+)\]`)
+
+func (m *MapScene) parseMessageSyntax(str string) string {
+	return reMessage.ReplaceAllStringFunc(str, func(part string) string {
+		name := strings.ToLower(part[1:2])
+		id, err := strconv.Atoi(part[3 : len(part)-1])
+		if err != nil {
+			panic(fmt.Sprintf("not reach: %s", err))
+		}
+		switch name {
+		case "v":
+			return strconv.Itoa(m.variableValue(id))
+		}
+		return str
+	})
+}
+
 func (m *MapScene) showMessage(taskLine *task.TaskLine, content string, character *character) {
-	m.balloons.ShowMessage(taskLine, content, character, m)
+	content = m.parseMessageSyntax(content)
+	m.balloons.ShowMessage(taskLine, content, character)
 }
 
 func (m *MapScene) showChoices(taskLine *task.TaskLine, choices []string, chosenIndexSetter func(int)) {
-	m.balloons.ShowChoices(taskLine, choices, chosenIndexSetter, m)
+	for i, c := range choices {
+		choices[i] = m.parseMessageSyntax(c)
+	}
+	m.balloons.ShowChoices(taskLine, choices, chosenIndexSetter)
 }
 
 func (m *MapScene) closeAllBalloons(taskLine *task.TaskLine) {

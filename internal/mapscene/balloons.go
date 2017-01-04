@@ -39,12 +39,12 @@ func (b *balloons) removeBalloon(balloon *balloon) {
 	}
 }
 
-func (b *balloons) ShowMessage(taskLine *task.TaskLine, content string, character *character, mapScene *MapScene) {
+func (b *balloons) ShowMessage(taskLine *task.TaskLine, content string, character *character) {
 	taskLine.Push(task.Sub(func(sub *task.TaskLine) error {
 		// TODO: How to call newBalloonCenter?
 		x := character.x*scene.TileSize + scene.TileSize/2 + scene.GameMarginX/scene.TileScale
 		y := character.y*scene.TileSize + scene.GameMarginTop/scene.TileScale
-		newBalloon := newBalloonWithArrow(x, y, content, mapScene)
+		newBalloon := newBalloonWithArrow(x, y, content)
 		b.balloons = []*balloon{newBalloon}
 		b.balloons[0].open(sub)
 		return task.Terminated
@@ -58,7 +58,7 @@ func (b *balloons) ShowMessage(taskLine *task.TaskLine, content string, characte
 	// TODO: close balloon here?
 }
 
-func (b *balloons) ShowChoices(taskLine *task.TaskLine, choices []string, chosenIndexSetter func(int), mapScene *MapScene) {
+func (b *balloons) ShowChoices(taskLine *task.TaskLine, choices []string, chosenIndexSetter func(int)) {
 	const height = 20
 	const ymax = scene.TileYNum*scene.TileSize + (scene.GameMarginTop+scene.GameMarginBottom)/scene.TileScale
 	ymin := ymax - len(choices)*height
@@ -69,7 +69,7 @@ func (b *balloons) ShowChoices(taskLine *task.TaskLine, choices []string, chosen
 			x := 0
 			y := i*height + ymin
 			width := scene.TileXNum * scene.TileSize
-			balloon := newBalloon(x, y, width, height, choice, mapScene)
+			balloon := newBalloon(x, y, width, height, choice)
 			b.balloons = append(b.balloons, balloon)
 			t := &task.TaskLine{}
 			sub2 = append(sub2, t)

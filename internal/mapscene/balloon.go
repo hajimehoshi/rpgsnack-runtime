@@ -15,11 +15,7 @@
 package mapscene
 
 import (
-	"fmt"
 	"image/color"
-	"regexp"
-	"strconv"
-	"strings"
 
 	"github.com/hajimehoshi/ebiten"
 
@@ -54,10 +50,9 @@ type balloon struct {
 	maxCount       int
 }
 
-func newBalloon(x, y, width, height int, content string, mapScene *MapScene) *balloon {
-	c := parseMessageSyntax(content, mapScene)
+func newBalloon(x, y, width, height int, content string) *balloon {
 	b := &balloon{
-		content: c,
+		content: content,
 		x:       x,
 		y:       y,
 		width:   ((width + 3) / 4) * 4,
@@ -82,15 +77,14 @@ func balloonSizeFromContent(content string) (int, int, int) {
 	return w, h, contentOffsetX
 }
 
-func newBalloonCenter(content string, mapScene *MapScene) *balloon {
-	c := parseMessageSyntax(content, mapScene)
+func newBalloonCenter(content string) *balloon {
 	sw := scene.TileXNum*scene.TileSize + scene.GameMarginX/scene.TileScale
 	sh := scene.TileYNum*scene.TileSize + scene.GameMarginTop/scene.TileScale
-	w, h, contentOffsetX := balloonSizeFromContent(c)
+	w, h, contentOffsetX := balloonSizeFromContent(content)
 	x := (sw - w) / 2
 	y := (sh - h) / 2
 	b := &balloon{
-		content:        c,
+		content:        content,
 		contentOffsetX: contentOffsetX,
 		x:              x,
 		y:              y,
@@ -101,16 +95,15 @@ func newBalloonCenter(content string, mapScene *MapScene) *balloon {
 	return b
 }
 
-func newBalloonWithArrow(arrowX, arrowY int, content string, mapScene *MapScene) *balloon {
-	c := parseMessageSyntax(content, mapScene)
+func newBalloonWithArrow(arrowX, arrowY int, content string) *balloon {
 	b := &balloon{
-		content:  c,
+		content:  content,
 		hasArrow: true,
 		arrowX:   arrowX,
 		arrowY:   arrowY - balloonArrowHeight,
 		count:    balloonMaxCount,
 	}
-	w, h, contentOffsetX := balloonSizeFromContent(c)
+	w, h, contentOffsetX := balloonSizeFromContent(content)
 	b.width = w
 	b.height = h
 	b.contentOffsetX = contentOffsetX
@@ -210,23 +203,6 @@ func (b *balloonImageParts) Dst(index int) (int, int, int, int) {
 	x := b.balloon.x + (index%w)*4
 	y := b.balloon.y + (index/w)*4
 	return x, y, x + 4, y + 4
-}
-
-var reMessage = regexp.MustCompile(`\\([a-zA-Z])\[(\d+)\]`)
-
-func parseMessageSyntax(str string, mapScene *MapScene) string {
-	return reMessage.ReplaceAllStringFunc(str, func(part string) string {
-		name := strings.ToLower(part[1:2])
-		id, err := strconv.Atoi(part[3 : len(part)-1])
-		if err != nil {
-			panic(fmt.Sprintf("not reach: %s", err))
-		}
-		switch name {
-		case "v":
-			return strconv.Itoa(mapScene.variableValue(id))
-		}
-		return str
-	})
 }
 
 func (b *balloon) draw(screen *ebiten.Image) error {
