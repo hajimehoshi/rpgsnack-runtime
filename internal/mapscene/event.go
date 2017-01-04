@@ -263,9 +263,13 @@ func (e *event) goOn(sub *task.TaskLine) error {
 			}
 			if matches {
 				e.commandIndex.choose(0)
-			} else {
-				e.commandIndex.advance()
+				return task.Terminated
 			}
+			if len(c.Branches) >= 2 {
+				e.commandIndex.choose(1)
+				return task.Terminated
+			}
+			e.commandIndex.advance()
 			return task.Terminated
 		})
 	case data.CommandNameWait:
