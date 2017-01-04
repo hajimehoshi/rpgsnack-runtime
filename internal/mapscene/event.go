@@ -400,6 +400,7 @@ func (e *event) transfer(taskLine *task.TaskLine, roomID, x, y int) {
 	})
 	taskLine.PushFunc(func() error {
 		e.mapScene.player.transferImmediately(x, y)
+		e.mapScene.changeRoom(roomID)
 		return task.Terminated
 	})
 	taskLine.PushFunc(func() error {

@@ -80,24 +80,17 @@ func New(gameData *data.Game) (*MapScene, error) {
 		return nil, err
 	}
 	mapScene := &MapScene{
-		gameData:      gameData,
-		currentMap:    gameData.Maps[0],
-		currentRoomID: roomID,
-		player:        player,
-		balloons:      &balloons{},
-		tilesImage:    tilesImage,
-		emptyImage:    emptyImage,
-		tint:          &tint{},
-		origTint:      &tint{},
-		targetTint:    &tint{},
+		gameData:   gameData,
+		currentMap: gameData.Maps[0],
+		player:     player,
+		balloons:   &balloons{},
+		tilesImage: tilesImage,
+		emptyImage: emptyImage,
+		tint:       &tint{},
+		origTint:   &tint{},
+		targetTint: &tint{},
 	}
-	for _, e := range mapScene.currentRoom().Events {
-		event, err := newEvent(e, mapScene)
-		if err != nil {
-			return nil, err
-		}
-		mapScene.events = append(mapScene.events, event)
-	}
+	mapScene.changeRoom(roomID)
 	return mapScene, nil
 }
 
@@ -106,6 +99,19 @@ func (m *MapScene) currentRoom() *data.Room {
 		if r.ID == m.currentRoomID {
 			return r
 		}
+	}
+	return nil
+}
+
+func (m *MapScene) changeRoom(roomID int) error {
+	m.currentRoomID = roomID
+	m.events = nil
+	for _, e := range m.currentRoom().Events {
+		event, err := newEvent(e, m)
+		if err != nil {
+			return err
+		}
+		m.events = append(m.events, event)
 	}
 	return nil
 }
