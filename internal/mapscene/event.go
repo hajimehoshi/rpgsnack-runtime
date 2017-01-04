@@ -298,9 +298,10 @@ func (e *event) goOn(sub *task.TaskLine) error {
 			return task.Terminated
 		})
 	case data.CommandNameTransfer:
+		roomID := int(c.Args["roomId"].(float64))
 		x := int(c.Args["x"].(float64))
 		y := int(c.Args["y"].(float64))
-		e.transfer(sub, x, y)
+		e.transfer(sub, roomID, x, y)
 		sub.PushFunc(func() error {
 			e.commandIndex.advance()
 			return task.Terminated
@@ -386,7 +387,7 @@ func (e *event) setSelfSwitch(taskLine *task.TaskLine, number int, value bool) {
 	})
 }
 
-func (e *event) transfer(taskLine *task.TaskLine, x, y int) {
+func (e *event) transfer(taskLine *task.TaskLine, roomID, x, y int) {
 	count := 0
 	const maxCount = 30
 	taskLine.PushFunc(func() error {
@@ -398,7 +399,7 @@ func (e *event) transfer(taskLine *task.TaskLine, x, y int) {
 		return nil
 	})
 	taskLine.PushFunc(func() error {
-		e.mapScene.player.moveImmediately(x, y)
+		e.mapScene.player.transferImmediately(x, y)
 		return task.Terminated
 	})
 	taskLine.PushFunc(func() error {

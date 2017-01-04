@@ -55,6 +55,7 @@ func (b *balloons) ShowMessage(taskLine *task.TaskLine, content string, characte
 		}
 		return nil
 	})
+	// TODO: close balloon here?
 }
 
 func (b *balloons) ShowChoices(taskLine *task.TaskLine, choices []string, chosenIndexSetter func(int)) {

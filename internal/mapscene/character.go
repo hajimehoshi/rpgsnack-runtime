@@ -137,7 +137,7 @@ func (c *character) move(taskLine *task.TaskLine, passable func(x, y int) (bool,
 	return nil
 }
 
-func (c *character) moveImmediately(x, y int) {
+func (c *character) transferImmediately(x, y int) {
 	c.x = x
 	c.y = y
 }
