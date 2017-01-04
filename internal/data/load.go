@@ -18,8 +18,23 @@ package data
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 )
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a < b {
+		return b
+	}
+	return a
+}
 
 func Load() (*Game, error) {
 	dataJson, err := ioutil.ReadFile("data.json")
@@ -28,6 +43,12 @@ func Load() (*Game, error) {
 	}
 	var gameData *Game
 	if err := json.Unmarshal(dataJson, &gameData); err != nil {
+		if err, ok := err.(*json.SyntaxError); ok {
+			begin := max(int(err.Offset)-20, 0)
+			end := min(int(err.Offset)+40, len(dataJson))
+			part := string(dataJson[begin:end])
+			return nil, fmt.Errorf("data: JSON syntax error: %s:\n%s", err.Error(), part)
+		}
 		return nil, err
 	}
 	return gameData, nil
