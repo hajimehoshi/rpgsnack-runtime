@@ -134,8 +134,10 @@ func (e *event) meetsCondition(cond *data.Condition) (bool, error) {
 			return false, fmt.Errorf("mapscene: invalid value type: %s", cond.ValueType)
 		}
 		switch cond.Comp {
-		case data.ConditionCompEqual:
+		case data.ConditionCompEqualTo:
 			return v == rhs, nil
+		case data.ConditionCompNotEqualTo:
+			return v != rhs, nil
 		case data.ConditionCompGreaterThanOrEqualTo:
 			return v >= rhs, nil
 		case data.ConditionCompGreaterThan:

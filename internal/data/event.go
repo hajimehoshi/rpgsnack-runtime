@@ -138,7 +138,8 @@ const (
 type ConditionComp string
 
 const (
-	ConditionCompEqual                ConditionComp = "=="
+	ConditionCompEqualTo              ConditionComp = "=="
+	ConditionCompNotEqualTo                         = "!="
 	ConditionCompGreaterThanOrEqualTo               = ">="
 	ConditionCompGreaterThan                        = ">"
 	ConditionCompLessThanOrEqualTo                  = "<="
