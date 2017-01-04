@@ -281,7 +281,7 @@ func (e *event) goOn(sub *task.TaskLine) error {
 			return task.Terminated
 		})
 	case data.CommandNameCallEvent:
-		println("not implemented yet")
+		println(fmt.Sprintf("not implemented yet: %s", c.Name))
 		sub.PushFunc(func() error {
 			e.commandIndex.advance()
 			return task.Terminated
@@ -349,7 +349,7 @@ func (e *event) goOn(sub *task.TaskLine) error {
 			return task.Terminated
 		})
 	case data.CommandNameSetRoute:
-		println("not implemented yet")
+		println(fmt.Sprintf("not implemented yet: %s", c.Name))
 		sub.PushFunc(func() error {
 			e.commandIndex.advance()
 			return task.Terminated
@@ -373,19 +373,19 @@ func (e *event) goOn(sub *task.TaskLine) error {
 			return task.Terminated
 		})
 	case data.CommandNamePlaySE:
-		println("not implemented yet")
+		println(fmt.Sprintf("not implemented yet: %s", c.Name))
 		sub.PushFunc(func() error {
 			e.commandIndex.advance()
 			return task.Terminated
 		})
 	case data.CommandNamePlayBGM:
-		println("not implemented yet")
+		println(fmt.Sprintf("not implemented yet: %s", c.Name))
 		sub.PushFunc(func() error {
 			e.commandIndex.advance()
 			return task.Terminated
 		})
 	case data.CommandNameStopBGM:
-		println("not implemented yet")
+		println(fmt.Sprintf("not implemented yet: %s", c.Name))
 		sub.PushFunc(func() error {
 			e.commandIndex.advance()
 			return task.Terminated
@@ -404,7 +404,8 @@ func (e *event) showMessage(taskLine *task.TaskLine, content string, eventID int
 	case 0:
 		ch = e.character
 	default:
-		panic("not implemented")
+		println(fmt.Sprintf("not implemented yet (show_message): eventId: %d", eventID))
+		return
 	}
 	e.mapScene.showMessage(taskLine, content, ch)
 }
@@ -439,9 +440,11 @@ func (e *event) setVariable(taskLine *task.TaskLine, id int, op data.SetVariable
 			v := int(value.(float64))
 			rhs = e.mapScene.variableValue(v)
 		case data.SetVariableValueTypeRandom:
-			panic("not implemented yet")
+			println(fmt.Sprintf("not implemented yet (set_variable): valueType %s", valueType))
+			return task.Terminated
 		case data.SetVariableValueTypeCharacter:
-			panic("not implemented yet")
+			println(fmt.Sprintf("not implemented yet (set_variable): valueType %s", valueType))
+			return task.Terminated
 		}
 		switch op {
 		case data.SetVariableOpAssign:
