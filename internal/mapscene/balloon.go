@@ -15,7 +15,11 @@
 package mapscene
 
 import (
+	"fmt"
 	"image/color"
+	"regexp"
+	"strconv"
+	"strings"
 
 	"github.com/hajimehoshi/ebiten"
 
@@ -36,23 +40,24 @@ const (
 )
 
 type balloon struct {
-	x               int
-	y               int
-	width           int
-	height          int
-	hasArrow        bool
-	arrowX          int
-	arrowY          int
-	arrowFlip       bool
-	content         string
-	contentOffsetX  int
-	count           int
-	maxCount        int
+	x              int
+	y              int
+	width          int
+	height         int
+	hasArrow       bool
+	arrowX         int
+	arrowY         int
+	arrowFlip      bool
+	content        string
+	contentOffsetX int
+	count          int
+	maxCount       int
 }
 
-func newBalloon(x, y, width, height int, content string) *balloon {
+func newBalloon(x, y, width, height int, content string, mapScene *MapScene) *balloon {
+	c := parseMessageSyntax(content, mapScene)
 	b := &balloon{
-		content: content,
+		content: c,
 		x:       x,
 		y:       y,
 		width:   ((width + 3) / 4) * 4,
@@ -63,13 +68,13 @@ func newBalloon(x, y, width, height int, content string) *balloon {
 }
 
 func balloonSizeFromContent(content string) (int, int, int) {
+	// content is already parsed here.
 	contentOffsetX := 0
 	w, h := font.MeasureSize(content)
 	w = (w + 2*balloonMarginX) * scene.TextScale / scene.TileScale
 	h = (h + 2*balloonMarginY) * scene.TextScale / scene.TileScale
 	w = ((w + 3) / 4) * 4
 	h = ((h + 3) / 4) * 4
-
 	if w < balloonMinWidth {
 		contentOffsetX = (balloonMinWidth - w) / 2
 		w = balloonMinWidth
@@ -77,33 +82,35 @@ func balloonSizeFromContent(content string) (int, int, int) {
 	return w, h, contentOffsetX
 }
 
-func newBalloonCenter(content string) *balloon {
+func newBalloonCenter(content string, mapScene *MapScene) *balloon {
+	c := parseMessageSyntax(content, mapScene)
 	sw := scene.TileXNum*scene.TileSize + scene.GameMarginX/scene.TileScale
 	sh := scene.TileYNum*scene.TileSize + scene.GameMarginTop/scene.TileScale
-	w, h, contentOffsetX := balloonSizeFromContent(content)
+	w, h, contentOffsetX := balloonSizeFromContent(c)
 	x := (sw - w) / 2
 	y := (sh - h) / 2
 	b := &balloon{
-		content: content,
+		content:        c,
 		contentOffsetX: contentOffsetX,
-		x:       x,
-		y:       y,
-		width:   w,
-		height:  h,
-		count:   balloonMaxCount,
+		x:              x,
+		y:              y,
+		width:          w,
+		height:         h,
+		count:          balloonMaxCount,
 	}
 	return b
 }
 
-func newBalloonWithArrow(arrowX, arrowY int, content string) *balloon {
+func newBalloonWithArrow(arrowX, arrowY int, content string, mapScene *MapScene) *balloon {
+	c := parseMessageSyntax(content, mapScene)
 	b := &balloon{
-		content:  content,
+		content:  c,
 		hasArrow: true,
 		arrowX:   arrowX,
 		arrowY:   arrowY - balloonArrowHeight,
 		count:    balloonMaxCount,
 	}
-	w, h, contentOffsetX := balloonSizeFromContent(content)
+	w, h, contentOffsetX := balloonSizeFromContent(c)
 	b.width = w
 	b.height = h
 	b.contentOffsetX = contentOffsetX
@@ -203,6 +210,23 @@ func (b *balloonImageParts) Dst(index int) (int, int, int, int) {
 	x := b.balloon.x + (index%w)*4
 	y := b.balloon.y + (index/w)*4
 	return x, y, x + 4, y + 4
+}
+
+var reMessage = regexp.MustCompile(`\\([a-zA-Z])\[(\d+)\]`)
+
+func parseMessageSyntax(str string, mapScene *MapScene) string {
+	return reMessage.ReplaceAllStringFunc(str, func(part string) string {
+		name := strings.ToLower(part[1:2])
+		id, err := strconv.Atoi(part[3 : len(part)-1])
+		if err != nil {
+			panic(fmt.Sprintf("not reach: %s", err))
+		}
+		switch name {
+		case "v":
+			return strconv.Itoa(mapScene.variableValue(id))
+		}
+		return str
+	})
 }
 
 func (b *balloon) draw(screen *ebiten.Image) error {

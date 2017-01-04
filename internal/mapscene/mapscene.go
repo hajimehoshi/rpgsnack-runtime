@@ -287,11 +287,11 @@ func (m *MapScene) Update(subTasksUpdated bool, taskLine *task.TaskLine, sceneMa
 }
 
 func (m *MapScene) showMessage(taskLine *task.TaskLine, content string, character *character) {
-	m.balloons.ShowMessage(taskLine, content, character)
+	m.balloons.ShowMessage(taskLine, content, character, m)
 }
 
 func (m *MapScene) showChoices(taskLine *task.TaskLine, choices []string, chosenIndexSetter func(int)) {
-	m.balloons.ShowChoices(taskLine, choices, chosenIndexSetter)
+	m.balloons.ShowChoices(taskLine, choices, chosenIndexSetter, m)
 }
 
 func (m *MapScene) closeAllBalloons(taskLine *task.TaskLine) {
