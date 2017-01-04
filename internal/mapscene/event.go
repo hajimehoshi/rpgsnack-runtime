@@ -126,6 +126,13 @@ func (e *event) meetsCondition(cond *data.Condition) (bool, error) {
 		id := cond.ID
 		v := e.mapScene.variableValue(id)
 		rhs := int(cond.Value.(float64))
+		switch cond.ValueType {
+		case data.ConditionValueTypeConstant:
+		case data.ConditionValueTypeVariable:
+			rhs = e.mapScene.variableValue(rhs)
+		default:
+			return false, fmt.Errorf("mapscene: invalid value type: %s", cond.ValueType)
+		}
 		switch cond.Comp {
 		case data.ConditionCompEqual:
 			return v == rhs, nil

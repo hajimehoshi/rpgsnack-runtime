@@ -127,6 +127,6 @@ const (
 type ConditionValueType string
 
 const (
-	ConditionValueTypeConst    ConditionValueType = "const"
+	ConditionValueTypeConstant ConditionValueType = "constant"
 	ConditionValueTypeVariable                    = "variable"
 )
