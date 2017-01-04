@@ -461,29 +461,12 @@ func (e *event) setVariable(taskLine *task.TaskLine, id int, op data.SetVariable
 }
 
 func (e *event) transfer(taskLine *task.TaskLine, roomID, x, y int) {
-	count := 0
-	const maxCount = 30
+	e.mapScene.fadeOut(taskLine, 30)
 	taskLine.PushFunc(func() error {
-		count++
-		e.mapScene.fadingRate = float64(count) / maxCount
-		if count == maxCount {
-			return task.Terminated
-		}
-		return nil
-	})
-	taskLine.PushFunc(func() error {
-		e.mapScene.player.transferImmediately(x, y)
-		e.mapScene.changeRoom(roomID)
+		e.mapScene.transferPlayerImmediately(roomID, x, y)
 		return task.Terminated
 	})
-	taskLine.PushFunc(func() error {
-		count--
-		e.mapScene.fadingRate = float64(count) / maxCount
-		if count == 0 {
-			return task.Terminated
-		}
-		return nil
-	})
+	e.mapScene.fadeIn(taskLine, 30)
 }
 
 func (e *event) update() error {

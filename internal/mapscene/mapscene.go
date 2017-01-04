@@ -322,6 +322,35 @@ func (m *MapScene) closeAllBalloons(taskLine *task.TaskLine) {
 	m.balloons.CloseAll(taskLine)
 }
 
+func (m *MapScene) transferPlayerImmediately(roomID, x, y int) {
+	m.player.transferImmediately(x, y)
+	m.changeRoom(roomID)
+}
+
+func (m *MapScene) fadeOut(taskLine *task.TaskLine, maxCount int) {
+	count := 0
+	taskLine.PushFunc(func() error {
+		count++
+		m.fadingRate = float64(count) / float64(maxCount)
+		if count == maxCount {
+			return task.Terminated
+		}
+		return nil
+	})
+}
+
+func (m *MapScene) fadeIn(taskLine *task.TaskLine, maxCount int) {
+	count := maxCount
+	taskLine.PushFunc(func() error {
+		count--
+		m.fadingRate = float64(count) / float64(maxCount)
+		if count == 0 {
+			return task.Terminated
+		}
+		return nil
+	})
+}
+
 func (m *MapScene) updateTinting() {
 	if m.tintCount > 0 {
 		m.tintCount--
