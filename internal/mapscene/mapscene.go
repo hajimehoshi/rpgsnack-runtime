@@ -260,6 +260,20 @@ func (m *MapScene) movePlayerIfNeeded(taskLine *task.TaskLine) error {
 	return nil
 }
 
+func (m *MapScene) character(id int, self *event) *character {
+	var ch *character
+	switch id {
+	case -1:
+		ch = m.player.character
+	case 0:
+		ch = self.character
+	default:
+		println(fmt.Sprintf("not implemented yet (show_message): eventId: %d", id))
+		return nil
+	}
+	return ch
+}
+
 func (m *MapScene) Update(subTasksUpdated bool, taskLine *task.TaskLine, sceneManager *scene.SceneManager) error {
 	for _, e := range m.events {
 		if err := e.updateCharacterIfNeeded(); err != nil {

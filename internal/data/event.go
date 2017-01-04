@@ -123,6 +123,12 @@ const (
 	SetVariableValueTypeCharacter                      = "character"
 )
 
+type SetVariableCharacterType string
+
+const (
+	SetVariableCharacterTypeDirection SetVariableCharacterType = "direction"
+)
+
 type Condition struct {
 	Type      ConditionType      `json:"type"`
 	ID        int                `json:"id"`

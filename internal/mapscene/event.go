@@ -397,16 +397,7 @@ func (e *event) goOn(sub *task.TaskLine) error {
 }
 
 func (e *event) showMessage(taskLine *task.TaskLine, content string, eventID int) {
-	var ch *character
-	switch eventID {
-	case -1:
-		ch = e.mapScene.player.character
-	case 0:
-		ch = e.character
-	default:
-		println(fmt.Sprintf("not implemented yet (show_message): eventId: %d", eventID))
-		return
-	}
+	ch := e.mapScene.character(eventID, e)
 	e.mapScene.showMessage(taskLine, content, ch)
 }
 
@@ -443,8 +434,25 @@ func (e *event) setVariable(taskLine *task.TaskLine, id int, op data.SetVariable
 			println(fmt.Sprintf("not implemented yet (set_variable): valueType %s", valueType))
 			return task.Terminated
 		case data.SetVariableValueTypeCharacter:
-			println(fmt.Sprintf("not implemented yet (set_variable): valueType %s", valueType))
-			return task.Terminated
+			v := value.(map[string]interface{})
+			eventID := int(v["eventId"].(float64))
+			ch := e.mapScene.character(eventID, e)
+			t := data.SetVariableCharacterType(v["type"].(string))
+			switch t {
+			case data.SetVariableCharacterTypeDirection:
+				switch ch.dir {
+				case data.DirUp:
+					rhs = 0
+				case data.DirRight:
+					rhs = 1
+				case data.DirDown:
+					rhs = 2
+				case data.DirLeft:
+					rhs = 3
+				}
+			default:
+				println(fmt.Sprintf("not implemented yet (set_variable): type %s", t))
+			}
 		}
 		switch op {
 		case data.SetVariableOpAssign:
