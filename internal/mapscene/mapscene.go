@@ -42,7 +42,6 @@ type MapScene struct {
 	playerMoving  bool
 	balloons      *balloons
 	tilesImage    *ebiten.Image
-	emptyImage    *ebiten.Image
 	events        []*event
 	fadingRate    float64
 }
@@ -61,15 +60,10 @@ func New() (*MapScene, error) {
 	if err != nil {
 		return nil, err
 	}
-	emptyImage, err := ebiten.NewImage(16, 16, ebiten.FilterNearest)
-	if err != nil {
-		return nil, err
-	}
 	mapScene := &MapScene{
 		gameState:  gamestate.NewGame(),
 		balloons:   &balloons{},
 		tilesImage: tilesImage,
-		emptyImage: emptyImage,
 		player:     player,
 		currentMap: data.Current().Maps[0],
 	}
@@ -295,27 +289,29 @@ func (m *MapScene) transferPlayerImmediately(roomID, x, y int) {
 	m.changeRoom(roomID)
 }
 
-func (m *MapScene) fadeOut(taskLine *task.TaskLine, maxCount int) {
-	count := 0
+func (m *MapScene) fadeOut(taskLine *task.TaskLine, count int) {
 	taskLine.PushFunc(func() error {
-		count++
-		m.fadingRate = float64(count) / float64(maxCount)
-		if count == maxCount {
-			return task.Terminated
+		m.gameState.Screen().FadeOut(count)
+		return task.Terminated
+	})
+	taskLine.PushFunc(func() error {
+		if m.gameState.Screen().IsFading() {
+			return nil
 		}
-		return nil
+		return task.Terminated
 	})
 }
 
-func (m *MapScene) fadeIn(taskLine *task.TaskLine, maxCount int) {
-	count := maxCount
+func (m *MapScene) fadeIn(taskLine *task.TaskLine, count int) {
 	taskLine.PushFunc(func() error {
-		count--
-		m.fadingRate = float64(count) / float64(maxCount)
-		if count == 0 {
-			return task.Terminated
+		m.gameState.Screen().FadeIn(count)
+		return task.Terminated
+	})
+	taskLine.PushFunc(func() error {
+		if m.gameState.Screen().IsFading() {
+			return nil
 		}
-		return nil
+		return task.Terminated
 	})
 }
 
@@ -402,7 +398,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 	op = &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(scene.TileScale, scene.TileScale)
 	op.GeoM.Translate(scene.GameMarginX, scene.GameMarginTop)
-	m.gameState.Screen().ApplyTint(&op.ColorM)
+	m.gameState.Screen().Apply(&op.ColorM)
 	if err := screen.DrawImage(m.tilesImage, op); err != nil {
 		return err
 	}
@@ -413,18 +409,6 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 		op.GeoM.Scale(scene.TileScale, scene.TileScale)
 		op.GeoM.Translate(scene.GameMarginX, scene.GameMarginTop)
 		if err := screen.DrawImage(assets.GetImage("marker.png"), op); err != nil {
-			return err
-		}
-	}
-	if 0 < m.fadingRate {
-		w, h := scene.TileXNum*scene.TileSize, scene.TileYNum*scene.TileSize
-		ew, eh := m.emptyImage.Size()
-		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Scale(float64(w)/float64(ew), float64(h)/float64(eh))
-		op.GeoM.Scale(scene.TileScale, scene.TileScale)
-		op.GeoM.Translate(scene.GameMarginX, scene.GameMarginTop)
-		op.ColorM.Translate(0, 0, 0, m.fadingRate)
-		if err := screen.DrawImage(m.emptyImage, op); err != nil {
 			return err
 		}
 	}

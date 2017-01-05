@@ -30,11 +30,16 @@ func (t *tint) isZero() bool {
 }
 
 type Screen struct {
-	currentTint  tint
-	origTint     tint
-	targetTint   tint
-	tintCount    int
-	tintMaxCount int
+	currentTint     tint
+	origTint        tint
+	targetTint      tint
+	tintCount       int
+	tintMaxCount    int
+	fadeInCount     int
+	fadeInMaxCount  int
+	fadeOutCount    int
+	fadeOutMaxCount int
+	fadedOut        bool
 }
 
 func (s *Screen) StartTint(red, green, blue, gray float64, count int) {
@@ -50,39 +55,64 @@ func (s *Screen) StartTint(red, green, blue, gray float64, count int) {
 	s.tintMaxCount = count
 }
 
+func (s *Screen) FadeIn(count int) {
+	s.fadeInCount = count
+	s.fadeInMaxCount = count
+}
+
+func (s *Screen) FadeOut(count int) {
+	s.fadeOutCount = count
+	s.fadeOutMaxCount = count
+}
+
 func (s *Screen) IsChangingTint() bool {
 	return s.tintCount > 0
 }
 
-func (s *Screen) ApplyTint(colorM *ebiten.ColorM) {
-	if s.currentTint.isZero() {
+func (s *Screen) IsFading() bool {
+	return s.fadeInCount > 0 || s.fadeOutCount > 0
+}
+
+func (s *Screen) Apply(colorM *ebiten.ColorM) {
+	if s.fadedOut {
+		colorM.Scale(0, 0, 0, 1)
 		return
 	}
-	if s.currentTint.gray != 0 {
-		colorM.ChangeHSV(0, 1-s.currentTint.gray, 1)
+	if !s.currentTint.isZero() {
+		if s.currentTint.gray != 0 {
+			colorM.ChangeHSV(0, 1-s.currentTint.gray, 1)
+		}
+		rs, gs, bs := 1.0, 1.0, 1.0
+		if s.currentTint.red < 0 {
+			rs = 1 - -s.currentTint.red
+		}
+		if s.currentTint.green < 0 {
+			gs = 1 - -s.currentTint.green
+		}
+		if s.currentTint.blue < 0 {
+			bs = 1 - -s.currentTint.blue
+		}
+		colorM.Scale(rs, gs, bs, 1)
+		rt, gt, bt := 0.0, 0.0, 0.0
+		if s.currentTint.red > 0 {
+			rt = s.currentTint.red
+		}
+		if s.currentTint.green > 0 {
+			gt = s.currentTint.green
+		}
+		if s.currentTint.blue > 0 {
+			bt = s.currentTint.blue
+		}
+		colorM.Translate(rt, gt, bt, 0)
 	}
-	rs, gs, bs := 1.0, 1.0, 1.0
-	if s.currentTint.red < 0 {
-		rs = 1 - -s.currentTint.red
+	if s.fadeInCount > 0 {
+		rate := 1 - float64(s.fadeInCount)/float64(s.fadeInMaxCount)
+		colorM.Scale(rate, rate, rate, 1)
 	}
-	if s.currentTint.green < 0 {
-		gs = 1 - -s.currentTint.green
+	if s.fadeOutCount > 0 {
+		rate := float64(s.fadeOutCount) / float64(s.fadeOutMaxCount)
+		colorM.Scale(rate, rate, rate, 1)
 	}
-	if s.currentTint.blue < 0 {
-		bs = 1 - -s.currentTint.blue
-	}
-	colorM.Scale(rs, gs, bs, 1)
-	rt, gt, bt := 0.0, 0.0, 0.0
-	if s.currentTint.red > 0 {
-		rt = s.currentTint.red
-	}
-	if s.currentTint.green > 0 {
-		gt = s.currentTint.green
-	}
-	if s.currentTint.blue > 0 {
-		bt = s.currentTint.blue
-	}
-	colorM.Translate(rt, gt, bt, 0)
 }
 
 func (s *Screen) Update() error {
@@ -93,11 +123,21 @@ func (s *Screen) Update() error {
 		s.currentTint.green = s.origTint.green*(1-rate) + s.targetTint.green*rate
 		s.currentTint.blue = s.origTint.blue*(1-rate) + s.targetTint.blue*rate
 		s.currentTint.gray = s.origTint.gray*(1-rate) + s.targetTint.gray*rate
-		return nil
+	} else {
+		s.currentTint.red = s.targetTint.red
+		s.currentTint.green = s.targetTint.green
+		s.currentTint.blue = s.targetTint.blue
+		s.currentTint.gray = s.targetTint.gray
 	}
-	s.currentTint.red = s.targetTint.red
-	s.currentTint.green = s.targetTint.green
-	s.currentTint.blue = s.targetTint.blue
-	s.currentTint.gray = s.targetTint.gray
+	if s.fadeInCount > 0 {
+		s.fadedOut = false
+		s.fadeInCount--
+	}
+	if s.fadeOutCount > 0 {
+		s.fadeOutCount--
+		if s.fadeOutCount == 0 {
+			s.fadedOut = true
+		}
+	}
 	return nil
 }
