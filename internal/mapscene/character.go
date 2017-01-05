@@ -31,7 +31,12 @@ type character struct {
 	prevAttitude data.Attitude
 	x            int
 	y            int
+	moveDir      data.Dir
 	moveCount    int
+}
+
+func (c *character) isMoving() bool {
+	return c.moveCount > 0
 }
 
 func (c *character) turn(dir data.Dir) {
@@ -39,6 +44,36 @@ func (c *character) turn(dir data.Dir) {
 		return
 	}
 	c.dir = dir
+}
+
+func (c *character) tryMove(dir data.Dir, passable func(x, y int) (bool, error)) (bool, error) {
+	if c.isMoving() {
+		return false, nil
+	}
+	c.turn(dir)
+	c.moveDir = dir
+	// TODO: Rename this
+	c.moveCount = playerMaxMoveCount
+	nx, ny := c.x, c.y
+	switch dir {
+	case data.DirLeft:
+		nx--
+	case data.DirRight:
+		nx++
+	case data.DirUp:
+		ny--
+	case data.DirDown:
+		ny++
+	}
+	p, err := passable(nx, ny)
+	if err != nil {
+		return false, err
+	}
+	if !p {
+		c.moveCount = 0
+		return false, nil
+	}
+	return true, nil
 }
 
 type characterImageParts struct {
@@ -86,6 +121,34 @@ func (c *character) transferImmediately(x, y int) {
 }
 
 func (c *character) update(passable func(x, y int) (bool, error)) error {
+	if c.moveCount == 0 {
+		return nil
+	}
+	if c.moveCount >= playerMaxMoveCount/2 {
+		c.attitude = data.AttitudeMiddle
+	} else if c.prevAttitude == data.AttitudeLeft {
+		c.attitude = data.AttitudeRight
+	} else {
+		c.attitude = data.AttitudeLeft
+	}
+	c.moveCount--
+	if c.moveCount == 0 {
+		nx, ny := c.x, c.y
+		switch c.moveDir {
+		case data.DirLeft:
+			nx--
+		case data.DirRight:
+			nx++
+		case data.DirUp:
+			ny--
+		case data.DirDown:
+			ny++
+		}
+		c.x = nx
+		c.y = ny
+		c.prevAttitude = c.attitude
+		c.attitude = data.AttitudeMiddle
+	}
 	return nil
 }
 

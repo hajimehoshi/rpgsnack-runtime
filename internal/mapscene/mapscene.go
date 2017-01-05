@@ -241,6 +241,9 @@ func (m *MapScene) Update(subTasksUpdated bool, taskLine *task.TaskLine, sceneMa
 	if err := m.gameState.Screen().Update(); err != nil {
 		return nil
 	}
+	if err := m.player.update(m.passable); err != nil {
+		return err
+	}
 	if subTasksUpdated {
 		return nil
 	}
@@ -250,9 +253,6 @@ func (m *MapScene) Update(subTasksUpdated bool, taskLine *task.TaskLine, sceneMa
 		}
 	}
 	if err := m.movePlayerIfNeeded(taskLine); err != nil {
-		return err
-	}
-	if err := m.player.update(m.passable); err != nil {
 		return err
 	}
 	for _, e := range m.events {

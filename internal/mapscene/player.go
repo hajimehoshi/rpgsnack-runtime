@@ -51,52 +51,15 @@ func (p *player) move(taskLine *task.TaskLine, passable func(x, y int) (bool, er
 	}
 	for _, d := range path {
 		d := d
-		init := false
 		taskLine.PushFunc(func() error {
-			if !init {
-				c.turn(d)
-				c.moveCount = playerMaxMoveCount
-				init = true
+			c.tryMove(d, passable)
+			return task.Terminated
+		})
+		taskLine.PushFunc(func() error {
+			if c.isMoving() {
+				return nil
 			}
-			nx, ny := c.x, c.y
-			switch d {
-			case data.DirLeft:
-				nx--
-			case data.DirRight:
-				nx++
-			case data.DirUp:
-				ny--
-			case data.DirDown:
-				ny++
-			}
-			p, err := passable(nx, ny)
-			if err != nil {
-				return err
-			}
-			if !p {
-				nx = c.x
-				ny = c.y
-				c.moveCount = 0
-				return task.Terminated
-			}
-			if c.moveCount > 0 {
-				if c.moveCount >= playerMaxMoveCount/2 {
-					c.attitude = data.AttitudeMiddle
-				} else if c.prevAttitude == data.AttitudeLeft {
-					c.attitude = data.AttitudeRight
-				} else {
-					c.attitude = data.AttitudeLeft
-				}
-				c.moveCount--
-			}
-			if c.moveCount == 0 {
-				c.x = nx
-				c.y = ny
-				c.prevAttitude = c.attitude
-				c.attitude = data.AttitudeMiddle
-				return task.Terminated
-			}
-			return nil
+			return task.Terminated
 		})
 	}
 	return nil
