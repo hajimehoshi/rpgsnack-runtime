@@ -193,6 +193,9 @@ func (e *event) run(taskLine *task.TaskLine, trigger data.Trigger) bool {
 	}
 	var origDir data.Dir
 	taskLine.PushFunc(func() error {
+		if e.mapScene.player.character.isMoving() {
+			return nil
+		}
 		origDir = e.character.dir
 		var dir data.Dir
 		ex, ey := e.character.x, e.character.y

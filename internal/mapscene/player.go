@@ -18,7 +18,6 @@ import (
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/tsugunai/internal/data"
-	"github.com/hajimehoshi/tsugunai/internal/task"
 )
 
 const playerMaxMoveCount = 4
@@ -43,25 +42,24 @@ func newPlayer(x, y int) (*player, error) {
 	}, nil
 }
 
-func (p *player) move(taskLine *task.TaskLine, passable func(x, y int) (bool, error), x, y int) error {
+func (p *player) move(passable func(x, y int) (bool, error), x, y int) error {
 	c := p.character
 	path, err := calcPath(passable, c.x, c.y, x, y)
 	if err != nil {
 		return err
 	}
-	for _, d := range path {
-		d := d
-		taskLine.PushFunc(func() error {
-			c.tryMove(d, passable)
-			return task.Terminated
-		})
-		taskLine.PushFunc(func() error {
-			if c.isMoving() {
-				return nil
-			}
-			return task.Terminated
-		})
+	if len(path) == 0 {
+		return nil
 	}
+	lastP, err := passable(x, y)
+	if err != nil {
+		return err
+	}
+	if !lastP {
+		// There is an event at (x, y).
+		path = path[:len(path)-1]
+	}
+	c.setRoute(path)
 	return nil
 }
 

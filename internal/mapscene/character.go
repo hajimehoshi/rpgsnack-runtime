@@ -31,12 +31,12 @@ type character struct {
 	prevAttitude data.Attitude
 	x            int
 	y            int
-	moveDir      data.Dir
 	moveCount    int
+	route        []data.Dir
 }
 
 func (c *character) isMoving() bool {
-	return c.moveCount > 0
+	return c.moveCount > 0 || len(c.route) > 0
 }
 
 func (c *character) turn(dir data.Dir) {
@@ -46,12 +46,19 @@ func (c *character) turn(dir data.Dir) {
 	c.dir = dir
 }
 
-func (c *character) tryMove(dir data.Dir, passable func(x, y int) (bool, error)) (bool, error) {
+func (c *character) setRoute(route []data.Dir) {
 	if c.isMoving() {
-		return false, nil
+		return
 	}
+	c.route = route
+	if len(c.route) == 0 {
+		return
+	}
+	c.move(c.route[0])
+}
+
+func (c *character) move(dir data.Dir) (bool, error) {
 	c.turn(dir)
-	c.moveDir = dir
 	// TODO: Rename this
 	c.moveCount = playerMaxMoveCount
 	nx, ny := c.x, c.y
@@ -65,14 +72,7 @@ func (c *character) tryMove(dir data.Dir, passable func(x, y int) (bool, error))
 	case data.DirDown:
 		ny++
 	}
-	p, err := passable(nx, ny)
-	if err != nil {
-		return false, err
-	}
-	if !p {
-		c.moveCount = 0
-		return false, nil
-	}
+	// TODO: Check passability
 	return true, nil
 }
 
@@ -121,7 +121,7 @@ func (c *character) transferImmediately(x, y int) {
 }
 
 func (c *character) update(passable func(x, y int) (bool, error)) error {
-	if c.moveCount == 0 {
+	if !c.isMoving() {
 		return nil
 	}
 	if c.moveCount >= playerMaxMoveCount/2 {
@@ -134,7 +134,7 @@ func (c *character) update(passable func(x, y int) (bool, error)) error {
 	c.moveCount--
 	if c.moveCount == 0 {
 		nx, ny := c.x, c.y
-		switch c.moveDir {
+		switch c.route[0] {
 		case data.DirLeft:
 			nx--
 		case data.DirRight:
@@ -148,6 +148,12 @@ func (c *character) update(passable func(x, y int) (bool, error)) error {
 		c.y = ny
 		c.prevAttitude = c.attitude
 		c.attitude = data.AttitudeMiddle
+		if len(c.route) > 0 {
+			c.route = c.route[1:]
+		}
+		if len(c.route) > 0 {
+			c.move(c.route[0])
+		}
 	}
 	return nil
 }

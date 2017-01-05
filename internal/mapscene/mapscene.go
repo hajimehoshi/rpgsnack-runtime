@@ -39,7 +39,6 @@ type MapScene struct {
 	player        *player
 	moveDstX      int
 	moveDstY      int
-	playerMoving  bool
 	balloons      *balloons
 	tilesImage    *ebiten.Image
 	events        []*event
@@ -197,16 +196,11 @@ func (m *MapScene) movePlayerIfNeeded(taskLine *task.TaskLine) error {
 			return nil
 		}
 	}
-	m.playerMoving = true
-	if err := m.player.move(taskLine, m.passable, tx, ty); err != nil {
+	if err := m.player.move(m.passable, tx, ty); err != nil {
 		return err
 	}
 	m.moveDstX = tx
 	m.moveDstY = ty
-	taskLine.PushFunc(func() error {
-		m.playerMoving = false
-		return task.Terminated
-	})
 	if e == nil {
 		return nil
 	}
@@ -414,7 +408,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 	if err := screen.DrawImage(m.tilesImage, op); err != nil {
 		return err
 	}
-	if m.playerMoving {
+	if m.player.character.isMoving() {
 		x, y := m.moveDstX, m.moveDstY
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(x*scene.TileSize), float64(y*scene.TileSize))
