@@ -22,7 +22,7 @@ type Game struct {
 func NewGame() *Game {
 	return &Game{
 		variables: &Variables{},
-		screen:    newScreen(),
+		screen:    &Screen{},
 	}
 }
 

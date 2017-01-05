@@ -30,26 +30,18 @@ func (t *tint) isZero() bool {
 }
 
 type Screen struct {
-	tint         *tint
-	origTint     *tint
-	targetTint   *tint
+	currentTint  tint
+	origTint     tint
+	targetTint   tint
 	tintCount    int
 	tintMaxCount int
 }
 
-func newScreen() *Screen {
-	return &Screen{
-		tint:       &tint{},
-		origTint:   &tint{},
-		targetTint: &tint{},
-	}
-}
-
 func (s *Screen) StartTint(red, green, blue, gray float64, count int) {
-	s.origTint.red = s.tint.red
-	s.origTint.green = s.tint.green
-	s.origTint.blue = s.tint.blue
-	s.origTint.gray = s.tint.gray
+	s.origTint.red = s.currentTint.red
+	s.origTint.green = s.currentTint.green
+	s.origTint.blue = s.currentTint.blue
+	s.origTint.gray = s.currentTint.gray
 	s.targetTint.red = red
 	s.targetTint.green = green
 	s.targetTint.blue = blue
@@ -63,32 +55,32 @@ func (s *Screen) IsChangingTint() bool {
 }
 
 func (s *Screen) ApplyTint(colorM *ebiten.ColorM) {
-	if s.tint.isZero() {
+	if s.currentTint.isZero() {
 		return
 	}
-	if s.tint.gray != 0 {
-		colorM.ChangeHSV(0, 1-s.tint.gray, 1)
+	if s.currentTint.gray != 0 {
+		colorM.ChangeHSV(0, 1-s.currentTint.gray, 1)
 	}
 	rs, gs, bs := 1.0, 1.0, 1.0
-	if s.tint.red < 0 {
-		rs = 1 - -s.tint.red
+	if s.currentTint.red < 0 {
+		rs = 1 - -s.currentTint.red
 	}
-	if s.tint.green < 0 {
-		gs = 1 - -s.tint.green
+	if s.currentTint.green < 0 {
+		gs = 1 - -s.currentTint.green
 	}
-	if s.tint.blue < 0 {
-		bs = 1 - -s.tint.blue
+	if s.currentTint.blue < 0 {
+		bs = 1 - -s.currentTint.blue
 	}
 	colorM.Scale(rs, gs, bs, 1)
 	rt, gt, bt := 0.0, 0.0, 0.0
-	if s.tint.red > 0 {
-		rt = s.tint.red
+	if s.currentTint.red > 0 {
+		rt = s.currentTint.red
 	}
-	if s.tint.green > 0 {
-		gt = s.tint.green
+	if s.currentTint.green > 0 {
+		gt = s.currentTint.green
 	}
-	if s.tint.blue > 0 {
-		bt = s.tint.blue
+	if s.currentTint.blue > 0 {
+		bt = s.currentTint.blue
 	}
 	colorM.Translate(rt, gt, bt, 0)
 }
@@ -97,15 +89,15 @@ func (s *Screen) Update() error {
 	if s.tintCount > 0 {
 		s.tintCount--
 		rate := 1 - float64(s.tintCount)/float64(s.tintMaxCount)
-		s.tint.red = s.origTint.red*(1-rate) + s.targetTint.red*rate
-		s.tint.green = s.origTint.green*(1-rate) + s.targetTint.green*rate
-		s.tint.blue = s.origTint.blue*(1-rate) + s.targetTint.blue*rate
-		s.tint.gray = s.origTint.gray*(1-rate) + s.targetTint.gray*rate
+		s.currentTint.red = s.origTint.red*(1-rate) + s.targetTint.red*rate
+		s.currentTint.green = s.origTint.green*(1-rate) + s.targetTint.green*rate
+		s.currentTint.blue = s.origTint.blue*(1-rate) + s.targetTint.blue*rate
+		s.currentTint.gray = s.origTint.gray*(1-rate) + s.targetTint.gray*rate
 		return nil
 	}
-	s.tint.red = s.targetTint.red
-	s.tint.green = s.targetTint.green
-	s.tint.blue = s.targetTint.blue
-	s.tint.gray = s.targetTint.gray
+	s.currentTint.red = s.targetTint.red
+	s.currentTint.green = s.targetTint.green
+	s.currentTint.blue = s.targetTint.blue
+	s.currentTint.gray = s.targetTint.gray
 	return nil
 }
