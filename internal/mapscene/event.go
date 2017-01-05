@@ -90,7 +90,7 @@ func (e *event) updateCharacterIfNeeded() error {
 		c.imageName = ""
 		c.imageIndex = 0
 		c.dirFix = false
-		c.turn(data.Dir(0))
+		c.dir = data.Dir(0)
 		c.attitude = data.AttitudeMiddle
 		return nil
 	}

@@ -88,7 +88,6 @@ func (c *character) move(dir data.Dir) (bool, error) {
 	c.moveDir = dir
 	// TODO: Rename this
 	c.moveCount = playerMaxMoveCount
-	// TODO: Check passability
 	return true, nil
 }
 
