@@ -34,8 +34,8 @@ import (
 
 type MapScene struct {
 	gameState     *gamestate.Game
+	currentMapID  int
 	currentRoomID int
-	currentMap    *data.Map
 	player        *player
 	moveDstX      int
 	moveDstY      int
@@ -60,11 +60,11 @@ func New() (*MapScene, error) {
 		return nil, err
 	}
 	mapScene := &MapScene{
-		gameState:  gamestate.NewGame(),
-		balloons:   &balloons{},
-		tilesImage: tilesImage,
-		player:     player,
-		currentMap: data.Current().Maps[0],
+		currentMapID: 1,
+		gameState:    gamestate.NewGame(),
+		balloons:     &balloons{},
+		tilesImage:   tilesImage,
+		player:       player,
 	}
 	mapScene.changeRoom(roomID)
 	return mapScene, nil
@@ -74,8 +74,17 @@ func (m *MapScene) state() *gamestate.Game {
 	return m.gameState
 }
 
+func (m *MapScene) currentMap() *data.Map {
+	for _, d := range data.Current().Maps {
+		if d.ID == m.currentMapID {
+			return d
+		}
+	}
+	return nil
+}
+
 func (m *MapScene) currentRoom() *data.Room {
-	for _, r := range m.currentMap.Rooms {
+	for _, r := range m.currentMap().Rooms {
 		if r.ID == m.currentRoomID {
 			return r
 		}
@@ -106,7 +115,7 @@ func (m *MapScene) tileSet(id int) (*data.TileSet, error) {
 }
 
 func (m *MapScene) passableTile(x, y int) (bool, error) {
-	tileSet, err := m.tileSet(m.currentMap.TileSetID)
+	tileSet, err := m.tileSet(m.currentMap().TileSetID)
 	if err != nil {
 		return false, err
 	}
@@ -350,7 +359,7 @@ func (t *tilesImageParts) Dst(index int) (int, int, int, int) {
 
 func (m *MapScene) Draw(screen *ebiten.Image) error {
 	m.tilesImage.Clear()
-	tileset, err := m.tileSet(m.currentMap.TileSetID)
+	tileset, err := m.tileSet(m.currentMap().TileSetID)
 	if err != nil {
 		return err
 	}
@@ -381,7 +390,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 		}
 	}
 	op = &ebiten.DrawImageOptions{}
-	tileSet, err := m.tileSet(m.currentMap.TileSetID)
+	tileSet, err := m.tileSet(m.currentMap().TileSetID)
 	if err != nil {
 		return err
 	}
