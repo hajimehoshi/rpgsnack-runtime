@@ -20,7 +20,7 @@ import (
 
 // TODO: Return not only moving but also turning
 
-func calcPath(passable func(x, y int) (bool, error), startX, startY, goalX, goalY int) ([]data.Direction, error) {
+func calcPath(passable func(x, y int) (bool, error), startX, startY, goalX, goalY int) ([]data.Dir, error) {
 	type pos struct {
 		X, Y int
 	}
@@ -59,7 +59,7 @@ func calcPath(passable func(x, y int) (bool, error), startX, startY, goalX, goal
 		current = next
 	}
 	p := pos{goalX, goalY}
-	dirs := []data.Direction{}
+	dirs := []data.Dir{}
 	for p.X != startX || p.Y != startY {
 		parent, ok := parents[p]
 		// There is no path.
@@ -68,19 +68,19 @@ func calcPath(passable func(x, y int) (bool, error), startX, startY, goalX, goal
 		}
 		switch {
 		case parent.X == p.X-1:
-			dirs = append(dirs, data.DirectionRight)
+			dirs = append(dirs, data.DirRight)
 		case parent.X == p.X+1:
-			dirs = append(dirs, data.DirectionLeft)
+			dirs = append(dirs, data.DirLeft)
 		case parent.Y == p.Y-1:
-			dirs = append(dirs, data.DirectionDown)
+			dirs = append(dirs, data.DirDown)
 		case parent.Y == p.Y+1:
-			dirs = append(dirs, data.DirectionUp)
+			dirs = append(dirs, data.DirUp)
 		default:
 			panic("not reach")
 		}
 		p = parent
 	}
-	path := make([]data.Direction, len(dirs))
+	path := make([]data.Dir, len(dirs))
 	for i, d := range dirs {
 		path[len(dirs)-i-1] = d
 	}

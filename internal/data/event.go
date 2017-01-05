@@ -30,28 +30,28 @@ type Event struct {
 }
 
 type Page struct {
-	Conditions   []*Condition `json:"conditions"`
-	Image        string       `json:"image"`
-	ImageIndex   int          `json:"imageIndex"`
-	Attitude     Attitude     `json:"attitude"`
-	Direction    Direction    `json:"dir"`
-	DirectionFix bool         `json:"dirFix"`
-	Walking      bool         `json:"walking"`
-	Stepping     bool         `json:"stepping"`
-	Through      bool         `json:"through"`
-	Priority     Priority     `json:"priority"`
-	Trigger      Trigger      `json:"trigger"`
-	Route        *Route       `json:"route"`
-	Commands     []*Command   `json:"commands"`
+	Conditions []*Condition `json:"conditions"`
+	Image      string       `json:"image"`
+	ImageIndex int          `json:"imageIndex"`
+	Attitude   Attitude     `json:"attitude"`
+	Dir        Dir          `json:"dir"`
+	DirFix     bool         `json:"dirFix"`
+	Walking    bool         `json:"walking"`
+	Stepping   bool         `json:"stepping"`
+	Through    bool         `json:"through"`
+	Priority   Priority     `json:"priority"`
+	Trigger    Trigger      `json:"trigger"`
+	Route      *Route       `json:"route"`
+	Commands   []*Command   `json:"commands"`
 }
 
-type Direction int
+type Dir int
 
 const (
-	DirectionUp Direction = iota
-	DirectionRight
-	DirectionDown
-	DirectionLeft
+	DirUp Dir = iota
+	DirRight
+	DirDown
+	DirLeft
 )
 
 type Attitude int
