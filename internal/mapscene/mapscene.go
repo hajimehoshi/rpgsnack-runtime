@@ -64,7 +64,7 @@ type MapScene struct {
 }
 
 func New() (*MapScene, error) {
-	pos := scene.Data.System.InitialPosition
+	pos := data.Current().System.InitialPosition
 	x, y, roomID := 0, 0, 1
 	if pos != nil {
 		x, y, roomID = pos.X, pos.Y, pos.RoomID
@@ -87,7 +87,7 @@ func New() (*MapScene, error) {
 		tilesImage: tilesImage,
 		emptyImage: emptyImage,
 		player:     player,
-		currentMap: scene.Data.Maps[0],
+		currentMap: data.Current().Maps[0],
 		tint:       &tint{},
 		origTint:   &tint{},
 		targetTint: &tint{},
@@ -123,7 +123,7 @@ func (m *MapScene) changeRoom(roomID int) error {
 }
 
 func (m *MapScene) tileSet(id int) (*data.TileSet, error) {
-	for _, t := range scene.Data.TileSets {
+	for _, t := range data.Current().TileSets {
 		if t.ID == id {
 			return t, nil
 		}

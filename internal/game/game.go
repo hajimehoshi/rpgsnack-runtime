@@ -40,13 +40,10 @@ func (g *Game) startLoadingGameData() {
 	ch := make(chan error)
 	go func() {
 		defer close(ch)
-		gameData, err := data.Load()
-		if err != nil {
+		if err := data.Load(); err != nil {
 			ch <- err
 			return
 		}
-		// TODO: Refactoring
-		scene.Data = gameData
 		initScene := titlescene.New()
 		g.sceneManager = scene.NewSceneManager(initScene)
 	}()

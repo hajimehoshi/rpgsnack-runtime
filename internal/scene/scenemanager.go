@@ -17,7 +17,6 @@ package scene
 import (
 	"github.com/hajimehoshi/ebiten"
 
-	"github.com/hajimehoshi/tsugunai/internal/data"
 	"github.com/hajimehoshi/tsugunai/internal/task"
 )
 
@@ -36,8 +35,6 @@ type scene interface {
 	Update(subTasksUpdated bool, taskLine *task.TaskLine, sceneManager *SceneManager) error
 	Draw(screen *ebiten.Image) error
 }
-
-var Data *data.Game
 
 type SceneManager struct {
 	current  scene

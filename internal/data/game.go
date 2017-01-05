@@ -20,3 +20,9 @@ type Game struct {
 	TileSets []*TileSet `json:"tileSets"`
 	System   *System    `json:"system"`
 }
+
+var current *Game
+
+func Current() *Game {
+	return current
+}

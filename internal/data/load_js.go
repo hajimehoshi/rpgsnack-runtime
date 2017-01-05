@@ -22,7 +22,7 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 )
 
-func Load() (*Game, error) {
+func Load() error {
 	if js.Global.Get("_data") == nil {
 		ch := make(chan struct{})
 		js.Global.Set("_dataNotify", func() {
@@ -35,7 +35,8 @@ func Load() (*Game, error) {
 	dataJson := ([]uint8)(dataJsonStr.String())
 	var gameData *Game
 	if err := json.Unmarshal(dataJson, &gameData); err != nil {
-		return nil, err
+		return err
 	}
-	return gameData, nil
+	current = gameData
+	return nil
 }

@@ -22,7 +22,6 @@ import (
 
 	"github.com/hajimehoshi/tsugunai/internal/assets"
 	"github.com/hajimehoshi/tsugunai/internal/data"
-	"github.com/hajimehoshi/tsugunai/internal/scene"
 	"github.com/hajimehoshi/tsugunai/internal/task"
 )
 
@@ -284,7 +283,7 @@ func (e *event) executeCommands(sub *task.TaskLine) error {
 		})
 	case data.CommandNameShowMessage:
 		args := c.Args.(*data.CommandArgsShowMessage)
-		content := scene.Data.Texts.Get(language.Und, args.ContentID)
+		content := data.Current().Texts.Get(language.Und, args.ContentID)
 		e.showMessage(sub, content, args.EventID)
 		sub.PushFunc(func() error {
 			e.commandIndex.advance()
@@ -293,7 +292,7 @@ func (e *event) executeCommands(sub *task.TaskLine) error {
 	case data.CommandNameShowChoices:
 		choices := []string{}
 		for _, id := range c.Args.(*data.CommandArgsShowChoices).ChoiceIDs {
-			choice := scene.Data.Texts.Get(language.Und, id)
+			choice := data.Current().Texts.Get(language.Und, id)
 			choices = append(choices, choice)
 		}
 		e.showChoices(sub, choices)

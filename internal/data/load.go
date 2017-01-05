@@ -36,10 +36,10 @@ func max(a, b int) int {
 	return a
 }
 
-func Load() (*Game, error) {
+func Load() error {
 	dataJson, err := ioutil.ReadFile("data.json")
 	if err != nil {
-		return nil, err
+		return err
 	}
 	var gameData *Game
 	if err := json.Unmarshal(dataJson, &gameData); err != nil {
@@ -47,9 +47,10 @@ func Load() (*Game, error) {
 			begin := max(int(err.Offset)-20, 0)
 			end := min(int(err.Offset)+40, len(dataJson))
 			part := string(dataJson[begin:end])
-			return nil, fmt.Errorf("data: JSON syntax error: %s:\n%s", err.Error(), part)
+			return fmt.Errorf("data: JSON syntax error: %s:\n%s", err.Error(), part)
 		}
-		return nil, err
+		return err
 	}
-	return gameData, nil
+	current = gameData
+	return nil
 }
