@@ -247,35 +247,27 @@ func (e *event) executeCommands(sub *task.TaskLine) error {
 	switch c.Name {
 	case data.CommandNameIf:
 		conditions := c.Args.(*data.CommandArgsIf).Conditions
-		sub.PushFunc(func() error {
-			matches := true
-			for _, c := range conditions {
-				m, err := e.meetsCondition(c)
-				if err != nil {
-					return err
-				}
-				if !m {
-					matches = false
-					break
-				}
+		matches := true
+		for _, c := range conditions {
+			m, err := e.meetsCondition(c)
+			if err != nil {
+				return err
 			}
-			if matches {
-				e.commandIndex.choose(0)
-				return task.Terminated
+			if !m {
+				matches = false
+				break
 			}
-			if len(c.Branches) >= 2 {
-				e.commandIndex.choose(1)
-				return task.Terminated
-			}
+		}
+		if matches {
+			e.commandIndex.choose(0)
+		} else if len(c.Branches) >= 2 {
+			e.commandIndex.choose(1)
+		} else {
 			e.commandIndex.advance()
-			return task.Terminated
-		})
+		}
 	case data.CommandNameCallEvent:
 		println(fmt.Sprintf("not implemented yet: %s", c.Name))
-		sub.PushFunc(func() error {
-			e.commandIndex.advance()
-			return task.Terminated
-		})
+		e.commandIndex.advance()
 	case data.CommandNameWait:
 		e.mapScene.closeAllBalloons(sub)
 		frames := c.Args.(*data.CommandArgsWait).Time * 6
@@ -306,25 +298,16 @@ func (e *event) executeCommands(sub *task.TaskLine) error {
 		})
 	case data.CommandNameSetSwitch:
 		args := c.Args.(*data.CommandArgsSetSwitch)
-		e.setSwitch(sub, args.ID, args.Value)
-		sub.PushFunc(func() error {
-			e.commandIndex.advance()
-			return task.Terminated
-		})
+		e.setSwitch(args.ID, args.Value)
+		e.commandIndex.advance()
 	case data.CommandNameSetSelfSwitch:
 		args := c.Args.(*data.CommandArgsSetSelfSwitch)
-		e.setSelfSwitch(sub, args.ID, args.Value)
-		sub.PushFunc(func() error {
-			e.commandIndex.advance()
-			return task.Terminated
-		})
+		e.setSelfSwitch(args.ID, args.Value)
+		e.commandIndex.advance()
 	case data.CommandNameSetVariable:
 		args := c.Args.(*data.CommandArgsSetVariable)
-		e.setVariable(sub, args.ID, args.Op, args.ValueType, args.Value)
-		sub.PushFunc(func() error {
-			e.commandIndex.advance()
-			return task.Terminated
-		})
+		e.setVariable(args.ID, args.Op, args.ValueType, args.Value)
+		e.commandIndex.advance()
 	case data.CommandNameTransfer:
 		e.mapScene.closeAllBalloons(sub)
 		args := c.Args.(*data.CommandArgsTransfer)
@@ -396,66 +379,57 @@ func (e *event) showChoices(taskLine *task.TaskLine, choices []string) {
 	})
 }
 
-func (e *event) setSwitch(taskLine *task.TaskLine, id int, value bool) {
-	taskLine.PushFunc(func() error {
-		e.mapScene.state().Variables().SetSwitchValue(id, value)
-		return task.Terminated
-	})
+func (e *event) setSwitch(id int, value bool) {
+	e.mapScene.state().Variables().SetSwitchValue(id, value)
 }
 
-func (e *event) setSelfSwitch(taskLine *task.TaskLine, id int, value bool) {
-	taskLine.PushFunc(func() error {
-		e.selfSwitches[id] = value
-		return task.Terminated
-	})
+func (e *event) setSelfSwitch(id int, value bool) {
+	e.selfSwitches[id] = value
 }
 
-func (e *event) setVariable(taskLine *task.TaskLine, id int, op data.SetVariableOp, valueType data.SetVariableValueType, value interface{}) {
-	taskLine.PushFunc(func() error {
-		rhs := 0
-		switch valueType {
-		case data.SetVariableValueTypeConstant:
-			rhs = value.(int)
-		case data.SetVariableValueTypeVariable:
-			rhs = e.mapScene.state().Variables().VariableValue(value.(int))
-		case data.SetVariableValueTypeRandom:
-			println(fmt.Sprintf("not implemented yet (set_variable): valueType %s", valueType))
-			return task.Terminated
-		case data.SetVariableValueTypeCharacter:
-			args := value.(*data.SetVariableCharacterArgs)
-			ch := e.mapScene.character(args.EventID, e)
-			switch args.Type {
-			case data.SetVariableCharacterTypeDirection:
-				switch ch.dir {
-				case data.DirUp:
-					rhs = 0
-				case data.DirRight:
-					rhs = 1
-				case data.DirDown:
-					rhs = 2
-				case data.DirLeft:
-					rhs = 3
-				}
-			default:
-				println(fmt.Sprintf("not implemented yet (set_variable): type %s", args.Type))
+func (e *event) setVariable(id int, op data.SetVariableOp, valueType data.SetVariableValueType, value interface{}) {
+	rhs := 0
+	switch valueType {
+	case data.SetVariableValueTypeConstant:
+		rhs = value.(int)
+	case data.SetVariableValueTypeVariable:
+		rhs = e.mapScene.state().Variables().VariableValue(value.(int))
+	case data.SetVariableValueTypeRandom:
+		println(fmt.Sprintf("not implemented yet (set_variable): valueType %s", valueType))
+		return
+	case data.SetVariableValueTypeCharacter:
+		args := value.(*data.SetVariableCharacterArgs)
+		ch := e.mapScene.character(args.EventID, e)
+		switch args.Type {
+		case data.SetVariableCharacterTypeDirection:
+			switch ch.dir {
+			case data.DirUp:
+				rhs = 0
+			case data.DirRight:
+				rhs = 1
+			case data.DirDown:
+				rhs = 2
+			case data.DirLeft:
+				rhs = 3
 			}
+		default:
+			println(fmt.Sprintf("not implemented yet (set_variable): type %s", args.Type))
 		}
-		switch op {
-		case data.SetVariableOpAssign:
-		case data.SetVariableOpAdd:
-			rhs += e.mapScene.state().Variables().VariableValue(id)
-		case data.SetVariableOpSub:
-			rhs -= e.mapScene.state().Variables().VariableValue(id)
-		case data.SetVariableOpMul:
-			rhs *= e.mapScene.state().Variables().VariableValue(id)
-		case data.SetVariableOpDiv:
-			rhs /= e.mapScene.state().Variables().VariableValue(id)
-		case data.SetVariableOpMod:
-			rhs %= e.mapScene.state().Variables().VariableValue(id)
-		}
-		e.mapScene.state().Variables().SetVariableValue(id, rhs)
-		return task.Terminated
-	})
+	}
+	switch op {
+	case data.SetVariableOpAssign:
+	case data.SetVariableOpAdd:
+		rhs += e.mapScene.state().Variables().VariableValue(id)
+	case data.SetVariableOpSub:
+		rhs -= e.mapScene.state().Variables().VariableValue(id)
+	case data.SetVariableOpMul:
+		rhs *= e.mapScene.state().Variables().VariableValue(id)
+	case data.SetVariableOpDiv:
+		rhs /= e.mapScene.state().Variables().VariableValue(id)
+	case data.SetVariableOpMod:
+		rhs %= e.mapScene.state().Variables().VariableValue(id)
+	}
+	e.mapScene.state().Variables().SetVariableValue(id, rhs)
 }
 
 func (e *event) transfer(taskLine *task.TaskLine, roomID, x, y int) {
