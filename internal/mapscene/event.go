@@ -114,7 +114,7 @@ func (e *event) meetsCondition(cond *data.Condition) (bool, error) {
 	switch cond.Type {
 	case data.ConditionTypeSwitch:
 		id := cond.ID
-		v := e.mapScene.switchValue(id)
+		v := e.mapScene.state().Variables().SwitchValue(id)
 		rhs := cond.Value.(bool)
 		return v == rhs, nil
 	case data.ConditionTypeSelfSwitch:
@@ -123,12 +123,12 @@ func (e *event) meetsCondition(cond *data.Condition) (bool, error) {
 		return v == rhs, nil
 	case data.ConditionTypeVariable:
 		id := cond.ID
-		v := e.mapScene.variableValue(id)
+		v := e.mapScene.state().Variables().VariableValue(id)
 		rhs := cond.Value.(int)
 		switch cond.ValueType {
 		case data.ConditionValueTypeConstant:
 		case data.ConditionValueTypeVariable:
-			rhs = e.mapScene.variableValue(rhs)
+			rhs = e.mapScene.state().Variables().VariableValue(rhs)
 		default:
 			return false, fmt.Errorf("mapscene: invalid value type: %s", cond.ValueType)
 		}
@@ -388,7 +388,7 @@ func (e *event) showChoices(taskLine *task.TaskLine, choices []string) {
 
 func (e *event) setSwitch(taskLine *task.TaskLine, id int, value bool) {
 	taskLine.PushFunc(func() error {
-		e.mapScene.setSwitchValue(id, value)
+		e.mapScene.state().Variables().SetSwitchValue(id, value)
 		return task.Terminated
 	})
 }
@@ -407,7 +407,7 @@ func (e *event) setVariable(taskLine *task.TaskLine, id int, op data.SetVariable
 		case data.SetVariableValueTypeConstant:
 			rhs = value.(int)
 		case data.SetVariableValueTypeVariable:
-			rhs = e.mapScene.variableValue(value.(int))
+			rhs = e.mapScene.state().Variables().VariableValue(value.(int))
 		case data.SetVariableValueTypeRandom:
 			println(fmt.Sprintf("not implemented yet (set_variable): valueType %s", valueType))
 			return task.Terminated
@@ -433,17 +433,17 @@ func (e *event) setVariable(taskLine *task.TaskLine, id int, op data.SetVariable
 		switch op {
 		case data.SetVariableOpAssign:
 		case data.SetVariableOpAdd:
-			rhs += e.mapScene.variableValue(id)
+			rhs += e.mapScene.state().Variables().VariableValue(id)
 		case data.SetVariableOpSub:
-			rhs -= e.mapScene.variableValue(id)
+			rhs -= e.mapScene.state().Variables().VariableValue(id)
 		case data.SetVariableOpMul:
-			rhs *= e.mapScene.variableValue(id)
+			rhs *= e.mapScene.state().Variables().VariableValue(id)
 		case data.SetVariableOpDiv:
-			rhs /= e.mapScene.variableValue(id)
+			rhs /= e.mapScene.state().Variables().VariableValue(id)
 		case data.SetVariableOpMod:
-			rhs %= e.mapScene.variableValue(id)
+			rhs %= e.mapScene.state().Variables().VariableValue(id)
 		}
-		e.mapScene.setVariableValue(id, rhs)
+		e.mapScene.state().Variables().SetVariableValue(id, rhs)
 		return task.Terminated
 	})
 }

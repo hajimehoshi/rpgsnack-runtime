@@ -26,6 +26,7 @@ import (
 	"github.com/hajimehoshi/tsugunai/internal/assets"
 	"github.com/hajimehoshi/tsugunai/internal/data"
 	"github.com/hajimehoshi/tsugunai/internal/font"
+	"github.com/hajimehoshi/tsugunai/internal/gamestate"
 	"github.com/hajimehoshi/tsugunai/internal/input"
 	"github.com/hajimehoshi/tsugunai/internal/scene"
 	"github.com/hajimehoshi/tsugunai/internal/task"
@@ -44,6 +45,7 @@ func (t *tint) isZero() bool {
 
 type MapScene struct {
 	gameData      *data.Game
+	gameState     *gamestate.Game
 	currentRoomID int
 	currentMap    *data.Map
 	player        *player
@@ -54,8 +56,6 @@ type MapScene struct {
 	tilesImage    *ebiten.Image
 	emptyImage    *ebiten.Image
 	events        []*event
-	switches      []bool
-	variables     []int
 	fadingRate    float64
 	tint          *tint
 	origTint      *tint
@@ -84,6 +84,7 @@ func New(gameData *data.Game) (*MapScene, error) {
 	}
 	mapScene := &MapScene{
 		gameData:   gameData,
+		gameState:  gamestate.NewGame(),
 		currentMap: gameData.Maps[0],
 		player:     player,
 		balloons:   &balloons{},
@@ -95,6 +96,10 @@ func New(gameData *data.Game) (*MapScene, error) {
 	}
 	mapScene.changeRoom(roomID)
 	return mapScene, nil
+}
+
+func (m *MapScene) state() *gamestate.Game {
+	return m.gameState
 }
 
 func (m *MapScene) currentRoom() *data.Room {
@@ -117,38 +122,6 @@ func (m *MapScene) changeRoom(roomID int) error {
 		m.events = append(m.events, event)
 	}
 	return nil
-}
-
-func (m *MapScene) switchValue(id int) bool {
-	if len(m.switches) < id+1 {
-		zeros := make([]bool, id+1-len(m.switches))
-		m.switches = append(m.switches, zeros...)
-	}
-	return m.switches[id]
-}
-
-func (m *MapScene) setSwitchValue(id int, value bool) {
-	if len(m.switches) < id+1 {
-		zeros := make([]bool, id+1-len(m.switches))
-		m.switches = append(m.switches, zeros...)
-	}
-	m.switches[id] = value
-}
-
-func (m *MapScene) variableValue(id int) int {
-	if len(m.variables) < id+1 {
-		zeros := make([]int, id+1-len(m.variables))
-		m.variables = append(m.variables, zeros...)
-	}
-	return m.variables[id]
-}
-
-func (m *MapScene) setVariableValue(id int, value int) {
-	if len(m.variables) < id+1 {
-		zeros := make([]int, id+1-len(m.variables))
-		m.variables = append(m.variables, zeros...)
-	}
-	m.variables[id] = value
 }
 
 func (m *MapScene) tileSet(id int) (*data.TileSet, error) {
@@ -314,7 +287,7 @@ func (m *MapScene) parseMessageSyntax(str string) string {
 		}
 		switch name {
 		case "v":
-			return strconv.Itoa(m.variableValue(id))
+			return strconv.Itoa(m.state().Variables().VariableValue(id))
 		}
 		return str
 	})
