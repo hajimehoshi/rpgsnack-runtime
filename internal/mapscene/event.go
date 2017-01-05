@@ -341,11 +341,11 @@ func (e *event) executeCommands(sub *task.TaskLine) error {
 			g := float64(args.Green) / 255
 			b := float64(args.Blue) / 255
 			gray := float64(args.Gray) / 255
-			e.mapScene.startTint(r, g, b, gray, args.Time*6)
+			e.mapScene.gameState.Screen().StartTint(r, g, b, gray, args.Time*6)
 			return task.Terminated
 		})
 		sub.PushFunc(func() error {
-			if args.Wait && e.mapScene.isChangingTint() {
+			if args.Wait && e.mapScene.gameState.Screen().IsChangingTint() {
 				return nil
 			}
 			e.commandIndex.advance()

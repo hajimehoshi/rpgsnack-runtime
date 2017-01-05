@@ -16,14 +16,20 @@ package gamestate
 
 type Game struct {
 	variables *Variables
+	screen    *Screen
 }
 
 func NewGame() *Game {
 	return &Game{
 		variables: &Variables{},
+		screen:    newScreen(),
 	}
 }
 
 func (g *Game) Variables() *Variables {
 	return g.variables
+}
+
+func (g *Game) Screen() *Screen {
+	return g.screen
 }
