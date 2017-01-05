@@ -41,6 +41,7 @@ type Page struct {
 	Through    bool         `json:"through"`
 	Priority   Priority     `json:"priority"`
 	Trigger    Trigger      `json:"trigger"`
+	Route      *Route       `json:"route"`
 	Commands   []*Command   `json:"commands"`
 }
 
@@ -174,3 +175,11 @@ const (
 	ConditionValueTypeConstant ConditionValueType = "constant"
 	ConditionValueTypeVariable                    = "variable"
 )
+
+type Route struct {
+	EventID int  `json:"eventId"`
+	Repeat  bool `json:"repeat"`
+	Skip    bool `json:"skip"`
+	Wait    bool `json:"wait"`
+	//Commands []*Command `json:"commands"`
+}
