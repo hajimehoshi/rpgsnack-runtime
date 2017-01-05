@@ -222,7 +222,11 @@ func (m *MapScene) character(id int, self *event) *character {
 	case 0:
 		ch = self.character
 	default:
-		println(fmt.Sprintf("not implemented yet (show_message): eventId: %d", id))
+		for _, e := range m.events {
+			if id == e.data.ID {
+				return e.character
+			}
+		}
 		return nil
 	}
 	return ch
