@@ -47,7 +47,6 @@ type balloon struct {
 	content        string
 	contentOffsetX int
 	count          int
-	maxCount       int
 }
 
 func newBalloon(x, y, width, height int, content string) *balloon {
