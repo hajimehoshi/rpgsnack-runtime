@@ -140,6 +140,7 @@ func (c *character) move(taskLine *task.TaskLine, passable func(x, y int) (bool,
 func (c *character) transferImmediately(x, y int) {
 	c.x = x
 	c.y = y
+	c.moveCount = 0
 }
 
 func (c *character) update(passable func(x, y int) (bool, error)) error {
