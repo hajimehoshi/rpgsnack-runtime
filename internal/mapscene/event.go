@@ -33,6 +33,7 @@ type event struct {
 	chosenIndex      int
 	steppingCount    int
 	selfSwitches     [data.SelfSwitchNum]bool
+	waitingCount     int
 }
 
 func newEvent(eventData *data.Event, mapScene *MapScene) (*event, error) {
@@ -236,6 +237,13 @@ func (e *event) run(taskLine *task.TaskLine, trigger data.Trigger) bool {
 }
 
 func (e *event) executeCommands(sub *task.TaskLine) error {
+	if e.waitingCount > 0 {
+		e.waitingCount--
+		if e.waitingCount == 0 {
+			e.commandIndex.advance()
+		}
+		return nil
+	}
 	if e.commandIndex == nil {
 		return task.Terminated
 	}
@@ -270,12 +278,7 @@ func (e *event) executeCommands(sub *task.TaskLine) error {
 		e.commandIndex.advance()
 	case data.CommandNameWait:
 		e.mapScene.closeAllBalloons(sub)
-		frames := c.Args.(*data.CommandArgsWait).Time * 6
-		sub.Push(task.Sleep(frames))
-		sub.PushFunc(func() error {
-			e.commandIndex.advance()
-			return task.Terminated
-		})
+		e.waitingCount = c.Args.(*data.CommandArgsWait).Time * 6
 	case data.CommandNameShowMessage:
 		e.mapScene.closeAllBalloons(sub)
 		args := c.Args.(*data.CommandArgsShowMessage)

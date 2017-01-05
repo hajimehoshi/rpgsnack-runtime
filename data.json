@@ -231,7 +231,7 @@
                     {
                       "name": "wait",
                       "args": {
-                        "time": 5
+                        "time": 10
                       }
                     },
                     {
