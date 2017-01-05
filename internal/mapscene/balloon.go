@@ -29,7 +29,7 @@ const (
 	// TODO: Rename this to balloonUnitSize
 	balloonMarginX     = 4
 	balloonMarginY     = 4
-	balloonMaxCount    = 8
+	balloonMaxCount    = 4
 	balloonArrowWidth  = 6
 	balloonArrowHeight = 5
 	balloonMinWidth    = 24
@@ -46,7 +46,9 @@ type balloon struct {
 	arrowFlip      bool
 	content        string
 	contentOffsetX int
-	count          int
+	openingCount   int
+	closingCount   int
+	opened         bool
 }
 
 func newBalloon(x, y, width, height int, content string) *balloon {
@@ -56,7 +58,6 @@ func newBalloon(x, y, width, height int, content string) *balloon {
 		y:       y,
 		width:   ((width + 3) / 4) * 4,
 		height:  ((height + 3) / 4) * 4,
-		count:   balloonMaxCount,
 	}
 	return b
 }
@@ -89,7 +90,6 @@ func newBalloonCenter(content string) *balloon {
 		y:              y,
 		width:          w,
 		height:         h,
-		count:          balloonMaxCount,
 	}
 	return b
 }
@@ -100,7 +100,6 @@ func newBalloonWithArrow(arrowX, arrowY int, content string) *balloon {
 		hasArrow: true,
 		arrowX:   arrowX,
 		arrowY:   arrowY - balloonArrowHeight,
-		count:    balloonMaxCount,
 	}
 	w, h, contentOffsetX := balloonSizeFromContent(content)
 	b.width = w
@@ -119,9 +118,11 @@ func newBalloonWithArrow(arrowX, arrowY int, content string) *balloon {
 }
 
 func (b *balloon) open(taskLine *task.TaskLine) {
+	b.openingCount = balloonMaxCount
 	taskLine.PushFunc(func() error {
-		b.count--
-		if b.count == balloonMaxCount/2 {
+		b.openingCount--
+		if b.openingCount == 0 {
+			b.opened = true
 			return task.Terminated
 		}
 		return nil
@@ -129,12 +130,11 @@ func (b *balloon) open(taskLine *task.TaskLine) {
 }
 
 func (b *balloon) close(taskLine *task.TaskLine) {
+	b.closingCount = balloonMaxCount
+	b.opened = false
 	taskLine.PushFunc(func() error {
-		if b.count <= 0 {
-			panic("not reach")
-		}
-		b.count--
-		if b.count == 0 {
+		b.closingCount--
+		if b.closingCount == 0 {
 			return task.Terminated
 		}
 		return nil
@@ -205,31 +205,32 @@ func (b *balloonImageParts) Dst(index int) (int, int, int, int) {
 }
 
 func (b *balloon) draw(screen *ebiten.Image) error {
-	if b.count > 0 {
+	rate := 0.0
+	switch {
+	case b.opened:
+		rate = 1
+	case b.openingCount > 0:
+		rate = 1 - float64(b.openingCount)/float64(balloonMaxCount)
+	case b.closingCount > 0:
+		rate = float64(b.closingCount) / float64(balloonMaxCount)
+	}
+	if rate > 0 {
 		img := assets.GetImage("balloon.png")
 		op := &ebiten.DrawImageOptions{}
-		rate := 1.0
-		if balloonMaxCount/2 < b.count {
-			rate = 1 - float64(b.count-balloonMaxCount/2)/float64(balloonMaxCount/2)
-		} else if balloonMaxCount/2 > b.count {
-			rate = float64(b.count) / float64(balloonMaxCount/2)
-		}
-		if rate != 1.0 {
-			dx := float64(b.x + b.width/2)
-			dy := float64(b.y + b.height/2)
-			if b.hasArrow {
-				dx = float64(b.arrowX)
-				dy = float64(b.arrowY) + balloonArrowHeight
-				if b.arrowFlip {
-					dx -= 4
-				} else {
-					dx += 4
-				}
+		dx := float64(b.x + b.width/2)
+		dy := float64(b.y + b.height/2)
+		if b.hasArrow {
+			dx = float64(b.arrowX)
+			dy = float64(b.arrowY) + balloonArrowHeight
+			if b.arrowFlip {
+				dx -= 4
+			} else {
+				dx += 4
 			}
-			op.GeoM.Translate(-dx, -dy)
-			op.GeoM.Scale(rate, rate)
-			op.GeoM.Translate(dx, dy)
 		}
+		op.GeoM.Translate(-dx, -dy)
+		op.GeoM.Scale(rate, rate)
+		op.GeoM.Translate(dx, dy)
 		op.GeoM.Scale(scene.TileScale, scene.TileScale)
 		op.ImageParts = &balloonImageParts{
 			balloon: b,
@@ -238,7 +239,7 @@ func (b *balloon) draw(screen *ebiten.Image) error {
 			return err
 		}
 	}
-	if b.count == balloonMaxCount/2 {
+	if b.opened {
 		x := (b.x + balloonMarginX + b.contentOffsetX) * scene.TileScale
 		y := (b.y + balloonMarginY) * scene.TileScale
 		if err := font.DrawText(screen, b.content, x, y, scene.TextScale, color.Black); err != nil {
