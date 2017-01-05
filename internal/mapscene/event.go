@@ -29,7 +29,6 @@ type event struct {
 	data             *data.Event
 	mapScene         *MapScene
 	character        *character
-	origDir          data.Dir
 	currentPageIndex int
 	commandIndex     *commandIndex
 	chosenIndex      int
@@ -193,8 +192,9 @@ func (e *event) run(taskLine *task.TaskLine, trigger data.Trigger) bool {
 	if page.Trigger != trigger {
 		return false
 	}
+	var origDir data.Dir
 	taskLine.PushFunc(func() error {
-		e.origDir = e.character.dir
+		origDir = e.character.dir
 		var dir data.Dir
 		ex, ey := e.character.x, e.character.y
 		px, py := e.mapScene.player.character.x, e.mapScene.player.character.y
@@ -225,20 +225,20 @@ func (e *event) run(taskLine *task.TaskLine, trigger data.Trigger) bool {
 		e.commandIndex = newCommandIndex(page)
 		return task.Terminated
 	})
-	taskLine.Push(task.Sub(e.goOn))
+	taskLine.Push(task.Sub(e.executeCommands))
+	taskLine.PushFunc(func() error {
+		e.character.turn(origDir)
+		return task.Terminated
+	})
 	return true
 }
 
-func (e *event) goOn(sub *task.TaskLine) error {
+func (e *event) executeCommands(sub *task.TaskLine) error {
 	if e.commandIndex == nil {
 		return task.Terminated
 	}
 	e.mapScene.closeAllBalloons(sub)
 	if e.commandIndex.isTerminated() {
-		sub.PushFunc(func() error {
-			e.character.turn(e.origDir)
-			return task.Terminated
-		})
 		return task.Terminated
 	}
 	c := e.commandIndex.command()
