@@ -32,7 +32,7 @@ const (
 	balloonMaxCount    = 8
 	balloonArrowWidth  = 6
 	balloonArrowHeight = 5
-	balloonMinWidth    = 40
+	balloonMinWidth    = 24
 )
 
 type balloon struct {
