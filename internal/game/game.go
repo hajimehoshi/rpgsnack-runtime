@@ -27,7 +27,6 @@ import (
 
 type Game struct {
 	sceneManager *scene.SceneManager
-	gameData     *data.Game
 	loadingCh    chan error
 }
 
@@ -46,8 +45,9 @@ func (g *Game) startLoadingGameData() {
 			ch <- err
 			return
 		}
-		g.gameData = gameData
-		initScene := titlescene.New(gameData)
+		// TODO: Refactoring
+		scene.Data = gameData
+		initScene := titlescene.New()
 		g.sceneManager = scene.NewSceneManager(initScene)
 	}()
 	g.loadingCh = ch
