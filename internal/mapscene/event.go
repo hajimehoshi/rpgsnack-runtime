@@ -244,14 +244,10 @@ func (e *event) goOn(sub *task.TaskLine) error {
 	c := e.commandIndex.command()
 	switch c.Name {
 	case data.CommandNameIf:
-		conditions := c.Args["conditions"].([]interface{})
-		cs, err := data.ConditionsFromMaps(conditions)
-		if err != nil {
-			return err
-		}
+		conditions := c.Args.(*data.CommandArgsIf).Conditions
 		sub.PushFunc(func() error {
 			matches := true
-			for _, c := range cs {
+			for _, c := range conditions {
 				m, err := e.meetsCondition(c)
 				if err != nil {
 					return err
@@ -272,39 +268,30 @@ func (e *event) goOn(sub *task.TaskLine) error {
 			e.commandIndex.advance()
 			return task.Terminated
 		})
-	case data.CommandNameWait:
-		time := int(c.Args["time"].(float64))
-		frames := time * 6
-		sub.Push(task.Sleep(frames))
-		sub.PushFunc(func() error {
-			e.commandIndex.advance()
-			return task.Terminated
-		})
 	case data.CommandNameCallEvent:
 		println(fmt.Sprintf("not implemented yet: %s", c.Name))
 		sub.PushFunc(func() error {
 			e.commandIndex.advance()
 			return task.Terminated
 		})
+	case data.CommandNameWait:
+		frames := c.Args.(*data.CommandArgsWait).Time * 6
+		sub.Push(task.Sleep(frames))
+		sub.PushFunc(func() error {
+			e.commandIndex.advance()
+			return task.Terminated
+		})
 	case data.CommandNameShowMessage:
-		eventID := int(c.Args["eventId"].(float64))
-		contentID, err := data.UUIDFromString(c.Args["content"].(string))
-		if err != nil {
-			return err
-		}
-		content := e.mapScene.gameData.Texts.Get(language.Und, contentID)
-		e.showMessage(sub, content, eventID)
+		args := c.Args.(*data.CommandArgsShowMessage)
+		content := e.mapScene.gameData.Texts.Get(language.Und, args.ContentID)
+		e.showMessage(sub, content, args.EventID)
 		sub.PushFunc(func() error {
 			e.commandIndex.advance()
 			return task.Terminated
 		})
 	case data.CommandNameShowChoices:
 		choices := []string{}
-		for _, c := range c.Args["choices"].([]interface{}) {
-			id, err := data.UUIDFromString(c.(string))
-			if err != nil {
-				return err
-			}
+		for _, id := range c.Args.(*data.CommandArgsShowChoices).ChoiceIDs {
 			choice := e.mapScene.gameData.Texts.Get(language.Und, id)
 			choices = append(choices, choice)
 		}
@@ -314,36 +301,29 @@ func (e *event) goOn(sub *task.TaskLine) error {
 			return task.Terminated
 		})
 	case data.CommandNameSetSwitch:
-		id := int(c.Args["id"].(float64))
-		value := c.Args["value"].(bool)
-		e.setSwitch(sub, id, value)
+		args := c.Args.(*data.CommandArgsSetSwitch)
+		e.setSwitch(sub, args.ID, args.Value)
 		sub.PushFunc(func() error {
 			e.commandIndex.advance()
 			return task.Terminated
 		})
 	case data.CommandNameSetSelfSwitch:
-		id := int(c.Args["id"].(float64))
-		value := c.Args["value"].(bool)
-		e.setSelfSwitch(sub, id, value)
+		args := c.Args.(*data.CommandArgsSetSelfSwitch)
+		e.setSelfSwitch(sub, args.ID, args.Value)
 		sub.PushFunc(func() error {
 			e.commandIndex.advance()
 			return task.Terminated
 		})
 	case data.CommandNameSetVariable:
-		id := int(c.Args["id"].(float64))
-		op := data.SetVariableOp(c.Args["op"].(string))
-		valueType := data.SetVariableValueType(c.Args["valueType"].(string))
-		value := c.Args["value"]
-		e.setVariable(sub, id, op, valueType, value)
+		args := c.Args.(*data.CommandArgsSetVariable)
+		e.setVariable(sub, args.ID, args.Op, args.ValueType, args.Value)
 		sub.PushFunc(func() error {
 			e.commandIndex.advance()
 			return task.Terminated
 		})
 	case data.CommandNameTransfer:
-		roomID := int(c.Args["roomId"].(float64))
-		x := int(c.Args["x"].(float64))
-		y := int(c.Args["y"].(float64))
-		e.transfer(sub, roomID, x, y)
+		args := c.Args.(*data.CommandArgsTransfer)
+		e.transfer(sub, args.RoomID, args.X, args.Y)
 		sub.PushFunc(func() error {
 			e.commandIndex.advance()
 			return task.Terminated
@@ -355,18 +335,17 @@ func (e *event) goOn(sub *task.TaskLine) error {
 			return task.Terminated
 		})
 	case data.CommandNameTintScreen:
-		r := c.Args["red"].(float64) / 255
-		g := c.Args["green"].(float64) / 255
-		b := c.Args["blue"].(float64) / 255
-		gray := c.Args["gray"].(float64) / 255
-		time := int(c.Args["time"].(float64))
-		wait := c.Args["wait"].(bool)
+		args := c.Args.(*data.CommandArgsTintScreen)
 		sub.PushFunc(func() error {
-			e.mapScene.startTint(r, g, b, gray, time*6)
+			r := float64(args.Red) / 255
+			g := float64(args.Green) / 255
+			b := float64(args.Blue) / 255
+			gray := float64(args.Gray) / 255
+			e.mapScene.startTint(r, g, b, gray, args.Time*6)
 			return task.Terminated
 		})
 		sub.PushFunc(func() error {
-			if wait && e.mapScene.isChangingTint() {
+			if args.Wait && e.mapScene.isChangingTint() {
 				return nil
 			}
 			e.commandIndex.advance()

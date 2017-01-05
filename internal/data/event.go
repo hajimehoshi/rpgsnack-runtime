@@ -16,6 +16,7 @@ package data
 
 import (
 	"encoding/json"
+	"fmt"
 )
 
 const (
@@ -80,9 +81,90 @@ const (
 )
 
 type Command struct {
-	Name     CommandName            `json:"name"`
-	Args     map[string]interface{} `json:"args"`
-	Branches [][]*Command           `json:"branches"`
+	Name     CommandName
+	Args     interface{}
+	Branches [][]*Command
+}
+
+func (c *Command) UnmarshalJSON(data []uint8) error {
+	type tmpCommand struct {
+		Name     CommandName     `json:"name"`
+		Branches [][]*Command    `json:"branches"`
+		Args     json.RawMessage `json:"args"`
+	}
+	var tmp *tmpCommand
+	if err := json.Unmarshal(data, &tmp); err != nil {
+		return nil
+	}
+	c.Name = tmp.Name
+	c.Branches = tmp.Branches
+	switch c.Name {
+	case CommandNameIf:
+		var args *CommandArgsIf
+		if err := json.Unmarshal(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
+	case CommandNameCallEvent:
+		return fmt.Errorf("not implemented yet: %s", c.Name)
+	case CommandNameWait:
+		var args *CommandArgsWait
+		if err := json.Unmarshal(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
+	case CommandNameShowMessage:
+		var args *CommandArgsShowMessage
+		if err := json.Unmarshal(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
+	case CommandNameShowChoices:
+		var args *CommandArgsShowChoices
+		if err := json.Unmarshal(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
+	case CommandNameSetSwitch:
+		var args *CommandArgsSetSwitch
+		if err := json.Unmarshal(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
+	case CommandNameSetSelfSwitch:
+		var args *CommandArgsSetSelfSwitch
+		if err := json.Unmarshal(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
+	case CommandNameSetVariable:
+		var args *CommandArgsSetVariable
+		if err := json.Unmarshal(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
+	case CommandNameTransfer:
+		var args *CommandArgsTransfer
+		if err := json.Unmarshal(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
+	case CommandNameSetRoute:
+		return fmt.Errorf("not implemented yet: %s", c.Name)
+	case CommandNameTintScreen:
+		var args *CommandArgsTintScreen
+		if err := json.Unmarshal(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
+	case CommandNamePlaySE:
+		return fmt.Errorf("not implemented yet: %s", c.Name)
+	case CommandNamePlayBGM:
+		return fmt.Errorf("not implemented yet: %s", c.Name)
+	case CommandNameStopBGM:
+		return fmt.Errorf("not implemented yet: %s", c.Name)
+	}
+	return nil
 }
 
 type CommandName string
@@ -103,6 +185,55 @@ const (
 	CommandNamePlayBGM                   = "play_bgm"
 	CommandNameStopBGM                   = "stop_bgm"
 )
+
+type CommandArgsIf struct {
+	Conditions []*Condition `json:"conditions"`
+}
+
+type CommandArgsWait struct {
+	Time int `json:"time"`
+}
+
+type CommandArgsShowMessage struct {
+	EventID   int  `json:"eventId"`
+	ContentID UUID `json:"content"`
+}
+
+type CommandArgsShowChoices struct {
+	ChoiceIDs []UUID `json:"choices"`
+}
+
+type CommandArgsSetSwitch struct {
+	ID    int  `json:"id"`
+	Value bool `json:"value"`
+}
+
+type CommandArgsSetSelfSwitch struct {
+	ID    int  `json:"id"`
+	Value bool `json:"value"`
+}
+
+type CommandArgsSetVariable struct {
+	ID        int                  `json:"id"`
+	Op        SetVariableOp        `json:"op"`
+	ValueType SetVariableValueType `json:"valueType"`
+	Value     interface{}          `json:"value"`
+}
+
+type CommandArgsTransfer struct {
+	RoomID int `json:"roomId"`
+	X      int `json:"x"`
+	Y      int `json:"y"`
+}
+
+type CommandArgsTintScreen struct {
+	Red   int  `json:"red"`
+	Green int  `json:"green"`
+	Blue  int  `json:"blue"`
+	Gray  int  `json:"gray"`
+	Time  int  `json:"time"`
+	Wait  bool `json:"wait"`
+}
 
 type SetVariableOp string
 
@@ -138,7 +269,7 @@ type Condition struct {
 	Value     interface{}        `json:"value"`
 }
 
-func ConditionsFromMaps(m []interface{}) ([]*Condition, error) {
+/*func ConditionsFromMaps(m []interface{}) ([]*Condition, error) {
 	b, err := json.Marshal(m)
 	if err != nil {
 		return nil, err
@@ -148,7 +279,7 @@ func ConditionsFromMaps(m []interface{}) ([]*Condition, error) {
 		return nil, err
 	}
 	return c, nil
-}
+}*/
 
 type ConditionType string
 
