@@ -29,7 +29,7 @@ type event struct {
 	data             *data.Event
 	mapScene         *MapScene
 	character        *character
-	origDir          data.Dir
+	origDir          data.Direction
 	currentPageIndex int
 	commandIndex     *commandIndex
 	chosenIndex      int
@@ -91,8 +91,8 @@ func (e *event) updateCharacterIfNeeded() error {
 		c := e.character
 		c.image = nil
 		c.imageIndex = 0
-		c.dirFix = false
-		c.turn(data.Dir(0))
+		c.directionFix = false
+		c.turn(data.Direction(0))
 		c.attitude = data.AttitudeMiddle
 		return nil
 	}
@@ -100,8 +100,8 @@ func (e *event) updateCharacterIfNeeded() error {
 	c := e.character
 	c.image = assets.GetImage(page.Image)
 	c.imageIndex = page.ImageIndex
-	c.dirFix = page.DirFix
-	c.dir = page.Dir
+	c.directionFix = page.DirectionFix
+	c.direction = page.Direction
 	// page.Attitude is ignored so far.
 	c.attitude = data.AttitudeMiddle
 	return nil
@@ -194,8 +194,8 @@ func (e *event) run(taskLine *task.TaskLine, trigger data.Trigger) bool {
 		return false
 	}
 	taskLine.PushFunc(func() error {
-		e.origDir = e.character.dir
-		var dir data.Dir
+		e.origDir = e.character.direction
+		var dir data.Direction
 		ex, ey := e.character.x, e.character.y
 		px, py := e.mapScene.player.character.x, e.mapScene.player.character.y
 		switch {
@@ -203,13 +203,13 @@ func (e *event) run(taskLine *task.TaskLine, trigger data.Trigger) bool {
 		case ex == px && ey == py:
 			// The player and the event are at the same position.
 		case ex > px && ey == py:
-			dir = data.DirLeft
+			dir = data.DirectionLeft
 		case ex < px && ey == py:
-			dir = data.DirRight
+			dir = data.DirectionRight
 		case ex == px && ey > py:
-			dir = data.DirUp
+			dir = data.DirectionUp
 		case ex == px && ey < py:
-			dir = data.DirDown
+			dir = data.DirectionDown
 		default:
 			panic("not reach")
 		}
@@ -440,14 +440,14 @@ func (e *event) setVariable(taskLine *task.TaskLine, id int, op data.SetVariable
 			t := data.SetVariableCharacterType(v["type"].(string))
 			switch t {
 			case data.SetVariableCharacterTypeDirection:
-				switch ch.dir {
-				case data.DirUp:
+				switch ch.direction {
+				case data.DirectionUp:
 					rhs = 0
-				case data.DirRight:
+				case data.DirectionRight:
 					rhs = 1
-				case data.DirDown:
+				case data.DirectionDown:
 					rhs = 2
-				case data.DirLeft:
+				case data.DirectionLeft:
 					rhs = 3
 				}
 			default:

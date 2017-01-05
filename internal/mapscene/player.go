@@ -34,8 +34,8 @@ func newPlayer(x, y int) (*player, error) {
 		imageIndex:   0,
 		x:            x,
 		y:            y,
-		dir:          data.DirDown,
-		dirFix:       false,
+		direction:    data.DirectionDown,
+		directionFix: false,
 		attitude:     data.AttitudeMiddle,
 		prevAttitude: data.AttitudeMiddle,
 	}

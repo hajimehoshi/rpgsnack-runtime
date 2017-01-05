@@ -25,8 +25,8 @@ import (
 type character struct {
 	image        *ebiten.Image
 	imageIndex   int
-	dir          data.Dir
-	dirFix       bool
+	direction    data.Direction
+	directionFix bool
 	attitude     data.Attitude
 	prevAttitude data.Attitude
 	x            int
@@ -34,18 +34,18 @@ type character struct {
 	moveCount    int
 }
 
-func (c *character) turn(dir data.Dir) {
-	if c.dirFix {
+func (c *character) turn(dir data.Direction) {
+	if c.directionFix {
 		return
 	}
-	c.dir = dir
+	c.direction = dir
 }
 
 type characterImageParts struct {
 	charWidth  int
 	charHeight int
 	index      int
-	dir        data.Dir
+	direction  data.Direction
 	attitude   data.Attitude
 }
 
@@ -63,13 +63,13 @@ func (c *characterImageParts) Src(index int) (int, int, int, int) {
 	case data.AttitudeRight:
 		x += 2 * c.charHeight
 	}
-	switch c.dir {
-	case data.DirUp:
-	case data.DirRight:
+	switch c.direction {
+	case data.DirectionUp:
+	case data.DirectionRight:
 		y += c.charHeight
-	case data.DirDown:
+	case data.DirectionDown:
 		y += 2 * c.charHeight
-	case data.DirLeft:
+	case data.DirectionLeft:
 		y += 3 * c.charHeight
 	}
 	return x, y, x + c.charWidth, y + c.charHeight
@@ -95,13 +95,13 @@ func (c *character) move(taskLine *task.TaskLine, passable func(x, y int) (bool,
 			}
 			nx, ny := c.x, c.y
 			switch d {
-			case data.DirLeft:
+			case data.DirectionLeft:
 				nx--
-			case data.DirRight:
+			case data.DirectionRight:
 				nx++
-			case data.DirUp:
+			case data.DirectionUp:
 				ny--
-			case data.DirDown:
+			case data.DirectionDown:
 				ny++
 			}
 			p, err := passable(nx, ny)
@@ -160,14 +160,14 @@ func (c *character) draw(screen *ebiten.Image) error {
 		dx := 0
 		dy := 0
 		d := (playerMaxMoveCount - c.moveCount) * scene.TileSize / playerMaxMoveCount
-		switch c.dir {
-		case data.DirLeft:
+		switch c.direction {
+		case data.DirectionLeft:
 			dx -= d
-		case data.DirRight:
+		case data.DirectionRight:
 			dx += d
-		case data.DirUp:
+		case data.DirectionUp:
 			dy -= d
-		case data.DirDown:
+		case data.DirectionDown:
 			dy += d
 		}
 		op.GeoM.Translate(float64(dx), float64(dy))
@@ -176,7 +176,7 @@ func (c *character) draw(screen *ebiten.Image) error {
 		charWidth:  charW,
 		charHeight: charH,
 		index:      c.imageIndex,
-		dir:        c.dir,
+		direction:  c.direction,
 		attitude:   c.attitude,
 	}
 	if err := screen.DrawImage(c.image, op); err != nil {
