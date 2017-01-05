@@ -261,40 +261,6 @@ const (
 	SetVariableCharacterTypeDirection SetVariableCharacterType = "direction"
 )
 
-type Condition struct {
-	Type      ConditionType      `json:"type"`
-	ID        int                `json:"id"`
-	Comp      ConditionComp      `json:"comp"`
-	ValueType ConditionValueType `json:"valueType"`
-	Value     interface{}        `json:"value"`
-}
-
-type ConditionType string
-
-const (
-	ConditionTypeSwitch     ConditionType = "switch"
-	ConditionTypeSelfSwitch               = "self_switch"
-	ConditionTypeVariable                 = "variable"
-)
-
-type ConditionComp string
-
-const (
-	ConditionCompEqualTo              ConditionComp = "=="
-	ConditionCompNotEqualTo                         = "!="
-	ConditionCompGreaterThanOrEqualTo               = ">="
-	ConditionCompGreaterThan                        = ">"
-	ConditionCompLessThanOrEqualTo                  = "<="
-	ConditionCompLessThan                           = "<"
-)
-
-type ConditionValueType string
-
-const (
-	ConditionValueTypeConstant ConditionValueType = "constant"
-	ConditionValueTypeVariable                    = "variable"
-)
-
 type Route struct {
 	EventID int  `json:"eventId"`
 	Repeat  bool `json:"repeat"`

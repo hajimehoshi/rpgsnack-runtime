@@ -125,7 +125,7 @@ func (e *event) meetsCondition(cond *data.Condition) (bool, error) {
 	case data.ConditionTypeVariable:
 		id := cond.ID
 		v := e.mapScene.variableValue(id)
-		rhs := int(cond.Value.(float64))
+		rhs := cond.Value.(int)
 		switch cond.ValueType {
 		case data.ConditionValueTypeConstant:
 		case data.ConditionValueTypeVariable:
