@@ -405,19 +405,16 @@ func (e *event) setVariable(taskLine *task.TaskLine, id int, op data.SetVariable
 		rhs := 0
 		switch valueType {
 		case data.SetVariableValueTypeConstant:
-			rhs = int(value.(float64))
+			rhs = value.(int)
 		case data.SetVariableValueTypeVariable:
-			v := int(value.(float64))
-			rhs = e.mapScene.variableValue(v)
+			rhs = e.mapScene.variableValue(value.(int))
 		case data.SetVariableValueTypeRandom:
 			println(fmt.Sprintf("not implemented yet (set_variable): valueType %s", valueType))
 			return task.Terminated
 		case data.SetVariableValueTypeCharacter:
-			v := value.(map[string]interface{})
-			eventID := int(v["eventId"].(float64))
-			ch := e.mapScene.character(eventID, e)
-			t := data.SetVariableCharacterType(v["type"].(string))
-			switch t {
+			args := value.(*data.SetVariableCharacterArgs)
+			ch := e.mapScene.character(args.EventID, e)
+			switch args.Type {
 			case data.SetVariableCharacterTypeDirection:
 				switch ch.dir {
 				case data.DirUp:
@@ -430,7 +427,7 @@ func (e *event) setVariable(taskLine *task.TaskLine, id int, op data.SetVariable
 					rhs = 3
 				}
 			default:
-				println(fmt.Sprintf("not implemented yet (set_variable): type %s", t))
+				println(fmt.Sprintf("not implemented yet (set_variable): type %s", args.Type))
 			}
 		}
 		switch op {

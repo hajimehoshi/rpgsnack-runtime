@@ -106,7 +106,7 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 		}
 		c.Args = args
 	case CommandNameCallEvent:
-		return fmt.Errorf("not implemented yet: %s", c.Name)
+		return fmt.Errorf("data: not implemented yet: %s", c.Name)
 	case CommandNameWait:
 		var args *CommandArgsWait
 		if err := json.Unmarshal(tmp.Args, &args); err != nil {
@@ -150,7 +150,7 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 		}
 		c.Args = args
 	case CommandNameSetRoute:
-		return fmt.Errorf("not implemented yet: %s", c.Name)
+		return fmt.Errorf("data: not implemented yet: %s", c.Name)
 	case CommandNameTintScreen:
 		var args *CommandArgsTintScreen
 		if err := json.Unmarshal(tmp.Args, &args); err != nil {
@@ -158,11 +158,11 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 		}
 		c.Args = args
 	case CommandNamePlaySE:
-		return fmt.Errorf("not implemented yet: %s", c.Name)
+		return fmt.Errorf("data: not implemented yet: %s", c.Name)
 	case CommandNamePlayBGM:
-		return fmt.Errorf("not implemented yet: %s", c.Name)
+		return fmt.Errorf("data: not implemented yet: %s", c.Name)
 	case CommandNameStopBGM:
-		return fmt.Errorf("not implemented yet: %s", c.Name)
+		return fmt.Errorf("data: not implemented yet: %s", c.Name)
 	}
 	return nil
 }
@@ -214,10 +214,49 @@ type CommandArgsSetSelfSwitch struct {
 }
 
 type CommandArgsSetVariable struct {
-	ID        int                  `json:"id"`
-	Op        SetVariableOp        `json:"op"`
-	ValueType SetVariableValueType `json:"valueType"`
-	Value     interface{}          `json:"value"`
+	ID        int
+	Op        SetVariableOp
+	ValueType SetVariableValueType
+	Value     interface{}
+}
+
+func (c *CommandArgsSetVariable) UnmarshalJSON(data []uint8) error {
+	type tmpCommandArgsSetVariable struct {
+		ID        int                  `json:"id"`
+		Op        SetVariableOp        `json:"op"`
+		ValueType SetVariableValueType `json:"valueType"`
+		Value     json.RawMessage      `json:"value"`
+	}
+	var tmp *tmpCommandArgsSetVariable
+	if err := json.Unmarshal(data, &tmp); err != nil {
+		return err
+	}
+	c.ID = tmp.ID
+	c.Op = tmp.Op
+	c.ValueType = tmp.ValueType
+	switch c.ValueType {
+	case SetVariableValueTypeConstant:
+		v := 0
+		if err := json.Unmarshal(tmp.Value, &v); err != nil {
+			return err
+		}
+		c.Value = v
+	case SetVariableValueTypeVariable:
+		v := 0
+		if err := json.Unmarshal(tmp.Value, &v); err != nil {
+			return err
+		}
+		c.Value = v
+	case SetVariableValueTypeRandom:
+		return fmt.Errorf("data: not implemented yet (set_variable): valueType %s", c.ValueType)
+	case SetVariableValueTypeCharacter:
+		var v *SetVariableCharacterArgs
+		if err := json.Unmarshal(tmp.Value, &v); err != nil {
+			return err
+		}
+		c.Value = v
+	}
+	return nil
 }
 
 type CommandArgsTransfer struct {
@@ -254,6 +293,11 @@ const (
 	SetVariableValueTypeRandom                         = "random"
 	SetVariableValueTypeCharacter                      = "character"
 )
+
+type SetVariableCharacterArgs struct {
+	Type    SetVariableCharacterType `json:"type"`
+	EventID int                      `json:"eventId"`
+}
 
 type SetVariableCharacterType string
 
