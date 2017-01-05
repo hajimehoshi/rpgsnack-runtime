@@ -237,8 +237,8 @@ func (e *event) executeCommands(sub *task.TaskLine) error {
 	if e.commandIndex == nil {
 		return task.Terminated
 	}
-	e.mapScene.closeAllBalloons(sub)
 	if e.commandIndex.isTerminated() {
+		e.mapScene.closeAllBalloons(sub)
 		return task.Terminated
 	}
 	c := e.commandIndex.command()
@@ -275,6 +275,7 @@ func (e *event) executeCommands(sub *task.TaskLine) error {
 			return task.Terminated
 		})
 	case data.CommandNameWait:
+		e.mapScene.closeAllBalloons(sub)
 		frames := c.Args.(*data.CommandArgsWait).Time * 6
 		sub.Push(task.Sleep(frames))
 		sub.PushFunc(func() error {
@@ -282,6 +283,7 @@ func (e *event) executeCommands(sub *task.TaskLine) error {
 			return task.Terminated
 		})
 	case data.CommandNameShowMessage:
+		e.mapScene.closeAllBalloons(sub)
 		args := c.Args.(*data.CommandArgsShowMessage)
 		content := data.Current().Texts.Get(language.Und, args.ContentID)
 		e.showMessage(sub, content, args.EventID)
@@ -322,6 +324,7 @@ func (e *event) executeCommands(sub *task.TaskLine) error {
 			return task.Terminated
 		})
 	case data.CommandNameTransfer:
+		e.mapScene.closeAllBalloons(sub)
 		args := c.Args.(*data.CommandArgsTransfer)
 		e.transfer(sub, args.RoomID, args.X, args.Y)
 		sub.PushFunc(func() error {
@@ -329,12 +332,14 @@ func (e *event) executeCommands(sub *task.TaskLine) error {
 			return task.Terminated
 		})
 	case data.CommandNameSetRoute:
+		e.mapScene.closeAllBalloons(sub)
 		println(fmt.Sprintf("not implemented yet: %s", c.Name))
 		sub.PushFunc(func() error {
 			e.commandIndex.advance()
 			return task.Terminated
 		})
 	case data.CommandNameTintScreen:
+		e.mapScene.closeAllBalloons(sub)
 		args := c.Args.(*data.CommandArgsTintScreen)
 		sub.PushFunc(func() error {
 			r := float64(args.Red) / 255
@@ -352,18 +357,21 @@ func (e *event) executeCommands(sub *task.TaskLine) error {
 			return task.Terminated
 		})
 	case data.CommandNamePlaySE:
+		e.mapScene.closeAllBalloons(sub)
 		println(fmt.Sprintf("not implemented yet: %s", c.Name))
 		sub.PushFunc(func() error {
 			e.commandIndex.advance()
 			return task.Terminated
 		})
 	case data.CommandNamePlayBGM:
+		e.mapScene.closeAllBalloons(sub)
 		println(fmt.Sprintf("not implemented yet: %s", c.Name))
 		sub.PushFunc(func() error {
 			e.commandIndex.advance()
 			return task.Terminated
 		})
 	case data.CommandNameStopBGM:
+		e.mapScene.closeAllBalloons(sub)
 		println(fmt.Sprintf("not implemented yet: %s", c.Name))
 		sub.PushFunc(func() error {
 			e.commandIndex.advance()
