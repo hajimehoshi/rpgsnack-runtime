@@ -20,7 +20,6 @@ import (
 	"github.com/hajimehoshi/ebiten"
 	"golang.org/x/text/language"
 
-	"github.com/hajimehoshi/tsugunai/internal/assets"
 	"github.com/hajimehoshi/tsugunai/internal/data"
 	"github.com/hajimehoshi/tsugunai/internal/task"
 )
@@ -88,7 +87,7 @@ func (e *event) updateCharacterIfNeeded() error {
 	e.steppingCount = 0
 	if i == -1 {
 		c := e.character
-		c.image = nil
+		c.imageName = ""
 		c.imageIndex = 0
 		c.dirFix = false
 		c.turn(data.Dir(0))
@@ -97,7 +96,7 @@ func (e *event) updateCharacterIfNeeded() error {
 	}
 	page := e.data.Pages[i]
 	c := e.character
-	c.image = assets.GetImage(page.Image)
+	c.imageName = page.Image
 	c.imageIndex = page.ImageIndex
 	c.dirFix = page.DirFix
 	c.dir = page.Dir

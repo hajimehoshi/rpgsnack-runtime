@@ -17,13 +17,14 @@ package mapscene
 import (
 	"github.com/hajimehoshi/ebiten"
 
+	"github.com/hajimehoshi/tsugunai/internal/assets"
 	"github.com/hajimehoshi/tsugunai/internal/data"
 	"github.com/hajimehoshi/tsugunai/internal/scene"
 	"github.com/hajimehoshi/tsugunai/internal/task"
 )
 
 type character struct {
-	image        *ebiten.Image
+	imageName    string
 	imageIndex   int
 	dir          data.Dir
 	dirFix       bool
@@ -148,10 +149,10 @@ func (c *character) update(passable func(x, y int) (bool, error)) error {
 }
 
 func (c *character) draw(screen *ebiten.Image) error {
-	if c.image == nil {
+	if c.imageName == "" {
 		return nil
 	}
-	imageW, imageH := c.image.Size()
+	imageW, imageH := assets.GetImage(c.imageName).Size()
 	charW := imageW / 4 / 3
 	charH := imageH / 2 / 4
 	op := &ebiten.DrawImageOptions{}
@@ -180,7 +181,7 @@ func (c *character) draw(screen *ebiten.Image) error {
 		dir:        c.dir,
 		attitude:   c.attitude,
 	}
-	if err := screen.DrawImage(c.image, op); err != nil {
+	if err := screen.DrawImage(assets.GetImage(c.imageName), op); err != nil {
 		return err
 	}
 	return nil
