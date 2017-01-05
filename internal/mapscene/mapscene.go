@@ -43,7 +43,6 @@ type MapScene struct {
 	balloons      *balloons
 	tilesImage    *ebiten.Image
 	events        []*event
-	fadingRate    float64
 }
 
 func New() (*MapScene, error) {
