@@ -58,6 +58,7 @@ func (s *Screen) StartTint(red, green, blue, gray float64, count int) {
 func (s *Screen) FadeIn(count int) {
 	s.fadeInCount = count
 	s.fadeInMaxCount = count
+	s.fadedOut = false
 }
 
 func (s *Screen) FadeOut(count int) {
@@ -130,7 +131,6 @@ func (s *Screen) Update() error {
 		s.currentTint.gray = s.targetTint.gray
 	}
 	if s.fadeInCount > 0 {
-		s.fadedOut = false
 		s.fadeInCount--
 	}
 	if s.fadeOutCount > 0 {
