@@ -312,3 +312,17 @@ type Route struct {
 	Wait    bool `json:"wait"`
 	//Commands []*Command `json:"commands"`
 }
+
+// TODO: This might be temporary: Replace them with event commands.
+type RouteCommand string
+
+const (
+	RouteCommandMoveUp    RouteCommand = "move_up"
+	RouteCommandMoveRight              = "move_right"
+	RouteCommandMoveDown               = "move_down"
+	RouteCommandMoveLeft               = "move_left"
+	RouteCommandTurnUp                 = "turn_up"
+	RouteCommandTurnRight              = "turn_right"
+	RouteCommandTurnDown               = "turn_down"
+	RouteCommandTurnLeft               = "turn_left"
+)

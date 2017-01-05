@@ -18,9 +18,7 @@ import (
 	"github.com/hajimehoshi/tsugunai/internal/data"
 )
 
-// TODO: Return not only moving but also turning
-
-func calcPath(passable func(x, y int) (bool, error), startX, startY, goalX, goalY int) ([]data.Dir, error) {
+func calcPath(passable func(x, y int) (bool, error), startX, startY, goalX, goalY int) ([]data.RouteCommand, error) {
 	type pos struct {
 		X, Y int
 	}
@@ -80,9 +78,38 @@ func calcPath(passable func(x, y int) (bool, error), startX, startY, goalX, goal
 		}
 		p = parent
 	}
-	path := make([]data.Dir, len(dirs))
+	path := make([]data.RouteCommand, len(dirs))
 	for i, d := range dirs {
-		path[len(dirs)-i-1] = d
+		switch d {
+		case data.DirUp:
+			path[len(dirs)-i-1] = data.RouteCommandMoveUp
+		case data.DirRight:
+			path[len(dirs)-i-1] = data.RouteCommandMoveRight
+		case data.DirDown:
+			path[len(dirs)-i-1] = data.RouteCommandMoveDown
+		case data.DirLeft:
+			path[len(dirs)-i-1] = data.RouteCommandMoveLeft
+		default:
+			panic("not reach")
+		}
+	}
+	lastP, err := passable(goalX, goalY)
+	if err != nil {
+		return nil, err
+	}
+	if !lastP {
+		switch path[len(path)-1] {
+		case data.RouteCommandMoveUp:
+			path[len(path)-1] = data.RouteCommandTurnUp
+		case data.RouteCommandMoveRight:
+			path[len(path)-1] = data.RouteCommandTurnRight
+		case data.RouteCommandMoveDown:
+			path[len(path)-1] = data.RouteCommandTurnDown
+		case data.RouteCommandMoveLeft:
+			path[len(path)-1] = data.RouteCommandTurnLeft
+		default:
+			panic("not reach")
+		}
 	}
 	return path, nil
 }

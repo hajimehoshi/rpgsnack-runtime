@@ -51,14 +51,6 @@ func (p *player) move(passable func(x, y int) (bool, error), x, y int) error {
 	if len(path) == 0 {
 		return nil
 	}
-	lastP, err := passable(x, y)
-	if err != nil {
-		return err
-	}
-	if !lastP {
-		// There is an event at (x, y).
-		path = path[:len(path)-1]
-	}
 	c.setRoute(path)
 	return nil
 }

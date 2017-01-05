@@ -32,7 +32,8 @@ type character struct {
 	x            int
 	y            int
 	moveCount    int
-	route        []data.Dir
+	moveDir      data.Dir
+	route        []data.RouteCommand
 }
 
 func (c *character) isMoving() bool {
@@ -46,32 +47,47 @@ func (c *character) turn(dir data.Dir) {
 	c.dir = dir
 }
 
-func (c *character) setRoute(route []data.Dir) {
+func (c *character) setRoute(route []data.RouteCommand) {
 	if c.isMoving() {
 		return
 	}
 	c.route = route
-	if len(c.route) == 0 {
-		return
+	c.consumeRoute()
+}
+
+func (c *character) consumeRoute() {
+	for len(c.route) > 0 {
+		switch c.route[0] {
+		case data.RouteCommandMoveUp:
+			c.move(data.DirUp)
+			return
+		case data.RouteCommandMoveRight:
+			c.move(data.DirRight)
+			return
+		case data.RouteCommandMoveDown:
+			c.move(data.DirDown)
+			return
+		case data.RouteCommandMoveLeft:
+			c.move(data.DirLeft)
+			return
+		case data.RouteCommandTurnUp:
+			c.turn(data.DirUp)
+		case data.RouteCommandTurnRight:
+			c.turn(data.DirRight)
+		case data.RouteCommandTurnDown:
+			c.turn(data.DirDown)
+		case data.RouteCommandTurnLeft:
+			c.turn(data.DirLeft)
+		}
+		c.route = c.route[1:]
 	}
-	c.move(c.route[0])
 }
 
 func (c *character) move(dir data.Dir) (bool, error) {
 	c.turn(dir)
+	c.moveDir = dir
 	// TODO: Rename this
 	c.moveCount = playerMaxMoveCount
-	nx, ny := c.x, c.y
-	switch dir {
-	case data.DirLeft:
-		nx--
-	case data.DirRight:
-		nx++
-	case data.DirUp:
-		ny--
-	case data.DirDown:
-		ny++
-	}
 	// TODO: Check passability
 	return true, nil
 }
@@ -134,7 +150,7 @@ func (c *character) update(passable func(x, y int) (bool, error)) error {
 	c.moveCount--
 	if c.moveCount == 0 {
 		nx, ny := c.x, c.y
-		switch c.route[0] {
+		switch c.moveDir {
 		case data.DirLeft:
 			nx--
 		case data.DirRight:
@@ -151,9 +167,7 @@ func (c *character) update(passable func(x, y int) (bool, error)) error {
 		if len(c.route) > 0 {
 			c.route = c.route[1:]
 		}
-		if len(c.route) > 0 {
-			c.move(c.route[0])
-		}
+		c.consumeRoute()
 	}
 	return nil
 }
