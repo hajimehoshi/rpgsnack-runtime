@@ -23,7 +23,8 @@ import (
 const playerMaxMoveCount = 4
 
 type player struct {
-	character *character
+	character         *character
+	movingByUserInput bool
 }
 
 func newPlayer(x, y int) (*player, error) {
@@ -42,7 +43,11 @@ func newPlayer(x, y int) (*player, error) {
 	}, nil
 }
 
-func (p *player) move(passable func(x, y int) (bool, error), x, y int) error {
+func (p *player) isMovingByUserInput() bool {
+	return p.movingByUserInput
+}
+
+func (p *player) moveByUserInput(passable func(x, y int) (bool, error), x, y int) error {
 	c := p.character
 	path, err := calcPath(passable, c.x, c.y, x, y)
 	if err != nil {
@@ -52,6 +57,7 @@ func (p *player) move(passable func(x, y int) (bool, error), x, y int) error {
 		return nil
 	}
 	c.setRoute(path)
+	p.movingByUserInput = true
 	return nil
 }
 
@@ -62,6 +68,9 @@ func (p *player) transferImmediately(x, y int) {
 func (p *player) update(passable func(x, y int) (bool, error)) error {
 	if err := p.character.update(passable); err != nil {
 		return err
+	}
+	if p.movingByUserInput && !p.character.isMoving() {
+		p.movingByUserInput = false
 	}
 	return nil
 }

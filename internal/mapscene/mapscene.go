@@ -195,7 +195,7 @@ func (m *MapScene) movePlayerIfNeeded() error {
 			return nil
 		}
 	}
-	if err := m.player.move(m.passable, tx, ty); err != nil {
+	if err := m.player.moveByUserInput(m.passable, tx, ty); err != nil {
 		return err
 	}
 	m.moveDstX = tx
@@ -226,11 +226,6 @@ func (m *MapScene) character(id int, self *event) *character {
 }
 
 func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
-	for _, e := range m.events {
-		if err := e.updateCharacterIfNeeded(); err != nil {
-			return err
-		}
-	}
 	if err := m.gameState.Screen().Update(); err != nil {
 		return err
 	}

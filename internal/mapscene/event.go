@@ -208,8 +208,7 @@ func (e *event) updateCommands() error {
 	if !e.executingCommands {
 		return nil
 	}
-	// TODO: This doesn't work when player-moving event. Fix this.
-	if e.mapScene.player.character.isMoving() {
+	if e.mapScene.player.isMovingByUserInput() {
 		return nil
 	}
 	if e.commandIndex == nil {
@@ -426,6 +425,9 @@ func (e *event) setVariable(id int, op data.SetVariableOp, valueType data.SetVar
 }
 
 func (e *event) update() error {
+	if err := e.updateCharacterIfNeeded(); err != nil {
+		return err
+	}
 	page := e.currentPage()
 	if page == nil {
 		return nil
