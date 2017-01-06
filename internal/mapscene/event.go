@@ -248,7 +248,7 @@ func (e *event) executeCommands(sub *task.TaskLine) error {
 		return task.Terminated
 	}
 	if e.commandIndex.isTerminated() {
-		e.mapScene.closeAllBalloons(sub)
+		e.mapScene.closeAllBalloons()
 		return task.Terminated
 	}
 	c := e.commandIndex.command()
@@ -277,10 +277,10 @@ func (e *event) executeCommands(sub *task.TaskLine) error {
 		println(fmt.Sprintf("not implemented yet: %s", c.Name))
 		e.commandIndex.advance()
 	case data.CommandNameWait:
-		e.mapScene.closeAllBalloons(sub)
+		e.mapScene.closeAllBalloons()
 		e.waitingCount = c.Args.(*data.CommandArgsWait).Time * 6
 	case data.CommandNameShowMessage:
-		e.mapScene.closeAllBalloons(sub)
+		e.mapScene.closeAllBalloons()
 		args := c.Args.(*data.CommandArgsShowMessage)
 		content := data.Current().Texts.Get(language.Und, args.ContentID)
 		e.showMessage(sub, content, args.EventID)
@@ -312,31 +312,22 @@ func (e *event) executeCommands(sub *task.TaskLine) error {
 		e.setVariable(args.ID, args.Op, args.ValueType, args.Value)
 		e.commandIndex.advance()
 	case data.CommandNameTransfer:
-		e.mapScene.closeAllBalloons(sub)
+		e.mapScene.closeAllBalloons()
 		args := c.Args.(*data.CommandArgsTransfer)
 		e.transfer(sub, args.RoomID, args.X, args.Y)
-		sub.PushFunc(func() error {
-			e.commandIndex.advance()
-			return task.Terminated
-		})
+		e.commandIndex.advance()
 	case data.CommandNameSetRoute:
-		e.mapScene.closeAllBalloons(sub)
+		e.mapScene.closeAllBalloons()
 		println(fmt.Sprintf("not implemented yet: %s", c.Name))
-		sub.PushFunc(func() error {
-			e.commandIndex.advance()
-			return task.Terminated
-		})
+		e.commandIndex.advance()
 	case data.CommandNameTintScreen:
-		e.mapScene.closeAllBalloons(sub)
+		e.mapScene.closeAllBalloons()
 		args := c.Args.(*data.CommandArgsTintScreen)
-		sub.PushFunc(func() error {
-			r := float64(args.Red) / 255
-			g := float64(args.Green) / 255
-			b := float64(args.Blue) / 255
-			gray := float64(args.Gray) / 255
-			e.mapScene.gameState.Screen().StartTint(r, g, b, gray, args.Time*6)
-			return task.Terminated
-		})
+		r := float64(args.Red) / 255
+		g := float64(args.Green) / 255
+		b := float64(args.Blue) / 255
+		gray := float64(args.Gray) / 255
+		e.mapScene.gameState.Screen().StartTint(r, g, b, gray, args.Time*6)
 		sub.PushFunc(func() error {
 			if args.Wait && e.mapScene.gameState.Screen().IsChangingTint() {
 				return nil
@@ -345,26 +336,17 @@ func (e *event) executeCommands(sub *task.TaskLine) error {
 			return task.Terminated
 		})
 	case data.CommandNamePlaySE:
-		e.mapScene.closeAllBalloons(sub)
+		e.mapScene.closeAllBalloons()
 		println(fmt.Sprintf("not implemented yet: %s", c.Name))
-		sub.PushFunc(func() error {
-			e.commandIndex.advance()
-			return task.Terminated
-		})
+		e.commandIndex.advance()
 	case data.CommandNamePlayBGM:
-		e.mapScene.closeAllBalloons(sub)
+		e.mapScene.closeAllBalloons()
 		println(fmt.Sprintf("not implemented yet: %s", c.Name))
-		sub.PushFunc(func() error {
-			e.commandIndex.advance()
-			return task.Terminated
-		})
+		e.commandIndex.advance()
 	case data.CommandNameStopBGM:
-		e.mapScene.closeAllBalloons(sub)
+		e.mapScene.closeAllBalloons()
 		println(fmt.Sprintf("not implemented yet: %s", c.Name))
-		sub.PushFunc(func() error {
-			e.commandIndex.advance()
-			return task.Terminated
-		})
+		e.commandIndex.advance()
 	default:
 		return fmt.Errorf("command not implemented: %s", c.Name)
 	}

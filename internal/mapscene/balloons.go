@@ -40,6 +40,7 @@ func (b *balloons) removeBalloon(balloon *balloon) {
 }
 
 func (b *balloons) ShowMessage(taskLine *task.TaskLine, content string, character *character) {
+	b.balloons = nil
 	taskLine.Push(task.Sub(func(sub *task.TaskLine) error {
 		// TODO: How to call newBalloonCenter?
 		x := character.x*scene.TileSize + scene.TileSize/2 + scene.GameMarginX/scene.TileScale
@@ -117,30 +118,25 @@ func (b *balloons) ShowChoices(taskLine *task.TaskLine, choices []string, chosen
 	taskLine.Push(task.Sleep(30))
 }
 
-func (b *balloons) CloseAll(taskLine *task.TaskLine) {
-	taskLine.PushFunc(func() error {
-		for _, balloon := range b.balloons {
-			if balloon == nil {
-				continue
-			}
-			balloon := balloon
-			balloon.close()
-			b.removeBalloon(balloon)
+func (b *balloons) CloseAll() {
+	for _, balloon := range b.balloons {
+		if balloon == nil {
+			continue
 		}
-		return task.Terminated
-	})
-	taskLine.PushFunc(func() error {
-		for _, b := range b.balloons {
-			if b == nil {
-				continue
-			}
-			if b.isAnimating() {
-				return nil
-			}
+		balloon.close()
+	}
+}
+
+func (b *balloons) isAnimating() bool {
+	for _, balloon := range b.balloons {
+		if balloon == nil {
+			continue
 		}
-		b.balloons = nil
-		return task.Terminated
-	})
+		if balloon.isAnimating() {
+			return true
+		}
+	}
+	return false
 }
 
 func (b *balloons) Update() error {

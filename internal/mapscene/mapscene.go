@@ -241,6 +241,10 @@ func (m *MapScene) Update(subTasksUpdated bool, taskLine *task.TaskLine, sceneMa
 	if err := m.balloons.Update(); err != nil {
 		return err
 	}
+	// TODO: Now if only one balloon is animating, everything stops. Is this OK?
+	if m.balloons.isAnimating() {
+		return nil
+	}
 	if subTasksUpdated {
 		return nil
 	}
@@ -289,8 +293,8 @@ func (m *MapScene) showChoices(taskLine *task.TaskLine, choices []string, chosen
 	m.balloons.ShowChoices(taskLine, choices, chosenIndexSetter)
 }
 
-func (m *MapScene) closeAllBalloons(taskLine *task.TaskLine) {
-	m.balloons.CloseAll(taskLine)
+func (m *MapScene) closeAllBalloons() {
+	m.balloons.CloseAll()
 }
 
 func (m *MapScene) transferPlayerImmediately(roomID, x, y int) {
