@@ -19,10 +19,10 @@ import (
 
 	"github.com/hajimehoshi/ebiten"
 
-	"github.com/hajimehoshi/tsugunai/internal/assets"
-	"github.com/hajimehoshi/tsugunai/internal/font"
-	"github.com/hajimehoshi/tsugunai/internal/scene"
-	"github.com/hajimehoshi/tsugunai/internal/task"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/font"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/task"
 )
 
 const (

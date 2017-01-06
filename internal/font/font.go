@@ -19,7 +19,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten"
 
-	"github.com/hajimehoshi/tsugunai/internal/assets"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 )
 
 var positions = map[rune]int{}

@@ -21,7 +21,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten"
 
-	"github.com/hajimehoshi/tsugunai/internal/game"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/game"
 )
 
 var theGame *game.Game

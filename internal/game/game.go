@@ -18,11 +18,11 @@ import (
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
 
-	"github.com/hajimehoshi/tsugunai/internal/assets"
-	"github.com/hajimehoshi/tsugunai/internal/data"
-	"github.com/hajimehoshi/tsugunai/internal/input"
-	"github.com/hajimehoshi/tsugunai/internal/scene"
-	"github.com/hajimehoshi/tsugunai/internal/titlescene"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/titlescene"
 )
 
 type Game struct {

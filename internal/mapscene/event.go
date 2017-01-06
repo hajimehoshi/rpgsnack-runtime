@@ -20,8 +20,8 @@ import (
 	"github.com/hajimehoshi/ebiten"
 	"golang.org/x/text/language"
 
-	"github.com/hajimehoshi/tsugunai/internal/data"
-	"github.com/hajimehoshi/tsugunai/internal/task"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/task"
 )
 
 type event struct {

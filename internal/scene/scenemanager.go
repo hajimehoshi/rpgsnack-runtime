@@ -17,7 +17,7 @@ package scene
 import (
 	"github.com/hajimehoshi/ebiten"
 
-	"github.com/hajimehoshi/tsugunai/internal/task"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/task"
 )
 
 const (

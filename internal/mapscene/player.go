@@ -17,7 +17,7 @@ package mapscene
 import (
 	"github.com/hajimehoshi/ebiten"
 
-	"github.com/hajimehoshi/tsugunai/internal/data"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 )
 
 const playerMaxMoveCount = 4

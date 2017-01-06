@@ -17,7 +17,7 @@ package data_test
 import (
 	"testing"
 
-	. "github.com/hajimehoshi/tsugunai/internal/data"
+	. "github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 )
 
 func TestUUID(t *testing.T) {

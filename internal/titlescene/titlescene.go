@@ -19,11 +19,11 @@ import (
 
 	"github.com/hajimehoshi/ebiten"
 
-	"github.com/hajimehoshi/tsugunai/internal/font"
-	"github.com/hajimehoshi/tsugunai/internal/input"
-	"github.com/hajimehoshi/tsugunai/internal/mapscene"
-	"github.com/hajimehoshi/tsugunai/internal/scene"
-	"github.com/hajimehoshi/tsugunai/internal/task"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/font"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/mapscene"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/task"
 )
 
 type TitleScene struct {

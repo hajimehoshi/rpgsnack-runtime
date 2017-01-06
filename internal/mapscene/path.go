@@ -15,7 +15,7 @@
 package mapscene
 
 import (
-	"github.com/hajimehoshi/tsugunai/internal/data"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 )
 
 func calcPath(passable func(x, y int) (bool, error), startX, startY, goalX, goalY int) ([]data.RouteCommand, error) {
