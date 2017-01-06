@@ -264,10 +264,6 @@ func (e *event) executeCommands(sub *task.TaskLine) error {
 		}
 		e.waitingTint = false
 	}
-	if e.waitingChoosing {
-		e.commandIndex.choose(e.mapScene.balloons.ChosenIndex())
-		e.waitingChoosing = false
-	}
 	if e.commandIndex == nil {
 		return task.Terminated
 	}
@@ -315,13 +311,18 @@ func (e *event) executeCommands(sub *task.TaskLine) error {
 		e.waitingInput = true
 		e.commandIndex.advance()
 	case data.CommandNameShowChoices:
-		choices := []string{}
-		for _, id := range c.Args.(*data.CommandArgsShowChoices).ChoiceIDs {
-			choice := data.Current().Texts.Get(language.Und, id)
-			choices = append(choices, choice)
+		if !e.waitingChoosing {
+			choices := []string{}
+			for _, id := range c.Args.(*data.CommandArgsShowChoices).ChoiceIDs {
+				choice := data.Current().Texts.Get(language.Und, id)
+				choices = append(choices, choice)
+			}
+			e.showChoices(choices)
+			e.waitingChoosing = true
+			return nil
 		}
-		e.showChoices(choices)
-		e.waitingChoosing = true
+		e.commandIndex.choose(e.mapScene.balloons.ChosenIndex())
+		e.waitingChoosing = false
 	case data.CommandNameSetSwitch:
 		args := c.Args.(*data.CommandArgsSetSwitch)
 		e.setSwitch(args.ID, args.Value)
