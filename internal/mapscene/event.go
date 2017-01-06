@@ -26,17 +26,18 @@ import (
 )
 
 type event struct {
-	data             *data.Event
-	mapScene         *MapScene
-	character        *character
-	currentPageIndex int
-	commandIndex     *commandIndex
-	steppingCount    int
-	selfSwitches     [data.SelfSwitchNum]bool
-	waitingCount     int
-	waitingInput     bool
-	waitingTint      bool
-	waitingChoosing  bool
+	data               *data.Event
+	mapScene           *MapScene
+	character          *character
+	currentPageIndex   int
+	commandIndex       *commandIndex
+	steppingCount      int
+	selfSwitches       [data.SelfSwitchNum]bool
+	waitingCount       int
+	waitingInput       bool
+	waitingTint        bool
+	waitingChoosing    bool
+	waitingTransfering bool
 }
 
 func newEvent(eventData *data.Event, mapScene *MapScene) (*event, error) {
@@ -240,6 +241,9 @@ func (e *event) run(taskLine *task.TaskLine, trigger data.Trigger) bool {
 }
 
 func (e *event) executeCommands(sub *task.TaskLine) error {
+	if e.mapScene.gameState.Screen().IsFading() {
+		return nil
+	}
 	if e.waitingCount > 0 {
 		e.waitingCount--
 		return nil
@@ -332,8 +336,18 @@ func (e *event) executeCommands(sub *task.TaskLine) error {
 		e.commandIndex.advance()
 	case data.CommandNameTransfer:
 		e.mapScene.closeAllBalloons()
+		if e.mapScene.balloons.isBusy() {
+			return nil
+		}
 		args := c.Args.(*data.CommandArgsTransfer)
-		e.transfer(sub, args.RoomID, args.X, args.Y)
+		if !e.waitingTransfering {
+			e.waitingTransfering = true
+			e.mapScene.fadeOut(30)
+			return nil
+		}
+		e.mapScene.transferPlayerImmediately(args.RoomID, args.X, args.Y)
+		e.mapScene.fadeIn(30)
+		e.waitingTransfering = false
 		e.commandIndex.advance()
 	case data.CommandNameSetRoute:
 		e.mapScene.closeAllBalloons()
@@ -427,15 +441,6 @@ func (e *event) setVariable(id int, op data.SetVariableOp, valueType data.SetVar
 		rhs %= e.mapScene.state().Variables().VariableValue(id)
 	}
 	e.mapScene.state().Variables().SetVariableValue(id, rhs)
-}
-
-func (e *event) transfer(taskLine *task.TaskLine, roomID, x, y int) {
-	e.mapScene.fadeOut(taskLine, 30)
-	taskLine.PushFunc(func() error {
-		e.mapScene.transferPlayerImmediately(roomID, x, y)
-		return task.Terminated
-	})
-	e.mapScene.fadeIn(taskLine, 30)
 }
 
 func (e *event) update() error {

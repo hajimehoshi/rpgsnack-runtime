@@ -302,30 +302,12 @@ func (m *MapScene) transferPlayerImmediately(roomID, x, y int) {
 	m.changeRoom(roomID)
 }
 
-func (m *MapScene) fadeOut(taskLine *task.TaskLine, count int) {
-	taskLine.PushFunc(func() error {
-		m.gameState.Screen().FadeOut(count)
-		return task.Terminated
-	})
-	taskLine.PushFunc(func() error {
-		if m.gameState.Screen().IsFading() {
-			return nil
-		}
-		return task.Terminated
-	})
+func (m *MapScene) fadeOut(count int) {
+	m.gameState.Screen().FadeOut(count)
 }
 
-func (m *MapScene) fadeIn(taskLine *task.TaskLine, count int) {
-	taskLine.PushFunc(func() error {
-		m.gameState.Screen().FadeIn(count)
-		return task.Terminated
-	})
-	taskLine.PushFunc(func() error {
-		if m.gameState.Screen().IsFading() {
-			return nil
-		}
-		return task.Terminated
-	})
+func (m *MapScene) fadeIn(count int) {
+	m.gameState.Screen().FadeIn(count)
 }
 
 type tilesImageParts struct {
