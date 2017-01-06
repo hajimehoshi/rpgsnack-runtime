@@ -29,7 +29,6 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/gamestate"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/task"
 )
 
 type MapScene struct {
@@ -176,7 +175,7 @@ func (m *MapScene) eventAt(x, y int) *event {
 	return nil
 }
 
-func (m *MapScene) movePlayerIfNeeded(taskLine *task.TaskLine) error {
+func (m *MapScene) movePlayerIfNeeded() error {
 	if !input.Triggered() {
 		return nil
 	}
@@ -226,7 +225,7 @@ func (m *MapScene) character(id int, self *event) *character {
 	return ch
 }
 
-func (m *MapScene) Update(subTasksUpdated bool, taskLine *task.TaskLine, sceneManager *scene.SceneManager) error {
+func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 	for _, e := range m.events {
 		if err := e.updateCharacterIfNeeded(); err != nil {
 			return err
@@ -245,9 +244,6 @@ func (m *MapScene) Update(subTasksUpdated bool, taskLine *task.TaskLine, sceneMa
 	if m.balloons.isBusy() {
 		return nil
 	}
-	if subTasksUpdated {
-		return nil
-	}
 	for _, e := range m.events {
 		if e.tryRun(data.TriggerAuto) {
 			break
@@ -263,7 +259,7 @@ func (m *MapScene) Update(subTasksUpdated bool, taskLine *task.TaskLine, sceneMa
 			return nil
 		}
 	}
-	if err := m.movePlayerIfNeeded(taskLine); err != nil {
+	if err := m.movePlayerIfNeeded(); err != nil {
 		return err
 	}
 	return nil

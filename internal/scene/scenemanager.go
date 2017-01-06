@@ -16,8 +16,6 @@ package scene
 
 import (
 	"github.com/hajimehoshi/ebiten"
-
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/task"
 )
 
 const (
@@ -32,35 +30,27 @@ const (
 )
 
 type scene interface {
-	Update(subTasksUpdated bool, taskLine *task.TaskLine, sceneManager *SceneManager) error
+	Update(sceneManager *SceneManager) error
 	Draw(screen *ebiten.Image) error
 }
 
 type SceneManager struct {
-	current  scene
-	next     scene
-	taskLine *task.TaskLine
+	current scene
+	next    scene
 }
 
 func NewSceneManager(initScene scene) *SceneManager {
 	return &SceneManager{
-		current:  initScene,
-		taskLine: &task.TaskLine{},
+		current: initScene,
 	}
 }
 
 func (s *SceneManager) Update() error {
-	updated, err := s.taskLine.Update()
-	if err != nil {
-		return err
+	if s.next != nil {
+		s.current = s.next
+		s.next = nil
 	}
-	if !updated {
-		if s.next != nil {
-			s.current = s.next
-			s.next = nil
-		}
-	}
-	if err := s.current.Update(updated, s.taskLine, s); err != nil {
+	if err := s.current.Update(s); err != nil {
 		return err
 	}
 	return nil

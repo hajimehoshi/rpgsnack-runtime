@@ -23,7 +23,6 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/mapscene"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/task"
 )
 
 type TitleScene struct {
@@ -33,10 +32,7 @@ func New() *TitleScene {
 	return &TitleScene{}
 }
 
-func (t *TitleScene) Update(subTasksUpdated bool, taskLine *task.TaskLine, sceneManager *scene.SceneManager) error {
-	if subTasksUpdated {
-		return nil
-	}
+func (t *TitleScene) Update(sceneManager *scene.SceneManager) error {
 	if input.Triggered() {
 		mapScene, err := mapscene.New()
 		if err != nil {
