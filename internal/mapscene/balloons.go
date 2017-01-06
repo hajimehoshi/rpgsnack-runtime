@@ -40,7 +40,6 @@ func (b *balloons) removeBalloon(balloon *balloon) {
 }
 
 func (b *balloons) ShowMessage(content string, character *character) {
-	b.balloons = nil
 	// TODO: How to call newBalloonCenter?
 	x := character.x*scene.TileSize + scene.TileSize/2 + scene.GameMarginX/scene.TileScale
 	y := character.y*scene.TileSize + scene.GameMarginTop/scene.TileScale
@@ -54,18 +53,15 @@ func (b *balloons) ShowChoices(taskLine *task.TaskLine, choices []string, chosen
 	const ymax = scene.TileYNum*scene.TileSize + (scene.GameMarginTop+scene.GameMarginBottom)/scene.TileScale
 	ymin := ymax - len(choices)*height
 	balloons := []*balloon{}
-	taskLine.PushFunc(func() error {
-		for i, choice := range choices {
-			x := 0
-			y := i*height + ymin
-			width := scene.TileXNum * scene.TileSize
-			balloon := newBalloon(x, y, width, height, choice)
-			b.balloons = append(b.balloons, balloon)
-			balloon.open()
-			balloons = append(balloons, balloon)
-		}
-		return task.Terminated
-	})
+	for i, choice := range choices {
+		x := 0
+		y := i*height + ymin
+		width := scene.TileXNum * scene.TileSize
+		balloon := newBalloon(x, y, width, height, choice)
+		b.balloons = append(b.balloons, balloon)
+		balloon.open()
+		balloons = append(balloons, balloon)
+	}
 	chosenIndex := 0
 	taskLine.PushFunc(func() error {
 		if !input.Triggered() {
