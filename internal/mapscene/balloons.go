@@ -21,12 +21,22 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
 
+const (
+	choiceBalloonHeight = 20
+	choiceBalloonsMaxY  = scene.TileYNum*scene.TileSize +
+		(scene.GameMarginTop+scene.GameMarginBottom)/scene.TileScale
+)
+
 type balloons struct {
 	balloons                  []*balloon
 	choiceBalloons            []*balloon
 	chosenIndex               int
 	choosing                  bool
 	chosenBalloonWaitingCount int
+}
+
+func choiceBalloonsMinY(num int) int {
+	return choiceBalloonsMaxY - num*choiceBalloonHeight
 }
 
 func (b *balloons) ChosenIndex() int {
@@ -43,15 +53,13 @@ func (b *balloons) ShowMessage(content string, character *character) {
 }
 
 func (b *balloons) ShowChoices(choices []string) {
-	const height = 20
-	const ymax = scene.TileYNum*scene.TileSize + (scene.GameMarginTop+scene.GameMarginBottom)/scene.TileScale
-	ymin := ymax - len(choices)*height
+	ymin := choiceBalloonsMinY(len(choices))
 	b.choiceBalloons = nil
 	for i, choice := range choices {
 		x := 0
-		y := i*height + ymin
+		y := i*choiceBalloonHeight + ymin
 		width := scene.TileXNum * scene.TileSize
-		balloon := newBalloon(x, y, width, height, choice)
+		balloon := newBalloon(x, y, width, choiceBalloonHeight, choice)
 		b.choiceBalloons = append(b.choiceBalloons, balloon)
 		balloon.open()
 	}
@@ -125,16 +133,14 @@ func (b *balloons) Update() error {
 			b.choiceBalloons[b.chosenIndex].close()
 		}
 	} else if b.choosing && b.isOpened() && input.Triggered() {
-		// TODO: Unify these consts
-		const height = 20
-		const ymax = scene.TileYNum*scene.TileSize + (scene.GameMarginTop+scene.GameMarginBottom)/scene.TileScale
-		ymin := ymax - len(b.choiceBalloons)*height
+		ymax := choiceBalloonsMaxY
+		ymin := choiceBalloonsMinY(len(b.choiceBalloons))
 		_, y := input.Position()
 		y /= scene.TileScale
 		if y < ymin || ymax <= y {
 			return nil
 		}
-		b.chosenIndex = (y - ymin) / height
+		b.chosenIndex = (y - ymin) / choiceBalloonHeight
 		for i, balloon := range b.choiceBalloons {
 			balloon := balloon
 			if i == b.chosenIndex {
