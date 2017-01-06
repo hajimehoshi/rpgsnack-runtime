@@ -238,6 +238,9 @@ func (m *MapScene) Update(subTasksUpdated bool, taskLine *task.TaskLine, sceneMa
 	if err := m.player.update(m.passable); err != nil {
 		return err
 	}
+	if err := m.balloons.Update(); err != nil {
+		return err
+	}
 	if subTasksUpdated {
 		return nil
 	}

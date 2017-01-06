@@ -22,7 +22,6 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/font"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/task"
 )
 
 const (
@@ -117,28 +116,16 @@ func newBalloonWithArrow(arrowX, arrowY int, content string) *balloon {
 	return b
 }
 
-func (b *balloon) open(taskLine *task.TaskLine) {
-	b.openingCount = balloonMaxCount
-	taskLine.PushFunc(func() error {
-		b.openingCount--
-		if b.openingCount == 0 {
-			b.opened = true
-			return task.Terminated
-		}
-		return nil
-	})
+func (b *balloon) isAnimating() bool {
+	return b.openingCount > 0 || b.closingCount > 0
 }
 
-func (b *balloon) close(taskLine *task.TaskLine) {
+func (b *balloon) open() {
+	b.openingCount = balloonMaxCount
+}
+
+func (b *balloon) close() {
 	b.closingCount = balloonMaxCount
-	b.opened = false
-	taskLine.PushFunc(func() error {
-		b.closingCount--
-		if b.closingCount == 0 {
-			return task.Terminated
-		}
-		return nil
-	})
 }
 
 type balloonImageParts struct {
@@ -202,6 +189,20 @@ func (b *balloonImageParts) Dst(index int) (int, int, int, int) {
 	x := b.balloon.x + (index%w)*4
 	y := b.balloon.y + (index/w)*4
 	return x, y, x + 4, y + 4
+}
+
+func (b *balloon) update() error {
+	if b.closingCount > 0 {
+		b.closingCount--
+		b.opened = false
+	}
+	if b.openingCount > 0 {
+		b.openingCount--
+		if b.openingCount == 0 {
+			b.opened = true
+		}
+	}
+	return nil
 }
 
 func (b *balloon) draw(screen *ebiten.Image) error {

@@ -46,7 +46,7 @@ func (b *balloons) ShowMessage(taskLine *task.TaskLine, content string, characte
 		y := character.y*scene.TileSize + scene.GameMarginTop/scene.TileScale
 		newBalloon := newBalloonWithArrow(x, y, content)
 		b.balloons = []*balloon{newBalloon}
-		b.balloons[0].open(sub)
+		b.balloons[0].open()
 		return task.Terminated
 	}))
 	taskLine.PushFunc(func() error {
@@ -63,22 +63,18 @@ func (b *balloons) ShowChoices(taskLine *task.TaskLine, choices []string, chosen
 	const ymax = scene.TileYNum*scene.TileSize + (scene.GameMarginTop+scene.GameMarginBottom)/scene.TileScale
 	ymin := ymax - len(choices)*height
 	balloons := []*balloon{}
-	taskLine.Push(task.Sub(func(sub *task.TaskLine) error {
-		sub2 := []*task.TaskLine{}
+	taskLine.PushFunc(func() error {
 		for i, choice := range choices {
 			x := 0
 			y := i*height + ymin
 			width := scene.TileXNum * scene.TileSize
 			balloon := newBalloon(x, y, width, height, choice)
 			b.balloons = append(b.balloons, balloon)
-			t := &task.TaskLine{}
-			sub2 = append(sub2, t)
-			balloon.open(t)
+			balloon.open()
 			balloons = append(balloons, balloon)
 		}
-		sub.Push(task.Parallel(sub2...))
 		return task.Terminated
-	}))
+	})
 	chosenIndex := 0
 	taskLine.PushFunc(func() error {
 		if !input.Triggered() {
@@ -93,50 +89,70 @@ func (b *balloons) ShowChoices(taskLine *task.TaskLine, choices []string, chosen
 		chosenIndexSetter(chosenIndex)
 		return task.Terminated
 	})
-	taskLine.Push(task.Sub(func(sub *task.TaskLine) error {
-		subs := []*task.TaskLine{}
+	taskLine.PushFunc(func() error {
 		for i, balloon := range balloons {
 			balloon := balloon
 			if i == chosenIndex {
 				continue
 			}
-			t := &task.TaskLine{}
-			subs = append(subs, t)
-			balloon.close(t)
-			t.PushFunc(func() error {
-				b.removeBalloon(balloon)
-				return task.Terminated
-			})
+			balloon.close()
 		}
-		sub.Push(task.Parallel(subs...))
 		return task.Terminated
-	}))
+	})
+	taskLine.PushFunc(func() error {
+		for i, balloon := range balloons {
+			if i == chosenIndex {
+				continue
+			}
+			if balloon == nil {
+				continue
+			}
+			if balloon.isAnimating() {
+				return nil
+			}
+			b.removeBalloon(balloon)
+		}
+		return task.Terminated
+	})
 	taskLine.Push(task.Sleep(30))
 }
 
 func (b *balloons) CloseAll(taskLine *task.TaskLine) {
-	taskLine.Push(task.Sub(func(sub *task.TaskLine) error {
-		subs := []*task.TaskLine{}
+	taskLine.PushFunc(func() error {
 		for _, balloon := range b.balloons {
 			if balloon == nil {
 				continue
 			}
 			balloon := balloon
-			t := &task.TaskLine{}
-			subs = append(subs, t)
-			balloon.close(t)
-			t.PushFunc(func() error {
-				b.removeBalloon(balloon)
-				return task.Terminated
-			})
+			balloon.close()
+			b.removeBalloon(balloon)
 		}
-		sub.Push(task.Parallel(subs...))
 		return task.Terminated
-	}))
+	})
 	taskLine.PushFunc(func() error {
+		for _, b := range b.balloons {
+			if b == nil {
+				continue
+			}
+			if b.isAnimating() {
+				return nil
+			}
+		}
 		b.balloons = nil
 		return task.Terminated
 	})
+}
+
+func (b *balloons) Update() error {
+	for _, balloon := range b.balloons {
+		if balloon == nil {
+			continue
+		}
+		if err := balloon.update(); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (b *balloons) Draw(screen *ebiten.Image) error {
