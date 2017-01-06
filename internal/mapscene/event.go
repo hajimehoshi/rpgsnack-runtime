@@ -36,6 +36,7 @@ type event struct {
 	selfSwitches     [data.SelfSwitchNum]bool
 	waitingCount     int
 	waitingInput     bool
+	waitingTint      bool
 }
 
 func newEvent(eventData *data.Event, mapScene *MapScene) (*event, error) {
@@ -249,6 +250,12 @@ func (e *event) executeCommands(sub *task.TaskLine) error {
 		}
 		e.waitingInput = false
 	}
+	if e.waitingTint {
+		if e.mapScene.gameState.Screen().IsChangingTint() {
+			return nil
+		}
+		e.waitingTint = false
+	}
 	if e.commandIndex == nil {
 		return task.Terminated
 	}
@@ -338,13 +345,8 @@ func (e *event) executeCommands(sub *task.TaskLine) error {
 		b := float64(args.Blue) / 255
 		gray := float64(args.Gray) / 255
 		e.mapScene.gameState.Screen().StartTint(r, g, b, gray, args.Time*6)
-		sub.PushFunc(func() error {
-			if args.Wait && e.mapScene.gameState.Screen().IsChangingTint() {
-				return nil
-			}
-			e.commandIndex.advance()
-			return task.Terminated
-		})
+		e.waitingTint = args.Wait
+		e.commandIndex.advance()
 	case data.CommandNamePlaySE:
 		e.mapScene.closeAllBalloons()
 		println(fmt.Sprintf("not implemented yet: %s", c.Name))
