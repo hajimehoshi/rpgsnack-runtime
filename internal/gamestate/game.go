@@ -14,6 +14,13 @@
 
 package gamestate
 
+import (
+	"fmt"
+	"regexp"
+	"strconv"
+	"strings"
+)
+
 type Game struct {
 	variables *Variables
 	screen    *Screen
@@ -32,4 +39,21 @@ func (g *Game) Variables() *Variables {
 
 func (g *Game) Screen() *Screen {
 	return g.screen
+}
+
+var reMessage = regexp.MustCompile(`\\([a-zA-Z])\[(\d+)\]`)
+
+func (g *Game) ParseMessageSyntax(str string) string {
+	return reMessage.ReplaceAllStringFunc(str, func(part string) string {
+		name := strings.ToLower(part[1:2])
+		id, err := strconv.Atoi(part[3 : len(part)-1])
+		if err != nil {
+			panic(fmt.Sprintf("not reach: %s", err))
+		}
+		switch name {
+		case "v":
+			return strconv.Itoa(g.Variables().VariableValue(id))
+		}
+		return str
+	})
 }

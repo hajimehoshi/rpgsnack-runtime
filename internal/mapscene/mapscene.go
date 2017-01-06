@@ -17,9 +17,6 @@ package mapscene
 import (
 	"fmt"
 	"image/color"
-	"regexp"
-	"strconv"
-	"strings"
 
 	"github.com/hajimehoshi/ebiten"
 
@@ -260,31 +257,14 @@ func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 	return nil
 }
 
-var reMessage = regexp.MustCompile(`\\([a-zA-Z])\[(\d+)\]`)
-
-func (m *MapScene) parseMessageSyntax(str string) string {
-	return reMessage.ReplaceAllStringFunc(str, func(part string) string {
-		name := strings.ToLower(part[1:2])
-		id, err := strconv.Atoi(part[3 : len(part)-1])
-		if err != nil {
-			panic(fmt.Sprintf("not reach: %s", err))
-		}
-		switch name {
-		case "v":
-			return strconv.Itoa(m.state().Variables().VariableValue(id))
-		}
-		return str
-	})
-}
-
 func (m *MapScene) showMessage(content string, character *character) {
-	content = m.parseMessageSyntax(content)
+	content = m.gameState.ParseMessageSyntax(content)
 	m.balloons.ShowMessage(content, character)
 }
 
 func (m *MapScene) showChoices(choices []string) {
 	for i, c := range choices {
-		choices[i] = m.parseMessageSyntax(c)
+		choices[i] = m.gameState.ParseMessageSyntax(c)
 	}
 	m.balloons.ShowChoices(choices)
 }
