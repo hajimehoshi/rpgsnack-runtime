@@ -36,6 +36,7 @@ type event struct {
 	waitingCount     int
 	waitingInput     bool
 	waitingTint      bool
+	waitingChoosing  bool
 }
 
 func newEvent(eventData *data.Event, mapScene *MapScene) (*event, error) {
@@ -250,11 +251,18 @@ func (e *event) executeCommands(sub *task.TaskLine) error {
 		}
 		e.waitingInput = false
 	}
+	if e.mapScene.balloons.isBusy() {
+		return nil
+	}
 	if e.waitingTint {
 		if e.mapScene.gameState.Screen().IsChangingTint() {
 			return nil
 		}
 		e.waitingTint = false
+	}
+	if e.waitingChoosing {
+		e.commandIndex.choose(e.mapScene.balloons.ChosenIndex())
+		e.waitingChoosing = false
 	}
 	if e.commandIndex == nil {
 		return task.Terminated
@@ -293,11 +301,8 @@ func (e *event) executeCommands(sub *task.TaskLine) error {
 		e.waitingCount = c.Args.(*data.CommandArgsWait).Time * 6
 		e.commandIndex.advance()
 	case data.CommandNameShowMessage:
-		if e.mapScene.balloons.isOpened() {
-			e.mapScene.closeAllBalloons()
-			return nil
-		}
-		if e.mapScene.balloons.isAnimating() {
+		e.mapScene.closeAllBalloons()
+		if e.mapScene.balloons.isBusy() {
 			return nil
 		}
 		args := c.Args.(*data.CommandArgsShowMessage)
@@ -311,11 +316,8 @@ func (e *event) executeCommands(sub *task.TaskLine) error {
 			choice := data.Current().Texts.Get(language.Und, id)
 			choices = append(choices, choice)
 		}
-		e.showChoices(sub, choices)
-		sub.PushFunc(func() error {
-			e.commandIndex.choose(e.mapScene.balloons.ChosenIndex())
-			return task.Terminated
-		})
+		e.showChoices(choices)
+		e.waitingChoosing = true
 	case data.CommandNameSetSwitch:
 		args := c.Args.(*data.CommandArgsSetSwitch)
 		e.setSwitch(args.ID, args.Value)
@@ -370,8 +372,8 @@ func (e *event) showMessage(content string, eventID int) {
 	e.mapScene.showMessage(content, ch)
 }
 
-func (e *event) showChoices(taskLine *task.TaskLine, choices []string) {
-	e.mapScene.showChoices(taskLine, choices)
+func (e *event) showChoices(choices []string) {
+	e.mapScene.showChoices(choices)
 }
 
 func (e *event) setSwitch(id int, value bool) {

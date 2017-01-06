@@ -129,6 +129,7 @@ func (b *balloon) isAnimating() bool {
 }
 
 func (b *balloon) open() {
+	// TODO: This should be called only in the constructor?
 	b.openingCount = balloonMaxCount
 }
 

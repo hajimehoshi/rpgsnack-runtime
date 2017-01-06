@@ -19,13 +19,14 @@ import (
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/task"
 )
 
 type balloons struct {
-	balloons       []*balloon
-	choiceBalloons []*balloon
-	chosenIndex    int
+	balloons                  []*balloon
+	choiceBalloons            []*balloon
+	chosenIndex               int
+	choosing                  bool
+	chosenBalloonWaitingCount int
 }
 
 func (b *balloons) ChosenIndex() int {
@@ -41,7 +42,7 @@ func (b *balloons) ShowMessage(content string, character *character) {
 	b.balloons[0].open()
 }
 
-func (b *balloons) ShowChoices(taskLine *task.TaskLine, choices []string) {
+func (b *balloons) ShowChoices(choices []string) {
 	const height = 20
 	const ymax = scene.TileYNum*scene.TileSize + (scene.GameMarginTop+scene.GameMarginBottom)/scene.TileScale
 	ymin := ymax - len(choices)*height
@@ -55,43 +56,7 @@ func (b *balloons) ShowChoices(taskLine *task.TaskLine, choices []string) {
 		balloon.open()
 	}
 	b.chosenIndex = 0
-	taskLine.PushFunc(func() error {
-		if !input.Triggered() {
-			return nil
-		}
-		_, y := input.Position()
-		y /= scene.TileScale
-		if y < ymin || ymax <= y {
-			return nil
-		}
-		b.chosenIndex = (y - ymin) / height
-		return task.Terminated
-	})
-	taskLine.PushFunc(func() error {
-		for i, balloon := range b.choiceBalloons {
-			balloon := balloon
-			if i == b.chosenIndex {
-				continue
-			}
-			balloon.close()
-		}
-		return task.Terminated
-	})
-	taskLine.PushFunc(func() error {
-		for i, balloon := range b.choiceBalloons {
-			if i == b.chosenIndex {
-				continue
-			}
-			if balloon == nil {
-				continue
-			}
-			if balloon.isAnimating() {
-				return nil
-			}
-		}
-		return task.Terminated
-	})
-	taskLine.Push(task.Sleep(30))
+	b.choosing = true
 }
 
 func (b *balloons) CloseAll() {
@@ -107,6 +72,10 @@ func (b *balloons) CloseAll() {
 		}
 		balloon.close()
 	}
+}
+
+func (b *balloons) isBusy() bool {
+	return b.isAnimating() || b.choosing || b.chosenBalloonWaitingCount > 0
 }
 
 func (b *balloons) isOpened() bool {
@@ -150,6 +119,32 @@ func (b *balloons) isAnimating() bool {
 }
 
 func (b *balloons) Update() error {
+	if b.chosenBalloonWaitingCount > 0 {
+		b.chosenBalloonWaitingCount--
+		if b.chosenBalloonWaitingCount == 0 {
+			b.choiceBalloons[b.chosenIndex].close()
+		}
+	} else if b.choosing && b.isOpened() && input.Triggered() {
+		// TODO: Unify these consts
+		const height = 20
+		const ymax = scene.TileYNum*scene.TileSize + (scene.GameMarginTop+scene.GameMarginBottom)/scene.TileScale
+		ymin := ymax - len(b.choiceBalloons)*height
+		_, y := input.Position()
+		y /= scene.TileScale
+		if y < ymin || ymax <= y {
+			return nil
+		}
+		b.chosenIndex = (y - ymin) / height
+		for i, balloon := range b.choiceBalloons {
+			balloon := balloon
+			if i == b.chosenIndex {
+				continue
+			}
+			balloon.close()
+		}
+		b.chosenBalloonWaitingCount = 30
+		b.choosing = false
+	}
 	for i, balloon := range b.balloons {
 		if balloon == nil {
 			continue
