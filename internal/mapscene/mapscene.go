@@ -232,10 +232,6 @@ func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 	if err := m.balloons.Update(); err != nil {
 		return err
 	}
-	// TODO: Now if only one balloon is animating, everything stops. Is this OK?
-	if m.balloons.isBusy() {
-		return nil
-	}
 	for _, e := range m.events {
 		if e.tryRun(data.TriggerAuto) {
 			break
@@ -267,10 +263,6 @@ func (m *MapScene) showChoices(choices []string) {
 		choices[i] = m.gameState.ParseMessageSyntax(c)
 	}
 	m.balloons.ShowChoices(choices)
-}
-
-func (m *MapScene) closeAllBalloons() {
-	m.balloons.CloseAll()
 }
 
 func (m *MapScene) transferPlayerImmediately(roomID, x, y int) {

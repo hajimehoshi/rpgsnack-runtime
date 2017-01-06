@@ -21,7 +21,6 @@ import (
 	"golang.org/x/text/language"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 )
 
 type event struct {
@@ -33,7 +32,6 @@ type event struct {
 	steppingCount      int
 	selfSwitches       [data.SelfSwitchNum]bool
 	waitingCount       int
-	waitingInput       bool
 	waitingTint        bool
 	waitingChoosing    bool
 	waitingTransfering bool
@@ -244,16 +242,6 @@ func (e *event) updateCommands() error {
 		e.waitingCount--
 		return nil
 	}
-	// TODO: This should be processed at MapScene.Update
-	if e.waitingInput {
-		if !input.Triggered() {
-			return nil
-		}
-		e.waitingInput = false
-	}
-	if e.mapScene.balloons.isBusy() {
-		return nil
-	}
 	if e.waitingTint {
 		if e.mapScene.gameState.Screen().IsChangingTint() {
 			return nil
@@ -261,13 +249,21 @@ func (e *event) updateCommands() error {
 		e.waitingTint = false
 	}
 	if e.commandIndex.isTerminated() {
-		e.mapScene.closeAllBalloons()
 		e.character.turn(e.dirBeforeRunning)
 		e.executingCommands = false
 		e.commandIndex = nil
 		return nil
 	}
 	c := e.commandIndex.command()
+	if c.Name == data.CommandNameShowChoices {
+		if e.mapScene.balloons.isAnimating() {
+			return nil
+		}
+	} else {
+		if e.mapScene.balloons.isBusy() {
+			return nil
+		}
+	}
 	switch c.Name {
 	case data.CommandNameIf:
 		conditions := c.Args.(*data.CommandArgsIf).Conditions
@@ -293,18 +289,15 @@ func (e *event) updateCommands() error {
 		println(fmt.Sprintf("not implemented yet: %s", c.Name))
 		e.commandIndex.advance()
 	case data.CommandNameWait:
-		e.mapScene.closeAllBalloons()
 		e.waitingCount = c.Args.(*data.CommandArgsWait).Time * 6
 		e.commandIndex.advance()
 	case data.CommandNameShowMessage:
-		e.mapScene.closeAllBalloons()
 		if e.mapScene.balloons.isBusy() {
 			return nil
 		}
 		args := c.Args.(*data.CommandArgsShowMessage)
 		content := data.Current().Texts.Get(language.Und, args.ContentID)
 		e.mapScene.showMessage(content, e.mapScene.character(args.EventID, e))
-		e.waitingInput = true
 		e.commandIndex.advance()
 	case data.CommandNameShowChoices:
 		if !e.waitingChoosing {
@@ -315,6 +308,9 @@ func (e *event) updateCommands() error {
 			}
 			e.mapScene.showChoices(choices)
 			e.waitingChoosing = true
+			return nil
+		}
+		if e.mapScene.balloons.isOpened() {
 			return nil
 		}
 		e.commandIndex.choose(e.mapScene.balloons.ChosenIndex())
@@ -332,7 +328,6 @@ func (e *event) updateCommands() error {
 		e.setVariable(args.ID, args.Op, args.ValueType, args.Value)
 		e.commandIndex.advance()
 	case data.CommandNameTransfer:
-		e.mapScene.closeAllBalloons()
 		if e.mapScene.balloons.isBusy() {
 			return nil
 		}
@@ -348,11 +343,9 @@ func (e *event) updateCommands() error {
 		e.waitingTransfering = false
 		e.commandIndex.advance()
 	case data.CommandNameSetRoute:
-		e.mapScene.closeAllBalloons()
 		println(fmt.Sprintf("not implemented yet: %s", c.Name))
 		e.commandIndex.advance()
 	case data.CommandNameTintScreen:
-		e.mapScene.closeAllBalloons()
 		args := c.Args.(*data.CommandArgsTintScreen)
 		r := float64(args.Red) / 255
 		g := float64(args.Green) / 255
@@ -362,15 +355,12 @@ func (e *event) updateCommands() error {
 		e.waitingTint = args.Wait
 		e.commandIndex.advance()
 	case data.CommandNamePlaySE:
-		e.mapScene.closeAllBalloons()
 		println(fmt.Sprintf("not implemented yet: %s", c.Name))
 		e.commandIndex.advance()
 	case data.CommandNamePlayBGM:
-		e.mapScene.closeAllBalloons()
 		println(fmt.Sprintf("not implemented yet: %s", c.Name))
 		e.commandIndex.advance()
 	case data.CommandNameStopBGM:
-		e.mapScene.closeAllBalloons()
 		println(fmt.Sprintf("not implemented yet: %s", c.Name))
 		e.commandIndex.advance()
 	default:

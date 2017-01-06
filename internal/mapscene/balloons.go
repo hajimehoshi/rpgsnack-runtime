@@ -28,6 +28,7 @@ const (
 )
 
 type balloons struct {
+	nextBalloon               *balloon
 	balloons                  []*balloon
 	choiceBalloons            []*balloon
 	chosenIndex               int
@@ -44,12 +45,14 @@ func (b *balloons) ChosenIndex() int {
 }
 
 func (b *balloons) ShowMessage(content string, character *character) {
+	if b.nextBalloon != nil {
+		panic("not reach")
+	}
+	b.CloseAll()
 	// TODO: How to call newBalloonCenter?
 	x := character.x*scene.TileSize + scene.TileSize/2 + scene.GameMarginX/scene.TileScale
 	y := character.y*scene.TileSize + scene.GameMarginTop/scene.TileScale
-	newBalloon := newBalloonWithArrow(x, y, content)
-	b.balloons = []*balloon{newBalloon}
-	b.balloons[0].open()
+	b.nextBalloon = newBalloonWithArrow(x, y, content)
 }
 
 func (b *balloons) ShowChoices(choices []string) {
@@ -83,7 +86,16 @@ func (b *balloons) CloseAll() {
 }
 
 func (b *balloons) isBusy() bool {
-	return b.isAnimating() || b.choosing || b.chosenBalloonWaitingCount > 0
+	if b.isAnimating() {
+		return true
+	}
+	if b.choosing || b.chosenBalloonWaitingCount > 0 {
+		return true
+	}
+	if b.isOpened() {
+		return true
+	}
+	return false
 }
 
 func (b *balloons) isOpened() bool {
@@ -127,10 +139,24 @@ func (b *balloons) isAnimating() bool {
 }
 
 func (b *balloons) Update() error {
+	if b.nextBalloon != nil && !b.isBusy() {
+		b.balloons = []*balloon{b.nextBalloon}
+		b.balloons[0].open()
+		b.nextBalloon = nil
+	}
+	if !b.choosing && b.isOpened() && input.Triggered() {
+		b.CloseAll()
+	}
 	if b.chosenBalloonWaitingCount > 0 {
 		b.chosenBalloonWaitingCount--
 		if b.chosenBalloonWaitingCount == 0 {
 			b.choiceBalloons[b.chosenIndex].close()
+			for _, balloon := range b.balloons {
+				if balloon == nil {
+					continue
+				}
+				balloon.close()
+			}
 		}
 	} else if b.choosing && b.isOpened() && input.Triggered() {
 		ymax := choiceBalloonsMaxY
@@ -140,9 +166,9 @@ func (b *balloons) Update() error {
 		if y < ymin || ymax <= y {
 			return nil
 		}
+		// Close regular balloons
 		b.chosenIndex = (y - ymin) / choiceBalloonHeight
 		for i, balloon := range b.choiceBalloons {
-			balloon := balloon
 			if i == b.chosenIndex {
 				continue
 			}
