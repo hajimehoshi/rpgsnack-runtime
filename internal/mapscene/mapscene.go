@@ -233,7 +233,7 @@ func (m *MapScene) Update(subTasksUpdated bool, taskLine *task.TaskLine, sceneMa
 		}
 	}
 	if err := m.gameState.Screen().Update(); err != nil {
-		return nil
+		return err
 	}
 	if err := m.player.update(m.passable); err != nil {
 		return err
