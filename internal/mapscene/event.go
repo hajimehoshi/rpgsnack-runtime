@@ -21,6 +21,7 @@ import (
 	"golang.org/x/text/language"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/task"
 )
 
@@ -34,6 +35,7 @@ type event struct {
 	steppingCount    int
 	selfSwitches     [data.SelfSwitchNum]bool
 	waitingCount     int
+	waitingInput     bool
 }
 
 func newEvent(eventData *data.Event, mapScene *MapScene) (*event, error) {
@@ -239,10 +241,13 @@ func (e *event) run(taskLine *task.TaskLine, trigger data.Trigger) bool {
 func (e *event) executeCommands(sub *task.TaskLine) error {
 	if e.waitingCount > 0 {
 		e.waitingCount--
-		if e.waitingCount == 0 {
-			e.commandIndex.advance()
-		}
 		return nil
+	}
+	if e.waitingInput {
+		if !input.Triggered() {
+			return nil
+		}
+		e.waitingInput = false
 	}
 	if e.commandIndex == nil {
 		return task.Terminated
@@ -279,15 +284,14 @@ func (e *event) executeCommands(sub *task.TaskLine) error {
 	case data.CommandNameWait:
 		e.mapScene.closeAllBalloons()
 		e.waitingCount = c.Args.(*data.CommandArgsWait).Time * 6
+		e.commandIndex.advance()
 	case data.CommandNameShowMessage:
 		e.mapScene.closeAllBalloons()
 		args := c.Args.(*data.CommandArgsShowMessage)
 		content := data.Current().Texts.Get(language.Und, args.ContentID)
-		e.showMessage(sub, content, args.EventID)
-		sub.PushFunc(func() error {
-			e.commandIndex.advance()
-			return task.Terminated
-		})
+		e.showMessage(content, args.EventID)
+		e.waitingInput = true
+		e.commandIndex.advance()
 	case data.CommandNameShowChoices:
 		choices := []string{}
 		for _, id := range c.Args.(*data.CommandArgsShowChoices).ChoiceIDs {
@@ -353,9 +357,9 @@ func (e *event) executeCommands(sub *task.TaskLine) error {
 	return nil
 }
 
-func (e *event) showMessage(taskLine *task.TaskLine, content string, eventID int) {
+func (e *event) showMessage(content string, eventID int) {
 	ch := e.mapScene.character(eventID, e)
-	e.mapScene.showMessage(taskLine, content, ch)
+	e.mapScene.showMessage(content, ch)
 }
 
 func (e *event) showChoices(taskLine *task.TaskLine, choices []string) {

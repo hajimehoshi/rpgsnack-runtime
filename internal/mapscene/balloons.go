@@ -39,24 +39,14 @@ func (b *balloons) removeBalloon(balloon *balloon) {
 	}
 }
 
-func (b *balloons) ShowMessage(taskLine *task.TaskLine, content string, character *character) {
+func (b *balloons) ShowMessage(content string, character *character) {
 	b.balloons = nil
-	taskLine.Push(task.Sub(func(sub *task.TaskLine) error {
-		// TODO: How to call newBalloonCenter?
-		x := character.x*scene.TileSize + scene.TileSize/2 + scene.GameMarginX/scene.TileScale
-		y := character.y*scene.TileSize + scene.GameMarginTop/scene.TileScale
-		newBalloon := newBalloonWithArrow(x, y, content)
-		b.balloons = []*balloon{newBalloon}
-		b.balloons[0].open()
-		return task.Terminated
-	}))
-	taskLine.PushFunc(func() error {
-		if input.Triggered() {
-			return task.Terminated
-		}
-		return nil
-	})
-	// TODO: close balloon here?
+	// TODO: How to call newBalloonCenter?
+	x := character.x*scene.TileSize + scene.TileSize/2 + scene.GameMarginX/scene.TileScale
+	y := character.y*scene.TileSize + scene.GameMarginTop/scene.TileScale
+	newBalloon := newBalloonWithArrow(x, y, content)
+	b.balloons = []*balloon{newBalloon}
+	b.balloons[0].open()
 }
 
 func (b *balloons) ShowChoices(taskLine *task.TaskLine, choices []string, chosenIndexSetter func(int)) {

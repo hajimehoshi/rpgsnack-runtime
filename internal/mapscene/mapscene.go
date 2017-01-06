@@ -281,9 +281,9 @@ func (m *MapScene) parseMessageSyntax(str string) string {
 	})
 }
 
-func (m *MapScene) showMessage(taskLine *task.TaskLine, content string, character *character) {
+func (m *MapScene) showMessage(content string, character *character) {
 	content = m.parseMessageSyntax(content)
-	m.balloons.ShowMessage(taskLine, content, character)
+	m.balloons.ShowMessage(content, character)
 }
 
 func (m *MapScene) showChoices(taskLine *task.TaskLine, choices []string, chosenIndexSetter func(int)) {
