@@ -31,7 +31,6 @@ type event struct {
 	character        *character
 	currentPageIndex int
 	commandIndex     *commandIndex
-	chosenIndex      int
 	steppingCount    int
 	selfSwitches     [data.SelfSwitchNum]bool
 	waitingCount     int
@@ -244,6 +243,7 @@ func (e *event) executeCommands(sub *task.TaskLine) error {
 		e.waitingCount--
 		return nil
 	}
+	// TODO: This should be processed at MapScene.Update
 	if e.waitingInput {
 		if !input.Triggered() {
 			return nil
@@ -313,7 +313,7 @@ func (e *event) executeCommands(sub *task.TaskLine) error {
 		}
 		e.showChoices(sub, choices)
 		sub.PushFunc(func() error {
-			e.commandIndex.choose(e.chosenIndex)
+			e.commandIndex.choose(e.mapScene.balloons.ChosenIndex())
 			return task.Terminated
 		})
 	case data.CommandNameSetSwitch:
@@ -371,9 +371,7 @@ func (e *event) showMessage(content string, eventID int) {
 }
 
 func (e *event) showChoices(taskLine *task.TaskLine, choices []string) {
-	e.mapScene.showChoices(taskLine, choices, func(index int) {
-		e.chosenIndex = index
-	})
+	e.mapScene.showChoices(taskLine, choices)
 }
 
 func (e *event) setSwitch(id int, value bool) {

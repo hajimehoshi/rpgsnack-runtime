@@ -23,7 +23,12 @@ import (
 )
 
 type balloons struct {
-	balloons []*balloon
+	balloons    []*balloon
+	chosenIndex int
+}
+
+func (b *balloons) ChosenIndex() int {
+	return b.chosenIndex
 }
 
 func (b *balloons) removeBalloon(balloon *balloon) {
@@ -48,7 +53,7 @@ func (b *balloons) ShowMessage(content string, character *character) {
 	b.balloons[0].open()
 }
 
-func (b *balloons) ShowChoices(taskLine *task.TaskLine, choices []string, chosenIndexSetter func(int)) {
+func (b *balloons) ShowChoices(taskLine *task.TaskLine, choices []string) {
 	const height = 20
 	const ymax = scene.TileYNum*scene.TileSize + (scene.GameMarginTop+scene.GameMarginBottom)/scene.TileScale
 	ymin := ymax - len(choices)*height
@@ -62,7 +67,7 @@ func (b *balloons) ShowChoices(taskLine *task.TaskLine, choices []string, chosen
 		balloon.open()
 		balloons = append(balloons, balloon)
 	}
-	chosenIndex := 0
+	b.chosenIndex = 0
 	taskLine.PushFunc(func() error {
 		if !input.Triggered() {
 			return nil
@@ -72,14 +77,13 @@ func (b *balloons) ShowChoices(taskLine *task.TaskLine, choices []string, chosen
 		if y < ymin || ymax <= y {
 			return nil
 		}
-		chosenIndex = (y - ymin) / height
-		chosenIndexSetter(chosenIndex)
+		b.chosenIndex = (y - ymin) / height
 		return task.Terminated
 	})
 	taskLine.PushFunc(func() error {
 		for i, balloon := range balloons {
 			balloon := balloon
-			if i == chosenIndex {
+			if i == b.chosenIndex {
 				continue
 			}
 			balloon.close()
@@ -88,7 +92,7 @@ func (b *balloons) ShowChoices(taskLine *task.TaskLine, choices []string, chosen
 	})
 	taskLine.PushFunc(func() error {
 		for i, balloon := range balloons {
-			if i == chosenIndex {
+			if i == b.chosenIndex {
 				continue
 			}
 			if balloon == nil {

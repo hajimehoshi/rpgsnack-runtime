@@ -286,11 +286,11 @@ func (m *MapScene) showMessage(content string, character *character) {
 	m.balloons.ShowMessage(content, character)
 }
 
-func (m *MapScene) showChoices(taskLine *task.TaskLine, choices []string, chosenIndexSetter func(int)) {
+func (m *MapScene) showChoices(taskLine *task.TaskLine, choices []string) {
 	for i, c := range choices {
 		choices[i] = m.parseMessageSyntax(c)
 	}
-	m.balloons.ShowChoices(taskLine, choices, chosenIndexSetter)
+	m.balloons.ShowChoices(taskLine, choices)
 }
 
 func (m *MapScene) closeAllBalloons() {
