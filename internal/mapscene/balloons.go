@@ -23,25 +23,13 @@ import (
 )
 
 type balloons struct {
-	balloons    []*balloon
-	chosenIndex int
+	balloons       []*balloon
+	choiceBalloons []*balloon
+	chosenIndex    int
 }
 
 func (b *balloons) ChosenIndex() int {
 	return b.chosenIndex
-}
-
-func (b *balloons) removeBalloon(balloon *balloon) {
-	index := -1
-	for i, cb := range b.balloons {
-		if cb == balloon {
-			index = i
-			break
-		}
-	}
-	if index != -1 {
-		b.balloons[index] = nil
-	}
 }
 
 func (b *balloons) ShowMessage(content string, character *character) {
@@ -57,15 +45,14 @@ func (b *balloons) ShowChoices(taskLine *task.TaskLine, choices []string) {
 	const height = 20
 	const ymax = scene.TileYNum*scene.TileSize + (scene.GameMarginTop+scene.GameMarginBottom)/scene.TileScale
 	ymin := ymax - len(choices)*height
-	balloons := []*balloon{}
+	b.choiceBalloons = nil
 	for i, choice := range choices {
 		x := 0
 		y := i*height + ymin
 		width := scene.TileXNum * scene.TileSize
 		balloon := newBalloon(x, y, width, height, choice)
-		b.balloons = append(b.balloons, balloon)
+		b.choiceBalloons = append(b.choiceBalloons, balloon)
 		balloon.open()
-		balloons = append(balloons, balloon)
 	}
 	b.chosenIndex = 0
 	taskLine.PushFunc(func() error {
@@ -81,7 +68,7 @@ func (b *balloons) ShowChoices(taskLine *task.TaskLine, choices []string) {
 		return task.Terminated
 	})
 	taskLine.PushFunc(func() error {
-		for i, balloon := range balloons {
+		for i, balloon := range b.choiceBalloons {
 			balloon := balloon
 			if i == b.chosenIndex {
 				continue
@@ -91,7 +78,7 @@ func (b *balloons) ShowChoices(taskLine *task.TaskLine, choices []string) {
 		return task.Terminated
 	})
 	taskLine.PushFunc(func() error {
-		for i, balloon := range balloons {
+		for i, balloon := range b.choiceBalloons {
 			if i == b.chosenIndex {
 				continue
 			}
@@ -101,7 +88,6 @@ func (b *balloons) ShowChoices(taskLine *task.TaskLine, choices []string) {
 			if balloon.isAnimating() {
 				return nil
 			}
-			b.removeBalloon(balloon)
 		}
 		return task.Terminated
 	})
@@ -115,10 +101,24 @@ func (b *balloons) CloseAll() {
 		}
 		balloon.close()
 	}
+	for _, balloon := range b.choiceBalloons {
+		if balloon == nil {
+			continue
+		}
+		balloon.close()
+	}
 }
 
 func (b *balloons) isOpened() bool {
 	for _, balloon := range b.balloons {
+		if balloon == nil {
+			continue
+		}
+		if balloon.isOpened() {
+			return true
+		}
+	}
+	for _, balloon := range b.choiceBalloons {
 		if balloon == nil {
 			continue
 		}
@@ -138,16 +138,38 @@ func (b *balloons) isAnimating() bool {
 			return true
 		}
 	}
+	for _, balloon := range b.choiceBalloons {
+		if balloon == nil {
+			continue
+		}
+		if balloon.isAnimating() {
+			return true
+		}
+	}
 	return false
 }
 
 func (b *balloons) Update() error {
-	for _, balloon := range b.balloons {
+	for i, balloon := range b.balloons {
 		if balloon == nil {
 			continue
 		}
 		if err := balloon.update(); err != nil {
 			return err
+		}
+		if balloon.isClosed() {
+			b.balloons[i] = nil
+		}
+	}
+	for i, balloon := range b.choiceBalloons {
+		if balloon == nil {
+			continue
+		}
+		if err := balloon.update(); err != nil {
+			return err
+		}
+		if balloon.isClosed() {
+			b.choiceBalloons[i] = nil
 		}
 	}
 	return nil
@@ -155,6 +177,14 @@ func (b *balloons) Update() error {
 
 func (b *balloons) Draw(screen *ebiten.Image) error {
 	for _, balloon := range b.balloons {
+		if balloon == nil {
+			continue
+		}
+		if err := balloon.draw(screen); err != nil {
+			return err
+		}
+	}
+	for _, balloon := range b.choiceBalloons {
 		if balloon == nil {
 			continue
 		}
