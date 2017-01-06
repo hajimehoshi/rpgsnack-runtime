@@ -48,7 +48,7 @@ func (b *balloons) ShowMessage(content string, character *character) {
 	if b.nextBalloon != nil {
 		panic("not reach")
 	}
-	b.CloseAll()
+	b.closeAll()
 	// TODO: How to call newBalloonCenter?
 	x := character.x*scene.TileSize + scene.TileSize/2 + scene.GameMarginX/scene.TileScale
 	y := character.y*scene.TileSize + scene.GameMarginTop/scene.TileScale
@@ -70,7 +70,7 @@ func (b *balloons) ShowChoices(choices []string) {
 	b.choosing = true
 }
 
-func (b *balloons) CloseAll() {
+func (b *balloons) closeAll() {
 	for _, balloon := range b.balloons {
 		if balloon == nil {
 			continue
@@ -145,7 +145,7 @@ func (b *balloons) Update() error {
 		b.nextBalloon = nil
 	}
 	if !b.choosing && b.isOpened() && input.Triggered() {
-		b.CloseAll()
+		b.closeAll()
 	}
 	if b.chosenBalloonWaitingCount > 0 {
 		b.chosenBalloonWaitingCount--
