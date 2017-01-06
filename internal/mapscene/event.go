@@ -38,6 +38,8 @@ type event struct {
 	waitingTint        bool
 	waitingChoosing    bool
 	waitingTransfering bool
+	dirBeforeRunning   data.Dir
+	executingCommands  bool
 }
 
 func newEvent(eventData *data.Event, mapScene *MapScene) (*event, error) {
@@ -185,7 +187,10 @@ func (e *event) calcPageIndex() (int, error) {
 	return -1, nil
 }
 
-func (e *event) run(taskLine *task.TaskLine, trigger data.Trigger) bool {
+func (e *event) tryRun(taskLine *task.TaskLine, trigger data.Trigger) bool {
+	if e.executingCommands {
+		return false
+	}
 	if trigger == data.TriggerNever {
 		return false
 	}
@@ -196,12 +201,14 @@ func (e *event) run(taskLine *task.TaskLine, trigger data.Trigger) bool {
 	if page.Trigger != trigger {
 		return false
 	}
-	var origDir data.Dir
+	if e.executingCommands {
+		return false
+	}
 	taskLine.PushFunc(func() error {
 		if e.mapScene.player.character.isMoving() {
 			return nil
 		}
-		origDir = e.character.dir
+		e.dirBeforeRunning = e.character.dir
 		var dir data.Dir
 		ex, ey := e.character.x, e.character.y
 		px, py := e.mapScene.player.character.x, e.mapScene.player.character.y
@@ -230,17 +237,16 @@ func (e *event) run(taskLine *task.TaskLine, trigger data.Trigger) bool {
 		e.character.attitude = data.AttitudeMiddle
 		e.steppingCount = 0
 		e.commandIndex = newCommandIndex(page)
-		return task.Terminated
-	})
-	taskLine.Push(task.Sub(e.executeCommands))
-	taskLine.PushFunc(func() error {
-		e.character.turn(origDir)
+		e.executingCommands = true
 		return task.Terminated
 	})
 	return true
 }
 
-func (e *event) executeCommands(sub *task.TaskLine) error {
+func (e *event) updateCommands() error {
+	if !e.executingCommands {
+		return nil
+	}
 	if e.mapScene.gameState.Screen().IsFading() {
 		return nil
 	}
@@ -265,11 +271,16 @@ func (e *event) executeCommands(sub *task.TaskLine) error {
 		e.waitingTint = false
 	}
 	if e.commandIndex == nil {
-		return task.Terminated
+		// TODO: This should be done at defer?
+		e.character.turn(e.dirBeforeRunning)
+		e.executingCommands = false
+		return nil
 	}
 	if e.commandIndex.isTerminated() {
 		e.mapScene.closeAllBalloons()
-		return task.Terminated
+		e.character.turn(e.dirBeforeRunning)
+		e.executingCommands = false
+		return nil
 	}
 	c := e.commandIndex.command()
 	switch c.Name {
@@ -449,21 +460,23 @@ func (e *event) update() error {
 	if page == nil {
 		return nil
 	}
-	if !page.Stepping {
-		return nil
+	if page.Stepping {
+		switch {
+		case e.steppingCount < 30:
+			e.character.attitude = data.AttitudeMiddle
+		case e.steppingCount < 60:
+			e.character.attitude = data.AttitudeLeft
+		case e.steppingCount < 90:
+			e.character.attitude = data.AttitudeMiddle
+		default:
+			e.character.attitude = data.AttitudeRight
+		}
+		e.steppingCount++
+		e.steppingCount %= 120
 	}
-	switch {
-	case e.steppingCount < 30:
-		e.character.attitude = data.AttitudeMiddle
-	case e.steppingCount < 60:
-		e.character.attitude = data.AttitudeLeft
-	case e.steppingCount < 90:
-		e.character.attitude = data.AttitudeMiddle
-	default:
-		e.character.attitude = data.AttitudeRight
+	if err := e.updateCommands(); err != nil {
+		return err
 	}
-	e.steppingCount++
-	e.steppingCount %= 120
 	return nil
 }
 
