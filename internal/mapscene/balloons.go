@@ -113,6 +113,18 @@ func (b *balloons) CloseAll() {
 	}
 }
 
+func (b *balloons) isOpened() bool {
+	for _, balloon := range b.balloons {
+		if balloon == nil {
+			continue
+		}
+		if balloon.isOpened() {
+			return true
+		}
+	}
+	return false
+}
+
 func (b *balloons) isAnimating() bool {
 	for _, balloon := range b.balloons {
 		if balloon == nil {

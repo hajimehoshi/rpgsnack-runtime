@@ -116,6 +116,10 @@ func newBalloonWithArrow(arrowX, arrowY int, content string) *balloon {
 	return b
 }
 
+func (b *balloon) isOpened() bool {
+	return b.opened
+}
+
 func (b *balloon) isAnimating() bool {
 	return b.openingCount > 0 || b.closingCount > 0
 }

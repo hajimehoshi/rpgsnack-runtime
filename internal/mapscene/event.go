@@ -286,7 +286,13 @@ func (e *event) executeCommands(sub *task.TaskLine) error {
 		e.waitingCount = c.Args.(*data.CommandArgsWait).Time * 6
 		e.commandIndex.advance()
 	case data.CommandNameShowMessage:
-		e.mapScene.closeAllBalloons()
+		if e.mapScene.balloons.isOpened() {
+			e.mapScene.closeAllBalloons()
+			return nil
+		}
+		if e.mapScene.balloons.isAnimating() {
+			return nil
+		}
 		args := c.Args.(*data.CommandArgsShowMessage)
 		content := data.Current().Texts.Get(language.Und, args.ContentID)
 		e.showMessage(content, args.EventID)
