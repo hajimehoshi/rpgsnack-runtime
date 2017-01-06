@@ -304,7 +304,7 @@ func (e *event) updateCommands() error {
 		}
 		args := c.Args.(*data.CommandArgsShowMessage)
 		content := data.Current().Texts.Get(language.Und, args.ContentID)
-		e.showMessage(content, args.EventID)
+		e.mapScene.showMessage(content, e.mapScene.character(args.EventID, e))
 		e.waitingInput = true
 		e.commandIndex.advance()
 	case data.CommandNameShowChoices:
@@ -314,7 +314,7 @@ func (e *event) updateCommands() error {
 				choice := data.Current().Texts.Get(language.Und, id)
 				choices = append(choices, choice)
 			}
-			e.showChoices(choices)
+			e.mapScene.showChoices(choices)
 			e.waitingChoosing = true
 			return nil
 		}
@@ -322,11 +322,11 @@ func (e *event) updateCommands() error {
 		e.waitingChoosing = false
 	case data.CommandNameSetSwitch:
 		args := c.Args.(*data.CommandArgsSetSwitch)
-		e.setSwitch(args.ID, args.Value)
+		e.mapScene.state().Variables().SetSwitchValue(args.ID, args.Value)
 		e.commandIndex.advance()
 	case data.CommandNameSetSelfSwitch:
 		args := c.Args.(*data.CommandArgsSetSelfSwitch)
-		e.setSelfSwitch(args.ID, args.Value)
+		e.selfSwitches[args.ID] = args.Value
 		e.commandIndex.advance()
 	case data.CommandNameSetVariable:
 		args := c.Args.(*data.CommandArgsSetVariable)
@@ -378,23 +378,6 @@ func (e *event) updateCommands() error {
 		return fmt.Errorf("command not implemented: %s", c.Name)
 	}
 	return nil
-}
-
-func (e *event) showMessage(content string, eventID int) {
-	ch := e.mapScene.character(eventID, e)
-	e.mapScene.showMessage(content, ch)
-}
-
-func (e *event) showChoices(choices []string) {
-	e.mapScene.showChoices(choices)
-}
-
-func (e *event) setSwitch(id int, value bool) {
-	e.mapScene.state().Variables().SetSwitchValue(id, value)
-}
-
-func (e *event) setSelfSwitch(id int, value bool) {
-	e.selfSwitches[id] = value
 }
 
 func (e *event) setVariable(id int, op data.SetVariableOp, valueType data.SetVariableValueType, value interface{}) {
