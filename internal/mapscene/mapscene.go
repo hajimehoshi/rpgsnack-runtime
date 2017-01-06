@@ -232,6 +232,7 @@ func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 	if err := m.balloons.Update(); err != nil {
 		return err
 	}
+	// TODO: Don't execute an event while another event is running
 	for _, e := range m.events {
 		if e.tryRun(data.TriggerAuto) {
 			break

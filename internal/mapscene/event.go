@@ -256,6 +256,7 @@ func (e *event) updateCommands() error {
 	}
 	c := e.commandIndex.command()
 	if c.Name == data.CommandNameShowChoices {
+		// Note: This just waits for message balloons
 		if e.mapScene.balloons.isAnimating() {
 			return nil
 		}
@@ -292,9 +293,6 @@ func (e *event) updateCommands() error {
 		e.waitingCount = c.Args.(*data.CommandArgsWait).Time * 6
 		e.commandIndex.advance()
 	case data.CommandNameShowMessage:
-		if e.mapScene.balloons.isBusy() {
-			return nil
-		}
 		args := c.Args.(*data.CommandArgsShowMessage)
 		content := data.Current().Texts.Get(language.Und, args.ContentID)
 		e.mapScene.showMessage(content, e.mapScene.character(args.EventID, e))
@@ -311,6 +309,7 @@ func (e *event) updateCommands() error {
 			return nil
 		}
 		if e.mapScene.balloons.isOpened() {
+			// Index is not determined yet: this is hacky!
 			return nil
 		}
 		e.commandIndex.choose(e.mapScene.balloons.ChosenIndex())
@@ -328,9 +327,6 @@ func (e *event) updateCommands() error {
 		e.setVariable(args.ID, args.Op, args.ValueType, args.Value)
 		e.commandIndex.advance()
 	case data.CommandNameTransfer:
-		if e.mapScene.balloons.isBusy() {
-			return nil
-		}
 		args := c.Args.(*data.CommandArgsTransfer)
 		if !e.waitingTransfering {
 			e.waitingTransfering = true
