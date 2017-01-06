@@ -232,20 +232,19 @@ func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 	if err := m.balloons.Update(); err != nil {
 		return err
 	}
-	// TODO: Don't execute an event while another event is running
-	for _, e := range m.events {
-		if e.tryRun(data.TriggerAuto) {
-			break
-		}
-	}
 	for _, e := range m.events {
 		if err := e.update(); err != nil {
 			return err
 		}
 	}
 	for _, e := range m.events {
-		if e.executingCommands {
+		if e.executingPage != nil {
 			return nil
+		}
+	}
+	for _, e := range m.events {
+		if e.tryRun(data.TriggerAuto) {
+			break
 		}
 	}
 	if err := m.movePlayerIfNeeded(); err != nil {

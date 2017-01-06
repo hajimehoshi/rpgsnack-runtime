@@ -33,10 +33,11 @@ type event struct {
 	selfSwitches       [data.SelfSwitchNum]bool
 	waitingCount       int
 	waitingTint        bool
+	waitingMessage     bool
 	waitingChoosing    bool
 	waitingTransfering bool
 	dirBeforeRunning   data.Dir
-	executingCommands  bool
+	executingPage      *data.Page
 }
 
 func newEvent(eventData *data.Event, mapScene *MapScene) (*event, error) {
@@ -185,7 +186,7 @@ func (e *event) calcPageIndex() (int, error) {
 }
 
 func (e *event) tryRun(trigger data.Trigger) bool {
-	if e.executingCommands {
+	if e.executingPage != nil {
 		return false
 	}
 	if trigger == data.TriggerNever {
@@ -198,12 +199,12 @@ func (e *event) tryRun(trigger data.Trigger) bool {
 	if page.Trigger != trigger {
 		return false
 	}
-	e.executingCommands = true
+	e.executingPage = page
 	return true
 }
 
 func (e *event) updateCommands() error {
-	if !e.executingCommands {
+	if e.executingPage == nil {
 		return nil
 	}
 	if e.mapScene.player.isMovingByUserInput() {
@@ -215,7 +216,7 @@ func (e *event) updateCommands() error {
 		ex, ey := e.character.x, e.character.y
 		px, py := e.mapScene.player.character.x, e.mapScene.player.character.y
 		switch {
-		case e.currentPage().Trigger == data.TriggerAuto:
+		case e.executingPage.Trigger == data.TriggerAuto:
 		case ex == px && ey == py:
 			// The player and the event are at the same position.
 		case ex > px && ey == py:
@@ -238,129 +239,151 @@ func (e *event) updateCommands() error {
 	if e.mapScene.gameState.Screen().IsFading() {
 		return nil
 	}
-	if e.waitingCount > 0 {
-		e.waitingCount--
-		return nil
-	}
-	if e.waitingTint {
-		if e.mapScene.gameState.Screen().IsChangingTint() {
-			return nil
+commandLoop:
+	for !e.commandIndex.isTerminated() {
+		c := e.commandIndex.command()
+		if c.Name == data.CommandNameShowChoices {
+			// Note: This just waits for message balloons
+			if e.mapScene.balloons.isAnimating() {
+				break commandLoop
+			}
+		} else {
+			if e.mapScene.balloons.isBusy() {
+				break commandLoop
+			}
 		}
-		e.waitingTint = false
+		switch c.Name {
+		case data.CommandNameIf:
+			conditions := c.Args.(*data.CommandArgsIf).Conditions
+			matches := true
+			for _, c := range conditions {
+				m, err := e.meetsCondition(c)
+				if err != nil {
+					return err
+				}
+				if !m {
+					matches = false
+					break commandLoop
+				}
+			}
+			if matches {
+				e.commandIndex.choose(0)
+			} else if len(c.Branches) >= 2 {
+				e.commandIndex.choose(1)
+			} else {
+				e.commandIndex.advance()
+			}
+		case data.CommandNameCallEvent:
+			println(fmt.Sprintf("not implemented yet: %s", c.Name))
+			e.commandIndex.advance()
+		case data.CommandNameWait:
+			if e.waitingCount == 0 {
+				e.waitingCount = c.Args.(*data.CommandArgsWait).Time * 6
+				break commandLoop
+			}
+			if e.waitingCount > 0 {
+				e.waitingCount--
+				if e.waitingCount == 0 {
+					e.commandIndex.advance()
+					continue commandLoop
+				}
+				break commandLoop
+			}
+			e.commandIndex.advance()
+		case data.CommandNameShowMessage:
+			if !e.waitingMessage {
+				args := c.Args.(*data.CommandArgsShowMessage)
+				content := data.Current().Texts.Get(language.Und, args.ContentID)
+				e.mapScene.showMessage(content, e.mapScene.character(args.EventID, e))
+				e.waitingMessage = true
+				break commandLoop
+			}
+			e.commandIndex.advance()
+			e.waitingMessage = false
+		case data.CommandNameShowChoices:
+			if !e.waitingChoosing {
+				choices := []string{}
+				for _, id := range c.Args.(*data.CommandArgsShowChoices).ChoiceIDs {
+					choice := data.Current().Texts.Get(language.Und, id)
+					choices = append(choices, choice)
+				}
+				e.mapScene.showChoices(choices)
+				e.waitingChoosing = true
+				break commandLoop
+			}
+			if e.mapScene.balloons.isOpened() {
+				// Index is not determined yet: this is hacky!
+				break commandLoop
+			}
+			e.commandIndex.choose(e.mapScene.balloons.ChosenIndex())
+			e.waitingChoosing = false
+		case data.CommandNameSetSwitch:
+			args := c.Args.(*data.CommandArgsSetSwitch)
+			e.mapScene.state().Variables().SetSwitchValue(args.ID, args.Value)
+			e.commandIndex.advance()
+		case data.CommandNameSetSelfSwitch:
+			args := c.Args.(*data.CommandArgsSetSelfSwitch)
+			e.selfSwitches[args.ID] = args.Value
+			e.commandIndex.advance()
+		case data.CommandNameSetVariable:
+			args := c.Args.(*data.CommandArgsSetVariable)
+			e.setVariable(args.ID, args.Op, args.ValueType, args.Value)
+			e.commandIndex.advance()
+		case data.CommandNameTransfer:
+			args := c.Args.(*data.CommandArgsTransfer)
+			if !e.waitingTransfering {
+				e.waitingTransfering = true
+				e.mapScene.fadeOut(30)
+				break commandLoop
+			}
+			// TODO: After transfering, next commands are not executed.
+			e.mapScene.transferPlayerImmediately(args.RoomID, args.X, args.Y)
+			e.mapScene.fadeIn(30)
+			e.waitingTransfering = false
+			e.commandIndex.advance()
+		case data.CommandNameSetRoute:
+			println(fmt.Sprintf("not implemented yet: %s", c.Name))
+			e.commandIndex.advance()
+		case data.CommandNameTintScreen:
+			if !e.waitingTint {
+				args := c.Args.(*data.CommandArgsTintScreen)
+				r := float64(args.Red) / 255
+				g := float64(args.Green) / 255
+				b := float64(args.Blue) / 255
+				gray := float64(args.Gray) / 255
+				e.mapScene.gameState.Screen().StartTint(r, g, b, gray, args.Time*6)
+				e.waitingTint = args.Wait
+			}
+			if e.waitingTint {
+				if e.mapScene.gameState.Screen().IsChangingTint() {
+					break commandLoop
+				}
+				e.waitingTint = false
+				e.commandIndex.advance()
+				continue commandLoop
+			}
+			e.commandIndex.advance()
+		case data.CommandNamePlaySE:
+			println(fmt.Sprintf("not implemented yet: %s", c.Name))
+			e.commandIndex.advance()
+		case data.CommandNamePlayBGM:
+			println(fmt.Sprintf("not implemented yet: %s", c.Name))
+			e.commandIndex.advance()
+		case data.CommandNameStopBGM:
+			println(fmt.Sprintf("not implemented yet: %s", c.Name))
+			e.commandIndex.advance()
+		default:
+			return fmt.Errorf("command not implemented: %s", c.Name)
+		}
 	}
 	if e.commandIndex.isTerminated() {
-		e.character.turn(e.dirBeforeRunning)
-		e.executingCommands = false
-		e.commandIndex = nil
-		return nil
-	}
-	c := e.commandIndex.command()
-	if c.Name == data.CommandNameShowChoices {
-		// Note: This just waits for message balloons
-		if e.mapScene.balloons.isAnimating() {
-			return nil
-		}
-	} else {
 		if e.mapScene.balloons.isBusy() {
 			return nil
 		}
-	}
-	switch c.Name {
-	case data.CommandNameIf:
-		conditions := c.Args.(*data.CommandArgsIf).Conditions
-		matches := true
-		for _, c := range conditions {
-			m, err := e.meetsCondition(c)
-			if err != nil {
-				return err
-			}
-			if !m {
-				matches = false
-				break
-			}
-		}
-		if matches {
-			e.commandIndex.choose(0)
-		} else if len(c.Branches) >= 2 {
-			e.commandIndex.choose(1)
-		} else {
-			e.commandIndex.advance()
-		}
-	case data.CommandNameCallEvent:
-		println(fmt.Sprintf("not implemented yet: %s", c.Name))
-		e.commandIndex.advance()
-	case data.CommandNameWait:
-		e.waitingCount = c.Args.(*data.CommandArgsWait).Time * 6
-		e.commandIndex.advance()
-	case data.CommandNameShowMessage:
-		args := c.Args.(*data.CommandArgsShowMessage)
-		content := data.Current().Texts.Get(language.Und, args.ContentID)
-		e.mapScene.showMessage(content, e.mapScene.character(args.EventID, e))
-		e.commandIndex.advance()
-	case data.CommandNameShowChoices:
-		if !e.waitingChoosing {
-			choices := []string{}
-			for _, id := range c.Args.(*data.CommandArgsShowChoices).ChoiceIDs {
-				choice := data.Current().Texts.Get(language.Und, id)
-				choices = append(choices, choice)
-			}
-			e.mapScene.showChoices(choices)
-			e.waitingChoosing = true
-			return nil
-		}
-		if e.mapScene.balloons.isOpened() {
-			// Index is not determined yet: this is hacky!
-			return nil
-		}
-		e.commandIndex.choose(e.mapScene.balloons.ChosenIndex())
-		e.waitingChoosing = false
-	case data.CommandNameSetSwitch:
-		args := c.Args.(*data.CommandArgsSetSwitch)
-		e.mapScene.state().Variables().SetSwitchValue(args.ID, args.Value)
-		e.commandIndex.advance()
-	case data.CommandNameSetSelfSwitch:
-		args := c.Args.(*data.CommandArgsSetSelfSwitch)
-		e.selfSwitches[args.ID] = args.Value
-		e.commandIndex.advance()
-	case data.CommandNameSetVariable:
-		args := c.Args.(*data.CommandArgsSetVariable)
-		e.setVariable(args.ID, args.Op, args.ValueType, args.Value)
-		e.commandIndex.advance()
-	case data.CommandNameTransfer:
-		args := c.Args.(*data.CommandArgsTransfer)
-		if !e.waitingTransfering {
-			e.waitingTransfering = true
-			e.mapScene.fadeOut(30)
-			return nil
-		}
-		// TODO: After transfering, next commands are not executed.
-		e.mapScene.transferPlayerImmediately(args.RoomID, args.X, args.Y)
-		e.mapScene.fadeIn(30)
-		e.waitingTransfering = false
-		e.commandIndex.advance()
-	case data.CommandNameSetRoute:
-		println(fmt.Sprintf("not implemented yet: %s", c.Name))
-		e.commandIndex.advance()
-	case data.CommandNameTintScreen:
-		args := c.Args.(*data.CommandArgsTintScreen)
-		r := float64(args.Red) / 255
-		g := float64(args.Green) / 255
-		b := float64(args.Blue) / 255
-		gray := float64(args.Gray) / 255
-		e.mapScene.gameState.Screen().StartTint(r, g, b, gray, args.Time*6)
-		e.waitingTint = args.Wait
-		e.commandIndex.advance()
-	case data.CommandNamePlaySE:
-		println(fmt.Sprintf("not implemented yet: %s", c.Name))
-		e.commandIndex.advance()
-	case data.CommandNamePlayBGM:
-		println(fmt.Sprintf("not implemented yet: %s", c.Name))
-		e.commandIndex.advance()
-	case data.CommandNameStopBGM:
-		println(fmt.Sprintf("not implemented yet: %s", c.Name))
-		e.commandIndex.advance()
-	default:
-		return fmt.Errorf("command not implemented: %s", c.Name)
+		e.character.turn(e.dirBeforeRunning)
+		e.executingPage = nil
+		e.commandIndex = nil
+		return nil
 	}
 	return nil
 }

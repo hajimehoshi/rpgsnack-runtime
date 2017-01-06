@@ -95,6 +95,9 @@ func (b *balloons) isBusy() bool {
 	if b.isOpened() {
 		return true
 	}
+	if b.nextBalloon != nil {
+		return true
+	}
 	return false
 }
 
@@ -139,13 +142,15 @@ func (b *balloons) isAnimating() bool {
 }
 
 func (b *balloons) Update() error {
-	if b.nextBalloon != nil && !b.isBusy() {
-		b.balloons = []*balloon{b.nextBalloon}
-		b.balloons[0].open()
-		b.nextBalloon = nil
-	}
-	if !b.choosing && b.isOpened() && input.Triggered() {
-		b.closeAll()
+	if !b.choosing {
+		if b.nextBalloon != nil && !b.isAnimating() && !b.isOpened() {
+			b.balloons = []*balloon{b.nextBalloon}
+			b.balloons[0].open()
+			b.nextBalloon = nil
+		}
+		if b.isOpened() && input.Triggered() {
+			b.closeAll()
+		}
 	}
 	if b.chosenBalloonWaitingCount > 0 {
 		b.chosenBalloonWaitingCount--
