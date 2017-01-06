@@ -336,10 +336,10 @@ commandLoop:
 				e.mapScene.fadeOut(30)
 				break commandLoop
 			}
-			// TODO: After transfering, next commands are not executed.
 			e.mapScene.transferPlayerImmediately(args.RoomID, args.X, args.Y)
 			e.mapScene.fadeIn(30)
 			e.waitingTransfering = false
+			// TODO: advance is called too early.
 			e.commandIndex.advance()
 		case data.CommandNameSetRoute:
 			println(fmt.Sprintf("not implemented yet: %s", c.Name))
