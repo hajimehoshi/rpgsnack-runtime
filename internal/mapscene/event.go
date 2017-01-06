@@ -22,7 +22,6 @@ import (
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/task"
 )
 
 type event struct {
@@ -187,7 +186,7 @@ func (e *event) calcPageIndex() (int, error) {
 	return -1, nil
 }
 
-func (e *event) tryRun(taskLine *task.TaskLine, trigger data.Trigger) bool {
+func (e *event) tryRun(trigger data.Trigger) bool {
 	if e.executingCommands {
 		return false
 	}
@@ -201,19 +200,25 @@ func (e *event) tryRun(taskLine *task.TaskLine, trigger data.Trigger) bool {
 	if page.Trigger != trigger {
 		return false
 	}
-	if e.executingCommands {
-		return false
+	e.executingCommands = true
+	return true
+}
+
+func (e *event) updateCommands() error {
+	if !e.executingCommands {
+		return nil
 	}
-	taskLine.PushFunc(func() error {
-		if e.mapScene.player.character.isMoving() {
-			return nil
-		}
+	// TODO: This doesn't work when player-moving event. Fix this.
+	if e.mapScene.player.character.isMoving() {
+		return nil
+	}
+	if e.commandIndex == nil {
 		e.dirBeforeRunning = e.character.dir
 		var dir data.Dir
 		ex, ey := e.character.x, e.character.y
 		px, py := e.mapScene.player.character.x, e.mapScene.player.character.y
 		switch {
-		case trigger == data.TriggerAuto:
+		case e.currentPage().Trigger == data.TriggerAuto:
 		case ex == px && ey == py:
 			// The player and the event are at the same position.
 		case ex > px && ey == py:
@@ -228,24 +233,10 @@ func (e *event) tryRun(taskLine *task.TaskLine, trigger data.Trigger) bool {
 			panic("not reach")
 		}
 		e.character.turn(dir)
-		page := e.data.Pages[e.currentPageIndex]
-		if page == nil {
-			e.commandIndex = nil
-			return task.Terminated
-		}
 		// page.Attitude is ignored so far.
 		e.character.attitude = data.AttitudeMiddle
 		e.steppingCount = 0
-		e.commandIndex = newCommandIndex(page)
-		e.executingCommands = true
-		return task.Terminated
-	})
-	return true
-}
-
-func (e *event) updateCommands() error {
-	if !e.executingCommands {
-		return nil
+		e.commandIndex = newCommandIndex(e.currentPage())
 	}
 	if e.mapScene.gameState.Screen().IsFading() {
 		return nil
@@ -270,16 +261,11 @@ func (e *event) updateCommands() error {
 		}
 		e.waitingTint = false
 	}
-	if e.commandIndex == nil {
-		// TODO: This should be done at defer?
-		e.character.turn(e.dirBeforeRunning)
-		e.executingCommands = false
-		return nil
-	}
 	if e.commandIndex.isTerminated() {
 		e.mapScene.closeAllBalloons()
 		e.character.turn(e.dirBeforeRunning)
 		e.executingCommands = false
+		e.commandIndex = nil
 		return nil
 	}
 	c := e.commandIndex.command()
@@ -357,6 +343,7 @@ func (e *event) updateCommands() error {
 			e.mapScene.fadeOut(30)
 			return nil
 		}
+		// TODO: After transfering, next commands are not executed.
 		e.mapScene.transferPlayerImmediately(args.RoomID, args.X, args.Y)
 		e.mapScene.fadeIn(30)
 		e.waitingTransfering = false

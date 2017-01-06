@@ -204,7 +204,7 @@ func (m *MapScene) movePlayerIfNeeded(taskLine *task.TaskLine) error {
 	if e == nil {
 		return nil
 	}
-	e.tryRun(taskLine, data.TriggerPlayer)
+	e.tryRun(data.TriggerPlayer)
 	return nil
 }
 
@@ -249,7 +249,7 @@ func (m *MapScene) Update(subTasksUpdated bool, taskLine *task.TaskLine, sceneMa
 		return nil
 	}
 	for _, e := range m.events {
-		if e.tryRun(taskLine, data.TriggerAuto) {
+		if e.tryRun(data.TriggerAuto) {
 			break
 		}
 	}
