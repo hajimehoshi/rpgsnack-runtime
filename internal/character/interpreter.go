@@ -34,11 +34,12 @@ type MapScene interface {
 type interpreter struct {
 	gameState      *gamestate.Game
 	event          *Event
-	page           *data.Page
 	commandIndex   *commandIndex
 	waitingCount   int
 	waitingCommand bool
 	mapScene       MapScene
+	commands       []*data.Command
+	trigger        data.Trigger
 }
 
 func (i *interpreter) SetEvent(event *Event) {
@@ -46,11 +47,12 @@ func (i *interpreter) SetEvent(event *Event) {
 }
 
 func (i *interpreter) IsExecuting() bool {
-	return i.page != nil
+	return i.commands != nil
 }
 
-func (i *interpreter) SetPage(page *data.Page) {
-	i.page = page
+func (i *interpreter) SetCommands(commands []*data.Command, trigger data.Trigger) {
+	i.commands = commands
+	i.trigger = trigger
 }
 
 func (i *interpreter) MeetsCondition(cond *data.Condition) (bool, error) {
@@ -102,7 +104,7 @@ func (i *interpreter) MeetsCondition(cond *data.Condition) (bool, error) {
 }
 
 func (i *interpreter) Update() error {
-	if i.page == nil {
+	if i.commands == nil {
 		return nil
 	}
 	if i.commandIndex == nil {
@@ -110,7 +112,7 @@ func (i *interpreter) Update() error {
 		ex, ey := i.event.Position()
 		px, py := i.mapScene.Player().character.x, i.mapScene.Player().character.y
 		switch {
-		case i.page.Trigger == data.TriggerAuto:
+		case i.trigger == data.TriggerAuto:
 		case ex == px && ey == py:
 			// The player and the event are at the same position.
 		case ex > px && ey == py:
@@ -125,7 +127,7 @@ func (i *interpreter) Update() error {
 			panic("not reach")
 		}
 		i.event.StartEvent(dir)
-		i.commandIndex = newCommandIndex(i.event.CurrentPage().Commands)
+		i.commandIndex = newCommandIndex(i.commands)
 	}
 commandLoop:
 	for !i.commandIndex.isTerminated() {
@@ -288,7 +290,7 @@ commandLoop:
 		}
 		i.gameState.Windows().CloseAll()
 		i.event.EndEvent()
-		i.page = nil
+		i.commands = nil
 		i.commandIndex = nil
 		return nil
 	}

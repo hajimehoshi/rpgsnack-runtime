@@ -81,7 +81,7 @@ func (e *Event) EndEvent() {
 	e.character.turn(e.dirBeforeRunning)
 }
 
-func (e *Event) CurrentPage() *data.Page {
+func (e *Event) currentPage() *data.Page {
 	if e.currentPageIndex == -1 {
 		return nil
 	}
@@ -89,7 +89,7 @@ func (e *Event) CurrentPage() *data.Page {
 }
 
 func (e *Event) IsPassable() bool {
-	page := e.CurrentPage()
+	page := e.currentPage()
 	if page == nil {
 		return true
 	}
@@ -97,7 +97,7 @@ func (e *Event) IsPassable() bool {
 }
 
 func (e *Event) IsRunnable() bool {
-	page := e.CurrentPage()
+	page := e.currentPage()
 	if page == nil {
 		return true
 	}
@@ -172,20 +172,20 @@ func (e *Event) TryRun(trigger data.Trigger) bool {
 	if trigger == data.TriggerNever {
 		return false
 	}
-	page := e.CurrentPage()
+	page := e.currentPage()
 	if page == nil {
 		return false
 	}
 	if page.Trigger != trigger {
 		return false
 	}
-	e.interpreter.SetPage(page)
+	e.interpreter.SetCommands(page.Commands, page.Trigger)
 	return true
 }
 
 func (e *Event) Update() error {
 	if !e.interpreter.IsExecuting() {
-		page := e.CurrentPage()
+		page := e.currentPage()
 		if page == nil {
 			return nil
 		}
