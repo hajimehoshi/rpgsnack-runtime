@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package mapscene
+package window
 
 import (
 	"github.com/hajimehoshi/ebiten"
@@ -27,7 +27,7 @@ const (
 		(scene.GameMarginTop+scene.GameMarginBottom)/scene.TileScale
 )
 
-type balloons struct {
+type Windows struct {
 	nextBalloon               *balloon
 	balloons                  []*balloon
 	choiceBalloons            []*balloon
@@ -41,25 +41,25 @@ func choiceBalloonsMinY(num int) int {
 	return choiceBalloonsMaxY - num*choiceBalloonHeight
 }
 
-func (b *balloons) ChosenIndex() int {
+func (b *Windows) ChosenIndex() int {
 	return b.chosenIndex
 }
 
-func (b *balloons) HasChosenIndex() bool {
+func (b *Windows) HasChosenIndex() bool {
 	return b.hasChosenIndex
 }
 
-func (b *balloons) ShowMessage(content string, character *character) {
+func (b *Windows) ShowMessage(content string, x, y int) {
 	if b.nextBalloon != nil {
 		panic("not reach")
 	}
 	// TODO: How to call newBalloonCenter?
-	x := character.x*scene.TileSize + scene.TileSize/2 + scene.GameMarginX/scene.TileScale
-	y := character.y*scene.TileSize + scene.GameMarginTop/scene.TileScale
+	x += scene.TileSize/2 + scene.GameMarginX/scene.TileScale
+	y += scene.GameMarginTop/scene.TileScale
 	b.nextBalloon = newBalloonWithArrow(x, y, content)
 }
 
-func (b *balloons) ShowChoices(choices []string) {
+func (b *Windows) ShowChoices(choices []string) {
 	ymin := choiceBalloonsMinY(len(choices))
 	b.choiceBalloons = nil
 	for i, choice := range choices {
@@ -74,7 +74,7 @@ func (b *balloons) ShowChoices(choices []string) {
 	b.choosing = true
 }
 
-func (b *balloons) CloseAll() {
+func (b *Windows) CloseAll() {
 	for _, balloon := range b.balloons {
 		if balloon == nil {
 			continue
@@ -90,7 +90,7 @@ func (b *balloons) CloseAll() {
 	b.hasChosenIndex = false
 }
 
-func (b *balloons) IsBusy() bool {
+func (b *Windows) IsBusy() bool {
 	if b.isAnimating() {
 		return true
 	}
@@ -106,7 +106,7 @@ func (b *balloons) IsBusy() bool {
 	return false
 }
 
-func (b *balloons) CanProceed() bool {
+func (b *Windows) CanProceed() bool {
 	if !b.IsBusy() {
 		return true
 	}
@@ -119,7 +119,7 @@ func (b *balloons) CanProceed() bool {
 	return true
 }
 
-func (b *balloons) isOpened() bool {
+func (b *Windows) isOpened() bool {
 	for _, balloon := range b.balloons {
 		if balloon == nil {
 			continue
@@ -139,7 +139,7 @@ func (b *balloons) isOpened() bool {
 	return false
 }
 
-func (b *balloons) isAnimating() bool {
+func (b *Windows) isAnimating() bool {
 	for _, balloon := range b.balloons {
 		if balloon == nil {
 			continue
@@ -159,7 +159,7 @@ func (b *balloons) isAnimating() bool {
 	return false
 }
 
-func (b *balloons) Update() error {
+func (b *Windows) Update() error {
 	if !b.choosing {
 		if b.nextBalloon != nil && !b.isAnimating() && !b.isOpened() {
 			b.balloons = []*balloon{b.nextBalloon}
@@ -223,7 +223,7 @@ func (b *balloons) Update() error {
 	return nil
 }
 
-func (b *balloons) Draw(screen *ebiten.Image) error {
+func (b *Windows) Draw(screen *ebiten.Image) error {
 	for _, balloon := range b.balloons {
 		if balloon == nil {
 			continue

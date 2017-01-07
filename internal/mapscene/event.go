@@ -236,7 +236,7 @@ func (e *event) updateCommands() error {
 commandLoop:
 	for !e.commandIndex.isTerminated() {
 		c := e.commandIndex.command()
-		if !e.mapScene.balloons.CanProceed() {
+		if !e.gameState.Windows().CanProceed() {
 			break commandLoop
 		}
 		switch c.Name {
@@ -287,7 +287,7 @@ commandLoop:
 			}
 			if !e.commandIndex.isTerminated() {
 				if e.commandIndex.command().Name != data.CommandNameShowChoices {
-					e.mapScene.balloons.CloseAll()
+					e.gameState.Windows().CloseAll()
 				}
 			}
 			e.commandIndex.advance()
@@ -303,10 +303,10 @@ commandLoop:
 				e.waitingCommand = true
 				break commandLoop
 			}
-			if !e.mapScene.balloons.HasChosenIndex() {
+			if !e.gameState.Windows().HasChosenIndex() {
 				break commandLoop
 			}
-			e.commandIndex.choose(e.mapScene.balloons.ChosenIndex())
+			e.commandIndex.choose(e.gameState.Windows().ChosenIndex())
 			e.waitingCommand = false
 		case data.CommandNameSetSwitch:
 			args := c.Args.(*data.CommandArgsSetSwitch)
@@ -373,10 +373,10 @@ commandLoop:
 		}
 	}
 	if e.commandIndex.isTerminated() {
-		if e.mapScene.balloons.IsBusy() {
+		if e.gameState.Windows().IsBusy() {
 			return nil
 		}
-		e.mapScene.balloons.CloseAll()
+		e.gameState.Windows().CloseAll()
 		e.character.turn(e.dirBeforeRunning)
 		e.executingPage = nil
 		e.commandIndex = nil

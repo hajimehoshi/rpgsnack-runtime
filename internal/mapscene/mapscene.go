@@ -35,7 +35,6 @@ type MapScene struct {
 	player          *player
 	moveDstX        int
 	moveDstY        int
-	balloons        *balloons
 	tilesImage      *ebiten.Image
 	events          []*event
 	continuingEvent *event
@@ -58,7 +57,6 @@ func New() (*MapScene, error) {
 	mapScene := &MapScene{
 		currentMapID: 1,
 		gameState:    gamestate.NewGame(),
-		balloons:     &balloons{},
 		tilesImage:   tilesImage,
 		player:       player,
 	}
@@ -238,7 +236,7 @@ func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 	if err := m.player.update(m.passable); err != nil {
 		return err
 	}
-	if err := m.balloons.Update(); err != nil {
+	if err := m.gameState.Windows().Update(); err != nil {
 		return err
 	}
 	for _, e := range m.events {
@@ -278,14 +276,14 @@ func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 
 func (m *MapScene) showMessage(content string, character *character) {
 	content = m.gameState.ParseMessageSyntax(content)
-	m.balloons.ShowMessage(content, character)
+	m.gameState.Windows().ShowMessage(content, character.x*scene.TileSize, character.y*scene.TileSize)
 }
 
 func (m *MapScene) showChoices(choices []string) {
 	for i, c := range choices {
 		choices[i] = m.gameState.ParseMessageSyntax(c)
 	}
-	m.balloons.ShowChoices(choices)
+	m.gameState.Windows().ShowChoices(choices)
 }
 
 func (m *MapScene) transferPlayerImmediately(roomID, x, y int, e *event) {
@@ -391,7 +389,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 			return err
 		}
 	}
-	if err := m.balloons.Draw(screen); err != nil {
+	if err := m.gameState.Windows().Draw(screen); err != nil {
 		return nil
 	}
 	msg := fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS())

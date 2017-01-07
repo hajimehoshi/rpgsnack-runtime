@@ -15,6 +15,10 @@
 package gamestate
 
 import (
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/window"
+)
+
+import (
 	"fmt"
 	"regexp"
 	"strconv"
@@ -24,12 +28,14 @@ import (
 type Game struct {
 	variables *Variables
 	screen    *Screen
+	windows   *window.Windows
 }
 
 func NewGame() *Game {
 	return &Game{
 		variables: &Variables{},
 		screen:    &Screen{},
+		windows:   &window.Windows{},
 	}
 }
 
@@ -39,6 +45,10 @@ func (g *Game) Variables() *Variables {
 
 func (g *Game) Screen() *Screen {
 	return g.screen
+}
+
+func (g *Game) Windows() *window.Windows {
+	return g.windows
 }
 
 var reMessage = regexp.MustCompile(`\\([a-zA-Z])\[(\d+)\]`)
