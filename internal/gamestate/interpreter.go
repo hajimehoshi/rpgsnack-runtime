@@ -147,6 +147,155 @@ func (i *Interpreter) MeetsCondition(cond *data.Condition) (bool, error) {
 	return false, nil
 }
 
+func (i *Interpreter) doOneCommand() (bool, error) {
+	c := i.commandIndex.command()
+	if !i.gameState.windows.CanProceed() {
+		return false, nil
+	}
+	switch c.Name {
+	case data.CommandNameIf:
+		conditions := c.Args.(*data.CommandArgsIf).Conditions
+		matches := true
+		for _, c := range conditions {
+			m, err := i.MeetsCondition(c)
+			if err != nil {
+				return false, err
+			}
+			if !m {
+				matches = false
+				break
+			}
+		}
+		if matches {
+			i.commandIndex.choose(0)
+		} else if len(c.Branches) >= 2 {
+			i.commandIndex.choose(1)
+		} else {
+			i.commandIndex.advance()
+		}
+	case data.CommandNameCallEvent:
+		println(fmt.Sprintf("not implemented yet: %s", c.Name))
+		i.commandIndex.advance()
+	case data.CommandNameWait:
+		if i.waitingCount == 0 {
+			i.waitingCount = c.Args.(*data.CommandArgsWait).Time * 6
+			return false, nil
+		}
+		if i.waitingCount > 0 {
+			i.waitingCount--
+			if i.waitingCount == 0 {
+				i.commandIndex.advance()
+				return true, nil
+			}
+			return false, nil
+		}
+		i.commandIndex.advance()
+	case data.CommandNameShowMessage:
+		if !i.waitingCommand {
+			args := c.Args.(*data.CommandArgsShowMessage)
+			content := data.Current().Texts.Get(language.Und, args.ContentID)
+			if ch := i.character(args.EventID); ch != nil {
+				x, y := ch.Position()
+				content = i.gameState.ParseMessageSyntax(content)
+				i.gameState.windows.ShowMessage(content, x*scene.TileSize, y*scene.TileSize)
+				i.waitingCommand = true
+				return false, nil
+			}
+		}
+		// Advance command index first and check the next command.
+		i.commandIndex.advance()
+		if !i.commandIndex.isTerminated() {
+			if i.commandIndex.command().Name != data.CommandNameShowChoices {
+				i.gameState.windows.CloseAll()
+			}
+		} else {
+			i.gameState.windows.CloseAll()
+		}
+		i.waitingCommand = false
+	case data.CommandNameShowChoices:
+		if !i.waitingCommand {
+			choices := []string{}
+			for _, id := range c.Args.(*data.CommandArgsShowChoices).ChoiceIDs {
+				choice := data.Current().Texts.Get(language.Und, id)
+				choice = i.gameState.ParseMessageSyntax(choice)
+				choices = append(choices, choice)
+			}
+			i.gameState.windows.ShowChoices(choices)
+			i.waitingCommand = true
+			return false, nil
+		}
+		if !i.gameState.windows.HasChosenIndex() {
+			return false, nil
+		}
+		i.commandIndex.choose(i.gameState.windows.ChosenIndex())
+		i.waitingCommand = false
+	case data.CommandNameSetSwitch:
+		args := c.Args.(*data.CommandArgsSetSwitch)
+		i.gameState.variables.SetSwitchValue(args.ID, args.Value)
+		i.commandIndex.advance()
+	case data.CommandNameSetSelfSwitch:
+		args := c.Args.(*data.CommandArgsSetSelfSwitch)
+		m, r := i.gameState.mapID, i.gameState.roomID
+		i.gameState.variables.SetSelfSwitchValue(m, r, i.eventID, args.ID, args.Value)
+		i.commandIndex.advance()
+	case data.CommandNameSetVariable:
+		args := c.Args.(*data.CommandArgsSetVariable)
+		i.setVariable(args.ID, args.Op, args.ValueType, args.Value)
+		i.commandIndex.advance()
+	case data.CommandNameTransfer:
+		args := c.Args.(*data.CommandArgsTransfer)
+		if !i.waitingCommand {
+			i.gameState.screen.fadeOut(30)
+			i.waitingCommand = true
+			return false, nil
+		}
+		if i.gameState.screen.isFadedOut() {
+			i.gameState.transferPlayerImmediately(args.RoomID, args.X, args.Y, i)
+			i.gameState.screen.fadeIn(30)
+			return false, nil
+		}
+		if i.gameState.screen.isFading() {
+			return false, nil
+		}
+		i.waitingCommand = false
+		i.commandIndex.advance()
+	case data.CommandNameSetRoute:
+		println(fmt.Sprintf("not implemented yet: %s", c.Name))
+		i.commandIndex.advance()
+	case data.CommandNameTintScreen:
+		if !i.waitingCommand {
+			args := c.Args.(*data.CommandArgsTintScreen)
+			r := float64(args.Red) / 255
+			g := float64(args.Green) / 255
+			b := float64(args.Blue) / 255
+			gray := float64(args.Gray) / 255
+			i.gameState.screen.startTint(r, g, b, gray, args.Time*6)
+			if !args.Wait {
+				i.commandIndex.advance()
+				return true, nil
+			}
+			i.waitingCommand = args.Wait
+		}
+		if i.gameState.screen.isChangingTint() {
+			return false, nil
+		}
+		i.waitingCommand = false
+		i.commandIndex.advance()
+	case data.CommandNamePlaySE:
+		println(fmt.Sprintf("not implemented yet: %s", c.Name))
+		i.commandIndex.advance()
+	case data.CommandNamePlayBGM:
+		println(fmt.Sprintf("not implemented yet: %s", c.Name))
+		i.commandIndex.advance()
+	case data.CommandNameStopBGM:
+		println(fmt.Sprintf("not implemented yet: %s", c.Name))
+		i.commandIndex.advance()
+	default:
+		return false, fmt.Errorf("command not implemented: %s", c.Name)
+	}
+	return true, nil
+}
+
 func (i *Interpreter) Update() error {
 	if i.commandIndex == nil {
 		return nil
@@ -160,152 +309,13 @@ func (i *Interpreter) Update() error {
 		}
 		i.started = true
 	}
-commandLoop:
 	for !i.commandIndex.isTerminated() {
-		c := i.commandIndex.command()
-		if !i.gameState.windows.CanProceed() {
-			break commandLoop
+		cont, err := i.doOneCommand()
+		if err != nil {
+			return err
 		}
-		switch c.Name {
-		case data.CommandNameIf:
-			conditions := c.Args.(*data.CommandArgsIf).Conditions
-			matches := true
-			for _, c := range conditions {
-				m, err := i.MeetsCondition(c)
-				if err != nil {
-					return err
-				}
-				if !m {
-					matches = false
-					break
-				}
-			}
-			if matches {
-				i.commandIndex.choose(0)
-			} else if len(c.Branches) >= 2 {
-				i.commandIndex.choose(1)
-			} else {
-				i.commandIndex.advance()
-			}
-		case data.CommandNameCallEvent:
-			println(fmt.Sprintf("not implemented yet: %s", c.Name))
-			i.commandIndex.advance()
-		case data.CommandNameWait:
-			if i.waitingCount == 0 {
-				i.waitingCount = c.Args.(*data.CommandArgsWait).Time * 6
-				break commandLoop
-			}
-			if i.waitingCount > 0 {
-				i.waitingCount--
-				if i.waitingCount == 0 {
-					i.commandIndex.advance()
-					continue commandLoop
-				}
-				break commandLoop
-			}
-			i.commandIndex.advance()
-		case data.CommandNameShowMessage:
-			if !i.waitingCommand {
-				args := c.Args.(*data.CommandArgsShowMessage)
-				content := data.Current().Texts.Get(language.Und, args.ContentID)
-				if ch := i.character(args.EventID); ch != nil {
-					x, y := ch.Position()
-					content = i.gameState.ParseMessageSyntax(content)
-					i.gameState.windows.ShowMessage(content, x*scene.TileSize, y*scene.TileSize)
-					i.waitingCommand = true
-					break commandLoop
-				}
-			}
-			// Advance command index first and check the next command.
-			i.commandIndex.advance()
-			if !i.commandIndex.isTerminated() {
-				if i.commandIndex.command().Name != data.CommandNameShowChoices {
-					i.gameState.windows.CloseAll()
-				}
-			} else {
-				i.gameState.windows.CloseAll()
-			}
-			i.waitingCommand = false
-		case data.CommandNameShowChoices:
-			if !i.waitingCommand {
-				choices := []string{}
-				for _, id := range c.Args.(*data.CommandArgsShowChoices).ChoiceIDs {
-					choice := data.Current().Texts.Get(language.Und, id)
-					choice = i.gameState.ParseMessageSyntax(choice)
-					choices = append(choices, choice)
-				}
-				i.gameState.windows.ShowChoices(choices)
-				i.waitingCommand = true
-				break commandLoop
-			}
-			if !i.gameState.windows.HasChosenIndex() {
-				break commandLoop
-			}
-			i.commandIndex.choose(i.gameState.windows.ChosenIndex())
-			i.waitingCommand = false
-		case data.CommandNameSetSwitch:
-			args := c.Args.(*data.CommandArgsSetSwitch)
-			i.gameState.variables.SetSwitchValue(args.ID, args.Value)
-			i.commandIndex.advance()
-		case data.CommandNameSetSelfSwitch:
-			args := c.Args.(*data.CommandArgsSetSelfSwitch)
-			m, r := i.gameState.mapID, i.gameState.roomID
-			i.gameState.variables.SetSelfSwitchValue(m, r, i.eventID, args.ID, args.Value)
-			i.commandIndex.advance()
-		case data.CommandNameSetVariable:
-			args := c.Args.(*data.CommandArgsSetVariable)
-			i.setVariable(args.ID, args.Op, args.ValueType, args.Value)
-			i.commandIndex.advance()
-		case data.CommandNameTransfer:
-			args := c.Args.(*data.CommandArgsTransfer)
-			if !i.waitingCommand {
-				i.gameState.screen.fadeOut(30)
-				i.waitingCommand = true
-				break commandLoop
-			}
-			if i.gameState.screen.isFadedOut() {
-				i.gameState.transferPlayerImmediately(args.RoomID, args.X, args.Y, i)
-				i.gameState.screen.fadeIn(30)
-				break commandLoop
-			}
-			if i.gameState.screen.isFading() {
-				break commandLoop
-			}
-			i.waitingCommand = false
-			i.commandIndex.advance()
-		case data.CommandNameSetRoute:
-			println(fmt.Sprintf("not implemented yet: %s", c.Name))
-			i.commandIndex.advance()
-		case data.CommandNameTintScreen:
-			if !i.waitingCommand {
-				args := c.Args.(*data.CommandArgsTintScreen)
-				r := float64(args.Red) / 255
-				g := float64(args.Green) / 255
-				b := float64(args.Blue) / 255
-				gray := float64(args.Gray) / 255
-				i.gameState.screen.startTint(r, g, b, gray, args.Time*6)
-				if !args.Wait {
-					i.commandIndex.advance()
-					continue commandLoop
-				}
-				i.waitingCommand = args.Wait
-			}
-			if i.gameState.screen.isChangingTint() {
-				break commandLoop
-			}
-			i.waitingCommand = false
-			i.commandIndex.advance()
-		case data.CommandNamePlaySE:
-			println(fmt.Sprintf("not implemented yet: %s", c.Name))
-			i.commandIndex.advance()
-		case data.CommandNamePlayBGM:
-			println(fmt.Sprintf("not implemented yet: %s", c.Name))
-			i.commandIndex.advance()
-		case data.CommandNameStopBGM:
-			println(fmt.Sprintf("not implemented yet: %s", c.Name))
-			i.commandIndex.advance()
-		default:
-			return fmt.Errorf("command not implemented: %s", c.Name)
+		if !cont {
+			break
 		}
 	}
 	if i.commandIndex.isTerminated() {
