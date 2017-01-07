@@ -166,7 +166,7 @@ commandLoop:
 				}
 				if !m {
 					matches = false
-					break commandLoop
+					break
 				}
 			}
 			if matches {
