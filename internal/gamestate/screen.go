@@ -42,7 +42,7 @@ type Screen struct {
 	fadedOut        bool
 }
 
-func (s *Screen) StartTint(red, green, blue, gray float64, count int) {
+func (s *Screen) startTint(red, green, blue, gray float64, count int) {
 	s.origTint.red = s.currentTint.red
 	s.origTint.green = s.currentTint.green
 	s.origTint.blue = s.currentTint.blue
@@ -55,26 +55,26 @@ func (s *Screen) StartTint(red, green, blue, gray float64, count int) {
 	s.tintMaxCount = count
 }
 
-func (s *Screen) FadeIn(count int) {
+func (s *Screen) fadeIn(count int) {
 	s.fadeInCount = count
 	s.fadeInMaxCount = count
 	s.fadedOut = false
 }
 
-func (s *Screen) FadeOut(count int) {
+func (s *Screen) fadeOut(count int) {
 	s.fadeOutCount = count
 	s.fadeOutMaxCount = count
 }
 
-func (s *Screen) IsChangingTint() bool {
+func (s *Screen) isChangingTint() bool {
 	return s.tintCount > 0
 }
 
-func (s *Screen) IsFading() bool {
+func (s *Screen) isFading() bool {
 	return s.fadeInCount > 0 || s.fadeOutCount > 0
 }
 
-func (s *Screen) IsFadedOut() bool {
+func (s *Screen) isFadedOut() bool {
 	return s.fadedOut
 }
 

@@ -241,16 +241,16 @@ commandLoop:
 		case data.CommandNameTransfer:
 			args := c.Args.(*data.CommandArgsTransfer)
 			if !i.waitingCommand {
-				i.gameState.Screen().FadeOut(30)
+				i.gameState.Screen().fadeOut(30)
 				i.waitingCommand = true
 				break commandLoop
 			}
-			if i.gameState.Screen().IsFadedOut() {
+			if i.gameState.Screen().isFadedOut() {
 				i.mapScene.TransferPlayerImmediately(args.RoomID, args.X, args.Y, i.event)
-				i.gameState.Screen().FadeIn(30)
+				i.gameState.Screen().fadeIn(30)
 				break commandLoop
 			}
-			if i.gameState.Screen().IsFading() {
+			if i.gameState.Screen().isFading() {
 				break commandLoop
 			}
 			i.waitingCommand = false
@@ -265,14 +265,14 @@ commandLoop:
 				g := float64(args.Green) / 255
 				b := float64(args.Blue) / 255
 				gray := float64(args.Gray) / 255
-				i.gameState.Screen().StartTint(r, g, b, gray, args.Time*6)
+				i.gameState.Screen().startTint(r, g, b, gray, args.Time*6)
 				if !args.Wait {
 					i.commandIndex.advance()
 					continue commandLoop
 				}
 				i.waitingCommand = args.Wait
 			}
-			if i.gameState.Screen().IsChangingTint() {
+			if i.gameState.Screen().isChangingTint() {
 				break commandLoop
 			}
 			i.waitingCommand = false
