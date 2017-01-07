@@ -20,13 +20,6 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 )
 
-type Interpreter interface {
-	IsExecuting() bool
-	MeetsCondition(cond *data.Condition) (bool, error)
-	SetCommands(commands []*data.Command, trigger data.Trigger)
-	Update() error
-}
-
 type Event struct {
 	data             *data.Event
 	interpreter      Interpreter
