@@ -25,20 +25,17 @@ import (
 )
 
 type event struct {
-	data               *data.Event
-	mapScene           *MapScene
-	character          *character
-	currentPageIndex   int
-	commandIndex       *commandIndex
-	steppingCount      int
-	selfSwitches       [data.SelfSwitchNum]bool
-	waitingCount       int
-	waitingTint        bool
-	waitingMessage     bool
-	waitingChoosing    bool
-	waitingTransfering bool
-	dirBeforeRunning   data.Dir
-	executingPage      *data.Page
+	data             *data.Event
+	mapScene         *MapScene
+	character        *character
+	currentPageIndex int
+	commandIndex     *commandIndex
+	steppingCount    int
+	selfSwitches     [data.SelfSwitchNum]bool
+	waitingCount     int
+	waitingCommand   bool
+	dirBeforeRunning data.Dir
+	executingPage    *data.Page
 }
 
 func newEvent(eventData *data.Event, mapScene *MapScene) (*event, error) {
@@ -295,11 +292,11 @@ commandLoop:
 			}
 			e.commandIndex.advance()
 		case data.CommandNameShowMessage:
-			if !e.waitingMessage {
+			if !e.waitingCommand {
 				args := c.Args.(*data.CommandArgsShowMessage)
 				content := data.Current().Texts.Get(language.Und, args.ContentID)
 				e.mapScene.showMessage(content, e.mapScene.character(args.EventID, e))
-				e.waitingMessage = true
+				e.waitingCommand = true
 				break commandLoop
 			}
 			e.commandIndex.advance()
@@ -308,23 +305,23 @@ commandLoop:
 					e.mapScene.balloons.closeAll()
 				}
 			}
-			e.waitingMessage = false
+			e.waitingCommand = false
 		case data.CommandNameShowChoices:
-			if !e.waitingChoosing {
+			if !e.waitingCommand {
 				choices := []string{}
 				for _, id := range c.Args.(*data.CommandArgsShowChoices).ChoiceIDs {
 					choice := data.Current().Texts.Get(language.Und, id)
 					choices = append(choices, choice)
 				}
 				e.mapScene.showChoices(choices)
-				e.waitingChoosing = true
+				e.waitingCommand = true
 				break commandLoop
 			}
 			if !e.mapScene.balloons.HasChosenIndex() {
 				break commandLoop
 			}
 			e.commandIndex.choose(e.mapScene.balloons.ChosenIndex())
-			e.waitingChoosing = false
+			e.waitingCommand = false
 		case data.CommandNameSetSwitch:
 			args := c.Args.(*data.CommandArgsSetSwitch)
 			e.mapScene.state().Variables().SetSwitchValue(args.ID, args.Value)
@@ -339,9 +336,9 @@ commandLoop:
 			e.commandIndex.advance()
 		case data.CommandNameTransfer:
 			args := c.Args.(*data.CommandArgsTransfer)
-			if !e.waitingTransfering {
-				e.waitingTransfering = true
+			if !e.waitingCommand {
 				e.mapScene.fadeOut(30)
+				e.waitingCommand = true
 				break commandLoop
 			}
 			if e.mapScene.isFadedOut() {
@@ -352,29 +349,29 @@ commandLoop:
 			if e.mapScene.gameState.Screen().IsFading() {
 				break commandLoop
 			}
-			e.waitingTransfering = false
+			e.waitingCommand = false
 			e.commandIndex.advance()
 		case data.CommandNameSetRoute:
 			println(fmt.Sprintf("not implemented yet: %s", c.Name))
 			e.commandIndex.advance()
 		case data.CommandNameTintScreen:
-			if !e.waitingTint {
+			if !e.waitingCommand {
 				args := c.Args.(*data.CommandArgsTintScreen)
 				r := float64(args.Red) / 255
 				g := float64(args.Green) / 255
 				b := float64(args.Blue) / 255
 				gray := float64(args.Gray) / 255
 				e.mapScene.gameState.Screen().StartTint(r, g, b, gray, args.Time*6)
-				e.waitingTint = args.Wait
-			}
-			if e.waitingTint {
-				if e.mapScene.gameState.Screen().IsChangingTint() {
-					break commandLoop
+				if !args.Wait {
+					e.commandIndex.advance()
+					continue commandLoop
 				}
-				e.waitingTint = false
-				e.commandIndex.advance()
-				continue commandLoop
+				e.waitingCommand = args.Wait
 			}
+			if e.mapScene.gameState.Screen().IsChangingTint() {
+				break commandLoop
+			}
+			e.waitingCommand = false
 			e.commandIndex.advance()
 		case data.CommandNamePlaySE:
 			println(fmt.Sprintf("not implemented yet: %s", c.Name))
