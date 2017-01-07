@@ -22,7 +22,7 @@ import (
 
 type Interpreter interface {
 	IsExecuting() bool
-	MeetsCondition(cond *data.Condition, event *Event) (bool, error)
+	MeetsCondition(cond *data.Condition) (bool, error)
 	SetCommands(commands []*data.Command, trigger data.Trigger)
 	Update(event *Event) error
 }

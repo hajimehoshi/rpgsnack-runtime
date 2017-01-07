@@ -63,7 +63,7 @@ func (g *Game) setRoomID(id int) error {
 	g.roomID = id
 	g.events = nil
 	for _, e := range g.CurrentRoom().Events {
-		i := NewInterpreter(g)
+		i := NewInterpreter(g, g.mapID, g.roomID, e.ID)
 		event, err := character.NewEvent(e, i)
 		if err != nil {
 			return err
