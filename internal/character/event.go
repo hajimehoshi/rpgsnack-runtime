@@ -46,7 +46,7 @@ func NewEvent(eventData *data.Event, gameState *gamestate.Game, mapScene MapScen
 		character:        c,
 		currentPageIndex: -1,
 	}
-	e.interpreter.event = e
+	e.interpreter.SetEvent(e)
 	if err := e.UpdateCharacterIfNeeded(); err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func (e *Event) IsRunnable() bool {
 }
 
 func (e *Event) IsExecutingCommands() bool {
-	return e.interpreter.executingPage != nil
+	return e.interpreter.IsExecuting()
 }
 
 func (e *Event) UpdateCharacterIfNeeded() error {
@@ -140,7 +140,7 @@ func (e *Event) UpdateCharacterIfNeeded() error {
 
 func (e *Event) meetsPageCondition(page *data.Page) (bool, error) {
 	for _, cond := range page.Conditions {
-		m, err := e.interpreter.meetsCondition(cond)
+		m, err := e.interpreter.MeetsCondition(cond)
 		if err != nil {
 			return false, err
 		}
@@ -166,7 +166,7 @@ func (e *Event) calcPageIndex() (int, error) {
 }
 
 func (e *Event) TryRun(trigger data.Trigger) bool {
-	if e.interpreter.executingPage != nil {
+	if e.interpreter.IsExecuting() {
 		return false
 	}
 	if trigger == data.TriggerNever {
@@ -179,12 +179,12 @@ func (e *Event) TryRun(trigger data.Trigger) bool {
 	if page.Trigger != trigger {
 		return false
 	}
-	e.interpreter.executingPage = page
+	e.interpreter.SetPage(page)
 	return true
 }
 
 func (e *Event) Update() error {
-	if e.interpreter.executingPage == nil {
+	if !e.interpreter.IsExecuting() {
 		page := e.CurrentPage()
 		if page == nil {
 			return nil
@@ -204,7 +204,7 @@ func (e *Event) Update() error {
 			e.steppingCount %= 120
 		}
 	}
-	if err := e.interpreter.update(); err != nil {
+	if err := e.interpreter.Update(); err != nil {
 		return err
 	}
 	return nil

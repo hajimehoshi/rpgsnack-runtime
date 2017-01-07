@@ -34,14 +34,26 @@ type MapScene interface {
 type interpreter struct {
 	gameState      *gamestate.Game
 	event          *Event
-	executingPage  *data.Page
+	page           *data.Page
 	commandIndex   *commandIndex
 	waitingCount   int
 	waitingCommand bool
 	mapScene       MapScene
 }
 
-func (i *interpreter) meetsCondition(cond *data.Condition) (bool, error) {
+func (i *interpreter) SetEvent(event *Event) {
+	i.event = event
+}
+
+func (i *interpreter) IsExecuting() bool {
+	return i.page != nil
+}
+
+func (i *interpreter) SetPage(page *data.Page) {
+	i.page = page
+}
+
+func (i *interpreter) MeetsCondition(cond *data.Condition) (bool, error) {
 	// TODO: Is it OK to allow null conditions?
 	if cond == nil {
 		return true, nil
@@ -89,8 +101,8 @@ func (i *interpreter) meetsCondition(cond *data.Condition) (bool, error) {
 	return false, nil
 }
 
-func (i *interpreter) update() error {
-	if i.executingPage == nil {
+func (i *interpreter) Update() error {
+	if i.page == nil {
 		return nil
 	}
 	if i.commandIndex == nil {
@@ -98,7 +110,7 @@ func (i *interpreter) update() error {
 		ex, ey := i.event.Position()
 		px, py := i.mapScene.Player().character.x, i.mapScene.Player().character.y
 		switch {
-		case i.executingPage.Trigger == data.TriggerAuto:
+		case i.page.Trigger == data.TriggerAuto:
 		case ex == px && ey == py:
 			// The player and the event are at the same position.
 		case ex > px && ey == py:
@@ -126,7 +138,7 @@ commandLoop:
 			conditions := c.Args.(*data.CommandArgsIf).Conditions
 			matches := true
 			for _, c := range conditions {
-				m, err := i.meetsCondition(c)
+				m, err := i.MeetsCondition(c)
 				if err != nil {
 					return err
 				}
@@ -276,7 +288,7 @@ commandLoop:
 		}
 		i.gameState.Windows().CloseAll()
 		i.event.EndEvent()
-		i.executingPage = nil
+		i.page = nil
 		i.commandIndex = nil
 		return nil
 	}
