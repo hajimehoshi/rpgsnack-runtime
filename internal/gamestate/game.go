@@ -34,9 +34,10 @@ type Game struct {
 	player    *character.Player
 	mapID     int
 	roomID    int
+	events    []*character.Event
 }
 
-func NewGame() (*Game, error) {
+func NewGame(m MapScene) (*Game, error) {
 	pos := data.Current().System.InitialPosition
 	x, y, roomID := 0, 0, 1
 	if pos != nil {
@@ -46,18 +47,33 @@ func NewGame() (*Game, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Game{
+	g := &Game{
 		variables: &Variables{},
 		screen:    &Screen{},
 		windows:   &window.Windows{},
 		player:    player,
 		mapID:     1,
-		roomID:    roomID,
-	}, nil
+	}
+	g.SetRoomID(roomID, m)
+	return g, nil
 }
 
-func (g *Game) SetRoomID(id int) {
+func (g *Game) SetRoomID(id int, m MapScene) error {
 	g.roomID = id
+	g.events = nil
+	for _, e := range g.CurrentRoom().Events {
+		i := NewInterpreter(g, m)
+		event, err := character.NewEvent(e, i)
+		if err != nil {
+			return err
+		}
+		g.events = append(g.events, event)
+	}
+	return nil
+}
+
+func (g *Game) Events() []*character.Event {
+	return g.events
 }
 
 func (g *Game) CurrentMap() *data.Map {

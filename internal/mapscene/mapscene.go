@@ -34,7 +34,6 @@ type MapScene struct {
 	moveDstX        int
 	moveDstY        int
 	tilesImage      *ebiten.Image
-	events          []*character.Event
 	continuingEvent *character.Event
 }
 
@@ -43,29 +42,15 @@ func New() (*MapScene, error) {
 	if err != nil {
 		return nil, err
 	}
-	state, err := gamestate.NewGame()
+	mapScene := &MapScene{
+		tilesImage: tilesImage,
+	}
+	state, err := gamestate.NewGame(mapScene)
 	if err != nil {
 		return nil, err
 	}
-	mapScene := &MapScene{
-		gameState:  state,
-		tilesImage: tilesImage,
-	}
-	mapScene.changeRoom()
+	mapScene.gameState = state
 	return mapScene, nil
-}
-
-func (m *MapScene) changeRoom() error {
-	m.events = nil
-	for _, e := range m.gameState.CurrentRoom().Events {
-		i := gamestate.NewInterpreter(m.gameState, m)
-		event, err := character.NewEvent(e, i)
-		if err != nil {
-			return err
-		}
-		m.events = append(m.events, event)
-	}
-	return nil
 }
 
 func (m *MapScene) tileSet(id int) (*data.TileSet, error) {
@@ -131,7 +116,7 @@ func (m *MapScene) passable(x, y int) (bool, error) {
 }
 
 func (m *MapScene) eventAt(x, y int) *character.Event {
-	for _, e := range m.events {
+	for _, e := range m.gameState.Events() {
 		ex, ey := e.Position()
 		if ex == x && ey == y {
 			return e
@@ -179,7 +164,7 @@ func (m *MapScene) Character(id int, self *character.Event) interface{} {
 	case 0:
 		return self
 	default:
-		for _, e := range m.events {
+		for _, e := range m.gameState.Events() {
 			if id == e.ID() {
 				return e
 			}
@@ -189,7 +174,7 @@ func (m *MapScene) Character(id int, self *character.Event) interface{} {
 }
 
 func (m *MapScene) executingEvent() *character.Event {
-	for _, e := range m.events {
+	for _, e := range m.gameState.Events() {
 		if e.IsExecutingCommands() {
 			return e
 		}
@@ -210,7 +195,7 @@ func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 	if err := m.gameState.Windows().Update(); err != nil {
 		return err
 	}
-	for _, e := range m.events {
+	for _, e := range m.gameState.Events() {
 		if err := e.UpdateCharacterIfNeeded(); err != nil {
 			return err
 		}
@@ -224,7 +209,7 @@ func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 		}
 		return nil
 	}
-	for _, e := range m.events {
+	for _, e := range m.gameState.Events() {
 		if err := e.Update(); err != nil {
 			return err
 		}
@@ -234,7 +219,7 @@ func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 			return err
 		}
 	}
-	for _, e := range m.events {
+	for _, e := range m.gameState.Events() {
 		if e.TryRun(data.TriggerAuto) {
 			break
 		}
@@ -247,8 +232,7 @@ func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 
 func (m *MapScene) TransferPlayerImmediately(roomID, x, y int, e *character.Event) {
 	m.gameState.Player().TransferImmediately(x, y)
-	m.gameState.SetRoomID(roomID)
-	m.changeRoom()
+	m.gameState.SetRoomID(roomID, m)
 	m.continuingEvent = e
 }
 
@@ -313,7 +297,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 	if err := m.gameState.Player().Draw(m.tilesImage); err != nil {
 		return err
 	}
-	for _, e := range m.events {
+	for _, e := range m.gameState.Events() {
 		if err := e.Draw(m.tilesImage); err != nil {
 			return err
 		}
