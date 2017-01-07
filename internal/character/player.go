@@ -47,10 +47,6 @@ func (p *Player) IsMovingByUserInput() bool {
 	return p.movingByUserInput
 }
 
-func (p *Player) IsMoving() bool {
-	return p.character.isMoving()
-}
-
 func (p *Player) MoveByUserInput(passable func(x, y int) (bool, error), x, y int) error {
 	c := p.character
 	path, err := calcPath(passable, c.x, c.y, x, y)

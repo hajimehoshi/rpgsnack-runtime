@@ -370,7 +370,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 	if err := screen.DrawImage(m.tilesImage, op); err != nil {
 		return err
 	}
-	if m.player.IsMoving() {
+	if m.player.IsMovingByUserInput() {
 		x, y := m.moveDstX, m.moveDstY
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(x*scene.TileSize), float64(y*scene.TileSize))
