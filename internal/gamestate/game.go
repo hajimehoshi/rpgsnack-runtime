@@ -28,14 +28,14 @@ import (
 )
 
 type Game struct {
-	variables       *Variables
-	screen          *Screen
-	windows         *window.Windows
-	player          *character.Player
-	mapID           int
-	roomID          int
-	events          []*character.Event
-	continuingEvent *character.Event // TODO: This should be an Interpreter?
+	variables             *Variables
+	screen                *Screen
+	windows               *window.Windows
+	player                *character.Player
+	mapID                 int
+	roomID                int
+	events                []*character.Event
+	continuingInterpreter *Interpreter
 }
 
 func NewGame() (*Game, error) {
@@ -78,7 +78,7 @@ func (g *Game) Events() []*character.Event {
 }
 
 func (g *Game) IsEventExecuting() bool {
-	if g.continuingEvent != nil && g.continuingEvent.IsExecutingCommands() {
+	if g.continuingInterpreter != nil && g.continuingInterpreter.IsExecuting() {
 		return true
 	}
 	for _, e := range g.events {
@@ -95,18 +95,21 @@ func (g *Game) UpdateEvents() error {
 			return err
 		}
 	}
-	if g.continuingEvent != nil {
-		if err := g.continuingEvent.Update(); err != nil {
+	if g.continuingInterpreter != nil {
+		if err := g.continuingInterpreter.Update(); err != nil {
 			return err
+		}
+		if !g.continuingInterpreter.IsExecuting() {
+			g.continuingInterpreter = nil
 		}
 	}
 	return nil
 }
 
-func (g *Game) transferPlayerImmediately(roomID, x, y int, e *character.Event) {
+func (g *Game) transferPlayerImmediately(roomID, x, y int, interpreter *Interpreter) {
 	g.player.TransferImmediately(x, y)
 	g.setRoomID(roomID)
-	g.continuingEvent = e
+	g.continuingInterpreter = interpreter
 }
 
 func (g *Game) CurrentMap() *data.Map {

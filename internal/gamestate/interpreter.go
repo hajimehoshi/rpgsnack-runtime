@@ -264,7 +264,7 @@ commandLoop:
 				break commandLoop
 			}
 			if i.gameState.screen.isFadedOut() {
-				i.gameState.transferPlayerImmediately(args.RoomID, args.X, args.Y, i.event())
+				i.gameState.transferPlayerImmediately(args.RoomID, args.X, args.Y, i)
 				i.gameState.screen.fadeIn(30)
 				break commandLoop
 			}
