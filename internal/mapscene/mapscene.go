@@ -278,6 +278,10 @@ func (m *MapScene) fadeIn(count int) {
 	m.gameState.Screen().FadeIn(count)
 }
 
+func (m *MapScene) isFadedOut() bool {
+	return m.gameState.Screen().IsFadedOut()
+}
+
 type tilesImageParts struct {
 	room     *data.Room
 	tileSet  *data.TileSet

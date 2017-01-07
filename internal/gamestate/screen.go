@@ -74,6 +74,10 @@ func (s *Screen) IsFading() bool {
 	return s.fadeInCount > 0 || s.fadeOutCount > 0
 }
 
+func (s *Screen) IsFadedOut() bool {
+	return s.fadedOut
+}
+
 func (s *Screen) Apply(colorM *ebiten.ColorM) {
 	if s.fadedOut {
 		colorM.Scale(0, 0, 0, 1)

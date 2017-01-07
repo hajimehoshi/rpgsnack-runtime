@@ -250,9 +250,6 @@ func (e *event) updateCommands() error {
 		e.steppingCount = 0
 		e.commandIndex = newCommandIndex(e.currentPage())
 	}
-	if e.mapScene.gameState.Screen().IsFading() {
-		return nil
-	}
 commandLoop:
 	for !e.commandIndex.isTerminated() {
 		c := e.commandIndex.command()
@@ -347,10 +344,15 @@ commandLoop:
 				e.mapScene.fadeOut(30)
 				break commandLoop
 			}
-			e.mapScene.transferPlayerImmediately(args.RoomID, args.X, args.Y)
-			e.mapScene.fadeIn(30)
-			e.waitingTransfering = false
-			// TODO: advance is called too early.
+			if e.mapScene.isFadedOut() {
+				e.mapScene.transferPlayerImmediately(args.RoomID, args.X, args.Y)
+				e.mapScene.fadeIn(30)
+				e.waitingTransfering = true
+				break commandLoop
+			}
+			if e.mapScene.gameState.Screen().IsFading() {
+				break commandLoop
+			}
 			e.commandIndex.advance()
 		case data.CommandNameSetRoute:
 			println(fmt.Sprintf("not implemented yet: %s", c.Name))
