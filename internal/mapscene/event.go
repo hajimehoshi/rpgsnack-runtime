@@ -299,12 +299,12 @@ commandLoop:
 				e.waitingCommand = true
 				break commandLoop
 			}
-			e.commandIndex.advance()
 			if !e.commandIndex.isTerminated() {
 				if e.commandIndex.command().Name != data.CommandNameShowChoices {
 					e.mapScene.balloons.closeAll()
 				}
 			}
+			e.commandIndex.advance()
 			e.waitingCommand = false
 		case data.CommandNameShowChoices:
 			if !e.waitingCommand {
@@ -387,8 +387,7 @@ commandLoop:
 		}
 	}
 	if e.commandIndex.isTerminated() {
-		// TODO: This is hacky
-		if e.mapScene.balloons.isAnimating() {
+		if e.mapScene.balloons.isBusy() {
 			return nil
 		}
 		e.mapScene.balloons.closeAll()
