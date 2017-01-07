@@ -171,9 +171,6 @@ func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 			return err
 		}
 	}
-	if m.gameState.Player().IsMovingByUserInput() {
-		return nil
-	}
 	if err := m.gameState.UpdateEvents(); err != nil {
 		return err
 	}

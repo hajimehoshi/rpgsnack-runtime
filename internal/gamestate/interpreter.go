@@ -32,9 +32,9 @@ type posAndDir interface {
 type Interpreter struct {
 	gameState      *Game
 	commandIndex   *commandIndex
+	started        bool
 	waitingCount   int
 	waitingCommand bool
-	commands       []*data.Command
 	trigger        data.Trigger
 }
 
@@ -45,11 +45,11 @@ func NewInterpreter(gameState *Game) *Interpreter {
 }
 
 func (i *Interpreter) IsExecuting() bool {
-	return i.commands != nil
+	return i.commandIndex != nil
 }
 
 func (i *Interpreter) SetCommands(commands []*data.Command, trigger data.Trigger) {
-	i.commands = commands
+	i.commandIndex = newCommandIndex(commands)
 	i.trigger = trigger
 }
 
@@ -119,10 +119,13 @@ func (i *Interpreter) MeetsCondition(cond *data.Condition, event *character.Even
 }
 
 func (i *Interpreter) Update(event *character.Event) error {
-	if i.commands == nil {
+	if i.commandIndex == nil {
 		return nil
 	}
-	if i.commandIndex == nil {
+	if i.gameState.Player().IsMovingByUserInput() {
+		return nil
+	}
+	if !i.started {
 		var dir data.Dir
 		ex, ey := event.Position()
 		px, py := i.gameState.Player().Position()
@@ -142,7 +145,7 @@ func (i *Interpreter) Update(event *character.Event) error {
 			panic("not reach")
 		}
 		event.StartEvent(dir)
-		i.commandIndex = newCommandIndex(i.commands)
+		i.started = true
 	}
 commandLoop:
 	for !i.commandIndex.isTerminated() {
@@ -297,8 +300,8 @@ commandLoop:
 		}
 		i.gameState.windows.CloseAll()
 		event.EndEvent()
-		i.commands = nil
 		i.commandIndex = nil
+		i.started = false
 		return nil
 	}
 	return nil
