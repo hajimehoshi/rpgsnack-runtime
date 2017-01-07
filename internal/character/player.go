@@ -43,6 +43,14 @@ func NewPlayer(x, y int) (*Player, error) {
 	}, nil
 }
 
+func (p *Player) Position() (int, int) {
+	return p.character.x, p.character.y
+}
+
+func (p *Player) Dir() data.Dir {
+	return p.character.dir
+}
+
 func (p *Player) IsMovingByUserInput() bool {
 	return p.movingByUserInput
 }

@@ -18,12 +18,19 @@ import (
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/gamestate"
 )
+
+type Interpreter interface {
+	SetEvent(event *Event)
+	IsExecuting() bool
+	MeetsCondition(cond *data.Condition) (bool, error)
+	SetCommands(commands []*data.Command, trigger data.Trigger)
+	Update() error
+}
 
 type Event struct {
 	data             *data.Event
-	interpreter      *Interpreter
+	interpreter      Interpreter
 	character        *character
 	currentPageIndex int
 	steppingCount    int
@@ -31,18 +38,14 @@ type Event struct {
 	dirBeforeRunning data.Dir
 }
 
-func NewEvent(eventData *data.Event, gameState *gamestate.Game, mapScene MapScene) (*Event, error) {
+func NewEvent(eventData *data.Event, interpreter Interpreter) (*Event, error) {
 	c := &character{
 		x: eventData.X,
 		y: eventData.Y,
 	}
-	i := &Interpreter{
-		gameState: gameState,
-		mapScene:  mapScene,
-	}
 	e := &Event{
 		data:             eventData,
-		interpreter:      i,
+		interpreter:      interpreter,
 		character:        c,
 		currentPageIndex: -1,
 	}
@@ -59,6 +62,10 @@ func (e *Event) ID() int {
 
 func (e *Event) Position() (int, int) {
 	return e.character.x, e.character.y
+}
+
+func (e *Event) Dir() data.Dir {
+	return e.character.dir
 }
 
 func (e *Event) SelfSwitch(id int) bool {

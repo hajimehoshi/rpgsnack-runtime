@@ -23,6 +23,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/event"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/font"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/gamestate"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
@@ -91,7 +92,8 @@ func (m *MapScene) changeRoom(roomID int) error {
 	m.currentRoomID = roomID
 	m.events = nil
 	for _, e := range m.currentRoom().Events {
-		event, err := character.NewEvent(e, m.gameState, m)
+		i := event.NewInterpreter(m.gameState, m)
+		event, err := character.NewEvent(e, i)
 		if err != nil {
 			return err
 		}

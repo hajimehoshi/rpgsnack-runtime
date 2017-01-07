@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package character
+package event
 
 import (
 	"fmt"
 
 	"golang.org/x/text/language"
 
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/gamestate"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
@@ -26,14 +27,14 @@ import (
 
 // TODO: Remove this
 type MapScene interface {
-	Player() *Player
-	Character(eventID int, self *Event) interface{}
-	TransferPlayerImmediately(roomID, x, y int, event *Event)
+	Player() *character.Player
+	Character(eventID int, self *character.Event) interface{}
+	TransferPlayerImmediately(roomID, x, y int, event *character.Event)
 }
 
 type Interpreter struct {
 	gameState      *gamestate.Game
-	event          *Event
+	event          *character.Event
 	commandIndex   *commandIndex
 	waitingCount   int
 	waitingCommand bool
@@ -42,7 +43,14 @@ type Interpreter struct {
 	trigger        data.Trigger
 }
 
-func (i *Interpreter) SetEvent(event *Event) {
+func NewInterpreter(gameState *gamestate.Game, mapScene MapScene) *Interpreter {
+	return &Interpreter{
+		gameState: gameState,
+		mapScene:  mapScene,
+	}
+}
+
+func (i *Interpreter) SetEvent(event *character.Event) {
 	i.event = event
 }
 
@@ -110,7 +118,7 @@ func (i *Interpreter) Update() error {
 	if i.commandIndex == nil {
 		var dir data.Dir
 		ex, ey := i.event.Position()
-		px, py := i.mapScene.Player().character.x, i.mapScene.Player().character.y
+		px, py := i.mapScene.Player().Position()
 		switch {
 		case i.trigger == data.TriggerAuto:
 		case ex == px && ey == py:
@@ -182,10 +190,10 @@ commandLoop:
 				x := 0
 				y := 0
 				switch ch := ch.(type) {
-				case *Player:
-					x, y = ch.character.x, ch.character.y
-				case *Event:
-					x, y = ch.character.x, ch.character.y
+				case *character.Player:
+					x, y = ch.Position()
+				case *character.Event:
+					x, y = ch.Position()
 				default:
 					panic("not reach")
 				}
@@ -314,10 +322,10 @@ func (i *Interpreter) setVariable(id int, op data.SetVariableOp, valueType data.
 		case data.SetVariableCharacterTypeDirection:
 			var dir data.Dir
 			switch ch := ch.(type) {
-			case *Player:
-				dir = ch.character.dir
-			case *Event:
-				dir = ch.character.dir
+			case *character.Player:
+				dir = ch.Dir()
+			case *character.Event:
+				dir = ch.Dir()
 			default:
 				panic("not reach")
 			}
