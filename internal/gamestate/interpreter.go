@@ -154,27 +154,10 @@ func (i *Interpreter) Update() error {
 	if i.gameState.Player().IsMovingByUserInput() {
 		return nil
 	}
-	if !i.started && i.eventID != -1 {
-		event := i.event()
-		var dir data.Dir
-		ex, ey := event.Position()
-		px, py := i.gameState.Player().Position()
-		switch {
-		case i.trigger == data.TriggerAuto:
-		case ex == px && ey == py:
-			// The player and the event are at the same position.
-		case ex > px && ey == py:
-			dir = data.DirLeft
-		case ex < px && ey == py:
-			dir = data.DirRight
-		case ex == px && ey > py:
-			dir = data.DirUp
-		case ex == px && ey < py:
-			dir = data.DirDown
-		default:
-			panic("not reach")
+	if !i.started {
+		if e := i.event(); e != nil {
+			e.StartEvent(i.gameState.Player(), i.trigger)
 		}
-		event.StartEvent(dir)
 		i.started = true
 	}
 commandLoop:

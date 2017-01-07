@@ -65,7 +65,25 @@ func (e *Event) Dir() data.Dir {
 	return e.character.dir
 }
 
-func (e *Event) StartEvent(dir data.Dir) {
+func (e *Event) StartEvent(player *Player, trigger data.Trigger) {
+	var dir data.Dir
+	ex, ey := e.Position()
+	px, py := player.Position()
+	switch {
+	case trigger == data.TriggerAuto:
+	case ex == px && ey == py:
+		// The player and the event are at the same position.
+	case ex > px && ey == py:
+		dir = data.DirLeft
+	case ex < px && ey == py:
+		dir = data.DirRight
+	case ex == px && ey > py:
+		dir = data.DirUp
+	case ex == px && ey < py:
+		dir = data.DirDown
+	default:
+		panic("not reach")
+	}
 	e.dirBeforeRunning = e.character.dir
 	e.character.turn(dir)
 	// page.Attitude is ignored so far.
