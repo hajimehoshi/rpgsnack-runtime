@@ -28,13 +28,14 @@ import (
 )
 
 type Game struct {
-	variables *Variables
-	screen    *Screen
-	windows   *window.Windows
-	player    *character.Player
-	mapID     int
-	roomID    int
-	events    []*character.Event
+	variables       *Variables
+	screen          *Screen
+	windows         *window.Windows
+	player          *character.Player
+	mapID           int
+	roomID          int
+	events          []*character.Event
+	continuingEvent *character.Event
 }
 
 func NewGame(m MapScene) (*Game, error) {
@@ -74,6 +75,14 @@ func (g *Game) SetRoomID(id int, m MapScene) error {
 
 func (g *Game) Events() []*character.Event {
 	return g.events
+}
+
+func (g *Game) ContinuingEvent() *character.Event {
+	return g.continuingEvent
+}
+
+func (g *Game) SetContinuingEvent(e *character.Event) {
+	g.continuingEvent = e
 }
 
 func (g *Game) CurrentMap() *data.Map {

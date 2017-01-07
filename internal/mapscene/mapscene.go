@@ -30,11 +30,10 @@ import (
 )
 
 type MapScene struct {
-	gameState       *gamestate.Game
-	moveDstX        int
-	moveDstY        int
-	tilesImage      *ebiten.Image
-	continuingEvent *character.Event
+	gameState  *gamestate.Game
+	moveDstX   int
+	moveDstY   int
+	tilesImage *ebiten.Image
 }
 
 func New() (*MapScene, error) {
@@ -179,8 +178,8 @@ func (m *MapScene) executingEvent() *character.Event {
 			return e
 		}
 	}
-	if m.continuingEvent != nil && m.continuingEvent.IsExecutingCommands() {
-		return m.continuingEvent
+	if m.gameState.ContinuingEvent() != nil && m.gameState.ContinuingEvent().IsExecutingCommands() {
+		return m.gameState.ContinuingEvent()
 	}
 	return nil
 }
@@ -214,8 +213,8 @@ func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 			return err
 		}
 	}
-	if m.continuingEvent != nil {
-		if err := m.continuingEvent.Update(); err != nil {
+	if m.gameState.ContinuingEvent() != nil {
+		if err := m.gameState.ContinuingEvent().Update(); err != nil {
 			return err
 		}
 	}
@@ -229,11 +228,10 @@ func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 	}
 	return nil
 }
-
 func (m *MapScene) TransferPlayerImmediately(roomID, x, y int, e *character.Event) {
 	m.gameState.Player().TransferImmediately(x, y)
 	m.gameState.SetRoomID(roomID, m)
-	m.continuingEvent = e
+	m.gameState.SetContinuingEvent(e)
 }
 
 type tilesImageParts struct {
