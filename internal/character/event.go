@@ -317,12 +317,13 @@ commandLoop:
 				e.waitingCommand = true
 				break commandLoop
 			}
+			// Advance command index first and check the next command.
+			e.commandIndex.advance()
 			if !e.commandIndex.isTerminated() {
 				if e.commandIndex.command().Name != data.CommandNameShowChoices {
 					e.gameState.Windows().CloseAll()
 				}
 			}
-			e.commandIndex.advance()
 			e.waitingCommand = false
 		case data.CommandNameShowChoices:
 			if !e.waitingCommand {
