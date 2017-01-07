@@ -63,6 +63,14 @@ func New() (*MapScene, error) {
 	return mapScene, nil
 }
 
+func (m *MapScene) MapID() int {
+	return m.currentMapID
+}
+
+func (m *MapScene) RoomID() int {
+	return m.currentRoomID
+}
+
 func (m *MapScene) currentMap() *data.Map {
 	for _, d := range data.Current().Maps {
 		if d.ID == m.currentMapID {

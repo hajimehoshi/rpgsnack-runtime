@@ -14,9 +14,16 @@
 
 package gamestate
 
+import (
+	"fmt"
+
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
+)
+
 type Variables struct {
-	switches  []bool
-	variables []int
+	switches     []bool
+	selfSwitches map[string][data.SelfSwitchNum]bool
+	variables    []int
 }
 
 func (v *Variables) SwitchValue(id int) bool {
@@ -33,6 +40,24 @@ func (v *Variables) SetSwitchValue(id int, value bool) {
 		v.switches = append(v.switches, zeros...)
 	}
 	v.switches[id] = value
+}
+
+func (v *Variables) SelfSwitchValue(mapID, roomID, eventID int, id int) bool {
+	key := fmt.Sprintf("%d_%d_%d", mapID, roomID, eventID)
+	values, ok := v.selfSwitches[key]
+	if !ok {
+		v.selfSwitches[key] = [data.SelfSwitchNum]bool{}
+	}
+	return values[id]
+}
+
+func (v *Variables) SetSelfSwitchValue(mapID, roomID, eventID int, id int, value bool) {
+	key := fmt.Sprintf("%d_%d_%d", mapID, roomID, eventID)
+	values, ok := v.selfSwitches[key]
+	if !ok {
+		v.selfSwitches[key] = [data.SelfSwitchNum]bool{}
+	}
+	values[id] = value
 }
 
 func (v *Variables) VariableValue(id int) int {

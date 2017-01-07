@@ -34,7 +34,6 @@ type Event struct {
 	character        *character
 	currentPageIndex int
 	steppingCount    int
-	selfSwitches     [data.SelfSwitchNum]bool
 	dirBeforeRunning data.Dir
 }
 
@@ -66,14 +65,6 @@ func (e *Event) Position() (int, int) {
 
 func (e *Event) Dir() data.Dir {
 	return e.character.dir
-}
-
-func (e *Event) SelfSwitch(id int) bool {
-	return e.selfSwitches[id]
-}
-
-func (e *Event) SetSelfSwitch(id int, value bool) {
-	e.selfSwitches[id] = value
 }
 
 func (e *Event) StartEvent(dir data.Dir) {
