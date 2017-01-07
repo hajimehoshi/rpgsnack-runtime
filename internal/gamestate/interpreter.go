@@ -39,6 +39,7 @@ type Interpreter struct {
 	waitingCount   int
 	waitingCommand bool
 	trigger        data.Trigger // TODO: Remove this!
+	sub            *Interpreter
 }
 
 func NewInterpreter(gameState *Game, mapID, roomID, eventID int) *Interpreter {
@@ -152,6 +153,15 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 	if !i.gameState.windows.CanProceed() {
 		return false, nil
 	}
+	if i.sub != nil {
+		if err := i.sub.Update(); err != nil {
+			return false, err
+		}
+		if !i.sub.IsExecuting() {
+			i.sub = nil
+		}
+		return false, nil
+	}
 	switch c.Name {
 	case data.CommandNameIf:
 		conditions := c.Args.(*data.CommandArgsIf).Conditions
@@ -260,7 +270,9 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 		i.waitingCommand = false
 		i.commandIndex.advance()
 	case data.CommandNameSetRoute:
-		println(fmt.Sprintf("not implemented yet: %s", c.Name))
+		args := c.Args.(*data.CommandArgsSetRoute)
+		i.sub = NewInterpreter(i.gameState, i.mapID, i.roomID, args.EventID)
+		i.sub.SetCommands(args.Commands, data.TriggerAuto)
 		i.commandIndex.advance()
 	case data.CommandNameTintScreen:
 		if !i.waitingCommand {
@@ -290,8 +302,17 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 	case data.CommandNameStopBGM:
 		println(fmt.Sprintf("not implemented yet: %s", c.Name))
 		i.commandIndex.advance()
+	case data.CommandNameMoveCharacter:
+		println("move_character!")
+		i.commandIndex.advance()
+	case data.CommandNameTurnCharacter:
+		println("turn_character!")
+		i.commandIndex.advance()
+	case data.CommandNameRotateCharacter:
+		println("rotate_character!")
+		i.commandIndex.advance()
 	default:
-		return false, fmt.Errorf("command not implemented: %s", c.Name)
+		return false, fmt.Errorf("invaid command: %s", c.Name)
 	}
 	return true, nil
 }
