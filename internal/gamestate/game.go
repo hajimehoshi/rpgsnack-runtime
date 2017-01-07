@@ -81,6 +81,18 @@ func (g *Game) ContinuingEvent() *character.Event {
 	return g.continuingEvent
 }
 
+func (g *Game) ExecutingEvent() *character.Event {
+	for _, e := range g.events {
+		if e.IsExecutingCommands() {
+			return e
+		}
+	}
+	if g.continuingEvent != nil && g.continuingEvent.IsExecutingCommands() {
+		return g.continuingEvent
+	}
+	return nil
+}
+
 func (g *Game) character(id int, self *character.Event) posAndDir {
 	switch id {
 	case -1:

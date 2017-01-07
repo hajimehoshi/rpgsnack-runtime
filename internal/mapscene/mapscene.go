@@ -156,18 +156,6 @@ func (m *MapScene) movePlayerIfNeeded() error {
 	return nil
 }
 
-func (m *MapScene) executingEvent() *character.Event {
-	for _, e := range m.gameState.Events() {
-		if e.IsExecutingCommands() {
-			return e
-		}
-	}
-	if m.gameState.ContinuingEvent() != nil && m.gameState.ContinuingEvent().IsExecutingCommands() {
-		return m.gameState.ContinuingEvent()
-	}
-	return nil
-}
-
 func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 	if err := m.gameState.Screen().Update(); err != nil {
 		return err
@@ -186,7 +174,7 @@ func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 	if m.gameState.Player().IsMovingByUserInput() {
 		return nil
 	}
-	if e := m.executingEvent(); e != nil {
+	if e := m.gameState.ExecutingEvent(); e != nil {
 		if err := e.Update(); err != nil {
 			return err
 		}
