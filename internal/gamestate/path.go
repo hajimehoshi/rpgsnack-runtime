@@ -18,7 +18,20 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 )
 
-func calcPath(passable func(x, y int) (bool, error), startX, startY, goalX, goalY int) ([]data.RouteCommand, error) {
+type routeCommand int
+
+const (
+	routeCommandMoveUp routeCommand = iota
+	routeCommandMoveRight
+	routeCommandMoveDown
+	routeCommandMoveLeft
+	routeCommandTurnUp
+	routeCommandTurnRight
+	routeCommandTurnDown
+	routeCommandTurnLeft
+)
+
+func calcPath(passable func(x, y int) (bool, error), startX, startY, goalX, goalY int) ([]routeCommand, error) {
 	type pos struct {
 		X, Y int
 	}
@@ -78,17 +91,17 @@ func calcPath(passable func(x, y int) (bool, error), startX, startY, goalX, goal
 		}
 		p = parent
 	}
-	path := make([]data.RouteCommand, len(dirs))
+	path := make([]routeCommand, len(dirs))
 	for i, d := range dirs {
 		switch d {
 		case data.DirUp:
-			path[len(dirs)-i-1] = data.RouteCommandMoveUp
+			path[len(dirs)-i-1] = routeCommandMoveUp
 		case data.DirRight:
-			path[len(dirs)-i-1] = data.RouteCommandMoveRight
+			path[len(dirs)-i-1] = routeCommandMoveRight
 		case data.DirDown:
-			path[len(dirs)-i-1] = data.RouteCommandMoveDown
+			path[len(dirs)-i-1] = routeCommandMoveDown
 		case data.DirLeft:
-			path[len(dirs)-i-1] = data.RouteCommandMoveLeft
+			path[len(dirs)-i-1] = routeCommandMoveLeft
 		default:
 			panic("not reach")
 		}
@@ -99,14 +112,14 @@ func calcPath(passable func(x, y int) (bool, error), startX, startY, goalX, goal
 	}
 	if !lastP {
 		switch path[len(path)-1] {
-		case data.RouteCommandMoveUp:
-			path[len(path)-1] = data.RouteCommandTurnUp
-		case data.RouteCommandMoveRight:
-			path[len(path)-1] = data.RouteCommandTurnRight
-		case data.RouteCommandMoveDown:
-			path[len(path)-1] = data.RouteCommandTurnDown
-		case data.RouteCommandMoveLeft:
-			path[len(path)-1] = data.RouteCommandTurnLeft
+		case routeCommandMoveUp:
+			path[len(path)-1] = routeCommandTurnUp
+		case routeCommandMoveRight:
+			path[len(path)-1] = routeCommandTurnRight
+		case routeCommandMoveDown:
+			path[len(path)-1] = routeCommandTurnDown
+		case routeCommandMoveLeft:
+			path[len(path)-1] = routeCommandTurnLeft
 		default:
 			panic("not reach")
 		}

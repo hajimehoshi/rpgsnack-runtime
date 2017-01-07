@@ -31,19 +31,19 @@ type Event struct {
 }
 
 type Page struct {
-	Conditions []*Condition `json:"conditions"`
-	Image      string       `json:"image"`
-	ImageIndex int          `json:"imageIndex"`
-	Attitude   Attitude     `json:"attitude"`
-	Dir        Dir          `json:"dir"`
-	DirFix     bool         `json:"dirFix"`
-	Walking    bool         `json:"walking"`
-	Stepping   bool         `json:"stepping"`
-	Through    bool         `json:"through"`
-	Priority   Priority     `json:"priority"`
-	Trigger    Trigger      `json:"trigger"`
-	Route      *Route       `json:"route"`
-	Commands   []*Command   `json:"commands"`
+	Conditions []*Condition         `json:"conditions"`
+	Image      string               `json:"image"`
+	ImageIndex int                  `json:"imageIndex"`
+	Attitude   Attitude             `json:"attitude"`
+	Dir        Dir                  `json:"dir"`
+	DirFix     bool                 `json:"dirFix"`
+	Walking    bool                 `json:"walking"`
+	Stepping   bool                 `json:"stepping"`
+	Through    bool                 `json:"through"`
+	Priority   Priority             `json:"priority"`
+	Trigger    Trigger              `json:"trigger"`
+	Route      *CommandArgsSetRoute `json:"route"`
+	Commands   []*Command           `json:"commands"`
 }
 
 type Dir int
@@ -363,26 +363,4 @@ type SetVariableCharacterType string
 
 const (
 	SetVariableCharacterTypeDirection SetVariableCharacterType = "direction"
-)
-
-type Route struct {
-	EventID int  `json:"eventId"`
-	Repeat  bool `json:"repeat"`
-	Skip    bool `json:"skip"`
-	Wait    bool `json:"wait"`
-	//Commands []*Command `json:"commands"`
-}
-
-// TODO: This might be temporary: Replace them with event commands.
-type RouteCommand string
-
-const (
-	RouteCommandMoveUp    RouteCommand = "move_up"
-	RouteCommandMoveRight              = "move_right"
-	RouteCommandMoveDown               = "move_down"
-	RouteCommandMoveLeft               = "move_left"
-	RouteCommandTurnUp                 = "turn_up"
-	RouteCommandTurnRight              = "turn_right"
-	RouteCommandTurnDown               = "turn_down"
-	RouteCommandTurnLeft               = "turn_left"
 )

@@ -177,7 +177,7 @@ func (g *Game) MovePlayerByUserInput(passable func(x, y int) (bool, error), x, y
 	commands := []*data.Command{}
 	for _, r := range path {
 		switch r {
-		case data.RouteCommandMoveUp:
+		case routeCommandMoveUp:
 			commands = append(commands, &data.Command{
 				Name: data.CommandNameMoveCharacter,
 				Args: &data.CommandArgsMoveCharacter{
@@ -185,7 +185,7 @@ func (g *Game) MovePlayerByUserInput(passable func(x, y int) (bool, error), x, y
 					Distance: 1,
 				},
 			})
-		case data.RouteCommandMoveRight:
+		case routeCommandMoveRight:
 			commands = append(commands, &data.Command{
 				Name: data.CommandNameMoveCharacter,
 				Args: &data.CommandArgsMoveCharacter{
@@ -193,7 +193,7 @@ func (g *Game) MovePlayerByUserInput(passable func(x, y int) (bool, error), x, y
 					Distance: 1,
 				},
 			})
-		case data.RouteCommandMoveDown:
+		case routeCommandMoveDown:
 			commands = append(commands, &data.Command{
 				Name: data.CommandNameMoveCharacter,
 				Args: &data.CommandArgsMoveCharacter{
@@ -201,7 +201,7 @@ func (g *Game) MovePlayerByUserInput(passable func(x, y int) (bool, error), x, y
 					Distance: 1,
 				},
 			})
-		case data.RouteCommandMoveLeft:
+		case routeCommandMoveLeft:
 			commands = append(commands, &data.Command{
 				Name: data.CommandNameMoveCharacter,
 				Args: &data.CommandArgsMoveCharacter{
@@ -209,28 +209,28 @@ func (g *Game) MovePlayerByUserInput(passable func(x, y int) (bool, error), x, y
 					Distance: 1,
 				},
 			})
-		case data.RouteCommandTurnUp:
+		case routeCommandTurnUp:
 			commands = append(commands, &data.Command{
 				Name: data.CommandNameTurnCharacter,
 				Args: &data.CommandArgsTurnCharacter{
 					Dir: data.DirUp,
 				},
 			})
-		case data.RouteCommandTurnRight:
+		case routeCommandTurnRight:
 			commands = append(commands, &data.Command{
 				Name: data.CommandNameTurnCharacter,
 				Args: &data.CommandArgsTurnCharacter{
 					Dir: data.DirRight,
 				},
 			})
-		case data.RouteCommandTurnDown:
+		case routeCommandTurnDown:
 			commands = append(commands, &data.Command{
 				Name: data.CommandNameTurnCharacter,
 				Args: &data.CommandArgsTurnCharacter{
 					Dir: data.DirDown,
 				},
 			})
-		case data.RouteCommandTurnLeft:
+		case routeCommandTurnLeft:
 			commands = append(commands, &data.Command{
 				Name: data.CommandNameTurnCharacter,
 				Args: &data.CommandArgsTurnCharacter{
