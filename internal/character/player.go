@@ -23,8 +23,7 @@ import (
 const playerMaxMoveCount = 4
 
 type Player struct {
-	character         *character
-	movingByUserInput bool
+	character *character
 }
 
 func NewPlayer(x, y int) (*Player, error) {
@@ -51,34 +50,25 @@ func (p *Player) Dir() data.Dir {
 	return p.character.dir
 }
 
-func (p *Player) IsMovingByUserInput() bool {
-	return p.movingByUserInput
+func (p *Player) IsMoving() bool {
+	return p.character.isMoving()
 }
 
-func (p *Player) MoveByUserInput(passable func(x, y int) (bool, error), x, y int) error {
-	c := p.character
-	path, err := calcPath(passable, c.x, c.y, x, y)
-	if err != nil {
-		return err
-	}
-	if len(path) == 0 {
-		return nil
-	}
-	c.setRoute(path)
-	p.movingByUserInput = true
-	return nil
+func (p *Player) Move(dir data.Dir) {
+	p.character.move(dir)
+}
+
+func (p *Player) Turn(dir data.Dir) {
+	p.character.turn(dir)
 }
 
 func (p *Player) TransferImmediately(x, y int) {
 	p.character.transferImmediately(x, y)
 }
 
-func (p *Player) Update(passable func(x, y int) (bool, error)) error {
-	if err := p.character.update(passable); err != nil {
+func (p *Player) Update() error {
+	if err := p.character.update(); err != nil {
 		return err
-	}
-	if p.movingByUserInput && !p.character.isMoving() {
-		p.movingByUserInput = false
 	}
 	return nil
 }

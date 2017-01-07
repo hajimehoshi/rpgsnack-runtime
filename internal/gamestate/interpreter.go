@@ -24,9 +24,12 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
 
-type posAndDir interface {
+type char interface {
 	Position() (int, int)
 	Dir() data.Dir
+	IsMoving() bool
+	Move(dir data.Dir)
+	Turn(dir data.Dir)
 }
 
 type Interpreter struct {
@@ -78,7 +81,7 @@ func (i *Interpreter) SetCommands(commands []*data.Command, trigger data.Trigger
 	i.trigger = trigger
 }
 
-func (i *Interpreter) character(id int) posAndDir {
+func (i *Interpreter) character(id int) char {
 	if id == -1 {
 		return i.gameState.player
 	}
@@ -159,6 +162,7 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 		}
 		if !i.sub.IsExecuting() {
 			i.sub = nil
+			i.commandIndex.advance()
 		}
 		return false, nil
 	}
@@ -273,7 +277,6 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 		args := c.Args.(*data.CommandArgsSetRoute)
 		i.sub = NewInterpreter(i.gameState, i.mapID, i.roomID, args.EventID)
 		i.sub.SetCommands(args.Commands, data.TriggerAuto)
-		i.commandIndex.advance()
 	case data.CommandNameTintScreen:
 		if !i.waitingCommand {
 			args := c.Args.(*data.CommandArgsTintScreen)
@@ -303,10 +306,38 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 		println(fmt.Sprintf("not implemented yet: %s", c.Name))
 		i.commandIndex.advance()
 	case data.CommandNameMoveCharacter:
-		println("move_character!")
+		ch := i.character(i.eventID)
+		if ch == nil {
+			i.commandIndex.advance()
+			return true, nil
+		}
+		if ch.IsMoving() {
+			return false, nil
+		}
+		if !i.waitingCommand {
+			args := c.Args.(*data.CommandArgsMoveCharacter)
+			ch.Move(args.Dir)
+			i.waitingCommand = true
+			return false, nil
+		}
+		i.waitingCommand = false
 		i.commandIndex.advance()
 	case data.CommandNameTurnCharacter:
-		println("turn_character!")
+		ch := i.character(i.eventID)
+		if ch == nil {
+			i.commandIndex.advance()
+			return true, nil
+		}
+		if ch.IsMoving() {
+			return false, nil
+		}
+		if !i.waitingCommand {
+			args := c.Args.(*data.CommandArgsTurnCharacter)
+			ch.Turn(args.Dir)
+			i.waitingCommand = true
+			return false, nil
+		}
+		i.waitingCommand = false
 		i.commandIndex.advance()
 	case data.CommandNameRotateCharacter:
 		println("rotate_character!")
@@ -319,9 +350,6 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 
 func (i *Interpreter) Update() error {
 	if i.commandIndex == nil {
-		return nil
-	}
-	if i.gameState.Player().IsMovingByUserInput() {
 		return nil
 	}
 	if !i.started {

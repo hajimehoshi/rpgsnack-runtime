@@ -144,7 +144,7 @@ func (m *MapScene) movePlayerIfNeeded() error {
 			return nil
 		}
 	}
-	if err := m.gameState.Player().MoveByUserInput(m.passable, tx, ty); err != nil {
+	if err := m.gameState.MovePlayerByUserInput(m.passable, tx, ty); err != nil {
 		return err
 	}
 	m.moveDstX = tx
@@ -160,7 +160,7 @@ func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 	if err := m.gameState.Screen().Update(); err != nil {
 		return err
 	}
-	if err := m.gameState.Player().Update(m.passable); err != nil {
+	if err := m.gameState.Player().Update(); err != nil {
 		return err
 	}
 	if err := m.gameState.Windows().Update(); err != nil {
@@ -275,7 +275,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 	if err := screen.DrawImage(m.tilesImage, op); err != nil {
 		return err
 	}
-	if m.gameState.Player().IsMovingByUserInput() {
+	if m.gameState.IsPlayerMovingByUserInput() {
 		x, y := m.moveDstX, m.moveDstY
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(x*scene.TileSize), float64(y*scene.TileSize))

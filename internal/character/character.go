@@ -33,11 +33,10 @@ type character struct {
 	y            int
 	moveCount    int
 	moveDir      data.Dir
-	route        []data.RouteCommand
 }
 
 func (c *character) isMoving() bool {
-	return c.moveCount > 0 || len(c.route) > 0
+	return c.moveCount > 0
 }
 
 func (c *character) turn(dir data.Dir) {
@@ -45,42 +44,6 @@ func (c *character) turn(dir data.Dir) {
 		return
 	}
 	c.dir = dir
-}
-
-func (c *character) setRoute(route []data.RouteCommand) {
-	if c.isMoving() {
-		return
-	}
-	c.route = route
-	c.consumeRoute()
-}
-
-func (c *character) consumeRoute() {
-	for len(c.route) > 0 {
-		switch c.route[0] {
-		case data.RouteCommandMoveUp:
-			c.move(data.DirUp)
-			return
-		case data.RouteCommandMoveRight:
-			c.move(data.DirRight)
-			return
-		case data.RouteCommandMoveDown:
-			c.move(data.DirDown)
-			return
-		case data.RouteCommandMoveLeft:
-			c.move(data.DirLeft)
-			return
-		case data.RouteCommandTurnUp:
-			c.turn(data.DirUp)
-		case data.RouteCommandTurnRight:
-			c.turn(data.DirRight)
-		case data.RouteCommandTurnDown:
-			c.turn(data.DirDown)
-		case data.RouteCommandTurnLeft:
-			c.turn(data.DirLeft)
-		}
-		c.route = c.route[1:]
-	}
 }
 
 func (c *character) move(dir data.Dir) bool {
@@ -135,7 +98,7 @@ func (c *character) transferImmediately(x, y int) {
 	c.moveCount = 0
 }
 
-func (c *character) update(passable func(x, y int) (bool, error)) error {
+func (c *character) update() error {
 	if !c.isMoving() {
 		return nil
 	}
@@ -163,10 +126,6 @@ func (c *character) update(passable func(x, y int) (bool, error)) error {
 		c.y = ny
 		c.prevAttitude = c.attitude
 		c.attitude = data.AttitudeMiddle
-		if len(c.route) > 0 {
-			c.route = c.route[1:]
-		}
-		c.consumeRoute()
 	}
 	return nil
 }

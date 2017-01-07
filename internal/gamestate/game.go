@@ -36,6 +36,7 @@ type Game struct {
 	roomID                int
 	events                []*character.Event
 	continuingInterpreter *Interpreter
+	playerMoving          *Interpreter
 }
 
 func NewGame() (*Game, error) {
@@ -90,6 +91,19 @@ func (g *Game) IsEventExecuting() bool {
 }
 
 func (g *Game) UpdateEvents() error {
+	if g.playerMoving != nil {
+		if err := g.playerMoving.Update(); err != nil {
+			return err
+		}
+		if !g.playerMoving.IsExecuting() {
+			g.playerMoving = nil
+		}
+		return nil
+	}
+	// TODO: g.player is updated at MapScene. Is this OK?
+	if g.playerMoving != nil {
+		return nil
+	}
 	for _, e := range g.events {
 		if err := e.Update(); err != nil {
 			return err
@@ -141,6 +155,105 @@ func (g *Game) Windows() *window.Windows {
 
 func (g *Game) Player() *character.Player {
 	return g.player
+}
+
+func (g *Game) IsPlayerMovingByUserInput() bool {
+	return g.playerMoving != nil
+}
+
+func (g *Game) MovePlayerByUserInput(passable func(x, y int) (bool, error), x, y int) error {
+	if g.playerMoving != nil {
+		panic("not reach")
+	}
+	px, py := g.player.Position()
+	path, err := calcPath(passable, px, py, x, y)
+	if err != nil {
+		return err
+	}
+	if len(path) == 0 {
+		return nil
+	}
+	g.playerMoving = NewInterpreter(g, g.mapID, g.roomID, -1)
+	commands := []*data.Command{}
+	for _, r := range path {
+		switch r {
+		case data.RouteCommandMoveUp:
+			commands = append(commands, &data.Command{
+				Name: data.CommandNameMoveCharacter,
+				Args: &data.CommandArgsMoveCharacter{
+					Dir:      data.DirUp,
+					Distance: 1,
+				},
+			})
+		case data.RouteCommandMoveRight:
+			commands = append(commands, &data.Command{
+				Name: data.CommandNameMoveCharacter,
+				Args: &data.CommandArgsMoveCharacter{
+					Dir:      data.DirRight,
+					Distance: 1,
+				},
+			})
+		case data.RouteCommandMoveDown:
+			commands = append(commands, &data.Command{
+				Name: data.CommandNameMoveCharacter,
+				Args: &data.CommandArgsMoveCharacter{
+					Dir:      data.DirDown,
+					Distance: 1,
+				},
+			})
+		case data.RouteCommandMoveLeft:
+			commands = append(commands, &data.Command{
+				Name: data.CommandNameMoveCharacter,
+				Args: &data.CommandArgsMoveCharacter{
+					Dir:      data.DirLeft,
+					Distance: 1,
+				},
+			})
+		case data.RouteCommandTurnUp:
+			commands = append(commands, &data.Command{
+				Name: data.CommandNameTurnCharacter,
+				Args: &data.CommandArgsTurnCharacter{
+					Dir: data.DirUp,
+				},
+			})
+		case data.RouteCommandTurnRight:
+			commands = append(commands, &data.Command{
+				Name: data.CommandNameTurnCharacter,
+				Args: &data.CommandArgsTurnCharacter{
+					Dir: data.DirRight,
+				},
+			})
+		case data.RouteCommandTurnDown:
+			commands = append(commands, &data.Command{
+				Name: data.CommandNameTurnCharacter,
+				Args: &data.CommandArgsTurnCharacter{
+					Dir: data.DirDown,
+				},
+			})
+		case data.RouteCommandTurnLeft:
+			commands = append(commands, &data.Command{
+				Name: data.CommandNameTurnCharacter,
+				Args: &data.CommandArgsTurnCharacter{
+					Dir: data.DirLeft,
+				},
+			})
+		default:
+			panic("not reach")
+		}
+	}
+	g.playerMoving.SetCommands([]*data.Command{
+		{
+			Name: data.CommandNameSetRoute,
+			Args: &data.CommandArgsSetRoute{
+				EventID:  -1,
+				Repeat:   false,
+				Skip:     false,
+				Wait:     true,
+				Commands: commands,
+			},
+		},
+	}, data.TriggerAuto)
+	return nil
 }
 
 var reMessage = regexp.MustCompile(`\\([a-zA-Z])\[(\d+)\]`)

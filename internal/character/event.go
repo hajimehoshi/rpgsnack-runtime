@@ -58,6 +58,18 @@ func (e *Event) Dir() data.Dir {
 	return e.character.dir
 }
 
+func (e *Event) IsMoving() bool {
+	return e.character.isMoving()
+}
+
+func (e *Event) Move(dir data.Dir) {
+	e.character.move(dir)
+}
+
+func (e *Event) Turn(dir data.Dir) {
+	e.character.turn(dir)
+}
+
 func (e *Event) StartEvent(player *Player, trigger data.Trigger) {
 	var dir data.Dir
 	ex, ey := e.Position()
