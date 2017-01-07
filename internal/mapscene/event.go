@@ -323,8 +323,7 @@ commandLoop:
 				e.waitingChoosing = true
 				break commandLoop
 			}
-			if e.mapScene.balloons.isOpened() {
-				// Index is not determined yet: this is hacky!
+			if !e.mapScene.balloons.HasChosenIndex() {
 				break commandLoop
 			}
 			e.commandIndex.choose(e.mapScene.balloons.ChosenIndex())
@@ -389,6 +388,7 @@ commandLoop:
 		}
 	}
 	if e.commandIndex.isTerminated() {
+		// TODO: This is hacky
 		if e.mapScene.balloons.isAnimating() {
 			return nil
 		}

@@ -34,6 +34,7 @@ type balloons struct {
 	chosenIndex               int
 	choosing                  bool
 	chosenBalloonWaitingCount int
+	hasChosenIndex            bool
 }
 
 func choiceBalloonsMinY(num int) int {
@@ -42,6 +43,10 @@ func choiceBalloonsMinY(num int) int {
 
 func (b *balloons) ChosenIndex() int {
 	return b.chosenIndex
+}
+
+func (b *balloons) HasChosenIndex() bool {
+	return b.hasChosenIndex
 }
 
 func (b *balloons) ShowMessage(content string, character *character) {
@@ -82,6 +87,7 @@ func (b *balloons) closeAll() {
 		}
 		balloon.close()
 	}
+	b.hasChosenIndex = false
 }
 
 func (b *balloons) isBusy() bool {
@@ -177,6 +183,7 @@ func (b *balloons) Update() error {
 		}
 		b.chosenBalloonWaitingCount = 30
 		b.choosing = false
+		b.hasChosenIndex = true
 	}
 	for i, balloon := range b.balloons {
 		if balloon == nil {
