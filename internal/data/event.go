@@ -150,7 +150,11 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 		}
 		c.Args = args
 	case CommandNameSetRoute:
-		return fmt.Errorf("data: not implemented yet: %s", c.Name)
+		var args *CommandArgsSetRoute
+		if err := json.Unmarshal(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	case CommandNameTintScreen:
 		var args *CommandArgsTintScreen
 		if err := json.Unmarshal(tmp.Args, &args); err != nil {
@@ -163,6 +167,8 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 		return fmt.Errorf("data: not implemented yet: %s", c.Name)
 	case CommandNameStopBGM:
 		return fmt.Errorf("data: not implemented yet: %s", c.Name)
+	default:
+		return fmt.Errorf("data: invalid command: %s", c.Name)
 	}
 	return nil
 }
@@ -263,6 +269,14 @@ type CommandArgsTransfer struct {
 	RoomID int `json:"roomId"`
 	X      int `json:"x"`
 	Y      int `json:"y"`
+}
+
+type CommandArgsSetRoute struct {
+	EventID  int        `json:"eventId"`
+	Repeat   bool       `json:"repeat"`
+	Skip     bool       `json:"skip"`
+	Wait     bool       `json:"wait"`
+	Commands []*Command `json:"commands"`
 }
 
 type CommandArgsTintScreen struct {
