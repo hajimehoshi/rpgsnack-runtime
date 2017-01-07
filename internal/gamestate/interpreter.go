@@ -26,8 +26,12 @@ import (
 
 // TODO: Remove this
 type MapScene interface {
-	Character(eventID int, self *character.Event) interface{}
 	TransferPlayerImmediately(roomID, x, y int, event *character.Event)
+}
+
+type posAndDir interface {
+	Position() (int, int)
+	Dir() data.Dir
 }
 
 type Interpreter struct {
@@ -184,18 +188,9 @@ commandLoop:
 			if !i.waitingCommand {
 				args := c.Args.(*data.CommandArgsShowMessage)
 				content := data.Current().Texts.Get(language.Und, args.ContentID)
-				ch := i.mapScene.Character(args.EventID, i.event)
+				ch := i.gameState.character(args.EventID, i.event)
+				x, y := ch.Position()
 				content = i.gameState.ParseMessageSyntax(content)
-				x := 0
-				y := 0
-				switch ch := ch.(type) {
-				case *character.Player:
-					x, y = ch.Position()
-				case *character.Event:
-					x, y = ch.Position()
-				default:
-					panic("not reach")
-				}
 				i.gameState.windows.ShowMessage(content, x*scene.TileSize, y*scene.TileSize)
 				i.waitingCommand = true
 				break commandLoop
@@ -317,18 +312,10 @@ func (i *Interpreter) setVariable(id int, op data.SetVariableOp, valueType data.
 		return
 	case data.SetVariableValueTypeCharacter:
 		args := value.(*data.SetVariableCharacterArgs)
-		ch := i.mapScene.Character(args.EventID, i.event)
+		ch := i.gameState.character(args.EventID, i.event)
+		dir := ch.Dir()
 		switch args.Type {
 		case data.SetVariableCharacterTypeDirection:
-			var dir data.Dir
-			switch ch := ch.(type) {
-			case *character.Player:
-				dir = ch.Dir()
-			case *character.Event:
-				dir = ch.Dir()
-			default:
-				panic("not reach")
-			}
 			switch dir {
 			case data.DirUp:
 				rhs = 0

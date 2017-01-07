@@ -156,22 +156,6 @@ func (m *MapScene) movePlayerIfNeeded() error {
 	return nil
 }
 
-func (m *MapScene) Character(id int, self *character.Event) interface{} {
-	switch id {
-	case -1:
-		return m.gameState.Player()
-	case 0:
-		return self
-	default:
-		for _, e := range m.gameState.Events() {
-			if id == e.ID() {
-				return e
-			}
-		}
-		return nil
-	}
-}
-
 func (m *MapScene) executingEvent() *character.Event {
 	for _, e := range m.gameState.Events() {
 		if e.IsExecutingCommands() {

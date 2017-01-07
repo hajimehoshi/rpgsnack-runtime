@@ -77,6 +77,22 @@ func (g *Game) Events() []*character.Event {
 	return g.events
 }
 
+func (g *Game) character(id int, self *character.Event) posAndDir {
+	switch id {
+	case -1:
+		return g.Player()
+	case 0:
+		return self
+	default:
+		for _, e := range g.Events() {
+			if id == e.ID() {
+				return e
+			}
+		}
+		return nil
+	}
+}
+
 func (g *Game) ContinuingEvent() *character.Event {
 	return g.continuingEvent
 }
