@@ -55,11 +55,11 @@ func NewGame() (*Game, error) {
 		player:    player,
 		mapID:     1,
 	}
-	g.SetRoomID(roomID)
+	g.setRoomID(roomID)
 	return g, nil
 }
 
-func (g *Game) SetRoomID(id int) error {
+func (g *Game) setRoomID(id int) error {
 	g.roomID = id
 	g.events = nil
 	for _, e := range g.CurrentRoom().Events {
@@ -75,6 +75,10 @@ func (g *Game) SetRoomID(id int) error {
 
 func (g *Game) Events() []*character.Event {
 	return g.events
+}
+
+func (g *Game) ContinuingEvent() *character.Event {
+	return g.continuingEvent
 }
 
 func (g *Game) character(id int, self *character.Event) posAndDir {
@@ -95,12 +99,8 @@ func (g *Game) character(id int, self *character.Event) posAndDir {
 
 func (g *Game) transferPlayerImmediately(roomID, x, y int, e *character.Event) {
 	g.player.TransferImmediately(x, y)
-	g.SetRoomID(roomID)
+	g.setRoomID(roomID)
 	g.continuingEvent = e
-}
-
-func (g *Game) ContinuingEvent() *character.Event {
-	return g.continuingEvent
 }
 
 func (g *Game) CurrentMap() *data.Map {
