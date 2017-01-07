@@ -347,12 +347,12 @@ commandLoop:
 			if e.mapScene.isFadedOut() {
 				e.mapScene.transferPlayerImmediately(args.RoomID, args.X, args.Y)
 				e.mapScene.fadeIn(30)
-				e.waitingTransfering = true
 				break commandLoop
 			}
 			if e.mapScene.gameState.Screen().IsFading() {
 				break commandLoop
 			}
+			e.waitingTransfering = false
 			e.commandIndex.advance()
 		case data.CommandNameSetRoute:
 			println(fmt.Sprintf("not implemented yet: %s", c.Name))
