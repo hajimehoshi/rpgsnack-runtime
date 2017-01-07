@@ -167,6 +167,24 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 		return fmt.Errorf("data: not implemented yet: %s", c.Name)
 	case CommandNameStopBGM:
 		return fmt.Errorf("data: not implemented yet: %s", c.Name)
+	case CommandNameMoveCharacter:
+		var args *CommandArgsMoveCharacter
+		if err := json.Unmarshal(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
+	case CommandNameTurnCharacter:
+		var args *CommandArgsTurnCharacter
+		if err := json.Unmarshal(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
+	case CommandNameRotateCharacter:
+		var args *CommandArgsRotateCharacter
+		if err := json.Unmarshal(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	default:
 		return fmt.Errorf("data: invalid command: %s", c.Name)
 	}
@@ -190,6 +208,11 @@ const (
 	CommandNamePlaySE                    = "play_se"
 	CommandNamePlayBGM                   = "play_bgm"
 	CommandNameStopBGM                   = "stop_bgm"
+
+	// Route commands
+	CommandNameMoveCharacter   = "move_character"
+	CommandNameTurnCharacter   = "turn_character"
+	CommandNameRotateCharacter = "rotate_character"
 )
 
 type CommandArgsIf struct {
@@ -287,6 +310,29 @@ type CommandArgsTintScreen struct {
 	Time  int  `json:"time"`
 	Wait  bool `json:"wait"`
 }
+
+type CommandArgsMoveCharacter struct {
+	Dir      Dir `json:dir`
+	Distance int `json:distance`
+}
+
+type CommandArgsTurnCharacter struct {
+	Dir Dir `json:dir`
+}
+
+type CommandArgsRotateCharacter struct {
+	Angle int `json:angle`
+}
+
+/*
+move_character: dir: (int), distance: (int)
+turn_character: dir: (int)
+rotate_character: angle: (number: 90/180/270)
+set_character_property: type:(string:"visibility"/"dir_fix"/"stepping"/"through"/"walking"/"speed") value: (bool or int)
+wait: value: (int)
+set_character_image: image: (string), imageIndex: (int)
+play_se: // tbd
+*/
 
 type SetVariableOp string
 

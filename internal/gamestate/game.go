@@ -109,6 +109,7 @@ func (g *Game) UpdateEvents() error {
 func (g *Game) transferPlayerImmediately(roomID, x, y int, interpreter *Interpreter) {
 	g.player.TransferImmediately(x, y)
 	g.setRoomID(roomID)
+	// TODO: What if this is not nil?
 	g.continuingInterpreter = interpreter
 }
 
