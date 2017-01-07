@@ -69,7 +69,7 @@ func (i *Interpreter) MeetsCondition(cond *data.Condition) (bool, error) {
 	switch cond.Type {
 	case data.ConditionTypeSwitch:
 		id := cond.ID
-		v := i.gameState.Variables().SwitchValue(id)
+		v := i.gameState.variables.SwitchValue(id)
 		rhs := cond.Value.(bool)
 		return v == rhs, nil
 	case data.ConditionTypeSelfSwitch:
@@ -78,12 +78,12 @@ func (i *Interpreter) MeetsCondition(cond *data.Condition) (bool, error) {
 		return v == rhs, nil
 	case data.ConditionTypeVariable:
 		id := cond.ID
-		v := i.gameState.Variables().VariableValue(id)
+		v := i.gameState.variables.VariableValue(id)
 		rhs := cond.Value.(int)
 		switch cond.ValueType {
 		case data.ConditionValueTypeConstant:
 		case data.ConditionValueTypeVariable:
-			rhs = i.gameState.Variables().VariableValue(rhs)
+			rhs = i.gameState.variables.VariableValue(rhs)
 		default:
 			return false, fmt.Errorf("mapscene: invalid value type: %s", cond.ValueType)
 		}
@@ -228,7 +228,7 @@ commandLoop:
 			i.waitingCommand = false
 		case data.CommandNameSetSwitch:
 			args := c.Args.(*data.CommandArgsSetSwitch)
-			i.gameState.Variables().SetSwitchValue(args.ID, args.Value)
+			i.gameState.variables.SetSwitchValue(args.ID, args.Value)
 			i.commandIndex.advance()
 		case data.CommandNameSetSelfSwitch:
 			args := c.Args.(*data.CommandArgsSetSelfSwitch)
@@ -309,7 +309,7 @@ func (i *Interpreter) setVariable(id int, op data.SetVariableOp, valueType data.
 	case data.SetVariableValueTypeConstant:
 		rhs = value.(int)
 	case data.SetVariableValueTypeVariable:
-		rhs = i.gameState.Variables().VariableValue(value.(int))
+		rhs = i.gameState.variables.VariableValue(value.(int))
 	case data.SetVariableValueTypeRandom:
 		println(fmt.Sprintf("not implemented yet (set_variable): valueType %s", valueType))
 		return
@@ -344,15 +344,15 @@ func (i *Interpreter) setVariable(id int, op data.SetVariableOp, valueType data.
 	switch op {
 	case data.SetVariableOpAssign:
 	case data.SetVariableOpAdd:
-		rhs += i.gameState.Variables().VariableValue(id)
+		rhs += i.gameState.variables.VariableValue(id)
 	case data.SetVariableOpSub:
-		rhs -= i.gameState.Variables().VariableValue(id)
+		rhs -= i.gameState.variables.VariableValue(id)
 	case data.SetVariableOpMul:
-		rhs *= i.gameState.Variables().VariableValue(id)
+		rhs *= i.gameState.variables.VariableValue(id)
 	case data.SetVariableOpDiv:
-		rhs /= i.gameState.Variables().VariableValue(id)
+		rhs /= i.gameState.variables.VariableValue(id)
 	case data.SetVariableOpMod:
-		rhs %= i.gameState.Variables().VariableValue(id)
+		rhs %= i.gameState.variables.VariableValue(id)
 	}
-	i.gameState.Variables().SetVariableValue(id, rhs)
+	i.gameState.variables.SetVariableValue(id, rhs)
 }

@@ -52,10 +52,6 @@ func NewGame() (*Game, error) {
 	}, nil
 }
 
-func (g *Game) Variables() *Variables {
-	return g.variables
-}
-
 func (g *Game) Screen() *Screen {
 	return g.screen
 }
@@ -79,7 +75,7 @@ func (g *Game) ParseMessageSyntax(str string) string {
 		}
 		switch name {
 		case "v":
-			return strconv.Itoa(g.Variables().VariableValue(id))
+			return strconv.Itoa(g.variables.VariableValue(id))
 		}
 		return str
 	})
