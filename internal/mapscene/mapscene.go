@@ -250,6 +250,9 @@ func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 			return err
 		}
 	}
+	if m.player.isMovingByUserInput() {
+		return nil
+	}
 	if e := m.executingEvent(); e != nil {
 		if err := e.update(); err != nil {
 			return err

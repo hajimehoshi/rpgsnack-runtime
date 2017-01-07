@@ -204,9 +204,6 @@ func (e *event) updateCommands() error {
 	if e.executingPage == nil {
 		return nil
 	}
-	if e.mapScene.player.isMovingByUserInput() {
-		return nil
-	}
 	if e.commandIndex == nil {
 		e.dirBeforeRunning = e.character.dir
 		var dir data.Dir
