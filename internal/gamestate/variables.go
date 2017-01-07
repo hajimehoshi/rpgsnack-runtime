@@ -44,6 +44,9 @@ func (v *Variables) SetSwitchValue(id int, value bool) {
 
 func (v *Variables) SelfSwitchValue(mapID, roomID, eventID int, id int) bool {
 	key := fmt.Sprintf("%d_%d_%d", mapID, roomID, eventID)
+	if v.selfSwitches == nil {
+		v.selfSwitches = map[string][data.SelfSwitchNum]bool{}
+	}
 	values, ok := v.selfSwitches[key]
 	if !ok {
 		v.selfSwitches[key] = [data.SelfSwitchNum]bool{}
@@ -53,6 +56,9 @@ func (v *Variables) SelfSwitchValue(mapID, roomID, eventID int, id int) bool {
 
 func (v *Variables) SetSelfSwitchValue(mapID, roomID, eventID int, id int, value bool) {
 	key := fmt.Sprintf("%d_%d_%d", mapID, roomID, eventID)
+	if v.selfSwitches == nil {
+		v.selfSwitches = map[string][data.SelfSwitchNum]bool{}
+	}
 	values, ok := v.selfSwitches[key]
 	if !ok {
 		v.selfSwitches[key] = [data.SelfSwitchNum]bool{}
