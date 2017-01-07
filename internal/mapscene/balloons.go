@@ -74,7 +74,7 @@ func (b *balloons) ShowChoices(choices []string) {
 	b.choosing = true
 }
 
-func (b *balloons) closeAll() {
+func (b *balloons) CloseAll() {
 	for _, balloon := range b.balloons {
 		if balloon == nil {
 			continue
@@ -90,7 +90,7 @@ func (b *balloons) closeAll() {
 	b.hasChosenIndex = false
 }
 
-func (b *balloons) isBusy() bool {
+func (b *balloons) IsBusy() bool {
 	if b.isAnimating() {
 		return true
 	}
@@ -104,6 +104,19 @@ func (b *balloons) isBusy() bool {
 		return true
 	}
 	return false
+}
+
+func (b *balloons) CanProceed() bool {
+	if !b.IsBusy() {
+		return true
+	}
+	if !b.isOpened() {
+		return false
+	}
+	if !input.Triggered() {
+		return false
+	}
+	return true
 }
 
 func (b *balloons) isOpened() bool {
