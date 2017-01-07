@@ -31,8 +31,8 @@ type posAndDir interface {
 
 type Interpreter struct {
 	gameState      *Game
-	mapID          int
-	roomID         int
+	mapID          int // Note: This doesn't make sense when eventID == -1
+	roomID         int // Note: This doesn't make sense when eventID == -1
 	eventID        int
 	commandIndex   *commandIndex
 	started        bool
@@ -78,14 +78,14 @@ func (i *Interpreter) SetCommands(commands []*data.Command, trigger data.Trigger
 }
 
 func (i *Interpreter) character(id int) posAndDir {
+	if id == -1 {
+		return i.gameState.player
+	}
 	if i.gameState.mapID != i.mapID {
 		return nil
 	}
 	if i.gameState.roomID != i.roomID {
 		return nil
-	}
-	if id == -1 {
-		return i.gameState.player
 	}
 	if id == 0 {
 		id = i.eventID
