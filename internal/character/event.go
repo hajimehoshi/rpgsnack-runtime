@@ -21,11 +21,10 @@ import (
 )
 
 type Interpreter interface {
-	SetEvent(event *Event)
 	IsExecuting() bool
-	MeetsCondition(cond *data.Condition) (bool, error)
+	MeetsCondition(cond *data.Condition, event *Event) (bool, error)
 	SetCommands(commands []*data.Command, trigger data.Trigger)
-	Update() error
+	Update(event *Event) error
 }
 
 type Event struct {
@@ -48,7 +47,6 @@ func NewEvent(eventData *data.Event, interpreter Interpreter) (*Event, error) {
 		character:        c,
 		currentPageIndex: -1,
 	}
-	e.interpreter.SetEvent(e)
 	if err := e.UpdateCharacterIfNeeded(); err != nil {
 		return nil, err
 	}
@@ -138,7 +136,7 @@ func (e *Event) UpdateCharacterIfNeeded() error {
 
 func (e *Event) meetsPageCondition(page *data.Page) (bool, error) {
 	for _, cond := range page.Conditions {
-		m, err := e.interpreter.MeetsCondition(cond)
+		m, err := e.interpreter.MeetsCondition(cond, e)
 		if err != nil {
 			return false, err
 		}
@@ -202,7 +200,7 @@ func (e *Event) Update() error {
 			e.steppingCount %= 120
 		}
 	}
-	if err := e.interpreter.Update(); err != nil {
+	if err := e.interpreter.Update(e); err != nil {
 		return err
 	}
 	return nil

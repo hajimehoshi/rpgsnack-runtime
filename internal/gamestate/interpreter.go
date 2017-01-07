@@ -31,7 +31,6 @@ type posAndDir interface {
 
 type Interpreter struct {
 	gameState      *Game
-	event          *character.Event
 	commandIndex   *commandIndex
 	waitingCount   int
 	waitingCommand bool
@@ -45,10 +44,6 @@ func NewInterpreter(gameState *Game) *Interpreter {
 	}
 }
 
-func (i *Interpreter) SetEvent(event *character.Event) {
-	i.event = event
-}
-
 func (i *Interpreter) IsExecuting() bool {
 	return i.commands != nil
 }
@@ -58,12 +53,12 @@ func (i *Interpreter) SetCommands(commands []*data.Command, trigger data.Trigger
 	i.trigger = trigger
 }
 
-func (i *Interpreter) character(id int) posAndDir {
+func (i *Interpreter) character(id int, event *character.Event) posAndDir {
 	switch id {
 	case -1:
 		return i.gameState.player
 	case 0:
-		return i.event
+		return event
 	default:
 		for _, e := range i.gameState.events {
 			if id == e.ID() {
@@ -74,7 +69,7 @@ func (i *Interpreter) character(id int) posAndDir {
 	}
 }
 
-func (i *Interpreter) MeetsCondition(cond *data.Condition) (bool, error) {
+func (i *Interpreter) MeetsCondition(cond *data.Condition, event *character.Event) (bool, error) {
 	// TODO: Is it OK to allow null conditions?
 	if cond == nil {
 		return true, nil
@@ -87,7 +82,7 @@ func (i *Interpreter) MeetsCondition(cond *data.Condition) (bool, error) {
 		return v == rhs, nil
 	case data.ConditionTypeSelfSwitch:
 		m, r := i.gameState.mapID, i.gameState.roomID
-		v := i.gameState.variables.SelfSwitchValue(m, r, i.event.ID(), cond.ID)
+		v := i.gameState.variables.SelfSwitchValue(m, r, event.ID(), cond.ID)
 		rhs := cond.Value.(bool)
 		return v == rhs, nil
 	case data.ConditionTypeVariable:
@@ -123,13 +118,13 @@ func (i *Interpreter) MeetsCondition(cond *data.Condition) (bool, error) {
 	return false, nil
 }
 
-func (i *Interpreter) Update() error {
+func (i *Interpreter) Update(event *character.Event) error {
 	if i.commands == nil {
 		return nil
 	}
 	if i.commandIndex == nil {
 		var dir data.Dir
-		ex, ey := i.event.Position()
+		ex, ey := event.Position()
 		px, py := i.gameState.Player().Position()
 		switch {
 		case i.trigger == data.TriggerAuto:
@@ -146,7 +141,7 @@ func (i *Interpreter) Update() error {
 		default:
 			panic("not reach")
 		}
-		i.event.StartEvent(dir)
+		event.StartEvent(dir)
 		i.commandIndex = newCommandIndex(i.commands)
 	}
 commandLoop:
@@ -160,7 +155,7 @@ commandLoop:
 			conditions := c.Args.(*data.CommandArgsIf).Conditions
 			matches := true
 			for _, c := range conditions {
-				m, err := i.MeetsCondition(c)
+				m, err := i.MeetsCondition(c, event)
 				if err != nil {
 					return err
 				}
@@ -197,7 +192,7 @@ commandLoop:
 			if !i.waitingCommand {
 				args := c.Args.(*data.CommandArgsShowMessage)
 				content := data.Current().Texts.Get(language.Und, args.ContentID)
-				ch := i.character(args.EventID)
+				ch := i.character(args.EventID, event)
 				x, y := ch.Position()
 				content = i.gameState.ParseMessageSyntax(content)
 				i.gameState.windows.ShowMessage(content, x*scene.TileSize, y*scene.TileSize)
@@ -238,11 +233,11 @@ commandLoop:
 		case data.CommandNameSetSelfSwitch:
 			args := c.Args.(*data.CommandArgsSetSelfSwitch)
 			m, r := i.gameState.mapID, i.gameState.roomID
-			i.gameState.variables.SetSelfSwitchValue(m, r, i.event.ID(), args.ID, args.Value)
+			i.gameState.variables.SetSelfSwitchValue(m, r, event.ID(), args.ID, args.Value)
 			i.commandIndex.advance()
 		case data.CommandNameSetVariable:
 			args := c.Args.(*data.CommandArgsSetVariable)
-			i.setVariable(args.ID, args.Op, args.ValueType, args.Value)
+			i.setVariable(args.ID, args.Op, args.ValueType, args.Value, event)
 			i.commandIndex.advance()
 		case data.CommandNameTransfer:
 			args := c.Args.(*data.CommandArgsTransfer)
@@ -252,7 +247,7 @@ commandLoop:
 				break commandLoop
 			}
 			if i.gameState.screen.isFadedOut() {
-				i.gameState.transferPlayerImmediately(args.RoomID, args.X, args.Y, i.event)
+				i.gameState.transferPlayerImmediately(args.RoomID, args.X, args.Y, event)
 				i.gameState.screen.fadeIn(30)
 				break commandLoop
 			}
@@ -301,7 +296,7 @@ commandLoop:
 			return nil
 		}
 		i.gameState.windows.CloseAll()
-		i.event.EndEvent()
+		event.EndEvent()
 		i.commands = nil
 		i.commandIndex = nil
 		return nil
@@ -309,7 +304,7 @@ commandLoop:
 	return nil
 }
 
-func (i *Interpreter) setVariable(id int, op data.SetVariableOp, valueType data.SetVariableValueType, value interface{}) {
+func (i *Interpreter) setVariable(id int, op data.SetVariableOp, valueType data.SetVariableValueType, value interface{}, event *character.Event) {
 	rhs := 0
 	switch valueType {
 	case data.SetVariableValueTypeConstant:
@@ -321,7 +316,7 @@ func (i *Interpreter) setVariable(id int, op data.SetVariableOp, valueType data.
 		return
 	case data.SetVariableValueTypeCharacter:
 		args := value.(*data.SetVariableCharacterArgs)
-		ch := i.character(args.EventID)
+		ch := i.character(args.EventID, event)
 		dir := ch.Dir()
 		switch args.Type {
 		case data.SetVariableCharacterTypeDirection:
