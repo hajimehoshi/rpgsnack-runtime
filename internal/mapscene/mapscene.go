@@ -29,15 +29,16 @@ import (
 )
 
 type MapScene struct {
-	gameState     *gamestate.Game
-	currentMapID  int
-	currentRoomID int
-	player        *player
-	moveDstX      int
-	moveDstY      int
-	balloons      *balloons
-	tilesImage    *ebiten.Image
-	events        []*event
+	gameState       *gamestate.Game
+	currentMapID    int
+	currentRoomID   int
+	player          *player
+	moveDstX        int
+	moveDstY        int
+	balloons        *balloons
+	tilesImage      *ebiten.Image
+	events          []*event
+	continuingEvent *event
 }
 
 func New() (*MapScene, error) {
@@ -222,6 +223,18 @@ func (m *MapScene) character(id int, self *event) *character {
 	return ch
 }
 
+func (m *MapScene) isExecutingEvent() bool {
+	for _, e := range m.events {
+		if e.executingPage != nil {
+			return true
+		}
+	}
+	if m.continuingEvent != nil && m.continuingEvent.executingPage != nil {
+		return true
+	}
+	return false
+}
+
 func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 	if err := m.gameState.Screen().Update(); err != nil {
 		return err
@@ -237,10 +250,13 @@ func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 			return err
 		}
 	}
-	for _, e := range m.events {
-		if e.executingPage != nil {
-			return nil
+	if m.continuingEvent != nil {
+		if err := m.continuingEvent.update(); err != nil {
+			return err
 		}
+	}
+	if m.isExecutingEvent() {
+		return nil
 	}
 	for _, e := range m.events {
 		if e.tryRun(data.TriggerAuto) {
@@ -265,9 +281,10 @@ func (m *MapScene) showChoices(choices []string) {
 	m.balloons.ShowChoices(choices)
 }
 
-func (m *MapScene) transferPlayerImmediately(roomID, x, y int) {
+func (m *MapScene) transferPlayerImmediately(roomID, x, y int, e *event) {
 	m.player.transferImmediately(x, y)
 	m.changeRoom(roomID)
+	m.continuingEvent = e
 }
 
 func (m *MapScene) fadeOut(count int) {

@@ -342,7 +342,7 @@ commandLoop:
 				break commandLoop
 			}
 			if e.mapScene.isFadedOut() {
-				e.mapScene.transferPlayerImmediately(args.RoomID, args.X, args.Y)
+				e.mapScene.transferPlayerImmediately(args.RoomID, args.X, args.Y, e)
 				e.mapScene.fadeIn(30)
 				break commandLoop
 			}
