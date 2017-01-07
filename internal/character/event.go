@@ -15,36 +15,20 @@
 package character
 
 import (
-	"fmt"
-
 	"github.com/hajimehoshi/ebiten"
-	"golang.org/x/text/language"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/gamestate"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
-
-// TODO: Remove this
-type MapScene interface {
-	Player() *Player
-	Character(eventID int, self *Event) interface{}
-	TransferPlayerImmediately(roomID, x, y int, event *Event)
-}
 
 type Event struct {
 	data             *data.Event
-	gameState        *gamestate.Game
-	mapScene         MapScene
+	interpreter      *interpreter
 	character        *character
 	currentPageIndex int
-	commandIndex     *commandIndex
 	steppingCount    int
 	selfSwitches     [data.SelfSwitchNum]bool
-	waitingCount     int
-	waitingCommand   bool
 	dirBeforeRunning data.Dir
-	executingPage    *data.Page
 }
 
 func NewEvent(eventData *data.Event, gameState *gamestate.Game, mapScene MapScene) (*Event, error) {
@@ -52,13 +36,17 @@ func NewEvent(eventData *data.Event, gameState *gamestate.Game, mapScene MapScen
 		x: eventData.X,
 		y: eventData.Y,
 	}
+	i := &interpreter{
+		gameState: gameState,
+		mapScene:  mapScene,
+	}
 	e := &Event{
 		data:             eventData,
-		gameState:        gameState,
-		mapScene:         mapScene,
+		interpreter:      i,
 		character:        c,
 		currentPageIndex: -1,
 	}
+	e.interpreter.event = e
 	if err := e.UpdateCharacterIfNeeded(); err != nil {
 		return nil, err
 	}
@@ -73,7 +61,27 @@ func (e *Event) Position() (int, int) {
 	return e.character.x, e.character.y
 }
 
-func (e *Event) currentPage() *data.Page {
+func (e *Event) SelfSwitch(id int) bool {
+	return e.selfSwitches[id]
+}
+
+func (e *Event) SetSelfSwitch(id int, value bool) {
+	e.selfSwitches[id] = value
+}
+
+func (e *Event) StartEvent(dir data.Dir) {
+	e.dirBeforeRunning = e.character.dir
+	e.character.turn(dir)
+	// page.Attitude is ignored so far.
+	e.character.attitude = data.AttitudeMiddle
+	e.steppingCount = 0
+}
+
+func (e *Event) EndEvent() {
+	e.character.turn(e.dirBeforeRunning)
+}
+
+func (e *Event) CurrentPage() *data.Page {
 	if e.currentPageIndex == -1 {
 		return nil
 	}
@@ -81,7 +89,7 @@ func (e *Event) currentPage() *data.Page {
 }
 
 func (e *Event) IsPassable() bool {
-	page := e.currentPage()
+	page := e.CurrentPage()
 	if page == nil {
 		return true
 	}
@@ -89,7 +97,7 @@ func (e *Event) IsPassable() bool {
 }
 
 func (e *Event) IsRunnable() bool {
-	page := e.currentPage()
+	page := e.CurrentPage()
 	if page == nil {
 		return true
 	}
@@ -97,7 +105,7 @@ func (e *Event) IsRunnable() bool {
 }
 
 func (e *Event) IsExecutingCommands() bool {
-	return e.executingPage != nil
+	return e.interpreter.executingPage != nil
 }
 
 func (e *Event) UpdateCharacterIfNeeded() error {
@@ -130,57 +138,9 @@ func (e *Event) UpdateCharacterIfNeeded() error {
 	return nil
 }
 
-func (e *Event) meetsCondition(cond *data.Condition) (bool, error) {
-	// TODO: Is it OK to allow null conditions?
-	if cond == nil {
-		return true, nil
-	}
-	switch cond.Type {
-	case data.ConditionTypeSwitch:
-		id := cond.ID
-		v := e.gameState.Variables().SwitchValue(id)
-		rhs := cond.Value.(bool)
-		return v == rhs, nil
-	case data.ConditionTypeSelfSwitch:
-		v := e.selfSwitches[cond.ID]
-		rhs := cond.Value.(bool)
-		return v == rhs, nil
-	case data.ConditionTypeVariable:
-		id := cond.ID
-		v := e.gameState.Variables().VariableValue(id)
-		rhs := cond.Value.(int)
-		switch cond.ValueType {
-		case data.ConditionValueTypeConstant:
-		case data.ConditionValueTypeVariable:
-			rhs = e.gameState.Variables().VariableValue(rhs)
-		default:
-			return false, fmt.Errorf("mapscene: invalid value type: %s", cond.ValueType)
-		}
-		switch cond.Comp {
-		case data.ConditionCompEqualTo:
-			return v == rhs, nil
-		case data.ConditionCompNotEqualTo:
-			return v != rhs, nil
-		case data.ConditionCompGreaterThanOrEqualTo:
-			return v >= rhs, nil
-		case data.ConditionCompGreaterThan:
-			return v > rhs, nil
-		case data.ConditionCompLessThanOrEqualTo:
-			return v <= rhs, nil
-		case data.ConditionCompLessThan:
-			return v < rhs, nil
-		default:
-			return false, fmt.Errorf("mapscene: invalid comp: %s", cond.Comp)
-		}
-	default:
-		return false, fmt.Errorf("mapscene: invalid condition: %s", cond)
-	}
-	return false, nil
-}
-
 func (e *Event) meetsPageCondition(page *data.Page) (bool, error) {
 	for _, cond := range page.Conditions {
-		m, err := e.meetsCondition(cond)
+		m, err := e.interpreter.meetsCondition(cond)
 		if err != nil {
 			return false, err
 		}
@@ -206,278 +166,26 @@ func (e *Event) calcPageIndex() (int, error) {
 }
 
 func (e *Event) TryRun(trigger data.Trigger) bool {
-	if e.executingPage != nil {
+	if e.interpreter.executingPage != nil {
 		return false
 	}
 	if trigger == data.TriggerNever {
 		return false
 	}
-	page := e.currentPage()
+	page := e.CurrentPage()
 	if page == nil {
 		return false
 	}
 	if page.Trigger != trigger {
 		return false
 	}
-	e.executingPage = page
+	e.interpreter.executingPage = page
 	return true
 }
 
-func (e *Event) updateCommands() error {
-	if e.executingPage == nil {
-		return nil
-	}
-	if e.commandIndex == nil {
-		e.dirBeforeRunning = e.character.dir
-		var dir data.Dir
-		ex, ey := e.character.x, e.character.y
-		px, py := e.mapScene.Player().character.x, e.mapScene.Player().character.y
-		switch {
-		case e.executingPage.Trigger == data.TriggerAuto:
-		case ex == px && ey == py:
-			// The player and the event are at the same position.
-		case ex > px && ey == py:
-			dir = data.DirLeft
-		case ex < px && ey == py:
-			dir = data.DirRight
-		case ex == px && ey > py:
-			dir = data.DirUp
-		case ex == px && ey < py:
-			dir = data.DirDown
-		default:
-			panic("not reach")
-		}
-		e.character.turn(dir)
-		// page.Attitude is ignored so far.
-		e.character.attitude = data.AttitudeMiddle
-		e.steppingCount = 0
-		e.commandIndex = newCommandIndex(e.currentPage())
-	}
-commandLoop:
-	for !e.commandIndex.isTerminated() {
-		c := e.commandIndex.command()
-		if !e.gameState.Windows().CanProceed() {
-			break commandLoop
-		}
-		switch c.Name {
-		case data.CommandNameIf:
-			conditions := c.Args.(*data.CommandArgsIf).Conditions
-			matches := true
-			for _, c := range conditions {
-				m, err := e.meetsCondition(c)
-				if err != nil {
-					return err
-				}
-				if !m {
-					matches = false
-					break commandLoop
-				}
-			}
-			if matches {
-				e.commandIndex.choose(0)
-			} else if len(c.Branches) >= 2 {
-				e.commandIndex.choose(1)
-			} else {
-				e.commandIndex.advance()
-			}
-		case data.CommandNameCallEvent:
-			println(fmt.Sprintf("not implemented yet: %s", c.Name))
-			e.commandIndex.advance()
-		case data.CommandNameWait:
-			if e.waitingCount == 0 {
-				e.waitingCount = c.Args.(*data.CommandArgsWait).Time * 6
-				break commandLoop
-			}
-			if e.waitingCount > 0 {
-				e.waitingCount--
-				if e.waitingCount == 0 {
-					e.commandIndex.advance()
-					continue commandLoop
-				}
-				break commandLoop
-			}
-			e.commandIndex.advance()
-		case data.CommandNameShowMessage:
-			if !e.waitingCommand {
-				args := c.Args.(*data.CommandArgsShowMessage)
-				content := data.Current().Texts.Get(language.Und, args.ContentID)
-				ch := e.mapScene.Character(args.EventID, e)
-				content = e.gameState.ParseMessageSyntax(content)
-				x := 0
-				y := 0
-				switch ch := ch.(type) {
-				case *Player:
-					x, y = ch.character.x, ch.character.y
-				case *Event:
-					x, y = ch.character.x, ch.character.y
-				default:
-					panic("not reach")
-				}
-				e.gameState.Windows().ShowMessage(content, x*scene.TileSize, y*scene.TileSize)
-				e.waitingCommand = true
-				break commandLoop
-			}
-			// Advance command index first and check the next command.
-			e.commandIndex.advance()
-			if !e.commandIndex.isTerminated() {
-				if e.commandIndex.command().Name != data.CommandNameShowChoices {
-					e.gameState.Windows().CloseAll()
-				}
-			} else {
-				e.gameState.Windows().CloseAll()
-			}
-			e.waitingCommand = false
-		case data.CommandNameShowChoices:
-			if !e.waitingCommand {
-				choices := []string{}
-				for _, id := range c.Args.(*data.CommandArgsShowChoices).ChoiceIDs {
-					choice := data.Current().Texts.Get(language.Und, id)
-					choice = e.gameState.ParseMessageSyntax(choice)
-					choices = append(choices, choice)
-				}
-				e.gameState.Windows().ShowChoices(choices)
-				e.waitingCommand = true
-				break commandLoop
-			}
-			if !e.gameState.Windows().HasChosenIndex() {
-				break commandLoop
-			}
-			e.commandIndex.choose(e.gameState.Windows().ChosenIndex())
-			e.waitingCommand = false
-		case data.CommandNameSetSwitch:
-			args := c.Args.(*data.CommandArgsSetSwitch)
-			e.gameState.Variables().SetSwitchValue(args.ID, args.Value)
-			e.commandIndex.advance()
-		case data.CommandNameSetSelfSwitch:
-			args := c.Args.(*data.CommandArgsSetSelfSwitch)
-			e.selfSwitches[args.ID] = args.Value
-			e.commandIndex.advance()
-		case data.CommandNameSetVariable:
-			args := c.Args.(*data.CommandArgsSetVariable)
-			e.setVariable(args.ID, args.Op, args.ValueType, args.Value)
-			e.commandIndex.advance()
-		case data.CommandNameTransfer:
-			args := c.Args.(*data.CommandArgsTransfer)
-			if !e.waitingCommand {
-				e.gameState.Screen().FadeOut(30)
-				e.waitingCommand = true
-				break commandLoop
-			}
-			if e.gameState.Screen().IsFadedOut() {
-				e.mapScene.TransferPlayerImmediately(args.RoomID, args.X, args.Y, e)
-				e.gameState.Screen().FadeIn(30)
-				break commandLoop
-			}
-			if e.gameState.Screen().IsFading() {
-				break commandLoop
-			}
-			e.waitingCommand = false
-			e.commandIndex.advance()
-		case data.CommandNameSetRoute:
-			println(fmt.Sprintf("not implemented yet: %s", c.Name))
-			e.commandIndex.advance()
-		case data.CommandNameTintScreen:
-			if !e.waitingCommand {
-				args := c.Args.(*data.CommandArgsTintScreen)
-				r := float64(args.Red) / 255
-				g := float64(args.Green) / 255
-				b := float64(args.Blue) / 255
-				gray := float64(args.Gray) / 255
-				e.gameState.Screen().StartTint(r, g, b, gray, args.Time*6)
-				if !args.Wait {
-					e.commandIndex.advance()
-					continue commandLoop
-				}
-				e.waitingCommand = args.Wait
-			}
-			if e.gameState.Screen().IsChangingTint() {
-				break commandLoop
-			}
-			e.waitingCommand = false
-			e.commandIndex.advance()
-		case data.CommandNamePlaySE:
-			println(fmt.Sprintf("not implemented yet: %s", c.Name))
-			e.commandIndex.advance()
-		case data.CommandNamePlayBGM:
-			println(fmt.Sprintf("not implemented yet: %s", c.Name))
-			e.commandIndex.advance()
-		case data.CommandNameStopBGM:
-			println(fmt.Sprintf("not implemented yet: %s", c.Name))
-			e.commandIndex.advance()
-		default:
-			return fmt.Errorf("command not implemented: %s", c.Name)
-		}
-	}
-	if e.commandIndex.isTerminated() {
-		if e.gameState.Windows().IsBusy() {
-			return nil
-		}
-		e.gameState.Windows().CloseAll()
-		e.character.turn(e.dirBeforeRunning)
-		e.executingPage = nil
-		e.commandIndex = nil
-		return nil
-	}
-	return nil
-}
-
-func (e *Event) setVariable(id int, op data.SetVariableOp, valueType data.SetVariableValueType, value interface{}) {
-	rhs := 0
-	switch valueType {
-	case data.SetVariableValueTypeConstant:
-		rhs = value.(int)
-	case data.SetVariableValueTypeVariable:
-		rhs = e.gameState.Variables().VariableValue(value.(int))
-	case data.SetVariableValueTypeRandom:
-		println(fmt.Sprintf("not implemented yet (set_variable): valueType %s", valueType))
-		return
-	case data.SetVariableValueTypeCharacter:
-		args := value.(*data.SetVariableCharacterArgs)
-		ch := e.mapScene.Character(args.EventID, e)
-		switch args.Type {
-		case data.SetVariableCharacterTypeDirection:
-			var dir data.Dir
-			switch ch := ch.(type) {
-			case *Player:
-				dir = ch.character.dir
-			case *Event:
-				dir = ch.character.dir
-			default:
-				panic("not reach")
-			}
-			switch dir {
-			case data.DirUp:
-				rhs = 0
-			case data.DirRight:
-				rhs = 1
-			case data.DirDown:
-				rhs = 2
-			case data.DirLeft:
-				rhs = 3
-			}
-		default:
-			println(fmt.Sprintf("not implemented yet (set_variable): type %s", args.Type))
-		}
-	}
-	switch op {
-	case data.SetVariableOpAssign:
-	case data.SetVariableOpAdd:
-		rhs += e.gameState.Variables().VariableValue(id)
-	case data.SetVariableOpSub:
-		rhs -= e.gameState.Variables().VariableValue(id)
-	case data.SetVariableOpMul:
-		rhs *= e.gameState.Variables().VariableValue(id)
-	case data.SetVariableOpDiv:
-		rhs /= e.gameState.Variables().VariableValue(id)
-	case data.SetVariableOpMod:
-		rhs %= e.gameState.Variables().VariableValue(id)
-	}
-	e.gameState.Variables().SetVariableValue(id, rhs)
-}
-
 func (e *Event) Update() error {
-	if e.executingPage == nil {
-		page := e.currentPage()
+	if e.interpreter.executingPage == nil {
+		page := e.CurrentPage()
 		if page == nil {
 			return nil
 		}
@@ -496,7 +204,7 @@ func (e *Event) Update() error {
 			e.steppingCount %= 120
 		}
 	}
-	if err := e.updateCommands(); err != nil {
+	if err := e.interpreter.update(); err != nil {
 		return err
 	}
 	return nil
