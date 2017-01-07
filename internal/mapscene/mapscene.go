@@ -66,10 +66,6 @@ func New() (*MapScene, error) {
 	return mapScene, nil
 }
 
-func (m *MapScene) state() *gamestate.Game {
-	return m.gameState
-}
-
 func (m *MapScene) currentMap() *data.Map {
 	for _, d := range data.Current().Maps {
 		if d.ID == m.currentMapID {
@@ -92,7 +88,7 @@ func (m *MapScene) changeRoom(roomID int) error {
 	m.currentRoomID = roomID
 	m.events = nil
 	for _, e := range m.currentRoom().Events {
-		event, err := newEvent(e, m)
+		event, err := newEvent(e, m.gameState, m)
 		if err != nil {
 			return err
 		}
@@ -296,18 +292,6 @@ func (m *MapScene) transferPlayerImmediately(roomID, x, y int, e *event) {
 	m.player.transferImmediately(x, y)
 	m.changeRoom(roomID)
 	m.continuingEvent = e
-}
-
-func (m *MapScene) fadeOut(count int) {
-	m.gameState.Screen().FadeOut(count)
-}
-
-func (m *MapScene) fadeIn(count int) {
-	m.gameState.Screen().FadeIn(count)
-}
-
-func (m *MapScene) isFadedOut() bool {
-	return m.gameState.Screen().IsFadedOut()
 }
 
 type tilesImageParts struct {

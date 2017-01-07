@@ -21,10 +21,12 @@ import (
 	"golang.org/x/text/language"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/gamestate"
 )
 
 type event struct {
 	data             *data.Event
+	gameState        *gamestate.Game
 	mapScene         *MapScene
 	character        *character
 	currentPageIndex int
@@ -37,13 +39,14 @@ type event struct {
 	executingPage    *data.Page
 }
 
-func newEvent(eventData *data.Event, mapScene *MapScene) (*event, error) {
+func newEvent(eventData *data.Event, gameState *gamestate.Game, mapScene *MapScene) (*event, error) {
 	c := &character{
 		x: eventData.X,
 		y: eventData.Y,
 	}
 	e := &event{
 		data:             eventData,
+		gameState:        gameState,
 		mapScene:         mapScene,
 		character:        c,
 		currentPageIndex: -1,
@@ -115,7 +118,7 @@ func (e *event) meetsCondition(cond *data.Condition) (bool, error) {
 	switch cond.Type {
 	case data.ConditionTypeSwitch:
 		id := cond.ID
-		v := e.mapScene.state().Variables().SwitchValue(id)
+		v := e.gameState.Variables().SwitchValue(id)
 		rhs := cond.Value.(bool)
 		return v == rhs, nil
 	case data.ConditionTypeSelfSwitch:
@@ -124,12 +127,12 @@ func (e *event) meetsCondition(cond *data.Condition) (bool, error) {
 		return v == rhs, nil
 	case data.ConditionTypeVariable:
 		id := cond.ID
-		v := e.mapScene.state().Variables().VariableValue(id)
+		v := e.gameState.Variables().VariableValue(id)
 		rhs := cond.Value.(int)
 		switch cond.ValueType {
 		case data.ConditionValueTypeConstant:
 		case data.ConditionValueTypeVariable:
-			rhs = e.mapScene.state().Variables().VariableValue(rhs)
+			rhs = e.gameState.Variables().VariableValue(rhs)
 		default:
 			return false, fmt.Errorf("mapscene: invalid value type: %s", cond.ValueType)
 		}
@@ -307,7 +310,7 @@ commandLoop:
 			e.waitingCommand = false
 		case data.CommandNameSetSwitch:
 			args := c.Args.(*data.CommandArgsSetSwitch)
-			e.mapScene.state().Variables().SetSwitchValue(args.ID, args.Value)
+			e.gameState.Variables().SetSwitchValue(args.ID, args.Value)
 			e.commandIndex.advance()
 		case data.CommandNameSetSelfSwitch:
 			args := c.Args.(*data.CommandArgsSetSelfSwitch)
@@ -320,16 +323,16 @@ commandLoop:
 		case data.CommandNameTransfer:
 			args := c.Args.(*data.CommandArgsTransfer)
 			if !e.waitingCommand {
-				e.mapScene.fadeOut(30)
+				e.gameState.Screen().FadeOut(30)
 				e.waitingCommand = true
 				break commandLoop
 			}
-			if e.mapScene.isFadedOut() {
+			if e.gameState.Screen().IsFadedOut() {
 				e.mapScene.transferPlayerImmediately(args.RoomID, args.X, args.Y, e)
-				e.mapScene.fadeIn(30)
+				e.gameState.Screen().FadeIn(30)
 				break commandLoop
 			}
-			if e.mapScene.gameState.Screen().IsFading() {
+			if e.gameState.Screen().IsFading() {
 				break commandLoop
 			}
 			e.waitingCommand = false
@@ -344,14 +347,14 @@ commandLoop:
 				g := float64(args.Green) / 255
 				b := float64(args.Blue) / 255
 				gray := float64(args.Gray) / 255
-				e.mapScene.gameState.Screen().StartTint(r, g, b, gray, args.Time*6)
+				e.gameState.Screen().StartTint(r, g, b, gray, args.Time*6)
 				if !args.Wait {
 					e.commandIndex.advance()
 					continue commandLoop
 				}
 				e.waitingCommand = args.Wait
 			}
-			if e.mapScene.gameState.Screen().IsChangingTint() {
+			if e.gameState.Screen().IsChangingTint() {
 				break commandLoop
 			}
 			e.waitingCommand = false
@@ -388,7 +391,7 @@ func (e *event) setVariable(id int, op data.SetVariableOp, valueType data.SetVar
 	case data.SetVariableValueTypeConstant:
 		rhs = value.(int)
 	case data.SetVariableValueTypeVariable:
-		rhs = e.mapScene.state().Variables().VariableValue(value.(int))
+		rhs = e.gameState.Variables().VariableValue(value.(int))
 	case data.SetVariableValueTypeRandom:
 		println(fmt.Sprintf("not implemented yet (set_variable): valueType %s", valueType))
 		return
@@ -414,17 +417,17 @@ func (e *event) setVariable(id int, op data.SetVariableOp, valueType data.SetVar
 	switch op {
 	case data.SetVariableOpAssign:
 	case data.SetVariableOpAdd:
-		rhs += e.mapScene.state().Variables().VariableValue(id)
+		rhs += e.gameState.Variables().VariableValue(id)
 	case data.SetVariableOpSub:
-		rhs -= e.mapScene.state().Variables().VariableValue(id)
+		rhs -= e.gameState.Variables().VariableValue(id)
 	case data.SetVariableOpMul:
-		rhs *= e.mapScene.state().Variables().VariableValue(id)
+		rhs *= e.gameState.Variables().VariableValue(id)
 	case data.SetVariableOpDiv:
-		rhs /= e.mapScene.state().Variables().VariableValue(id)
+		rhs /= e.gameState.Variables().VariableValue(id)
 	case data.SetVariableOpMod:
-		rhs %= e.mapScene.state().Variables().VariableValue(id)
+		rhs %= e.gameState.Variables().VariableValue(id)
 	}
-	e.mapScene.state().Variables().SetVariableValue(id, rhs)
+	e.gameState.Variables().SetVariableValue(id, rhs)
 }
 
 func (e *event) update() error {
