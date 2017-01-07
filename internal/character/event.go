@@ -23,7 +23,7 @@ import (
 
 type Event struct {
 	data             *data.Event
-	interpreter      *interpreter
+	interpreter      *Interpreter
 	character        *character
 	currentPageIndex int
 	steppingCount    int
@@ -36,7 +36,7 @@ func NewEvent(eventData *data.Event, gameState *gamestate.Game, mapScene MapScen
 		x: eventData.X,
 		y: eventData.Y,
 	}
-	i := &interpreter{
+	i := &Interpreter{
 		gameState: gameState,
 		mapScene:  mapScene,
 	}

@@ -31,7 +31,7 @@ type MapScene interface {
 	TransferPlayerImmediately(roomID, x, y int, event *Event)
 }
 
-type interpreter struct {
+type Interpreter struct {
 	gameState      *gamestate.Game
 	event          *Event
 	commandIndex   *commandIndex
@@ -42,20 +42,20 @@ type interpreter struct {
 	trigger        data.Trigger
 }
 
-func (i *interpreter) SetEvent(event *Event) {
+func (i *Interpreter) SetEvent(event *Event) {
 	i.event = event
 }
 
-func (i *interpreter) IsExecuting() bool {
+func (i *Interpreter) IsExecuting() bool {
 	return i.commands != nil
 }
 
-func (i *interpreter) SetCommands(commands []*data.Command, trigger data.Trigger) {
+func (i *Interpreter) SetCommands(commands []*data.Command, trigger data.Trigger) {
 	i.commands = commands
 	i.trigger = trigger
 }
 
-func (i *interpreter) MeetsCondition(cond *data.Condition) (bool, error) {
+func (i *Interpreter) MeetsCondition(cond *data.Condition) (bool, error) {
 	// TODO: Is it OK to allow null conditions?
 	if cond == nil {
 		return true, nil
@@ -103,7 +103,7 @@ func (i *interpreter) MeetsCondition(cond *data.Condition) (bool, error) {
 	return false, nil
 }
 
-func (i *interpreter) Update() error {
+func (i *Interpreter) Update() error {
 	if i.commands == nil {
 		return nil
 	}
@@ -297,7 +297,7 @@ commandLoop:
 	return nil
 }
 
-func (i *interpreter) setVariable(id int, op data.SetVariableOp, valueType data.SetVariableValueType, value interface{}) {
+func (i *Interpreter) setVariable(id int, op data.SetVariableOp, valueType data.SetVariableValueType, value interface{}) {
 	rhs := 0
 	switch valueType {
 	case data.SetVariableValueTypeConstant:
