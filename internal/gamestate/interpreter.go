@@ -138,7 +138,7 @@ func (i *Interpreter) Update() error {
 commandLoop:
 	for !i.commandIndex.isTerminated() {
 		c := i.commandIndex.command()
-		if !i.gameState.Windows().CanProceed() {
+		if !i.gameState.windows.CanProceed() {
 			break commandLoop
 		}
 		switch c.Name {
@@ -195,7 +195,7 @@ commandLoop:
 				default:
 					panic("not reach")
 				}
-				i.gameState.Windows().ShowMessage(content, x*scene.TileSize, y*scene.TileSize)
+				i.gameState.windows.ShowMessage(content, x*scene.TileSize, y*scene.TileSize)
 				i.waitingCommand = true
 				break commandLoop
 			}
@@ -203,10 +203,10 @@ commandLoop:
 			i.commandIndex.advance()
 			if !i.commandIndex.isTerminated() {
 				if i.commandIndex.command().Name != data.CommandNameShowChoices {
-					i.gameState.Windows().CloseAll()
+					i.gameState.windows.CloseAll()
 				}
 			} else {
-				i.gameState.Windows().CloseAll()
+				i.gameState.windows.CloseAll()
 			}
 			i.waitingCommand = false
 		case data.CommandNameShowChoices:
@@ -217,14 +217,14 @@ commandLoop:
 					choice = i.gameState.ParseMessageSyntax(choice)
 					choices = append(choices, choice)
 				}
-				i.gameState.Windows().ShowChoices(choices)
+				i.gameState.windows.ShowChoices(choices)
 				i.waitingCommand = true
 				break commandLoop
 			}
-			if !i.gameState.Windows().HasChosenIndex() {
+			if !i.gameState.windows.HasChosenIndex() {
 				break commandLoop
 			}
-			i.commandIndex.choose(i.gameState.Windows().ChosenIndex())
+			i.commandIndex.choose(i.gameState.windows.ChosenIndex())
 			i.waitingCommand = false
 		case data.CommandNameSetSwitch:
 			args := c.Args.(*data.CommandArgsSetSwitch)
@@ -241,16 +241,16 @@ commandLoop:
 		case data.CommandNameTransfer:
 			args := c.Args.(*data.CommandArgsTransfer)
 			if !i.waitingCommand {
-				i.gameState.Screen().fadeOut(30)
+				i.gameState.screen.fadeOut(30)
 				i.waitingCommand = true
 				break commandLoop
 			}
-			if i.gameState.Screen().isFadedOut() {
+			if i.gameState.screen.isFadedOut() {
 				i.mapScene.TransferPlayerImmediately(args.RoomID, args.X, args.Y, i.event)
-				i.gameState.Screen().fadeIn(30)
+				i.gameState.screen.fadeIn(30)
 				break commandLoop
 			}
-			if i.gameState.Screen().isFading() {
+			if i.gameState.screen.isFading() {
 				break commandLoop
 			}
 			i.waitingCommand = false
@@ -265,14 +265,14 @@ commandLoop:
 				g := float64(args.Green) / 255
 				b := float64(args.Blue) / 255
 				gray := float64(args.Gray) / 255
-				i.gameState.Screen().startTint(r, g, b, gray, args.Time*6)
+				i.gameState.screen.startTint(r, g, b, gray, args.Time*6)
 				if !args.Wait {
 					i.commandIndex.advance()
 					continue commandLoop
 				}
 				i.waitingCommand = args.Wait
 			}
-			if i.gameState.Screen().isChangingTint() {
+			if i.gameState.screen.isChangingTint() {
 				break commandLoop
 			}
 			i.waitingCommand = false
@@ -291,10 +291,10 @@ commandLoop:
 		}
 	}
 	if i.commandIndex.isTerminated() {
-		if i.gameState.Windows().IsBusy() {
+		if i.gameState.windows.IsBusy() {
 			return nil
 		}
-		i.gameState.Windows().CloseAll()
+		i.gameState.windows.CloseAll()
 		i.event.EndEvent()
 		i.commands = nil
 		i.commandIndex = nil
