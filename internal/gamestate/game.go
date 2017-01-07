@@ -56,16 +56,26 @@ func NewGame() (*Game, error) {
 	}, nil
 }
 
-func (g *Game) MapID() int {
-	return g.mapID
-}
-
-func (g *Game) RoomID() int {
-	return g.roomID
-}
-
 func (g *Game) SetRoomID(id int) {
 	g.roomID = id
+}
+
+func (g *Game) CurrentMap() *data.Map {
+	for _, d := range data.Current().Maps {
+		if d.ID == g.mapID {
+			return d
+		}
+	}
+	return nil
+}
+
+func (g *Game) CurrentRoom() *data.Room {
+	for _, r := range g.CurrentMap().Rooms {
+		if r.ID == g.roomID {
+			return r
+		}
+	}
+	return nil
 }
 
 func (g *Game) Screen() *Screen {
