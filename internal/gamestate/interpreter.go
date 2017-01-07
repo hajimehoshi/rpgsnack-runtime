@@ -26,8 +26,6 @@ import (
 
 // TODO: Remove this
 type MapScene interface {
-	MapID() int
-	RoomID() int
 	Character(eventID int, self *character.Event) interface{}
 	TransferPlayerImmediately(roomID, x, y int, event *character.Event)
 }
@@ -75,7 +73,7 @@ func (i *Interpreter) MeetsCondition(cond *data.Condition) (bool, error) {
 		rhs := cond.Value.(bool)
 		return v == rhs, nil
 	case data.ConditionTypeSelfSwitch:
-		m, r := i.mapScene.MapID(), i.mapScene.RoomID()
+		m, r := i.gameState.mapID, i.gameState.roomID
 		v := i.gameState.variables.SelfSwitchValue(m, r, i.event.ID(), cond.ID)
 		rhs := cond.Value.(bool)
 		return v == rhs, nil
@@ -235,7 +233,7 @@ commandLoop:
 			i.commandIndex.advance()
 		case data.CommandNameSetSelfSwitch:
 			args := c.Args.(*data.CommandArgsSetSelfSwitch)
-			m, r := i.mapScene.MapID(), i.mapScene.RoomID()
+			m, r := i.gameState.mapID, i.gameState.roomID
 			i.gameState.variables.SetSelfSwitchValue(m, r, i.event.ID(), args.ID, args.Value)
 			i.commandIndex.advance()
 		case data.CommandNameSetVariable:

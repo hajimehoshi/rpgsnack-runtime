@@ -32,13 +32,15 @@ type Game struct {
 	screen    *Screen
 	windows   *window.Windows
 	player    *character.Player
+	mapID     int
+	roomID    int
 }
 
 func NewGame() (*Game, error) {
 	pos := data.Current().System.InitialPosition
-	x, y := 0, 0
+	x, y, roomID := 0, 0, 1
 	if pos != nil {
-		x, y = pos.X, pos.Y
+		x, y, roomID = pos.X, pos.Y, pos.RoomID
 	}
 	player, err := character.NewPlayer(x, y)
 	if err != nil {
@@ -49,7 +51,21 @@ func NewGame() (*Game, error) {
 		screen:    &Screen{},
 		windows:   &window.Windows{},
 		player:    player,
+		mapID:     1,
+		roomID:    roomID,
 	}, nil
+}
+
+func (g *Game) MapID() int {
+	return g.mapID
+}
+
+func (g *Game) RoomID() int {
+	return g.roomID
+}
+
+func (g *Game) SetRoomID(id int) {
+	g.roomID = id
 }
 
 func (g *Game) Screen() *Screen {

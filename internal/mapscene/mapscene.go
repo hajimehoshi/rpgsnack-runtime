@@ -31,8 +31,6 @@ import (
 
 type MapScene struct {
 	gameState       *gamestate.Game
-	currentMapID    int
-	currentRoomID   int
 	moveDstX        int
 	moveDstY        int
 	tilesImage      *ebiten.Image
@@ -41,11 +39,6 @@ type MapScene struct {
 }
 
 func New() (*MapScene, error) {
-	pos := data.Current().System.InitialPosition
-	roomID := 1
-	if pos != nil {
-		roomID = pos.RoomID
-	}
 	tilesImage, err := ebiten.NewImage(scene.TileXNum*scene.TileSize, scene.TileYNum*scene.TileSize, ebiten.FilterNearest)
 	if err != nil {
 		return nil, err
@@ -55,25 +48,16 @@ func New() (*MapScene, error) {
 		return nil, err
 	}
 	mapScene := &MapScene{
-		currentMapID: 1,
 		gameState:    state,
 		tilesImage:   tilesImage,
 	}
-	mapScene.changeRoom(roomID)
+	mapScene.changeRoom()
 	return mapScene, nil
-}
-
-func (m *MapScene) MapID() int {
-	return m.currentMapID
-}
-
-func (m *MapScene) RoomID() int {
-	return m.currentRoomID
 }
 
 func (m *MapScene) currentMap() *data.Map {
 	for _, d := range data.Current().Maps {
-		if d.ID == m.currentMapID {
+		if d.ID == m.gameState.MapID() {
 			return d
 		}
 	}
@@ -82,15 +66,14 @@ func (m *MapScene) currentMap() *data.Map {
 
 func (m *MapScene) currentRoom() *data.Room {
 	for _, r := range m.currentMap().Rooms {
-		if r.ID == m.currentRoomID {
+		if r.ID == m.gameState.RoomID() {
 			return r
 		}
 	}
 	return nil
 }
 
-func (m *MapScene) changeRoom(roomID int) error {
-	m.currentRoomID = roomID
+func (m *MapScene) changeRoom() error {
 	m.events = nil
 	for _, e := range m.currentRoom().Events {
 		i := gamestate.NewInterpreter(m.gameState, m)
@@ -282,7 +265,8 @@ func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 
 func (m *MapScene) TransferPlayerImmediately(roomID, x, y int, e *character.Event) {
 	m.gameState.Player().TransferImmediately(x, y)
-	m.changeRoom(roomID)
+	m.gameState.SetRoomID(roomID)
+	m.changeRoom()
 	m.continuingEvent = e
 }
 
