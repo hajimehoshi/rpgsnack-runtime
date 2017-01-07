@@ -323,6 +323,8 @@ commandLoop:
 				if e.commandIndex.command().Name != data.CommandNameShowChoices {
 					e.gameState.Windows().CloseAll()
 				}
+			} else {
+				e.gameState.Windows().CloseAll()
 			}
 			e.waitingCommand = false
 		case data.CommandNameShowChoices:
