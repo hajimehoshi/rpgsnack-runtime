@@ -83,12 +83,12 @@ func (c *character) consumeRoute() {
 	}
 }
 
-func (c *character) move(dir data.Dir) (bool, error) {
+func (c *character) move(dir data.Dir) bool {
 	c.turn(dir)
 	c.moveDir = dir
 	// TODO: Rename this
 	c.moveCount = playerMaxMoveCount
-	return true, nil
+	return true
 }
 
 type characterImageParts struct {
