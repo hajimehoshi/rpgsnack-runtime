@@ -125,7 +125,7 @@ func (i *interpreter) Update() error {
 			panic("not reach")
 		}
 		i.event.StartEvent(dir)
-		i.commandIndex = newCommandIndex(i.event.CurrentPage())
+		i.commandIndex = newCommandIndex(i.event.CurrentPage().Commands)
 	}
 commandLoop:
 	for !i.commandIndex.isTerminated() {

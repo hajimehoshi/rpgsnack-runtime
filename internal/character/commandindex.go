@@ -19,42 +19,42 @@ import (
 )
 
 type commandIndex struct {
-	commands []int
-	branches []int
-	page     *data.Page
+	commandIndices []int
+	branchIndices  []int
+	commands       []*data.Command
 }
 
-func newCommandIndex(page *data.Page) *commandIndex {
+func newCommandIndex(commands []*data.Command) *commandIndex {
 	c := &commandIndex{
-		commands: []int{0},
-		page:     page,
+		commandIndices: []int{0},
+		commands:       commands,
 	}
 	c.unindentIfNeeded()
 	return c
 }
 
 func (c *commandIndex) isTerminated() bool {
-	return len(c.commands) == 0
+	return len(c.commandIndices) == 0
 }
 
 func (c *commandIndex) unindentIfNeeded() {
 loop:
-	for 0 < len(c.commands) {
-		branch := c.page.Commands
-		for i := 0; i < len(c.commands); i++ {
-			if len(branch) <= c.commands[i] {
-				c.commands = c.commands[:i]
-				if len(c.commands) > 0 {
-					c.commands[len(c.commands)-1]++
+	for 0 < len(c.commandIndices) {
+		branch := c.commands
+		for i := 0; i < len(c.commandIndices); i++ {
+			if len(branch) <= c.commandIndices[i] {
+				c.commandIndices = c.commandIndices[:i]
+				if len(c.commandIndices) > 0 {
+					c.commandIndices[len(c.commandIndices)-1]++
 				}
 				if i > 0 {
-					c.branches = c.branches[:i-1]
+					c.branchIndices = c.branchIndices[:i-1]
 				}
 				continue loop
 			}
-			if i < len(c.commands)-1 {
-				command := branch[c.commands[i]]
-				branch = command.Branches[c.branches[i]]
+			if i < len(c.commandIndices)-1 {
+				command := branch[c.commandIndices[i]]
+				branch = command.Branches[c.branchIndices[i]]
 				continue
 			}
 		}
@@ -63,21 +63,21 @@ loop:
 }
 
 func (c *commandIndex) command() *data.Command {
-	branch := c.page.Commands
-	for i, bi := range c.branches {
-		command := branch[c.commands[i]]
+	branch := c.commands
+	for i, bi := range c.branchIndices {
+		command := branch[c.commandIndices[i]]
 		branch = command.Branches[bi]
 	}
-	return branch[c.commands[len(c.commands)-1]]
+	return branch[c.commandIndices[len(c.commandIndices)-1]]
 }
 
 func (c *commandIndex) advance() {
-	c.commands[len(c.commands)-1]++
+	c.commandIndices[len(c.commandIndices)-1]++
 	c.unindentIfNeeded()
 }
 
 func (c *commandIndex) choose(branchIndex int) {
-	c.branches = append(c.branches, branchIndex)
-	c.commands = append(c.commands, 0)
+	c.branchIndices = append(c.branchIndices, branchIndex)
+	c.commandIndices = append(c.commandIndices, 0)
 	c.unindentIfNeeded()
 }
