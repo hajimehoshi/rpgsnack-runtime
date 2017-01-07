@@ -50,6 +50,24 @@ func NewInterpreter(gameState *Game, mapID, roomID, eventID int) *Interpreter {
 	}
 }
 
+func (i *Interpreter) event() *character.Event {
+	if i.eventID == -1 {
+		return nil
+	}
+	if i.gameState.mapID != i.mapID {
+		return nil
+	}
+	if i.gameState.roomID != i.roomID {
+		return nil
+	}
+	for _, e := range i.gameState.events {
+		if i.eventID == e.ID() {
+			return e
+		}
+	}
+	return nil
+}
+
 func (i *Interpreter) IsExecuting() bool {
 	return i.commandIndex != nil
 }
@@ -60,6 +78,12 @@ func (i *Interpreter) SetCommands(commands []*data.Command, trigger data.Trigger
 }
 
 func (i *Interpreter) character(id int) posAndDir {
+	if i.gameState.mapID != i.mapID {
+		return nil
+	}
+	if i.gameState.roomID != i.roomID {
+		return nil
+	}
 	if id == -1 {
 		return i.gameState.player
 	}
@@ -123,14 +147,15 @@ func (i *Interpreter) MeetsCondition(cond *data.Condition) (bool, error) {
 	return false, nil
 }
 
-func (i *Interpreter) Update(event *character.Event) error {
+func (i *Interpreter) Update() error {
 	if i.commandIndex == nil {
 		return nil
 	}
 	if i.gameState.Player().IsMovingByUserInput() {
 		return nil
 	}
-	if !i.started {
+	if !i.started && i.eventID != -1 {
+		event := i.event()
 		var dir data.Dir
 		ex, ey := event.Position()
 		px, py := i.gameState.Player().Position()
@@ -200,12 +225,13 @@ commandLoop:
 			if !i.waitingCommand {
 				args := c.Args.(*data.CommandArgsShowMessage)
 				content := data.Current().Texts.Get(language.Und, args.ContentID)
-				ch := i.character(args.EventID)
-				x, y := ch.Position()
-				content = i.gameState.ParseMessageSyntax(content)
-				i.gameState.windows.ShowMessage(content, x*scene.TileSize, y*scene.TileSize)
-				i.waitingCommand = true
-				break commandLoop
+				if ch := i.character(args.EventID); ch != nil {
+					x, y := ch.Position()
+					content = i.gameState.ParseMessageSyntax(content)
+					i.gameState.windows.ShowMessage(content, x*scene.TileSize, y*scene.TileSize)
+					i.waitingCommand = true
+					break commandLoop
+				}
 			}
 			// Advance command index first and check the next command.
 			i.commandIndex.advance()
@@ -255,7 +281,7 @@ commandLoop:
 				break commandLoop
 			}
 			if i.gameState.screen.isFadedOut() {
-				i.gameState.transferPlayerImmediately(args.RoomID, args.X, args.Y, event)
+				i.gameState.transferPlayerImmediately(args.RoomID, args.X, args.Y, i.event())
 				i.gameState.screen.fadeIn(30)
 				break commandLoop
 			}
@@ -304,7 +330,9 @@ commandLoop:
 			return nil
 		}
 		i.gameState.windows.CloseAll()
-		event.EndEvent()
+		if e := i.event(); e != nil {
+			e.EndEvent()
+		}
 		i.commandIndex = nil
 		i.started = false
 		return nil
@@ -325,6 +353,10 @@ func (i *Interpreter) setVariable(id int, op data.SetVariableOp, valueType data.
 	case data.SetVariableValueTypeCharacter:
 		args := value.(*data.SetVariableCharacterArgs)
 		ch := i.character(args.EventID)
+		if ch == nil {
+			// TODO: return error?
+			return
+		}
 		dir := ch.Dir()
 		switch args.Type {
 		case data.SetVariableCharacterTypeDirection:

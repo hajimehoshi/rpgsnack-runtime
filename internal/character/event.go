@@ -24,7 +24,7 @@ type Interpreter interface {
 	IsExecuting() bool
 	MeetsCondition(cond *data.Condition) (bool, error)
 	SetCommands(commands []*data.Command, trigger data.Trigger)
-	Update(event *Event) error
+	Update() error
 }
 
 type Event struct {
@@ -136,7 +136,7 @@ func (e *Event) UpdateCharacterIfNeeded() error {
 
 func (e *Event) meetsPageCondition(page *data.Page) (bool, error) {
 	for _, cond := range page.Conditions {
-		m, err := e.interpreter.MeetsCondition(cond, e)
+		m, err := e.interpreter.MeetsCondition(cond)
 		if err != nil {
 			return false, err
 		}
@@ -200,7 +200,7 @@ func (e *Event) Update() error {
 			e.steppingCount %= 120
 		}
 	}
-	if err := e.interpreter.Update(e); err != nil {
+	if err := e.interpreter.Update(); err != nil {
 		return err
 	}
 	return nil
