@@ -77,29 +77,19 @@ func (g *Game) Events() []*character.Event {
 	return g.events
 }
 
-func (g *Game) executingEvent() *character.Event {
+func (g *Game) IsEventExecuting() bool {
 	if g.continuingEvent != nil && g.continuingEvent.IsExecutingCommands() {
-		return g.continuingEvent
+		return true
 	}
 	for _, e := range g.events {
 		if e.IsExecutingCommands() {
-			return e
+			return true
 		}
 	}
-	return nil
-}
-
-func (g *Game) IsEventExecuting() bool {
-	return g.executingEvent() != nil
+	return false
 }
 
 func (g *Game) UpdateEvents() error {
-	if e := g.executingEvent(); e != nil {
-		if err := e.Update(); err != nil {
-			return err
-		}
-		return nil
-	}
 	for _, e := range g.events {
 		if err := e.Update(); err != nil {
 			return err
