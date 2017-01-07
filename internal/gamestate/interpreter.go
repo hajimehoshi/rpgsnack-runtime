@@ -24,11 +24,6 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
 
-// TODO: Remove this
-type MapScene interface {
-	TransferPlayerImmediately(roomID, x, y int, event *character.Event)
-}
-
 type posAndDir interface {
 	Position() (int, int)
 	Dir() data.Dir
@@ -40,15 +35,13 @@ type Interpreter struct {
 	commandIndex   *commandIndex
 	waitingCount   int
 	waitingCommand bool
-	mapScene       MapScene
 	commands       []*data.Command
 	trigger        data.Trigger
 }
 
-func NewInterpreter(gameState *Game, mapScene MapScene) *Interpreter {
+func NewInterpreter(gameState *Game) *Interpreter {
 	return &Interpreter{
 		gameState: gameState,
-		mapScene:  mapScene,
 	}
 }
 
@@ -243,7 +236,7 @@ commandLoop:
 				break commandLoop
 			}
 			if i.gameState.screen.isFadedOut() {
-				i.mapScene.TransferPlayerImmediately(args.RoomID, args.X, args.Y, i.event)
+				i.gameState.transferPlayerImmediately(args.RoomID, args.X, args.Y, i.event)
 				i.gameState.screen.fadeIn(30)
 				break commandLoop
 			}

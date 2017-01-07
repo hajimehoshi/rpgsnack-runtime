@@ -38,7 +38,7 @@ type Game struct {
 	continuingEvent *character.Event
 }
 
-func NewGame(m MapScene) (*Game, error) {
+func NewGame() (*Game, error) {
 	pos := data.Current().System.InitialPosition
 	x, y, roomID := 0, 0, 1
 	if pos != nil {
@@ -55,15 +55,15 @@ func NewGame(m MapScene) (*Game, error) {
 		player:    player,
 		mapID:     1,
 	}
-	g.SetRoomID(roomID, m)
+	g.SetRoomID(roomID)
 	return g, nil
 }
 
-func (g *Game) SetRoomID(id int, m MapScene) error {
+func (g *Game) SetRoomID(id int) error {
 	g.roomID = id
 	g.events = nil
 	for _, e := range g.CurrentRoom().Events {
-		i := NewInterpreter(g, m)
+		i := NewInterpreter(g)
 		event, err := character.NewEvent(e, i)
 		if err != nil {
 			return err
@@ -93,12 +93,14 @@ func (g *Game) character(id int, self *character.Event) posAndDir {
 	}
 }
 
-func (g *Game) ContinuingEvent() *character.Event {
-	return g.continuingEvent
+func (g *Game) transferPlayerImmediately(roomID, x, y int, e *character.Event) {
+	g.player.TransferImmediately(x, y)
+	g.SetRoomID(roomID)
+	g.continuingEvent = e
 }
 
-func (g *Game) SetContinuingEvent(e *character.Event) {
-	g.continuingEvent = e
+func (g *Game) ContinuingEvent() *character.Event {
+	return g.continuingEvent
 }
 
 func (g *Game) CurrentMap() *data.Map {

@@ -41,14 +41,14 @@ func New() (*MapScene, error) {
 	if err != nil {
 		return nil, err
 	}
-	mapScene := &MapScene{
-		tilesImage: tilesImage,
-	}
-	state, err := gamestate.NewGame(mapScene)
+	state, err := gamestate.NewGame()
 	if err != nil {
 		return nil, err
 	}
-	mapScene.gameState = state
+	mapScene := &MapScene{
+		tilesImage: tilesImage,
+		gameState:  state,
+	}
 	return mapScene, nil
 }
 
@@ -211,11 +211,6 @@ func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 		return err
 	}
 	return nil
-}
-func (m *MapScene) TransferPlayerImmediately(roomID, x, y int, e *character.Event) {
-	m.gameState.Player().TransferImmediately(x, y)
-	m.gameState.SetRoomID(roomID, m)
-	m.gameState.SetContinuingEvent(e)
 }
 
 type tilesImageParts struct {
