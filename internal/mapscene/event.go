@@ -431,26 +431,25 @@ func (e *event) setVariable(id int, op data.SetVariableOp, valueType data.SetVar
 }
 
 func (e *event) update() error {
-	if err := e.updateCharacterIfNeeded(); err != nil {
-		return err
-	}
-	page := e.currentPage()
-	if page == nil {
-		return nil
-	}
-	if page.Stepping {
-		switch {
-		case e.steppingCount < 30:
-			e.character.attitude = data.AttitudeMiddle
-		case e.steppingCount < 60:
-			e.character.attitude = data.AttitudeLeft
-		case e.steppingCount < 90:
-			e.character.attitude = data.AttitudeMiddle
-		default:
-			e.character.attitude = data.AttitudeRight
+	if e.executingPage == nil {
+		page := e.currentPage()
+		if page == nil {
+			return nil
 		}
-		e.steppingCount++
-		e.steppingCount %= 120
+		if page.Stepping {
+			switch {
+			case e.steppingCount < 30:
+				e.character.attitude = data.AttitudeMiddle
+			case e.steppingCount < 60:
+				e.character.attitude = data.AttitudeLeft
+			case e.steppingCount < 90:
+				e.character.attitude = data.AttitudeMiddle
+			default:
+				e.character.attitude = data.AttitudeRight
+			}
+			e.steppingCount++
+			e.steppingCount %= 120
+		}
 	}
 	if err := e.updateCommands(); err != nil {
 		return err

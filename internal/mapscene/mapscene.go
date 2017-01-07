@@ -223,16 +223,16 @@ func (m *MapScene) character(id int, self *event) *character {
 	return ch
 }
 
-func (m *MapScene) isExecutingEvent() bool {
+func (m *MapScene) executingEvent() *event {
 	for _, e := range m.events {
 		if e.executingPage != nil {
-			return true
+			return e
 		}
 	}
 	if m.continuingEvent != nil && m.continuingEvent.executingPage != nil {
-		return true
+		return m.continuingEvent
 	}
-	return false
+	return nil
 }
 
 func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
@@ -246,6 +246,17 @@ func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 		return err
 	}
 	for _, e := range m.events {
+		if err := e.updateCharacterIfNeeded(); err != nil {
+			return err
+		}
+	}
+	if e := m.executingEvent(); e != nil {
+		if err := e.update(); err != nil {
+			return err
+		}
+		return nil
+	}
+	for _, e := range m.events {
 		if err := e.update(); err != nil {
 			return err
 		}
@@ -254,9 +265,6 @@ func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 		if err := m.continuingEvent.update(); err != nil {
 			return err
 		}
-	}
-	if m.isExecutingEvent() {
-		return nil
 	}
 	for _, e := range m.events {
 		if e.tryRun(data.TriggerAuto) {
