@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package mapscene
+package character
 
 import (
 	"github.com/hajimehoshi/ebiten"
@@ -22,12 +22,12 @@ import (
 
 const playerMaxMoveCount = 4
 
-type player struct {
+type Player struct {
 	character         *character
 	movingByUserInput bool
 }
 
-func newPlayer(x, y int) (*player, error) {
+func NewPlayer(x, y int) (*Player, error) {
 	c := &character{
 		imageName:    "characters0.png",
 		imageIndex:   0,
@@ -38,16 +38,20 @@ func newPlayer(x, y int) (*player, error) {
 		attitude:     data.AttitudeMiddle,
 		prevAttitude: data.AttitudeMiddle,
 	}
-	return &player{
+	return &Player{
 		character: c,
 	}, nil
 }
 
-func (p *player) isMovingByUserInput() bool {
+func (p *Player) IsMovingByUserInput() bool {
 	return p.movingByUserInput
 }
 
-func (p *player) moveByUserInput(passable func(x, y int) (bool, error), x, y int) error {
+func (p *Player) IsMoving() bool {
+	return p.character.isMoving()
+}
+
+func (p *Player) MoveByUserInput(passable func(x, y int) (bool, error), x, y int) error {
 	c := p.character
 	path, err := calcPath(passable, c.x, c.y, x, y)
 	if err != nil {
@@ -61,11 +65,11 @@ func (p *player) moveByUserInput(passable func(x, y int) (bool, error), x, y int
 	return nil
 }
 
-func (p *player) transferImmediately(x, y int) {
+func (p *Player) TransferImmediately(x, y int) {
 	p.character.transferImmediately(x, y)
 }
 
-func (p *player) update(passable func(x, y int) (bool, error)) error {
+func (p *Player) Update(passable func(x, y int) (bool, error)) error {
 	if err := p.character.update(passable); err != nil {
 		return err
 	}
@@ -75,7 +79,7 @@ func (p *player) update(passable func(x, y int) (bool, error)) error {
 	return nil
 }
 
-func (p *player) draw(screen *ebiten.Image) error {
+func (p *Player) Draw(screen *ebiten.Image) error {
 	if err := p.character.draw(screen); err != nil {
 		return err
 	}

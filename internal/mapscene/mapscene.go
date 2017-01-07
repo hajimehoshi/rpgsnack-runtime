@@ -21,6 +21,7 @@ import (
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/font"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/gamestate"
@@ -32,12 +33,12 @@ type MapScene struct {
 	gameState       *gamestate.Game
 	currentMapID    int
 	currentRoomID   int
-	player          *player
+	player          *character.Player
 	moveDstX        int
 	moveDstY        int
 	tilesImage      *ebiten.Image
-	events          []*event
-	continuingEvent *event
+	events          []*character.Event
+	continuingEvent *character.Event
 }
 
 func New() (*MapScene, error) {
@@ -46,7 +47,7 @@ func New() (*MapScene, error) {
 	if pos != nil {
 		x, y, roomID = pos.X, pos.Y, pos.RoomID
 	}
-	player, err := newPlayer(x, y)
+	player, err := character.NewPlayer(x, y)
 	if err != nil {
 		return nil, err
 	}
@@ -62,6 +63,10 @@ func New() (*MapScene, error) {
 	}
 	mapScene.changeRoom(roomID)
 	return mapScene, nil
+}
+
+func (m *MapScene) Player() *character.Player {
+	return m.player
 }
 
 func (m *MapScene) currentMap() *data.Map {
@@ -86,7 +91,7 @@ func (m *MapScene) changeRoom(roomID int) error {
 	m.currentRoomID = roomID
 	m.events = nil
 	for _, e := range m.currentRoom().Events {
-		event, err := newEvent(e, m.gameState, m)
+		event, err := character.NewEvent(e, m.gameState, m)
 		if err != nil {
 			return err
 		}
@@ -154,12 +159,12 @@ func (m *MapScene) passable(x, y int) (bool, error) {
 	if e == nil {
 		return true, nil
 	}
-	return e.isPassable(), nil
+	return e.IsPassable(), nil
 }
 
-func (m *MapScene) eventAt(x, y int) *event {
+func (m *MapScene) eventAt(x, y int) *character.Event {
 	for _, e := range m.events {
-		ex, ey := e.character.x, e.character.y
+		ex, ey := e.Position()
 		if ex == x && ey == y {
 			return e
 		}
@@ -183,11 +188,11 @@ func (m *MapScene) movePlayerIfNeeded() error {
 		if e == nil {
 			return nil
 		}
-		if !e.isRunnable() {
+		if !e.IsRunnable() {
 			return nil
 		}
 	}
-	if err := m.player.moveByUserInput(m.passable, tx, ty); err != nil {
+	if err := m.player.MoveByUserInput(m.passable, tx, ty); err != nil {
 		return err
 	}
 	m.moveDstX = tx
@@ -195,35 +200,33 @@ func (m *MapScene) movePlayerIfNeeded() error {
 	if e == nil {
 		return nil
 	}
-	e.tryRun(data.TriggerPlayer)
+	e.TryRun(data.TriggerPlayer)
 	return nil
 }
 
-func (m *MapScene) character(id int, self *event) *character {
-	var ch *character
+func (m *MapScene) Character(id int, self *character.Event) interface{} {
 	switch id {
 	case -1:
-		ch = m.player.character
+		return m.player
 	case 0:
-		ch = self.character
+		return self
 	default:
 		for _, e := range m.events {
-			if id == e.data.ID {
-				return e.character
+			if id == e.ID() {
+				return e
 			}
 		}
 		return nil
 	}
-	return ch
 }
 
-func (m *MapScene) executingEvent() *event {
+func (m *MapScene) executingEvent() *character.Event {
 	for _, e := range m.events {
-		if e.executingPage != nil {
+		if e.IsExecutingCommands() {
 			return e
 		}
 	}
-	if m.continuingEvent != nil && m.continuingEvent.executingPage != nil {
+	if m.continuingEvent != nil && m.continuingEvent.IsExecutingCommands() {
 		return m.continuingEvent
 	}
 	return nil
@@ -233,38 +236,38 @@ func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 	if err := m.gameState.Screen().Update(); err != nil {
 		return err
 	}
-	if err := m.player.update(m.passable); err != nil {
+	if err := m.player.Update(m.passable); err != nil {
 		return err
 	}
 	if err := m.gameState.Windows().Update(); err != nil {
 		return err
 	}
 	for _, e := range m.events {
-		if err := e.updateCharacterIfNeeded(); err != nil {
+		if err := e.UpdateCharacterIfNeeded(); err != nil {
 			return err
 		}
 	}
-	if m.player.isMovingByUserInput() {
+	if m.player.IsMovingByUserInput() {
 		return nil
 	}
 	if e := m.executingEvent(); e != nil {
-		if err := e.update(); err != nil {
+		if err := e.Update(); err != nil {
 			return err
 		}
 		return nil
 	}
 	for _, e := range m.events {
-		if err := e.update(); err != nil {
+		if err := e.Update(); err != nil {
 			return err
 		}
 	}
 	if m.continuingEvent != nil {
-		if err := m.continuingEvent.update(); err != nil {
+		if err := m.continuingEvent.Update(); err != nil {
 			return err
 		}
 	}
 	for _, e := range m.events {
-		if e.tryRun(data.TriggerAuto) {
+		if e.TryRun(data.TriggerAuto) {
 			break
 		}
 	}
@@ -274,20 +277,8 @@ func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 	return nil
 }
 
-func (m *MapScene) showMessage(content string, character *character) {
-	content = m.gameState.ParseMessageSyntax(content)
-	m.gameState.Windows().ShowMessage(content, character.x*scene.TileSize, character.y*scene.TileSize)
-}
-
-func (m *MapScene) showChoices(choices []string) {
-	for i, c := range choices {
-		choices[i] = m.gameState.ParseMessageSyntax(c)
-	}
-	m.gameState.Windows().ShowChoices(choices)
-}
-
-func (m *MapScene) transferPlayerImmediately(roomID, x, y int, e *event) {
-	m.player.transferImmediately(x, y)
+func (m *MapScene) TransferPlayerImmediately(roomID, x, y int, e *character.Event) {
+	m.player.TransferImmediately(x, y)
 	m.changeRoom(roomID)
 	m.continuingEvent = e
 }
@@ -350,11 +341,11 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 	if err := m.tilesImage.DrawImage(assets.GetImage(tileset.Images[1]), op); err != nil {
 		return err
 	}
-	if err := m.player.draw(m.tilesImage); err != nil {
+	if err := m.player.Draw(m.tilesImage); err != nil {
 		return err
 	}
 	for _, e := range m.events {
-		if err := e.draw(m.tilesImage); err != nil {
+		if err := e.Draw(m.tilesImage); err != nil {
 			return err
 		}
 	}
@@ -379,7 +370,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 	if err := screen.DrawImage(m.tilesImage, op); err != nil {
 		return err
 	}
-	if m.player.character.isMoving() {
+	if m.player.IsMoving() {
 		x, y := m.moveDstX, m.moveDstY
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(x*scene.TileSize), float64(y*scene.TileSize))

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package mapscene
+package character
 
 import (
 	"fmt"
@@ -22,12 +22,20 @@ import (
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/gamestate"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
 
-type event struct {
+// TODO: Remove this
+type MapScene interface {
+	Player() *Player
+	Character(eventID int, self *Event) interface{}
+	TransferPlayerImmediately(roomID, x, y int, event *Event)
+}
+
+type Event struct {
 	data             *data.Event
 	gameState        *gamestate.Game
-	mapScene         *MapScene
+	mapScene         MapScene
 	character        *character
 	currentPageIndex int
 	commandIndex     *commandIndex
@@ -39,32 +47,40 @@ type event struct {
 	executingPage    *data.Page
 }
 
-func newEvent(eventData *data.Event, gameState *gamestate.Game, mapScene *MapScene) (*event, error) {
+func NewEvent(eventData *data.Event, gameState *gamestate.Game, mapScene MapScene) (*Event, error) {
 	c := &character{
 		x: eventData.X,
 		y: eventData.Y,
 	}
-	e := &event{
+	e := &Event{
 		data:             eventData,
 		gameState:        gameState,
 		mapScene:         mapScene,
 		character:        c,
 		currentPageIndex: -1,
 	}
-	if err := e.updateCharacterIfNeeded(); err != nil {
+	if err := e.UpdateCharacterIfNeeded(); err != nil {
 		return nil, err
 	}
 	return e, nil
 }
 
-func (e *event) currentPage() *data.Page {
+func (e *Event) ID() int {
+	return e.data.ID
+}
+
+func (e *Event) Position() (int, int) {
+	return e.character.x, e.character.y
+}
+
+func (e *Event) currentPage() *data.Page {
 	if e.currentPageIndex == -1 {
 		return nil
 	}
 	return e.data.Pages[e.currentPageIndex]
 }
 
-func (e *event) isPassable() bool {
+func (e *Event) IsPassable() bool {
 	page := e.currentPage()
 	if page == nil {
 		return true
@@ -72,7 +88,7 @@ func (e *event) isPassable() bool {
 	return page.Priority != data.PrioritySameAsCharacters
 }
 
-func (e *event) isRunnable() bool {
+func (e *Event) IsRunnable() bool {
 	page := e.currentPage()
 	if page == nil {
 		return true
@@ -80,7 +96,11 @@ func (e *event) isRunnable() bool {
 	return len(page.Commands) > 0
 }
 
-func (e *event) updateCharacterIfNeeded() error {
+func (e *Event) IsExecutingCommands() bool {
+	return e.executingPage != nil
+}
+
+func (e *Event) UpdateCharacterIfNeeded() error {
 	i, err := e.calcPageIndex()
 	if err != nil {
 		return err
@@ -110,7 +130,7 @@ func (e *event) updateCharacterIfNeeded() error {
 	return nil
 }
 
-func (e *event) meetsCondition(cond *data.Condition) (bool, error) {
+func (e *Event) meetsCondition(cond *data.Condition) (bool, error) {
 	// TODO: Is it OK to allow null conditions?
 	if cond == nil {
 		return true, nil
@@ -158,7 +178,7 @@ func (e *event) meetsCondition(cond *data.Condition) (bool, error) {
 	return false, nil
 }
 
-func (e *event) meetsPageCondition(page *data.Page) (bool, error) {
+func (e *Event) meetsPageCondition(page *data.Page) (bool, error) {
 	for _, cond := range page.Conditions {
 		m, err := e.meetsCondition(cond)
 		if err != nil {
@@ -171,7 +191,7 @@ func (e *event) meetsPageCondition(page *data.Page) (bool, error) {
 	return true, nil
 }
 
-func (e *event) calcPageIndex() (int, error) {
+func (e *Event) calcPageIndex() (int, error) {
 	for i := len(e.data.Pages) - 1; i >= 0; i-- {
 		page := e.data.Pages[i]
 		m, err := e.meetsPageCondition(page)
@@ -185,7 +205,7 @@ func (e *event) calcPageIndex() (int, error) {
 	return -1, nil
 }
 
-func (e *event) tryRun(trigger data.Trigger) bool {
+func (e *Event) TryRun(trigger data.Trigger) bool {
 	if e.executingPage != nil {
 		return false
 	}
@@ -203,7 +223,7 @@ func (e *event) tryRun(trigger data.Trigger) bool {
 	return true
 }
 
-func (e *event) updateCommands() error {
+func (e *Event) updateCommands() error {
 	if e.executingPage == nil {
 		return nil
 	}
@@ -211,7 +231,7 @@ func (e *event) updateCommands() error {
 		e.dirBeforeRunning = e.character.dir
 		var dir data.Dir
 		ex, ey := e.character.x, e.character.y
-		px, py := e.mapScene.player.character.x, e.mapScene.player.character.y
+		px, py := e.mapScene.Player().character.x, e.mapScene.Player().character.y
 		switch {
 		case e.executingPage.Trigger == data.TriggerAuto:
 		case ex == px && ey == py:
@@ -281,7 +301,19 @@ commandLoop:
 			if !e.waitingCommand {
 				args := c.Args.(*data.CommandArgsShowMessage)
 				content := data.Current().Texts.Get(language.Und, args.ContentID)
-				e.mapScene.showMessage(content, e.mapScene.character(args.EventID, e))
+				ch := e.mapScene.Character(args.EventID, e)
+				content = e.gameState.ParseMessageSyntax(content)
+				x := 0
+				y := 0
+				switch ch := ch.(type) {
+				case *Player:
+					x, y = ch.character.x, ch.character.y
+				case *Event:
+					x, y = ch.character.x, ch.character.y
+				default:
+					panic("not reach")
+				}
+				e.gameState.Windows().ShowMessage(content, x*scene.TileSize, y*scene.TileSize)
 				e.waitingCommand = true
 				break commandLoop
 			}
@@ -297,9 +329,10 @@ commandLoop:
 				choices := []string{}
 				for _, id := range c.Args.(*data.CommandArgsShowChoices).ChoiceIDs {
 					choice := data.Current().Texts.Get(language.Und, id)
+					choice = e.gameState.ParseMessageSyntax(choice)
 					choices = append(choices, choice)
 				}
-				e.mapScene.showChoices(choices)
+				e.gameState.Windows().ShowChoices(choices)
 				e.waitingCommand = true
 				break commandLoop
 			}
@@ -328,7 +361,7 @@ commandLoop:
 				break commandLoop
 			}
 			if e.gameState.Screen().IsFadedOut() {
-				e.mapScene.transferPlayerImmediately(args.RoomID, args.X, args.Y, e)
+				e.mapScene.TransferPlayerImmediately(args.RoomID, args.X, args.Y, e)
 				e.gameState.Screen().FadeIn(30)
 				break commandLoop
 			}
@@ -385,7 +418,7 @@ commandLoop:
 	return nil
 }
 
-func (e *event) setVariable(id int, op data.SetVariableOp, valueType data.SetVariableValueType, value interface{}) {
+func (e *Event) setVariable(id int, op data.SetVariableOp, valueType data.SetVariableValueType, value interface{}) {
 	rhs := 0
 	switch valueType {
 	case data.SetVariableValueTypeConstant:
@@ -397,10 +430,19 @@ func (e *event) setVariable(id int, op data.SetVariableOp, valueType data.SetVar
 		return
 	case data.SetVariableValueTypeCharacter:
 		args := value.(*data.SetVariableCharacterArgs)
-		ch := e.mapScene.character(args.EventID, e)
+		ch := e.mapScene.Character(args.EventID, e)
 		switch args.Type {
 		case data.SetVariableCharacterTypeDirection:
-			switch ch.dir {
+			var dir data.Dir
+			switch ch := ch.(type) {
+			case *Player:
+				dir = ch.character.dir
+			case *Event:
+				dir = ch.character.dir
+			default:
+				panic("not reach")
+			}
+			switch dir {
 			case data.DirUp:
 				rhs = 0
 			case data.DirRight:
@@ -430,7 +472,7 @@ func (e *event) setVariable(id int, op data.SetVariableOp, valueType data.SetVar
 	e.gameState.Variables().SetVariableValue(id, rhs)
 }
 
-func (e *event) update() error {
+func (e *Event) Update() error {
 	if e.executingPage == nil {
 		page := e.currentPage()
 		if page == nil {
@@ -457,7 +499,7 @@ func (e *event) update() error {
 	return nil
 }
 
-func (e *event) draw(screen *ebiten.Image) error {
+func (e *Event) Draw(screen *ebiten.Image) error {
 	if err := e.character.draw(screen); err != nil {
 		return err
 	}
