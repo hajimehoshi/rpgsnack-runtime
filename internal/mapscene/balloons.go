@@ -48,7 +48,6 @@ func (b *balloons) ShowMessage(content string, character *character) {
 	if b.nextBalloon != nil {
 		panic("not reach")
 	}
-	b.closeAll()
 	// TODO: How to call newBalloonCenter?
 	x := character.x*scene.TileSize + scene.TileSize/2 + scene.GameMarginX/scene.TileScale
 	y := character.y*scene.TileSize + scene.GameMarginTop/scene.TileScale
@@ -147,9 +146,6 @@ func (b *balloons) Update() error {
 			b.balloons = []*balloon{b.nextBalloon}
 			b.balloons[0].open()
 			b.nextBalloon = nil
-		}
-		if b.isOpened() && input.Triggered() {
-			b.closeAll()
 		}
 	}
 	if b.chosenBalloonWaitingCount > 0 {

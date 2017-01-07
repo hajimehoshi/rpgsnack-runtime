@@ -21,6 +21,7 @@ import (
 	"golang.org/x/text/language"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 )
 
 type event struct {
@@ -203,6 +204,19 @@ func (e *event) tryRun(trigger data.Trigger) bool {
 	return true
 }
 
+func (e *event) canProceed() bool {
+	if !e.mapScene.balloons.isBusy() {
+		return true
+	}
+	if !e.mapScene.balloons.isOpened() {
+		return false
+	}
+	if !input.Triggered() {
+		return false
+	}
+	return true
+}
+
 func (e *event) updateCommands() error {
 	if e.executingPage == nil {
 		return nil
@@ -242,15 +256,8 @@ func (e *event) updateCommands() error {
 commandLoop:
 	for !e.commandIndex.isTerminated() {
 		c := e.commandIndex.command()
-		if c.Name == data.CommandNameShowChoices {
-			// Note: This just waits for message balloons
-			if e.mapScene.balloons.isAnimating() {
-				break commandLoop
-			}
-		} else {
-			if e.mapScene.balloons.isBusy() {
-				break commandLoop
-			}
+		if !e.canProceed() {
+			break commandLoop
 		}
 		switch c.Name {
 		case data.CommandNameIf:
@@ -299,6 +306,11 @@ commandLoop:
 				break commandLoop
 			}
 			e.commandIndex.advance()
+			if !e.commandIndex.isTerminated() {
+				if e.commandIndex.command().Name != data.CommandNameShowChoices {
+					e.mapScene.balloons.closeAll()
+				}
+			}
 			e.waitingMessage = false
 		case data.CommandNameShowChoices:
 			if !e.waitingChoosing {
@@ -377,9 +389,10 @@ commandLoop:
 		}
 	}
 	if e.commandIndex.isTerminated() {
-		if e.mapScene.balloons.isBusy() {
+		if e.mapScene.balloons.isAnimating() {
 			return nil
 		}
+		e.mapScene.balloons.closeAll()
 		e.character.turn(e.dirBeforeRunning)
 		e.executingPage = nil
 		e.commandIndex = nil
