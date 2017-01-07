@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package event
+package gamestate
 
 import (
 	"fmt"
@@ -21,7 +21,6 @@ import (
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/gamestate"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
 
@@ -32,7 +31,7 @@ type MapScene interface {
 }
 
 type Interpreter struct {
-	gameState      *gamestate.Game
+	gameState      *Game
 	event          *character.Event
 	commandIndex   *commandIndex
 	waitingCount   int
@@ -42,7 +41,7 @@ type Interpreter struct {
 	trigger        data.Trigger
 }
 
-func NewInterpreter(gameState *gamestate.Game, mapScene MapScene) *Interpreter {
+func NewInterpreter(gameState *Game, mapScene MapScene) *Interpreter {
 	return &Interpreter{
 		gameState: gameState,
 		mapScene:  mapScene,
