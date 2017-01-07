@@ -174,21 +174,11 @@ func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 	if m.gameState.Player().IsMovingByUserInput() {
 		return nil
 	}
-	if e := m.gameState.ExecutingEvent(); e != nil {
-		if err := e.Update(); err != nil {
-			return err
-		}
+	if err := m.gameState.UpdateEvents(); err != nil {
+		return err
+	}
+	if m.gameState.IsEventExecuting() {
 		return nil
-	}
-	for _, e := range m.gameState.Events() {
-		if err := e.Update(); err != nil {
-			return err
-		}
-	}
-	if m.gameState.ContinuingEvent() != nil {
-		if err := m.gameState.ContinuingEvent().Update(); err != nil {
-			return err
-		}
 	}
 	for _, e := range m.gameState.Events() {
 		if e.TryRun(data.TriggerAuto) {

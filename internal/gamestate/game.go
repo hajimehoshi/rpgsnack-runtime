@@ -35,7 +35,7 @@ type Game struct {
 	mapID           int
 	roomID          int
 	events          []*character.Event
-	continuingEvent *character.Event
+	continuingEvent *character.Event // TODO: This should be an Interpreter?
 }
 
 func NewGame() (*Game, error) {
@@ -77,36 +77,40 @@ func (g *Game) Events() []*character.Event {
 	return g.events
 }
 
-func (g *Game) ContinuingEvent() *character.Event {
-	return g.continuingEvent
-}
-
-func (g *Game) ExecutingEvent() *character.Event {
+func (g *Game) executingEvent() *character.Event {
+	if g.continuingEvent != nil && g.continuingEvent.IsExecutingCommands() {
+		return g.continuingEvent
+	}
 	for _, e := range g.events {
 		if e.IsExecutingCommands() {
 			return e
 		}
 	}
-	if g.continuingEvent != nil && g.continuingEvent.IsExecutingCommands() {
-		return g.continuingEvent
-	}
 	return nil
 }
 
-func (g *Game) character(id int, self *character.Event) posAndDir {
-	switch id {
-	case -1:
-		return g.Player()
-	case 0:
-		return self
-	default:
-		for _, e := range g.Events() {
-			if id == e.ID() {
-				return e
-			}
+func (g *Game) IsEventExecuting() bool {
+	return g.executingEvent() != nil
+}
+
+func (g *Game) UpdateEvents() error {
+	if e := g.executingEvent(); e != nil {
+		if err := e.Update(); err != nil {
+			return err
 		}
 		return nil
 	}
+	for _, e := range g.events {
+		if err := e.Update(); err != nil {
+			return err
+		}
+	}
+	if g.continuingEvent != nil {
+		if err := g.continuingEvent.Update(); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (g *Game) transferPlayerImmediately(roomID, x, y int, e *character.Event) {

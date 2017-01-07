@@ -58,6 +58,22 @@ func (i *Interpreter) SetCommands(commands []*data.Command, trigger data.Trigger
 	i.trigger = trigger
 }
 
+func (i *Interpreter) character(id int) posAndDir {
+	switch id {
+	case -1:
+		return i.gameState.player
+	case 0:
+		return i.event
+	default:
+		for _, e := range i.gameState.events {
+			if id == e.ID() {
+				return e
+			}
+		}
+		return nil
+	}
+}
+
 func (i *Interpreter) MeetsCondition(cond *data.Condition) (bool, error) {
 	// TODO: Is it OK to allow null conditions?
 	if cond == nil {
@@ -181,7 +197,7 @@ commandLoop:
 			if !i.waitingCommand {
 				args := c.Args.(*data.CommandArgsShowMessage)
 				content := data.Current().Texts.Get(language.Und, args.ContentID)
-				ch := i.gameState.character(args.EventID, i.event)
+				ch := i.character(args.EventID)
 				x, y := ch.Position()
 				content = i.gameState.ParseMessageSyntax(content)
 				i.gameState.windows.ShowMessage(content, x*scene.TileSize, y*scene.TileSize)
@@ -305,7 +321,7 @@ func (i *Interpreter) setVariable(id int, op data.SetVariableOp, valueType data.
 		return
 	case data.SetVariableValueTypeCharacter:
 		args := value.(*data.SetVariableCharacterArgs)
-		ch := i.gameState.character(args.EventID, i.event)
+		ch := i.character(args.EventID)
 		dir := ch.Dir()
 		switch args.Type {
 		case data.SetVariableCharacterTypeDirection:
