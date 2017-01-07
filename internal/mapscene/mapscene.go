@@ -34,7 +34,6 @@ type MapScene struct {
 	gameState       *gamestate.Game
 	currentMapID    int
 	currentRoomID   int
-	player          *character.Player
 	moveDstX        int
 	moveDstY        int
 	tilesImage      *ebiten.Image
@@ -44,30 +43,25 @@ type MapScene struct {
 
 func New() (*MapScene, error) {
 	pos := data.Current().System.InitialPosition
-	x, y, roomID := 0, 0, 1
+	roomID := 1
 	if pos != nil {
-		x, y, roomID = pos.X, pos.Y, pos.RoomID
-	}
-	player, err := character.NewPlayer(x, y)
-	if err != nil {
-		return nil, err
+		roomID = pos.RoomID
 	}
 	tilesImage, err := ebiten.NewImage(scene.TileXNum*scene.TileSize, scene.TileYNum*scene.TileSize, ebiten.FilterNearest)
 	if err != nil {
 		return nil, err
 	}
+	state, err := gamestate.NewGame()
+	if err != nil {
+		return nil, err
+	}
 	mapScene := &MapScene{
 		currentMapID: 1,
-		gameState:    gamestate.NewGame(),
+		gameState:    state,
 		tilesImage:   tilesImage,
-		player:       player,
 	}
 	mapScene.changeRoom(roomID)
 	return mapScene, nil
-}
-
-func (m *MapScene) Player() *character.Player {
-	return m.player
 }
 
 func (m *MapScene) currentMap() *data.Map {
@@ -194,7 +188,7 @@ func (m *MapScene) movePlayerIfNeeded() error {
 			return nil
 		}
 	}
-	if err := m.player.MoveByUserInput(m.passable, tx, ty); err != nil {
+	if err := m.gameState.Player().MoveByUserInput(m.passable, tx, ty); err != nil {
 		return err
 	}
 	m.moveDstX = tx
@@ -209,7 +203,7 @@ func (m *MapScene) movePlayerIfNeeded() error {
 func (m *MapScene) Character(id int, self *character.Event) interface{} {
 	switch id {
 	case -1:
-		return m.player
+		return m.gameState.Player()
 	case 0:
 		return self
 	default:
@@ -238,7 +232,7 @@ func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 	if err := m.gameState.Screen().Update(); err != nil {
 		return err
 	}
-	if err := m.player.Update(m.passable); err != nil {
+	if err := m.gameState.Player().Update(m.passable); err != nil {
 		return err
 	}
 	if err := m.gameState.Windows().Update(); err != nil {
@@ -249,7 +243,7 @@ func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 			return err
 		}
 	}
-	if m.player.IsMovingByUserInput() {
+	if m.gameState.Player().IsMovingByUserInput() {
 		return nil
 	}
 	if e := m.executingEvent(); e != nil {
@@ -280,7 +274,7 @@ func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 }
 
 func (m *MapScene) TransferPlayerImmediately(roomID, x, y int, e *character.Event) {
-	m.player.TransferImmediately(x, y)
+	m.gameState.Player().TransferImmediately(x, y)
 	m.changeRoom(roomID)
 	m.continuingEvent = e
 }
@@ -343,7 +337,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 	if err := m.tilesImage.DrawImage(assets.GetImage(tileset.Images[1]), op); err != nil {
 		return err
 	}
-	if err := m.player.Draw(m.tilesImage); err != nil {
+	if err := m.gameState.Player().Draw(m.tilesImage); err != nil {
 		return err
 	}
 	for _, e := range m.events {
@@ -372,7 +366,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 	if err := screen.DrawImage(m.tilesImage, op); err != nil {
 		return err
 	}
-	if m.player.IsMovingByUserInput() {
+	if m.gameState.Player().IsMovingByUserInput() {
 		x, y := m.moveDstX, m.moveDstY
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(x*scene.TileSize), float64(y*scene.TileSize))

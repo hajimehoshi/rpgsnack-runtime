@@ -15,6 +15,8 @@
 package gamestate
 
 import (
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/window"
 )
 
@@ -29,14 +31,25 @@ type Game struct {
 	variables *Variables
 	screen    *Screen
 	windows   *window.Windows
+	player    *character.Player
 }
 
-func NewGame() *Game {
+func NewGame() (*Game, error) {
+	pos := data.Current().System.InitialPosition
+	x, y := 0, 0
+	if pos != nil {
+		x, y = pos.X, pos.Y
+	}
+	player, err := character.NewPlayer(x, y)
+	if err != nil {
+		return nil, err
+	}
 	return &Game{
 		variables: &Variables{},
 		screen:    &Screen{},
 		windows:   &window.Windows{},
-	}
+		player:    player,
+	}, nil
 }
 
 func (g *Game) Variables() *Variables {
@@ -49,6 +62,10 @@ func (g *Game) Screen() *Screen {
 
 func (g *Game) Windows() *window.Windows {
 	return g.windows
+}
+
+func (g *Game) Player() *character.Player {
+	return g.player
 }
 
 var reMessage = regexp.MustCompile(`\\([a-zA-Z])\[(\d+)\]`)

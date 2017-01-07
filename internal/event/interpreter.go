@@ -27,7 +27,6 @@ import (
 
 // TODO: Remove this
 type MapScene interface {
-	Player() *character.Player
 	Character(eventID int, self *character.Event) interface{}
 	TransferPlayerImmediately(roomID, x, y int, event *character.Event)
 }
@@ -118,7 +117,7 @@ func (i *Interpreter) Update() error {
 	if i.commandIndex == nil {
 		var dir data.Dir
 		ex, ey := i.event.Position()
-		px, py := i.mapScene.Player().Position()
+		px, py := i.gameState.Player().Position()
 		switch {
 		case i.trigger == data.TriggerAuto:
 		case ex == px && ey == py:
