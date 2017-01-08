@@ -106,7 +106,11 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 		}
 		c.Args = args
 	case CommandNameCallEvent:
-		return fmt.Errorf("data: not implemented yet: %s", c.Name)
+		var args *CommandArgsCallEvent
+		if err := json.Unmarshal(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	case CommandNameWait:
 		var args *CommandArgsWait
 		if err := json.Unmarshal(tmp.Args, &args); err != nil {
@@ -217,6 +221,11 @@ const (
 
 type CommandArgsIf struct {
 	Conditions []*Condition `json:"conditions"`
+}
+
+type CommandArgsCallEvent struct {
+	EventID int `json:"event_id"`
+	PageID  int `json:"page_id"`
 }
 
 type CommandArgsWait struct {

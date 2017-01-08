@@ -188,8 +188,16 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 			i.commandIndex.advance()
 		}
 	case data.CommandNameCallEvent:
-		println(fmt.Sprintf("not implemented yet: %s", c.Name))
-		i.commandIndex.advance()
+		args := c.Args.(*data.CommandArgsCallEvent)
+		eventID := args.EventID
+		if eventID == 0 {
+			eventID = i.eventID
+		}
+		pageID := args.PageID
+		page := data.Current().Maps[i.mapID].Rooms[i.roomID].Events[eventID].Pages[pageID]
+		commands := page.Commands
+		i.sub = NewInterpreter(i.gameState, i.mapID, i.roomID, eventID)
+		i.sub.SetCommands(commands, data.TriggerAuto)
 	case data.CommandNameWait:
 		if i.waitingCount == 0 {
 			i.waitingCount = c.Args.(*data.CommandArgsWait).Time * 6
