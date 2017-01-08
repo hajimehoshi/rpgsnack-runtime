@@ -15,6 +15,8 @@
 package gamestate
 
 import (
+	"github.com/hajimehoshi/ebiten"
+
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/window"
@@ -153,11 +155,16 @@ func (g *Game) Windows() *window.Windows {
 	return g.windows
 }
 
-func (g *Game) Player() *character.Player {
-	return g.player
+func (g *Game) UpdatePlayer() error {
+	return g.player.Update()
+}
+
+func (g *Game) DrawPlayer(screen *ebiten.Image) error {
+	return g.player.Draw(screen)
 }
 
 func (g *Game) IsPlayerMovingByUserInput() bool {
+	// TODO: This is wrong
 	return g.playerMoving != nil
 }
 

@@ -159,7 +159,7 @@ func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 	if err := m.gameState.Screen().Update(); err != nil {
 		return err
 	}
-	if err := m.gameState.Player().Update(); err != nil {
+	if err := m.gameState.UpdatePlayer(); err != nil {
 		return err
 	}
 	if err := m.gameState.Windows().Update(); err != nil {
@@ -245,7 +245,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 	if err := m.tilesImage.DrawImage(assets.GetImage(tileset.Images[1]), op); err != nil {
 		return err
 	}
-	if err := m.gameState.Player().Draw(m.tilesImage); err != nil {
+	if err := m.gameState.DrawPlayer(m.tilesImage); err != nil {
 		return err
 	}
 	for _, e := range m.gameState.Events() {
