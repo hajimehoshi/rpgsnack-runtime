@@ -275,7 +275,11 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 		i.commandIndex.advance()
 	case data.CommandNameSetRoute:
 		args := c.Args.(*data.CommandArgsSetRoute)
-		i.sub = NewInterpreter(i.gameState, i.mapID, i.roomID, args.EventID)
+		id := args.EventID
+		if id == 0 {
+			id = i.eventID
+		}
+		i.sub = NewInterpreter(i.gameState, i.mapID, i.roomID, id)
 		i.sub.SetCommands(args.Commands, data.TriggerAuto)
 	case data.CommandNameTintScreen:
 		if !i.waitingCommand {

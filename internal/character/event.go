@@ -226,6 +226,9 @@ func (e *Event) Update() error {
 	if err := e.interpreter.Update(); err != nil {
 		return err
 	}
+	if err := e.character.update(); err != nil {
+		return err
+	}
 	return nil
 }
 
