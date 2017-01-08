@@ -30,9 +30,9 @@ type Map struct {
 	mapID                 int
 	roomID                int
 	events                []*character.Event
+	playerMoving          *Interpreter
 	continuingInterpreter *Interpreter
 	autoInterpreter       *Interpreter
-	playerMoving          *Interpreter
 }
 
 func NewMap(game *Game) (*Map, error) {
