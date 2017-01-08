@@ -21,9 +21,10 @@ import (
 )
 
 type Variables struct {
-	switches     []bool
-	selfSwitches map[string][data.SelfSwitchNum]bool
-	variables    []int
+	switches       []bool
+	selfSwitches   map[string][data.SelfSwitchNum]bool
+	variables      []int
+	innerVariables map[string]int
 }
 
 func (v *Variables) SwitchValue(id int) bool {
@@ -80,4 +81,23 @@ func (v *Variables) SetVariableValue(id int, value int) {
 		v.variables = append(v.variables, zeros...)
 	}
 	v.variables[id] = value
+}
+
+func (v *Variables) InnerVariableValue(key string) int {
+	if v.innerVariables == nil {
+		v.innerVariables = map[string]int{}
+	}
+	value, ok := v.innerVariables[key]
+	if !ok {
+		v.innerVariables[key] = 0
+		return 0
+	}
+	return value
+}
+
+func (v *Variables) SetInnerVariableValue(key string, value int) {
+	if v.innerVariables == nil {
+		v.innerVariables = map[string]int{}
+	}
+	v.innerVariables[key] = value
 }

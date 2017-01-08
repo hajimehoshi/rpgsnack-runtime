@@ -189,6 +189,8 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 			return err
 		}
 		c.Args = args
+	case CommandNameSetInnerVariable:
+		fallthrough
 	default:
 		return fmt.Errorf("data: invalid command: %s", c.Name)
 	}
@@ -217,6 +219,9 @@ const (
 	CommandNameMoveCharacter   = "move_character"
 	CommandNameTurnCharacter   = "turn_character"
 	CommandNameRotateCharacter = "rotate_character"
+
+	// Special commands
+	CommandNameSetInnerVariable = "set_inner_variable"
 )
 
 type CommandArgsIf struct {
@@ -342,6 +347,11 @@ wait: value: (int)
 set_character_image: image: (string), imageIndex: (int)
 play_se: // tbd
 */
+
+type CommandArgsSetInnerVariable struct {
+	Name  string `json:name`
+	Value int    `json:value`
+}
 
 type SetVariableOp string
 

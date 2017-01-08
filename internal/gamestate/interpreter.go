@@ -364,6 +364,10 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 	case data.CommandNameRotateCharacter:
 		println("rotate_character!")
 		i.commandIndex.advance()
+	case data.CommandNameSetInnerVariable:
+		args := c.Args.(*data.CommandArgsSetInnerVariable)
+		i.gameState.variables.SetInnerVariableValue(args.Name, args.Value)
+		i.commandIndex.advance()
 	default:
 		return false, fmt.Errorf("invaid command: %s", c.Name)
 	}

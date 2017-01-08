@@ -81,6 +81,9 @@ func (g *Game) Events() []*character.Event {
 }
 
 func (g *Game) IsEventExecuting() bool {
+	if g.playerMoving != nil && g.playerMoving.IsExecuting() {
+		return true
+	}
 	if g.continuingInterpreter != nil && g.continuingInterpreter.IsExecuting() {
 		return true
 	}
@@ -164,8 +167,7 @@ func (g *Game) DrawPlayer(screen *ebiten.Image) error {
 }
 
 func (g *Game) IsPlayerMovingByUserInput() bool {
-	// TODO: This is wrong
-	return g.playerMoving != nil
+	return g.variables.InnerVariableValue("is_player_moving_by_user_input") != 0
 }
 
 func (g *Game) MovePlayerByUserInput(passable func(x, y int) (bool, error), x, y int, event *character.Event) error {
@@ -255,6 +257,13 @@ func (g *Game) MovePlayerByUserInput(passable func(x, y int) (bool, error), x, y
 	}
 	commands = []*data.Command{
 		{
+			Name: data.CommandNameSetInnerVariable,
+			Args: &data.CommandArgsSetInnerVariable{
+				Name:  "is_player_moving_by_user_input",
+				Value: 1,
+			},
+		},
+		{
 			Name: data.CommandNameSetRoute,
 			Args: &data.CommandArgsSetRoute{
 				EventID:  -1,
@@ -262,6 +271,13 @@ func (g *Game) MovePlayerByUserInput(passable func(x, y int) (bool, error), x, y
 				Skip:     false,
 				Wait:     true,
 				Commands: commands,
+			},
+		},
+		{
+			Name: data.CommandNameSetInnerVariable,
+			Args: &data.CommandArgsSetInnerVariable{
+				Name:  "is_player_moving_by_user_input",
+				Value: 0,
 			},
 		},
 	}

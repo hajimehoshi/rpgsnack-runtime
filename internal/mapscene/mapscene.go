@@ -125,7 +125,7 @@ func (m *MapScene) eventAt(x, y int) *character.Event {
 }
 
 func (m *MapScene) movePlayerIfNeeded() error {
-	if m.gameState.IsPlayerMovingByUserInput() {
+	if m.gameState.IsEventExecuting() {
 		return nil
 	}
 	if !input.Triggered() {
