@@ -138,12 +138,14 @@ func (m *Map) Update() error {
 			m.playerMoving = nil
 		}
 	}
-	for _, i := range m.eventRouteInterpreters {
-		if i == nil {
-			continue
-		}
-		if err := i.Update(); err != nil {
-			return err
+	if !m.IsPlayerMovingByUserInput() {
+		for _, i := range m.eventRouteInterpreters {
+			if i == nil {
+				continue
+			}
+			if err := i.Update(); err != nil {
+				return err
+			}
 		}
 	}
 	if m.autoInterpreter != nil {
