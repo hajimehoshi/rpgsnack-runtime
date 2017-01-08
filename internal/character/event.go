@@ -94,10 +94,6 @@ func (e *Event) IsRunnable() bool {
 	return len(page.Commands) > 0
 }
 
-func (e *Event) IsExecutingCommands() bool {
-	return e.interpreter.IsExecuting()
-}
-
 func (e *Event) UpdateCharacterIfNeeded(index int) error {
 	if e.currentPageIndex == index {
 		return nil

@@ -84,7 +84,7 @@ func (g *Game) IsEventExecuting() bool {
 		return true
 	}
 	for _, e := range g.events {
-		if e.IsExecutingCommands() {
+		if e.Interpreter().IsExecuting() {
 			return true
 		}
 	}
