@@ -364,7 +364,7 @@ func (g *Game) MovePlayerByUserInput(passable func(x, y int) (bool, error), x, y
 			},
 		},
 	}
-	if event != nil {
+	if event != nil && event.CurrentPage() != nil && event.CurrentPage().Trigger == data.TriggerPlayer {
 		origDir := event.Dir()
 		var dir data.Dir
 		ex, ey := event.Position()
