@@ -22,7 +22,18 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
 
+type speed int
+
+const (
+	speedFastest speed = 4
+	speedFast          = 8
+	speedNormal        = 16
+	speedSlow          = 32
+	speedSlowest       = 64
+)
+
 type character struct {
+	speed        speed
 	imageName    string
 	imageIndex   int
 	dir          data.Dir
@@ -68,7 +79,7 @@ func (c *character) move(dir data.Dir) bool {
 	c.turn(dir)
 	c.moveDir = dir
 	// TODO: Rename this
-	c.moveCount = playerMaxMoveCount
+	c.moveCount = int(c.speed)
 	return true
 }
 
@@ -120,7 +131,7 @@ func (c *character) update() error {
 	if !c.isMoving() {
 		return nil
 	}
-	if c.moveCount >= playerMaxMoveCount/2 {
+	if c.moveCount >= int(c.speed)/2 {
 		c.attitude = data.AttitudeMiddle
 	} else if c.prevAttitude == data.AttitudeLeft {
 		c.attitude = data.AttitudeRight
@@ -161,7 +172,7 @@ func (c *character) draw(screen *ebiten.Image) error {
 	if c.moveCount > 0 {
 		dx := 0
 		dy := 0
-		d := (playerMaxMoveCount - c.moveCount) * scene.TileSize / playerMaxMoveCount
+		d := (int(c.speed) - c.moveCount) * scene.TileSize / int(c.speed)
 		switch c.dir {
 		case data.DirLeft:
 			dx -= d

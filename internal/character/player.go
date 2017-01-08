@@ -20,14 +20,13 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 )
 
-const playerMaxMoveCount = 4
-
 type Player struct {
 	character *character
 }
 
 func NewPlayer(x, y int) (*Player, error) {
 	c := &character{
+		speed:        speedFastest,
 		imageName:    "characters0.png",
 		imageIndex:   0,
 		x:            x,

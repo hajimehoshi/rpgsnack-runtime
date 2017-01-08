@@ -29,8 +29,9 @@ type Event struct {
 
 func NewEvent(eventData *data.Event) (*Event, error) {
 	c := &character{
-		x: eventData.X,
-		y: eventData.Y,
+		speed: speedNormal,
+		x:     eventData.X,
+		y:     eventData.Y,
 	}
 	e := &Event{
 		data:             eventData,
