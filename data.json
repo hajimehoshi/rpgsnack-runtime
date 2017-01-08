@@ -362,6 +362,28 @@
                   "through":    false,
                   "priority":   1,
                   "trigger":    "player",
+                  "route":      {
+                    "event_id": 0,
+                    "repeat":   true,
+                    "skip":     false,
+                    "wait":     false,
+                    "commands": [
+                      {
+                        "name": "move_character",
+                        "args": {
+                          "dir":      0,
+                          "distance": 1
+                        }
+                      },
+                      {
+                        "name": "move_character",
+                        "args": {
+                          "dir":      2,
+                          "distance": 1
+                        }
+                      }
+                    ]
+                  },
                   "commands": [
                     {
                       "name": "show_message",
