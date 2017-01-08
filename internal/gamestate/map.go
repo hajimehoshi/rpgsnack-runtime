@@ -115,9 +115,6 @@ func (m *Map) pageIndex(eventID int) (int, error) {
 }
 
 func (m *Map) Update() error {
-	if err := m.player.Update(); err != nil {
-		return err
-	}
 	if m.playerMoving != nil {
 		if err := m.playerMoving.Update(); err != nil {
 			return err
@@ -141,6 +138,9 @@ func (m *Map) Update() error {
 		if !m.continuingInterpreter.IsExecuting() {
 			m.continuingInterpreter = nil
 		}
+	}
+	if err := m.player.Update(); err != nil {
+		return err
 	}
 	if m.IsPlayerMovingByUserInput() {
 		return nil
