@@ -111,7 +111,7 @@ func calcPath(passable func(x, y int) (bool, error), startX, startY, goalX, goal
 		return nil, 0, 0, err
 	}
 	lastX, lastY := goalX, goalY
-	if !lastP {
+	if !lastP && len(path) > 0 {
 		switch path[len(path)-1] {
 		case routeCommandMoveUp:
 			path[len(path)-1] = routeCommandTurnUp
