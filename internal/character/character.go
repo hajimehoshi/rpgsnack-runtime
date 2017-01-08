@@ -35,6 +35,24 @@ type character struct {
 	moveDir      data.Dir
 }
 
+func (c *character) position() (int, int) {
+	if c.moveCount > 0 {
+		x, y := c.x, c.y
+		switch c.moveDir {
+		case data.DirLeft:
+			x--
+		case data.DirRight:
+			x++
+		case data.DirUp:
+			y--
+		case data.DirDown:
+			y++
+		}
+		return x, y
+	}
+	return c.x, c.y
+}
+
 func (c *character) isMoving() bool {
 	return c.moveCount > 0
 }

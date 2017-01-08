@@ -45,7 +45,7 @@ func (e *Event) ID() int {
 }
 
 func (e *Event) Position() (int, int) {
-	return e.character.x, e.character.y
+	return e.character.position()
 }
 
 func (e *Event) Dir() data.Dir {

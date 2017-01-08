@@ -43,7 +43,7 @@ func NewPlayer(x, y int) (*Player, error) {
 }
 
 func (p *Player) Position() (int, int) {
-	return p.character.x, p.character.y
+	return p.character.position()
 }
 
 func (p *Player) Dir() data.Dir {
