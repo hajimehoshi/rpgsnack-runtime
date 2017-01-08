@@ -25,14 +25,15 @@ import (
 )
 
 type Map struct {
-	game                  *Game
-	player                *character.Player
-	mapID                 int
-	roomID                int
-	events                []*character.Event
-	playerMoving          *Interpreter
-	continuingInterpreter *Interpreter
-	autoInterpreter       *Interpreter
+	game                   *Game
+	player                 *character.Player
+	mapID                  int
+	roomID                 int
+	events                 []*character.Event
+	playerMoving           *Interpreter
+	eventRouteInterpreters []*Interpreter
+	continuingInterpreter  *Interpreter
+	autoInterpreter        *Interpreter
 }
 
 func NewMap(game *Game) (*Map, error) {
@@ -74,6 +75,7 @@ func (m *Map) setRoomID(id int) error {
 		}
 		m.events = append(m.events, event)
 	}
+	m.eventRouteInterpreters = make([]*Interpreter, len(m.events))
 	return nil
 }
 
@@ -136,6 +138,14 @@ func (m *Map) Update() error {
 			m.playerMoving = nil
 		}
 	}
+	for _, i := range m.eventRouteInterpreters {
+		if i == nil {
+			continue
+		}
+		if err := i.Update(); err != nil {
+			return err
+		}
+	}
 	if m.autoInterpreter != nil {
 		if err := m.autoInterpreter.Update(); err != nil {
 			return err
@@ -158,14 +168,39 @@ func (m *Map) Update() error {
 	if m.IsPlayerMovingByUserInput() {
 		return nil
 	}
-	for _, e := range m.events {
+	for i, e := range m.events {
 		index, err := m.pageIndex(e.ID())
 		if err != nil {
 			return err
 		}
-		if err := e.UpdateCharacterIfNeeded(index); err != nil {
+		result, err := e.UpdateCharacterIfNeeded(index)
+		if err != nil {
 			return err
 		}
+		if !result {
+			continue
+		}
+		if e.CurrentPage() == nil {
+			continue
+		}
+		route := e.CurrentPage().Route
+		if route == nil {
+			m.eventRouteInterpreters[i] = nil
+			continue
+		}
+		commands := []*data.Command{
+			{
+				Name: data.CommandNameSetRoute,
+				Args: &data.CommandArgsSetRoute{
+					EventID:  0,
+					Repeat:   route.Repeat,
+					Skip:     route.Skip,
+					Wait:     route.Wait,
+					Commands: route.Commands,
+				},
+			},
+		}
+		m.eventRouteInterpreters[i] = NewInterpreter(m.game, m.mapID, m.roomID, e.ID(), commands)
 	}
 	for _, e := range m.events {
 		if err := e.Update(); err != nil {

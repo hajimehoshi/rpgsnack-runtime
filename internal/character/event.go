@@ -91,9 +91,9 @@ func (e *Event) IsRunnable() bool {
 	return len(page.Commands) > 0
 }
 
-func (e *Event) UpdateCharacterIfNeeded(index int) error {
+func (e *Event) UpdateCharacterIfNeeded(index int) (bool, error) {
 	if e.currentPageIndex == index {
-		return nil
+		return false, nil
 	}
 	e.currentPageIndex = index
 	e.steppingCount = 0
@@ -104,7 +104,7 @@ func (e *Event) UpdateCharacterIfNeeded(index int) error {
 		c.dirFix = false
 		c.dir = data.Dir(0)
 		c.attitude = data.AttitudeMiddle
-		return nil
+		return true, nil
 	}
 	page := e.data.Pages[index]
 	c := e.character
@@ -114,7 +114,7 @@ func (e *Event) UpdateCharacterIfNeeded(index int) error {
 	c.dir = page.Dir
 	// page.Attitude is ignored so far.
 	c.attitude = data.AttitudeMiddle
-	return nil
+	return true, nil
 }
 
 func (e *Event) Update() error {
