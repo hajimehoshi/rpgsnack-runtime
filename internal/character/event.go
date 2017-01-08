@@ -25,7 +25,6 @@ type Event struct {
 	character        *character
 	currentPageIndex int
 	steppingCount    int
-	dirBeforeRunning data.Dir
 }
 
 func NewEvent(eventData *data.Event) (*Event, error) {

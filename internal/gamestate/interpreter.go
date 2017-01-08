@@ -284,6 +284,7 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 			i.commandIndex.advance()
 			return true, nil
 		}
+		// Check IsMoving() first since the character might be moving at this time.
 		if ch.IsMoving() {
 			return false, nil
 		}
@@ -301,6 +302,7 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 			i.commandIndex.advance()
 			return true, nil
 		}
+		// Check IsMoving() first since the character might be moving at this time.
 		if ch.IsMoving() {
 			return false, nil
 		}
