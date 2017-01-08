@@ -95,6 +95,43 @@ func (g *Game) IsEventExecuting() bool {
 	return false
 }
 
+func (g *Game) meetsPageCondition(page *data.Page, eventID int) (bool, error) {
+	for _, cond := range page.Conditions {
+		m, err := g.MeetsCondition(cond, eventID)
+		if err != nil {
+			return false, err
+		}
+		if !m {
+			return false, nil
+		}
+	}
+	return true, nil
+}
+
+func (g *Game) pageIndex(eventID int) (int, error) {
+	var event *data.Event
+	for _, e := range g.CurrentRoom().Events {
+		if e.ID == eventID {
+			event = e
+			break
+		}
+	}
+	if event == nil {
+		panic("not reach")
+	}
+	for i := len(event.Pages) - 1; i >= 0; i-- {
+		page := event.Pages[i]
+		m, err := g.meetsPageCondition(page, event.ID)
+		if err != nil {
+			return 0, err
+		}
+		if m {
+			return i, nil
+		}
+	}
+	return -1, nil
+}
+
 func (g *Game) UpdateEvents() error {
 	if g.playerMoving != nil {
 		if err := g.playerMoving.Update(); err != nil {
@@ -103,11 +140,15 @@ func (g *Game) UpdateEvents() error {
 		if !g.playerMoving.IsExecuting() {
 			g.playerMoving = nil
 		}
-		return nil
 	}
-	// TODO: g.player is updated at MapScene. Is this OK?
-	if g.playerMoving != nil {
-		return nil
+	for _, e := range g.events {
+		index, err := g.pageIndex(e.ID())
+		if err != nil {
+			return err
+		}
+		if err := e.UpdateCharacterIfNeeded(index); err != nil {
+			return err
+		}
 	}
 	for _, e := range g.events {
 		if err := e.Update(); err != nil {

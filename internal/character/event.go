@@ -40,9 +40,6 @@ func NewEvent(eventData *data.Event, interpreter Interpreter) (*Event, error) {
 		character:        c,
 		currentPageIndex: -1,
 	}
-	if err := e.UpdateCharacterIfNeeded(); err != nil {
-		return nil, err
-	}
 	return e, nil
 }
 
@@ -101,17 +98,13 @@ func (e *Event) IsExecutingCommands() bool {
 	return e.interpreter.IsExecuting()
 }
 
-func (e *Event) UpdateCharacterIfNeeded() error {
-	i, err := e.calcPageIndex()
-	if err != nil {
-		return err
-	}
-	if e.currentPageIndex == i {
+func (e *Event) UpdateCharacterIfNeeded(index int) error {
+	if e.currentPageIndex == index {
 		return nil
 	}
-	e.currentPageIndex = i
+	e.currentPageIndex = index
 	e.steppingCount = 0
-	if i == -1 {
+	if index == -1 {
 		c := e.character
 		c.imageName = ""
 		c.imageIndex = 0
@@ -120,7 +113,7 @@ func (e *Event) UpdateCharacterIfNeeded() error {
 		c.attitude = data.AttitudeMiddle
 		return nil
 	}
-	page := e.data.Pages[i]
+	page := e.data.Pages[index]
 	c := e.character
 	c.imageName = page.Image
 	c.imageIndex = page.ImageIndex
@@ -129,33 +122,6 @@ func (e *Event) UpdateCharacterIfNeeded() error {
 	// page.Attitude is ignored so far.
 	c.attitude = data.AttitudeMiddle
 	return nil
-}
-
-func (e *Event) meetsPageCondition(page *data.Page) (bool, error) {
-	for _, cond := range page.Conditions {
-		m, err := e.interpreter.MeetsCondition(cond)
-		if err != nil {
-			return false, err
-		}
-		if !m {
-			return false, nil
-		}
-	}
-	return true, nil
-}
-
-func (e *Event) calcPageIndex() (int, error) {
-	for i := len(e.data.Pages) - 1; i >= 0; i-- {
-		page := e.data.Pages[i]
-		m, err := e.meetsPageCondition(page)
-		if err != nil {
-			return 0, err
-		}
-		if m {
-			return i, nil
-		}
-	}
-	return -1, nil
 }
 
 func (e *Event) TryRun(trigger data.Trigger) bool {

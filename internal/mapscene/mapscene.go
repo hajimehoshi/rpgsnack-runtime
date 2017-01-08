@@ -165,11 +165,6 @@ func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 	if err := m.gameState.Windows().Update(); err != nil {
 		return err
 	}
-	for _, e := range m.gameState.Events() {
-		if err := e.UpdateCharacterIfNeeded(); err != nil {
-			return err
-		}
-	}
 	if err := m.gameState.UpdateEvents(); err != nil {
 		return err
 	}

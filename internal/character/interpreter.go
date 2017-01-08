@@ -21,6 +21,5 @@ import (
 type Interpreter interface {
 	IsExecuting() bool
 	Update() error
-	MeetsCondition(cond *data.Condition) (bool, error)
 	SetCommands(commands []*data.Command)
 }

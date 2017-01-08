@@ -99,10 +99,6 @@ func (i *Interpreter) character(id int) char {
 	return nil
 }
 
-func (i *Interpreter) MeetsCondition(cond *data.Condition) (bool, error) {
-	return i.gameState.MeetsCondition(cond, i.eventID)
-}
-
 func (i *Interpreter) doOneCommand() (bool, error) {
 	c := i.commandIndex.command()
 	if !i.gameState.windows.CanProceed() {
@@ -123,7 +119,7 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 		conditions := c.Args.(*data.CommandArgsIf).Conditions
 		matches := true
 		for _, c := range conditions {
-			m, err := i.MeetsCondition(c)
+			m, err := i.gameState.MeetsCondition(c, i.eventID)
 			if err != nil {
 				return false, err
 			}
