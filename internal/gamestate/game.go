@@ -364,3 +364,52 @@ func (g *Game) ParseMessageSyntax(str string) string {
 		return str
 	})
 }
+
+func (g *Game) MeetsCondition(cond *data.Condition, eventID int) (bool, error) {
+	// TODO: Is it OK to allow null conditions?
+	if cond == nil {
+		return true, nil
+	}
+	switch cond.Type {
+	case data.ConditionTypeSwitch:
+		id := cond.ID
+		v := g.variables.SwitchValue(id)
+		rhs := cond.Value.(bool)
+		return v == rhs, nil
+	case data.ConditionTypeSelfSwitch:
+		m, r := g.mapID, g.roomID
+		v := g.variables.SelfSwitchValue(m, r, eventID, cond.ID)
+		rhs := cond.Value.(bool)
+		return v == rhs, nil
+	case data.ConditionTypeVariable:
+		id := cond.ID
+		v := g.variables.VariableValue(id)
+		rhs := cond.Value.(int)
+		switch cond.ValueType {
+		case data.ConditionValueTypeConstant:
+		case data.ConditionValueTypeVariable:
+			rhs = g.variables.VariableValue(rhs)
+		default:
+			return false, fmt.Errorf("mapscene: invalid value type: %s", cond.ValueType)
+		}
+		switch cond.Comp {
+		case data.ConditionCompEqualTo:
+			return v == rhs, nil
+		case data.ConditionCompNotEqualTo:
+			return v != rhs, nil
+		case data.ConditionCompGreaterThanOrEqualTo:
+			return v >= rhs, nil
+		case data.ConditionCompGreaterThan:
+			return v > rhs, nil
+		case data.ConditionCompLessThanOrEqualTo:
+			return v <= rhs, nil
+		case data.ConditionCompLessThan:
+			return v < rhs, nil
+		default:
+			return false, fmt.Errorf("mapscene: invalid comp: %s", cond.Comp)
+		}
+	default:
+		return false, fmt.Errorf("mapscene: invalid condition: %s", cond)
+	}
+	return false, nil
+}

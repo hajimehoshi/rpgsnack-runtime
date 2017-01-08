@@ -100,52 +100,7 @@ func (i *Interpreter) character(id int) char {
 }
 
 func (i *Interpreter) MeetsCondition(cond *data.Condition) (bool, error) {
-	// TODO: Is it OK to allow null conditions?
-	if cond == nil {
-		return true, nil
-	}
-	switch cond.Type {
-	case data.ConditionTypeSwitch:
-		id := cond.ID
-		v := i.gameState.variables.SwitchValue(id)
-		rhs := cond.Value.(bool)
-		return v == rhs, nil
-	case data.ConditionTypeSelfSwitch:
-		m, r := i.gameState.mapID, i.gameState.roomID
-		v := i.gameState.variables.SelfSwitchValue(m, r, i.eventID, cond.ID)
-		rhs := cond.Value.(bool)
-		return v == rhs, nil
-	case data.ConditionTypeVariable:
-		id := cond.ID
-		v := i.gameState.variables.VariableValue(id)
-		rhs := cond.Value.(int)
-		switch cond.ValueType {
-		case data.ConditionValueTypeConstant:
-		case data.ConditionValueTypeVariable:
-			rhs = i.gameState.variables.VariableValue(rhs)
-		default:
-			return false, fmt.Errorf("mapscene: invalid value type: %s", cond.ValueType)
-		}
-		switch cond.Comp {
-		case data.ConditionCompEqualTo:
-			return v == rhs, nil
-		case data.ConditionCompNotEqualTo:
-			return v != rhs, nil
-		case data.ConditionCompGreaterThanOrEqualTo:
-			return v >= rhs, nil
-		case data.ConditionCompGreaterThan:
-			return v > rhs, nil
-		case data.ConditionCompLessThanOrEqualTo:
-			return v <= rhs, nil
-		case data.ConditionCompLessThan:
-			return v < rhs, nil
-		default:
-			return false, fmt.Errorf("mapscene: invalid comp: %s", cond.Comp)
-		}
-	default:
-		return false, fmt.Errorf("mapscene: invalid condition: %s", cond)
-	}
-	return false, nil
+	return i.gameState.MeetsCondition(cond, i.eventID)
 }
 
 func (i *Interpreter) doOneCommand() (bool, error) {
