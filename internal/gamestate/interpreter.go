@@ -310,7 +310,54 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 		i.waitingCommand = false
 		i.commandIndex.advance()
 	case data.CommandNameRotateCharacter:
-		println("rotate_character!")
+		ch := i.character(i.eventID)
+		if ch == nil {
+			i.commandIndex.advance()
+			return true, nil
+		}
+		// Check IsMoving() first since the character might be moving at this time.
+		if ch.IsMoving() {
+			return false, nil
+		}
+		if !i.waitingCommand {
+			args := c.Args.(*data.CommandArgsRotateCharacter)
+			dirI := 0
+			switch ch.Dir() {
+			case data.DirUp:
+				dirI = 0
+			case data.DirRight:
+				dirI = 1
+			case data.DirDown:
+				dirI = 2
+			case data.DirLeft:
+				dirI = 3
+			}
+			switch args.Angle {
+			case 0:
+			case 90:
+				dirI += 1
+			case 180:
+				dirI += 2
+			case 270:
+				dirI += 3
+			}
+			dirI %= 4
+			var dir data.Dir
+			switch dirI {
+			case 0:
+				dir = data.DirUp
+			case 1:
+				dir = data.DirRight
+			case 2:
+				dir = data.DirDown
+			case 3:
+				dir = data.DirLeft
+			}
+			ch.Turn(dir)
+			i.waitingCommand = true
+			return false, nil
+		}
+		i.waitingCommand = false
 		i.commandIndex.advance()
 	case data.CommandNameSetInnerVariable:
 		args := c.Args.(*data.CommandArgsSetInnerVariable)
