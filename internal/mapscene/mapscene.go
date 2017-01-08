@@ -61,12 +61,12 @@ func (m *MapScene) tileSet(id int) (*data.TileSet, error) {
 }
 
 func (m *MapScene) passableTile(x, y int) (bool, error) {
-	tileSet, err := m.tileSet(m.gameState.CurrentMap().TileSetID)
+	tileSet, err := m.tileSet(m.gameState.Map().CurrentMap().TileSetID)
 	if err != nil {
 		return false, err
 	}
 	layer := 1
-	tile := m.gameState.CurrentRoom().Tiles[layer][y*scene.TileXNum+x]
+	tile := m.gameState.Map().CurrentRoom().Tiles[layer][y*scene.TileXNum+x]
 	switch tileSet.PassageTypes[layer][tile] {
 	case data.PassageTypeBlock:
 		return false, nil
@@ -79,7 +79,7 @@ func (m *MapScene) passableTile(x, y int) (bool, error) {
 		panic("not reach")
 	}
 	layer = 0
-	tile = m.gameState.CurrentRoom().Tiles[layer][y*scene.TileXNum+x]
+	tile = m.gameState.Map().CurrentRoom().Tiles[layer][y*scene.TileXNum+x]
 	if tileSet.PassageTypes[layer][tile] == data.PassageTypePassable {
 		return true, nil
 	}
@@ -106,7 +106,7 @@ func (m *MapScene) passable(x, y int) (bool, error) {
 	if !p {
 		return false, nil
 	}
-	e := m.gameState.EventAt(x, y)
+	e := m.gameState.Map().EventAt(x, y)
 	if e == nil {
 		return true, nil
 	}
@@ -114,7 +114,7 @@ func (m *MapScene) passable(x, y int) (bool, error) {
 }
 
 func (m *MapScene) movePlayerIfNeeded() error {
-	if m.gameState.IsEventExecuting() {
+	if m.gameState.Map().IsEventExecuting() {
 		return nil
 	}
 	if !input.Triggered() {
@@ -123,7 +123,7 @@ func (m *MapScene) movePlayerIfNeeded() error {
 	x, y := input.Position()
 	tx := (x - scene.GameMarginX) / scene.TileSize / scene.TileScale
 	ty := (y - scene.GameMarginTop) / scene.TileSize / scene.TileScale
-	e := m.gameState.EventAt(tx, ty)
+	e := m.gameState.Map().EventAt(tx, ty)
 	p, err := m.passable(tx, ty)
 	if err != nil {
 		return err
@@ -139,7 +139,7 @@ func (m *MapScene) movePlayerIfNeeded() error {
 			return nil
 		}
 	}
-	if err := m.gameState.MovePlayerByUserInput(m.passable, tx, ty, e); err != nil {
+	if err := m.gameState.Map().MovePlayerByUserInput(m.passable, tx, ty, e); err != nil {
 		return err
 	}
 	m.moveDstX = tx
@@ -151,19 +151,19 @@ func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 	if err := m.gameState.Screen().Update(); err != nil {
 		return err
 	}
-	if err := m.gameState.UpdatePlayer(); err != nil {
+	if err := m.gameState.Map().UpdatePlayer(); err != nil {
 		return err
 	}
 	if err := m.gameState.Windows().Update(); err != nil {
 		return err
 	}
-	if err := m.gameState.UpdateEvents(); err != nil {
+	if err := m.gameState.Map().UpdateEvents(); err != nil {
 		return err
 	}
-	if m.gameState.IsEventExecuting() {
+	if m.gameState.Map().IsEventExecuting() {
 		return nil
 	}
-	m.gameState.TryRunAutoEvent()
+	m.gameState.Map().TryRunAutoEvent()
 	if err := m.movePlayerIfNeeded(); err != nil {
 		return err
 	}
@@ -206,13 +206,13 @@ func (t *tilesImageParts) Dst(index int) (int, int, int, int) {
 
 func (m *MapScene) Draw(screen *ebiten.Image) error {
 	m.tilesImage.Clear()
-	tileset, err := m.tileSet(m.gameState.CurrentMap().TileSetID)
+	tileset, err := m.tileSet(m.gameState.Map().CurrentMap().TileSetID)
 	if err != nil {
 		return err
 	}
 	op := &ebiten.DrawImageOptions{}
 	op.ImageParts = &tilesImageParts{
-		room:    m.gameState.CurrentRoom(),
+		room:    m.gameState.Map().CurrentRoom(),
 		tileSet: tileset,
 		layer:   0,
 	}
@@ -220,7 +220,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 		return err
 	}
 	op.ImageParts = &tilesImageParts{
-		room:     m.gameState.CurrentRoom(),
+		room:     m.gameState.Map().CurrentRoom(),
 		tileSet:  tileset,
 		layer:    1,
 		overOnly: false,
@@ -228,19 +228,19 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 	if err := m.tilesImage.DrawImage(assets.GetImage(tileset.Images[1]), op); err != nil {
 		return err
 	}
-	if err := m.gameState.DrawPlayer(m.tilesImage); err != nil {
+	if err := m.gameState.Map().DrawPlayer(m.tilesImage); err != nil {
 		return err
 	}
-	if err := m.gameState.DrawEvents(m.tilesImage); err != nil {
+	if err := m.gameState.Map().DrawEvents(m.tilesImage); err != nil {
 		return err
 	}
 	op = &ebiten.DrawImageOptions{}
-	tileSet, err := m.tileSet(m.gameState.CurrentMap().TileSetID)
+	tileSet, err := m.tileSet(m.gameState.Map().CurrentMap().TileSetID)
 	if err != nil {
 		return err
 	}
 	op.ImageParts = &tilesImageParts{
-		room:     m.gameState.CurrentRoom(),
+		room:     m.gameState.Map().CurrentRoom(),
 		tileSet:  tileSet,
 		layer:    1,
 		overOnly: true,
@@ -255,7 +255,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 	if err := screen.DrawImage(m.tilesImage, op); err != nil {
 		return err
 	}
-	if m.gameState.IsPlayerMovingByUserInput() {
+	if m.gameState.Map().IsPlayerMovingByUserInput() {
 		x, y := m.moveDstX, m.moveDstY
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(x*scene.TileSize), float64(y*scene.TileSize))

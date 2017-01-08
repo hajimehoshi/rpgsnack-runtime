@@ -57,13 +57,13 @@ func (i *Interpreter) event() *character.Event {
 	if i.eventID == -1 {
 		return nil
 	}
-	if i.gameState.mapID != i.mapID {
+	if i.gameState.Map().mapID != i.mapID {
 		return nil
 	}
-	if i.gameState.roomID != i.roomID {
+	if i.gameState.Map().roomID != i.roomID {
 		return nil
 	}
-	for _, e := range i.gameState.events {
+	for _, e := range i.gameState.Map().events {
 		if i.eventID == e.ID() {
 			return e
 		}
@@ -77,18 +77,18 @@ func (i *Interpreter) IsExecuting() bool {
 
 func (i *Interpreter) character(id int) char {
 	if id == -1 {
-		return i.gameState.player
+		return i.gameState.Map().player
 	}
-	if i.gameState.mapID != i.mapID {
+	if i.gameState.Map().mapID != i.mapID {
 		return nil
 	}
-	if i.gameState.roomID != i.roomID {
+	if i.gameState.Map().roomID != i.roomID {
 		return nil
 	}
 	if id == 0 {
 		id = i.eventID
 	}
-	for _, e := range i.gameState.events {
+	for _, e := range i.gameState.Map().events {
 		if id == e.ID() {
 			return e
 		}
@@ -139,7 +139,7 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 			eventID = i.eventID
 		}
 		// TODO: Should i.mapID and i.roomID be considered here?
-		room := i.gameState.CurrentRoom()
+		room := i.gameState.Map().CurrentRoom()
 		var event *data.Event
 		for _, e := range room.Events {
 			if e.ID == eventID {
@@ -215,7 +215,7 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 		i.commandIndex.advance()
 	case data.CommandNameSetSelfSwitch:
 		args := c.Args.(*data.CommandArgsSetSelfSwitch)
-		m, r := i.gameState.mapID, i.gameState.roomID
+		m, r := i.gameState.Map().mapID, i.gameState.Map().roomID
 		i.gameState.variables.SetSelfSwitchValue(m, r, i.eventID, args.ID, args.Value)
 		i.commandIndex.advance()
 	case data.CommandNameSetVariable:
@@ -230,7 +230,7 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 			return false, nil
 		}
 		if i.gameState.screen.isFadedOut() {
-			i.gameState.transferPlayerImmediately(args.RoomID, args.X, args.Y, i)
+			i.gameState.Map().transferPlayerImmediately(args.RoomID, args.X, args.Y, i)
 			i.gameState.screen.fadeIn(30)
 			return false, nil
 		}

@@ -15,9 +15,6 @@
 package gamestate
 
 import (
-	"github.com/hajimehoshi/ebiten"
-
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/window"
 )
@@ -30,206 +27,24 @@ import (
 )
 
 type Game struct {
-	variables             *Variables
-	screen                *Screen
-	windows               *window.Windows
-	player                *character.Player
-	mapID                 int
-	roomID                int
-	events                []*character.Event
-	continuingInterpreter *Interpreter
-	autoInterpreter       *Interpreter
-	playerMoving          *Interpreter
+	variables  *Variables
+	screen     *Screen
+	windows    *window.Windows
+	currentMap *Map
 }
 
 func NewGame() (*Game, error) {
-	pos := data.Current().System.InitialPosition
-	x, y, roomID := 0, 0, 1
-	if pos != nil {
-		x, y, roomID = pos.X, pos.Y, pos.RoomID
-	}
-	player, err := character.NewPlayer(x, y)
-	if err != nil {
-		return nil, err
-	}
 	g := &Game{
 		variables: &Variables{},
 		screen:    &Screen{},
 		windows:   &window.Windows{},
-		player:    player,
-		mapID:     1,
 	}
-	g.setRoomID(roomID)
+	m, err := NewMap(g)
+	if err != nil {
+		return nil, err
+	}
+	g.currentMap = m
 	return g, nil
-}
-
-func (g *Game) setRoomID(id int) error {
-	g.roomID = id
-	g.events = nil
-	for _, e := range g.CurrentRoom().Events {
-		event, err := character.NewEvent(e)
-		if err != nil {
-			return err
-		}
-		g.events = append(g.events, event)
-	}
-	return nil
-}
-
-func (g *Game) IsEventExecuting() bool {
-	if g.playerMoving != nil && g.playerMoving.IsExecuting() {
-		return true
-	}
-	if g.continuingInterpreter != nil && g.continuingInterpreter.IsExecuting() {
-		return true
-	}
-	if g.autoInterpreter != nil && g.autoInterpreter.IsExecuting() {
-		return true
-	}
-	return false
-}
-
-func (g *Game) meetsPageCondition(page *data.Page, eventID int) (bool, error) {
-	for _, cond := range page.Conditions {
-		m, err := g.MeetsCondition(cond, eventID)
-		if err != nil {
-			return false, err
-		}
-		if !m {
-			return false, nil
-		}
-	}
-	return true, nil
-}
-
-func (g *Game) pageIndex(eventID int) (int, error) {
-	var event *data.Event
-	for _, e := range g.CurrentRoom().Events {
-		if e.ID == eventID {
-			event = e
-			break
-		}
-	}
-	if event == nil {
-		panic("not reach")
-	}
-	for i := len(event.Pages) - 1; i >= 0; i-- {
-		page := event.Pages[i]
-		m, err := g.meetsPageCondition(page, event.ID)
-		if err != nil {
-			return 0, err
-		}
-		if m {
-			return i, nil
-		}
-	}
-	return -1, nil
-}
-
-func (g *Game) UpdateEvents() error {
-	if g.playerMoving != nil {
-		if err := g.playerMoving.Update(); err != nil {
-			return err
-		}
-		if !g.playerMoving.IsExecuting() {
-			g.playerMoving = nil
-		}
-	}
-	if g.autoInterpreter != nil {
-		if err := g.autoInterpreter.Update(); err != nil {
-			return err
-		}
-		if !g.autoInterpreter.IsExecuting() {
-			g.autoInterpreter = nil
-		}
-	}
-	if g.continuingInterpreter != nil {
-		if err := g.continuingInterpreter.Update(); err != nil {
-			return err
-		}
-		if !g.continuingInterpreter.IsExecuting() {
-			g.continuingInterpreter = nil
-		}
-	}
-	if g.IsPlayerMovingByUserInput() {
-		return nil
-	}
-	for _, e := range g.events {
-		index, err := g.pageIndex(e.ID())
-		if err != nil {
-			return err
-		}
-		if err := e.UpdateCharacterIfNeeded(index); err != nil {
-			return err
-		}
-	}
-	for _, e := range g.events {
-		if err := e.Update(); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (g *Game) EventAt(x, y int) *character.Event {
-	for _, e := range g.events {
-		ex, ey := e.Position()
-		if ex == x && ey == y {
-			return e
-		}
-	}
-	return nil
-}
-
-func (g *Game) TryRunAutoEvent() {
-	if g.autoInterpreter != nil {
-		return
-	}
-	for _, e := range g.events {
-		page := e.CurrentPage()
-		if page == nil {
-			continue
-		}
-		if page.Trigger != data.TriggerAuto {
-			continue
-		}
-		g.autoInterpreter = NewInterpreter(g, g.mapID, g.roomID, e.ID(), page.Commands)
-		break
-	}
-}
-
-func (g *Game) DrawEvents(screen *ebiten.Image) error {
-	for _, e := range g.events {
-		if err := e.Draw(screen); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (g *Game) transferPlayerImmediately(roomID, x, y int, interpreter *Interpreter) {
-	g.player.TransferImmediately(x, y)
-	g.setRoomID(roomID)
-	// TODO: What if this is not nil?
-	g.continuingInterpreter = interpreter
-}
-
-func (g *Game) CurrentMap() *data.Map {
-	for _, d := range data.Current().Maps {
-		if d.ID == g.mapID {
-			return d
-		}
-	}
-	return nil
-}
-
-func (g *Game) CurrentRoom() *data.Room {
-	for _, r := range g.CurrentMap().Rooms {
-		if r.ID == g.roomID {
-			return r
-		}
-	}
-	return nil
 }
 
 func (g *Game) Screen() *Screen {
@@ -240,193 +55,8 @@ func (g *Game) Windows() *window.Windows {
 	return g.windows
 }
 
-func (g *Game) UpdatePlayer() error {
-	return g.player.Update()
-}
-
-func (g *Game) DrawPlayer(screen *ebiten.Image) error {
-	return g.player.Draw(screen)
-}
-
-func (g *Game) IsPlayerMovingByUserInput() bool {
-	return g.variables.InnerVariableValue("is_player_moving_by_user_input") != 0
-}
-
-func (g *Game) MovePlayerByUserInput(passable func(x, y int) (bool, error), x, y int, event *character.Event) error {
-	if g.playerMoving != nil {
-		panic("not reach")
-	}
-	px, py := g.player.Position()
-	lastPlayerX, lastPlayerY := px, py
-	path, err := calcPath(passable, px, py, x, y)
-	if err != nil {
-		return err
-	}
-	if len(path) == 0 {
-		return nil
-	}
-	commands := []*data.Command{}
-	for _, r := range path {
-		switch r {
-		case routeCommandMoveUp:
-			commands = append(commands, &data.Command{
-				Name: data.CommandNameMoveCharacter,
-				Args: &data.CommandArgsMoveCharacter{
-					Dir:      data.DirUp,
-					Distance: 1,
-				},
-			})
-			lastPlayerY--
-		case routeCommandMoveRight:
-			commands = append(commands, &data.Command{
-				Name: data.CommandNameMoveCharacter,
-				Args: &data.CommandArgsMoveCharacter{
-					Dir:      data.DirRight,
-					Distance: 1,
-				},
-			})
-			lastPlayerX++
-		case routeCommandMoveDown:
-			commands = append(commands, &data.Command{
-				Name: data.CommandNameMoveCharacter,
-				Args: &data.CommandArgsMoveCharacter{
-					Dir:      data.DirDown,
-					Distance: 1,
-				},
-			})
-			lastPlayerY++
-		case routeCommandMoveLeft:
-			commands = append(commands, &data.Command{
-				Name: data.CommandNameMoveCharacter,
-				Args: &data.CommandArgsMoveCharacter{
-					Dir:      data.DirLeft,
-					Distance: 1,
-				},
-			})
-			lastPlayerX--
-		case routeCommandTurnUp:
-			commands = append(commands, &data.Command{
-				Name: data.CommandNameTurnCharacter,
-				Args: &data.CommandArgsTurnCharacter{
-					Dir: data.DirUp,
-				},
-			})
-		case routeCommandTurnRight:
-			commands = append(commands, &data.Command{
-				Name: data.CommandNameTurnCharacter,
-				Args: &data.CommandArgsTurnCharacter{
-					Dir: data.DirRight,
-				},
-			})
-		case routeCommandTurnDown:
-			commands = append(commands, &data.Command{
-				Name: data.CommandNameTurnCharacter,
-				Args: &data.CommandArgsTurnCharacter{
-					Dir: data.DirDown,
-				},
-			})
-		case routeCommandTurnLeft:
-			commands = append(commands, &data.Command{
-				Name: data.CommandNameTurnCharacter,
-				Args: &data.CommandArgsTurnCharacter{
-					Dir: data.DirLeft,
-				},
-			})
-		default:
-			panic("not reach")
-		}
-	}
-	commands = []*data.Command{
-		{
-			Name: data.CommandNameSetInnerVariable,
-			Args: &data.CommandArgsSetInnerVariable{
-				Name:  "is_player_moving_by_user_input",
-				Value: 1,
-			},
-		},
-		{
-			Name: data.CommandNameSetRoute,
-			Args: &data.CommandArgsSetRoute{
-				EventID:  -1,
-				Repeat:   false,
-				Skip:     false,
-				Wait:     true,
-				Commands: commands,
-			},
-		},
-		{
-			Name: data.CommandNameSetInnerVariable,
-			Args: &data.CommandArgsSetInnerVariable{
-				Name:  "is_player_moving_by_user_input",
-				Value: 0,
-			},
-		},
-	}
-	if event != nil && event.CurrentPage() != nil && event.CurrentPage().Trigger == data.TriggerPlayer {
-		origDir := event.Dir()
-		var dir data.Dir
-		ex, ey := event.Position()
-		px, py := lastPlayerX, lastPlayerY
-		switch {
-		case ex == px && ey == py:
-			// The player and the event are at the same position.
-			dir = event.Dir()
-		case ex > px && ey == py:
-			dir = data.DirLeft
-		case ex < px && ey == py:
-			dir = data.DirRight
-		case ex == px && ey > py:
-			dir = data.DirUp
-		case ex == px && ey < py:
-			dir = data.DirDown
-		default:
-			panic("not reach")
-		}
-		commands = append(commands,
-			&data.Command{
-				Name: data.CommandNameSetRoute,
-				Args: &data.CommandArgsSetRoute{
-					EventID: event.ID(),
-					Repeat:  false,
-					Skip:    false,
-					Wait:    true,
-					Commands: []*data.Command{
-						{
-							Name: data.CommandNameTurnCharacter,
-							Args: &data.CommandArgsTurnCharacter{
-								Dir: dir,
-							},
-						},
-					},
-				},
-			},
-			&data.Command{
-				Name: data.CommandNameCallEvent,
-				Args: &data.CommandArgsCallEvent{
-					EventID:   event.ID(),
-					PageIndex: event.CurrentPageIndex(),
-				},
-			},
-			&data.Command{
-				Name: data.CommandNameSetRoute,
-				Args: &data.CommandArgsSetRoute{
-					EventID: event.ID(),
-					Repeat:  false,
-					Skip:    false,
-					Wait:    true,
-					Commands: []*data.Command{
-						{
-							Name: data.CommandNameTurnCharacter,
-							Args: &data.CommandArgsTurnCharacter{
-								Dir: origDir,
-							},
-						},
-					},
-				},
-			})
-	}
-	g.playerMoving = NewInterpreter(g, g.mapID, g.roomID, -1, commands)
-	return nil
+func (g *Game) Map() *Map {
+	return g.currentMap
 }
 
 var reMessage = regexp.MustCompile(`\\([a-zA-Z])\[(\d+)\]`)
@@ -458,7 +88,7 @@ func (g *Game) MeetsCondition(cond *data.Condition, eventID int) (bool, error) {
 		rhs := cond.Value.(bool)
 		return v == rhs, nil
 	case data.ConditionTypeSelfSwitch:
-		m, r := g.mapID, g.roomID
+		m, r := g.currentMap.mapID, g.currentMap.roomID
 		v := g.variables.SelfSwitchValue(m, r, eventID, cond.ID)
 		rhs := cond.Value.(bool)
 		return v == rhs, nil
