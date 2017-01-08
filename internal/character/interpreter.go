@@ -22,5 +22,5 @@ type Interpreter interface {
 	IsExecuting() bool
 	Update() error
 	MeetsCondition(cond *data.Condition) (bool, error)
-	SetCommands(commands []*data.Command, trigger data.Trigger)
+	SetCommands(commands []*data.Command)
 }

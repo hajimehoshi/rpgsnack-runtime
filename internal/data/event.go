@@ -224,8 +224,8 @@ type CommandArgsIf struct {
 }
 
 type CommandArgsCallEvent struct {
-	EventID int `json:"event_id"`
-	PageID  int `json:"page_id"`
+	EventID   int `json:"event_id"`
+	PageIndex int `json:"page_index"`
 }
 
 type CommandArgsWait struct {

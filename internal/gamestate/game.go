@@ -161,11 +161,12 @@ func (g *Game) IsPlayerMovingByUserInput() bool {
 	return g.playerMoving != nil
 }
 
-func (g *Game) MovePlayerByUserInput(passable func(x, y int) (bool, error), x, y int) error {
+func (g *Game) MovePlayerByUserInput(passable func(x, y int) (bool, error), x, y int, event *character.Event) error {
 	if g.playerMoving != nil {
 		panic("not reach")
 	}
 	px, py := g.player.Position()
+	lastPlayerX, lastPlayerY := px, py
 	path, err := calcPath(passable, px, py, x, y)
 	if err != nil {
 		return err
@@ -185,6 +186,7 @@ func (g *Game) MovePlayerByUserInput(passable func(x, y int) (bool, error), x, y
 					Distance: 1,
 				},
 			})
+			lastPlayerY--
 		case routeCommandMoveRight:
 			commands = append(commands, &data.Command{
 				Name: data.CommandNameMoveCharacter,
@@ -193,6 +195,7 @@ func (g *Game) MovePlayerByUserInput(passable func(x, y int) (bool, error), x, y
 					Distance: 1,
 				},
 			})
+			lastPlayerX++
 		case routeCommandMoveDown:
 			commands = append(commands, &data.Command{
 				Name: data.CommandNameMoveCharacter,
@@ -201,6 +204,7 @@ func (g *Game) MovePlayerByUserInput(passable func(x, y int) (bool, error), x, y
 					Distance: 1,
 				},
 			})
+			lastPlayerY++
 		case routeCommandMoveLeft:
 			commands = append(commands, &data.Command{
 				Name: data.CommandNameMoveCharacter,
@@ -209,6 +213,7 @@ func (g *Game) MovePlayerByUserInput(passable func(x, y int) (bool, error), x, y
 					Distance: 1,
 				},
 			})
+			lastPlayerX--
 		case routeCommandTurnUp:
 			commands = append(commands, &data.Command{
 				Name: data.CommandNameTurnCharacter,
@@ -241,7 +246,7 @@ func (g *Game) MovePlayerByUserInput(passable func(x, y int) (bool, error), x, y
 			panic("not reach")
 		}
 	}
-	g.playerMoving.SetCommands([]*data.Command{
+	commands = []*data.Command{
 		{
 			Name: data.CommandNameSetRoute,
 			Args: &data.CommandArgsSetRoute{
@@ -252,7 +257,71 @@ func (g *Game) MovePlayerByUserInput(passable func(x, y int) (bool, error), x, y
 				Commands: commands,
 			},
 		},
-	}, data.TriggerAuto)
+	}
+	if event != nil {
+		origDir := event.Dir()
+		var dir data.Dir
+		ex, ey := event.Position()
+		px, py := lastPlayerX, lastPlayerY
+		switch {
+		case ex == px && ey == py:
+			// The player and the event are at the same position.
+			dir = event.Dir()
+		case ex > px && ey == py:
+			dir = data.DirLeft
+		case ex < px && ey == py:
+			dir = data.DirRight
+		case ex == px && ey > py:
+			dir = data.DirUp
+		case ex == px && ey < py:
+			dir = data.DirDown
+		default:
+			panic("not reach")
+		}
+		commands = append(commands,
+			&data.Command{
+				Name: data.CommandNameSetRoute,
+				Args: &data.CommandArgsSetRoute{
+					EventID: event.ID(),
+					Repeat:  false,
+					Skip:    false,
+					Wait:    true,
+					Commands: []*data.Command{
+						{
+							Name: data.CommandNameTurnCharacter,
+							Args: &data.CommandArgsTurnCharacter{
+								Dir: dir,
+							},
+						},
+					},
+				},
+			},
+			&data.Command{
+				Name: data.CommandNameCallEvent,
+				Args: &data.CommandArgsCallEvent{
+					EventID:   event.ID(),
+					PageIndex: event.CurrentPageIndex(),
+				},
+			},
+			&data.Command{
+				Name: data.CommandNameSetRoute,
+				Args: &data.CommandArgsSetRoute{
+					EventID: event.ID(),
+					Repeat:  false,
+					Skip:    false,
+					Wait:    true,
+					Commands: []*data.Command{
+						{
+							Name: data.CommandNameTurnCharacter,
+							Args: &data.CommandArgsTurnCharacter{
+								Dir: origDir,
+							},
+						},
+					},
+				},
+			})
+	}
+	g.playerMoving.SetCommands(commands)
 	return nil
 }
 

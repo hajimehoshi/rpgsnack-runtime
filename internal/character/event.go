@@ -70,41 +70,15 @@ func (e *Event) Turn(dir data.Dir) {
 	e.character.turn(dir)
 }
 
-func (e *Event) StartEvent(player *Player, trigger data.Trigger) {
-	var dir data.Dir
-	ex, ey := e.Position()
-	px, py := player.Position()
-	switch {
-	case trigger == data.TriggerAuto:
-	case ex == px && ey == py:
-		// The player and the event are at the same position.
-	case ex > px && ey == py:
-		dir = data.DirLeft
-	case ex < px && ey == py:
-		dir = data.DirRight
-	case ex == px && ey > py:
-		dir = data.DirUp
-	case ex == px && ey < py:
-		dir = data.DirDown
-	default:
-		panic("not reach")
-	}
-	e.dirBeforeRunning = e.character.dir
-	e.character.turn(dir)
-	// page.Attitude is ignored so far.
-	e.character.attitude = data.AttitudeMiddle
-	e.steppingCount = 0
-}
-
-func (e *Event) EndEvent() {
-	e.character.turn(e.dirBeforeRunning)
-}
-
 func (e *Event) currentPage() *data.Page {
 	if e.currentPageIndex == -1 {
 		return nil
 	}
 	return e.data.Pages[e.currentPageIndex]
+}
+
+func (e *Event) CurrentPageIndex() int {
+	return e.currentPageIndex
 }
 
 func (e *Event) IsPassable() bool {
@@ -198,7 +172,7 @@ func (e *Event) TryRun(trigger data.Trigger) bool {
 	if page.Trigger != trigger {
 		return false
 	}
-	e.interpreter.SetCommands(page.Commands, page.Trigger)
+	e.interpreter.SetCommands(page.Commands)
 	return true
 }
 

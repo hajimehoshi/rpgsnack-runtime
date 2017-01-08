@@ -38,10 +38,8 @@ type Interpreter struct {
 	roomID         int // Note: This doesn't make sense when eventID == -1
 	eventID        int
 	commandIndex   *commandIndex
-	started        bool
 	waitingCount   int
 	waitingCommand bool
-	trigger        data.Trigger // TODO: Remove this!
 	sub            *Interpreter
 }
 
@@ -76,9 +74,8 @@ func (i *Interpreter) IsExecuting() bool {
 	return i.commandIndex != nil
 }
 
-func (i *Interpreter) SetCommands(commands []*data.Command, trigger data.Trigger) {
+func (i *Interpreter) SetCommands(commands []*data.Command) {
 	i.commandIndex = newCommandIndex(commands)
-	i.trigger = trigger
 }
 
 func (i *Interpreter) character(id int) char {
@@ -193,11 +190,24 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 		if eventID == 0 {
 			eventID = i.eventID
 		}
-		pageID := args.PageID
-		page := data.Current().Maps[i.mapID].Rooms[i.roomID].Events[eventID].Pages[pageID]
+		// TODO: Should i.mapID and i.roomID be considered here?
+		room := i.gameState.CurrentRoom()
+		var event *data.Event
+		for _, e := range room.Events {
+			if e.ID == eventID {
+				event = e
+				break
+			}
+		}
+		if event == nil {
+			// TODO: warning?
+			i.commandIndex.advance()
+			return true, nil
+		}
+		page := event.Pages[args.PageIndex]
 		commands := page.Commands
 		i.sub = NewInterpreter(i.gameState, i.mapID, i.roomID, eventID)
-		i.sub.SetCommands(commands, data.TriggerAuto)
+		i.sub.SetCommands(commands)
 	case data.CommandNameWait:
 		if i.waitingCount == 0 {
 			i.waitingCount = c.Args.(*data.CommandArgsWait).Time * 6
@@ -288,7 +298,7 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 			id = i.eventID
 		}
 		i.sub = NewInterpreter(i.gameState, i.mapID, i.roomID, id)
-		i.sub.SetCommands(args.Commands, data.TriggerAuto)
+		i.sub.SetCommands(args.Commands)
 	case data.CommandNameTintScreen:
 		if !i.waitingCommand {
 			args := c.Args.(*data.CommandArgsTintScreen)
@@ -364,12 +374,6 @@ func (i *Interpreter) Update() error {
 	if i.commandIndex == nil {
 		return nil
 	}
-	if !i.started {
-		if e := i.event(); e != nil {
-			e.StartEvent(i.gameState.Player(), i.trigger)
-		}
-		i.started = true
-	}
 	for !i.commandIndex.isTerminated() {
 		cont, err := i.doOneCommand()
 		if err != nil {
@@ -384,11 +388,7 @@ func (i *Interpreter) Update() error {
 			return nil
 		}
 		i.gameState.windows.CloseAll()
-		if e := i.event(); e != nil {
-			e.EndEvent()
-		}
 		i.commandIndex = nil
-		i.started = false
 		return nil
 	}
 	return nil

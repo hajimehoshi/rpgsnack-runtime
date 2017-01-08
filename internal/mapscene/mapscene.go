@@ -125,6 +125,9 @@ func (m *MapScene) eventAt(x, y int) *character.Event {
 }
 
 func (m *MapScene) movePlayerIfNeeded() error {
+	if m.gameState.IsPlayerMovingByUserInput() {
+		return nil
+	}
 	if !input.Triggered() {
 		return nil
 	}
@@ -144,15 +147,11 @@ func (m *MapScene) movePlayerIfNeeded() error {
 			return nil
 		}
 	}
-	if err := m.gameState.MovePlayerByUserInput(m.passable, tx, ty); err != nil {
+	if err := m.gameState.MovePlayerByUserInput(m.passable, tx, ty, e); err != nil {
 		return err
 	}
 	m.moveDstX = tx
 	m.moveDstY = ty
-	if e == nil {
-		return nil
-	}
-	e.TryRun(data.TriggerPlayer)
 	return nil
 }
 
