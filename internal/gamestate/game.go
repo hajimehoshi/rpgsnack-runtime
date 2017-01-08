@@ -151,6 +151,9 @@ func (g *Game) UpdateEvents() error {
 			g.continuingInterpreter = nil
 		}
 	}
+	if g.IsPlayerMovingByUserInput() {
+		return nil
+	}
 	for _, e := range g.events {
 		index, err := g.pageIndex(e.ID())
 		if err != nil {
