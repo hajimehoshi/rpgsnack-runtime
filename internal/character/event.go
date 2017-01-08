@@ -125,17 +125,17 @@ func (e *Event) Update() error {
 	}
 	if page.Stepping {
 		switch {
-		case e.steppingCount < 30:
+		case e.steppingCount < 15:
 			e.character.attitude = data.AttitudeMiddle
-		case e.steppingCount < 60:
+		case e.steppingCount < 30:
 			e.character.attitude = data.AttitudeLeft
-		case e.steppingCount < 90:
+		case e.steppingCount < 45:
 			e.character.attitude = data.AttitudeMiddle
 		default:
 			e.character.attitude = data.AttitudeRight
 		}
 		e.steppingCount++
-		e.steppingCount %= 120
+		e.steppingCount %= 60
 	}
 	if err := e.character.update(); err != nil {
 		return err
