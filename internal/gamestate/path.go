@@ -31,7 +31,7 @@ const (
 	routeCommandTurnLeft
 )
 
-func calcPath(passable func(x, y int) (bool, error), startX, startY, goalX, goalY int) ([]routeCommand, error) {
+func calcPath(passable func(x, y int) (bool, error), startX, startY, goalX, goalY int) ([]routeCommand, int, int, error) {
 	type pos struct {
 		X, Y int
 	}
@@ -49,7 +49,7 @@ func calcPath(passable func(x, y int) (bool, error), startX, startY, goalX, goal
 			for _, s := range successors {
 				pa, err := passable(s.X, s.Y)
 				if err != nil {
-					return nil, err
+					return nil, 0, 0, err
 				}
 				if !pa {
 					// It's OK even if the final destination is not passable so far.
@@ -75,7 +75,7 @@ func calcPath(passable func(x, y int) (bool, error), startX, startY, goalX, goal
 		parent, ok := parents[p]
 		// There is no path.
 		if !ok {
-			return nil, nil
+			return nil, 0, 0, nil
 		}
 		switch {
 		case parent.X == p.X-1:
@@ -108,21 +108,97 @@ func calcPath(passable func(x, y int) (bool, error), startX, startY, goalX, goal
 	}
 	lastP, err := passable(goalX, goalY)
 	if err != nil {
-		return nil, err
+		return nil, 0, 0, err
 	}
+	lastX, lastY := goalX, goalY
 	if !lastP {
 		switch path[len(path)-1] {
 		case routeCommandMoveUp:
 			path[len(path)-1] = routeCommandTurnUp
+			lastY++
 		case routeCommandMoveRight:
 			path[len(path)-1] = routeCommandTurnRight
+			lastX--
 		case routeCommandMoveDown:
 			path[len(path)-1] = routeCommandTurnDown
+			lastY--
 		case routeCommandMoveLeft:
 			path[len(path)-1] = routeCommandTurnLeft
+			lastX++
 		default:
 			panic("not reach")
 		}
 	}
-	return path, nil
+	return path, lastX, lastY, nil
+}
+
+func routeCommandsToEventCommands(path []routeCommand) []*data.Command {
+	commands := []*data.Command{}
+	for _, r := range path {
+		switch r {
+		case routeCommandMoveUp:
+			commands = append(commands, &data.Command{
+				Name: data.CommandNameMoveCharacter,
+				Args: &data.CommandArgsMoveCharacter{
+					Dir:      data.DirUp,
+					Distance: 1,
+				},
+			})
+		case routeCommandMoveRight:
+			commands = append(commands, &data.Command{
+				Name: data.CommandNameMoveCharacter,
+				Args: &data.CommandArgsMoveCharacter{
+					Dir:      data.DirRight,
+					Distance: 1,
+				},
+			})
+		case routeCommandMoveDown:
+			commands = append(commands, &data.Command{
+				Name: data.CommandNameMoveCharacter,
+				Args: &data.CommandArgsMoveCharacter{
+					Dir:      data.DirDown,
+					Distance: 1,
+				},
+			})
+		case routeCommandMoveLeft:
+			commands = append(commands, &data.Command{
+				Name: data.CommandNameMoveCharacter,
+				Args: &data.CommandArgsMoveCharacter{
+					Dir:      data.DirLeft,
+					Distance: 1,
+				},
+			})
+		case routeCommandTurnUp:
+			commands = append(commands, &data.Command{
+				Name: data.CommandNameTurnCharacter,
+				Args: &data.CommandArgsTurnCharacter{
+					Dir: data.DirUp,
+				},
+			})
+		case routeCommandTurnRight:
+			commands = append(commands, &data.Command{
+				Name: data.CommandNameTurnCharacter,
+				Args: &data.CommandArgsTurnCharacter{
+					Dir: data.DirRight,
+				},
+			})
+		case routeCommandTurnDown:
+			commands = append(commands, &data.Command{
+				Name: data.CommandNameTurnCharacter,
+				Args: &data.CommandArgsTurnCharacter{
+					Dir: data.DirDown,
+				},
+			})
+		case routeCommandTurnLeft:
+			commands = append(commands, &data.Command{
+				Name: data.CommandNameTurnCharacter,
+				Args: &data.CommandArgsTurnCharacter{
+					Dir: data.DirLeft,
+				},
+			})
+		default:
+			panic("not reach")
+		}
+	}
+	return commands
 }

@@ -308,86 +308,11 @@ func (m *Map) MovePlayerByUserInput(x, y int) error {
 		}
 	}
 	px, py := m.player.Position()
-	lastPlayerX, lastPlayerY := px, py
-	path, err := calcPath(m.passable, px, py, x, y)
+	path, lastPlayerX, lastPlayerY, err := calcPath(m.passable, px, py, x, y)
 	if err != nil {
 		return err
 	}
-	if len(path) == 0 {
-		return nil
-	}
-	commands := []*data.Command{}
-	for _, r := range path {
-		switch r {
-		case routeCommandMoveUp:
-			commands = append(commands, &data.Command{
-				Name: data.CommandNameMoveCharacter,
-				Args: &data.CommandArgsMoveCharacter{
-					Dir:      data.DirUp,
-					Distance: 1,
-				},
-			})
-			lastPlayerY--
-		case routeCommandMoveRight:
-			commands = append(commands, &data.Command{
-				Name: data.CommandNameMoveCharacter,
-				Args: &data.CommandArgsMoveCharacter{
-					Dir:      data.DirRight,
-					Distance: 1,
-				},
-			})
-			lastPlayerX++
-		case routeCommandMoveDown:
-			commands = append(commands, &data.Command{
-				Name: data.CommandNameMoveCharacter,
-				Args: &data.CommandArgsMoveCharacter{
-					Dir:      data.DirDown,
-					Distance: 1,
-				},
-			})
-			lastPlayerY++
-		case routeCommandMoveLeft:
-			commands = append(commands, &data.Command{
-				Name: data.CommandNameMoveCharacter,
-				Args: &data.CommandArgsMoveCharacter{
-					Dir:      data.DirLeft,
-					Distance: 1,
-				},
-			})
-			lastPlayerX--
-		case routeCommandTurnUp:
-			commands = append(commands, &data.Command{
-				Name: data.CommandNameTurnCharacter,
-				Args: &data.CommandArgsTurnCharacter{
-					Dir: data.DirUp,
-				},
-			})
-		case routeCommandTurnRight:
-			commands = append(commands, &data.Command{
-				Name: data.CommandNameTurnCharacter,
-				Args: &data.CommandArgsTurnCharacter{
-					Dir: data.DirRight,
-				},
-			})
-		case routeCommandTurnDown:
-			commands = append(commands, &data.Command{
-				Name: data.CommandNameTurnCharacter,
-				Args: &data.CommandArgsTurnCharacter{
-					Dir: data.DirDown,
-				},
-			})
-		case routeCommandTurnLeft:
-			commands = append(commands, &data.Command{
-				Name: data.CommandNameTurnCharacter,
-				Args: &data.CommandArgsTurnCharacter{
-					Dir: data.DirLeft,
-				},
-			})
-		default:
-			panic("not reach")
-		}
-	}
-	commands = []*data.Command{
+	commands := []*data.Command{
 		{
 			Name: data.CommandNameSetInnerVariable,
 			Args: &data.CommandArgsSetInnerVariable{
@@ -402,7 +327,7 @@ func (m *Map) MovePlayerByUserInput(x, y int) error {
 				Repeat:   false,
 				Skip:     false,
 				Wait:     true,
-				Commands: commands,
+				Commands: routeCommandsToEventCommands(path),
 			},
 		},
 		{
