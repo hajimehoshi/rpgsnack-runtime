@@ -38,7 +38,7 @@ type Game struct {
 	roomID                int
 	events                []*character.Event
 	continuingInterpreter *Interpreter
-	eventInterpreters     map[int]*Interpreter
+	autoInterpreter       *Interpreter
 	playerMoving          *Interpreter
 }
 
@@ -66,14 +66,12 @@ func NewGame() (*Game, error) {
 func (g *Game) setRoomID(id int) error {
 	g.roomID = id
 	g.events = nil
-	g.eventInterpreters = map[int]*Interpreter{}
 	for _, e := range g.CurrentRoom().Events {
 		event, err := character.NewEvent(e)
 		if err != nil {
 			return err
 		}
 		g.events = append(g.events, event)
-		g.eventInterpreters[e.ID] = NewInterpreter(g, g.mapID, g.roomID, e.ID)
 	}
 	return nil
 }
@@ -85,10 +83,8 @@ func (g *Game) IsEventExecuting() bool {
 	if g.continuingInterpreter != nil && g.continuingInterpreter.IsExecuting() {
 		return true
 	}
-	for _, i := range g.eventInterpreters {
-		if i.IsExecuting() {
-			return true
-		}
+	if g.autoInterpreter != nil && g.autoInterpreter.IsExecuting() {
+		return true
 	}
 	return false
 }
@@ -139,6 +135,22 @@ func (g *Game) UpdateEvents() error {
 			g.playerMoving = nil
 		}
 	}
+	if g.autoInterpreter != nil {
+		if err := g.autoInterpreter.Update(); err != nil {
+			return err
+		}
+		if !g.autoInterpreter.IsExecuting() {
+			g.autoInterpreter = nil
+		}
+	}
+	if g.continuingInterpreter != nil {
+		if err := g.continuingInterpreter.Update(); err != nil {
+			return err
+		}
+		if !g.continuingInterpreter.IsExecuting() {
+			g.continuingInterpreter = nil
+		}
+	}
 	for _, e := range g.events {
 		index, err := g.pageIndex(e.ID())
 		if err != nil {
@@ -148,22 +160,9 @@ func (g *Game) UpdateEvents() error {
 			return err
 		}
 	}
-	for _, i := range g.eventInterpreters {
-		if err := i.Update(); err != nil {
-			return err
-		}
-	}
 	for _, e := range g.events {
 		if err := e.Update(); err != nil {
 			return err
-		}
-	}
-	if g.continuingInterpreter != nil {
-		if err := g.continuingInterpreter.Update(); err != nil {
-			return err
-		}
-		if !g.continuingInterpreter.IsExecuting() {
-			g.continuingInterpreter = nil
 		}
 	}
 	return nil
@@ -180,11 +179,10 @@ func (g *Game) EventAt(x, y int) *character.Event {
 }
 
 func (g *Game) TryRunAutoEvent() {
+	if g.autoInterpreter != nil {
+		return
+	}
 	for _, e := range g.events {
-		i := g.eventInterpreters[e.ID()]
-		if i.IsExecuting() {
-			continue
-		}
 		page := e.CurrentPage()
 		if page == nil {
 			continue
@@ -192,7 +190,9 @@ func (g *Game) TryRunAutoEvent() {
 		if page.Trigger != data.TriggerAuto {
 			continue
 		}
-		i.SetCommands(page.Commands)
+		g.autoInterpreter = NewInterpreter(g, g.mapID, g.roomID, e.ID())
+		g.autoInterpreter.SetCommands(page.Commands)
+		break
 	}
 }
 
