@@ -22,21 +22,19 @@ import (
 
 type Event struct {
 	data             *data.Event
-	interpreter      Interpreter
 	character        *character
 	currentPageIndex int
 	steppingCount    int
 	dirBeforeRunning data.Dir
 }
 
-func NewEvent(eventData *data.Event, interpreter Interpreter) (*Event, error) {
+func NewEvent(eventData *data.Event) (*Event, error) {
 	c := &character{
 		x: eventData.X,
 		y: eventData.Y,
 	}
 	e := &Event{
 		data:             eventData,
-		interpreter:      interpreter,
 		character:        c,
 		currentPageIndex: -1,
 	}
@@ -120,34 +118,24 @@ func (e *Event) UpdateCharacterIfNeeded(index int) error {
 	return nil
 }
 
-// TODO: This is temporary hack: Remove this
-func (e *Event) Interpreter() Interpreter {
-	return e.interpreter
-}
-
 func (e *Event) Update() error {
-	if !e.interpreter.IsExecuting() {
-		page := e.CurrentPage()
-		if page == nil {
-			return nil
-		}
-		if page.Stepping {
-			switch {
-			case e.steppingCount < 30:
-				e.character.attitude = data.AttitudeMiddle
-			case e.steppingCount < 60:
-				e.character.attitude = data.AttitudeLeft
-			case e.steppingCount < 90:
-				e.character.attitude = data.AttitudeMiddle
-			default:
-				e.character.attitude = data.AttitudeRight
-			}
-			e.steppingCount++
-			e.steppingCount %= 120
-		}
+	page := e.CurrentPage()
+	if page == nil {
+		return nil
 	}
-	if err := e.interpreter.Update(); err != nil {
-		return err
+	if page.Stepping {
+		switch {
+		case e.steppingCount < 30:
+			e.character.attitude = data.AttitudeMiddle
+		case e.steppingCount < 60:
+			e.character.attitude = data.AttitudeLeft
+		case e.steppingCount < 90:
+			e.character.attitude = data.AttitudeMiddle
+		default:
+			e.character.attitude = data.AttitudeRight
+		}
+		e.steppingCount++
+		e.steppingCount %= 120
 	}
 	if err := e.character.update(); err != nil {
 		return err

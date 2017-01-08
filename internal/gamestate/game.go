@@ -38,6 +38,7 @@ type Game struct {
 	roomID                int
 	events                []*character.Event
 	continuingInterpreter *Interpreter
+	eventInterpreters     map[int]*Interpreter
 	playerMoving          *Interpreter
 }
 
@@ -65,13 +66,14 @@ func NewGame() (*Game, error) {
 func (g *Game) setRoomID(id int) error {
 	g.roomID = id
 	g.events = nil
+	g.eventInterpreters = map[int]*Interpreter{}
 	for _, e := range g.CurrentRoom().Events {
-		i := NewInterpreter(g, g.mapID, g.roomID, e.ID)
-		event, err := character.NewEvent(e, i)
+		event, err := character.NewEvent(e)
 		if err != nil {
 			return err
 		}
 		g.events = append(g.events, event)
+		g.eventInterpreters[e.ID] = NewInterpreter(g, g.mapID, g.roomID, e.ID)
 	}
 	return nil
 }
@@ -83,8 +85,8 @@ func (g *Game) IsEventExecuting() bool {
 	if g.continuingInterpreter != nil && g.continuingInterpreter.IsExecuting() {
 		return true
 	}
-	for _, e := range g.events {
-		if e.Interpreter().IsExecuting() {
+	for _, i := range g.eventInterpreters {
+		if i.IsExecuting() {
 			return true
 		}
 	}
@@ -146,6 +148,11 @@ func (g *Game) UpdateEvents() error {
 			return err
 		}
 	}
+	for _, i := range g.eventInterpreters {
+		if err := i.Update(); err != nil {
+			return err
+		}
+	}
 	for _, e := range g.events {
 		if err := e.Update(); err != nil {
 			return err
@@ -178,7 +185,8 @@ func (g *Game) EventAt(x, y int) *character.Event {
 
 func (g *Game) TryRunAutoEvent() {
 	for _, e := range g.events {
-		if e.Interpreter().IsExecuting() {
+		i := g.eventInterpreters[e.ID()]
+		if i.IsExecuting() {
 			continue
 		}
 		page := e.CurrentPage()
@@ -188,7 +196,7 @@ func (g *Game) TryRunAutoEvent() {
 		if page.Trigger != data.TriggerAuto {
 			continue
 		}
-		e.Interpreter().SetCommands(page.Commands)
+		i.SetCommands(page.Commands)
 	}
 }
 
