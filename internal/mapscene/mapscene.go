@@ -135,6 +135,9 @@ func (m *MapScene) movePlayerIfNeeded() error {
 		if !e.IsRunnable() {
 			return nil
 		}
+		if e.CurrentPage().Trigger != data.TriggerPlayer {
+			return nil
+		}
 	}
 	if err := m.gameState.MovePlayerByUserInput(m.passable, tx, ty, e); err != nil {
 		return err
