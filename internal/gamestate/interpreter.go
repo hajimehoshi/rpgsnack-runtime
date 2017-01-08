@@ -43,12 +43,13 @@ type Interpreter struct {
 	sub            *Interpreter
 }
 
-func NewInterpreter(gameState *Game, mapID, roomID, eventID int) *Interpreter {
+func NewInterpreter(gameState *Game, mapID, roomID, eventID int, commands []*data.Command) *Interpreter {
 	return &Interpreter{
-		gameState: gameState,
-		mapID:     mapID,
-		roomID:    roomID,
-		eventID:   eventID,
+		gameState:    gameState,
+		mapID:        mapID,
+		roomID:       roomID,
+		eventID:      eventID,
+		commandIndex: newCommandIndex(commands),
 	}
 }
 
@@ -72,10 +73,6 @@ func (i *Interpreter) event() *character.Event {
 
 func (i *Interpreter) IsExecuting() bool {
 	return i.commandIndex != nil
-}
-
-func (i *Interpreter) SetCommands(commands []*data.Command) {
-	i.commandIndex = newCommandIndex(commands)
 }
 
 func (i *Interpreter) character(id int) char {
@@ -157,8 +154,7 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 		}
 		page := event.Pages[args.PageIndex]
 		commands := page.Commands
-		i.sub = NewInterpreter(i.gameState, i.mapID, i.roomID, eventID)
-		i.sub.SetCommands(commands)
+		i.sub = NewInterpreter(i.gameState, i.mapID, i.roomID, eventID, commands)
 	case data.CommandNameWait:
 		if i.waitingCount == 0 {
 			i.waitingCount = c.Args.(*data.CommandArgsWait).Time * 6
@@ -248,8 +244,7 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 		if id == 0 {
 			id = i.eventID
 		}
-		i.sub = NewInterpreter(i.gameState, i.mapID, i.roomID, id)
-		i.sub.SetCommands(args.Commands)
+		i.sub = NewInterpreter(i.gameState, i.mapID, i.roomID, id, args.Commands)
 	case data.CommandNameTintScreen:
 		if !i.waitingCommand {
 			args := c.Args.(*data.CommandArgsTintScreen)

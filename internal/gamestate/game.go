@@ -193,8 +193,7 @@ func (g *Game) TryRunAutoEvent() {
 		if page.Trigger != data.TriggerAuto {
 			continue
 		}
-		g.autoInterpreter = NewInterpreter(g, g.mapID, g.roomID, e.ID())
-		g.autoInterpreter.SetCommands(page.Commands)
+		g.autoInterpreter = NewInterpreter(g, g.mapID, g.roomID, e.ID(), page.Commands)
 		break
 	}
 }
@@ -266,7 +265,6 @@ func (g *Game) MovePlayerByUserInput(passable func(x, y int) (bool, error), x, y
 	if len(path) == 0 {
 		return nil
 	}
-	g.playerMoving = NewInterpreter(g, g.mapID, g.roomID, -1)
 	commands := []*data.Command{}
 	for _, r := range path {
 		switch r {
@@ -427,7 +425,7 @@ func (g *Game) MovePlayerByUserInput(passable func(x, y int) (bool, error), x, y
 				},
 			})
 	}
-	g.playerMoving.SetCommands(commands)
+	g.playerMoving = NewInterpreter(g, g.mapID, g.roomID, -1, commands)
 	return nil
 }
 
