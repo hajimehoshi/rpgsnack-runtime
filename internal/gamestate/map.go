@@ -114,7 +114,10 @@ func (m *Map) pageIndex(eventID int) (int, error) {
 	return -1, nil
 }
 
-func (m *Map) UpdateEvents() error {
+func (m *Map) Update() error {
+	if err := m.player.Update(); err != nil {
+		return err
+	}
 	if m.playerMoving != nil {
 		if err := m.playerMoving.Update(); err != nil {
 			return err
@@ -218,10 +221,6 @@ func (m *Map) CurrentRoom() *data.Room {
 		}
 	}
 	return nil
-}
-
-func (m *Map) UpdatePlayer() error {
-	return m.player.Update()
 }
 
 func (m *Map) DrawPlayer(screen *ebiten.Image) error {

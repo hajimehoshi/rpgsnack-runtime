@@ -151,13 +151,10 @@ func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 	if err := m.gameState.Screen().Update(); err != nil {
 		return err
 	}
-	if err := m.gameState.Map().UpdatePlayer(); err != nil {
-		return err
-	}
 	if err := m.gameState.Windows().Update(); err != nil {
 		return err
 	}
-	if err := m.gameState.Map().UpdateEvents(); err != nil {
+	if err := m.gameState.Map().Update(); err != nil {
 		return err
 	}
 	if m.gameState.Map().IsEventExecuting() {
