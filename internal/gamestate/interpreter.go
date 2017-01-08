@@ -158,17 +158,18 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 	case data.CommandNameWait:
 		if i.waitingCount == 0 {
 			i.waitingCount = c.Args.(*data.CommandArgsWait).Time * 6
-			return false, nil
 		}
-		if i.waitingCount > 0 {
-			i.waitingCount--
-			if i.waitingCount == 0 {
-				i.commandIndex.advance()
-				return true, nil
-			}
-			return false, nil
+		if i.waitingCount == 0 {
+			// Time 0.0[s] is specified.
+			i.commandIndex.advance()
+			return true, nil
 		}
-		i.commandIndex.advance()
+		i.waitingCount--
+		if i.waitingCount == 0 {
+			i.commandIndex.advance()
+			return true, nil
+		}
+		return false, nil
 	case data.CommandNameShowMessage:
 		if !i.waitingCommand {
 			args := c.Args.(*data.CommandArgsShowMessage)
