@@ -15,10 +15,13 @@
 package gamestate
 
 import (
+	"fmt"
+
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
 
 type Map struct {
@@ -49,6 +52,16 @@ func NewMap(game *Game) (*Map, error) {
 	}
 	m.setRoomID(roomID)
 	return m, nil
+}
+
+func (m *Map) TileSet() (*data.TileSet, error) {
+	id := m.currentMap().TileSetID
+	for _, t := range data.Current().TileSets {
+		if t.ID == id {
+			return t, nil
+		}
+	}
+	return nil, fmt.Errorf("mapscene: tile set not found: %d", id)
 }
 
 func (m *Map) setRoomID(id int) error {
@@ -162,7 +175,7 @@ func (m *Map) Update() error {
 	return nil
 }
 
-func (m *Map) EventAt(x, y int) *character.Event {
+func (m *Map) eventAt(x, y int) *character.Event {
 	for _, e := range m.events {
 		ex, ey := e.Position()
 		if ex == x && ey == y {
@@ -173,6 +186,9 @@ func (m *Map) EventAt(x, y int) *character.Event {
 }
 
 func (m *Map) TryRunAutoEvent() {
+	if m.IsEventExecuting() {
+		return
+	}
 	if m.autoInterpreter != nil {
 		return
 	}
@@ -189,15 +205,6 @@ func (m *Map) TryRunAutoEvent() {
 	}
 }
 
-func (m *Map) DrawEvents(screen *ebiten.Image) error {
-	for _, e := range m.events {
-		if err := e.Draw(screen); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 func (m *Map) transferPlayerImmediately(roomID, x, y int, interpreter *Interpreter) {
 	m.player.TransferImmediately(x, y)
 	m.setRoomID(roomID)
@@ -205,7 +212,7 @@ func (m *Map) transferPlayerImmediately(roomID, x, y int, interpreter *Interpret
 	m.continuingInterpreter = interpreter
 }
 
-func (m *Map) CurrentMap() *data.Map {
+func (m *Map) currentMap() *data.Map {
 	for _, d := range data.Current().Maps {
 		if d.ID == m.mapID {
 			return d
@@ -215,7 +222,7 @@ func (m *Map) CurrentMap() *data.Map {
 }
 
 func (m *Map) CurrentRoom() *data.Room {
-	for _, r := range m.CurrentMap().Rooms {
+	for _, r := range m.currentMap().Rooms {
 		if r.ID == m.roomID {
 			return r
 		}
@@ -223,21 +230,86 @@ func (m *Map) CurrentRoom() *data.Room {
 	return nil
 }
 
-func (m *Map) DrawPlayer(screen *ebiten.Image) error {
-	return m.player.Draw(screen)
-}
-
 func (m *Map) IsPlayerMovingByUserInput() bool {
 	return m.game.variables.InnerVariableValue("is_player_moving_by_user_input") != 0
 }
 
-func (m *Map) MovePlayerByUserInput(passable func(x, y int) (bool, error), x, y int, event *character.Event) error {
+func (m *Map) passableTile(x, y int) (bool, error) {
+	tileSet, err := m.TileSet()
+	if err != nil {
+		return false, err
+	}
+	layer := 1
+	tile := m.CurrentRoom().Tiles[layer][y*scene.TileXNum+x]
+	switch tileSet.PassageTypes[layer][tile] {
+	case data.PassageTypeBlock:
+		return false, nil
+	case data.PassageTypePassable:
+		return true, nil
+	case data.PassageTypeWall:
+		panic("not implemented")
+	case data.PassageTypeOver:
+	default:
+		panic("not reach")
+	}
+	layer = 0
+	tile = m.CurrentRoom().Tiles[layer][y*scene.TileXNum+x]
+	if tileSet.PassageTypes[layer][tile] == data.PassageTypePassable {
+		return true, nil
+	}
+	return false, nil
+}
+
+func (m *Map) passable(x, y int) (bool, error) {
+	if x < 0 {
+		return false, nil
+	}
+	if y < 0 {
+		return false, nil
+	}
+	if scene.TileXNum <= x {
+		return false, nil
+	}
+	if scene.TileYNum <= y {
+		return false, nil
+	}
+	p, err := m.passableTile(x, y)
+	if err != nil {
+		return false, err
+	}
+	if !p {
+		return false, nil
+	}
+	e := m.eventAt(x, y)
+	if e == nil {
+		return true, nil
+	}
+	return e.IsPassable(), nil
+}
+
+func (m *Map) MovePlayerByUserInput(x, y int) error {
 	if m.playerMoving != nil {
 		panic("not reach")
 	}
+	event := m.eventAt(x, y)
+	p, err := m.passable(x, y)
+	if err != nil {
+		return err
+	}
+	if !p {
+		if event == nil {
+			return nil
+		}
+		if !event.IsRunnable() {
+			return nil
+		}
+		if event.CurrentPage().Trigger != data.TriggerPlayer {
+			return nil
+		}
+	}
 	px, py := m.player.Position()
 	lastPlayerX, lastPlayerY := px, py
-	path, err := calcPath(passable, px, py, x, y)
+	path, err := calcPath(m.passable, px, py, x, y)
 	if err != nil {
 		return err
 	}
@@ -405,5 +477,18 @@ func (m *Map) MovePlayerByUserInput(passable func(x, y int) (bool, error), x, y 
 			})
 	}
 	m.playerMoving = NewInterpreter(m.game, m.mapID, m.roomID, -1, commands)
+	return nil
+}
+
+func (m *Map) DrawPlayer(screen *ebiten.Image) error {
+	return m.player.Draw(screen)
+}
+
+func (m *Map) DrawEvents(screen *ebiten.Image) error {
+	for _, e := range m.events {
+		if err := e.Draw(screen); err != nil {
+			return err
+		}
+	}
 	return nil
 }
