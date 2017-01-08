@@ -33,17 +33,19 @@ const (
 )
 
 type character struct {
-	speed        speed
-	imageName    string
-	imageIndex   int
-	dir          data.Dir
-	dirFix       bool
-	attitude     data.Attitude
-	prevAttitude data.Attitude
-	x            int
-	y            int
-	moveCount    int
-	moveDir      data.Dir
+	speed         speed
+	imageName     string
+	imageIndex    int
+	dir           data.Dir
+	dirFix        bool
+	stepping      bool
+	steppingCount int
+	attitude      data.Attitude
+	prevAttitude  data.Attitude
+	x             int
+	y             int
+	moveCount     int
+	moveDir       data.Dir
 }
 
 func (c *character) position() (int, int) {
@@ -128,15 +130,31 @@ func (c *character) transferImmediately(x, y int) {
 }
 
 func (c *character) update() error {
+	if c.stepping {
+		switch {
+		case c.steppingCount < 15:
+			c.attitude = data.AttitudeMiddle
+		case c.steppingCount < 30:
+			c.attitude = data.AttitudeLeft
+		case c.steppingCount < 45:
+			c.attitude = data.AttitudeMiddle
+		default:
+			c.attitude = data.AttitudeRight
+		}
+		c.steppingCount++
+		c.steppingCount %= 60
+	}
 	if !c.isMoving() {
 		return nil
 	}
-	if c.moveCount >= int(c.speed)/2 {
-		c.attitude = data.AttitudeMiddle
-	} else if c.prevAttitude == data.AttitudeLeft {
-		c.attitude = data.AttitudeRight
-	} else {
-		c.attitude = data.AttitudeLeft
+	if !c.stepping {
+		if c.moveCount >= int(c.speed)/2 {
+			c.attitude = data.AttitudeMiddle
+		} else if c.prevAttitude == data.AttitudeLeft {
+			c.attitude = data.AttitudeRight
+		} else {
+			c.attitude = data.AttitudeLeft
+		}
 	}
 	c.moveCount--
 	if c.moveCount == 0 {
@@ -153,8 +171,10 @@ func (c *character) update() error {
 		}
 		c.x = nx
 		c.y = ny
-		c.prevAttitude = c.attitude
-		c.attitude = data.AttitudeMiddle
+		if !c.stepping {
+			c.prevAttitude = c.attitude
+			c.attitude = data.AttitudeMiddle
+		}
 	}
 	return nil
 }

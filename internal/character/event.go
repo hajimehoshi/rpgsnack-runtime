@@ -105,6 +105,7 @@ func (e *Event) UpdateCharacterIfNeeded(index int) (bool, error) {
 		c.dirFix = false
 		c.dir = data.Dir(0)
 		c.attitude = data.AttitudeMiddle
+		c.stepping = false
 		return true, nil
 	}
 	page := e.data.Pages[index]
@@ -115,6 +116,7 @@ func (e *Event) UpdateCharacterIfNeeded(index int) (bool, error) {
 	c.dir = page.Dir
 	// page.Attitude is ignored so far.
 	c.attitude = data.AttitudeMiddle
+	c.stepping = page.Stepping
 	return true, nil
 }
 
@@ -122,20 +124,6 @@ func (e *Event) Update() error {
 	page := e.CurrentPage()
 	if page == nil {
 		return nil
-	}
-	if page.Stepping {
-		switch {
-		case e.steppingCount < 15:
-			e.character.attitude = data.AttitudeMiddle
-		case e.steppingCount < 30:
-			e.character.attitude = data.AttitudeLeft
-		case e.steppingCount < 45:
-			e.character.attitude = data.AttitudeMiddle
-		default:
-			e.character.attitude = data.AttitudeRight
-		}
-		e.steppingCount++
-		e.steppingCount %= 60
 	}
 	if err := e.character.update(); err != nil {
 		return err
