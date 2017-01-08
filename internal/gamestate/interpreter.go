@@ -32,7 +32,15 @@ type char interface {
 	Turn(dir data.Dir)
 }
 
+var interpreterID = 0
+
+func generateInterpreterID() int {
+	interpreterID++
+	return interpreterID
+}
+
 type Interpreter struct {
+	id             int
 	gameState      *Game
 	mapID          int // Note: This doesn't make sense when eventID == -1
 	roomID         int // Note: This doesn't make sense when eventID == -1
@@ -46,6 +54,7 @@ type Interpreter struct {
 
 func NewInterpreter(gameState *Game, mapID, roomID, eventID int, commands []*data.Command) *Interpreter {
 	return &Interpreter{
+		id:           generateInterpreterID(),
 		gameState:    gameState,
 		mapID:        mapID,
 		roomID:       roomID,
@@ -99,7 +108,7 @@ func (i *Interpreter) character(id int) char {
 
 func (i *Interpreter) doOneCommand() (bool, error) {
 	c := i.commandIndex.command()
-	if !i.gameState.windows.CanProceed() {
+	if !i.gameState.windows.CanProceed(i.id) {
 		return false, nil
 	}
 	if i.sub != nil {
@@ -178,7 +187,7 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 			if ch := i.character(args.EventID); ch != nil {
 				x, y := ch.Position()
 				content = i.gameState.ParseMessageSyntax(content)
-				i.gameState.windows.ShowMessage(content, x*scene.TileSize, y*scene.TileSize)
+				i.gameState.windows.ShowMessage(content, x*scene.TileSize, y*scene.TileSize, i.id)
 				i.waitingCommand = true
 				return false, nil
 			}
@@ -201,7 +210,7 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 				choice = i.gameState.ParseMessageSyntax(choice)
 				choices = append(choices, choice)
 			}
-			i.gameState.windows.ShowChoices(choices)
+			i.gameState.windows.ShowChoices(choices, i.id)
 			i.waitingCommand = true
 			return false, nil
 		}
@@ -390,7 +399,7 @@ func (i *Interpreter) Update() error {
 			i.commandIndex.rewind()
 			return nil
 		}
-		if i.gameState.windows.IsBusy() {
+		if i.gameState.windows.IsBusy(i.id) {
 			return nil
 		}
 		i.gameState.windows.CloseAll()

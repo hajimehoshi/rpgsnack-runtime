@@ -35,6 +35,7 @@ const (
 )
 
 type balloon struct {
+	interpreterID  int
 	x              int
 	y              int
 	width          int
@@ -50,13 +51,14 @@ type balloon struct {
 	opened         bool
 }
 
-func newBalloon(x, y, width, height int, content string) *balloon {
+func newBalloon(x, y, width, height int, content string, interpreterID int) *balloon {
 	b := &balloon{
-		content: content,
-		x:       x,
-		y:       y,
-		width:   ((width + 3) / 4) * 4,
-		height:  ((height + 3) / 4) * 4,
+		interpreterID: interpreterID,
+		content:       content,
+		x:             x,
+		y:             y,
+		width:         ((width + 3) / 4) * 4,
+		height:        ((height + 3) / 4) * 4,
 	}
 	return b
 }
@@ -76,13 +78,14 @@ func balloonSizeFromContent(content string) (int, int, int) {
 	return w, h, contentOffsetX
 }
 
-func newBalloonCenter(content string) *balloon {
+func newBalloonCenter(content string, interpreterID int) *balloon {
 	sw := scene.TileXNum*scene.TileSize + scene.GameMarginX/scene.TileScale
 	sh := scene.TileYNum*scene.TileSize + scene.GameMarginTop/scene.TileScale
 	w, h, contentOffsetX := balloonSizeFromContent(content)
 	x := (sw - w) / 2
 	y := (sh - h) / 2
 	b := &balloon{
+		interpreterID:  interpreterID,
 		content:        content,
 		contentOffsetX: contentOffsetX,
 		x:              x,
@@ -93,12 +96,13 @@ func newBalloonCenter(content string) *balloon {
 	return b
 }
 
-func newBalloonWithArrow(arrowX, arrowY int, content string) *balloon {
+func newBalloonWithArrow(arrowX, arrowY int, content string, interpreterID int) *balloon {
 	b := &balloon{
-		content:  content,
-		hasArrow: true,
-		arrowX:   arrowX,
-		arrowY:   arrowY - balloonArrowHeight,
+		interpreterID: interpreterID,
+		content:       content,
+		hasArrow:      true,
+		arrowX:        arrowX,
+		arrowY:        arrowY - balloonArrowHeight,
 	}
 	w, h, contentOffsetX := balloonSizeFromContent(content)
 	b.width = w

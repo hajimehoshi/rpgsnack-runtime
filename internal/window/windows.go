@@ -49,24 +49,24 @@ func (b *Windows) HasChosenIndex() bool {
 	return b.hasChosenIndex
 }
 
-func (b *Windows) ShowMessage(content string, x, y int) {
+func (b *Windows) ShowMessage(content string, x, y int, interpreterID int) {
 	if b.nextBalloon != nil {
 		panic("not reach")
 	}
 	// TODO: How to call newBalloonCenter?
 	x += scene.TileSize/2 + scene.GameMarginX/scene.TileScale
-	y += scene.GameMarginTop/scene.TileScale
-	b.nextBalloon = newBalloonWithArrow(x, y, content)
+	y += scene.GameMarginTop / scene.TileScale
+	b.nextBalloon = newBalloonWithArrow(x, y, content, interpreterID)
 }
 
-func (b *Windows) ShowChoices(choices []string) {
+func (b *Windows) ShowChoices(choices []string, interpreterID int) {
 	ymin := choiceBalloonsMinY(len(choices))
 	b.choiceBalloons = nil
 	for i, choice := range choices {
 		x := 0
 		y := i*choiceBalloonHeight + ymin
 		width := scene.TileXNum * scene.TileSize
-		balloon := newBalloon(x, y, width, choiceBalloonHeight, choice)
+		balloon := newBalloon(x, y, width, choiceBalloonHeight, choice, interpreterID)
 		b.choiceBalloons = append(b.choiceBalloons, balloon)
 		balloon.open()
 	}
@@ -90,14 +90,14 @@ func (b *Windows) CloseAll() {
 	b.hasChosenIndex = false
 }
 
-func (b *Windows) IsBusy() bool {
-	if b.isAnimating() {
+func (b *Windows) IsBusy(interpreterID int) bool {
+	if b.isAnimating(interpreterID) {
 		return true
 	}
 	if b.choosing || b.chosenBalloonWaitingCount > 0 {
 		return true
 	}
-	if b.isOpened() {
+	if b.isOpened(interpreterID) {
 		return true
 	}
 	if b.nextBalloon != nil {
@@ -106,11 +106,11 @@ func (b *Windows) IsBusy() bool {
 	return false
 }
 
-func (b *Windows) CanProceed() bool {
-	if !b.IsBusy() {
+func (b *Windows) CanProceed(interpreterID int) bool {
+	if !b.IsBusy(interpreterID) {
 		return true
 	}
-	if !b.isOpened() {
+	if !b.isOpened(interpreterID) {
 		return false
 	}
 	if !input.Triggered() {
@@ -119,9 +119,12 @@ func (b *Windows) CanProceed() bool {
 	return true
 }
 
-func (b *Windows) isOpened() bool {
+func (b *Windows) isOpened(interpreterID int) bool {
 	for _, balloon := range b.balloons {
 		if balloon == nil {
+			continue
+		}
+		if interpreterID > 0 && balloon.interpreterID != interpreterID {
 			continue
 		}
 		if balloon.isOpened() {
@@ -130,6 +133,9 @@ func (b *Windows) isOpened() bool {
 	}
 	for _, balloon := range b.choiceBalloons {
 		if balloon == nil {
+			continue
+		}
+		if interpreterID > 0 && balloon.interpreterID != interpreterID {
 			continue
 		}
 		if balloon.isOpened() {
@@ -139,9 +145,12 @@ func (b *Windows) isOpened() bool {
 	return false
 }
 
-func (b *Windows) isAnimating() bool {
+func (b *Windows) isAnimating(interpreterID int) bool {
 	for _, balloon := range b.balloons {
 		if balloon == nil {
+			continue
+		}
+		if interpreterID > 0 && balloon.interpreterID != interpreterID {
 			continue
 		}
 		if balloon.isAnimating() {
@@ -150,6 +159,9 @@ func (b *Windows) isAnimating() bool {
 	}
 	for _, balloon := range b.choiceBalloons {
 		if balloon == nil {
+			continue
+		}
+		if interpreterID > 0 && balloon.interpreterID != interpreterID {
 			continue
 		}
 		if balloon.isAnimating() {
@@ -161,7 +173,9 @@ func (b *Windows) isAnimating() bool {
 
 func (b *Windows) Update() error {
 	if !b.choosing {
-		if b.nextBalloon != nil && !b.isAnimating() && !b.isOpened() {
+		// 0 means to check all balloons.
+		// TODO: Don't use magic numbers.
+		if b.nextBalloon != nil && !b.isAnimating(0) && !b.isOpened(0) {
 			b.balloons = []*balloon{b.nextBalloon}
 			b.balloons[0].open()
 			b.nextBalloon = nil
@@ -178,7 +192,7 @@ func (b *Windows) Update() error {
 				balloon.close()
 			}
 		}
-	} else if b.choosing && b.isOpened() && input.Triggered() {
+	} else if b.choosing && b.isOpened(0) && input.Triggered() {
 		ymax := choiceBalloonsMaxY
 		ymin := choiceBalloonsMinY(len(b.choiceBalloons))
 		_, y := input.Position()
