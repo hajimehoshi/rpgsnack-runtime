@@ -67,7 +67,7 @@ func (e *Event) Turn(dir data.Dir) {
 	e.character.turn(dir)
 }
 
-func (e *Event) currentPage() *data.Page {
+func (e *Event) CurrentPage() *data.Page {
 	if e.currentPageIndex == -1 {
 		return nil
 	}
@@ -79,7 +79,7 @@ func (e *Event) CurrentPageIndex() int {
 }
 
 func (e *Event) IsPassable() bool {
-	page := e.currentPage()
+	page := e.CurrentPage()
 	if page == nil {
 		return true
 	}
@@ -87,7 +87,7 @@ func (e *Event) IsPassable() bool {
 }
 
 func (e *Event) IsRunnable() bool {
-	page := e.currentPage()
+	page := e.CurrentPage()
 	if page == nil {
 		return true
 	}
@@ -124,27 +124,14 @@ func (e *Event) UpdateCharacterIfNeeded(index int) error {
 	return nil
 }
 
-func (e *Event) TryRun(trigger data.Trigger) bool {
-	if e.interpreter.IsExecuting() {
-		return false
-	}
-	if trigger == data.TriggerNever {
-		return false
-	}
-	page := e.currentPage()
-	if page == nil {
-		return false
-	}
-	if page.Trigger != trigger {
-		return false
-	}
-	e.interpreter.SetCommands(page.Commands)
-	return true
+// TODO: This is temporary hack: Remove this
+func (e *Event) Interpreter() Interpreter {
+	return e.interpreter
 }
 
 func (e *Event) Update() error {
 	if !e.interpreter.IsExecuting() {
-		page := e.currentPage()
+		page := e.CurrentPage()
 		if page == nil {
 			return nil
 		}

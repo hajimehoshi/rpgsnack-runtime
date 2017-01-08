@@ -178,9 +178,17 @@ func (g *Game) EventAt(x, y int) *character.Event {
 
 func (g *Game) TryRunAutoEvent() {
 	for _, e := range g.events {
-		if e.TryRun(data.TriggerAuto) {
-			return
+		if e.Interpreter().IsExecuting() {
+			continue
 		}
+		page := e.CurrentPage()
+		if page == nil {
+			continue
+		}
+		if page.Trigger != data.TriggerAuto {
+			continue
+		}
+		e.Interpreter().SetCommands(page.Commands)
 	}
 }
 
