@@ -169,10 +169,6 @@ func (g *Game) UpdateEvents() error {
 	return nil
 }
 
-func (g *Game) Events() []*character.Event {
-	return g.events
-}
-
 func (g *Game) EventAt(x, y int) *character.Event {
 	for _, e := range g.events {
 		ex, ey := e.Position()
