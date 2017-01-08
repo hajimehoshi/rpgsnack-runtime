@@ -33,6 +33,7 @@ type Windows struct {
 	choiceBalloons            []*balloon
 	chosenIndex               int
 	choosing                  bool
+	choosingInterpreterID     int
 	chosenBalloonWaitingCount int
 	hasChosenIndex            bool
 }
@@ -72,6 +73,7 @@ func (b *Windows) ShowChoices(choices []string, interpreterID int) {
 	}
 	b.chosenIndex = 0
 	b.choosing = true
+	b.choosingInterpreterID = interpreterID
 }
 
 func (b *Windows) CloseAll() {
@@ -94,8 +96,10 @@ func (b *Windows) IsBusy(interpreterID int) bool {
 	if b.isAnimating(interpreterID) {
 		return true
 	}
-	if b.choosing || b.chosenBalloonWaitingCount > 0 {
-		return true
+	if b.choosingInterpreterID == interpreterID {
+		if b.choosing || b.chosenBalloonWaitingCount > 0 {
+			return true
+		}
 	}
 	if b.isOpened(interpreterID) {
 		return true
@@ -210,6 +214,7 @@ func (b *Windows) Update() error {
 		}
 		b.chosenBalloonWaitingCount = 30
 		b.choosing = false
+		b.choosingInterpreterID = 0
 		b.hasChosenIndex = true
 	}
 	for i, balloon := range b.balloons {
