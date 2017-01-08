@@ -77,7 +77,7 @@ func (m *Map) setRoomID(id int) error {
 	return nil
 }
 
-func (m *Map) IsEventExecuting() bool {
+func (m *Map) isEventExecuting() bool {
 	if m.playerMoving != nil && m.playerMoving.IsExecuting() {
 		return true
 	}
@@ -186,7 +186,7 @@ func (m *Map) eventAt(x, y int) *character.Event {
 }
 
 func (m *Map) TryRunAutoEvent() {
-	if m.IsEventExecuting() {
+	if m.isEventExecuting() {
 		return
 	}
 	if m.autoInterpreter != nil {
@@ -287,30 +287,33 @@ func (m *Map) passable(x, y int) (bool, error) {
 	return e.IsPassable(), nil
 }
 
-func (m *Map) MovePlayerByUserInput(x, y int) error {
+func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
+	if m.isEventExecuting() {
+		return false, nil
+	}
 	if m.playerMoving != nil {
 		panic("not reach")
 	}
 	event := m.eventAt(x, y)
 	p, err := m.passable(x, y)
 	if err != nil {
-		return err
+		return false, err
 	}
 	if !p {
 		if event == nil {
-			return nil
+			return false, nil
 		}
 		if !event.IsRunnable() {
-			return nil
+			return false, nil
 		}
 		if event.CurrentPage().Trigger != data.TriggerPlayer {
-			return nil
+			return false, nil
 		}
 	}
 	px, py := m.player.Position()
 	path, lastPlayerX, lastPlayerY, err := calcPath(m.passable, px, py, x, y)
 	if err != nil {
-		return err
+		return false, err
 	}
 	commands := []*data.Command{
 		{
@@ -402,7 +405,7 @@ func (m *Map) MovePlayerByUserInput(x, y int) error {
 			})
 	}
 	m.playerMoving = NewInterpreter(m.game, m.mapID, m.roomID, -1, commands)
-	return nil
+	return true, nil
 }
 
 func (m *Map) DrawPlayer(screen *ebiten.Image) error {

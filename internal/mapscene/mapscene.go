@@ -52,17 +52,18 @@ func New() (*MapScene, error) {
 }
 
 func (m *MapScene) movePlayerIfNeeded() error {
-	if m.gameState.Map().IsEventExecuting() {
-		return nil
-	}
 	if !input.Triggered() {
 		return nil
 	}
 	x, y := input.Position()
 	tx := (x - scene.GameMarginX) / scene.TileSize / scene.TileScale
 	ty := (y - scene.GameMarginTop) / scene.TileSize / scene.TileScale
-	if err := m.gameState.Map().MovePlayerByUserInput(tx, ty); err != nil {
+	result, err := m.gameState.Map().TryMovePlayerByUserInput(tx, ty)
+	if err != nil {
 		return err
+	}
+	if !result {
+		return nil
 	}
 	m.moveDstX = tx
 	m.moveDstY = ty
