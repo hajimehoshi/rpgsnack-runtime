@@ -33,6 +33,11 @@ func newCommandIndex(commands []*data.Command) *commandIndex {
 	return c
 }
 
+func (c *commandIndex) rewind() {
+	c.commandIndices = []int{0}
+	c.unindentIfNeeded()
+}
+
 func (c *commandIndex) isTerminated() bool {
 	return len(c.commandIndices) == 0
 }

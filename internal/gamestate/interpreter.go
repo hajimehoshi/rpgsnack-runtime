@@ -40,6 +40,7 @@ type Interpreter struct {
 	commandIndex   *commandIndex
 	waitingCount   int
 	waitingCommand bool
+	repeat         bool
 	sub            *Interpreter
 }
 
@@ -246,6 +247,7 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 			id = i.eventID
 		}
 		i.sub = NewInterpreter(i.gameState, i.mapID, i.roomID, id, args.Commands)
+		i.sub.repeat = args.Repeat
 	case data.CommandNameTintScreen:
 		if !i.waitingCommand {
 			args := c.Args.(*data.CommandArgsTintScreen)
@@ -384,6 +386,10 @@ func (i *Interpreter) Update() error {
 		}
 	}
 	if i.commandIndex.isTerminated() {
+		if i.repeat {
+			i.commandIndex.rewind()
+			return nil
+		}
 		if i.gameState.windows.IsBusy() {
 			return nil
 		}
