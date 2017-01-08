@@ -376,10 +376,22 @@
                         }
                       },
                       {
+                        "name": "wait",
+                        "args": {
+                          "time": 5
+                        }
+                      },
+                      {
                         "name": "move_character",
                         "args": {
                           "dir":      2,
                           "distance": 1
+                        }
+                      },
+                      {
+                        "name": "wait",
+                        "args": {
+                          "time": 5
                         }
                       }
                     ]
