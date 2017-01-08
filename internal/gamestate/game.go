@@ -76,10 +76,6 @@ func (g *Game) setRoomID(id int) error {
 	return nil
 }
 
-func (g *Game) Events() []*character.Event {
-	return g.events
-}
-
 func (g *Game) IsEventExecuting() bool {
 	if g.playerMoving != nil && g.playerMoving.IsExecuting() {
 		return true
@@ -161,6 +157,37 @@ func (g *Game) UpdateEvents() error {
 		}
 		if !g.continuingInterpreter.IsExecuting() {
 			g.continuingInterpreter = nil
+		}
+	}
+	return nil
+}
+
+func (g *Game) Events() []*character.Event {
+	return g.events
+}
+
+func (g *Game) EventAt(x, y int) *character.Event {
+	for _, e := range g.events {
+		ex, ey := e.Position()
+		if ex == x && ey == y {
+			return e
+		}
+	}
+	return nil
+}
+
+func (g *Game) TryRunAutoEvent() {
+	for _, e := range g.events {
+		if e.TryRun(data.TriggerAuto) {
+			return
+		}
+	}
+}
+
+func (g *Game) DrawEvents(screen *ebiten.Image) error {
+	for _, e := range g.events {
+		if err := e.Draw(screen); err != nil {
+			return err
 		}
 	}
 	return nil

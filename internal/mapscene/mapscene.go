@@ -21,7 +21,6 @@ import (
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/font"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/gamestate"
@@ -107,21 +106,11 @@ func (m *MapScene) passable(x, y int) (bool, error) {
 	if !p {
 		return false, nil
 	}
-	e := m.eventAt(x, y)
+	e := m.gameState.EventAt(x, y)
 	if e == nil {
 		return true, nil
 	}
 	return e.IsPassable(), nil
-}
-
-func (m *MapScene) eventAt(x, y int) *character.Event {
-	for _, e := range m.gameState.Events() {
-		ex, ey := e.Position()
-		if ex == x && ey == y {
-			return e
-		}
-	}
-	return nil
 }
 
 func (m *MapScene) movePlayerIfNeeded() error {
@@ -134,7 +123,7 @@ func (m *MapScene) movePlayerIfNeeded() error {
 	x, y := input.Position()
 	tx := (x - scene.GameMarginX) / scene.TileSize / scene.TileScale
 	ty := (y - scene.GameMarginTop) / scene.TileSize / scene.TileScale
-	e := m.eventAt(tx, ty)
+	e := m.gameState.EventAt(tx, ty)
 	p, err := m.passable(tx, ty)
 	if err != nil {
 		return err
@@ -171,11 +160,7 @@ func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 	if m.gameState.IsEventExecuting() {
 		return nil
 	}
-	for _, e := range m.gameState.Events() {
-		if e.TryRun(data.TriggerAuto) {
-			break
-		}
-	}
+	m.gameState.TryRunAutoEvent()
 	if err := m.movePlayerIfNeeded(); err != nil {
 		return err
 	}
@@ -243,10 +228,8 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 	if err := m.gameState.DrawPlayer(m.tilesImage); err != nil {
 		return err
 	}
-	for _, e := range m.gameState.Events() {
-		if err := e.Draw(m.tilesImage); err != nil {
-			return err
-		}
+	if err := m.gameState.DrawEvents(m.tilesImage); err != nil {
+		return err
 	}
 	op = &ebiten.DrawImageOptions{}
 	tileSet, err := m.tileSet(m.gameState.CurrentMap().TileSetID)
