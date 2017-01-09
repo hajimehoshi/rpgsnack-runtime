@@ -15,17 +15,15 @@
 package gamestate
 
 import (
-	"math/rand"
-
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/window"
-)
-
-import (
 	"fmt"
+	"math/rand"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
+
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/window"
 )
 
 type Game struct {
@@ -34,6 +32,7 @@ type Game struct {
 	windows       *window.Windows
 	currentMap    *Map
 	interpreterID int
+	rand          *rand.Rand
 }
 
 func NewGame() (*Game, error) {
@@ -41,6 +40,7 @@ func NewGame() (*Game, error) {
 		variables: &Variables{},
 		screen:    &Screen{},
 		windows:   &window.Windows{},
+		rand:      rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
 	m, err := NewMap(g)
 	if err != nil {
@@ -128,7 +128,11 @@ func (g *Game) MeetsCondition(cond *data.Condition, eventID int) (bool, error) {
 	return false, nil
 }
 
+func (g *Game) SetRandomSource(src rand.Source) {
+	g.rand = rand.New(src)
+}
+
 func (g *Game) RandomValue(values []int) int {
 	// TODO: Use random generator
-	return values[0] + rand.Intn(values[1]-values[0]+1)
+	return values[0] + g.rand.Intn(values[1]-values[0]+1)
 }

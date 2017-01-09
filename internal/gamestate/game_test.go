@@ -15,7 +15,9 @@
 package gamestate_test
 
 import (
+	"math/rand"
 	"testing"
+	"time"
 
 	. "github.com/hajimehoshi/rpgsnack-runtime/internal/gamestate"
 )
@@ -23,8 +25,9 @@ import (
 func TestRandomValue(t *testing.T) {
 	value := []int{1, 3}
 	g := &Game{}
+	// TODO: We should mock math.random for consistent results
+	g.SetRandomSource(rand.NewSource(time.Now().UnixNano()))
 	got := g.RandomValue(value)
-	// TODO: We should  mock math.random for consistent results
 	if got <= 0 || got >= 4 {
 		t.Errorf("RandomValue([1, 3]) out of range got: %v", got)
 	}
