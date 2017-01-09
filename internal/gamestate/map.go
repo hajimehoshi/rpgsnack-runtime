@@ -447,7 +447,9 @@ func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
 			})
 	}
 	m.playerMoving = NewInterpreter(m.game, m.mapID, m.roomID, -1, commands)
-	m.executingEventIDByUserInput = event.ID()
+	if event != nil {
+		m.executingEventIDByUserInput = event.ID()
+	}
 	return true, nil
 }
 
