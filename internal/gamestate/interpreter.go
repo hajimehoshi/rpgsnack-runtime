@@ -32,14 +32,6 @@ type char interface {
 	Turn(dir data.Dir)
 }
 
-// TODO: This should be saved: How about moving this to variable?
-var interpreterID = 0
-
-func generateInterpreterID() int {
-	interpreterID++
-	return interpreterID
-}
-
 type Interpreter struct {
 	id             int
 	gameState      *Game
@@ -54,8 +46,11 @@ type Interpreter struct {
 }
 
 func NewInterpreter(gameState *Game, mapID, roomID, eventID int, commands []*data.Command) *Interpreter {
+	id := gameState.variables.InnerVariableValue("inerpreter_id")
+	id++
+	gameState.variables.SetInnerVariableValue("inerpreter_id", id)
 	return &Interpreter{
-		id:           generateInterpreterID(),
+		id:           id,
 		gameState:    gameState,
 		mapID:        mapID,
 		roomID:       roomID,
