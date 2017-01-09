@@ -20,12 +20,12 @@ import (
 	. "github.com/hajimehoshi/rpgsnack-runtime/internal/gamestate"
 )
 
-func TestSelfSwitches(t *testing.T) {
-	v := &Variables{}
-	v.SetSelfSwitchValue(1, 2, 3, 0, true)
-	got := v.SelfSwitchValue(1, 2, 3, 0)
-	want := true
-	if got != want {
-		t.Errorf("SelfSwitchValue(1, 2, 3) got: %v, want: %v", got, want)
+func TestRandomValue(t *testing.T) {
+	value := []int{1, 3}
+	g := &Game{}
+	got := g.RandomValue(value)
+	// TODO: We should  mock math.random for consistent results
+	if got <= 0 || got >= 4 {
+		t.Errorf("RandomValue([1, 3]) out of range got: %v", got)
 	}
 }

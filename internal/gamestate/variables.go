@@ -16,7 +16,6 @@ package gamestate
 
 import (
 	"fmt"
-	"math/rand"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 )
@@ -104,8 +103,4 @@ func (v *Variables) SetInnerVariableValue(key string, value int) {
 		v.innerVariables = map[string]int{}
 	}
 	v.innerVariables[key] = value
-}
-
-func (v *Variables) RandomValue(values []int) int {
-	return values[0] + rand.Intn(values[1] - values[0] + 1)
 }

@@ -15,6 +15,8 @@
 package gamestate
 
 import (
+	"math/rand"
+
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/window"
 )
@@ -124,4 +126,9 @@ func (g *Game) MeetsCondition(cond *data.Condition, eventID int) (bool, error) {
 		return false, fmt.Errorf("mapscene: invalid condition: %s", cond)
 	}
 	return false, nil
+}
+
+func (g *Game) RandomValue(values []int) int {
+	// TODO: Use random generator
+	return values[0] + rand.Intn(values[1]-values[0]+1)
 }
