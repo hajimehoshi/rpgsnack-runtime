@@ -232,9 +232,6 @@ func (m *Map) TryRunAutoEvent() {
 	if m.isEventExecuting() {
 		return
 	}
-	if m.autoInterpreter != nil {
-		return
-	}
 	for _, e := range m.events {
 		page := e.CurrentPage()
 		if page == nil {
@@ -337,9 +334,6 @@ func (m *Map) passable(x, y int) (bool, error) {
 func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
 	if m.isEventExecuting() {
 		return false, nil
-	}
-	if m.playerMovingInterpreter != nil {
-		panic("not reach")
 	}
 	event := m.eventAt(x, y)
 	p, err := m.passable(x, y)
