@@ -21,7 +21,7 @@ import (
 )
 
 func TestSelfSwitches(t *testing.T) {
-	v := Variables{}
+	v := &Variables{}
 	v.SetSelfSwitchValue(1, 2, 3, 0, true)
 	got := v.SelfSwitchValue(1, 2, 3, 0)
 	want := true
