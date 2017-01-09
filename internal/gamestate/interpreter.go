@@ -249,6 +249,7 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 		if id == 0 {
 			id = i.eventID
 		}
+		// TODO: Consider args.Skip and args.Wait
 		i.sub = NewInterpreter(i.gameState, i.mapID, i.roomID, id, args.Commands)
 		i.sub.repeat = args.Repeat
 	case data.CommandNameTintScreen:
@@ -290,6 +291,7 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 			return false, nil
 		}
 		if !i.waitingCommand {
+			// TODO: Consider args.Distance
 			args := c.Args.(*data.CommandArgsMoveCharacter)
 			dx, dy := ch.Position()
 			switch args.Dir {
