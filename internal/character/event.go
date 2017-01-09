@@ -45,6 +45,10 @@ func (e *Event) ID() int {
 	return e.data.ID
 }
 
+func (e *Event) Size() (int, int) {
+	return e.character.size()
+}
+
 func (e *Event) Position() (int, int) {
 	return e.character.position()
 }

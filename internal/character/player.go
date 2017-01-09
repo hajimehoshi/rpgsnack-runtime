@@ -41,6 +41,10 @@ func NewPlayer(x, y int) (*Player, error) {
 	}, nil
 }
 
+func (p *Player) Size() (int, int) {
+	return p.character.size()
+}
+
 func (p *Player) Position() (int, int) {
 	return p.character.position()
 }

@@ -25,6 +25,7 @@ import (
 )
 
 type char interface {
+	Size() (int, int)
 	Position() (int, int)
 	Dir() data.Dir
 	IsMoving() bool
@@ -181,8 +182,9 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 			if ch := i.character(args.EventID); ch != nil {
 				x, y := ch.Position()
 				content = i.gameState.ParseMessageSyntax(content)
+				_, h := ch.Size()
 				wx := x*scene.TileSize + scene.TileSize/2
-				wy := y * scene.TileSize
+				wy := y*scene.TileSize - h + scene.TileSize
 				i.gameState.windows.ShowMessage(content, wx, wy, i.id)
 				i.waitingCommand = true
 				return false, nil

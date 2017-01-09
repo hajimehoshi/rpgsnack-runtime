@@ -179,13 +179,21 @@ func (c *character) update() error {
 	return nil
 }
 
+func (c *character) size() (int, int) {
+	if c.imageName == "" {
+		return 0, 0
+	}
+	imageW, imageH := assets.GetImage(c.imageName).Size()
+	w := imageW / 4 / 3
+	h := imageH / 2 / 4
+	return w, h
+}
+
 func (c *character) draw(screen *ebiten.Image) error {
 	if c.imageName == "" {
 		return nil
 	}
-	imageW, imageH := assets.GetImage(c.imageName).Size()
-	charW := imageW / 4 / 3
-	charH := imageH / 2 / 4
+	charW, charH := c.size()
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(c.x*scene.TileSize+scene.TileSize/2), float64((c.y+1)*scene.TileSize))
 	op.GeoM.Translate(float64(-charW/2), float64(-charH))
