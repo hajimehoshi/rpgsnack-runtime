@@ -31,11 +31,10 @@ type Map struct {
 	mapID                       int
 	roomID                      int
 	events                      []*character.Event
-	playerMovingInterpreter     *Interpreter
 	executingEventIDByUserInput int
+	interpreters                map[int]*Interpreter
+	playerInterpreterID         int
 	eventRouteInterpreters      []*Interpreter
-	continuingInterpreter       *Interpreter
-	autoInterpreter             *Interpreter
 }
 
 func NewMap(game *Game) (*Map, error) {
@@ -49,9 +48,10 @@ func NewMap(game *Game) (*Map, error) {
 		return nil, err
 	}
 	m := &Map{
-		game:   game,
-		player: player,
-		mapID:  1,
+		game:         game,
+		player:       player,
+		mapID:        1,
+		interpreters: map[int]*Interpreter{},
 	}
 	m.setRoomID(roomID)
 	return m, nil
@@ -82,14 +82,10 @@ func (m *Map) setRoomID(id int) error {
 }
 
 func (m *Map) isEventExecuting() bool {
-	if m.playerMovingInterpreter != nil && m.playerMovingInterpreter.IsExecuting() {
-		return true
-	}
-	if m.continuingInterpreter != nil && m.continuingInterpreter.IsExecuting() {
-		return true
-	}
-	if m.autoInterpreter != nil && m.autoInterpreter.IsExecuting() {
-		return true
+	for _, i := range m.interpreters {
+		if i.IsExecuting() {
+			return true
+		}
 	}
 	return false
 }
@@ -131,14 +127,27 @@ func (m *Map) pageIndex(eventID int) (int, error) {
 	return -1, nil
 }
 
+type interpretersByID []*Interpreter
+
+func (i interpretersByID) Len() int           { return len(i) }
+func (i interpretersByID) Less(a, b int) bool { return i[a].id < i[b].id }
+func (i interpretersByID) Swap(a, b int)      { i[a], i[b] = i[b], i[a] }
+
 func (m *Map) Update() error {
-	if m.playerMovingInterpreter != nil {
-		if err := m.playerMovingInterpreter.Update(); err != nil {
+	is := []*Interpreter{}
+	for _, i := range m.interpreters {
+		is = append(is, i)
+	}
+	sort.Sort(interpretersByID(is))
+	for _, i := range is {
+		if err := i.Update(); err != nil {
 			return err
 		}
-		if !m.playerMovingInterpreter.IsExecuting() {
-			m.playerMovingInterpreter = nil
-			m.executingEventIDByUserInput = 0
+		if !i.IsExecuting() {
+			if i.id == m.playerInterpreterID {
+				m.executingEventIDByUserInput = 0
+			}
+			delete(m.interpreters, i.id)
 		}
 	}
 	if !m.IsPlayerMovingByUserInput() {
@@ -152,22 +161,6 @@ func (m *Map) Update() error {
 			if err := i.Update(); err != nil {
 				return err
 			}
-		}
-	}
-	if m.autoInterpreter != nil {
-		if err := m.autoInterpreter.Update(); err != nil {
-			return err
-		}
-		if !m.autoInterpreter.IsExecuting() {
-			m.autoInterpreter = nil
-		}
-	}
-	if m.continuingInterpreter != nil {
-		if err := m.continuingInterpreter.Update(); err != nil {
-			return err
-		}
-		if !m.continuingInterpreter.IsExecuting() {
-			m.continuingInterpreter = nil
 		}
 	}
 	if err := m.player.Update(); err != nil {
@@ -208,7 +201,8 @@ func (m *Map) Update() error {
 				},
 			},
 		}
-		m.eventRouteInterpreters[i] = NewInterpreter(m.game, m.mapID, m.roomID, e.ID(), commands)
+		interpreter := NewInterpreter(m.game, m.mapID, m.roomID, e.ID(), commands)
+		m.eventRouteInterpreters[i] = interpreter
 	}
 	for _, e := range m.events {
 		if err := e.Update(); err != nil {
@@ -240,7 +234,8 @@ func (m *Map) TryRunAutoEvent() {
 		if page.Trigger != data.TriggerAuto {
 			continue
 		}
-		m.autoInterpreter = NewInterpreter(m.game, m.mapID, m.roomID, e.ID(), page.Commands)
+		i := NewInterpreter(m.game, m.mapID, m.roomID, e.ID(), page.Commands)
+		m.interpreters[i.id] = i
 		break
 	}
 }
@@ -248,8 +243,7 @@ func (m *Map) TryRunAutoEvent() {
 func (m *Map) transferPlayerImmediately(roomID, x, y int, interpreter *Interpreter) {
 	m.player.TransferImmediately(x, y)
 	m.setRoomID(roomID)
-	// TODO: What if this is not nil?
-	m.continuingInterpreter = interpreter
+	m.interpreters[interpreter.id] = interpreter
 }
 
 func (m *Map) currentMap() *data.Map {
@@ -445,7 +439,9 @@ func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
 				},
 			})
 	}
-	m.playerMovingInterpreter = NewInterpreter(m.game, m.mapID, m.roomID, -1, commands)
+	i := NewInterpreter(m.game, m.mapID, m.roomID, -1, commands)
+	m.interpreters[i.id] = i
+	m.playerInterpreterID = i.id
 	if event != nil {
 		m.executingEventIDByUserInput = event.ID()
 	}
