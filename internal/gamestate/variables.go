@@ -22,7 +22,7 @@ import (
 
 type Variables struct {
 	switches       []bool
-	selfSwitches   map[string][data.SelfSwitchNum]bool
+	selfSwitches   map[string][]bool
 	variables      []int
 	innerVariables map[string]int
 }
@@ -46,11 +46,12 @@ func (v *Variables) SetSwitchValue(id int, value bool) {
 func (v *Variables) SelfSwitchValue(mapID, roomID, eventID int, id int) bool {
 	key := fmt.Sprintf("%d_%d_%d", mapID, roomID, eventID)
 	if v.selfSwitches == nil {
-		v.selfSwitches = map[string][data.SelfSwitchNum]bool{}
+		v.selfSwitches = map[string][]bool{}
 	}
 	values, ok := v.selfSwitches[key]
 	if !ok {
-		v.selfSwitches[key] = [data.SelfSwitchNum]bool{}
+		v.selfSwitches[key] = make([]bool, data.SelfSwitchNum)
+		return false
 	}
 	return values[id]
 }
@@ -58,14 +59,15 @@ func (v *Variables) SelfSwitchValue(mapID, roomID, eventID int, id int) bool {
 func (v *Variables) SetSelfSwitchValue(mapID, roomID, eventID int, id int, value bool) {
 	key := fmt.Sprintf("%d_%d_%d", mapID, roomID, eventID)
 	if v.selfSwitches == nil {
-		v.selfSwitches = map[string][data.SelfSwitchNum]bool{}
+		v.selfSwitches = map[string][]bool{}
 	}
 	values, ok := v.selfSwitches[key]
 	if !ok {
-		v.selfSwitches[key] = [data.SelfSwitchNum]bool{}
+		v.selfSwitches[key] = make([]bool, data.SelfSwitchNum)
+		v.selfSwitches[key][id] = value
+		return
 	}
 	values[id] = value
-	v.selfSwitches[key] = values
 }
 
 func (v *Variables) VariableValue(id int) int {
