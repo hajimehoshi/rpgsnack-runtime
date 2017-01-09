@@ -346,6 +346,8 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 				dirI += 2
 			case 270:
 				dirI += 3
+			default:
+				panic("not reach")
 			}
 			dirI %= 4
 			var dir data.Dir

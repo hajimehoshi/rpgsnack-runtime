@@ -25,15 +25,16 @@ import (
 )
 
 type Map struct {
-	game                   *Game
-	player                 *character.Player
-	mapID                  int
-	roomID                 int
-	events                 []*character.Event
-	playerMoving           *Interpreter
-	eventRouteInterpreters []*Interpreter
-	continuingInterpreter  *Interpreter
-	autoInterpreter        *Interpreter
+	game                        *Game
+	player                      *character.Player
+	mapID                       int
+	roomID                      int
+	events                      []*character.Event
+	playerMoving                *Interpreter
+	executingEventIDByUserInput int
+	eventRouteInterpreters      []*Interpreter
+	continuingInterpreter       *Interpreter
+	autoInterpreter             *Interpreter
 }
 
 func NewMap(game *Game) (*Map, error) {
@@ -136,11 +137,15 @@ func (m *Map) Update() error {
 		}
 		if !m.playerMoving.IsExecuting() {
 			m.playerMoving = nil
+			m.executingEventIDByUserInput = 0
 		}
 	}
 	if !m.IsPlayerMovingByUserInput() {
 		for _, i := range m.eventRouteInterpreters {
 			if i == nil {
+				continue
+			}
+			if m.executingEventIDByUserInput == i.eventID {
 				continue
 			}
 			if err := i.Update(); err != nil {
@@ -442,6 +447,7 @@ func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
 			})
 	}
 	m.playerMoving = NewInterpreter(m.game, m.mapID, m.roomID, -1, commands)
+	m.executingEventIDByUserInput = event.ID()
 	return true, nil
 }
 
