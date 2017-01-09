@@ -26,13 +26,17 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/window"
 )
 
+type Rand interface {
+	Intn(n int) int
+}
+
 type Game struct {
 	variables     *Variables
 	screen        *Screen
 	windows       *window.Windows
 	currentMap    *Map
 	interpreterID int
-	rand          *rand.Rand
+	rand          Rand
 }
 
 func NewGame() (*Game, error) {
@@ -128,11 +132,10 @@ func (g *Game) MeetsCondition(cond *data.Condition, eventID int) (bool, error) {
 	return false, nil
 }
 
-func (g *Game) SetRandomSource(src rand.Source) {
-	g.rand = rand.New(src)
+func (g *Game) SetRandom(r Rand) {
+	g.rand = r
 }
 
-func (g *Game) RandomValue(values []int) int {
-	// TODO: Use random generator
-	return values[0] + g.rand.Intn(values[1]-values[0]+1)
+func (g *Game) RandomValue(min, max int) int {
+	return min + g.rand.Intn(max-min)
 }

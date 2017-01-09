@@ -15,20 +15,30 @@
 package gamestate_test
 
 import (
-	"math/rand"
 	"testing"
 
 	. "github.com/hajimehoshi/rpgsnack-runtime/internal/gamestate"
 )
 
+type pseudoRand struct {
+	values []int
+	index  int
+}
+
+func (p *pseudoRand) Intn(n int) int {
+	v := p.values[p.index]
+	p.index++
+	return int(uint(v) % uint(n))
+}
+
 func TestRandomValue(t *testing.T) {
-	value := []int{1, 3}
+	values := []int{-1, 0, 3, 4}
 	g := &Game{}
-	g.SetRandomSource(rand.NewSource(0))
-	for i := 0; i < 100; i++ {
-		got := g.RandomValue(value)
+	g.SetRandom(&pseudoRand{values, 0})
+	for range values {
+		got := g.RandomValue(1, 4)
 		if got <= 0 || got >= 4 {
-			t.Errorf("RandomValue([1, 3]) out of range: got: %v", got)
+			t.Errorf("RandomValue(1, 4) out of range: got: %v", got)
 		}
 	}
 }
