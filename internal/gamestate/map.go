@@ -457,11 +457,10 @@ func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
 	return true, nil
 }
 
-func (m *Map) DrawPlayer(screen *ebiten.Image) error {
-	return m.player.Draw(screen)
-}
-
-func (m *Map) DrawEvents(screen *ebiten.Image) error {
+func (m *Map) DrawCharacters(screen *ebiten.Image) error {
+	if err := m.player.Draw(screen); err != nil {
+		return nil
+	}
 	for _, e := range m.events {
 		if err := e.Draw(screen); err != nil {
 			return err

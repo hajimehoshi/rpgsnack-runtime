@@ -145,10 +145,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 	if err := m.tilesImage.DrawImage(assets.GetImage(tileset.Images[1]), op); err != nil {
 		return err
 	}
-	if err := m.gameState.Map().DrawPlayer(m.tilesImage); err != nil {
-		return err
-	}
-	if err := m.gameState.Map().DrawEvents(m.tilesImage); err != nil {
+	if err := m.gameState.Map().DrawCharacters(m.tilesImage); err != nil {
 		return err
 	}
 	op = &ebiten.DrawImageOptions{}
