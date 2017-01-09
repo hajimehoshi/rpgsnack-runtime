@@ -263,6 +263,11 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 		// TODO: Consider args.Skip and args.Wait
 		sub := i.createChild(id, args.Commands)
 		sub.repeat = args.Repeat
+		if !args.Wait {
+			i.gameState.Map().addInterpreter(sub)
+			i.commandIndex.advance()
+			return true, nil
+		}
 		i.sub = sub
 	case data.CommandNameTintScreen:
 		if !i.waitingCommand {

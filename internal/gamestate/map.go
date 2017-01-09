@@ -56,6 +56,10 @@ func NewMap(game *Game) (*Map, error) {
 	return m, nil
 }
 
+func (m *Map) addInterpreter(interpreter *Interpreter) {
+	m.interpreters[interpreter.id] = interpreter
+}
+
 func (m *Map) TileSet() (*data.TileSet, error) {
 	id := m.currentMap().TileSetID
 	for _, t := range data.Current().TileSets {
@@ -78,7 +82,7 @@ func (m *Map) setRoomID(id int, interpreter *Interpreter) error {
 	}
 	m.interpreters = map[int]*Interpreter{}
 	if interpreter != nil {
-		m.interpreters[interpreter.id] = interpreter
+		m.addInterpreter(interpreter)
 	}
 	return nil
 }
@@ -209,7 +213,7 @@ func (m *Map) Update() error {
 		}
 		interpreter := NewInterpreter(m.game, m.mapID, m.roomID, e.ID(), commands)
 		interpreter.route = true
-		m.interpreters[interpreter.id] = interpreter
+		m.addInterpreter(interpreter)
 	}
 	for _, e := range m.events {
 		if err := e.Update(); err != nil {
@@ -241,8 +245,7 @@ func (m *Map) TryRunAutoEvent() {
 		if page.Trigger != data.TriggerAuto {
 			continue
 		}
-		i := NewInterpreter(m.game, m.mapID, m.roomID, e.ID(), page.Commands)
-		m.interpreters[i.id] = i
+		m.addInterpreter(NewInterpreter(m.game, m.mapID, m.roomID, e.ID(), page.Commands))
 		break
 	}
 }
@@ -446,7 +449,7 @@ func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
 			})
 	}
 	i := NewInterpreter(m.game, m.mapID, m.roomID, -1, commands)
-	m.interpreters[i.id] = i
+	m.addInterpreter(i)
 	m.playerInterpreterID = i.id
 	if event != nil {
 		m.executingEventIDByUserInput = event.ID()
