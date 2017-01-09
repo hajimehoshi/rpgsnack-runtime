@@ -31,7 +31,7 @@ type Map struct {
 	mapID                       int
 	roomID                      int
 	events                      []*character.Event
-	playerMoving                *Interpreter
+	playerMovingInterpreter     *Interpreter
 	executingEventIDByUserInput int
 	eventRouteInterpreters      []*Interpreter
 	continuingInterpreter       *Interpreter
@@ -82,7 +82,7 @@ func (m *Map) setRoomID(id int) error {
 }
 
 func (m *Map) isEventExecuting() bool {
-	if m.playerMoving != nil && m.playerMoving.IsExecuting() {
+	if m.playerMovingInterpreter != nil && m.playerMovingInterpreter.IsExecuting() {
 		return true
 	}
 	if m.continuingInterpreter != nil && m.continuingInterpreter.IsExecuting() {
@@ -132,12 +132,12 @@ func (m *Map) pageIndex(eventID int) (int, error) {
 }
 
 func (m *Map) Update() error {
-	if m.playerMoving != nil {
-		if err := m.playerMoving.Update(); err != nil {
+	if m.playerMovingInterpreter != nil {
+		if err := m.playerMovingInterpreter.Update(); err != nil {
 			return err
 		}
-		if !m.playerMoving.IsExecuting() {
-			m.playerMoving = nil
+		if !m.playerMovingInterpreter.IsExecuting() {
+			m.playerMovingInterpreter = nil
 			m.executingEventIDByUserInput = 0
 		}
 	}
@@ -338,7 +338,7 @@ func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
 	if m.isEventExecuting() {
 		return false, nil
 	}
-	if m.playerMoving != nil {
+	if m.playerMovingInterpreter != nil {
 		panic("not reach")
 	}
 	event := m.eventAt(x, y)
@@ -451,7 +451,7 @@ func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
 				},
 			})
 	}
-	m.playerMoving = NewInterpreter(m.game, m.mapID, m.roomID, -1, commands)
+	m.playerMovingInterpreter = NewInterpreter(m.game, m.mapID, m.roomID, -1, commands)
 	if event != nil {
 		m.executingEventIDByUserInput = event.ID()
 	}
