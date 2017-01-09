@@ -128,6 +128,12 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 			return err
 		}
 		c.Args = args
+	case CommandNameSetCharacterProperty:
+		var args *CommandArgsSetCharacterProperty
+		if err := json.Unmarshal(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	case CommandNameSetInnerVariable:
 		fallthrough
 	default:
@@ -155,9 +161,10 @@ const (
 	CommandNameStopBGM                   = "stop_bgm"
 
 	// Route commands
-	CommandNameMoveCharacter   = "move_character"
-	CommandNameTurnCharacter   = "turn_character"
-	CommandNameRotateCharacter = "rotate_character"
+	CommandNameMoveCharacter        = "move_character"
+	CommandNameTurnCharacter        = "turn_character"
+	CommandNameRotateCharacter      = "rotate_character"
+	CommandNameSetCharacterProperty = "set_character_property"
 
 	// Special commands
 	CommandNameSetInnerVariable = "set_inner_variable"
@@ -241,6 +248,8 @@ func (c *CommandArgsSetVariable) UnmarshalJSON(data []uint8) error {
 			return err
 		}
 		c.Value = v
+	default:
+		return fmt.Errorf("data: invalid type: %s", c.ValueType)
 	}
 	return nil
 }
@@ -279,6 +288,64 @@ type CommandArgsTurnCharacter struct {
 
 type CommandArgsRotateCharacter struct {
 	Angle int `json:angle`
+}
+
+type CommandArgsSetCharacterProperty struct {
+	Type  SetCharacterPropertyType
+	Value interface{}
+}
+
+func (c *CommandArgsSetCharacterProperty) UnmarshalJSON(data []uint8) error {
+	type tmpCommandArgsSetCharacterProperty struct {
+		Type  SetCharacterPropertyType `json:"type"`
+		Value json.RawMessage          `json:"value"`
+	}
+	var tmp *tmpCommandArgsSetCharacterProperty
+	if err := json.Unmarshal(data, &tmp); err != nil {
+		return err
+	}
+	c.Type = tmp.Type
+	switch c.Type {
+	case SetCharacterPropertyTypeVisibility:
+		v := false
+		if err := json.Unmarshal(tmp.Value, &v); err != nil {
+			return err
+		}
+		c.Value = v
+	case SetCharacterPropertyTypeDirFix:
+		v := false
+		if err := json.Unmarshal(tmp.Value, &v); err != nil {
+			return err
+		}
+		c.Value = v
+	case SetCharacterPropertyTypeStepping:
+		v := false
+		if err := json.Unmarshal(tmp.Value, &v); err != nil {
+			return err
+		}
+		c.Value = v
+	case SetCharacterPropertyTypeThrough:
+		v := false
+		if err := json.Unmarshal(tmp.Value, &v); err != nil {
+			return err
+		}
+		c.Value = v
+	case SetCharacterPropertyTypeWalking:
+		v := false
+		if err := json.Unmarshal(tmp.Value, &v); err != nil {
+			return err
+		}
+		c.Value = v
+	case SetCharacterPropertyTypeSpeed:
+		v := 0
+		if err := json.Unmarshal(tmp.Value, &v); err != nil {
+			return err
+		}
+		c.Value = v
+	default:
+		return fmt.Errorf("data: invalid type: %s", c.Type)
+	}
+	return nil
 }
 
 /*
@@ -324,4 +391,15 @@ type SetVariableCharacterType string
 
 const (
 	SetVariableCharacterTypeDirection SetVariableCharacterType = "direction"
+)
+
+type SetCharacterPropertyType string
+
+const (
+	SetCharacterPropertyTypeVisibility SetCharacterPropertyType = "visibility"
+	SetCharacterPropertyTypeDirFix                              = "dir_fix"
+	SetCharacterPropertyTypeStepping                            = "stepping"
+	SetCharacterPropertyTypeThrough                             = "through"
+	SetCharacterPropertyTypeWalking                             = "walking"
+	SetCharacterPropertyTypeSpeed                               = "speed"
 )
