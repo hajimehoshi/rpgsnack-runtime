@@ -46,11 +46,9 @@ type Interpreter struct {
 }
 
 func NewInterpreter(gameState *Game, mapID, roomID, eventID int, commands []*data.Command) *Interpreter {
-	id := gameState.variables.InnerVariableValue("inerpreter_id")
-	id++
-	gameState.variables.SetInnerVariableValue("inerpreter_id", id)
+	gameState.interpreterID++
 	return &Interpreter{
-		id:           id,
+		id:           gameState.interpreterID,
 		gameState:    gameState,
 		mapID:        mapID,
 		roomID:       roomID,

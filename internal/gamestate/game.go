@@ -27,10 +27,11 @@ import (
 )
 
 type Game struct {
-	variables  *Variables
-	screen     *Screen
-	windows    *window.Windows
-	currentMap *Map
+	variables     *Variables
+	screen        *Screen
+	windows       *window.Windows
+	currentMap    *Map
+	interpreterID int
 }
 
 func NewGame() (*Game, error) {
