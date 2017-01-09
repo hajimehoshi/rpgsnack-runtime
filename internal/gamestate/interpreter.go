@@ -32,6 +32,7 @@ type char interface {
 	Turn(dir data.Dir)
 }
 
+// TODO: This should be saved: How about moving this to variable?
 var interpreterID = 0
 
 func generateInterpreterID() int {

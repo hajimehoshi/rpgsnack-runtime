@@ -401,7 +401,7 @@
                       "name": "show_message",
                       "args": {
                         "content": "ab610c8c-578a-4876-92db-6398931087b7",
-                        "eventId": -1
+                        "eventId": 0
                       }
                     },
                     {
