@@ -65,6 +65,7 @@ func (v *Variables) SetSelfSwitchValue(mapID, roomID, eventID int, id int, value
 		v.selfSwitches[key] = [data.SelfSwitchNum]bool{}
 	}
 	values[id] = value
+	v.selfSwitches[key] = values
 }
 
 func (v *Variables) VariableValue(id int) int {
