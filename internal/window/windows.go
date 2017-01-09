@@ -55,7 +55,7 @@ func (b *Windows) ShowMessage(content string, x, y int, interpreterID int) {
 		panic("not reach")
 	}
 	// TODO: How to call newBalloonCenter?
-	x += scene.TileSize/2 + scene.GameMarginX/scene.TileScale
+	x += scene.GameMarginX / scene.TileScale
 	y += scene.GameMarginTop / scene.TileScale
 	b.nextBalloon = newBalloonWithArrow(x, y, content, interpreterID)
 }

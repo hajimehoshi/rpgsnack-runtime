@@ -181,7 +181,9 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 			if ch := i.character(args.EventID); ch != nil {
 				x, y := ch.Position()
 				content = i.gameState.ParseMessageSyntax(content)
-				i.gameState.windows.ShowMessage(content, x*scene.TileSize, y*scene.TileSize, i.id)
+				wx := x*scene.TileSize + scene.TileSize/2
+				wy := y * scene.TileSize
+				i.gameState.windows.ShowMessage(content, wx, wy, i.id)
 				i.waitingCommand = true
 				return false, nil
 			}
