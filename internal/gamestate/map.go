@@ -323,10 +323,14 @@ func (m *Map) passable(x, y int) (bool, error) {
 		return false, nil
 	}
 	e := m.eventAt(x, y)
-	if e == nil {
-		return true, nil
+	if e != nil && !e.IsPassable() {
+		return false, nil
 	}
-	return e.IsPassable(), nil
+	px, py := m.player.Position()
+	if x == px && y == py {
+		return false, nil
+	}
+	return true, nil
 }
 
 func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {

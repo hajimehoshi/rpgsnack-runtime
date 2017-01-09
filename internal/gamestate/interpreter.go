@@ -291,6 +291,24 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 		}
 		if !i.waitingCommand {
 			args := c.Args.(*data.CommandArgsMoveCharacter)
+			dx, dy := ch.Position()
+			switch args.Dir {
+			case data.DirUp:
+				dy--
+			case data.DirRight:
+				dx++
+			case data.DirDown:
+				dy++
+			case data.DirLeft:
+				dx--
+			}
+			p, err := i.gameState.Map().passable(dx, dy)
+			if err != nil {
+				return false, err
+			}
+			if !p {
+				return false, nil
+			}
 			ch.Move(args.Dir)
 			i.waitingCommand = true
 			return false, nil
