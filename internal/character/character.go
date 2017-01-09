@@ -105,7 +105,7 @@ func (c *characterImageParts) Src(index int) (int, int, int, int) {
 	case data.AttitudeMiddle:
 		x += c.charWidth
 	case data.AttitudeRight:
-		x += 2 * c.charHeight
+		x += 2 * c.charWidth
 	}
 	switch c.dir {
 	case data.DirUp:
