@@ -102,6 +102,12 @@ func (i *Interpreter) character(id int) char {
 	return nil
 }
 
+func (i *Interpreter) createChild(eventID int, commands []*data.Command) *Interpreter {
+	child := NewInterpreter(i.gameState, i.mapID, i.roomID, eventID, commands)
+	child.route = i.route
+	return child
+}
+
 func (i *Interpreter) doOneCommand() (bool, error) {
 	c := i.commandIndex.command()
 	if !i.gameState.windows.CanProceed(i.id) {
@@ -160,8 +166,7 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 		}
 		page := event.Pages[args.PageIndex]
 		commands := page.Commands
-		i.sub = NewInterpreter(i.gameState, i.mapID, i.roomID, eventID, commands)
-		i.sub.route = i.route
+		i.sub = i.createChild(eventID, commands)
 	case data.CommandNameWait:
 		if i.waitingCount == 0 {
 			i.waitingCount = c.Args.(*data.CommandArgsWait).Time * 6
@@ -256,9 +261,9 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 			id = i.eventID
 		}
 		// TODO: Consider args.Skip and args.Wait
-		i.sub = NewInterpreter(i.gameState, i.mapID, i.roomID, id, args.Commands)
-		i.sub.route = i.route
-		i.sub.repeat = args.Repeat
+		sub := i.createChild(id, args.Commands)
+		sub.repeat = args.Repeat
+		i.sub = sub
 	case data.CommandNameTintScreen:
 		if !i.waitingCommand {
 			args := c.Args.(*data.CommandArgsTintScreen)
