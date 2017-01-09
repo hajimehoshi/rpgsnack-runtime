@@ -16,6 +16,7 @@ package gamestate
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/hajimehoshi/ebiten"
 
@@ -457,12 +458,29 @@ func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
 	return true, nil
 }
 
+type positionDrawer interface {
+	Position() (int, int)
+	Draw(screen *ebiten.Image) error
+}
+
+type charactersByY []positionDrawer
+
+func (c charactersByY) Len() int { return len(c) }
+func (c charactersByY) Less(i, j int) bool {
+	_, yi := c[i].Position()
+	_, yj := c[j].Position()
+	return yi < yj
+}
+func (c charactersByY) Swap(i, j int) { c[i], c[j] = c[j], c[i] }
+
 func (m *Map) DrawCharacters(screen *ebiten.Image) error {
-	if err := m.player.Draw(screen); err != nil {
-		return nil
-	}
+	chars := []positionDrawer{m.player}
 	for _, e := range m.events {
-		if err := e.Draw(screen); err != nil {
+		chars = append(chars, e)
+	}
+	sort.Sort(charactersByY(chars))
+	for _, c := range chars {
+		if err := c.Draw(screen); err != nil {
 			return err
 		}
 	}
