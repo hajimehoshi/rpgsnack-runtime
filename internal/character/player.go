@@ -26,7 +26,7 @@ type Player struct {
 
 func NewPlayer(x, y int) (*Player, error) {
 	c := &character{
-		speed:        speedFastest,
+		speed:        data.Speed5,
 		imageName:    "characters0.png",
 		imageIndex:   0,
 		x:            x,

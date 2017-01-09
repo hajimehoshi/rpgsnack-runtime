@@ -74,3 +74,30 @@ const (
 	TriggerDirect         = "direct"
 	TriggerNever          = "never"
 )
+
+type Speed int
+
+const (
+	Speed1 Speed = 1
+	Speed2       = 2
+	Speed3       = 3
+	Speed4       = 4
+	Speed5       = 5
+)
+
+func (s Speed) Frames() int {
+	switch s {
+	case Speed1:
+		return 64
+	case Speed2:
+		return 32
+	case Speed3:
+		return 16
+	case Speed4:
+		return 8
+	case Speed5:
+		return 4
+	default:
+		panic("not reach")
+	}
+}
