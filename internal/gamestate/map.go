@@ -140,6 +140,9 @@ func (m *Map) Update() error {
 	}
 	sort.Sort(interpretersByID(is))
 	for _, i := range is {
+		if m.IsPlayerMovingByUserInput() && i.id != m.playerInterpreterID {
+			continue
+		}
 		if err := i.Update(); err != nil {
 			return err
 		}
