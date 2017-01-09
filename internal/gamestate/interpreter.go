@@ -260,10 +260,11 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 		if id == 0 {
 			id = i.eventID
 		}
-		// TODO: Consider args.Skip and args.Wait
+		// TODO: Consider args.Skip
 		sub := i.createChild(id, args.Commands)
 		sub.repeat = args.Repeat
 		if !args.Wait {
+			// TODO: What if set_route w/o waiting already exists for this event?
 			i.gameState.Map().addInterpreter(sub)
 			i.commandIndex.advance()
 			return true, nil
