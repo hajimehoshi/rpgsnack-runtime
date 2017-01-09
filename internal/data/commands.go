@@ -230,7 +230,11 @@ func (c *CommandArgsSetVariable) UnmarshalJSON(data []uint8) error {
 		}
 		c.Value = v
 	case SetVariableValueTypeRandom:
-		return fmt.Errorf("data: not implemented yet (set_variable): valueType %s", c.ValueType)
+		var v []int
+		if err := json.Unmarshal(tmp.Value, &v); err != nil {
+			return err
+		}
+		c.Value = v
 	case SetVariableValueTypeCharacter:
 		var v *SetVariableCharacterArgs
 		if err := json.Unmarshal(tmp.Value, &v); err != nil {

@@ -411,8 +411,7 @@ func (i *Interpreter) setVariable(id int, op data.SetVariableOp, valueType data.
 	case data.SetVariableValueTypeVariable:
 		rhs = i.gameState.variables.VariableValue(value.(int))
 	case data.SetVariableValueTypeRandom:
-		println(fmt.Sprintf("not implemented yet (set_variable): valueType %s", valueType))
-		return
+		rhs = i.gameState.variables.RandomValue(value.([]int))
 	case data.SetVariableValueTypeCharacter:
 		args := value.(*data.SetVariableCharacterArgs)
 		ch := i.character(args.EventID)

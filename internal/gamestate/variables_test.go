@@ -29,3 +29,13 @@ func TestSelfSwitches(t *testing.T) {
 		t.Errorf("SelfSwitchValue(1, 2, 3) got: %v, want: %v", got, want)
 	}
 }
+
+func TestRandomValue(t *testing.T) {
+	value := []int{1, 3}
+	v := Variables{}
+	got := v.RandomValue(value)
+	// TODO: We should  mock math.random for consistent results
+	if got <= 0|| got >= 4 {
+		t.Errorf("RandomValue([1, 3]) out of range got: %v", got)
+	}
+}
