@@ -220,6 +220,7 @@ func (m *Map) Update() error {
 			return err
 		}
 	}
+	m.tryRunAutoEvent()
 	return nil
 }
 
@@ -233,7 +234,7 @@ func (m *Map) eventAt(x, y int) *character.Event {
 	return nil
 }
 
-func (m *Map) TryRunAutoEvent() {
+func (m *Map) tryRunAutoEvent() {
 	if m.isEventExecuting() {
 		return
 	}

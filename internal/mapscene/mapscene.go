@@ -80,7 +80,6 @@ func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 	if err := m.gameState.Map().Update(); err != nil {
 		return err
 	}
-	m.gameState.Map().TryRunAutoEvent()
 	if err := m.movePlayerIfNeeded(); err != nil {
 		return err
 	}
