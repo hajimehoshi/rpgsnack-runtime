@@ -34,7 +34,6 @@ type Map struct {
 	executingEventIDByUserInput int
 	interpreters                map[int]*Interpreter
 	playerInterpreterID         int
-	eventRouteInterpreters      []*Interpreter
 }
 
 func NewMap(game *Game) (*Map, error) {
@@ -53,7 +52,7 @@ func NewMap(game *Game) (*Map, error) {
 		mapID:        1,
 		interpreters: map[int]*Interpreter{},
 	}
-	m.setRoomID(roomID)
+	m.setRoomID(roomID, nil)
 	return m, nil
 }
 
@@ -67,7 +66,7 @@ func (m *Map) TileSet() (*data.TileSet, error) {
 	return nil, fmt.Errorf("mapscene: tile set not found: %d", id)
 }
 
-func (m *Map) setRoomID(id int) error {
+func (m *Map) setRoomID(id int, interpreter *Interpreter) error {
 	m.roomID = id
 	m.events = nil
 	for _, e := range m.CurrentRoom().Events {
@@ -77,12 +76,18 @@ func (m *Map) setRoomID(id int) error {
 		}
 		m.events = append(m.events, event)
 	}
-	m.eventRouteInterpreters = make([]*Interpreter, len(m.events))
+	m.interpreters = map[int]*Interpreter{}
+	if interpreter != nil {
+		m.interpreters[interpreter.id] = interpreter
+	}
 	return nil
 }
 
 func (m *Map) isEventExecuting() bool {
 	for _, i := range m.interpreters {
+		if i.route {
+			continue
+		}
 		if i.IsExecuting() {
 			return true
 		}
@@ -143,6 +148,9 @@ func (m *Map) Update() error {
 		if m.IsPlayerMovingByUserInput() && i.id != m.playerInterpreterID {
 			continue
 		}
+		if i.route && m.executingEventIDByUserInput == i.eventID {
+			continue
+		}
 		if err := i.Update(); err != nil {
 			return err
 		}
@@ -153,26 +161,13 @@ func (m *Map) Update() error {
 			delete(m.interpreters, i.id)
 		}
 	}
-	if !m.IsPlayerMovingByUserInput() {
-		for _, i := range m.eventRouteInterpreters {
-			if i == nil {
-				continue
-			}
-			if m.executingEventIDByUserInput == i.eventID {
-				continue
-			}
-			if err := i.Update(); err != nil {
-				return err
-			}
-		}
-	}
 	if err := m.player.Update(); err != nil {
 		return err
 	}
 	if m.IsPlayerMovingByUserInput() {
 		return nil
 	}
-	for i, e := range m.events {
+	for _, e := range m.events {
 		index, err := m.pageIndex(e.ID())
 		if err != nil {
 			return err
@@ -189,7 +184,15 @@ func (m *Map) Update() error {
 		}
 		route := e.CurrentPage().Route
 		if route == nil {
-			m.eventRouteInterpreters[i] = nil
+			ids := []int{}
+			for id, i := range m.interpreters {
+				if i.route && i.eventID == e.ID() {
+					ids = append(ids, id)
+				}
+			}
+			for _, id := range ids {
+				delete(m.interpreters, id)
+			}
 			continue
 		}
 		commands := []*data.Command{
@@ -205,7 +208,8 @@ func (m *Map) Update() error {
 			},
 		}
 		interpreter := NewInterpreter(m.game, m.mapID, m.roomID, e.ID(), commands)
-		m.eventRouteInterpreters[i] = interpreter
+		interpreter.route = true
+		m.interpreters[interpreter.id] = interpreter
 	}
 	for _, e := range m.events {
 		if err := e.Update(); err != nil {
@@ -245,8 +249,7 @@ func (m *Map) TryRunAutoEvent() {
 
 func (m *Map) transferPlayerImmediately(roomID, x, y int, interpreter *Interpreter) {
 	m.player.TransferImmediately(x, y)
-	m.setRoomID(roomID)
-	m.interpreters[interpreter.id] = interpreter
+	m.setRoomID(roomID, interpreter)
 }
 
 func (m *Map) currentMap() *data.Map {

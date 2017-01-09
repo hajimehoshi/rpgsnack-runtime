@@ -44,6 +44,7 @@ type Interpreter struct {
 	waitingCommand bool
 	repeat         bool
 	sub            *Interpreter
+	route          bool // True when used for event routing property.
 }
 
 func NewInterpreter(gameState *Game, mapID, roomID, eventID int, commands []*data.Command) *Interpreter {
@@ -160,6 +161,7 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 		page := event.Pages[args.PageIndex]
 		commands := page.Commands
 		i.sub = NewInterpreter(i.gameState, i.mapID, i.roomID, eventID, commands)
+		i.sub.route = i.route
 	case data.CommandNameWait:
 		if i.waitingCount == 0 {
 			i.waitingCount = c.Args.(*data.CommandArgsWait).Time * 6
@@ -255,6 +257,7 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 		}
 		// TODO: Consider args.Skip and args.Wait
 		i.sub = NewInterpreter(i.gameState, i.mapID, i.roomID, id, args.Commands)
+		i.sub.route = i.route
 		i.sub.repeat = args.Repeat
 	case data.CommandNameTintScreen:
 		if !i.waitingCommand {
