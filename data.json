@@ -462,7 +462,7 @@
                         "eventId": -1,
                         "repeat":   false,
                         "skip":     false,
-                        "wait":     true,
+                        "wait":     false,
                         "commands": [
                           {
                             "name": "move_character",

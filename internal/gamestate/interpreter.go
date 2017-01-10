@@ -479,7 +479,6 @@ func (i *Interpreter) Update() error {
 		if i.gameState.windows.IsBusy(i.id) {
 			return nil
 		}
-		i.gameState.windows.CloseAll()
 		i.commandIterator = nil
 		return nil
 	}
