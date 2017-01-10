@@ -18,19 +18,65 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 )
 
+type pointer struct {
+	commandIndices []int
+	branchIndices  []int
+}
+
+func (p *pointer) appendCommand(i int) *pointer {
+	ci := make([]int, len(p.commandIndices)+1)
+	copy(ci, p.commandIndices)
+	ci[len(ci)-1] = i
+	return &pointer{
+		commandIndices: ci,
+		branchIndices:  p.branchIndices,
+	}
+}
+
+func (p *pointer) appendBranch(i int) *pointer {
+	bi := make([]int, len(p.branchIndices)+1)
+	copy(bi, p.branchIndices)
+	bi[len(bi)-1] = i
+	return &pointer{
+		commandIndices: p.commandIndices,
+		branchIndices:  bi,
+	}
+}
+
 type CommandIterator struct {
 	commandIndices []int
 	branchIndices  []int
 	commands       []*data.Command
+	labels         map[string]*pointer
 }
 
 func New(commands []*data.Command) *CommandIterator {
 	c := &CommandIterator{
 		commandIndices: []int{0},
 		commands:       commands,
+		labels:         map[string]*pointer{},
 	}
 	c.unindentIfNeeded()
+	c.recordLabel(c.commands, &pointer{[]int{}, []int{}})
 	return c
+}
+
+func (c *CommandIterator) recordLabel(commands []*data.Command, pointer *pointer) {
+	for ci, command := range commands {
+		p := pointer.appendCommand(ci)
+		if command.Name == data.CommandNameLabel {
+			label := command.Args.(*data.CommandArgsLabel).Name
+			if _, ok := c.labels[label]; !ok {
+				c.labels[label] = p
+			}
+		}
+		if command.Branches == nil {
+			continue
+		}
+		for bi, b := range command.Branches {
+			c.recordLabel(b, p.appendBranch(bi))
+		}
+	}
 }
 
 func (c *CommandIterator) Rewind() {
@@ -81,8 +127,18 @@ func (c *CommandIterator) Advance() {
 	c.unindentIfNeeded()
 }
 
-func (c *CommandIterator ) Choose(branchIndex int) {
+func (c *CommandIterator) Choose(branchIndex int) {
 	c.branchIndices = append(c.branchIndices, branchIndex)
 	c.commandIndices = append(c.commandIndices, 0)
 	c.unindentIfNeeded()
+}
+
+func (c *CommandIterator) Goto(label string) {
+	p, ok := c.labels[label]
+	if !ok {
+		// TODO: log error?
+		return
+	}
+	c.commandIndices = p.commandIndices
+	c.branchIndices = p.branchIndices
 }
