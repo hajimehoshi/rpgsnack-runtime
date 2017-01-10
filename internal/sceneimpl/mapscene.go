@@ -78,6 +78,10 @@ func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 		return err
 	}
 	if err := m.gameState.Map().Update(); err != nil {
+		if err == gamestate.GoToTitle {
+			sceneManager.GoTo(NewTitleScene())
+			return nil
+		}
 		return err
 	}
 	if err := m.movePlayerIfNeeded(); err != nil {

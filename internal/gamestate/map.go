@@ -15,6 +15,7 @@
 package gamestate
 
 import (
+	"errors"
 	"fmt"
 	"sort"
 
@@ -141,6 +142,8 @@ type interpretersByID []*Interpreter
 func (i interpretersByID) Len() int           { return len(i) }
 func (i interpretersByID) Less(a, b int) bool { return i[a].id < i[b].id }
 func (i interpretersByID) Swap(a, b int)      { i[a], i[b] = i[b], i[a] }
+
+var GoToTitle = errors.New("go to title")
 
 func (m *Map) Update() error {
 	is := []*Interpreter{}

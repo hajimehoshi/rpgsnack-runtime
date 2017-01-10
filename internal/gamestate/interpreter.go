@@ -47,6 +47,7 @@ type Interpreter struct {
 	repeat          bool
 	sub             *Interpreter
 	route           bool // True when used for event routing property.
+	shouldGoToTitle bool
 }
 
 func NewInterpreter(gameState *Game, mapID, roomID, eventID int, commands []*data.Command) *Interpreter {
@@ -308,8 +309,8 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 		println(fmt.Sprintf("not implemented yet: %s", c.Name))
 		i.commandIterator.Advance()
 	case data.CommandNameGotoTitle:
-		// TODO: Implement
-		return false, nil
+		i.shouldGoToTitle = true
+		return false, GoToTitle
 	case data.CommandNameMoveCharacter:
 		ch := i.character(i.eventID)
 		if ch == nil {
