@@ -12,15 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// +build !js
-
 package data
 
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"os"
 )
 
 func min(a, b int) int {
@@ -38,11 +34,7 @@ func max(a, b int) int {
 }
 
 func Load() error {
-	jsonPath := "data.json"
-	if len(os.Args) >= 2 {
-		jsonPath = os.Args[1]
-	}
-	dataJson, err := ioutil.ReadFile(jsonPath)
+	dataJson, err := loadJSON()
 	if err != nil {
 		return err
 	}

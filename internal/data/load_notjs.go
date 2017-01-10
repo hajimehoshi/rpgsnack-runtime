@@ -1,4 +1,4 @@
-// Copyright 2016 Hajime Hoshi
+// Copyright 2017 Hajime Hoshi
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,24 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// +build js
+// +build !js
 
 package data
 
 import (
-	"github.com/gopherjs/gopherjs/js"
+	"io/ioutil"
+	"os"
 )
 
 func loadJSON() ([]uint8, error) {
-	if js.Global.Get("_data") == nil {
-		ch := make(chan struct{})
-		js.Global.Set("_dataNotify", func() {
-			close(ch)
-		})
-		<-ch
+	jsonPath := "data.json"
+	if len(os.Args) >= 2 {
+		jsonPath = os.Args[1]
 	}
-	println(js.Global.Get("_data"))
-	dataJsonStr := js.Global.Get("JSON").Call("stringify", js.Global.Get("_data"))
-	dataJson := ([]uint8)(dataJsonStr.String())
+	dataJson, err := ioutil.ReadFile(jsonPath)
+	if err != nil {
+		return nil, err
+	}
 	return dataJson, nil
 }
