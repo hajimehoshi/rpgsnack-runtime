@@ -70,19 +70,19 @@ type Trigger string
 
 const (
 	TriggerPlayer Trigger = "player"
-	TriggerAuto           = "auto"
-	TriggerDirect         = "direct"
-	TriggerNever          = "never"
+	TriggerAuto   Trigger = "auto"
+	TriggerDirect Trigger = "direct"
+	TriggerNever  Trigger = "never"
 )
 
 type Speed int
 
 const (
 	Speed1 Speed = 1
-	Speed2       = 2
-	Speed3       = 3
-	Speed4       = 4
-	Speed5       = 5
+	Speed2 Speed = 2
+	Speed3 Speed = 3
+	Speed4 Speed = 4
+	Speed5 Speed = 5
 )
 
 func (s Speed) Frames() int {

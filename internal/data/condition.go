@@ -57,24 +57,24 @@ type ConditionType string
 
 const (
 	ConditionTypeSwitch     ConditionType = "switch"
-	ConditionTypeSelfSwitch               = "self_switch"
-	ConditionTypeVariable                 = "variable"
+	ConditionTypeSelfSwitch ConditionType = "self_switch"
+	ConditionTypeVariable   ConditionType = "variable"
 )
 
 type ConditionComp string
 
 const (
 	ConditionCompEqualTo              ConditionComp = "=="
-	ConditionCompNotEqualTo                         = "!="
-	ConditionCompGreaterThanOrEqualTo               = ">="
-	ConditionCompGreaterThan                        = ">"
-	ConditionCompLessThanOrEqualTo                  = "<="
-	ConditionCompLessThan                           = "<"
+	ConditionCompNotEqualTo           ConditionComp = "!="
+	ConditionCompGreaterThanOrEqualTo ConditionComp = ">="
+	ConditionCompGreaterThan          ConditionComp = ">"
+	ConditionCompLessThanOrEqualTo    ConditionComp = "<="
+	ConditionCompLessThan             ConditionComp = "<"
 )
 
 type ConditionValueType string
 
 const (
 	ConditionValueTypeConstant ConditionValueType = "constant"
-	ConditionValueTypeVariable                    = "variable"
+	ConditionValueTypeVariable ConditionValueType = "variable"
 )

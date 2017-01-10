@@ -146,28 +146,28 @@ type CommandName string
 
 const (
 	CommandNameIf            CommandName = "if"
-	CommandNameCallEvent                 = "call_event"
-	CommandNameWait                      = "wait"
-	CommandNameShowMessage               = "show_message"
-	CommandNameShowChoices               = "show_choices"
-	CommandNameSetSwitch                 = "set_switch"
-	CommandNameSetSelfSwitch             = "set_self_switch"
-	CommandNameSetVariable               = "set_variable"
-	CommandNameTransfer                  = "transfer"
-	CommandNameSetRoute                  = "set_route"
-	CommandNameTintScreen                = "tint_screen"
-	CommandNamePlaySE                    = "play_se"
-	CommandNamePlayBGM                   = "play_bgm"
-	CommandNameStopBGM                   = "stop_bgm"
+	CommandNameCallEvent     CommandName = "call_event"
+	CommandNameWait          CommandName = "wait"
+	CommandNameShowMessage   CommandName = "show_message"
+	CommandNameShowChoices   CommandName = "show_choices"
+	CommandNameSetSwitch     CommandName = "set_switch"
+	CommandNameSetSelfSwitch CommandName = "set_self_switch"
+	CommandNameSetVariable   CommandName = "set_variable"
+	CommandNameTransfer      CommandName = "transfer"
+	CommandNameSetRoute      CommandName = "set_route"
+	CommandNameTintScreen    CommandName = "tint_screen"
+	CommandNamePlaySE        CommandName = "play_se"
+	CommandNamePlayBGM       CommandName = "play_bgm"
+	CommandNameStopBGM       CommandName = "stop_bgm"
 
 	// Route commands
-	CommandNameMoveCharacter        = "move_character"
-	CommandNameTurnCharacter        = "turn_character"
-	CommandNameRotateCharacter      = "rotate_character"
-	CommandNameSetCharacterProperty = "set_character_property"
+	CommandNameMoveCharacter        CommandName = "move_character"
+	CommandNameTurnCharacter        CommandName = "turn_character"
+	CommandNameRotateCharacter      CommandName = "rotate_character"
+	CommandNameSetCharacterProperty CommandName = "set_character_property"
 
 	// Special commands
-	CommandNameSetInnerVariable = "set_inner_variable"
+	CommandNameSetInnerVariable CommandName = "set_inner_variable"
 )
 
 type CommandArgsIf struct {
@@ -337,7 +337,7 @@ func (c *CommandArgsSetCharacterProperty) UnmarshalJSON(data []uint8) error {
 		}
 		c.Value = v
 	case SetCharacterPropertyTypeSpeed:
-		v := 0
+		var v Speed
 		if err := json.Unmarshal(tmp.Value, &v); err != nil {
 			return err
 		}
@@ -366,20 +366,20 @@ type SetVariableOp string
 
 const (
 	SetVariableOpAssign SetVariableOp = "="
-	SetVariableOpAdd                  = "+"
-	SetVariableOpSub                  = "-"
-	SetVariableOpMul                  = "*"
-	SetVariableOpDiv                  = "/"
-	SetVariableOpMod                  = "%"
+	SetVariableOpAdd    SetVariableOp = "+"
+	SetVariableOpSub    SetVariableOp = "-"
+	SetVariableOpMul    SetVariableOp = "*"
+	SetVariableOpDiv    SetVariableOp = "/"
+	SetVariableOpMod    SetVariableOp = "%"
 )
 
 type SetVariableValueType string
 
 const (
 	SetVariableValueTypeConstant  SetVariableValueType = "constant"
-	SetVariableValueTypeVariable                       = "variable"
-	SetVariableValueTypeRandom                         = "random"
-	SetVariableValueTypeCharacter                      = "character"
+	SetVariableValueTypeVariable  SetVariableValueType = "variable"
+	SetVariableValueTypeRandom    SetVariableValueType = "random"
+	SetVariableValueTypeCharacter SetVariableValueType = "character"
 )
 
 type SetVariableValueRandom struct {
@@ -402,9 +402,9 @@ type SetCharacterPropertyType string
 
 const (
 	SetCharacterPropertyTypeVisibility SetCharacterPropertyType = "visibility"
-	SetCharacterPropertyTypeDirFix                              = "dir_fix"
-	SetCharacterPropertyTypeStepping                            = "stepping"
-	SetCharacterPropertyTypeThrough                             = "through"
-	SetCharacterPropertyTypeWalking                             = "walking"
-	SetCharacterPropertyTypeSpeed                               = "speed"
+	SetCharacterPropertyTypeDirFix     SetCharacterPropertyType = "dir_fix"
+	SetCharacterPropertyTypeStepping   SetCharacterPropertyType = "stepping"
+	SetCharacterPropertyTypeThrough    SetCharacterPropertyType = "through"
+	SetCharacterPropertyTypeWalking    SetCharacterPropertyType = "walking"
+	SetCharacterPropertyTypeSpeed      SetCharacterPropertyType = "speed"
 )
