@@ -40,7 +40,6 @@ func Load() error {
 	}
 	var gameData *Game
 	if err := json.Unmarshal(dataJson, &gameData); err != nil {
-		fmt.Printf("%v\n", err)
 		switch err := err.(type) {
 		case *json.UnmarshalTypeError:
 			begin := max(int(err.Offset)-20, 0)
