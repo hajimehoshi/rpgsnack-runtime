@@ -307,6 +307,9 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 	case data.CommandNameStopBGM:
 		println(fmt.Sprintf("not implemented yet: %s", c.Name))
 		i.commandIterator.Advance()
+	case data.CommandNameGotoTitle:
+		// TODO: Implement
+		return false, nil
 	case data.CommandNameMoveCharacter:
 		ch := i.character(i.eventID)
 		if ch == nil {

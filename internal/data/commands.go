@@ -122,6 +122,7 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 		return fmt.Errorf("data: not implemented yet: %s", c.Name)
 	case CommandNameStopBGM:
 		return fmt.Errorf("data: not implemented yet: %s", c.Name)
+	case CommandNameGotoTitle:
 	case CommandNameMoveCharacter:
 		var args *CommandArgsMoveCharacter
 		if err := json.Unmarshal(tmp.Args, &args); err != nil {
@@ -173,6 +174,7 @@ const (
 	CommandNamePlaySE        CommandName = "play_se"
 	CommandNamePlayBGM       CommandName = "play_bgm"
 	CommandNameStopBGM       CommandName = "stop_bgm"
+	CommandNameGotoTitle     CommandName = "goto_title"
 
 	// Route commands
 	CommandNameMoveCharacter        CommandName = "move_character"
