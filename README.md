@@ -7,3 +7,7 @@ RPGSnack Runtime
 3. Run `go get -u github.com/hajimehoshi/rpgsnack-runtime/...`
 4. Run `cd $GOPATH/src/github.com/hajimehoshi/rpgsnack-runtime`
 5. Run `go run main.go`
+
+## How to specify a JSON file to run
+
+Run `go run main.go /path/to/json/file`

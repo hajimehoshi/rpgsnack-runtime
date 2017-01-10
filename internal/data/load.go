@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
 )
 
 func min(a, b int) int {
@@ -37,7 +38,11 @@ func max(a, b int) int {
 }
 
 func Load() error {
-	dataJson, err := ioutil.ReadFile("data.json")
+	jsonPath := "data.json"
+	if len(os.Args) >= 2 {
+		jsonPath = os.Args[1]
+	}
+	dataJson, err := ioutil.ReadFile(jsonPath)
 	if err != nil {
 		return err
 	}
