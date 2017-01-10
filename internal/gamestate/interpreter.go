@@ -20,6 +20,7 @@ import (
 	"golang.org/x/text/language"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/commanditerator"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
@@ -35,28 +36,28 @@ type char interface {
 }
 
 type Interpreter struct {
-	id             int
-	gameState      *Game
-	mapID          int // Note: This doesn't make sense when eventID == -1
-	roomID         int // Note: This doesn't make sense when eventID == -1
-	eventID        int
-	commandIndex   *commandIndex
-	waitingCount   int
-	waitingCommand bool
-	repeat         bool
-	sub            *Interpreter
-	route          bool // True when used for event routing property.
+	id              int
+	gameState       *Game
+	mapID           int // Note: This doesn't make sense when eventID == -1
+	roomID          int // Note: This doesn't make sense when eventID == -1
+	eventID         int
+	commandIterator *commanditerator.CommandIterator
+	waitingCount    int
+	waitingCommand  bool
+	repeat          bool
+	sub             *Interpreter
+	route           bool // True when used for event routing property.
 }
 
 func NewInterpreter(gameState *Game, mapID, roomID, eventID int, commands []*data.Command) *Interpreter {
 	gameState.interpreterID++
 	return &Interpreter{
-		id:           gameState.interpreterID,
-		gameState:    gameState,
-		mapID:        mapID,
-		roomID:       roomID,
-		eventID:      eventID,
-		commandIndex: newCommandIndex(commands),
+		id:              gameState.interpreterID,
+		gameState:       gameState,
+		mapID:           mapID,
+		roomID:          roomID,
+		eventID:         eventID,
+		commandIterator: commanditerator.New(commands),
 	}
 }
 
@@ -79,7 +80,7 @@ func (i *Interpreter) event() *character.Event {
 }
 
 func (i *Interpreter) IsExecuting() bool {
-	return i.commandIndex != nil
+	return i.commandIterator != nil
 }
 
 func (i *Interpreter) character(id int) char {
@@ -110,7 +111,7 @@ func (i *Interpreter) createChild(eventID int, commands []*data.Command) *Interp
 }
 
 func (i *Interpreter) doOneCommand() (bool, error) {
-	c := i.commandIndex.command()
+	c := i.commandIterator.Command()
 	if !i.gameState.windows.CanProceed(i.id) {
 		return false, nil
 	}
@@ -120,7 +121,7 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 		}
 		if !i.sub.IsExecuting() {
 			i.sub = nil
-			i.commandIndex.advance()
+			i.commandIterator.Advance()
 		}
 		return false, nil
 	}
@@ -139,11 +140,11 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 			}
 		}
 		if matches {
-			i.commandIndex.choose(0)
+			i.commandIterator.Choose(0)
 		} else if len(c.Branches) >= 2 {
-			i.commandIndex.choose(1)
+			i.commandIterator.Choose(1)
 		} else {
-			i.commandIndex.advance()
+			i.commandIterator.Advance()
 		}
 	case data.CommandNameCallEvent:
 		args := c.Args.(*data.CommandArgsCallEvent)
@@ -162,7 +163,7 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 		}
 		if event == nil {
 			// TODO: warning?
-			i.commandIndex.advance()
+			i.commandIterator.Advance()
 			return true, nil
 		}
 		page := event.Pages[args.PageIndex]
@@ -174,12 +175,12 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 		}
 		if i.waitingCount == 0 {
 			// Time 0.0[s] is specified.
-			i.commandIndex.advance()
+			i.commandIterator.Advance()
 			return true, nil
 		}
 		i.waitingCount--
 		if i.waitingCount == 0 {
-			i.commandIndex.advance()
+			i.commandIterator.Advance()
 			return true, nil
 		}
 		return false, nil
@@ -199,9 +200,9 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 			}
 		}
 		// Advance command index first and check the next command.
-		i.commandIndex.advance()
-		if !i.commandIndex.isTerminated() {
-			if i.commandIndex.command().Name != data.CommandNameShowChoices {
+		i.commandIterator.Advance()
+		if !i.commandIterator.IsTerminated() {
+			if i.commandIterator.Command().Name != data.CommandNameShowChoices {
 				i.gameState.windows.CloseAll()
 			}
 		} else {
@@ -223,21 +224,21 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 		if !i.gameState.windows.HasChosenIndex() {
 			return false, nil
 		}
-		i.commandIndex.choose(i.gameState.windows.ChosenIndex())
+		i.commandIterator.Choose(i.gameState.windows.ChosenIndex())
 		i.waitingCommand = false
 	case data.CommandNameSetSwitch:
 		args := c.Args.(*data.CommandArgsSetSwitch)
 		i.gameState.variables.SetSwitchValue(args.ID, args.Value)
-		i.commandIndex.advance()
+		i.commandIterator.Advance()
 	case data.CommandNameSetSelfSwitch:
 		args := c.Args.(*data.CommandArgsSetSelfSwitch)
 		m, r := i.gameState.Map().mapID, i.gameState.Map().roomID
 		i.gameState.variables.SetSelfSwitchValue(m, r, i.eventID, args.ID, args.Value)
-		i.commandIndex.advance()
+		i.commandIterator.Advance()
 	case data.CommandNameSetVariable:
 		args := c.Args.(*data.CommandArgsSetVariable)
 		i.setVariable(args.ID, args.Op, args.ValueType, args.Value)
-		i.commandIndex.advance()
+		i.commandIterator.Advance()
 	case data.CommandNameTransfer:
 		args := c.Args.(*data.CommandArgsTransfer)
 		if !i.waitingCommand {
@@ -254,7 +255,7 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 			return false, nil
 		}
 		i.waitingCommand = false
-		i.commandIndex.advance()
+		i.commandIterator.Advance()
 	case data.CommandNameSetRoute:
 		args := c.Args.(*data.CommandArgsSetRoute)
 		id := args.EventID
@@ -267,7 +268,7 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 		if !args.Wait {
 			// TODO: What if set_route w/o waiting already exists for this event?
 			i.gameState.Map().addInterpreter(sub)
-			i.commandIndex.advance()
+			i.commandIterator.Advance()
 			return true, nil
 		}
 		i.sub = sub
@@ -280,7 +281,7 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 			gray := float64(args.Gray) / 255
 			i.gameState.screen.startTint(r, g, b, gray, args.Time*6)
 			if !args.Wait {
-				i.commandIndex.advance()
+				i.commandIterator.Advance()
 				return true, nil
 			}
 			i.waitingCommand = args.Wait
@@ -289,20 +290,20 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 			return false, nil
 		}
 		i.waitingCommand = false
-		i.commandIndex.advance()
+		i.commandIterator.Advance()
 	case data.CommandNamePlaySE:
 		println(fmt.Sprintf("not implemented yet: %s", c.Name))
-		i.commandIndex.advance()
+		i.commandIterator.Advance()
 	case data.CommandNamePlayBGM:
 		println(fmt.Sprintf("not implemented yet: %s", c.Name))
-		i.commandIndex.advance()
+		i.commandIterator.Advance()
 	case data.CommandNameStopBGM:
 		println(fmt.Sprintf("not implemented yet: %s", c.Name))
-		i.commandIndex.advance()
+		i.commandIterator.Advance()
 	case data.CommandNameMoveCharacter:
 		ch := i.character(i.eventID)
 		if ch == nil {
-			i.commandIndex.advance()
+			i.commandIterator.Advance()
 			return true, nil
 		}
 		// Check IsMoving() first since the character might be moving at this time.
@@ -337,11 +338,11 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 			return false, nil
 		}
 		i.waitingCommand = false
-		i.commandIndex.advance()
+		i.commandIterator.Advance()
 	case data.CommandNameTurnCharacter:
 		ch := i.character(i.eventID)
 		if ch == nil {
-			i.commandIndex.advance()
+			i.commandIterator.Advance()
 			return true, nil
 		}
 		// Check IsMoving() first since the character might be moving at this time.
@@ -355,11 +356,11 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 			return false, nil
 		}
 		i.waitingCommand = false
-		i.commandIndex.advance()
+		i.commandIterator.Advance()
 	case data.CommandNameRotateCharacter:
 		ch := i.character(i.eventID)
 		if ch == nil {
-			i.commandIndex.advance()
+			i.commandIterator.Advance()
 			return true, nil
 		}
 		// Check IsMoving() first since the character might be moving at this time.
@@ -411,12 +412,12 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 			return false, nil
 		}
 		i.waitingCommand = false
-		i.commandIndex.advance()
+		i.commandIterator.Advance()
 	case data.CommandNameSetCharacterProperty:
 		args := c.Args.(*data.CommandArgsSetCharacterProperty)
 		ch := i.character(i.eventID)
 		if ch == nil {
-			i.commandIndex.advance()
+			i.commandIterator.Advance()
 			return true, nil
 		}
 		switch args.Type {
@@ -435,11 +436,11 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 		default:
 			return false, fmt.Errorf("invaid set_character_property type: %s", args.Type)
 		}
-		i.commandIndex.advance()
+		i.commandIterator.Advance()
 	case data.CommandNameSetInnerVariable:
 		args := c.Args.(*data.CommandArgsSetInnerVariable)
 		i.gameState.variables.SetInnerVariableValue(args.Name, args.Value)
-		i.commandIndex.advance()
+		i.commandIterator.Advance()
 	default:
 		return false, fmt.Errorf("invaid command: %s", c.Name)
 	}
@@ -447,10 +448,10 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 }
 
 func (i *Interpreter) Update() error {
-	if i.commandIndex == nil {
+	if i.commandIterator == nil {
 		return nil
 	}
-	for !i.commandIndex.isTerminated() {
+	for !i.commandIterator.IsTerminated() {
 		cont, err := i.doOneCommand()
 		if err != nil {
 			return err
@@ -459,16 +460,16 @@ func (i *Interpreter) Update() error {
 			break
 		}
 	}
-	if i.commandIndex.isTerminated() {
+	if i.commandIterator.IsTerminated() {
 		if i.repeat {
-			i.commandIndex.rewind()
+			i.commandIterator.Rewind()
 			return nil
 		}
 		if i.gameState.windows.IsBusy(i.id) {
 			return nil
 		}
 		i.gameState.windows.CloseAll()
-		i.commandIndex = nil
+		i.commandIterator = nil
 		return nil
 	}
 	return nil

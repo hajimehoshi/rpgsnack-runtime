@@ -12,20 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package gamestate
+package commanditerator
 
 import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 )
 
-type commandIndex struct {
+type CommandIterator struct {
 	commandIndices []int
 	branchIndices  []int
 	commands       []*data.Command
 }
 
-func newCommandIndex(commands []*data.Command) *commandIndex {
-	c := &commandIndex{
+func New(commands []*data.Command) *CommandIterator {
+	c := &CommandIterator{
 		commandIndices: []int{0},
 		commands:       commands,
 	}
@@ -33,16 +33,16 @@ func newCommandIndex(commands []*data.Command) *commandIndex {
 	return c
 }
 
-func (c *commandIndex) rewind() {
+func (c *CommandIterator) Rewind() {
 	c.commandIndices = []int{0}
 	c.unindentIfNeeded()
 }
 
-func (c *commandIndex) isTerminated() bool {
+func (c *CommandIterator) IsTerminated() bool {
 	return len(c.commandIndices) == 0
 }
 
-func (c *commandIndex) unindentIfNeeded() {
+func (c *CommandIterator) unindentIfNeeded() {
 loop:
 	for 0 < len(c.commandIndices) {
 		branch := c.commands
@@ -67,7 +67,7 @@ loop:
 	}
 }
 
-func (c *commandIndex) command() *data.Command {
+func (c *CommandIterator) Command() *data.Command {
 	branch := c.commands
 	for i, bi := range c.branchIndices {
 		command := branch[c.commandIndices[i]]
@@ -76,12 +76,12 @@ func (c *commandIndex) command() *data.Command {
 	return branch[c.commandIndices[len(c.commandIndices)-1]]
 }
 
-func (c *commandIndex) advance() {
+func (c *CommandIterator) Advance() {
 	c.commandIndices[len(c.commandIndices)-1]++
 	c.unindentIfNeeded()
 }
 
-func (c *commandIndex) choose(branchIndex int) {
+func (c *CommandIterator ) Choose(branchIndex int) {
 	c.branchIndices = append(c.branchIndices, branchIndex)
 	c.commandIndices = append(c.commandIndices, 0)
 	c.unindentIfNeeded()
