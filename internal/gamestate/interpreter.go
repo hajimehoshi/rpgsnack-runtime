@@ -31,6 +31,7 @@ type char interface {
 	IsMoving() bool
 	Move(dir data.Dir)
 	Turn(dir data.Dir)
+	SetSpeed(speed data.Speed)
 }
 
 type Interpreter struct {
@@ -321,6 +322,8 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 				dy++
 			case data.DirLeft:
 				dx--
+			default:
+				panic("not reach")
 			}
 			p, err := i.gameState.Map().passable(dx, dy)
 			if err != nil {
@@ -375,6 +378,8 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 				dirI = 2
 			case data.DirLeft:
 				dirI = 3
+			default:
+				panic("not reach")
 			}
 			switch args.Angle {
 			case 0:
@@ -398,12 +403,38 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 				dir = data.DirDown
 			case 3:
 				dir = data.DirLeft
+			default:
+				panic("not reach")
 			}
 			ch.Turn(dir)
 			i.waitingCommand = true
 			return false, nil
 		}
 		i.waitingCommand = false
+		i.commandIndex.advance()
+	case data.CommandNameSetCharacterProperty:
+		args := c.Args.(*data.CommandArgsSetCharacterProperty)
+		ch := i.character(i.eventID)
+		if ch == nil {
+			i.commandIndex.advance()
+			return true, nil
+		}
+		switch args.Type {
+		case data.SetCharacterPropertyTypeVisibility:
+			return false, fmt.Errorf("not implemented set_character_property type: %s", args.Type)
+		case data.SetCharacterPropertyTypeDirFix:
+			return false, fmt.Errorf("not implemented set_character_property type: %s", args.Type)
+		case data.SetCharacterPropertyTypeStepping:
+			return false, fmt.Errorf("not implemented set_character_property type: %s", args.Type)
+		case data.SetCharacterPropertyTypeThrough:
+			return false, fmt.Errorf("not implemented set_character_property type: %s", args.Type)
+		case data.SetCharacterPropertyTypeWalking:
+			return false, fmt.Errorf("not implemented set_character_property type: %s", args.Type)
+		case data.SetCharacterPropertyTypeSpeed:
+			ch.SetSpeed(args.Value.(data.Speed))
+		default:
+			return false, fmt.Errorf("invaid set_character_property type: %s", args.Type)
+		}
 		i.commandIndex.advance()
 	case data.CommandNameSetInnerVariable:
 		args := c.Args.(*data.CommandArgsSetInnerVariable)

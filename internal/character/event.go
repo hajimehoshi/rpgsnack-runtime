@@ -69,6 +69,10 @@ func (e *Event) Turn(dir data.Dir) {
 	e.character.turn(dir)
 }
 
+func (e *Event) SetSpeed(speed data.Speed) {
+	e.character.speed = speed
+}
+
 func (e *Event) CurrentPage() *data.Page {
 	if e.currentPageIndex == -1 {
 		return nil

@@ -26,7 +26,7 @@ type Player struct {
 
 func NewPlayer(x, y int) (*Player, error) {
 	c := &character{
-		speed:        data.Speed5,
+		speed:        data.Speed3,
 		imageName:    "characters0.png",
 		imageIndex:   0,
 		x:            x,
@@ -63,6 +63,14 @@ func (p *Player) Move(dir data.Dir) {
 
 func (p *Player) Turn(dir data.Dir) {
 	p.character.turn(dir)
+}
+
+func (p *Player) Speed() data.Speed {
+	return p.character.speed
+}
+
+func (p *Player) SetSpeed(speed data.Speed) {
+	p.character.speed = speed
 }
 
 func (p *Player) TransferImmediately(x, y int) {

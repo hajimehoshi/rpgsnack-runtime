@@ -360,6 +360,7 @@ func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	origSpeed := m.player.Speed()
 	commands := []*data.Command{
 		{
 			Name: data.CommandNameSetInnerVariable,
@@ -371,11 +372,47 @@ func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
 		{
 			Name: data.CommandNameSetRoute,
 			Args: &data.CommandArgsSetRoute{
+				EventID: -1,
+				Repeat:  false,
+				Skip:    false,
+				Wait:    true,
+				Commands: []*data.Command{
+					{
+						Name: data.CommandNameSetCharacterProperty,
+						Args: &data.CommandArgsSetCharacterProperty{
+							Type:  data.SetCharacterPropertyTypeSpeed,
+							Value: data.Speed5,
+						},
+					},
+				},
+			},
+		},
+		{
+			Name: data.CommandNameSetRoute,
+			Args: &data.CommandArgsSetRoute{
 				EventID:  -1,
 				Repeat:   false,
 				Skip:     false,
 				Wait:     true,
 				Commands: routeCommandsToEventCommands(path),
+			},
+		},
+		{
+			Name: data.CommandNameSetRoute,
+			Args: &data.CommandArgsSetRoute{
+				EventID: -1,
+				Repeat:  false,
+				Skip:    false,
+				Wait:    true,
+				Commands: []*data.Command{
+					{
+						Name: data.CommandNameSetCharacterProperty,
+						Args: &data.CommandArgsSetCharacterProperty{
+							Type:  data.SetCharacterPropertyTypeSpeed,
+							Value: origSpeed,
+						},
+					},
+				},
 			},
 		},
 		{
