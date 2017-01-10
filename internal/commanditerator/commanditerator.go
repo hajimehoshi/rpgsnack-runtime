@@ -133,12 +133,13 @@ func (c *CommandIterator) Choose(branchIndex int) {
 	c.unindentIfNeeded()
 }
 
-func (c *CommandIterator) Goto(label string) {
+func (c *CommandIterator) Goto(label string) bool {
 	p, ok := c.labels[label]
 	if !ok {
 		// TODO: log error?
-		return
+		return false
 	}
 	c.commandIndices = p.commandIndices
 	c.branchIndices = p.branchIndices
+	return true
 }

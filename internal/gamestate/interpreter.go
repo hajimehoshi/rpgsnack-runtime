@@ -146,6 +146,13 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 		} else {
 			i.commandIterator.Advance()
 		}
+	case data.CommandNameLabel:
+		i.commandIterator.Advance()
+	case data.CommandNameGoto:
+		label := c.Args.(*data.CommandArgsGoto).Label
+		if !i.commandIterator.Goto(label) {
+			i.commandIterator.Advance()
+		}
 	case data.CommandNameCallEvent:
 		args := c.Args.(*data.CommandArgsCallEvent)
 		eventID := args.EventID
