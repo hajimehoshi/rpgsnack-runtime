@@ -48,7 +48,14 @@ func Load() error {
 	}
 	var gameData *Game
 	if err := json.Unmarshal(dataJson, &gameData); err != nil {
-		if err, ok := err.(*json.SyntaxError); ok {
+		fmt.Printf("%v\n", err)
+		switch err := err.(type) {
+		case *json.UnmarshalTypeError:
+			begin := max(int(err.Offset)-20, 0)
+			end := min(int(err.Offset)+40, len(dataJson))
+			part := string(dataJson[begin:end])
+			return fmt.Errorf("data JSON type error: %s:\n%s", err.Error(), part)
+		case *json.SyntaxError:
 			begin := max(int(err.Offset)-20, 0)
 			end := min(int(err.Offset)+40, len(dataJson))
 			part := string(dataJson[begin:end])
