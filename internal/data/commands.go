@@ -237,7 +237,7 @@ func (c *CommandArgsSetVariable) UnmarshalJSON(data []uint8) error {
 		}
 		c.Value = v
 	case SetVariableValueTypeRandom:
-		var v []int
+		var v *SetVariableValueRandom
 		if err := json.Unmarshal(tmp.Value, &v); err != nil {
 			return err
 		}
@@ -381,6 +381,11 @@ const (
 	SetVariableValueTypeRandom                         = "random"
 	SetVariableValueTypeCharacter                      = "character"
 )
+
+type SetVariableValueRandom struct {
+	Begin int `json:"begin"`
+	End   int `json:"end"`
+}
 
 type SetVariableCharacterArgs struct {
 	Type    SetVariableCharacterType `json:"type"`

@@ -413,7 +413,10 @@
                         "id":        2,
                         "op":        "=",
                         "valueType": "random",
-                        "value":     [5, 10]
+                        "value":     {
+                          "begin": 5,
+                          "end":   10
+                        }
                       }
                     },
                     {

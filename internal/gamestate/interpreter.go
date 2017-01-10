@@ -451,8 +451,8 @@ func (i *Interpreter) setVariable(id int, op data.SetVariableOp, valueType data.
 	case data.SetVariableValueTypeVariable:
 		rhs = i.gameState.variables.VariableValue(value.(int))
 	case data.SetVariableValueTypeRandom:
-		v := value.([]int)
-		rhs = i.gameState.RandomValue(v[0], v[1]+1)
+		v := value.(*data.SetVariableValueRandom)
+		rhs = i.gameState.RandomValue(v.Begin, v.End+1)
 	case data.SetVariableValueTypeCharacter:
 		args := value.(*data.SetVariableCharacterArgs)
 		ch := i.character(args.EventID)
