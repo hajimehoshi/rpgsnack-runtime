@@ -360,6 +360,8 @@ func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	// The player's speed is never changed by another events during the player walks
+	// by user input.
 	origSpeed := m.player.Speed()
 	commands := []*data.Command{
 		{
