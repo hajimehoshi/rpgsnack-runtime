@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package mapscene
+package sceneimpl
 
 import (
 	"fmt"
@@ -35,7 +35,7 @@ type MapScene struct {
 	tilesImage *ebiten.Image
 }
 
-func New() (*MapScene, error) {
+func NewMapScene() (*MapScene, error) {
 	tilesImage, err := ebiten.NewImage(scene.TileXNum*scene.TileSize, scene.TileYNum*scene.TileSize, ebiten.FilterNearest)
 	if err != nil {
 		return nil, err

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package titlescene
+package sceneimpl
 
 import (
 	"image/color"
@@ -21,20 +21,19 @@ import (
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/font"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/mapscene"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
 
 type TitleScene struct {
 }
 
-func New() *TitleScene {
+func NewTitleScene() *TitleScene {
 	return &TitleScene{}
 }
 
 func (t *TitleScene) Update(sceneManager *scene.SceneManager) error {
 	if input.Triggered() {
-		mapScene, err := mapscene.New()
+		mapScene, err := NewMapScene()
 		if err != nil {
 			return err
 		}

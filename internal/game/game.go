@@ -22,7 +22,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/titlescene"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/sceneimpl"
 )
 
 type Game struct {
@@ -44,7 +44,7 @@ func (g *Game) startLoadingGameData() {
 			ch <- err
 			return
 		}
-		initScene := titlescene.New()
+		initScene := sceneimpl.NewTitleScene()
 		g.sceneManager = scene.NewSceneManager(initScene)
 	}()
 	g.loadingCh = ch
