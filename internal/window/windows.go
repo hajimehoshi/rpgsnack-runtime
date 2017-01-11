@@ -27,6 +27,11 @@ const (
 		(scene.GameMarginTop+scene.GameMarginBottom)/scene.TileScale
 )
 
+type Character interface {
+	DrawPosition() (int, int)
+	Size() (int, int)
+}
+
 type Windows struct {
 	nextBalloon               *balloon
 	balloons                  []*balloon
@@ -50,12 +55,12 @@ func (b *Windows) HasChosenIndex() bool {
 	return b.hasChosenIndex
 }
 
-func (b *Windows) ShowMessage(content string, x, y int, interpreterID int) {
+func (b *Windows) ShowMessage(content string, character Character, interpreterID int) {
 	if b.nextBalloon != nil {
 		panic("not reach")
 	}
 	// TODO: How to call newBalloonCenter?
-	b.nextBalloon = newBalloonWithArrow(x, y, content, interpreterID)
+	b.nextBalloon = newBalloonWithArrow(character, content, interpreterID)
 }
 
 func (b *Windows) ShowChoices(choices []string, interpreterID int) {

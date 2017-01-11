@@ -41,8 +41,7 @@ type balloon struct {
 	width          int
 	height         int
 	hasArrow       bool
-	arrowX         int
-	arrowY         int
+	character      Character
 	content        string
 	contentOffsetX int
 	openingCount   int
@@ -95,13 +94,12 @@ func newBalloonCenter(content string, interpreterID int) *balloon {
 	return b
 }
 
-func newBalloonWithArrow(arrowX, arrowY int, content string, interpreterID int) *balloon {
+func newBalloonWithArrow(character Character, content string, interpreterID int) *balloon {
 	b := &balloon{
 		interpreterID: interpreterID,
 		content:       content,
 		hasArrow:      true,
-		arrowX:        arrowX,
-		arrowY:        arrowY,
+		character:     character,
 	}
 	w, h, contentOffsetX := balloonSizeFromContent(content)
 	b.width = w
@@ -114,7 +112,13 @@ func (b *balloon) arrowPosition() (int, int) {
 	if !b.hasArrow {
 		panic("not reach")
 	}
-	return b.arrowX + scene.GameMarginX/scene.TileScale, b.arrowY + scene.GameMarginTop/scene.TileScale
+	x := scene.GameMarginX / scene.TileScale
+	y := scene.GameMarginTop / scene.TileScale
+	cx, cy := b.character.DrawPosition()
+	w, _ := b.character.Size()
+	x += cx + w/2
+	y += cy
+	return x, y
 }
 
 func (b *balloon) position() (int, int) {

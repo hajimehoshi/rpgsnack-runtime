@@ -49,6 +49,10 @@ func (p *Player) Position() (int, int) {
 	return p.character.position()
 }
 
+func (p *Player) DrawPosition() (int, int) {
+	return p.character.drawPosition()
+}
+
 func (p *Player) Dir() data.Dir {
 	return p.character.dir
 }

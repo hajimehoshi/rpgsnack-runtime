@@ -53,6 +53,10 @@ func (e *Event) Position() (int, int) {
 	return e.character.position()
 }
 
+func (e *Event) DrawPosition() (int, int) {
+	return e.character.drawPosition()
+}
+
 func (e *Event) Dir() data.Dir {
 	return e.character.dir
 }
