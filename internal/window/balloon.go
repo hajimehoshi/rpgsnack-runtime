@@ -43,7 +43,6 @@ type balloon struct {
 	hasArrow       bool
 	arrowX         int
 	arrowY         int
-	arrowFlip      bool
 	content        string
 	contentOffsetX int
 	openingCount   int
@@ -110,7 +109,6 @@ func newBalloonWithArrow(arrowX, arrowY int, content string, interpreterID int) 
 	b.contentOffsetX = contentOffsetX
 	b.x = arrowX - w/2
 	if scene.TileXNum*scene.TileSize < b.x+w {
-		b.arrowFlip = true
 		b.x = scene.TileXNum*scene.TileSize - w
 	}
 	if b.x < 0 {
@@ -118,6 +116,13 @@ func newBalloonWithArrow(arrowX, arrowY int, content string, interpreterID int) 
 	}
 	b.y = arrowY - h - 4
 	return b
+}
+
+func (b *balloon) arrowFlip() bool {
+	if !b.hasArrow {
+		return false
+	}
+	return scene.TileXNum*scene.TileSize == b.x+b.width
 }
 
 func (b *balloon) isClosed() bool {
@@ -190,7 +195,7 @@ func (b *balloonImageParts) Dst(index int) (int, int, int, int) {
 		}
 		x := b.balloon.arrowX
 		y := b.balloon.arrowY - balloonArrowHeight
-		if b.balloon.arrowFlip {
+		if b.balloon.arrowFlip() {
 			// TODO: 4 is an arbitrary number. Define a const.
 			x -= 4
 			return x, y, x - balloonArrowWidth, y + balloonArrowHeight
@@ -236,7 +241,7 @@ func (b *balloon) draw(screen *ebiten.Image) error {
 		if b.hasArrow {
 			dx = float64(b.arrowX)
 			dy = float64(b.arrowY) + balloonArrowHeight
-			if b.arrowFlip {
+			if b.arrowFlip() {
 				dx -= 4
 			} else {
 				dx += 4
