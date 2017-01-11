@@ -110,18 +110,26 @@ func newBalloonWithArrow(arrowX, arrowY int, content string, interpreterID int) 
 	return b
 }
 
+func (b *balloon) arrowPosition() (int, int) {
+	if !b.hasArrow {
+		panic("not reach")
+	}
+	return b.arrowX + scene.GameMarginX/scene.TileScale, b.arrowY + scene.GameMarginTop/scene.TileScale
+}
+
 func (b *balloon) position() (int, int) {
 	if !b.hasArrow {
 		return b.x, b.y
 	}
-	x := b.arrowX - b.width/2
+	ax, ay := b.arrowPosition()
+	x := ax - b.width/2
 	if scene.TileXNum*scene.TileSize < x+b.width {
 		x = scene.TileXNum*scene.TileSize - b.width
 	}
 	if x < 0 {
 		x = 0
 	}
-	y := b.arrowY - b.height - 4
+	y := ay - b.height - 4
 	return x, y
 }
 
@@ -201,8 +209,9 @@ func (b *balloonImageParts) Dst(index int) (int, int, int, int) {
 		if !b.balloon.hasArrow {
 			return 0, 0, 0, 0
 		}
-		x := b.balloon.arrowX
-		y := b.balloon.arrowY - balloonArrowHeight
+		ax, ay := b.balloon.arrowPosition()
+		x := ax
+		y := ay - balloonArrowHeight
 		if b.balloon.arrowFlip() {
 			// TODO: 4 is an arbitrary number. Define a const.
 			x -= 4
@@ -249,8 +258,9 @@ func (b *balloon) draw(screen *ebiten.Image) error {
 		dx := float64(x + b.width/2)
 		dy := float64(y + b.height/2)
 		if b.hasArrow {
-			dx = float64(b.arrowX)
-			dy = float64(b.arrowY) + balloonArrowHeight
+			ax, ay := b.arrowPosition()
+			dx = float64(ax)
+			dy = float64(ay) + balloonArrowHeight
 			if b.arrowFlip() {
 				dx -= 4
 			} else {
