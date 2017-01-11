@@ -183,30 +183,34 @@ func (c *character) size() (int, int) {
 	return w, h
 }
 
+func (c *character) drawPosition() (int, int) {
+	charW, charH := c.size()
+	x := c.x*scene.TileSize + scene.TileSize/2 - charW/2
+	y := (c.y+1)*scene.TileSize - charH
+	if c.moveCount > 0 {
+		d := (c.speed.Frames() - c.moveCount) * scene.TileSize / c.speed.Frames()
+		switch c.dir {
+		case data.DirLeft:
+			x -= d
+		case data.DirRight:
+			x += d
+		case data.DirUp:
+			y -= d
+		case data.DirDown:
+			y += d
+		}
+	}
+	return x, y
+}
+
 func (c *character) draw(screen *ebiten.Image) error {
 	if c.imageName == "" {
 		return nil
 	}
-	charW, charH := c.size()
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(float64(c.x*scene.TileSize+scene.TileSize/2), float64((c.y+1)*scene.TileSize))
-	op.GeoM.Translate(float64(-charW/2), float64(-charH))
-	if c.moveCount > 0 {
-		dx := 0
-		dy := 0
-		d := (c.speed.Frames() - c.moveCount) * scene.TileSize / c.speed.Frames()
-		switch c.dir {
-		case data.DirLeft:
-			dx -= d
-		case data.DirRight:
-			dx += d
-		case data.DirUp:
-			dy -= d
-		case data.DirDown:
-			dy += d
-		}
-		op.GeoM.Translate(float64(dx), float64(dy))
-	}
+	x, y := c.drawPosition()
+	op.GeoM.Translate(float64(x), float64(y))
+	charW, charH := c.size()
 	op.ImageParts = &characterImageParts{
 		charWidth:  charW,
 		charHeight: charH,
