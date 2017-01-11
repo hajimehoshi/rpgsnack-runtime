@@ -50,6 +50,8 @@ func (c *character) position() (int, int) {
 			y--
 		case data.DirDown:
 			y++
+		default:
+			panic("not reach")
 		}
 		return x, y
 	}
@@ -162,6 +164,8 @@ func (c *character) update() error {
 			ny--
 		case data.DirDown:
 			ny++
+		default:
+			panic("not reach")
 		}
 		c.x = nx
 		c.y = ny
@@ -198,6 +202,8 @@ func (c *character) drawPosition() (int, int) {
 			y -= d
 		case data.DirDown:
 			y += d
+		default:
+			panic("not reach")
 		}
 	}
 	return x, y
