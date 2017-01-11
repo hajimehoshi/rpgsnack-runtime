@@ -107,22 +107,30 @@ func newBalloonWithArrow(arrowX, arrowY int, content string, interpreterID int) 
 	b.width = w
 	b.height = h
 	b.contentOffsetX = contentOffsetX
-	b.x = arrowX - w/2
-	if scene.TileXNum*scene.TileSize < b.x+w {
-		b.x = scene.TileXNum*scene.TileSize - w
-	}
-	if b.x < 0 {
-		b.x = 0
-	}
-	b.y = arrowY - h - 4
 	return b
+}
+
+func (b *balloon) position() (int, int) {
+	if !b.hasArrow {
+		return b.x, b.y
+	}
+	x := b.arrowX - b.width/2
+	if scene.TileXNum*scene.TileSize < x+b.width {
+		x = scene.TileXNum*scene.TileSize - b.width
+	}
+	if x < 0 {
+		x = 0
+	}
+	y := b.arrowY - b.height - 4
+	return x, y
 }
 
 func (b *balloon) arrowFlip() bool {
 	if !b.hasArrow {
 		return false
 	}
-	return scene.TileXNum*scene.TileSize == b.x+b.width
+	x, _ := b.position()
+	return scene.TileXNum*scene.TileSize == x+b.width
 }
 
 func (b *balloon) isClosed() bool {
@@ -204,8 +212,9 @@ func (b *balloonImageParts) Dst(index int) (int, int, int, int) {
 		return x, y, x + balloonArrowWidth, y + balloonArrowHeight
 	}
 	w, _ := b.partsNum()
-	x := b.balloon.x + (index%w)*4
-	y := b.balloon.y + (index/w)*4
+	x, y := b.balloon.position()
+	x += (index % w) * 4
+	y += (index / w) * 4
 	return x, y, x + 4, y + 4
 }
 
@@ -236,8 +245,9 @@ func (b *balloon) draw(screen *ebiten.Image) error {
 	if rate > 0 {
 		img := assets.GetImage("balloon.png")
 		op := &ebiten.DrawImageOptions{}
-		dx := float64(b.x + b.width/2)
-		dy := float64(b.y + b.height/2)
+		x, y := b.position()
+		dx := float64(x + b.width/2)
+		dy := float64(y + b.height/2)
 		if b.hasArrow {
 			dx = float64(b.arrowX)
 			dy = float64(b.arrowY) + balloonArrowHeight
@@ -259,8 +269,9 @@ func (b *balloon) draw(screen *ebiten.Image) error {
 		}
 	}
 	if b.opened {
-		x := (b.x + balloonMarginX + b.contentOffsetX) * scene.TileScale
-		y := (b.y + balloonMarginY) * scene.TileScale
+		x, y := b.position()
+		x = (x + balloonMarginX + b.contentOffsetX) * scene.TileScale
+		y = (y + balloonMarginY) * scene.TileScale
 		if err := font.DrawText(screen, b.content, x, y, scene.TextScale, color.Black); err != nil {
 			return err
 		}
