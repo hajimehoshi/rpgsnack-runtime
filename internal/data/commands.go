@@ -32,7 +32,7 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 		Args     json.RawMessage `json:"args"`
 	}
 	var tmp *tmpCommand
-	if err := json.Unmarshal(data, &tmp); err != nil {
+	if err := unmarshalJSON(data, &tmp); err != nil {
 		return nil
 	}
 	c.Name = tmp.Name
@@ -40,79 +40,79 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 	switch c.Name {
 	case CommandNameIf:
 		var args *CommandArgsIf
-		if err := json.Unmarshal(tmp.Args, &args); err != nil {
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
 			return err
 		}
 		c.Args = args
 	case CommandNameLabel:
 		var args *CommandArgsLabel
-		if err := json.Unmarshal(tmp.Args, &args); err != nil {
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
 			return err
 		}
 		c.Args = args
 	case CommandNameGoto:
 		var args *CommandArgsGoto
-		if err := json.Unmarshal(tmp.Args, &args); err != nil {
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
 			return err
 		}
 		c.Args = args
 	case CommandNameCallEvent:
 		var args *CommandArgsCallEvent
-		if err := json.Unmarshal(tmp.Args, &args); err != nil {
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
 			return err
 		}
 		c.Args = args
 	case CommandNameWait:
 		var args *CommandArgsWait
-		if err := json.Unmarshal(tmp.Args, &args); err != nil {
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
 			return err
 		}
 		c.Args = args
 	case CommandNameShowMessage:
 		var args *CommandArgsShowMessage
-		if err := json.Unmarshal(tmp.Args, &args); err != nil {
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
 			return err
 		}
 		c.Args = args
 	case CommandNameShowChoices:
 		var args *CommandArgsShowChoices
-		if err := json.Unmarshal(tmp.Args, &args); err != nil {
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
 			return err
 		}
 		c.Args = args
 	case CommandNameSetSwitch:
 		var args *CommandArgsSetSwitch
-		if err := json.Unmarshal(tmp.Args, &args); err != nil {
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
 			return err
 		}
 		c.Args = args
 	case CommandNameSetSelfSwitch:
 		var args *CommandArgsSetSelfSwitch
-		if err := json.Unmarshal(tmp.Args, &args); err != nil {
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
 			return err
 		}
 		c.Args = args
 	case CommandNameSetVariable:
 		var args *CommandArgsSetVariable
-		if err := json.Unmarshal(tmp.Args, &args); err != nil {
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
 			return err
 		}
 		c.Args = args
 	case CommandNameTransfer:
 		var args *CommandArgsTransfer
-		if err := json.Unmarshal(tmp.Args, &args); err != nil {
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
 			return err
 		}
 		c.Args = args
 	case CommandNameSetRoute:
 		var args *CommandArgsSetRoute
-		if err := json.Unmarshal(tmp.Args, &args); err != nil {
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
 			return err
 		}
 		c.Args = args
 	case CommandNameTintScreen:
 		var args *CommandArgsTintScreen
-		if err := json.Unmarshal(tmp.Args, &args); err != nil {
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
 			return err
 		}
 		c.Args = args
@@ -125,31 +125,31 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 	case CommandNameGotoTitle:
 	case CommandNameMoveCharacter:
 		var args *CommandArgsMoveCharacter
-		if err := json.Unmarshal(tmp.Args, &args); err != nil {
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
 			return err
 		}
 		c.Args = args
 	case CommandNameTurnCharacter:
 		var args *CommandArgsTurnCharacter
-		if err := json.Unmarshal(tmp.Args, &args); err != nil {
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
 			return err
 		}
 		c.Args = args
 	case CommandNameRotateCharacter:
 		var args *CommandArgsRotateCharacter
-		if err := json.Unmarshal(tmp.Args, &args); err != nil {
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
 			return err
 		}
 		c.Args = args
 	case CommandNameSetCharacterProperty:
 		var args *CommandArgsSetCharacterProperty
-		if err := json.Unmarshal(tmp.Args, &args); err != nil {
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
 			return err
 		}
 		c.Args = args
 	case CommandNameSetCharacterImage:
 		var args *CommandArgsSetCharacterImage
-		if err := json.Unmarshal(tmp.Args, &args); err != nil {
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
 			return err
 		}
 		c.Args = args
@@ -248,7 +248,7 @@ func (c *CommandArgsSetVariable) UnmarshalJSON(data []uint8) error {
 		Value     json.RawMessage      `json:"value"`
 	}
 	var tmp *tmpCommandArgsSetVariable
-	if err := json.Unmarshal(data, &tmp); err != nil {
+	if err := unmarshalJSON(data, &tmp); err != nil {
 		return err
 	}
 	c.ID = tmp.ID
@@ -257,25 +257,25 @@ func (c *CommandArgsSetVariable) UnmarshalJSON(data []uint8) error {
 	switch c.ValueType {
 	case SetVariableValueTypeConstant:
 		v := 0
-		if err := json.Unmarshal(tmp.Value, &v); err != nil {
+		if err := unmarshalJSON(tmp.Value, &v); err != nil {
 			return err
 		}
 		c.Value = v
 	case SetVariableValueTypeVariable:
 		v := 0
-		if err := json.Unmarshal(tmp.Value, &v); err != nil {
+		if err := unmarshalJSON(tmp.Value, &v); err != nil {
 			return err
 		}
 		c.Value = v
 	case SetVariableValueTypeRandom:
 		var v *SetVariableValueRandom
-		if err := json.Unmarshal(tmp.Value, &v); err != nil {
+		if err := unmarshalJSON(tmp.Value, &v); err != nil {
 			return err
 		}
 		c.Value = v
 	case SetVariableValueTypeCharacter:
 		var v *SetVariableCharacterArgs
-		if err := json.Unmarshal(tmp.Value, &v); err != nil {
+		if err := unmarshalJSON(tmp.Value, &v); err != nil {
 			return err
 		}
 		c.Value = v
@@ -332,44 +332,44 @@ func (c *CommandArgsSetCharacterProperty) UnmarshalJSON(data []uint8) error {
 		Value json.RawMessage          `json:"value"`
 	}
 	var tmp *tmpCommandArgsSetCharacterProperty
-	if err := json.Unmarshal(data, &tmp); err != nil {
+	if err := unmarshalJSON(data, &tmp); err != nil {
 		return err
 	}
 	c.Type = tmp.Type
 	switch c.Type {
 	case SetCharacterPropertyTypeVisibility:
 		v := false
-		if err := json.Unmarshal(tmp.Value, &v); err != nil {
+		if err := unmarshalJSON(tmp.Value, &v); err != nil {
 			return err
 		}
 		c.Value = v
 	case SetCharacterPropertyTypeDirFix:
 		v := false
-		if err := json.Unmarshal(tmp.Value, &v); err != nil {
+		if err := unmarshalJSON(tmp.Value, &v); err != nil {
 			return err
 		}
 		c.Value = v
 	case SetCharacterPropertyTypeStepping:
 		v := false
-		if err := json.Unmarshal(tmp.Value, &v); err != nil {
+		if err := unmarshalJSON(tmp.Value, &v); err != nil {
 			return err
 		}
 		c.Value = v
 	case SetCharacterPropertyTypeThrough:
 		v := false
-		if err := json.Unmarshal(tmp.Value, &v); err != nil {
+		if err := unmarshalJSON(tmp.Value, &v); err != nil {
 			return err
 		}
 		c.Value = v
 	case SetCharacterPropertyTypeWalking:
 		v := false
-		if err := json.Unmarshal(tmp.Value, &v); err != nil {
+		if err := unmarshalJSON(tmp.Value, &v); err != nil {
 			return err
 		}
 		c.Value = v
 	case SetCharacterPropertyTypeSpeed:
 		var v Speed
-		if err := json.Unmarshal(tmp.Value, &v); err != nil {
+		if err := unmarshalJSON(tmp.Value, &v); err != nil {
 			return err
 		}
 		c.Value = v

@@ -33,27 +33,32 @@ func max(a, b int) int {
 	return a
 }
 
+func unmarshalJSON(data []uint8, v interface{}) error {
+	if err := json.Unmarshal(data, v); err != nil {
+		switch err := err.(type) {
+		case *json.UnmarshalTypeError:
+			begin := max(int(err.Offset)-20, 0)
+			end := min(int(err.Offset)+40, len(data))
+			part := string(data[begin:end])
+			return fmt.Errorf("data JSON type error: %s:\n%s", err.Error(), part)
+		case *json.SyntaxError:
+			begin := max(int(err.Offset)-20, 0)
+			end := min(int(err.Offset)+40, len(data))
+			part := string(data[begin:end])
+			return fmt.Errorf("data: JSON syntax error: %s:\n%s", err.Error(), part)
+		}
+		return err
+	}
+	return nil
+}
+
 func Load() error {
 	dataJson, err := loadJSON()
 	if err != nil {
 		return err
 	}
 	var gameData *Game
-	if err := json.Unmarshal(dataJson, &gameData); err != nil {
-		switch err := err.(type) {
-		case *json.UnmarshalTypeError:
-			// TODO: Offset indicates a position of a part which was parsed.
-			// Using offset with dataJson doesn't make sense.
-			begin := max(int(err.Offset)-20, 0)
-			end := min(int(err.Offset)+40, len(dataJson))
-			part := string(dataJson[begin:end])
-			return fmt.Errorf("data JSON type error: %s:\n%s", err.Error(), part)
-		case *json.SyntaxError:
-			begin := max(int(err.Offset)-20, 0)
-			end := min(int(err.Offset)+40, len(dataJson))
-			part := string(dataJson[begin:end])
-			return fmt.Errorf("data: JSON syntax error: %s:\n%s", err.Error(), part)
-		}
+	if err := unmarshalJSON(dataJson, &gameData); err != nil {
 		return err
 	}
 	current = gameData

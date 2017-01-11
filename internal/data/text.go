@@ -15,8 +15,6 @@
 package data
 
 import (
-	"encoding/json"
-
 	"golang.org/x/text/language"
 )
 
@@ -26,7 +24,7 @@ type Texts struct {
 
 func (t *Texts) UnmarshalJSON(data []uint8) error {
 	orig := map[string]map[UUID]string{}
-	if err := json.Unmarshal(data, &orig); err != nil {
+	if err := unmarshalJSON(data, &orig); err != nil {
 		return err
 	}
 	t.data = map[language.Tag]map[UUID]string{}

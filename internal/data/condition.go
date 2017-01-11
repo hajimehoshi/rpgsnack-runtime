@@ -14,10 +14,6 @@
 
 package data
 
-import (
-	"encoding/json"
-)
-
 type Condition struct {
 	Type      ConditionType
 	ID        int
@@ -35,7 +31,7 @@ func (c *Condition) UnmarshalJSON(data []uint8) error {
 		Value     interface{}        `json:"value"`
 	}
 	var tmp *tmpCondition
-	if err := json.Unmarshal(data, &tmp); err != nil {
+	if err := unmarshalJSON(data, &tmp); err != nil {
 		return err
 	}
 	c.Type = tmp.Type
