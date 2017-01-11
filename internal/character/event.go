@@ -24,7 +24,6 @@ type Event struct {
 	data             *data.Event
 	character        *character
 	currentPageIndex int
-	steppingCount    int
 }
 
 func NewEvent(eventData *data.Event) (*Event, error) {
@@ -109,7 +108,6 @@ func (e *Event) UpdateCharacterIfNeeded(index int) (bool, error) {
 		return false, nil
 	}
 	e.currentPageIndex = index
-	e.steppingCount = 0
 	if index == -1 {
 		c := e.character
 		c.imageName = ""
