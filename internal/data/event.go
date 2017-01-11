@@ -29,7 +29,7 @@ type Page struct {
 	Conditions []*Condition         `json:"conditions"`
 	Image      string               `json:"image"`
 	ImageIndex int                  `json:"imageIndex"`
-	Attitude   Attitude             `json:"attitude"`
+	Frame      int                  `json:"frame"`
 	Dir        Dir                  `json:"dir"`
 	DirFix     bool                 `json:"dirFix"`
 	Walking    bool                 `json:"walking"`
@@ -48,14 +48,6 @@ const (
 	DirRight
 	DirDown
 	DirLeft
-)
-
-type Attitude int
-
-const (
-	AttitudeLeft Attitude = iota
-	AttitudeMiddle
-	AttitudeRight
 )
 
 type Priority int

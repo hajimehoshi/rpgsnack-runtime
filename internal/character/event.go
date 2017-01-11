@@ -112,7 +112,7 @@ func (e *Event) UpdateCharacterIfNeeded(index int) (bool, error) {
 		c.imageIndex = 0
 		c.dirFix = false
 		c.dir = data.Dir(0)
-		c.attitude = data.AttitudeMiddle
+		c.frame = 1
 		c.stepping = false
 		return true, nil
 	}
@@ -122,8 +122,7 @@ func (e *Event) UpdateCharacterIfNeeded(index int) (bool, error) {
 	c.imageIndex = page.ImageIndex
 	c.dirFix = page.DirFix
 	c.dir = page.Dir
-	// page.Attitude is ignored so far.
-	c.attitude = data.AttitudeMiddle
+	c.frame = page.Frame
 	c.stepping = page.Stepping
 	return true, nil
 }

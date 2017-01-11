@@ -26,15 +26,15 @@ type Player struct {
 
 func NewPlayer(x, y int) (*Player, error) {
 	c := &character{
-		speed:        data.Speed3,
-		imageName:    "characters0.png",
-		imageIndex:   0,
-		x:            x,
-		y:            y,
-		dir:          data.DirDown,
-		dirFix:       false,
-		attitude:     data.AttitudeMiddle,
-		prevAttitude: data.AttitudeMiddle,
+		speed:      data.Speed3,
+		imageName:  "characters0.png",
+		imageIndex: 0,
+		x:          x,
+		y:          y,
+		dir:        data.DirDown,
+		dirFix:     false,
+		frame:      1,
+		prevFrame:  1,
 	}
 	return &Player{
 		character: c,

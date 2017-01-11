@@ -42,6 +42,8 @@ func Load() error {
 	if err := json.Unmarshal(dataJson, &gameData); err != nil {
 		switch err := err.(type) {
 		case *json.UnmarshalTypeError:
+			// TODO: Offset indicates a position of a part which was parsed.
+			// Using offset with dataJson doesn't make sense.
 			begin := max(int(err.Offset)-20, 0)
 			end := min(int(err.Offset)+40, len(dataJson))
 			part := string(dataJson[begin:end])

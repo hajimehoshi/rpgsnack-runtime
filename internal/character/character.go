@@ -30,8 +30,8 @@ type character struct {
 	dirFix        bool
 	stepping      bool
 	steppingCount int
-	attitude      data.Attitude
-	prevAttitude  data.Attitude
+	frame         int
+	prevFrame     int
 	x             int
 	y             int
 	moveCount     int
@@ -79,8 +79,8 @@ type characterImageParts struct {
 	charWidth  int
 	charHeight int
 	index      int
+	frame      int
 	dir        data.Dir
-	attitude   data.Attitude
 }
 
 func (c *characterImageParts) Len() int {
@@ -90,12 +90,14 @@ func (c *characterImageParts) Len() int {
 func (c *characterImageParts) Src(index int) (int, int, int, int) {
 	x := ((c.index % 4) * 3) * c.charWidth
 	y := (c.index / 4) * 2 * c.charHeight
-	switch c.attitude {
-	case data.AttitudeLeft:
-	case data.AttitudeMiddle:
+	switch c.frame {
+	case 0:
+	case 1:
 		x += c.charWidth
-	case data.AttitudeRight:
+	case 2:
 		x += 2 * c.charWidth
+	default:
+		panic("not reach")
 	}
 	switch c.dir {
 	case data.DirUp:
@@ -105,6 +107,8 @@ func (c *characterImageParts) Src(index int) (int, int, int, int) {
 		y += 2 * c.charHeight
 	case data.DirLeft:
 		y += 3 * c.charHeight
+	default:
+		panic("not reach")
 	}
 	return x, y, x + c.charWidth, y + c.charHeight
 }
@@ -123,13 +127,13 @@ func (c *character) update() error {
 	if c.stepping {
 		switch {
 		case c.steppingCount < 15:
-			c.attitude = data.AttitudeMiddle
+			c.frame = 1
 		case c.steppingCount < 30:
-			c.attitude = data.AttitudeLeft
+			c.frame = 0
 		case c.steppingCount < 45:
-			c.attitude = data.AttitudeMiddle
+			c.frame = 1
 		default:
-			c.attitude = data.AttitudeRight
+			c.frame = 2
 		}
 		c.steppingCount++
 		c.steppingCount %= 60
@@ -139,11 +143,11 @@ func (c *character) update() error {
 	}
 	if !c.stepping {
 		if c.moveCount >= c.speed.Frames()/2 {
-			c.attitude = data.AttitudeMiddle
-		} else if c.prevAttitude == data.AttitudeLeft {
-			c.attitude = data.AttitudeRight
+			c.frame = 1
+		} else if c.prevFrame == 0 {
+			c.frame = 2
 		} else {
-			c.attitude = data.AttitudeLeft
+			c.frame = 0
 		}
 	}
 	c.moveCount--
@@ -162,8 +166,8 @@ func (c *character) update() error {
 		c.x = nx
 		c.y = ny
 		if !c.stepping {
-			c.prevAttitude = c.attitude
-			c.attitude = data.AttitudeMiddle
+			c.prevFrame = c.frame
+			c.frame = 1
 		}
 	}
 	return nil
@@ -208,7 +212,7 @@ func (c *character) draw(screen *ebiten.Image) error {
 		charHeight: charH,
 		index:      c.imageIndex,
 		dir:        c.dir,
-		attitude:   c.attitude,
+		frame:      c.frame,
 	}
 	if err := screen.DrawImage(assets.GetImage(c.imageName), op); err != nil {
 		return err
