@@ -17,6 +17,7 @@ package data
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 )
 
 type Command struct {
@@ -117,11 +118,11 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 		}
 		c.Args = args
 	case CommandNamePlaySE:
-		return fmt.Errorf("data: not implemented yet: %s", c.Name)
+		log.Printf("not implemented command: %s", c.Name)
 	case CommandNamePlayBGM:
-		return fmt.Errorf("data: not implemented yet: %s", c.Name)
+		log.Printf("not implemented command: %s", c.Name)
 	case CommandNameStopBGM:
-		return fmt.Errorf("data: not implemented yet: %s", c.Name)
+		log.Printf("not implemented command: %s", c.Name)
 	case CommandNameGotoTitle:
 	case CommandNameMoveCharacter:
 		var args *CommandArgsMoveCharacter
