@@ -102,7 +102,7 @@ func newBalloonWithArrow(arrowX, arrowY int, content string, interpreterID int) 
 		content:       content,
 		hasArrow:      true,
 		arrowX:        arrowX,
-		arrowY:        arrowY - balloonArrowHeight,
+		arrowY:        arrowY,
 	}
 	w, h, contentOffsetX := balloonSizeFromContent(content)
 	b.width = w
@@ -189,7 +189,7 @@ func (b *balloonImageParts) Dst(index int) (int, int, int, int) {
 			return 0, 0, 0, 0
 		}
 		x := b.balloon.arrowX
-		y := b.balloon.arrowY
+		y := b.balloon.arrowY - balloonArrowHeight
 		if b.balloon.arrowFlip {
 			// TODO: 4 is an arbitrary number. Define a const.
 			x -= 4
