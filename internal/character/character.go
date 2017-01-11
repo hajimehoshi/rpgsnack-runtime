@@ -23,6 +23,7 @@ import (
 )
 
 type character struct {
+	id            int
 	speed         data.Speed
 	imageName     string
 	imageIndex    int

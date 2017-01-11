@@ -28,6 +28,7 @@ type Event struct {
 
 func NewEvent(eventData *data.Event) (*Event, error) {
 	c := &character{
+		id:    eventData.ID,
 		speed: data.Speed3,
 		x:     eventData.X,
 		y:     eventData.Y,
@@ -41,7 +42,7 @@ func NewEvent(eventData *data.Event) (*Event, error) {
 }
 
 func (e *Event) ID() int {
-	return e.data.ID
+	return e.character.id
 }
 
 func (e *Event) Size() (int, int) {
