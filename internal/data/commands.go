@@ -147,6 +147,12 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 			return err
 		}
 		c.Args = args
+	case CommandNameSetCharacterImage:
+		var args *CommandArgsSetCharacterImage
+		if err := json.Unmarshal(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	case CommandNameSetInnerVariable:
 		fallthrough
 	default:
@@ -181,6 +187,7 @@ const (
 	CommandNameTurnCharacter        CommandName = "turn_character"
 	CommandNameRotateCharacter      CommandName = "rotate_character"
 	CommandNameSetCharacterProperty CommandName = "set_character_property"
+	CommandNameSetCharacterImage    CommandName = "set_character_image"
 
 	// Special commands
 	CommandNameSetInnerVariable CommandName = "set_inner_variable"
@@ -372,14 +379,12 @@ func (c *CommandArgsSetCharacterProperty) UnmarshalJSON(data []uint8) error {
 	return nil
 }
 
-/*
-move_character: dir: (int), distance: (int)
-turn_character: dir: (int)
-rotate_character: angle: (number: 90/180/270)
-set_character_property: type:(string:"visibility"/"dir_fix"/"stepping"/"through"/"walking"/"speed") value: (bool or int)
-set_character_image: image: (string), imageIndex: (int)
-play_se: // tbd
-*/
+type CommandArgsSetCharacterImage struct {
+	Image      int `json:"image"`
+	ImageIndex int `json:"imageIndex"`
+	Frame      int `json:"frame"`
+	Dir        Dir `json:"dir"`
+}
 
 type CommandArgsSetInnerVariable struct {
 	Name  string `json:name`
