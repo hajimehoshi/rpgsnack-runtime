@@ -28,10 +28,11 @@ type Event struct {
 
 func NewEvent(eventData *data.Event) (*Event, error) {
 	c := &character{
-		id:    eventData.ID,
-		speed: data.Speed3,
-		x:     eventData.X,
-		y:     eventData.Y,
+		id:      eventData.ID,
+		speed:   data.Speed3,
+		x:       eventData.X,
+		y:       eventData.Y,
+		visible: true,
 	}
 	e := &Event{
 		data:             eventData,
@@ -147,7 +148,6 @@ func (e *Event) UpdateCharacterIfNeeded(index int) (bool, error) {
 	}
 	page := e.data.Pages[index]
 	c := e.character
-	c.visible = true
 	c.imageName = page.Image
 	c.imageIndex = page.ImageIndex
 	c.dirFix = page.DirFix
