@@ -113,7 +113,7 @@ func (m *Map) meetsPageCondition(page *data.Page, eventID int) (bool, error) {
 	return true, nil
 }
 
-func (m *Map) pageIndex(eventID int) (int, error) {
+func (m *Map) calcPageIndex(eventID int) (int, error) {
 	var event *data.Event
 	for _, e := range m.CurrentRoom().Events {
 		if e.ID == eventID {
@@ -175,7 +175,7 @@ func (m *Map) Update() error {
 		return nil
 	}
 	for _, e := range m.events {
-		index, err := m.pageIndex(e.ID())
+		index, err := m.calcPageIndex(e.ID())
 		if err != nil {
 			return err
 		}
