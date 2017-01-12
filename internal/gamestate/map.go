@@ -517,12 +517,7 @@ func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
 	return true, nil
 }
 
-type positionDrawer interface {
-	Position() (int, int)
-	Draw(screen *ebiten.Image) error
-}
-
-type charactersByY []positionDrawer
+type charactersByY []*character.Character
 
 func (c charactersByY) Len() int { return len(c) }
 func (c charactersByY) Less(i, j int) bool {
@@ -533,7 +528,7 @@ func (c charactersByY) Less(i, j int) bool {
 func (c charactersByY) Swap(i, j int) { c[i], c[j] = c[j], c[i] }
 
 func (m *Map) DrawCharacters(screen *ebiten.Image) error {
-	chars := []positionDrawer{m.player}
+	chars := []*character.Character{m.player}
 	for _, e := range m.events {
 		chars = append(chars, e)
 	}

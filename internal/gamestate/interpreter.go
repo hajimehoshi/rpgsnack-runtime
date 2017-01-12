@@ -24,22 +24,6 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 )
 
-type char interface {
-	Size() (int, int)
-	Position() (int, int)
-	DrawPosition() (int, int)
-	Dir() data.Dir
-	IsMoving() bool
-	Move(dir data.Dir)
-	Turn(dir data.Dir)
-	SetSpeed(speed data.Speed)
-	SetVisibility(visible bool)
-	SetDirFix(dirFix bool)
-	SetStepping(stepping bool)
-	SetWalking(walking bool)
-	SetImage(imageName string, imageIndex int, frame int, dir data.Dir, useFrameAndDir bool)
-}
-
 type Interpreter struct {
 	id              int
 	gameState       *Game
@@ -89,7 +73,7 @@ func (i *Interpreter) IsExecuting() bool {
 	return i.commandIterator != nil
 }
 
-func (i *Interpreter) character(id int) char {
+func (i *Interpreter) character(id int) *character.Character {
 	if id == -1 {
 		return i.gameState.Map().player
 	}
