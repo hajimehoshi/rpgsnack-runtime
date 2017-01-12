@@ -67,7 +67,7 @@ func NewInterpreter(gameState *Game, mapID, roomID, eventID int, commands []*dat
 	}
 }
 
-func (i *Interpreter) event() *character.Event {
+func (i *Interpreter) event() *character.Character {
 	if i.eventID == -1 {
 		return nil
 	}

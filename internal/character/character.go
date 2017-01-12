@@ -43,6 +43,7 @@ type Character struct {
 
 func NewPlayer(x, y int) *Character {
 	return &Character{
+		id:         -1,
 		speed:      data.Speed3,
 		imageName:  "characters0.png",
 		imageIndex: 0,
@@ -54,6 +55,20 @@ func NewPlayer(x, y int) *Character {
 		frame:      1,
 		prevFrame:  1,
 	}
+}
+
+func NewEvent(id int, x, y int) *Character {
+	return &Character{
+		id:      id,
+		speed:   data.Speed3,
+		x:       x,
+		y:       y,
+		visible: true,
+	}
+}
+
+func (c *Character) ID() int {
+	return c.id
 }
 
 func (c *Character) Size() (int, int) {
@@ -210,6 +225,25 @@ func (c *Character) TransferImmediately(x, y int) {
 	c.x = x
 	c.y = y
 	c.moveCount = 0
+}
+
+func (c *Character) UpdateWithPage(page *data.Page) error {
+	if page == nil {
+		c.imageName = ""
+		c.imageIndex = 0
+		c.dirFix = false
+		c.dir = data.Dir(0)
+		c.frame = 1
+		c.stepping = false
+		return nil
+	}
+	c.imageName = page.Image
+	c.imageIndex = page.ImageIndex
+	c.dirFix = page.DirFix
+	c.dir = page.Dir
+	c.frame = page.Frame
+	c.stepping = page.Stepping
+	return nil
 }
 
 func (c *Character) Update() error {

@@ -31,9 +31,9 @@ type Map struct {
 	player                      *character.Character
 	mapID                       int
 	roomID                      int
-	events                      []*character.Event
-	eventPageIndices            map[*character.Event]int
-	eventData                   map[*character.Event]*data.Event
+	events                      []*character.Character
+	eventPageIndices            map[*character.Character]int
+	eventData                   map[*character.Character]*data.Event
 	executingEventIDByUserInput int
 	interpreters                map[int]*Interpreter
 	playerInterpreterID         int
@@ -73,13 +73,10 @@ func (m *Map) TileSet() (*data.TileSet, error) {
 func (m *Map) setRoomID(id int, interpreter *Interpreter) error {
 	m.roomID = id
 	m.events = nil
-	m.eventPageIndices = map[*character.Event]int{}
-	m.eventData = map[*character.Event]*data.Event{}
+	m.eventPageIndices = map[*character.Character]int{}
+	m.eventData = map[*character.Character]*data.Event{}
 	for _, e := range m.CurrentRoom().Events {
-		event, err := character.NewEvent(e.ID, e.X, e.Y)
-		if err != nil {
-			return err
-		}
+		event := character.NewEvent(e.ID, e.X, e.Y)
 		m.events = append(m.events, event)
 		m.eventPageIndices[event] = -1
 		m.eventData[event] = e
@@ -140,7 +137,7 @@ func (m *Map) calcPageIndex(eventID int) (int, error) {
 	return -1, nil
 }
 
-func (m *Map) currentPage(event *character.Event) *data.Page {
+func (m *Map) currentPage(event *character.Character) *data.Page {
 	i := m.eventPageIndices[event]
 	if i == -1 {
 		return nil
@@ -196,7 +193,7 @@ func (m *Map) Update() error {
 		}
 		m.eventPageIndices[e] = index
 		page := m.currentPage(e)
-		if err := e.UpdateCharacterIfNeeded(page); err != nil {
+		if err := e.UpdateWithPage(page); err != nil {
 			return err
 		}
 		if page == nil {
@@ -240,7 +237,7 @@ func (m *Map) Update() error {
 	return nil
 }
 
-func (m *Map) eventAt(x, y int) *character.Event {
+func (m *Map) eventAt(x, y int) *character.Character {
 	for _, e := range m.events {
 		ex, ey := e.Position()
 		if ex == x && ey == y {
