@@ -21,9 +21,8 @@ import (
 )
 
 type Event struct {
-	data             *data.Event
-	character        *character
-	currentPageIndex int
+	data      *data.Event
+	character *character
 }
 
 func NewEvent(eventData *data.Event) (*Event, error) {
@@ -35,11 +34,14 @@ func NewEvent(eventData *data.Event) (*Event, error) {
 		visible: true,
 	}
 	e := &Event{
-		data:             eventData,
-		character:        c,
-		currentPageIndex: -1,
+		data:      eventData,
+		character: c,
 	}
 	return e, nil
+}
+
+func (e *Event) Data() *data.Event {
+	return e.data
 }
 
 func (e *Event) ID() int {
@@ -104,38 +106,7 @@ func (e *Event) SetImage(imageName string, imageIndex int, frame int, dir data.D
 	}
 }
 
-func (e *Event) CurrentPage() *data.Page {
-	if e.currentPageIndex == -1 {
-		return nil
-	}
-	return e.data.Pages[e.currentPageIndex]
-}
-
-func (e *Event) CurrentPageIndex() int {
-	return e.currentPageIndex
-}
-
-func (e *Event) IsPassable() bool {
-	page := e.CurrentPage()
-	if page == nil {
-		return true
-	}
-	return page.Priority != data.PrioritySameAsCharacters
-}
-
-func (e *Event) IsRunnable() bool {
-	page := e.CurrentPage()
-	if page == nil {
-		return true
-	}
-	return len(page.Commands) > 0
-}
-
-func (e *Event) UpdateCharacterIfNeeded(index int) (bool, error) {
-	if e.currentPageIndex == index {
-		return false, nil
-	}
-	e.currentPageIndex = index
+func (e *Event) UpdateCharacterIfNeeded(index int) error {
 	if index == -1 {
 		c := e.character
 		c.imageName = ""
@@ -144,7 +115,7 @@ func (e *Event) UpdateCharacterIfNeeded(index int) (bool, error) {
 		c.dir = data.Dir(0)
 		c.frame = 1
 		c.stepping = false
-		return true, nil
+		return nil
 	}
 	page := e.data.Pages[index]
 	c := e.character
@@ -154,14 +125,10 @@ func (e *Event) UpdateCharacterIfNeeded(index int) (bool, error) {
 	c.dir = page.Dir
 	c.frame = page.Frame
 	c.stepping = page.Stepping
-	return true, nil
+	return nil
 }
 
 func (e *Event) Update() error {
-	page := e.CurrentPage()
-	if page == nil {
-		return nil
-	}
 	if err := e.character.update(); err != nil {
 		return err
 	}

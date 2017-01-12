@@ -32,6 +32,7 @@ type Map struct {
 	mapID                       int
 	roomID                      int
 	events                      []*character.Event
+	eventPageIndices            map[*character.Event]int
 	executingEventIDByUserInput int
 	interpreters                map[int]*Interpreter
 	playerInterpreterID         int
@@ -74,12 +75,14 @@ func (m *Map) TileSet() (*data.TileSet, error) {
 func (m *Map) setRoomID(id int, interpreter *Interpreter) error {
 	m.roomID = id
 	m.events = nil
+	m.eventPageIndices = map[*character.Event]int{}
 	for _, e := range m.CurrentRoom().Events {
 		event, err := character.NewEvent(e)
 		if err != nil {
 			return err
 		}
 		m.events = append(m.events, event)
+		m.eventPageIndices[event] = -1
 	}
 	m.interpreters = map[int]*Interpreter{}
 	if interpreter != nil {
@@ -137,6 +140,14 @@ func (m *Map) calcPageIndex(eventID int) (int, error) {
 	return -1, nil
 }
 
+func (m *Map) currentPage(event *character.Event) *data.Page {
+	i := m.eventPageIndices[event]
+	if i == -1 {
+		return nil
+	}
+	return event.Data().Pages[i]
+}
+
 type interpretersByID []*Interpreter
 
 func (i interpretersByID) Len() int           { return len(i) }
@@ -179,17 +190,19 @@ func (m *Map) Update() error {
 		if err != nil {
 			return err
 		}
-		result, err := e.UpdateCharacterIfNeeded(index)
-		if err != nil {
+		p := m.eventPageIndices[e]
+		if p == index {
+			continue
+		}
+		m.eventPageIndices[e] = index
+		if err := e.UpdateCharacterIfNeeded(index); err != nil {
 			return err
 		}
-		if !result {
+		page := m.currentPage(e)
+		if page == nil {
 			continue
 		}
-		if e.CurrentPage() == nil {
-			continue
-		}
-		route := e.CurrentPage().Route
+		route := page.Route
 		if route == nil {
 			ids := []int{}
 			for id, i := range m.interpreters {
@@ -242,7 +255,7 @@ func (m *Map) tryRunAutoEvent() {
 		return
 	}
 	for _, e := range m.events {
-		page := e.CurrentPage()
+		page := m.currentPage(e)
 		if page == nil {
 			continue
 		}
@@ -328,8 +341,10 @@ func (m *Map) passable(x, y int) (bool, error) {
 		return false, nil
 	}
 	e := m.eventAt(x, y)
-	if e != nil && !e.IsPassable() {
-		return false, nil
+	if e != nil {
+		if page := m.currentPage(e); page != nil && page.Priority == data.PrioritySameAsCharacters {
+			return false, nil
+		}
 	}
 	px, py := m.player.Position()
 	if x == px && y == py {
@@ -351,11 +366,13 @@ func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
 		if event == nil {
 			return false, nil
 		}
-		if !event.IsRunnable() {
-			return false, nil
-		}
-		if event.CurrentPage().Trigger != data.TriggerPlayer {
-			return false, nil
+		if page := m.currentPage(event); page != nil {
+			if len(page.Commands) == 0 {
+				return false, nil
+			}
+			if page.Trigger != data.TriggerPlayer {
+				return false, nil
+			}
 		}
 	}
 	px, py := m.player.Position()
@@ -428,68 +445,71 @@ func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
 			},
 		},
 	}
-	if event != nil && event.CurrentPage() != nil && event.CurrentPage().Trigger == data.TriggerPlayer {
-		origDir := event.Dir()
-		var dir data.Dir
-		ex, ey := event.Position()
-		px, py := lastPlayerX, lastPlayerY
-		switch {
-		case ex == px && ey == py:
-			// The player and the event are at the same position.
-			dir = event.Dir()
-		case ex > px && ey == py:
-			dir = data.DirLeft
-		case ex < px && ey == py:
-			dir = data.DirRight
-		case ex == px && ey > py:
-			dir = data.DirUp
-		case ex == px && ey < py:
-			dir = data.DirDown
-		default:
-			panic("not reach")
+	if event != nil {
+		page := m.currentPage(event)
+		if page != nil && page.Trigger == data.TriggerPlayer {
+			origDir := event.Dir()
+			var dir data.Dir
+			ex, ey := event.Position()
+			px, py := lastPlayerX, lastPlayerY
+			switch {
+			case ex == px && ey == py:
+				// The player and the event are at the same position.
+				dir = event.Dir()
+			case ex > px && ey == py:
+				dir = data.DirLeft
+			case ex < px && ey == py:
+				dir = data.DirRight
+			case ex == px && ey > py:
+				dir = data.DirUp
+			case ex == px && ey < py:
+				dir = data.DirDown
+			default:
+				panic("not reach")
+			}
+			commands = append(commands,
+				&data.Command{
+					Name: data.CommandNameSetRoute,
+					Args: &data.CommandArgsSetRoute{
+						EventID: event.ID(),
+						Repeat:  false,
+						Skip:    false,
+						Wait:    true,
+						Commands: []*data.Command{
+							{
+								Name: data.CommandNameTurnCharacter,
+								Args: &data.CommandArgsTurnCharacter{
+									Dir: dir,
+								},
+							},
+						},
+					},
+				},
+				&data.Command{
+					Name: data.CommandNameCallEvent,
+					Args: &data.CommandArgsCallEvent{
+						EventID:   event.ID(),
+						PageIndex: m.eventPageIndices[event],
+					},
+				},
+				&data.Command{
+					Name: data.CommandNameSetRoute,
+					Args: &data.CommandArgsSetRoute{
+						EventID: event.ID(),
+						Repeat:  false,
+						Skip:    false,
+						Wait:    true,
+						Commands: []*data.Command{
+							{
+								Name: data.CommandNameTurnCharacter,
+								Args: &data.CommandArgsTurnCharacter{
+									Dir: origDir,
+								},
+							},
+						},
+					},
+				})
 		}
-		commands = append(commands,
-			&data.Command{
-				Name: data.CommandNameSetRoute,
-				Args: &data.CommandArgsSetRoute{
-					EventID: event.ID(),
-					Repeat:  false,
-					Skip:    false,
-					Wait:    true,
-					Commands: []*data.Command{
-						{
-							Name: data.CommandNameTurnCharacter,
-							Args: &data.CommandArgsTurnCharacter{
-								Dir: dir,
-							},
-						},
-					},
-				},
-			},
-			&data.Command{
-				Name: data.CommandNameCallEvent,
-				Args: &data.CommandArgsCallEvent{
-					EventID:   event.ID(),
-					PageIndex: event.CurrentPageIndex(),
-				},
-			},
-			&data.Command{
-				Name: data.CommandNameSetRoute,
-				Args: &data.CommandArgsSetRoute{
-					EventID: event.ID(),
-					Repeat:  false,
-					Skip:    false,
-					Wait:    true,
-					Commands: []*data.Command{
-						{
-							Name: data.CommandNameTurnCharacter,
-							Args: &data.CommandArgsTurnCharacter{
-								Dir: origDir,
-							},
-						},
-					},
-				},
-			})
 	}
 	i := NewInterpreter(m.game, m.mapID, m.roomID, -1, commands)
 	m.addInterpreter(i)
