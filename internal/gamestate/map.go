@@ -338,7 +338,7 @@ func (m *Map) passable(x, y int) (bool, error) {
 		return false, nil
 	}
 	e := m.eventAt(x, y)
-	if e != nil {
+	if e != nil && !e.Through() {
 		if page := m.currentPage(e); page != nil && page.Priority == data.PrioritySameAsCharacters {
 			return false, nil
 		}

@@ -429,7 +429,7 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 		case data.SetCharacterPropertyTypeStepping:
 			ch.SetStepping(args.Value.(bool))
 		case data.SetCharacterPropertyTypeThrough:
-			return false, fmt.Errorf("not implemented set_character_property type: %s", args.Type)
+			ch.SetThrough(args.Value.(bool))
 		case data.SetCharacterPropertyTypeWalking:
 			ch.SetWalking(args.Value.(bool))
 		case data.SetCharacterPropertyTypeSpeed:

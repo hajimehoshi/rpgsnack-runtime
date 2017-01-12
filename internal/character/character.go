@@ -39,6 +39,7 @@ type Character struct {
 	moveCount     int
 	moveDir       data.Dir
 	visible       bool
+	through       bool
 }
 
 func NewPlayer(x, y int) *Character {
@@ -149,6 +150,10 @@ func (c *Character) Speed() data.Speed {
 	return c.speed
 }
 
+func (c *Character) Through() bool {
+	return c.through
+}
+
 func (c *Character) SetSpeed(speed data.Speed) {
 	c.speed = speed
 }
@@ -167,6 +172,10 @@ func (c *Character) SetStepping(stepping bool) {
 
 func (c *Character) SetWalking(walking bool) {
 	c.walking = walking
+}
+
+func (c *Character) SetThrough(through bool) {
+	c.through = through
 }
 
 func (c *Character) SetImage(imageName string, imageIndex int) {
@@ -247,6 +256,7 @@ func (c *Character) UpdateWithPage(page *data.Page) error {
 	c.dir = page.Dir
 	c.frame = page.Frame
 	c.stepping = page.Stepping
+	c.through = page.Through
 	return nil
 }
 
