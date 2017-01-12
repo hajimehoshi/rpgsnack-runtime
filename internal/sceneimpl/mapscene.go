@@ -125,7 +125,9 @@ func (t *tilesImageParts) Dst(index int) (int, int, int, int) {
 }
 
 func (m *MapScene) Draw(screen *ebiten.Image) error {
-	m.tilesImage.Clear()
+	if err := m.tilesImage.Fill(color.Black); err != nil {
+		return err
+	}
 	tileset, err := m.gameState.Map().TileSet()
 	if err != nil {
 		return err
