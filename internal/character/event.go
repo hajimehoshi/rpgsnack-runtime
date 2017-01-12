@@ -21,27 +21,21 @@ import (
 )
 
 type Event struct {
-	data      *data.Event
 	character *character
 }
 
-func NewEvent(eventData *data.Event) (*Event, error) {
+func NewEvent(id int, x, y int) (*Event, error) {
 	c := &character{
-		id:      eventData.ID,
+		id:      id,
 		speed:   data.Speed3,
-		x:       eventData.X,
-		y:       eventData.Y,
+		x:       x,
+		y:       y,
 		visible: true,
 	}
 	e := &Event{
-		data:      eventData,
 		character: c,
 	}
 	return e, nil
-}
-
-func (e *Event) Data() *data.Event {
-	return e.data
 }
 
 func (e *Event) ID() int {
@@ -106,8 +100,8 @@ func (e *Event) SetImage(imageName string, imageIndex int, frame int, dir data.D
 	}
 }
 
-func (e *Event) UpdateCharacterIfNeeded(index int) error {
-	if index == -1 {
+func (e *Event) UpdateCharacterIfNeeded(page *data.Page) error {
+	if page == nil {
 		c := e.character
 		c.imageName = ""
 		c.imageIndex = 0
@@ -117,7 +111,6 @@ func (e *Event) UpdateCharacterIfNeeded(index int) error {
 		c.stepping = false
 		return nil
 	}
-	page := e.data.Pages[index]
 	c := e.character
 	c.imageName = page.Image
 	c.imageIndex = page.ImageIndex

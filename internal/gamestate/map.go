@@ -33,6 +33,7 @@ type Map struct {
 	roomID                      int
 	events                      []*character.Event
 	eventPageIndices            map[*character.Event]int
+	eventData                   map[*character.Event]*data.Event
 	executingEventIDByUserInput int
 	interpreters                map[int]*Interpreter
 	playerInterpreterID         int
@@ -76,13 +77,15 @@ func (m *Map) setRoomID(id int, interpreter *Interpreter) error {
 	m.roomID = id
 	m.events = nil
 	m.eventPageIndices = map[*character.Event]int{}
+	m.eventData = map[*character.Event]*data.Event{}
 	for _, e := range m.CurrentRoom().Events {
-		event, err := character.NewEvent(e)
+		event, err := character.NewEvent(e.ID, e.X, e.Y)
 		if err != nil {
 			return err
 		}
 		m.events = append(m.events, event)
 		m.eventPageIndices[event] = -1
+		m.eventData[event] = e
 	}
 	m.interpreters = map[int]*Interpreter{}
 	if interpreter != nil {
@@ -145,7 +148,7 @@ func (m *Map) currentPage(event *character.Event) *data.Page {
 	if i == -1 {
 		return nil
 	}
-	return event.Data().Pages[i]
+	return m.eventData[event].Pages[i]
 }
 
 type interpretersByID []*Interpreter
@@ -195,10 +198,10 @@ func (m *Map) Update() error {
 			continue
 		}
 		m.eventPageIndices[e] = index
-		if err := e.UpdateCharacterIfNeeded(index); err != nil {
+		page := m.currentPage(e)
+		if err := e.UpdateCharacterIfNeeded(page); err != nil {
 			return err
 		}
-		page := m.currentPage(e)
 		if page == nil {
 			continue
 		}
