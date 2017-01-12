@@ -33,6 +33,11 @@ type char interface {
 	Move(dir data.Dir)
 	Turn(dir data.Dir)
 	SetSpeed(speed data.Speed)
+	SetVisibility(visible bool)
+	SetDirFix(dirFix bool)
+	SetStepping(stepping bool)
+	SetWalking(walking bool)
+	SetImage(imageName string, imageIndex int, frame int, dir data.Dir, useFrameAndDir bool)
 }
 
 type Interpreter struct {
@@ -433,21 +438,31 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 		}
 		switch args.Type {
 		case data.SetCharacterPropertyTypeVisibility:
-			return false, fmt.Errorf("not implemented set_character_property type: %s", args.Type)
+			ch.SetVisibility(args.Value.(bool))
 		case data.SetCharacterPropertyTypeDirFix:
-			return false, fmt.Errorf("not implemented set_character_property type: %s", args.Type)
+			ch.SetDirFix(args.Value.(bool))
 		case data.SetCharacterPropertyTypeStepping:
-			return false, fmt.Errorf("not implemented set_character_property type: %s", args.Type)
+			ch.SetStepping(args.Value.(bool))
 		case data.SetCharacterPropertyTypeThrough:
 			return false, fmt.Errorf("not implemented set_character_property type: %s", args.Type)
 		case data.SetCharacterPropertyTypeWalking:
-			return false, fmt.Errorf("not implemented set_character_property type: %s", args.Type)
+			ch.SetWalking(args.Value.(bool))
 		case data.SetCharacterPropertyTypeSpeed:
 			ch.SetSpeed(args.Value.(data.Speed))
 		default:
 			return false, fmt.Errorf("invaid set_character_property type: %s", args.Type)
 		}
 		i.commandIterator.Advance()
+	case data.CommandNameSetCharacterImage:
+		args := c.Args.(*data.CommandArgsSetCharacterImage)
+		ch := i.character(i.eventID)
+		if ch == nil {
+			i.commandIterator.Advance()
+			return true, nil
+		}
+		ch.SetImage(args.Image, args.ImageIndex, args.Frame, args.Dir, args.UseFrameAndDir)
+		i.commandIterator.Advance()
+
 	case data.CommandNameSetInnerVariable:
 		args := c.Args.(*data.CommandArgsSetInnerVariable)
 		i.gameState.variables.SetInnerVariableValue(args.Name, args.Value)

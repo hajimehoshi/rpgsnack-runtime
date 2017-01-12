@@ -30,12 +30,14 @@ type character struct {
 	dirFix        bool
 	stepping      bool
 	steppingCount int
+	walking       bool
 	frame         int
 	prevFrame     int
 	x             int
 	y             int
 	moveCount     int
 	moveDir       data.Dir
+	visible       bool
 }
 
 func (c *character) position() (int, int) {
@@ -143,7 +145,7 @@ func (c *character) update() error {
 	if !c.isMoving() {
 		return nil
 	}
-	if !c.stepping {
+	if !c.stepping && c.walking {
 		if c.moveCount >= c.speed.Frames()/2 {
 			c.frame = 1
 		} else if c.prevFrame == 0 {
@@ -193,7 +195,7 @@ func (c *character) drawPosition() (int, int) {
 	y := (c.y+1)*scene.TileSize - charH
 	if c.moveCount > 0 {
 		d := (c.speed.Frames() - c.moveCount) * scene.TileSize / c.speed.Frames()
-		switch c.dir {
+		switch c.moveDir {
 		case data.DirLeft:
 			x -= d
 		case data.DirRight:
@@ -210,7 +212,7 @@ func (c *character) drawPosition() (int, int) {
 }
 
 func (c *character) draw(screen *ebiten.Image) error {
-	if c.imageName == "" {
+	if c.imageName == "" || !c.visible {
 		return nil
 	}
 	op := &ebiten.DrawImageOptions{}

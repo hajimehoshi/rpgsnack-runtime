@@ -381,10 +381,11 @@ func (c *CommandArgsSetCharacterProperty) UnmarshalJSON(data []uint8) error {
 }
 
 type CommandArgsSetCharacterImage struct {
-	Image      string `json:"image"`
-	ImageIndex int    `json:"imageIndex"`
-	Frame      int    `json:"frame"`
-	Dir        Dir    `json:"dir"`
+	Image             string `json:"image"`
+	ImageIndex        int    `json:"imageIndex"`
+	Frame             int    `json:"frame"`
+	Dir               Dir    `json:"dir"`
+	UseFrameAndDir    bool   `json:"useFrameAndDir"`
 }
 
 type CommandArgsSetInnerVariable struct {

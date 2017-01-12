@@ -426,6 +426,27 @@
                         "content": "ab610c8c-578a-4876-92db-6398931087b7",
                         "eventId": -1
                       }
+                    },
+                    {
+                      "name": "set_route",
+                      "args": {
+                        "eventId": 0,
+                        "repeat":   false,
+                        "skip":     false,
+                        "wait":     false,
+                        "commands": [
+                          {
+                            "args": {
+                              "image": "TimeOver_chara.png",
+                              "imageIndex": 0,
+                              "frame": 1,
+                              "dir": 1,
+                              "useFrameAndDir": true
+                            },
+                            "name": "set_character_image"
+                          }
+                        ]
+                      }
                     }
                   ]
                 }
@@ -483,6 +504,32 @@
                             "args": {
                               "dir": 1
                             }
+                          },
+                          {
+                            "args": {
+                              "time": 5
+                            },
+                            "name": "wait"
+                          },
+                          {
+                            "args": {
+                              "type": "visibility",
+                              "value": false
+                            },
+                            "name": "set_character_property"
+                          },
+                          {
+                            "args": {
+                              "time": 5
+                            },
+                            "name": "wait"
+                          },
+                          {
+                            "args": {
+                              "type": "visibility",
+                              "value": true
+                            },
+                            "name": "set_character_property"
                           }
                         ]
                       }

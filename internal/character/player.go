@@ -33,6 +33,7 @@ func NewPlayer(x, y int) (*Player, error) {
 		y:          y,
 		dir:        data.DirDown,
 		dirFix:     false,
+		visible:    true,
 		frame:      1,
 		prevFrame:  1,
 	}
@@ -75,6 +76,32 @@ func (p *Player) Speed() data.Speed {
 
 func (p *Player) SetSpeed(speed data.Speed) {
 	p.character.speed = speed
+}
+
+func (p *Player) SetVisibility(visible bool) {
+	p.character.visible = visible
+}
+
+func (p *Player) SetDirFix(dirFix bool) {
+	p.character.dirFix = dirFix
+}
+
+func (p *Player) SetStepping(stepping bool) {
+	p.character.stepping = stepping
+}
+
+func (p *Player) SetWalking(walking bool) {
+	p.character.walking = walking
+}
+
+func (p *Player) SetImage(imageName string, imageIndex int, frame int, dir data.Dir, useFrameAndDir bool) {
+	p.character.imageName = imageName
+	p.character.imageIndex = imageIndex
+	if useFrameAndDir {
+		p.character.dir = dir
+		p.character.frame = frame
+		p.character.prevFrame = frame
+	}
 }
 
 func (p *Player) TransferImmediately(x, y int) {

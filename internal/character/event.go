@@ -76,6 +76,32 @@ func (e *Event) SetSpeed(speed data.Speed) {
 	e.character.speed = speed
 }
 
+func (e *Event) SetVisibility(visible bool) {
+	e.character.visible = visible
+}
+
+func (e *Event) SetDirFix(dirFix bool) {
+	e.character.dirFix = dirFix
+}
+
+func (e *Event) SetStepping(stepping bool) {
+	e.character.stepping = stepping
+}
+
+func (e *Event) SetWalking(walking bool) {
+	e.character.walking = walking
+}
+
+func (e *Event) SetImage(imageName string, imageIndex int, frame int, dir data.Dir, useFrameAndDir bool) {
+	e.character.imageName = imageName
+	e.character.imageIndex = imageIndex
+	if useFrameAndDir {
+		e.character.dir = dir
+		e.character.frame = frame
+		e.character.prevFrame = frame
+	}
+}
+
 func (e *Event) CurrentPage() *data.Page {
 	if e.currentPageIndex == -1 {
 		return nil
@@ -120,6 +146,7 @@ func (e *Event) UpdateCharacterIfNeeded(index int) (bool, error) {
 	}
 	page := e.data.Pages[index]
 	c := e.character
+	c.visible = true
 	c.imageName = page.Image
 	c.imageIndex = page.ImageIndex
 	c.dirFix = page.DirFix
