@@ -43,15 +43,15 @@ func (e *Event) ID() int {
 }
 
 func (e *Event) Size() (int, int) {
-	return e.character.size()
+	return e.character.Size()
 }
 
 func (e *Event) Position() (int, int) {
-	return e.character.position()
+	return e.character.Position()
 }
 
 func (e *Event) DrawPosition() (int, int) {
-	return e.character.drawPosition()
+	return e.character.DrawPosition()
 }
 
 func (e *Event) Dir() data.Dir {
@@ -59,15 +59,15 @@ func (e *Event) Dir() data.Dir {
 }
 
 func (e *Event) IsMoving() bool {
-	return e.character.isMoving()
+	return e.character.IsMoving()
 }
 
 func (e *Event) Move(dir data.Dir) {
-	e.character.move(dir)
+	e.character.Move(dir)
 }
 
 func (e *Event) Turn(dir data.Dir) {
-	e.character.turn(dir)
+	e.character.Turn(dir)
 }
 
 func (e *Event) SetSpeed(speed data.Speed) {
@@ -122,14 +122,14 @@ func (e *Event) UpdateCharacterIfNeeded(page *data.Page) error {
 }
 
 func (e *Event) Update() error {
-	if err := e.character.update(); err != nil {
+	if err := e.character.Update(); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (e *Event) Draw(screen *ebiten.Image) error {
-	if err := e.character.draw(screen); err != nil {
+	if err := e.character.Draw(screen); err != nil {
 		return err
 	}
 	return nil

@@ -41,7 +41,32 @@ type Character struct {
 	visible       bool
 }
 
-func (c *Character) position() (int, int) {
+func NewPlayer(x, y int) *Character {
+	return &Character{
+		speed:      data.Speed3,
+		imageName:  "characters0.png",
+		imageIndex: 0,
+		x:          x,
+		y:          y,
+		dir:        data.DirDown,
+		dirFix:     false,
+		visible:    true,
+		frame:      1,
+		prevFrame:  1,
+	}
+}
+
+func (c *Character) Size() (int, int) {
+	if c.imageName == "" {
+		return 0, 0
+	}
+	imageW, imageH := assets.GetImage(c.imageName).Size()
+	w := imageW / 4 / 3
+	h := imageH / 2 / 4
+	return w, h
+}
+
+func (c *Character) Position() (int, int) {
 	if c.moveCount > 0 {
 		x, y := c.x, c.y
 		switch c.moveDir {
@@ -61,23 +86,82 @@ func (c *Character) position() (int, int) {
 	return c.x, c.y
 }
 
-func (c *Character) isMoving() bool {
+func (c *Character) DrawPosition() (int, int) {
+	charW, charH := c.Size()
+	x := c.x*scene.TileSize + scene.TileSize/2 - charW/2
+	y := (c.y+1)*scene.TileSize - charH
+	if c.moveCount > 0 {
+		d := (c.speed.Frames() - c.moveCount) * scene.TileSize / c.speed.Frames()
+		switch c.moveDir {
+		case data.DirLeft:
+			x -= d
+		case data.DirRight:
+			x += d
+		case data.DirUp:
+			y -= d
+		case data.DirDown:
+			y += d
+		default:
+			panic("not reach")
+		}
+	}
+	return x, y
+}
+
+func (c *Character) Dir() data.Dir {
+	return c.dir
+}
+
+func (c *Character) IsMoving() bool {
 	return c.moveCount > 0
 }
 
-func (c *Character) turn(dir data.Dir) {
+func (c *Character) Move(dir data.Dir) {
+	c.Turn(dir)
+	c.moveDir = dir
+	// TODO: Rename this
+	c.moveCount = c.speed.Frames()
+}
+
+func (c *Character) Turn(dir data.Dir) {
 	if c.dirFix {
 		return
 	}
 	c.dir = dir
 }
 
-func (c *Character) move(dir data.Dir) bool {
-	c.turn(dir)
-	c.moveDir = dir
-	// TODO: Rename this
-	c.moveCount = c.speed.Frames()
-	return true
+func (c *Character) Speed() data.Speed {
+	return c.speed
+}
+
+func (c *Character) SetSpeed(speed data.Speed) {
+	c.speed = speed
+}
+
+func (c *Character) SetVisibility(visible bool) {
+	c.visible = visible
+}
+
+func (c *Character) SetDirFix(dirFix bool) {
+	c.dirFix = dirFix
+}
+
+func (c *Character) SetStepping(stepping bool) {
+	c.stepping = stepping
+}
+
+func (c *Character) SetWalking(walking bool) {
+	c.walking = walking
+}
+
+func (c *Character) SetImage(imageName string, imageIndex int, frame int, dir data.Dir, useFrameAndDir bool) {
+	c.imageName = imageName
+	c.imageIndex = imageIndex
+	if useFrameAndDir {
+		c.dir = dir
+		c.frame = frame
+		c.prevFrame = frame
+	}
 }
 
 type characterImageParts struct {
@@ -122,13 +206,13 @@ func (c *characterImageParts) Dst(index int) (int, int, int, int) {
 	return 0, 0, c.charWidth, c.charHeight
 }
 
-func (c *Character) transferImmediately(x, y int) {
+func (c *Character) TransferImmediately(x, y int) {
 	c.x = x
 	c.y = y
 	c.moveCount = 0
 }
 
-func (c *Character) update() error {
+func (c *Character) Update() error {
 	if c.stepping {
 		switch {
 		case c.steppingCount < 15:
@@ -143,7 +227,7 @@ func (c *Character) update() error {
 		c.steppingCount++
 		c.steppingCount %= 60
 	}
-	if !c.isMoving() {
+	if !c.IsMoving() {
 		return nil
 	}
 	if !c.stepping && c.walking {
@@ -180,46 +264,14 @@ func (c *Character) update() error {
 	return nil
 }
 
-func (c *Character) size() (int, int) {
-	if c.imageName == "" {
-		return 0, 0
-	}
-	imageW, imageH := assets.GetImage(c.imageName).Size()
-	w := imageW / 4 / 3
-	h := imageH / 2 / 4
-	return w, h
-}
-
-func (c *Character) drawPosition() (int, int) {
-	charW, charH := c.size()
-	x := c.x*scene.TileSize + scene.TileSize/2 - charW/2
-	y := (c.y+1)*scene.TileSize - charH
-	if c.moveCount > 0 {
-		d := (c.speed.Frames() - c.moveCount) * scene.TileSize / c.speed.Frames()
-		switch c.moveDir {
-		case data.DirLeft:
-			x -= d
-		case data.DirRight:
-			x += d
-		case data.DirUp:
-			y -= d
-		case data.DirDown:
-			y += d
-		default:
-			panic("not reach")
-		}
-	}
-	return x, y
-}
-
-func (c *Character) draw(screen *ebiten.Image) error {
+func (c *Character) Draw(screen *ebiten.Image) error {
 	if c.imageName == "" || !c.visible {
 		return nil
 	}
 	op := &ebiten.DrawImageOptions{}
-	x, y := c.drawPosition()
+	x, y := c.DrawPosition()
 	op.GeoM.Translate(float64(x), float64(y))
-	charW, charH := c.size()
+	charW, charH := c.Size()
 	op.ImageParts = &characterImageParts{
 		charWidth:  charW,
 		charHeight: charH,

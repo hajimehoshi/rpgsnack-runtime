@@ -28,7 +28,7 @@ import (
 
 type Map struct {
 	game                        *Game
-	player                      *character.Player
+	player                      *character.Character
 	mapID                       int
 	roomID                      int
 	events                      []*character.Event
@@ -45,10 +45,7 @@ func NewMap(game *Game) (*Map, error) {
 	if pos != nil {
 		x, y, roomID = pos.X, pos.Y, pos.RoomID
 	}
-	player, err := character.NewPlayer(x, y)
-	if err != nil {
-		return nil, err
-	}
+	player := character.NewPlayer(x, y)
 	m := &Map{
 		game:         game,
 		player:       player,
