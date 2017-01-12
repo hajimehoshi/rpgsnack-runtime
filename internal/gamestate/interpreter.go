@@ -184,12 +184,13 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 		i.sub = i.createChild(eventID, commands)
 	case data.CommandNameWait:
 		if i.waitingCount == 0 {
-			i.waitingCount = c.Args.(*data.CommandArgsWait).Time * 6
-		}
-		if i.waitingCount == 0 {
-			// Time 0.0[s] is specified.
-			i.commandIterator.Advance()
-			return true, nil
+			time := c.Args.(*data.CommandArgsWait).Time
+			// If Wait 0.0 is specified, treat is as one frame
+			if time == 0 {
+				i.waitingCount = 1
+			} else {
+				i.waitingCount = time * 6
+			}
 		}
 		i.waitingCount--
 		if i.waitingCount == 0 {
