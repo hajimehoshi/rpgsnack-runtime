@@ -318,9 +318,6 @@ func (m *Map) passableTile(x, y int) (bool, error) {
 }
 
 func (m *Map) passable(self *character.Character, x, y int) (bool, error) {
-	if self.Through() {
-		return true, nil
-	}
 	if x < 0 {
 		return false, nil
 	}
@@ -332,6 +329,9 @@ func (m *Map) passable(self *character.Character, x, y int) (bool, error) {
 	}
 	if scene.TileYNum <= y {
 		return false, nil
+	}
+	if self.Through() {
+		return true, nil
 	}
 	p, err := m.passableTile(x, y)
 	if err != nil {
