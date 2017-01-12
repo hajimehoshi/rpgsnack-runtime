@@ -317,7 +317,10 @@ func (m *Map) passableTile(x, y int) (bool, error) {
 	return false, nil
 }
 
-func (m *Map) passable(x, y int) (bool, error) {
+func (m *Map) passable(self *character.Character, x, y int) (bool, error) {
+	if self.Through() {
+		return true, nil
+	}
 	if x < 0 {
 		return false, nil
 	}
@@ -355,7 +358,7 @@ func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
 		return false, nil
 	}
 	event := m.eventAt(x, y)
-	p, err := m.passable(x, y)
+	p, err := m.passable(m.player, x, y)
 	if err != nil {
 		return false, err
 	}
@@ -373,7 +376,9 @@ func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
 		}
 	}
 	px, py := m.player.Position()
-	path, lastPlayerX, lastPlayerY, err := calcPath(m.passable, px, py, x, y)
+	path, lastPlayerX, lastPlayerY, err := calcPath(func(x, y int) (bool, error) {
+		return m.passable(m.player, x, y)
+	}, px, py, x, y)
 	if err != nil {
 		return false, err
 	}

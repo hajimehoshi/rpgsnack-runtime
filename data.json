@@ -212,7 +212,7 @@
                   "dirFix":     true,
                   "walking":    false,
                   "stepping":   true,
-                  "through":    true,
+                  "through":    false,
                   "priority":   1,
                   "trigger":    "player",
                   "commands": [
@@ -221,6 +221,59 @@
                       "args":    {
                         "content": "e6796850-08a3-4f07-a316-a013d6f8c6b0",
                         "eventId": 0
+                      }
+                    },
+                    {
+                      "name": "set_route",
+                      "args": {
+                        "eventId": 0,
+                        "repeat":  false,
+                        "skip":    false,
+                        "wait":    true,
+                        "commands": [
+                          {
+                            "name": "set_character_property",
+                            "args": {
+                              "type":  "through",
+                              "value": true
+                            }
+                          },
+                          {
+                            "name": "move_character",
+                            "args": {
+                              "dir": 3,
+                              "distance": 1
+                            }
+                          },
+                          {
+                            "name": "move_character",
+                            "args": {
+                              "dir": 3,
+                              "distance": 1
+                            }
+                          },
+                          {
+                            "name": "move_character",
+                            "args": {
+                              "dir": 1,
+                              "distance": 1
+                            }
+                          },
+                          {
+                            "name": "move_character",
+                            "args": {
+                              "dir": 1,
+                              "distance": 1
+                            }
+                          },
+                          {
+                            "name": "set_character_property",
+                            "args": {
+                              "type":  "through",
+                              "value": false
+                            }
+                          }
+                        ]
                       }
                     },
                     {
@@ -430,7 +483,7 @@
                     {
                       "name": "set_route",
                       "args": {
-                        "eventId": 0,
+                        "eventId":  0,
                         "repeat":   false,
                         "skip":     false,
                         "wait":     false,

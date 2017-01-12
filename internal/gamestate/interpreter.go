@@ -327,7 +327,7 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 			default:
 				panic("not reach")
 			}
-			p, err := i.gameState.Map().passable(dx, dy)
+			p, err := i.gameState.Map().passable(ch, dx, dy)
 			if err != nil {
 				return false, err
 			}
