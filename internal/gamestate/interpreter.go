@@ -37,6 +37,7 @@ type Interpreter struct {
 	repeat          bool
 	sub             *Interpreter
 	route           bool // True when used for event routing property.
+	routeSkip       bool
 	shouldGoToTitle bool
 }
 
@@ -261,9 +262,9 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 		if id == 0 {
 			id = i.eventID
 		}
-		// TODO: Consider args.Skip
 		sub := i.createChild(id, args.Commands)
 		sub.repeat = args.Repeat
+		sub.routeSkip = args.Skip
 		if !args.Wait {
 			// TODO: What if set_route w/o waiting already exists for this event?
 			i.gameState.Map().addInterpreter(sub)
@@ -335,7 +336,15 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 				return false, err
 			}
 			if !p {
-				return false, nil
+				if !i.routeSkip {
+					return false, nil
+				}
+				// Skip
+				ch.Turn(args.Dir)
+				i.waitingCommand = false
+				i.distanceCount = 0
+				i.commandIterator.Advance()
+				return true, nil
 			}
 			ch.Move(args.Dir)
 			i.waitingCommand = true
