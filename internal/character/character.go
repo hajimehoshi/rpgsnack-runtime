@@ -169,14 +169,18 @@ func (c *Character) SetWalking(walking bool) {
 	c.walking = walking
 }
 
-func (c *Character) SetImage(imageName string, imageIndex int, frame int, dir data.Dir, useFrameAndDir bool) {
+func (c *Character) SetImage(imageName string, imageIndex int) {
 	c.imageName = imageName
 	c.imageIndex = imageIndex
-	if useFrameAndDir {
-		c.dir = dir
-		c.frame = frame
-		c.prevFrame = frame
-	}
+}
+
+func (c *Character) SetFrame(frame int) {
+	c.frame = frame
+	c.prevFrame = frame
+}
+
+func (c *Character) SetDir(dir data.Dir) {
+	c.dir = dir
 }
 
 type characterImageParts struct {

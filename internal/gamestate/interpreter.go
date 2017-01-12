@@ -445,7 +445,11 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 			i.commandIterator.Advance()
 			return true, nil
 		}
-		ch.SetImage(args.Image, args.ImageIndex, args.Frame, args.Dir, args.UseFrameAndDir)
+		ch.SetImage(args.Image, args.ImageIndex)
+		if args.UseFrameAndDir {
+			ch.SetFrame(args.Frame)
+			ch.SetDir(args.Dir)
+		}
 		i.commandIterator.Advance()
 
 	case data.CommandNameSetInnerVariable:
