@@ -33,6 +33,7 @@ type Interpreter struct {
 	commandIterator *commanditerator.CommandIterator
 	waitingCount    int
 	waitingCommand  bool
+	distanceCount   int
 	repeat          bool
 	sub             *Interpreter
 	route           bool // True when used for event routing property.
@@ -311,9 +312,11 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 		if ch.IsMoving() {
 			return false, nil
 		}
-		if !i.waitingCommand {
-			// TODO: Consider args.Distance
-			args := c.Args.(*data.CommandArgsMoveCharacter)
+		args := c.Args.(*data.CommandArgsMoveCharacter)
+		if i.distanceCount == 0 {
+			i.distanceCount = args.Distance
+		}
+		if i.distanceCount > 0 && !i.waitingCommand {
 			dx, dy := ch.Position()
 			switch args.Dir {
 			case data.DirUp:
@@ -338,7 +341,11 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 			i.waitingCommand = true
 			return false, nil
 		}
+		i.distanceCount--
 		i.waitingCommand = false
+		if i.distanceCount > 0 {
+			return false, nil
+		}
 		i.commandIterator.Advance()
 	case data.CommandNameTurnCharacter:
 		ch := i.character(i.eventID)
