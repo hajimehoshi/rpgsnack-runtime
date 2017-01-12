@@ -208,8 +208,10 @@ func (c *characterImageParts) Len() int {
 }
 
 func (c *characterImageParts) Src(index int) (int, int, int, int) {
-	x := ((c.index % 4) * 3) * c.charWidth
-	y := (c.index / 4) * 2 * c.charHeight
+	const characterXNum = 3
+	const characterYNum = 4
+	x := (c.index % 4) * characterXNum * c.charWidth
+	y := (c.index / 4) * characterYNum * c.charHeight
 	switch c.frame {
 	case 0:
 	case 1:
