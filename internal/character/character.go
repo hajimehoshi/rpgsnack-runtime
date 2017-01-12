@@ -22,7 +22,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
 
-type character struct {
+type Character struct {
 	id            int
 	speed         data.Speed
 	imageName     string
@@ -41,7 +41,7 @@ type character struct {
 	visible       bool
 }
 
-func (c *character) position() (int, int) {
+func (c *Character) position() (int, int) {
 	if c.moveCount > 0 {
 		x, y := c.x, c.y
 		switch c.moveDir {
@@ -61,18 +61,18 @@ func (c *character) position() (int, int) {
 	return c.x, c.y
 }
 
-func (c *character) isMoving() bool {
+func (c *Character) isMoving() bool {
 	return c.moveCount > 0
 }
 
-func (c *character) turn(dir data.Dir) {
+func (c *Character) turn(dir data.Dir) {
 	if c.dirFix {
 		return
 	}
 	c.dir = dir
 }
 
-func (c *character) move(dir data.Dir) bool {
+func (c *Character) move(dir data.Dir) bool {
 	c.turn(dir)
 	c.moveDir = dir
 	// TODO: Rename this
@@ -122,13 +122,13 @@ func (c *characterImageParts) Dst(index int) (int, int, int, int) {
 	return 0, 0, c.charWidth, c.charHeight
 }
 
-func (c *character) transferImmediately(x, y int) {
+func (c *Character) transferImmediately(x, y int) {
 	c.x = x
 	c.y = y
 	c.moveCount = 0
 }
 
-func (c *character) update() error {
+func (c *Character) update() error {
 	if c.stepping {
 		switch {
 		case c.steppingCount < 15:
@@ -180,7 +180,7 @@ func (c *character) update() error {
 	return nil
 }
 
-func (c *character) size() (int, int) {
+func (c *Character) size() (int, int) {
 	if c.imageName == "" {
 		return 0, 0
 	}
@@ -190,7 +190,7 @@ func (c *character) size() (int, int) {
 	return w, h
 }
 
-func (c *character) drawPosition() (int, int) {
+func (c *Character) drawPosition() (int, int) {
 	charW, charH := c.size()
 	x := c.x*scene.TileSize + scene.TileSize/2 - charW/2
 	y := (c.y+1)*scene.TileSize - charH
@@ -212,7 +212,7 @@ func (c *character) drawPosition() (int, int) {
 	return x, y
 }
 
-func (c *character) draw(screen *ebiten.Image) error {
+func (c *Character) draw(screen *ebiten.Image) error {
 	if c.imageName == "" || !c.visible {
 		return nil
 	}

@@ -21,11 +21,11 @@ import (
 )
 
 type Event struct {
-	character *character
+	character *Character
 }
 
 func NewEvent(id int, x, y int) (*Event, error) {
-	c := &character{
+	c := &Character{
 		id:      id,
 		speed:   data.Speed3,
 		x:       x,

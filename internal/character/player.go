@@ -21,11 +21,11 @@ import (
 )
 
 type Player struct {
-	character *character
+	character *Character
 }
 
 func NewPlayer(x, y int) (*Player, error) {
-	c := &character{
+	c := &Character{
 		speed:      data.Speed3,
 		imageName:  "characters0.png",
 		imageIndex: 0,
