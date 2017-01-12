@@ -55,6 +55,7 @@ func NewPlayer(x, y int) *Character {
 		visible:    true,
 		frame:      1,
 		prevFrame:  1,
+		walking:    true,
 	}
 }
 
@@ -65,6 +66,7 @@ func NewEvent(id int, x, y int) *Character {
 		x:       x,
 		y:       y,
 		visible: true,
+		walking: true,
 	}
 }
 
