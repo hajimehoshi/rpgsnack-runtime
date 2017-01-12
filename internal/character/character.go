@@ -32,6 +32,7 @@ type Character struct {
 	stepping      bool
 	steppingCount int
 	walking       bool
+	walkingCount  int
 	frame         int
 	prevFrame     int
 	x             int
@@ -281,13 +282,15 @@ func (c *Character) Update() error {
 		return nil
 	}
 	if !c.stepping && c.walking {
-		if c.moveCount >= c.speed.Frames()/2 {
+		if c.walkingCount < 8 {
 			c.frame = 1
 		} else if c.prevFrame == 0 {
 			c.frame = 2
 		} else {
 			c.frame = 0
 		}
+		c.walkingCount++
+		c.walkingCount %= 16
 	}
 	c.moveCount--
 	if c.moveCount == 0 {
