@@ -469,48 +469,54 @@ func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
 			default:
 				panic("not reach")
 			}
-			commands = append(commands,
-				&data.Command{
-					Name: data.CommandNameSetRoute,
-					Args: &data.CommandArgsSetRoute{
-						EventID: event.ID(),
-						Repeat:  false,
-						Skip:    false,
-						Wait:    true,
-						Commands: []*data.Command{
-							{
-								Name: data.CommandNameTurnCharacter,
-								Args: &data.CommandArgsTurnCharacter{
-									Dir: dir,
+			if !event.DirFix() {
+				commands = append(commands,
+					&data.Command{
+						Name: data.CommandNameSetRoute,
+						Args: &data.CommandArgsSetRoute{
+							EventID: event.ID(),
+							Repeat:  false,
+							Skip:    false,
+							Wait:    true,
+							Commands: []*data.Command{
+								{
+									Name: data.CommandNameTurnCharacter,
+									Args: &data.CommandArgsTurnCharacter{
+										Dir: dir,
+									},
 								},
 							},
 						},
-					},
-				},
+					})
+			}
+			commands = append(commands,
 				&data.Command{
 					Name: data.CommandNameCallEvent,
 					Args: &data.CommandArgsCallEvent{
 						EventID:   event.ID(),
 						PageIndex: m.eventPageIndices[event],
 					},
-				},
-				&data.Command{
-					Name: data.CommandNameSetRoute,
-					Args: &data.CommandArgsSetRoute{
-						EventID: event.ID(),
-						Repeat:  false,
-						Skip:    false,
-						Wait:    true,
-						Commands: []*data.Command{
-							{
-								Name: data.CommandNameTurnCharacter,
-								Args: &data.CommandArgsTurnCharacter{
-									Dir: origDir,
+				})
+			if !event.DirFix() {
+				commands = append(commands,
+					&data.Command{
+						Name: data.CommandNameSetRoute,
+						Args: &data.CommandArgsSetRoute{
+							EventID: event.ID(),
+							Repeat:  false,
+							Skip:    false,
+							Wait:    true,
+							Commands: []*data.Command{
+								{
+									Name: data.CommandNameTurnCharacter,
+									Args: &data.CommandArgsTurnCharacter{
+										Dir: origDir,
+									},
 								},
 							},
 						},
-					},
-				})
+					})
+			}
 		}
 	}
 	i := NewInterpreter(m.game, m.mapID, m.roomID, -1, commands)

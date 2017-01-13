@@ -153,6 +153,10 @@ func (c *Character) Speed() data.Speed {
 	return c.speed
 }
 
+func (c *Character) DirFix() bool {
+	return c.dirFix
+}
+
 func (c *Character) Through() bool {
 	return c.through
 }
