@@ -51,14 +51,21 @@ func NewMapScene() (*MapScene, error) {
 	return mapScene, nil
 }
 
-func (m *MapScene) movePlayerIfNeeded() error {
+func (m *MapScene) runEventIfNeeded() error {
 	if !input.Triggered() {
 		return nil
 	}
 	x, y := input.Position()
 	tx := (x - scene.GameMarginX) / scene.TileSize / scene.TileScale
 	ty := (y - scene.GameMarginTop) / scene.TileSize / scene.TileScale
-	result, err := m.gameState.Map().TryMovePlayerByUserInput(tx, ty)
+	result, err := m.gameState.Map().TryRunDirectEvent(tx, ty)
+	if err != nil {
+		return err
+	}
+	if result {
+		return nil
+	}
+	result, err = m.gameState.Map().TryMovePlayerByUserInput(tx, ty)
 	if err != nil {
 		return err
 	}
@@ -84,7 +91,7 @@ func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
 		}
 		return err
 	}
-	if err := m.movePlayerIfNeeded(); err != nil {
+	if err := m.runEventIfNeeded(); err != nil {
 		return err
 	}
 	return nil

@@ -357,6 +357,29 @@ func (m *Map) passable(self *character.Character, x, y int) (bool, error) {
 	return true, nil
 }
 
+func (m *Map) TryRunDirectEvent(x, y int) (bool, error) {
+	if m.isEventExecuting() {
+		return false, nil
+	}
+	event := m.eventAt(x, y)
+	if event == nil {
+		return false, nil
+	}
+	page := m.currentPage(event)
+	if page == nil {
+		return false, nil
+	}
+	if len(page.Commands) == 0 {
+		return false, nil
+	}
+	if page.Trigger != data.TriggerDirect {
+		return false, nil
+	}
+	i := NewInterpreter(m.game, m.mapID, m.roomID, event.ID(), page.Commands)
+	m.addInterpreter(i)
+	return true, nil
+}
+
 func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
 	if m.isEventExecuting() {
 		return false, nil
