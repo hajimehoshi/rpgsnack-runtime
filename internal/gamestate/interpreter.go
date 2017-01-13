@@ -368,7 +368,7 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 		}
 		if !i.waitingCommand {
 			args := c.Args.(*data.CommandArgsTurnCharacter)
-			ch.Turn(args.Dir)
+			ch.SetDir(args.Dir)
 			i.waitingCommand = true
 			return false, nil
 		}
