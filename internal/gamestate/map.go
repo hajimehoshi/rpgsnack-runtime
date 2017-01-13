@@ -153,6 +153,18 @@ func (i interpretersByID) Swap(a, b int)      { i[a], i[b] = i[b], i[a] }
 
 var GoToTitle = errors.New("go to title")
 
+func (m *Map) removeRoutes(eventID int) {
+	ids := []int{}
+	for id, i := range m.interpreters {
+		if i.route && i.eventID == eventID {
+			ids = append(ids, id)
+		}
+	}
+	for _, id := range ids {
+		delete(m.interpreters, id)
+	}
+}
+
 func (m *Map) Update() error {
 	is := []*Interpreter{}
 	for _, i := range m.interpreters {
@@ -197,19 +209,12 @@ func (m *Map) Update() error {
 			return err
 		}
 		if page == nil {
+			m.removeRoutes(e.ID())
 			continue
 		}
 		route := page.Route
 		if route == nil {
-			ids := []int{}
-			for id, i := range m.interpreters {
-				if i.route && i.eventID == e.ID() {
-					ids = append(ids, id)
-				}
-			}
-			for _, id := range ids {
-				delete(m.interpreters, id)
-			}
+			m.removeRoutes(e.ID())
 			continue
 		}
 		commands := []*data.Command{
