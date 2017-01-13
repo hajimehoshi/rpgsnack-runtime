@@ -203,18 +203,17 @@ func (m *Map) Update() error {
 		if p == index {
 			continue
 		}
+		m.removeRoutes(e.ID())
 		m.eventPageIndices[e] = index
 		page := m.currentPage(e)
 		if err := e.UpdateWithPage(page); err != nil {
 			return err
 		}
 		if page == nil {
-			m.removeRoutes(e.ID())
 			continue
 		}
 		route := page.Route
 		if route == nil {
-			m.removeRoutes(e.ID())
 			continue
 		}
 		commands := []*data.Command{
