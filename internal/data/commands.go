@@ -207,8 +207,8 @@ type CommandArgsGoto struct {
 }
 
 type CommandArgsCallEvent struct {
-	EventID   int `json:"event_id"`
-	PageIndex int `json:"page_index"`
+	EventID   int `json:"eventId"`
+	PageIndex int `json:"pageIndex"`
 }
 
 type CommandArgsWait struct {

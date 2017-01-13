@@ -404,7 +404,7 @@
                   "priority":   1,
                   "trigger":    "player",
                   "route":      {
-                    "event_id": 0,
+                    "eventId": 0,
                     "repeat":   true,
                     "skip":     false,
                     "wait":     false,
