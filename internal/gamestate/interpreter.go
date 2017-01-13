@@ -315,11 +315,42 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 		}
 		args := c.Args.(*data.CommandArgsMoveCharacter)
 		if i.distanceCount == 0 {
-			i.distanceCount = args.Distance
+			switch args.Type {
+			case data.MoveCharacterTypeDirection, data.MoveCharacterTypeForward, data.MoveCharacterTypeBackward:
+				i.distanceCount = args.Distance
+			case data.MoveCharacterTypeTarget:
+				// TODO: Calc path
+				println(fmt.Sprintf("not implemented yet (move_character): type %s", args.Type))
+			case data.MoveCharacterTypeRandom, data.MoveCharacterTypeToward:
+				i.distanceCount = 1
+
+			default:
+				panic("not reach")
+			}
 		}
 		if i.distanceCount > 0 && !i.waitingCommand {
 			dx, dy := ch.Position()
-			switch args.Dir {
+			var dir data.Dir
+			switch args.Type {
+			case data.MoveCharacterTypeDirection:
+				dir = args.Dir
+			case data.MoveCharacterTypeTarget:
+				println(fmt.Sprintf("not implemented yet (move_character): type %s", args.Type))
+			case data.MoveCharacterTypeForward:
+				dir = ch.Dir()
+			case data.MoveCharacterTypeBackward:
+				println(fmt.Sprintf("not implemented yet (move_character): type %s", args.Type))
+				dir = ch.Dir()
+			case data.MoveCharacterTypeToward:
+				println(fmt.Sprintf("not implemented yet (move_character): type %s", args.Type))
+				dir = ch.Dir()
+			case data.MoveCharacterTypeRandom:
+				println(fmt.Sprintf("not implemented yet (move_character): type %s", args.Type))
+				dir = ch.Dir()
+			default:
+				panic("not reach")
+			}
+			switch dir {
 			case data.DirUp:
 				dy--
 			case data.DirRight:

@@ -310,11 +310,11 @@ type CommandArgsTintScreen struct {
 }
 
 type CommandArgsMoveCharacter struct {
-	Type     MoveCharacterType `json:type`
-	Dir      Dir               `json:dir`
-	Distance int               `json:distance`
-	X        int               `json:x`
-	Y        int               `json:y`
+	Type     MoveCharacterType `json:"type"`
+	Dir      Dir               `json:"dir"`
+	Distance int               `json:"distance"`
+	X        int               `json:"x"`
+	Y        int               `json:"y"`
 }
 
 type CommandArgsTurnCharacter struct {

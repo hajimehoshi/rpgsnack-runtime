@@ -140,6 +140,7 @@ func routeCommandsToEventCommands(path []routeCommand) []*data.Command {
 			commands = append(commands, &data.Command{
 				Name: data.CommandNameMoveCharacter,
 				Args: &data.CommandArgsMoveCharacter{
+					Type:     data.MoveCharacterTypeDirection,
 					Dir:      data.DirUp,
 					Distance: 1,
 				},
@@ -148,6 +149,7 @@ func routeCommandsToEventCommands(path []routeCommand) []*data.Command {
 			commands = append(commands, &data.Command{
 				Name: data.CommandNameMoveCharacter,
 				Args: &data.CommandArgsMoveCharacter{
+					Type:     data.MoveCharacterTypeDirection,
 					Dir:      data.DirRight,
 					Distance: 1,
 				},
@@ -156,6 +158,7 @@ func routeCommandsToEventCommands(path []routeCommand) []*data.Command {
 			commands = append(commands, &data.Command{
 				Name: data.CommandNameMoveCharacter,
 				Args: &data.CommandArgsMoveCharacter{
+					Type:     data.MoveCharacterTypeDirection,
 					Dir:      data.DirDown,
 					Distance: 1,
 				},
@@ -164,6 +167,7 @@ func routeCommandsToEventCommands(path []routeCommand) []*data.Command {
 			commands = append(commands, &data.Command{
 				Name: data.CommandNameMoveCharacter,
 				Args: &data.CommandArgsMoveCharacter{
+					Type:     data.MoveCharacterTypeDirection,
 					Dir:      data.DirLeft,
 					Distance: 1,
 				},

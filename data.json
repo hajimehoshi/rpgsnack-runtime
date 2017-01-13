@@ -242,6 +242,7 @@
                           {
                             "name": "move_character",
                             "args": {
+                              "type": "direction",
                               "dir": 3,
                               "distance": 2
                             }
@@ -249,6 +250,7 @@
                           {
                             "name": "move_character",
                             "args": {
+                              "type": "direction",
                               "dir": 1,
                               "distance": 2
                             }
@@ -413,6 +415,7 @@
                       {
                         "name": "move_character",
                         "args": {
+                          "type": "direction",
                           "dir":      0,
                           "distance": 1
                         }
@@ -426,6 +429,7 @@
                       {
                         "name": "move_character",
                         "args": {
+                          "type": "direction",
                           "dir":      2,
                           "distance": 1
                         }
@@ -528,6 +532,7 @@
                           {
                             "name": "move_character",
                             "args": {
+                              "type": "direction",
                               "dir":      2,
                               "distance": 2
                             }
@@ -535,6 +540,7 @@
                           {
                             "name": "move_character",
                             "args": {
+                              "type": "direction",
                               "dir":      3,
                               "distance": 1
                             }
@@ -542,6 +548,7 @@
                           {
                             "name": "move_character",
                             "args": {
+                              "type": "direction",
                               "dir":      0,
                               "distance": 10
                             }
