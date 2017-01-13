@@ -61,8 +61,13 @@ func (m *MapScene) runEventIfNeeded() error {
 		return nil
 	}
 	x, y := input.Position()
-	tx := (x - scene.GameMarginX) / scene.TileSize / scene.TileScale
-	ty := (y - scene.GameMarginTop) / scene.TileSize / scene.TileScale
+	x -= scene.GameMarginX
+	y -= scene.GameMarginTop
+	if x < 0 || y < 0 {
+		return nil
+	}
+	tx := x / scene.TileSize / scene.TileScale
+	ty := y / scene.TileSize / scene.TileScale
 	if tx < 0 || scene.TileXNum <= tx || ty < 0 || scene.TileYNum <= ty {
 		return nil
 	}
