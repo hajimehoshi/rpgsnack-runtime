@@ -88,7 +88,7 @@ func (m *Map) setRoomID(id int, interpreter *Interpreter) error {
 	return nil
 }
 
-func (m *Map) isEventExecuting() bool {
+func (m *Map) IsEventExecuting() bool {
 	for _, i := range m.interpreters {
 		if i.route {
 			continue
@@ -252,7 +252,7 @@ func (m *Map) eventAt(x, y int) *character.Character {
 }
 
 func (m *Map) tryRunAutoEvent() {
-	if m.isEventExecuting() {
+	if m.IsEventExecuting() {
 		return
 	}
 	for _, e := range m.events {
@@ -358,7 +358,7 @@ func (m *Map) passable(self *character.Character, x, y int) (bool, error) {
 }
 
 func (m *Map) TryRunDirectEvent(x, y int) (bool, error) {
-	if m.isEventExecuting() {
+	if m.IsEventExecuting() {
 		return false, nil
 	}
 	event := m.eventAt(x, y)
@@ -381,7 +381,7 @@ func (m *Map) TryRunDirectEvent(x, y int) (bool, error) {
 }
 
 func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
-	if m.isEventExecuting() {
+	if m.IsEventExecuting() {
 		return false, nil
 	}
 	event := m.eventAt(x, y)
@@ -408,6 +408,9 @@ func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
 	}, px, py, x, y)
 	if err != nil {
 		return false, err
+	}
+	if len(path) == 0 {
+		return false, nil
 	}
 	// The player's speed is never changed by another events during the player walks
 	// by user input.

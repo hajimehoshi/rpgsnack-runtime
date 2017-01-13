@@ -29,10 +29,11 @@ import (
 )
 
 type MapScene struct {
-	gameState  *gamestate.Game
-	moveDstX   int
-	moveDstY   int
-	tilesImage *ebiten.Image
+	gameState        *gamestate.Game
+	moveDstX         int
+	moveDstY         int
+	tilesImage       *ebiten.Image
+	triggeringFailed bool
 }
 
 func NewMapScene() (*MapScene, error) {
@@ -52,17 +53,24 @@ func NewMapScene() (*MapScene, error) {
 }
 
 func (m *MapScene) runEventIfNeeded() error {
+	if m.gameState.Map().IsEventExecuting() {
+		m.triggeringFailed = false
+		return nil
+	}
 	if !input.Triggered() {
 		return nil
 	}
 	x, y := input.Position()
 	tx := (x - scene.GameMarginX) / scene.TileSize / scene.TileScale
 	ty := (y - scene.GameMarginTop) / scene.TileSize / scene.TileScale
+	m.moveDstX = tx
+	m.moveDstY = ty
 	result, err := m.gameState.Map().TryRunDirectEvent(tx, ty)
 	if err != nil {
 		return err
 	}
 	if result {
+		m.triggeringFailed = false
 		return nil
 	}
 	result, err = m.gameState.Map().TryMovePlayerByUserInput(tx, ty)
@@ -70,10 +78,10 @@ func (m *MapScene) runEventIfNeeded() error {
 		return err
 	}
 	if !result {
+		m.triggeringFailed = true
 		return nil
 	}
-	m.moveDstX = tx
-	m.moveDstY = ty
+	m.triggeringFailed = false
 	return nil
 }
 
@@ -181,7 +189,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 	if err := screen.DrawImage(m.tilesImage, op); err != nil {
 		return err
 	}
-	if m.gameState.Map().IsPlayerMovingByUserInput() {
+	if m.gameState.Map().IsPlayerMovingByUserInput() || m.triggeringFailed {
 		x, y := m.moveDstX, m.moveDstY
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(x*scene.TileSize), float64(y*scene.TileSize))
