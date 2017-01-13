@@ -63,6 +63,9 @@ func (m *MapScene) runEventIfNeeded() error {
 	x, y := input.Position()
 	tx := (x - scene.GameMarginX) / scene.TileSize / scene.TileScale
 	ty := (y - scene.GameMarginTop) / scene.TileSize / scene.TileScale
+	if tx < 0 || scene.TileXNum <= tx || ty < 0 || scene.TileYNum <= ty {
+		return nil
+	}
 	m.moveDstX = tx
 	m.moveDstY = ty
 	result, err := m.gameState.Map().TryRunDirectEvent(tx, ty)
