@@ -310,8 +310,11 @@ type CommandArgsTintScreen struct {
 }
 
 type CommandArgsMoveCharacter struct {
-	Dir      Dir `json:dir`
-	Distance int `json:distance`
+	Type     MoveCharacterType `json:type`
+	Dir      Dir               `json:dir`
+	Distance int               `json:distance`
+	X        int               `json:x`
+	Y        int               `json:y`
 }
 
 type CommandArgsTurnCharacter struct {
@@ -381,11 +384,11 @@ func (c *CommandArgsSetCharacterProperty) UnmarshalJSON(data []uint8) error {
 }
 
 type CommandArgsSetCharacterImage struct {
-	Image             string `json:"image"`
-	ImageIndex        int    `json:"imageIndex"`
-	Frame             int    `json:"frame"`
-	Dir               Dir    `json:"dir"`
-	UseFrameAndDir    bool   `json:"useFrameAndDir"`
+	Image          string `json:"image"`
+	ImageIndex     int    `json:"imageIndex"`
+	Frame          int    `json:"frame"`
+	Dir            Dir    `json:"dir"`
+	UseFrameAndDir bool   `json:"useFrameAndDir"`
 }
 
 type CommandArgsSetInnerVariable struct {
@@ -427,6 +430,17 @@ type SetVariableCharacterType string
 
 const (
 	SetVariableCharacterTypeDirection SetVariableCharacterType = "direction"
+)
+
+type MoveCharacterType string
+
+const (
+	MoveCharacterTypeDirection MoveCharacterType = "direction"
+	MoveCharacterTypeTarget    MoveCharacterType = "target"
+	MoveCharacterTypeForward   MoveCharacterType = "forward"
+	MoveCharacterTypeBackward  MoveCharacterType = "backward"
+	MoveCharacterTypeToward    MoveCharacterType = "toward"
+	MoveCharacterTypeRandom    MoveCharacterType = "random"
 )
 
 type SetCharacterPropertyType string
