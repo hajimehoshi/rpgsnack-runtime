@@ -310,11 +310,15 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 			return true, nil
 		}
 		if i.moveCharacterState == nil {
-			i.moveCharacterState = newMoveCharacterState(
+			m, err := newMoveCharacterState(
 				i.gameState,
 				ch,
 				c.Args.(*data.CommandArgsMoveCharacter),
 				i.routeSkip)
+			if err != nil {
+				return false, err
+			}
+			i.moveCharacterState = m
 		}
 		if err := i.moveCharacterState.Update(); err != nil {
 			return false, err

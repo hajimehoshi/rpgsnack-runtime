@@ -415,9 +415,9 @@
                       {
                         "name": "move_character",
                         "args": {
-                          "type": "direction",
-                          "dir":      0,
-                          "distance": 1
+                          "type": "target",
+                          "x":    1,
+                          "y":    2
                         }
                       },
                       {
@@ -429,9 +429,9 @@
                       {
                         "name": "move_character",
                         "args": {
-                          "type": "direction",
-                          "dir":      2,
-                          "distance": 1
+                          "type": "target",
+                          "x":    1,
+                          "y":    8
                         }
                       },
                       {

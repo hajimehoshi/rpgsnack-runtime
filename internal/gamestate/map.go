@@ -27,12 +27,13 @@ import (
 )
 
 type passableOnMap struct {
-	self *character.Character
-	m    *Map
+	self             *character.Character
+	ignoreCharacters bool
+	m                *Map
 }
 
 func (p *passableOnMap) At(x, y int) (bool, error) {
-	return p.m.passable(p.self, x, y)
+	return p.m.passable(p.self, x, y, p.ignoreCharacters)
 }
 
 type Map struct {
@@ -330,7 +331,7 @@ func (m *Map) passableTile(x, y int) (bool, error) {
 	return false, nil
 }
 
-func (m *Map) passable(self *character.Character, x, y int) (bool, error) {
+func (m *Map) passable(self *character.Character, x, y int, ignoreCharacters bool) (bool, error) {
 	if x < 0 {
 		return false, nil
 	}
@@ -352,6 +353,9 @@ func (m *Map) passable(self *character.Character, x, y int) (bool, error) {
 	}
 	if !p {
 		return false, nil
+	}
+	if ignoreCharacters {
+		return true, nil
 	}
 	e := m.eventAt(x, y)
 	if e != nil && !e.Through() {
@@ -394,7 +398,7 @@ func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
 		return false, nil
 	}
 	event := m.eventAt(x, y)
-	p, err := m.passable(m.player, x, y)
+	p, err := m.passable(m.player, x, y, false)
 	if err != nil {
 		return false, err
 	}
