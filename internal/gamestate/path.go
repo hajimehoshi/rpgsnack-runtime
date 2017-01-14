@@ -31,7 +31,11 @@ const (
 	routeCommandTurnLeft
 )
 
-func calcPath(passable func(x, y int) (bool, error), startX, startY, goalX, goalY int) ([]routeCommand, int, int, error) {
+type passable interface {
+	At(x, y int) (bool, error)
+}
+
+func calcPath(passable passable, startX, startY, goalX, goalY int) ([]routeCommand, int, int, error) {
 	type pos struct {
 		X, Y int
 	}
@@ -47,7 +51,7 @@ func calcPath(passable func(x, y int) (bool, error), startX, startY, goalX, goal
 				{p.X, p.Y - 1},
 			}
 			for _, s := range successors {
-				pa, err := passable(s.X, s.Y)
+				pa, err := passable.At(s.X, s.Y)
 				if err != nil {
 					return nil, 0, 0, err
 				}
@@ -106,7 +110,7 @@ func calcPath(passable func(x, y int) (bool, error), startX, startY, goalX, goal
 			panic("not reach")
 		}
 	}
-	lastP, err := passable(goalX, goalY)
+	lastP, err := passable.At(goalX, goalY)
 	if err != nil {
 		return nil, 0, 0, err
 	}

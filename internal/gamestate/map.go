@@ -26,6 +26,15 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
 
+type passableOnMap struct {
+	self *character.Character
+	m    *Map
+}
+
+func (p *passableOnMap) At(x, y int) (bool, error) {
+	return p.m.passable(p.self, x, y)
+}
+
 type Map struct {
 	game                        *Game
 	player                      *character.Character
@@ -403,8 +412,9 @@ func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
 		}
 	}
 	px, py := m.player.Position()
-	path, lastPlayerX, lastPlayerY, err := calcPath(func(x, y int) (bool, error) {
-		return m.passable(m.player, x, y)
+	path, lastPlayerX, lastPlayerY, err := calcPath(&passableOnMap{
+		self: m.player,
+		m:    m,
 	}, px, py, x, y)
 	if err != nil {
 		return false, err
