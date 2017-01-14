@@ -289,9 +289,9 @@
                       "name": "tint_screen",
                       "args": {
                         "red":   255,
-                        "green": 0,
-                        "blue":  0,
-                        "gray":  128,
+                        "green": 255,
+                        "blue":  255,
+                        "gray":  0,
                         "time":  20,
                         "wait":  true
                       }

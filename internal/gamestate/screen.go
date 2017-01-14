@@ -16,7 +16,19 @@ package gamestate
 
 import (
 	"github.com/hajimehoshi/ebiten"
+
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
+
+var emptyImage *ebiten.Image
+
+func init() {
+	img, err := ebiten.NewImage(16, 16, ebiten.FilterNearest)
+	if err != nil {
+		panic(err)
+	}
+	emptyImage = img
+}
 
 type tint struct {
 	red   float64
@@ -78,46 +90,64 @@ func (s *Screen) isFadedOut() bool {
 	return s.fadedOut
 }
 
-func (s *Screen) Apply(colorM *ebiten.ColorM) {
+func (s *Screen) Draw(screen *ebiten.Image, img *ebiten.Image, op *ebiten.DrawImageOptions) error {
+	fadeRate := 0.0
 	if s.fadedOut {
-		colorM.Scale(0, 0, 0, 1)
-		return
+		fadeRate = 1
+	} else {
+		if !s.currentTint.isZero() {
+			if s.currentTint.gray != 0 {
+				op.ColorM.ChangeHSV(0, 1-s.currentTint.gray, 1)
+			}
+			rs, gs, bs := 1.0, 1.0, 1.0
+			if s.currentTint.red < 0 {
+				rs = 1 - -s.currentTint.red
+			}
+			if s.currentTint.green < 0 {
+				gs = 1 - -s.currentTint.green
+			}
+			if s.currentTint.blue < 0 {
+				bs = 1 - -s.currentTint.blue
+			}
+			op.ColorM.Scale(rs, gs, bs, 1)
+			rt, gt, bt := 0.0, 0.0, 0.0
+			if s.currentTint.red > 0 {
+				rt = s.currentTint.red
+			}
+			if s.currentTint.green > 0 {
+				gt = s.currentTint.green
+			}
+			if s.currentTint.blue > 0 {
+				bt = s.currentTint.blue
+			}
+			op.ColorM.Translate(rt, gt, bt, 0)
+		}
+		if s.fadeInCount > 0 {
+			fadeRate = float64(s.fadeInCount) / float64(s.fadeInMaxCount)
+		}
+		if s.fadeOutCount > 0 {
+			fadeRate = 1 - float64(s.fadeOutCount)/float64(s.fadeOutMaxCount)
+		}
 	}
-	if !s.currentTint.isZero() {
-		if s.currentTint.gray != 0 {
-			colorM.ChangeHSV(0, 1-s.currentTint.gray, 1)
-		}
-		rs, gs, bs := 1.0, 1.0, 1.0
-		if s.currentTint.red < 0 {
-			rs = 1 - -s.currentTint.red
-		}
-		if s.currentTint.green < 0 {
-			gs = 1 - -s.currentTint.green
-		}
-		if s.currentTint.blue < 0 {
-			bs = 1 - -s.currentTint.blue
-		}
-		colorM.Scale(rs, gs, bs, 1)
-		rt, gt, bt := 0.0, 0.0, 0.0
-		if s.currentTint.red > 0 {
-			rt = s.currentTint.red
-		}
-		if s.currentTint.green > 0 {
-			gt = s.currentTint.green
-		}
-		if s.currentTint.blue > 0 {
-			bt = s.currentTint.blue
-		}
-		colorM.Translate(rt, gt, bt, 0)
+	if err := screen.DrawImage(img, op); err != nil {
+		return err
 	}
-	if s.fadeInCount > 0 {
-		rate := 1 - float64(s.fadeInCount)/float64(s.fadeInMaxCount)
-		colorM.Scale(rate, rate, rate, 1)
+	if fadeRate > 0 {
+		op := &ebiten.DrawImageOptions{}
+		w, h := emptyImage.Size()
+		targetW, targetH := img.Size()
+		sx := float64(targetW) / float64(w)
+		sy := float64(targetH) / float64(h)
+		op.GeoM.Scale(sx, sy)
+		op.GeoM.Scale(scene.TileScale, scene.TileScale)
+		op.GeoM.Translate(scene.GameMarginX, scene.GameMarginTop)
+		op.ColorM.Translate(0, 0, 0, 1)
+		op.ColorM.Scale(1, 1, 1, fadeRate)
+		if err := screen.DrawImage(emptyImage, op); err != nil {
+			return err
+		}
 	}
-	if s.fadeOutCount > 0 {
-		rate := float64(s.fadeOutCount) / float64(s.fadeOutMaxCount)
-		colorM.Scale(rate, rate, rate, 1)
-	}
+	return nil
 }
 
 func (s *Screen) Update() error {

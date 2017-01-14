@@ -193,8 +193,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 	op = &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(scene.TileScale, scene.TileScale)
 	op.GeoM.Translate(scene.GameMarginX, scene.GameMarginTop)
-	m.gameState.Screen().Apply(&op.ColorM)
-	if err := screen.DrawImage(m.tilesImage, op); err != nil {
+	if err := m.gameState.Screen().Draw(screen, m.tilesImage, op); err != nil {
 		return err
 	}
 	if m.gameState.Map().IsPlayerMovingByUserInput() || m.triggeringFailed {
