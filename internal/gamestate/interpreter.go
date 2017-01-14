@@ -25,20 +25,20 @@ import (
 )
 
 type Interpreter struct {
-	id              int
-	gameState       *Game
-	mapID           int // Note: This doesn't make sense when eventID == -1
-	roomID          int // Note: This doesn't make sense when eventID == -1
-	eventID         int
-	commandIterator *commanditerator.CommandIterator
-	waitingCount    int
-	waitingCommand  bool
-	distanceCount   int
-	repeat          bool
-	sub             *Interpreter
-	route           bool // True when used for event routing property.
-	routeSkip       bool
-	shouldGoToTitle bool
+	id                 int
+	gameState          *Game
+	mapID              int // Note: This doesn't make sense when eventID == -1
+	roomID             int // Note: This doesn't make sense when eventID == -1
+	eventID            int
+	commandIterator    *commanditerator.CommandIterator
+	waitingCount       int
+	waitingCommand     bool
+	moveCharacterState *moveCharacterState
+	repeat             bool
+	sub                *Interpreter
+	route              bool // True when used for event routing property.
+	routeSkip          bool
+	shouldGoToTitle    bool
 }
 
 func NewInterpreter(gameState *Game, mapID, roomID, eventID int, commands []*data.Command) *Interpreter {
@@ -309,83 +309,20 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 			i.commandIterator.Advance()
 			return true, nil
 		}
-		// Check IsMoving() first since the character might be moving at this time.
-		if ch.IsMoving() {
+		if i.moveCharacterState == nil {
+			i.moveCharacterState = newMoveCharacterState(
+				i.gameState,
+				ch,
+				c.Args.(*data.CommandArgsMoveCharacter),
+				i.routeSkip)
+		}
+		if err := i.moveCharacterState.Update(); err != nil {
+			return false, err
+		}
+		if !i.moveCharacterState.IsTerminated() {
 			return false, nil
 		}
-		args := c.Args.(*data.CommandArgsMoveCharacter)
-		if i.distanceCount == 0 {
-			switch args.Type {
-			case data.MoveCharacterTypeDirection, data.MoveCharacterTypeForward, data.MoveCharacterTypeBackward:
-				i.distanceCount = args.Distance
-			case data.MoveCharacterTypeTarget:
-				// TODO: Calc path
-				println(fmt.Sprintf("not implemented yet (move_character): type %s", args.Type))
-			case data.MoveCharacterTypeRandom, data.MoveCharacterTypeToward:
-				i.distanceCount = 1
-
-			default:
-				panic("not reach")
-			}
-		}
-		if i.distanceCount > 0 && !i.waitingCommand {
-			dx, dy := ch.Position()
-			var dir data.Dir
-			switch args.Type {
-			case data.MoveCharacterTypeDirection:
-				dir = args.Dir
-			case data.MoveCharacterTypeTarget:
-				println(fmt.Sprintf("not implemented yet (move_character): type %s", args.Type))
-			case data.MoveCharacterTypeForward:
-				dir = ch.Dir()
-			case data.MoveCharacterTypeBackward:
-				println(fmt.Sprintf("not implemented yet (move_character): type %s", args.Type))
-				dir = ch.Dir()
-			case data.MoveCharacterTypeToward:
-				println(fmt.Sprintf("not implemented yet (move_character): type %s", args.Type))
-				dir = ch.Dir()
-			case data.MoveCharacterTypeRandom:
-				println(fmt.Sprintf("not implemented yet (move_character): type %s", args.Type))
-				dir = ch.Dir()
-			default:
-				panic("not reach")
-			}
-			switch dir {
-			case data.DirUp:
-				dy--
-			case data.DirRight:
-				dx++
-			case data.DirDown:
-				dy++
-			case data.DirLeft:
-				dx--
-			default:
-				panic("not reach")
-			}
-			p, err := i.gameState.Map().passable(ch, dx, dy)
-			if err != nil {
-				return false, err
-			}
-			if !p {
-				if !i.routeSkip {
-					return false, nil
-				}
-				// Skip
-				ch.Turn(args.Dir)
-				i.waitingCommand = false
-				i.distanceCount = 0
-				i.commandIterator.Advance()
-				return true, nil
-			}
-			ch.Move(args.Dir)
-			i.waitingCommand = true
-			return false, nil
-		}
-		i.distanceCount--
-		i.waitingCommand = false
-		if i.distanceCount > 0 {
-			return false, nil
-		}
+		i.moveCharacterState = nil
 		i.commandIterator.Advance()
 	case data.CommandNameTurnCharacter:
 		ch := i.character(i.eventID)
