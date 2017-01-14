@@ -54,12 +54,18 @@ func newMoveCharacterState(gameState *Game, character *character.Character, args
 }
 
 func (m *moveCharacterState) IsTerminated() bool {
+	if m.character.IsMoving() {
+		return false
+	}
 	return m.terminated
 }
 
 func (m *moveCharacterState) Update() error {
 	// Check IsMoving() first since the character might be moving at this time.
 	if m.character.IsMoving() {
+		return nil
+	}
+	if m.terminated {
 		return nil
 	}
 	if m.distanceCount > 0 && !m.waiting {
