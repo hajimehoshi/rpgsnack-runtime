@@ -135,11 +135,11 @@ func (m *moveCharacterState) Update() error {
 			return err
 		}
 		if !p {
+			m.character.Turn(dir)
 			if !m.routeSkip {
 				return nil
 			}
 			// Skip
-			m.character.Turn(dir)
 			m.terminated = true
 			m.distanceCount = 0
 			// TODO: Can continue Update.
