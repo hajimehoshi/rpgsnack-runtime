@@ -208,7 +208,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 		}
 	}
 	if err := m.gameState.Windows().Draw(screen); err != nil {
-		return nil
+		return err
 	}
 	msg := fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS())
 	if err := font.DrawText(screen, msg, 0, 0, scene.TextScale, color.White); err != nil {
