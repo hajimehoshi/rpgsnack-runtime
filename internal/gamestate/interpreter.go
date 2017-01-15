@@ -302,10 +302,19 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 		}
 		i.commandIterator.Advance()
 	case data.CommandNamePlayBGM:
-		println(fmt.Sprintf("not implemented yet: %s", c.Name))
+		args := c.Args.(*data.CommandArgsPlayBGM)
+		v := float64(args.Volume) / data.MaxVolume
+		if err := audio.PlayBGM(args.Name, v); err != nil {
+			return false, err
+		}
+		if args.FadeTime > 0 {
+			println(fmt.Sprintf("fade time is not used so far: %d"), args.FadeTime)
+		}
 		i.commandIterator.Advance()
 	case data.CommandNameStopBGM:
-		println(fmt.Sprintf("not implemented yet: %s", c.Name))
+		if err := audio.StopBGM(); err != nil {
+			return false, err
+		}
 		i.commandIterator.Advance()
 	case data.CommandNameGotoTitle:
 		i.shouldGoToTitle = true

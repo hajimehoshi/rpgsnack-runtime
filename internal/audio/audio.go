@@ -47,8 +47,19 @@ func PlaySE(path string, volume float64) error {
 	return theAudio.PlaySE(path, volume)
 }
 
+func PlayBGM(path string, volume float64) error {
+	return theAudio.PlayBGM(path, volume)
+}
+
+func StopBGM() error {
+	return theAudio.StopBGM()
+}
+
 type audio struct {
-	context *eaudio.Context
+	context     *eaudio.Context
+	players     map[string]*eaudio.Player
+	playing     *eaudio.Player
+	playingName string
 }
 
 func newAudio() (*audio, error) {
@@ -58,6 +69,7 @@ func newAudio() (*audio, error) {
 	}
 	return &audio{
 		context: context,
+		players: map[string]*eaudio.Player{},
 	}, nil
 }
 
@@ -65,8 +77,8 @@ func (a *audio) Update() error {
 	return a.context.Update()
 }
 
-func (a *audio) PlaySE(path string, volume float64) error {
-	bin := assets.MustAsset("audio/se/" + path + ".wav")
+func (a *audio) PlaySE(name string, volume float64) error {
+	bin := assets.MustAsset("audio/se/" + name + ".wav")
 	s, err := wav.Decode(a.context, &byteStream{bytes.NewReader(bin)})
 	if err != nil {
 		return err
@@ -77,4 +89,48 @@ func (a *audio) PlaySE(path string, volume float64) error {
 	}
 	p.SetVolume(volume)
 	return p.Play()
+}
+
+func (a *audio) PlayBGM(name string, volume float64) error {
+	p, ok := a.players[name]
+	if !ok {
+		bin := assets.MustAsset("audio/bgm/" + name + ".wav")
+		s, err := wav.Decode(a.context, &byteStream{bytes.NewReader(bin)})
+		if err != nil {
+			return err
+		}
+		ss := eaudio.NewInfiniteLoop(s, s.Size())
+		player, err := eaudio.NewPlayer(a.context, ss)
+		if err != nil {
+			return err
+		}
+		a.players[name] = player
+		p = player
+	}
+	if a.playingName == name {
+		a.playing.SetVolume(volume)
+		return nil
+	}
+	if err := p.Rewind(); err != nil {
+		return err
+	}
+	if err := p.Play(); err != nil {
+		return err
+	}
+	p.SetVolume(volume)
+	a.playing = p
+	a.playingName = name
+	return nil
+}
+
+func (a *audio) StopBGM() error {
+	if a.playing == nil {
+		return nil
+	}
+	if err := a.playing.Pause(); err != nil {
+		return err
+	}
+	a.playing = nil
+	a.playingName = ""
+	return nil
 }

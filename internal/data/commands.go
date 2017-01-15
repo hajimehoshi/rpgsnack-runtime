@@ -17,7 +17,6 @@ package data
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 )
 
 type Command struct {
@@ -124,9 +123,12 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 		}
 		c.Args = args
 	case CommandNamePlayBGM:
-		log.Printf("not implemented command: %s", c.Name)
+		var args *CommandArgsPlayBGM
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	case CommandNameStopBGM:
-		log.Printf("not implemented command: %s", c.Name)
 	case CommandNameGotoTitle:
 	case CommandNameMoveCharacter:
 		var args *CommandArgsMoveCharacter
@@ -316,6 +318,12 @@ type CommandArgsTintScreen struct {
 type CommandArgsPlaySE struct {
 	Name   string `json:"key"` // TODO: Rename
 	Volume int    `json:"volume"`
+}
+
+type CommandArgsPlayBGM struct {
+	Name     string `json:"key"` // TODO: Rename
+	Volume   int    `json:"volume"`
+	FadeTime int    `json:"fadeTime"`
 }
 
 type CommandArgsMoveCharacter struct {
