@@ -315,7 +315,7 @@ func (c *Character) Update() error {
 		}
 		c.x = nx
 		c.y = ny
-		if !c.stepping {
+		if !c.stepping && c.walking {
 			c.prevFrame = c.frame
 			c.frame = 1
 		}
