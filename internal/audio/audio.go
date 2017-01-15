@@ -15,8 +15,6 @@
 package audio
 
 import (
-	"bytes"
-
 	eaudio "github.com/hajimehoshi/ebiten/audio"
 	"github.com/hajimehoshi/ebiten/audio/wav"
 
@@ -73,7 +71,7 @@ func (a *audio) Update() error {
 
 func (a *audio) PlaySE(name string, volume float64) error {
 	bin := assets.MustAsset("audio/se/" + name + ".wav")
-	s, err := wav.Decode(a.context, eaudio.NopCloser(bytes.NewReader(bin)))
+	s, err := wav.Decode(a.context, eaudio.BytesReadSeekCloser(bin))
 	if err != nil {
 		return err
 	}
@@ -89,7 +87,7 @@ func (a *audio) PlayBGM(name string, volume float64) error {
 	p, ok := a.players[name]
 	if !ok {
 		bin := assets.MustAsset("audio/bgm/" + name + ".wav")
-		s, err := wav.Decode(a.context, eaudio.NopCloser(bytes.NewReader(bin)))
+		s, err := wav.Decode(a.context, eaudio.BytesReadSeekCloser(bin))
 		if err != nil {
 			return err
 		}
