@@ -230,15 +230,21 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 		args := c.Args.(*data.CommandArgsSetSwitch)
 		i.gameState.variables.SetSwitchValue(args.ID, args.Value)
 		i.commandIterator.Advance()
+		// Suspend executing to give other events chances to update their pages.
+		return false, nil
 	case data.CommandNameSetSelfSwitch:
 		args := c.Args.(*data.CommandArgsSetSelfSwitch)
 		m, r := i.gameState.Map().mapID, i.gameState.Map().roomID
 		i.gameState.variables.SetSelfSwitchValue(m, r, i.eventID, args.ID, args.Value)
 		i.commandIterator.Advance()
+		// Suspend executing to give other events chances to update their pages.
+		return false, nil
 	case data.CommandNameSetVariable:
 		args := c.Args.(*data.CommandArgsSetVariable)
 		i.setVariable(args.ID, args.Op, args.ValueType, args.Value)
 		i.commandIterator.Advance()
+		// Suspend executing to give other events chances to update their pages.
+		return false, nil
 	case data.CommandNameTransfer:
 		args := c.Args.(*data.CommandArgsTransfer)
 		if !i.waitingCommand {
