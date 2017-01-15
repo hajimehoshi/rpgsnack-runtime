@@ -23,12 +23,6 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 )
 
-type byteStream struct {
-	*bytes.Reader
-}
-
-func (b *byteStream) Close() error { return nil }
-
 var theAudio = &audio{}
 
 func init() {
@@ -79,7 +73,7 @@ func (a *audio) Update() error {
 
 func (a *audio) PlaySE(name string, volume float64) error {
 	bin := assets.MustAsset("audio/se/" + name + ".wav")
-	s, err := wav.Decode(a.context, &byteStream{bytes.NewReader(bin)})
+	s, err := wav.Decode(a.context, eaudio.NopCloser(bytes.NewReader(bin)))
 	if err != nil {
 		return err
 	}
@@ -95,7 +89,7 @@ func (a *audio) PlayBGM(name string, volume float64) error {
 	p, ok := a.players[name]
 	if !ok {
 		bin := assets.MustAsset("audio/bgm/" + name + ".wav")
-		s, err := wav.Decode(a.context, &byteStream{bytes.NewReader(bin)})
+		s, err := wav.Decode(a.context, eaudio.NopCloser(bytes.NewReader(bin)))
 		if err != nil {
 			return err
 		}
