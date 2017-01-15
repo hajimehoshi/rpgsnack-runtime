@@ -316,12 +316,12 @@ type CommandArgsTintScreen struct {
 }
 
 type CommandArgsPlaySE struct {
-	Name   string `json:"key"` // TODO: Rename
+	Name   string `json:"name"`
 	Volume int    `json:"volume"`
 }
 
 type CommandArgsPlayBGM struct {
-	Name     string `json:"key"` // TODO: Rename
+	Name     string `json:"name"`
 	Volume   int    `json:"volume"`
 	FadeTime int    `json:"fadeTime"`
 }
