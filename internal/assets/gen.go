@@ -13,7 +13,7 @@
 // limitations under the License.
 
 //go:generate go run tools/compact_mplus.go
-//go:generate go-bindata -nocompress -pkg=assets -ignore=(/\.|mplus\.png$) images
+//go:generate go-bindata -pkg=assets -ignore=(/\.|mplus\.png$) audio/bgm audio/se images
 //go:generate gofmt -s -w .
 
 package assets
