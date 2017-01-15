@@ -30,7 +30,9 @@
       "ab610c8c-578a-4876-92db-6398931087b7": "変数テスト: Constant: \\v[1] Random: \\v[2]",
       "7d7bb542-cead-4989-96c5-3ab0e48710fd": "スキップありのルート指定のテスト\nVisibilityも変わるよ",
       "828e2dd3-a0c9-4aad-88f6-d9c6f0a1d79e": "タイトルへ戻ります",
-      "1b202433-d8ba-4bf0-9a97-c84cb73380b3": "ダイレクトタッチイベントです"
+      "3d1e6c63-983a-46da-88de-036fd651ca7d": "選択肢A",
+      "66a533ed-7556-4063-af8a-5d96bbfccc6e": "選択肢B",
+      "b384c510-c28a-4248-90fb-1148afd3694c": "キャンセル"
     }
   },
   "maps": [
@@ -615,11 +617,33 @@
                   "trigger":    "direct",
                   "commands": [
                     {
-                      "name": "show_message",
+                      "name": "show_choices",
                       "args": {
-                        "content": "1b202433-d8ba-4bf0-9a97-c84cb73380b3",
-                        "eventId": -1
-                      }
+                        "choices": [
+                          "3d1e6c63-983a-46da-88de-036fd651ca7d",
+                          "66a533ed-7556-4063-af8a-5d96bbfccc6e",
+                          "b384c510-c28a-4248-90fb-1148afd3694c"
+                        ]
+                      },
+                      "branches": [
+                        [
+                          {
+                            "name": "show_message",
+                            "args": {
+                              "content": "3d1e6c63-983a-46da-88de-036fd651ca7d"
+                            }
+                          }
+                        ],
+                        [
+                          {
+                            "name": "show_message",
+                            "args": {
+                              "content": "66a533ed-7556-4063-af8a-5d96bbfccc6e"
+                            }
+                          }
+                        ],
+                        []
+                      ]
                     }
                   ]
                 }

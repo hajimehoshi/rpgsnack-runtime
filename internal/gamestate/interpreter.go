@@ -189,11 +189,7 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 			args := c.Args.(*data.CommandArgsShowMessage)
 			content := data.Current().Texts.Get(language.Und, args.ContentID)
 			if ch := i.character(args.EventID); ch != nil {
-				//x, y := ch.Position()
 				content = i.gameState.ParseMessageSyntax(content)
-				/*_, h := ch.Size()
-				wx := x*scene.TileSize + scene.TileSize/2
-				wy := y*scene.TileSize - h + scene.TileSize*/
 				i.gameState.windows.ShowMessage(content, ch, i.id)
 				i.waitingCommand = true
 				return false, nil

@@ -92,7 +92,6 @@ func (b *Windows) CloseAll() {
 		}
 		balloon.close()
 	}
-	b.hasChosenIndex = false
 }
 
 func (b *Windows) IsBusy(interpreterID int) bool {
@@ -198,6 +197,7 @@ func (b *Windows) Update() error {
 				}
 				balloon.close()
 			}
+			b.hasChosenIndex = false
 		}
 	} else if b.choosing && b.isOpened(0) && input.Triggered() {
 		ymax := choiceBalloonsMaxY
