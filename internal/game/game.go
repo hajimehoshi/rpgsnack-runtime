@@ -19,6 +19,7 @@ import (
 	"github.com/hajimehoshi/ebiten/ebitenutil"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
@@ -68,6 +69,9 @@ func (g *Game) Update() error {
 		}
 	}
 	input.Update()
+	if err := audio.Update(); err != nil {
+		return err
+	}
 	return g.sceneManager.Update()
 }
 

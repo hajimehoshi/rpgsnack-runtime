@@ -118,7 +118,11 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 		}
 		c.Args = args
 	case CommandNamePlaySE:
-		log.Printf("not implemented command: %s", c.Name)
+		var args *CommandArgsPlaySE
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	case CommandNamePlayBGM:
 		log.Printf("not implemented command: %s", c.Name)
 	case CommandNameStopBGM:
@@ -307,6 +311,11 @@ type CommandArgsTintScreen struct {
 	Gray  int  `json:"gray"`
 	Time  int  `json:"time"`
 	Wait  bool `json:"wait"`
+}
+
+type CommandArgsPlaySE struct {
+	Name   string `json:"key"` // TODO: Rename
+	Volume int    `json:"volume"`
 }
 
 type CommandArgsMoveCharacter struct {

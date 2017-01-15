@@ -19,6 +19,7 @@ import (
 
 	"golang.org/x/text/language"
 
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/commanditerator"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
@@ -294,7 +295,11 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 		i.waitingCommand = false
 		i.commandIterator.Advance()
 	case data.CommandNamePlaySE:
-		println(fmt.Sprintf("not implemented yet: %s", c.Name))
+		args := c.Args.(*data.CommandArgsPlaySE)
+		v := float64(args.Volume) / data.MaxVolume
+		if err := audio.PlaySE(args.Name, v); err != nil {
+			return false, err
+		}
 		i.commandIterator.Advance()
 	case data.CommandNamePlayBGM:
 		println(fmt.Sprintf("not implemented yet: %s", c.Name))

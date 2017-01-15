@@ -93,3 +93,5 @@ func (s Speed) Frames() int {
 		panic("not reach")
 	}
 }
+
+const MaxVolume = 100
