@@ -25,6 +25,7 @@ const (
 	choiceBalloonHeight = 20
 	choiceBalloonsMaxY  = scene.TileYNum*scene.TileSize +
 		(scene.GameMarginTop+scene.GameMarginBottom)/scene.TileScale
+	chosenBalloonWaitingFrames = 5
 )
 
 type Character interface {
@@ -215,7 +216,7 @@ func (b *Windows) Update() error {
 			}
 			balloon.close()
 		}
-		b.chosenBalloonWaitingCount = 30
+		b.chosenBalloonWaitingCount = chosenBalloonWaitingFrames
 		b.choosing = false
 		b.choosingInterpreterID = 0
 		b.hasChosenIndex = true
