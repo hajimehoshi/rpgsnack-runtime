@@ -11,3 +11,8 @@ RPGSnack Runtime
 ## How to specify a JSON file to run
 
 Run `go run main.go /path/to/json/file`
+
+## How to create .framework file for iOS
+
+1. Install gomobile with `go get golang.org/x/mobile/cmd/...`
+2. Run `gomobile bind -target ios -o ./Mobile.framework github.com/hajimehoshi/rpgsnack-runtime/mobile`
