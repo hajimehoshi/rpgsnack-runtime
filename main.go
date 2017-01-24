@@ -24,21 +24,6 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/game"
 )
 
-var theGame *game.Game
-
-func update(screen *ebiten.Image) error {
-	if err := theGame.Update(); err != nil {
-		return err
-	}
-	if ebiten.IsRunningSlowly() {
-		return nil
-	}
-	if err := theGame.Draw(screen); err != nil {
-		return err
-	}
-	return nil
-}
-
 var cpuProfile = flag.String("cpuprofile", "", "write cpu profile to file")
 
 func main() {
@@ -57,10 +42,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	theGame = g
 	w, h := game.Size()
-	title := game.Title()
-	if err := ebiten.Run(update, w, h, game.Scale(), title); err != nil {
+	if err := ebiten.Run(g.Update, w, h, game.Scale(), game.Title()); err != nil {
 		panic(err)
 	}
 }
