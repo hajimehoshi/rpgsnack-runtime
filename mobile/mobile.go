@@ -17,12 +17,17 @@ package mobile
 import (
 	"github.com/hajimehoshi/ebiten/mobile"
 
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/game"
 )
 
 var (
 	running bool
 )
+
+func SetData(jsonData []uint8) {
+	data.SetData(jsonData)
+}
 
 func ScreenWidth() int {
 	w, _ := game.Size()
