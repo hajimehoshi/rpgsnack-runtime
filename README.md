@@ -15,4 +15,9 @@ Run `go run main.go /path/to/json/file`
 ## How to create .framework file for iOS
 
 1. Install gomobile with `go get golang.org/x/mobile/cmd/...`
-2. Run `gomobile bind -target ios -o ./Mobile.framework github.com/hajimehoshi/rpgsnack-runtime/mobile`
+2. Run `gomobile bind -target ios -o ./RPGSnackRuntime.framework github.com/hajimehoshi/rpgsnack-runtime/mobile`
+
+## How to create .aar file for Android
+
+1. Install gomobile with `go get golang.org/x/mobile/cmd/...`
+2. Run `gomobile bind -target android -javapkg net.rpgsnack.runtime -o ./rpgsnack_runtime.aar github.com/hajimehoshi/rpgsnack-runtime/mobile`
