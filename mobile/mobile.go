@@ -26,7 +26,11 @@ var (
 )
 
 func SetData(jsonData []uint8) {
-	data.SetData(jsonData)
+	// Copy data here since the given data is just a reference and might be
+	// broken in the mobile side.
+	d := make([]uint8, len(jsonData))
+	copy(d, jsonData)
+	data.SetData(d)
 }
 
 func ScreenWidth() int {
