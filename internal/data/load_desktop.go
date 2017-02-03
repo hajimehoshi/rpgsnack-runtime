@@ -14,6 +14,7 @@
 
 // +build !android
 // +build !ios
+// +build !js
 
 package data
 

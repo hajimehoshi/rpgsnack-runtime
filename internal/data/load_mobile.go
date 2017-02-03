@@ -13,6 +13,7 @@
 // limitations under the License.
 
 // +build android ios
+// +build !js
 
 package data
 
