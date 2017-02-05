@@ -22,9 +22,7 @@ import (
 )
 
 const (
-	choiceBalloonHeight = 20
-	choiceBalloonsMaxY  = scene.TileYNum*scene.TileSize +
-		(scene.GameMarginTop+scene.GameMarginBottom)/scene.TileScale
+	choiceBalloonHeight        = 20
 	chosenBalloonWaitingFrames = 5
 )
 
@@ -44,10 +42,6 @@ type Windows struct {
 	hasChosenIndex            bool
 }
 
-func choiceBalloonsMinY(num int) int {
-	return choiceBalloonsMaxY - num*choiceBalloonHeight
-}
-
 func (b *Windows) ChosenIndex() int {
 	return b.chosenIndex
 }
@@ -64,8 +58,9 @@ func (b *Windows) ShowMessage(content string, character Character, interpreterID
 	b.nextBalloon = newBalloonWithArrow(character, content, interpreterID)
 }
 
-func (b *Windows) ShowChoices(choices []string, interpreterID int) {
-	ymin := choiceBalloonsMinY(len(choices))
+func (b *Windows) ShowChoices(sceneManager *scene.SceneManager, choices []string, interpreterID int) {
+	_, h := sceneManager.Size()
+	ymin := h/scene.TileScale - len(choices)*choiceBalloonHeight
 	b.choiceBalloons = nil
 	for i, choice := range choices {
 		x := 0
@@ -178,7 +173,7 @@ func (b *Windows) isAnimating(interpreterID int) bool {
 	return false
 }
 
-func (b *Windows) Update() error {
+func (b *Windows) Update(sceneManager *scene.SceneManager) error {
 	if !b.choosing {
 		// 0 means to check all balloons.
 		// TODO: Don't use magic numbers.
@@ -201,8 +196,9 @@ func (b *Windows) Update() error {
 			b.hasChosenIndex = false
 		}
 	} else if b.choosing && b.isOpened(0) && input.Triggered() {
-		ymax := choiceBalloonsMaxY
-		ymin := choiceBalloonsMinY(len(b.choiceBalloons))
+		_, h := sceneManager.Size()
+		ymax := h / scene.TileScale
+		ymin := ymax - len(b.choiceBalloons)*choiceBalloonHeight
 		_, y := input.Position()
 		y /= scene.TileScale
 		if y < ymin || ymax <= y {

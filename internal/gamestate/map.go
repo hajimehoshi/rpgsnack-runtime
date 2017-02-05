@@ -175,7 +175,7 @@ func (m *Map) removeRoutes(eventID int) {
 	}
 }
 
-func (m *Map) Update() error {
+func (m *Map) Update(sceneManager *scene.SceneManager) error {
 	is := []*Interpreter{}
 	for _, i := range m.interpreters {
 		is = append(is, i)
@@ -188,7 +188,7 @@ func (m *Map) Update() error {
 		if i.route && m.executingEventIDByUserInput == i.eventID {
 			continue
 		}
-		if err := i.Update(); err != nil {
+		if err := i.Update(sceneManager); err != nil {
 			return err
 		}
 		if !i.IsExecuting() {

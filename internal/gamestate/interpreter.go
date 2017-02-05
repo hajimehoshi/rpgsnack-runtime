@@ -23,6 +23,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/commanditerator"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
 
 type Interpreter struct {
@@ -103,13 +104,13 @@ func (i *Interpreter) createChild(eventID int, commands []*data.Command) *Interp
 	return child
 }
 
-func (i *Interpreter) doOneCommand() (bool, error) {
+func (i *Interpreter) doOneCommand(sceneManager *scene.SceneManager) (bool, error) {
 	c := i.commandIterator.Command()
 	if !i.gameState.windows.CanProceed(i.id) {
 		return false, nil
 	}
 	if i.sub != nil {
-		if err := i.sub.Update(); err != nil {
+		if err := i.sub.Update(sceneManager); err != nil {
 			return false, err
 		}
 		if !i.sub.IsExecuting() {
@@ -214,7 +215,7 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 				choice = i.gameState.ParseMessageSyntax(choice)
 				choices = append(choices, choice)
 			}
-			i.gameState.windows.ShowChoices(choices, i.id)
+			i.gameState.windows.ShowChoices(sceneManager, choices, i.id)
 			i.waitingCommand = true
 			return false, nil
 		}
@@ -466,12 +467,12 @@ func (i *Interpreter) doOneCommand() (bool, error) {
 	return true, nil
 }
 
-func (i *Interpreter) Update() error {
+func (i *Interpreter) Update(sceneManager *scene.SceneManager) error {
 	if i.commandIterator == nil {
 		return nil
 	}
 	for !i.commandIterator.IsTerminated() {
-		cont, err := i.doOneCommand()
+		cont, err := i.doOneCommand(sceneManager)
 		if err != nil {
 			return err
 		}
