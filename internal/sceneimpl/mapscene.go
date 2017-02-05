@@ -93,7 +93,7 @@ func (m *MapScene) runEventIfNeeded() error {
 	return nil
 }
 
-func (m *MapScene) Update(sceneManager *scene.SceneManager) error {
+func (m *MapScene) Update(sceneManager *scene.Manager) error {
 	if err := m.gameState.Screen().Update(); err != nil {
 		return err
 	}

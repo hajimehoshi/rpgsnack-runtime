@@ -27,7 +27,7 @@ import (
 )
 
 type Game struct {
-	sceneManager *scene.SceneManager
+	sceneManager *scene.Manager
 	loadingCh    chan error
 }
 
@@ -35,7 +35,7 @@ func New(width, height int) (*Game, error) {
 	g := &Game{}
 	g.loadGameData()
 	initScene := sceneimpl.NewTitleScene()
-	g.sceneManager = scene.NewSceneManager(width, height, initScene)
+	g.sceneManager = scene.NewManager(width, height, initScene)
 	return g, nil
 }
 

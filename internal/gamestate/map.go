@@ -175,7 +175,7 @@ func (m *Map) removeRoutes(eventID int) {
 	}
 }
 
-func (m *Map) Update(sceneManager *scene.SceneManager) error {
+func (m *Map) Update(sceneManager *scene.Manager) error {
 	is := []*Interpreter{}
 	for _, i := range m.interpreters {
 		is = append(is, i)

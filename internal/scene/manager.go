@@ -29,47 +29,47 @@ const (
 )
 
 type scene interface {
-	Update(sceneManager *SceneManager) error
+	Update(manager *Manager) error
 	Draw(screen *ebiten.Image) error
 }
 
-type SceneManager struct {
+type Manager struct {
 	width   int
 	height  int
 	current scene
 	next    scene
 }
 
-func NewSceneManager(width, height int, initScene scene) *SceneManager {
-	return &SceneManager{
+func NewManager(width, height int, initScene scene) *Manager {
+	return &Manager{
 		width:   width,
 		height:  height,
 		current: initScene,
 	}
 }
 
-func (s *SceneManager) Size() (int, int) {
-	return s.width, s.height
+func (m *Manager) Size() (int, int) {
+	return m.width, m.height
 }
 
-func (s *SceneManager) Update() error {
-	if s.next != nil {
-		s.current = s.next
-		s.next = nil
+func (m *Manager) Update() error {
+	if m.next != nil {
+		m.current = m.next
+		m.next = nil
 	}
-	if err := s.current.Update(s); err != nil {
+	if err := m.current.Update(m); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (s *SceneManager) Draw(screen *ebiten.Image) error {
-	if err := s.current.Draw(screen); err != nil {
+func (m *Manager) Draw(screen *ebiten.Image) error {
+	if err := m.current.Draw(screen); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (s *SceneManager) GoTo(next scene) {
-	s.next = next
+func (m *Manager) GoTo(next scene) {
+	m.next = next
 }

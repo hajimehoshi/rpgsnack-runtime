@@ -58,7 +58,7 @@ func (b *Windows) ShowMessage(content string, character Character, interpreterID
 	b.nextBalloon = newBalloonWithArrow(character, content, interpreterID)
 }
 
-func (b *Windows) ShowChoices(sceneManager *scene.SceneManager, choices []string, interpreterID int) {
+func (b *Windows) ShowChoices(sceneManager *scene.Manager, choices []string, interpreterID int) {
 	_, h := sceneManager.Size()
 	ymin := h/scene.TileScale - len(choices)*choiceBalloonHeight
 	b.choiceBalloons = nil
@@ -173,7 +173,7 @@ func (b *Windows) isAnimating(interpreterID int) bool {
 	return false
 }
 
-func (b *Windows) Update(sceneManager *scene.SceneManager) error {
+func (b *Windows) Update(sceneManager *scene.Manager) error {
 	if !b.choosing {
 		// 0 means to check all balloons.
 		// TODO: Don't use magic numbers.

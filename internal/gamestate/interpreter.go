@@ -104,7 +104,7 @@ func (i *Interpreter) createChild(eventID int, commands []*data.Command) *Interp
 	return child
 }
 
-func (i *Interpreter) doOneCommand(sceneManager *scene.SceneManager) (bool, error) {
+func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 	c := i.commandIterator.Command()
 	if !i.gameState.windows.CanProceed(i.id) {
 		return false, nil
@@ -467,7 +467,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.SceneManager) (bool, erro
 	return true, nil
 }
 
-func (i *Interpreter) Update(sceneManager *scene.SceneManager) error {
+func (i *Interpreter) Update(sceneManager *scene.Manager) error {
 	if i.commandIterator == nil {
 		return nil
 	}

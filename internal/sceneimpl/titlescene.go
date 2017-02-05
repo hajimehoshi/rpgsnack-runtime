@@ -29,7 +29,7 @@ func NewTitleScene() *TitleScene {
 	return &TitleScene{}
 }
 
-func (t *TitleScene) Update(sceneManager *scene.SceneManager) error {
+func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 	if input.Triggered() {
 		mapScene, err := NewMapScene()
 		if err != nil {
