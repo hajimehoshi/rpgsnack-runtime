@@ -15,11 +15,9 @@
 package sceneimpl
 
 import (
-	"image/color"
-
 	"github.com/hajimehoshi/ebiten"
 
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/font"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
@@ -43,7 +41,12 @@ func (t *TitleScene) Update(sceneManager *scene.SceneManager) error {
 }
 
 func (t *TitleScene) Draw(screen *ebiten.Image) error {
-	if err := font.DrawText(screen, "償いの時計\nClock of Atonement", 0, 0, scene.TextScale, color.White); err != nil {
+	timg := assets.GetImage("title.png")
+	tw, _ := timg.Size()
+	sw, _ := screen.Size()
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate((float64(sw)-float64(tw))/2, 0)
+	if err := screen.DrawImage(timg, op); err != nil {
 		return err
 	}
 	return nil

@@ -31,13 +31,15 @@ type Game struct {
 	loadingCh    chan error
 }
 
-func New() (*Game, error) {
+func New(width, height int) (*Game, error) {
 	g := &Game{}
-	g.startLoadingGameData()
+	g.loadGameData()
+	initScene := sceneimpl.NewTitleScene()
+	g.sceneManager = scene.NewSceneManager(width, height, initScene)
 	return g, nil
 }
 
-func (g *Game) startLoadingGameData() {
+func (g *Game) loadGameData() {
 	ch := make(chan error)
 	go func() {
 		defer close(ch)
@@ -45,8 +47,6 @@ func (g *Game) startLoadingGameData() {
 			ch <- err
 			return
 		}
-		initScene := sceneimpl.NewTitleScene()
-		g.sceneManager = scene.NewSceneManager(initScene)
 	}()
 	g.loadingCh = ch
 }
@@ -103,10 +103,6 @@ func Title() string {
 	return "Clock of Atonement"
 }
 
-func Size() (int, int) {
-	w := scene.TileXNum * scene.TileSize * scene.TileScale
-	h := scene.TileYNum * scene.TileSize * scene.TileScale
-	w += 2 * scene.GameMarginX
-	h += scene.GameMarginTop + scene.GameMarginBottom
-	return w, h
+func (g *Game) Size() (int, int) {
+	return g.sceneManager.Size()
 }

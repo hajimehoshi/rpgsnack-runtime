@@ -38,11 +38,11 @@ func main() {
 		}
 		defer pprof.StopCPUProfile()
 	}
-	g, err := game.New()
+	g, err := game.New(480, 720)
 	if err != nil {
 		panic(err)
 	}
-	w, h := game.Size()
+	w, h := g.Size()
 	if err := ebiten.Run(g.Update, w, h, game.Scale(), game.Title()); err != nil {
 		panic(err)
 	}

@@ -35,14 +35,22 @@ type scene interface {
 }
 
 type SceneManager struct {
+	width   int
+	height  int
 	current scene
 	next    scene
 }
 
-func NewSceneManager(initScene scene) *SceneManager {
+func NewSceneManager(width, height int, initScene scene) *SceneManager {
 	return &SceneManager{
+		width:   width,
+		height:  height,
 		current: initScene,
 	}
+}
+
+func (s *SceneManager) Size() (int, int) {
+	return s.width, s.height
 }
 
 func (s *SceneManager) Update() error {
