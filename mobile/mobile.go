@@ -23,6 +23,7 @@ import (
 
 var (
 	running      bool
+	theGame      *game.Game
 	theRequester Requester
 )
 
@@ -35,12 +36,12 @@ func SetData(jsonData []uint8) {
 }
 
 func ScreenWidth() int {
-	w, _ := game.Size()
+	w, _ := theGame.Size()
 	return w
 }
 
 func ScreenHeight() int {
-	_, h := game.Size()
+	_, h := theGame.Size()
 	return h
 }
 
@@ -48,13 +49,14 @@ func IsRunning() bool {
 	return running
 }
 
-func Start(scale float64, requester Requester) error {
+func Start(screenWidth int, screenHeight int, scale float64, requester Requester) error {
 	running = true
 	theRequester = requester
-	g, err := game.New()
+	g, err := game.New(screenWidth, screenHeight)
 	if err != nil {
 		return err
 	}
+	theGame = g
 	if err := mobile.Start(g.Update, ScreenWidth(), ScreenHeight(), scale, game.Title()); err != nil {
 		return err
 	}
