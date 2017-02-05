@@ -23,7 +23,6 @@ const (
 	TileXNum      = 10
 	TileYNum      = 10
 	TileScale     = 3
-	GameMarginX   = 0
 	GameMarginTop = 2 * TileSize * TileScale
 	TextScale     = 2
 )

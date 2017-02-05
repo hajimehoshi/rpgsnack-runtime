@@ -52,7 +52,7 @@ func NewMapScene() (*MapScene, error) {
 	return mapScene, nil
 }
 
-func (m *MapScene) runEventIfNeeded() error {
+func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) error {
 	if m.gameState.Map().IsEventExecuting() {
 		m.triggeringFailed = false
 		return nil
@@ -61,7 +61,8 @@ func (m *MapScene) runEventIfNeeded() error {
 		return nil
 	}
 	x, y := input.Position()
-	x -= scene.GameMarginX
+	sw, _ := sceneManager.Size()
+	x -= (sw - scene.TileXNum*scene.TileSize*scene.TileScale) / 2
 	y -= scene.GameMarginTop
 	if x < 0 || y < 0 {
 		return nil
@@ -107,7 +108,7 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 		}
 		return err
 	}
-	if err := m.runEventIfNeeded(); err != nil {
+	if err := m.runEventIfNeeded(sceneManager); err != nil {
 		return err
 	}
 	return nil
@@ -192,7 +193,9 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 	}
 	op = &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(scene.TileScale, scene.TileScale)
-	op.GeoM.Translate(scene.GameMarginX, scene.GameMarginTop)
+	sw, _ := screen.Size()
+	tx := (float64(sw) - scene.TileXNum*scene.TileSize*scene.TileScale) / 2
+	op.GeoM.Translate(tx, scene.GameMarginTop)
 	if err := m.gameState.Screen().Draw(screen, m.tilesImage, op); err != nil {
 		return err
 	}
@@ -201,7 +204,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(x*scene.TileSize), float64(y*scene.TileSize))
 		op.GeoM.Scale(scene.TileScale, scene.TileScale)
-		op.GeoM.Translate(scene.GameMarginX, scene.GameMarginTop)
+		op.GeoM.Translate(tx, scene.GameMarginTop)
 		if err := screen.DrawImage(assets.GetImage("marker.png"), op); err != nil {
 			return err
 		}

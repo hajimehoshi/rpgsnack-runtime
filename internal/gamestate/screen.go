@@ -140,7 +140,9 @@ func (s *Screen) Draw(screen *ebiten.Image, img *ebiten.Image, op *ebiten.DrawIm
 		sy := float64(targetH) / float64(h)
 		op.GeoM.Scale(sx, sy)
 		op.GeoM.Scale(scene.TileScale, scene.TileScale)
-		op.GeoM.Translate(scene.GameMarginX, scene.GameMarginTop)
+		sw, _ := screen.Size()
+		tx := (float64(sw) - scene.TileXNum*scene.TileSize*scene.TileScale) / 2
+		op.GeoM.Translate(tx, scene.GameMarginTop)
 		op.ColorM.Translate(0, 0, 0, 1)
 		op.ColorM.Scale(1, 1, 1, fadeRate)
 		if err := screen.DrawImage(emptyImage, op); err != nil {
