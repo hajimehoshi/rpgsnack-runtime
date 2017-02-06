@@ -334,10 +334,7 @@ type CommandArgsPlayBGM struct {
 }
 
 type CommandArgsUnlockAchievement struct {
-	ID    int    `json:"id"`
-	Name  UUID   `json:"name"`
-	Desc  UUID   `json:"desc"`
-	Image string `json:"image"`
+	ID int `json:"id"`
 }
 
 type CommandArgsMoveCharacter struct {
