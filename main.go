@@ -53,7 +53,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	g, err := game.New(sw, sh)
+	g, err := game.New(sw, sh, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

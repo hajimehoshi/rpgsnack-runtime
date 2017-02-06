@@ -28,6 +28,7 @@ import (
 
 type Game struct {
 	sceneManager *scene.Manager
+	requester    Requester
 	loadingCh    chan error
 }
 
@@ -41,8 +42,10 @@ type Requester interface {
 	RequestShareImage(requestID int, title string, message string, image string)
 }
 
-func New(width, height int) (*Game, error) {
-	g := &Game{}
+func New(width, height int, requester Requester) (*Game, error) {
+	g := &Game{
+		requester: requester,
+	}
 	g.loadGameData()
 	initScene := sceneimpl.NewTitleScene()
 	g.sceneManager = scene.NewManager(width, height, initScene)

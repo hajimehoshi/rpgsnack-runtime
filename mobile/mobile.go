@@ -22,8 +22,7 @@ import (
 )
 
 var (
-	running      bool
-	theRequester Requester
+	running bool
 )
 
 func SetData(jsonData []uint8) {
@@ -40,8 +39,7 @@ func IsRunning() bool {
 
 func Start(screenWidth int, screenHeight int, scale float64, requester Requester) error {
 	running = true
-	theRequester = requester
-	g, err := game.New(screenWidth, screenHeight)
+	g, err := game.New(screenWidth, screenHeight, requester)
 	if err != nil {
 		return err
 	}
