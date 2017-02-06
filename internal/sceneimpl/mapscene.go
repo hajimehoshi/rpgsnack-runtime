@@ -61,8 +61,7 @@ func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) error {
 		return nil
 	}
 	x, y := input.Position()
-	sw, _ := sceneManager.Size()
-	x -= (sw - scene.TileXNum*scene.TileSize*scene.TileScale) / 2
+	x -= sceneManager.MapOffsetX()
 	y -= scene.GameMarginTop
 	if x < 0 || y < 0 {
 		return nil

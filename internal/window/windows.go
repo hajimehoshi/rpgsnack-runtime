@@ -63,7 +63,7 @@ func (b *Windows) ShowChoices(sceneManager *scene.Manager, choices []string, int
 	ymin := h/scene.TileScale - len(choices)*choiceBalloonHeight
 	b.choiceBalloons = nil
 	for i, choice := range choices {
-		x := 0
+		x := sceneManager.MapOffsetX() / scene.TileScale
 		y := i*choiceBalloonHeight + ymin
 		width := scene.TileXNum * scene.TileSize
 		balloon := newBalloon(x, y, width, choiceBalloonHeight, choice, interpreterID)

@@ -51,6 +51,10 @@ func (m *Manager) Size() (int, int) {
 	return m.width, m.height
 }
 
+func (m *Manager) MapOffsetX() int {
+	return (m.width - TileXNum*TileSize*TileScale) / 2
+}
+
 func (m *Manager) Update() error {
 	if m.next != nil {
 		m.current = m.next
