@@ -33,22 +33,38 @@ type scene interface {
 }
 
 type Manager struct {
-	width   int
-	height  int
-	current scene
-	next    scene
+	width     int
+	height    int
+	requester Requester
+	current   scene
+	next      scene
 }
 
-func NewManager(width, height int, initScene scene) *Manager {
+type Requester interface {
+	RequestUnlockAhievement(requestID int, achievementID int)
+	RequestSaveProgress(requestID int, data string)
+	RequestPurchase(requestID int, productID string)
+	RequestInterstitialAds(requestID int)
+	RequestRewardedAds(requestID int)
+	RequestOpenLink(requestID int, linkType string, data string)
+	RequestShareImage(requestID int, title string, message string, image string)
+}
+
+func NewManager(width, height int, requester Requester, initScene scene) *Manager {
 	return &Manager{
-		width:   width,
-		height:  height,
-		current: initScene,
+		width:     width,
+		height:    height,
+		requester: requester,
+		current:   initScene,
 	}
 }
 
 func (m *Manager) Size() (int, int) {
 	return m.width, m.height
+}
+
+func (m *Manager) Requester() Requester {
+	return m.requester
 }
 
 func (m *Manager) MapOffsetX() int {

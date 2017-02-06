@@ -15,10 +15,10 @@
 package mobile
 
 import (
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/game"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
 
-type Requester game.Requester
+type Requester scene.Requester
 
 func FinishUnlockAhievement(id int, achievements string, err string) {
 }

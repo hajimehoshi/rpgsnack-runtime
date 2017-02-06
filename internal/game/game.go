@@ -28,27 +28,14 @@ import (
 
 type Game struct {
 	sceneManager *scene.Manager
-	requester    Requester
 	loadingCh    chan error
 }
 
-type Requester interface {
-	RequestUnlockAhievement(requestID int, achievementID int)
-	RequestSaveProgress(requestID int, data string)
-	RequestPurchase(requestID int, productID string)
-	RequestInterstitialAds(requestID int)
-	RequestRewardedAds(requestID int)
-	RequestOpenLink(requestID int, linkType string, data string)
-	RequestShareImage(requestID int, title string, message string, image string)
-}
-
-func New(width, height int, requester Requester) (*Game, error) {
-	g := &Game{
-		requester: requester,
-	}
+func New(width, height int, requester scene.Requester) (*Game, error) {
+	g := &Game{}
 	g.loadGameData()
 	initScene := sceneimpl.NewTitleScene()
-	g.sceneManager = scene.NewManager(width, height, initScene)
+	g.sceneManager = scene.NewManager(width, height, requester, initScene)
 	return g, nil
 }
 
