@@ -41,6 +41,7 @@ type Interpreter struct {
 	route              bool // True when used for event routing property.
 	routeSkip          bool
 	shouldGoToTitle    bool
+	waitingRequestID   int
 }
 
 func NewInterpreter(gameState *Game, mapID, roomID, eventID int, commands []*data.Command) *Interpreter {
@@ -118,6 +119,11 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 			i.commandIterator.Advance()
 		}
 		return false, nil
+	}
+	if i.waitingRequestID != 0 {
+		// TODO: Accept finish commands
+		i.waitingRequestID = 0
+		i.commandIterator.Advance()
 	}
 	switch c.Name {
 	case data.CommandNameIf:
@@ -321,8 +327,10 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		i.shouldGoToTitle = true
 		return false, GoToTitle
 	case data.CommandUnlockAchievement:
-		// TODO: Implement this
-		i.commandIterator.Advance()
+		args := c.Args.(*data.CommandArgsUnlockAchievement)
+		i.waitingRequestID = i.gameState.GenerateRequestID()
+		sceneManager.Requester().RequestUnlockAchievement(i.waitingRequestID, args.ID)
+		return false, nil
 	case data.CommandNameMoveCharacter:
 		ch := i.character(i.eventID)
 		if ch == nil {

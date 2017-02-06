@@ -36,6 +36,7 @@ type Game struct {
 	windows       *window.Windows
 	currentMap    *Map
 	interpreterID int
+	lastRequestID int
 	rand          Rand
 }
 
@@ -130,6 +131,11 @@ func (g *Game) MeetsCondition(cond *data.Condition, eventID int) (bool, error) {
 		return false, fmt.Errorf("mapscene: invalid condition: %s", cond)
 	}
 	return false, nil
+}
+
+func (g *Game) GenerateRequestID() int {
+	g.lastRequestID++
+	return g.lastRequestID
 }
 
 func (g *Game) SetRandom(r Rand) {
