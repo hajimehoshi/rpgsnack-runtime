@@ -14,15 +14,11 @@
 
 package mobile
 
-type Requester interface {
-	RequestUnlockAhievement(requestID int, achievementID int)
-	RequestSaveProgress(requestID int, data string)
-	RequestPurchase(requestID int, productID string)
-	RequestInterstitialAds(requestID int)
-	RequestRewardedAds(requestID int)
-	RequestOpenLink(requestID int, linkType string, data string)
-	RequestShareImage(requestID int, title string, message string, image string)
-}
+import (
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/game"
+)
+
+type Requester game.Requester
 
 func FinishUnlockAhievement(id int, achievements string, err string) {
 }
