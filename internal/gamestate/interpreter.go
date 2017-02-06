@@ -526,6 +526,8 @@ func (i *Interpreter) setVariable(id int, op data.SetVariableOp, valueType data.
 				rhs = 2
 			case data.DirLeft:
 				rhs = 3
+			default:
+				panic("not reach")
 			}
 		default:
 			println(fmt.Sprintf("not implemented yet (set_variable): type %s", args.Type))
