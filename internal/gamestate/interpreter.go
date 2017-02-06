@@ -106,7 +106,6 @@ func (i *Interpreter) createChild(eventID int, commands []*data.Command) *Interp
 }
 
 func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
-	c := i.commandIterator.Command()
 	if !i.gameState.windows.CanProceed(i.id) {
 		return false, nil
 	}
@@ -127,8 +126,8 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		sceneManager.FinishRequestID(i.waitingRequestID)
 		i.waitingRequestID = 0
 		i.commandIterator.Advance()
-		return true, nil
 	}
+	c := i.commandIterator.Command()
 	switch c.Name {
 	case data.CommandNameIf:
 		conditions := c.Args.(*data.CommandArgsIf).Conditions
