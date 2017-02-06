@@ -320,6 +320,9 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 	case data.CommandNameGotoTitle:
 		i.shouldGoToTitle = true
 		return false, GoToTitle
+	case data.CommandUnlockAchievement:
+		// TODO: Implement this
+		i.commandIterator.Advance()
 	case data.CommandNameMoveCharacter:
 		ch := i.character(i.eventID)
 		if ch == nil {

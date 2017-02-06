@@ -160,6 +160,12 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 			return err
 		}
 		c.Args = args
+	case CommandUnlockAchievement:
+		var args *CommandArgsUnlockAchievement
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	case CommandNameSetInnerVariable:
 		fallthrough
 	default:
@@ -188,6 +194,7 @@ const (
 	CommandNamePlayBGM       CommandName = "play_bgm"
 	CommandNameStopBGM       CommandName = "stop_bgm"
 	CommandNameGotoTitle     CommandName = "goto_title"
+	CommandUnlockAchievement CommandName = "unlock_achievement"
 
 	// Route commands
 	CommandNameMoveCharacter        CommandName = "move_character"
@@ -324,6 +331,13 @@ type CommandArgsPlayBGM struct {
 	Name     string `json:"name"`
 	Volume   int    `json:"volume"`
 	FadeTime int    `json:"fadeTime"`
+}
+
+type CommandArgsUnlockAchievement struct {
+	Id     int    `json:"id"`
+	NameID string `json:"name"`
+	DescID string `json:"desc"`
+	Image  string `json:"image"`
 }
 
 type CommandArgsMoveCharacter struct {
