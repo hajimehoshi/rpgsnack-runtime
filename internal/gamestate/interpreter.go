@@ -41,7 +41,7 @@ type Interpreter struct {
 	route              bool // True when used for event routing property.
 	routeSkip          bool
 	shouldGoToTitle    bool
-	waitingRequestID   int
+	waitingRequestID   int // Note: When this is not 0, the game state can't be saved.
 }
 
 func NewInterpreter(gameState *Game, mapID, roomID, eventID int, commands []*data.Command) *Interpreter {
@@ -121,9 +121,13 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		return false, nil
 	}
 	if i.waitingRequestID != 0 {
-		// TODO: Accept finish commands
+		if !sceneManager.HasFinishedRequestID(i.waitingRequestID) {
+			return false, nil
+		}
+		sceneManager.FinishRequestID(i.waitingRequestID)
 		i.waitingRequestID = 0
 		i.commandIterator.Advance()
+		return true, nil
 	}
 	switch c.Name {
 	case data.CommandNameIf:

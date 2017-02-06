@@ -39,6 +39,14 @@ func New(width, height int, requester scene.Requester) (*Game, error) {
 	return g, nil
 }
 
+func NewWithMockRequester(width, height int) (*Game, error) {
+	g := &Game{}
+	g.loadGameData()
+	initScene := sceneimpl.NewTitleScene()
+	g.sceneManager = scene.NewManager(width, height, &MockRequester{g}, initScene)
+	return g, nil
+}
+
 func (g *Game) loadGameData() {
 	ch := make(chan error)
 	go func() {
@@ -105,4 +113,8 @@ func Title() string {
 
 func (g *Game) Size() (int, int) {
 	return g.sceneManager.Size()
+}
+
+func (g *Game) FinishUnlockAchievement(id int, achievements string, err string) {
+	g.sceneManager.FinishUnlockAchievement(id, achievements, err)
 }

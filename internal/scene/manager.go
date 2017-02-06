@@ -33,11 +33,13 @@ type scene interface {
 }
 
 type Manager struct {
-	width     int
-	height    int
-	requester Requester
-	current   scene
-	next      scene
+	width              int
+	height             int
+	requester          Requester
+	current            scene
+	next               scene
+	requestFinisher    chan func() int
+	finishedRequestIDs map[int]struct{}
 }
 
 type Requester interface {
@@ -52,10 +54,12 @@ type Requester interface {
 
 func NewManager(width, height int, requester Requester, initScene scene) *Manager {
 	return &Manager{
-		width:     width,
-		height:    height,
-		requester: requester,
-		current:   initScene,
+		width:              width,
+		height:             height,
+		requester:          requester,
+		current:            initScene,
+		requestFinisher:    make(chan func() int, 1),
+		finishedRequestIDs: map[int]struct{}{},
 	}
 }
 
@@ -72,6 +76,12 @@ func (m *Manager) MapOffsetX() int {
 }
 
 func (m *Manager) Update() error {
+	select {
+	case f := <-m.requestFinisher:
+		id := f()
+		m.finishedRequestIDs[id] = struct{}{}
+	default:
+	}
 	if m.next != nil {
 		m.current = m.next
 		m.next = nil
@@ -91,4 +101,20 @@ func (m *Manager) Draw(screen *ebiten.Image) error {
 
 func (m *Manager) GoTo(next scene) {
 	m.next = next
+}
+
+func (m *Manager) HasFinishedRequestID(id int) bool {
+	_, ok := m.finishedRequestIDs[id]
+	return ok
+}
+
+func (m *Manager) FinishRequestID(id int) {
+	delete(m.finishedRequestIDs, id)
+}
+
+func (m *Manager) FinishUnlockAchievement(id int, achievements string, err string) {
+	m.requestFinisher <- func() int {
+		// TODO: Implement this
+		return id
+	}
 }

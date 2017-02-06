@@ -20,7 +20,8 @@ import (
 
 type Requester scene.Requester
 
-func FinishUnlockAhievement(id int, achievements string, err string) {
+func FinishUnlockAchievement(id int, achievements string, err string) {
+	theGame.FinishUnlockAchievement(id, achievements, err)
 }
 
 func FinishSaveProgress(id int, err string) {
