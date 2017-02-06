@@ -32,7 +32,8 @@ func Scale() float64 {
 	window := js.Global.Get("window")
 	windowWidth := window.Get("innerWidth").Float()
 	windowHeight := window.Get("innerHeight").Float()
-	width, height := Size()
+	// Now window size is fixed. Adjust these values when necessary.
+	width, height := 480, 720
 	return min(windowWidth/float64(width), windowHeight/float64(height))
 }
 
