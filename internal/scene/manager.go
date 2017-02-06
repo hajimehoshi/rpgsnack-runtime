@@ -41,7 +41,7 @@ type Manager struct {
 }
 
 type Requester interface {
-	RequestUnlockAhievement(requestID int, achievementID int)
+	RequestUnlockAchievement(requestID int, achievementID int)
 	RequestSaveProgress(requestID int, data string)
 	RequestPurchase(requestID int, productID string)
 	RequestInterstitialAds(requestID int)
