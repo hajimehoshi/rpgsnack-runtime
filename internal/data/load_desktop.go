@@ -19,16 +19,16 @@
 package data
 
 import (
+	"flag"
 	"io/ioutil"
-	"os"
+)
+
+var (
+	dataPath = flag.String("data", "./data.json", "data path")
 )
 
 func loadJSON() ([]uint8, error) {
-	jsonPath := "data.json"
-	if len(os.Args) >= 2 {
-		jsonPath = os.Args[1]
-	}
-	dataJson, err := ioutil.ReadFile(jsonPath)
+	dataJson, err := ioutil.ReadFile(*dataPath)
 	if err != nil {
 		return nil, err
 	}

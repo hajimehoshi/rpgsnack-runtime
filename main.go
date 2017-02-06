@@ -16,34 +16,48 @@ package main
 
 import (
 	"flag"
+	"log"
 	"os"
 	"runtime/pprof"
+	"strconv"
+	"strings"
 
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/game"
 )
 
-var cpuProfile = flag.String("cpuprofile", "", "write cpu profile to file")
+var (
+	cpuProfile = flag.String("cpuprofile", "", "write cpu profile to file")
+	screenSize = flag.String("screensize", "480x720", "screen size like 480x720")
+)
 
 func main() {
 	flag.Parse()
 	if *cpuProfile != "" {
 		f, err := os.Create(*cpuProfile)
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 		if err := pprof.StartCPUProfile(f); err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 		defer pprof.StopCPUProfile()
 	}
-	g, err := game.New(480, 720)
+	sp := strings.Split(*screenSize, "x")
+	sw, err := strconv.Atoi(sp[0])
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
-	w, h := g.Size()
-	if err := ebiten.Run(g.Update, w, h, game.Scale(), game.Title()); err != nil {
-		panic(err)
+	sh, err := strconv.Atoi(sp[1])
+	if err != nil {
+		log.Fatal(err)
+	}
+	g, err := game.New(sw, sh)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := ebiten.Run(g.Update, sw, sh, game.Scale(), game.Title()); err != nil {
+		log.Fatal(err)
 	}
 }
