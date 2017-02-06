@@ -15,11 +15,13 @@
 package mobile
 
 type Requester interface {
-	RequestUnlockAhievement(requestID int, achievementID string)
-	RequestSaveProgress(requestID int, progressData string)
+	RequestUnlockAhievement(requestID int, achievementID int)
+	RequestSaveProgress(requestID int, data string)
 	RequestPurchase(requestID int, productID string)
 	RequestInterstitialAds(requestID int)
 	RequestRewardedAds(requestID int)
+	RequestOpenLink(requestID int, linkType string, data string)
+	RequestShareImage(requestID int, title string, message string, image string)
 }
 
 func FinishUnlockAhievement(id int, achievements string, err string) {
@@ -35,4 +37,10 @@ func FinishInterstitialAds(id int, err string) {
 }
 
 func FinishRewardedAds(id int, err string) {
+}
+
+func FinishOpenLink(id int, err string) {
+}
+
+func FinishShareImage(id int, err string) {
 }
