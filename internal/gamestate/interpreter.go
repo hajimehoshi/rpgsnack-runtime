@@ -330,6 +330,8 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		i.shouldGoToTitle = true
 		return false, GoToTitle
 	case data.CommandUnlockAchievement:
+		// TODO: Remove this command in the future.
+		// Implement passive achievements instead.
 		args := c.Args.(*data.CommandArgsUnlockAchievement)
 		i.waitingRequestID = i.gameState.GenerateRequestID()
 		sceneManager.Requester().RequestUnlockAchievement(i.waitingRequestID, args.ID)
