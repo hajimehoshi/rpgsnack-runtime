@@ -15,14 +15,35 @@
 package data
 
 type Game struct {
-	Maps     []*Map     `json:"maps"`
-	Texts    *Texts     `json:"texts"`
-	TileSets []*TileSet `json:"tileSets"`
-	System   *System    `json:"system"`
+	Maps         []*Map         `json:"maps"`
+	Texts        *Texts         `json:"texts"`
+	TileSets     []*TileSet     `json:"tileSets"`
+	Achievements []*Achievement `json:"achievements"`
+	Hints        []*Hint        `json:"hints"`
+	IAPProducts  []*IAPProduct  `json:"iapProducts"`
+	System       *System        `json:"system"`
 }
 
 var current *Game
 
 func Current() *Game {
 	return current
+}
+
+type Achievement struct {
+	ID    int    `json:"id"`
+	Name  UUID   `json:"name"`
+	Desc  UUID   `json:"desc"`
+	Image string `json:"image"`
+}
+
+type Hint struct {
+	ID         int          `json:"id"`
+	Text       UUID         `json:"text"`
+	Conditions []*Condition `json:"conditions"`
+}
+
+type IAPProduct struct {
+	ID  int    `json:"id"`
+	Key string `json:"key"`
 }
