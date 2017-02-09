@@ -20,13 +20,17 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/ui"
 )
 
 type TitleScene struct {
+	newGameButton *ui.Button
 }
 
 func NewTitleScene() *TitleScene {
-	return &TitleScene{}
+	return &TitleScene{
+		newGameButton: ui.NewButton(20, 200, 120, 20, "New Game"),
+	}
 }
 
 func (t *TitleScene) Update(sceneManager *scene.Manager) error {
@@ -47,6 +51,9 @@ func (t *TitleScene) Draw(screen *ebiten.Image) error {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate((float64(sw)-float64(tw))/2, 0)
 	if err := screen.DrawImage(timg, op); err != nil {
+		return err
+	}
+	if err := t.newGameButton.Draw(screen); err != nil {
 		return err
 	}
 	return nil
