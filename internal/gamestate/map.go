@@ -421,14 +421,13 @@ func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
 	if m.IsEventExecuting() {
 		return false, nil
 	}
-	events := m.eventsAt(x, y)
 	p, err := m.passable(m.player, x, y, false)
 	if err != nil {
 		return false, err
 	}
 	var event *character.Character
 	if !p {
-		for _, e := range events {
+		for _, e := range m.eventsAt(x, y) {
 			if page := m.currentPage(e); page != nil {
 				if len(page.Commands) == 0 {
 					continue
