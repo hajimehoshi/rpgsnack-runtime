@@ -251,14 +251,36 @@ func (m *Map) Update(sceneManager *scene.Manager) error {
 	return nil
 }
 
-func (m *Map) eventAt(x, y int) *character.Character {
+type eventsById struct {
+	mapData *Map
+	events  []*character.Character
+}
+
+func (e *eventsById) Len() int {
+	return len(e.events)
+}
+
+func (e *eventsById) Less(i, j int) bool {
+	return e.mapData.eventData[e.events[i]].ID < e.mapData.eventData[e.events[j]].ID
+}
+
+func (e *eventsById) Swap(i, j int) {
+	e.events[i], e.events[j] = e.events[j], e.events[i]
+}
+
+func (m *Map) eventsAt(x, y int) []*character.Character {
+	es := []*character.Character{}
 	for _, e := range m.events {
 		ex, ey := e.Position()
 		if ex == x && ey == y {
-			return e
+			es = append(es, e)
 		}
 	}
-	return nil
+	sort.Sort(&eventsById{
+		events:  es,
+		mapData: m,
+	})
+	return es
 }
 
 func (m *Map) tryRunAutoEvent() {
@@ -357,10 +379,12 @@ func (m *Map) passable(self *character.Character, x, y int, ignoreCharacters boo
 	if ignoreCharacters {
 		return true, nil
 	}
-	e := m.eventAt(x, y)
-	if e != nil && !e.Through() {
-		if page := m.currentPage(e); page != nil && page.Priority == data.PrioritySameAsCharacters {
-			return false, nil
+	es := m.eventsAt(x, y)
+	if len(es) > 0 {
+		if e := es[0]; !e.Through() {
+			if page := m.currentPage(e); page != nil && page.Priority == data.PrioritySameAsCharacters {
+				return false, nil
+			}
 		}
 	}
 	px, py := m.player.Position()
@@ -374,45 +398,50 @@ func (m *Map) TryRunDirectEvent(x, y int) (bool, error) {
 	if m.IsEventExecuting() {
 		return false, nil
 	}
-	event := m.eventAt(x, y)
-	if event == nil {
-		return false, nil
+	es := m.eventsAt(x, y)
+	for _, e := range es {
+		page := m.currentPage(e)
+		if page == nil {
+			continue
+		}
+		if len(page.Commands) == 0 {
+			continue
+		}
+		if page.Trigger != data.TriggerDirect {
+			continue
+		}
+		i := NewInterpreter(m.game, m.mapID, m.roomID, e.ID(), page.Commands)
+		m.addInterpreter(i)
+		return true, nil
 	}
-	page := m.currentPage(event)
-	if page == nil {
-		return false, nil
-	}
-	if len(page.Commands) == 0 {
-		return false, nil
-	}
-	if page.Trigger != data.TriggerDirect {
-		return false, nil
-	}
-	i := NewInterpreter(m.game, m.mapID, m.roomID, event.ID(), page.Commands)
-	m.addInterpreter(i)
-	return true, nil
+	return false, nil
 }
 
 func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
 	if m.IsEventExecuting() {
 		return false, nil
 	}
-	event := m.eventAt(x, y)
+	events := m.eventsAt(x, y)
 	p, err := m.passable(m.player, x, y, false)
 	if err != nil {
 		return false, err
 	}
+	var event *character.Character
 	if !p {
+		for _, e := range events {
+			if page := m.currentPage(e); page != nil {
+				if len(page.Commands) == 0 {
+					continue
+				}
+				if page.Trigger != data.TriggerPlayer {
+					continue
+				}
+			}
+			event = e
+			break
+		}
 		if event == nil {
 			return false, nil
-		}
-		if page := m.currentPage(event); page != nil {
-			if len(page.Commands) == 0 {
-				return false, nil
-			}
-			if page.Trigger != data.TriggerPlayer {
-				return false, nil
-			}
 		}
 	}
 	px, py := m.player.Position()
