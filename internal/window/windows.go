@@ -38,77 +38,77 @@ type Windows struct {
 	hasChosenIndex            bool
 }
 
-func (b *Windows) ChosenIndex() int {
-	return b.chosenIndex
+func (w *Windows) ChosenIndex() int {
+	return w.chosenIndex
 }
 
-func (b *Windows) HasChosenIndex() bool {
-	return b.hasChosenIndex
+func (w *Windows) HasChosenIndex() bool {
+	return w.hasChosenIndex
 }
 
-func (b *Windows) ShowMessage(content string, character *character.Character, interpreterID int) {
-	if b.nextBalloon != nil {
+func (w *Windows) ShowMessage(content string, character *character.Character, interpreterID int) {
+	if w.nextBalloon != nil {
 		panic("not reach")
 	}
 	// TODO: How to call newBalloonCenter?
-	b.nextBalloon = newBalloonWithArrow(character, content, interpreterID)
+	w.nextBalloon = newBalloonWithArrow(character, content, interpreterID)
 }
 
-func (b *Windows) ShowChoices(sceneManager *scene.Manager, choices []string, interpreterID int) {
+func (w *Windows) ShowChoices(sceneManager *scene.Manager, choices []string, interpreterID int) {
 	_, h := sceneManager.Size()
 	ymin := h/scene.TileScale - len(choices)*choiceBalloonHeight
-	b.choiceBalloons = nil
+	w.choiceBalloons = nil
 	for i, choice := range choices {
 		x := sceneManager.MapOffsetX() / scene.TileScale
 		y := i*choiceBalloonHeight + ymin
 		width := scene.TileXNum * scene.TileSize
 		balloon := newBalloon(x, y, width, choiceBalloonHeight, choice, interpreterID)
-		b.choiceBalloons = append(b.choiceBalloons, balloon)
+		w.choiceBalloons = append(w.choiceBalloons, balloon)
 		balloon.open()
 	}
-	b.chosenIndex = 0
-	b.choosing = true
-	b.choosingInterpreterID = interpreterID
+	w.chosenIndex = 0
+	w.choosing = true
+	w.choosingInterpreterID = interpreterID
 }
 
-func (b *Windows) CloseAll() {
-	for _, balloon := range b.balloons {
-		if balloon == nil {
+func (w *Windows) CloseAll() {
+	for _, b := range w.balloons {
+		if b == nil {
 			continue
 		}
-		balloon.close()
+		b.close()
 	}
-	for _, balloon := range b.choiceBalloons {
-		if balloon == nil {
+	for _, b := range w.choiceBalloons {
+		if b == nil {
 			continue
 		}
-		balloon.close()
+		b.close()
 	}
 }
 
-func (b *Windows) IsBusy(interpreterID int) bool {
-	if b.isAnimating(interpreterID) {
+func (w *Windows) IsBusy(interpreterID int) bool {
+	if w.isAnimating(interpreterID) {
 		return true
 	}
-	if b.choosingInterpreterID == interpreterID {
-		if b.choosing || b.chosenBalloonWaitingCount > 0 {
+	if w.choosingInterpreterID == interpreterID {
+		if w.choosing || w.chosenBalloonWaitingCount > 0 {
 			return true
 		}
 	}
-	if b.isOpened(interpreterID) {
+	if w.isOpened(interpreterID) {
 		return true
 	}
-	if b.nextBalloon != nil {
+	if w.nextBalloon != nil {
 		return true
 	}
 	return false
 }
 
-func (b *Windows) CanProceed(interpreterID int) bool {
-	if !b.IsBusy(interpreterID) {
+func (w *Windows) CanProceed(interpreterID int) bool {
+	if !w.IsBusy(interpreterID) {
 		return true
 	}
-	if !b.isOpened(interpreterID) {
+	if !w.isOpened(interpreterID) {
 		return false
 	}
 	if !input.Triggered() {
@@ -117,141 +117,141 @@ func (b *Windows) CanProceed(interpreterID int) bool {
 	return true
 }
 
-func (b *Windows) isOpened(interpreterID int) bool {
-	for _, balloon := range b.balloons {
-		if balloon == nil {
+func (w *Windows) isOpened(interpreterID int) bool {
+	for _, b := range w.balloons {
+		if b == nil {
 			continue
 		}
-		if interpreterID > 0 && balloon.interpreterID != interpreterID {
+		if interpreterID > 0 && b.interpreterID != interpreterID {
 			continue
 		}
-		if balloon.isOpened() {
+		if b.isOpened() {
 			return true
 		}
 	}
-	for _, balloon := range b.choiceBalloons {
-		if balloon == nil {
+	for _, b := range w.choiceBalloons {
+		if b == nil {
 			continue
 		}
-		if interpreterID > 0 && balloon.interpreterID != interpreterID {
+		if interpreterID > 0 && b.interpreterID != interpreterID {
 			continue
 		}
-		if balloon.isOpened() {
-			return true
-		}
-	}
-	return false
-}
-
-func (b *Windows) isAnimating(interpreterID int) bool {
-	for _, balloon := range b.balloons {
-		if balloon == nil {
-			continue
-		}
-		if interpreterID > 0 && balloon.interpreterID != interpreterID {
-			continue
-		}
-		if balloon.isAnimating() {
-			return true
-		}
-	}
-	for _, balloon := range b.choiceBalloons {
-		if balloon == nil {
-			continue
-		}
-		if interpreterID > 0 && balloon.interpreterID != interpreterID {
-			continue
-		}
-		if balloon.isAnimating() {
+		if b.isOpened() {
 			return true
 		}
 	}
 	return false
 }
 
-func (b *Windows) Update(sceneManager *scene.Manager) error {
-	if !b.choosing {
+func (w *Windows) isAnimating(interpreterID int) bool {
+	for _, b := range w.balloons {
+		if b == nil {
+			continue
+		}
+		if interpreterID > 0 && b.interpreterID != interpreterID {
+			continue
+		}
+		if b.isAnimating() {
+			return true
+		}
+	}
+	for _, b := range w.choiceBalloons {
+		if b == nil {
+			continue
+		}
+		if interpreterID > 0 && b.interpreterID != interpreterID {
+			continue
+		}
+		if b.isAnimating() {
+			return true
+		}
+	}
+	return false
+}
+
+func (w *Windows) Update(sceneManager *scene.Manager) error {
+	if !w.choosing {
 		// 0 means to check all balloons.
 		// TODO: Don't use magic numbers.
-		if b.nextBalloon != nil && !b.isAnimating(0) && !b.isOpened(0) {
-			b.balloons = []*balloon{b.nextBalloon}
-			b.balloons[0].open()
-			b.nextBalloon = nil
+		if w.nextBalloon != nil && !w.isAnimating(0) && !w.isOpened(0) {
+			w.balloons = []*balloon{w.nextBalloon}
+			w.balloons[0].open()
+			w.nextBalloon = nil
 		}
 	}
-	if b.chosenBalloonWaitingCount > 0 {
-		b.chosenBalloonWaitingCount--
-		if b.chosenBalloonWaitingCount == 0 {
-			b.choiceBalloons[b.chosenIndex].close()
-			for _, balloon := range b.balloons {
-				if balloon == nil {
+	if w.chosenBalloonWaitingCount > 0 {
+		w.chosenBalloonWaitingCount--
+		if w.chosenBalloonWaitingCount == 0 {
+			w.choiceBalloons[w.chosenIndex].close()
+			for _, b := range w.balloons {
+				if b == nil {
 					continue
 				}
-				balloon.close()
+				b.close()
 			}
-			b.hasChosenIndex = false
+			w.hasChosenIndex = false
 		}
-	} else if b.choosing && b.isOpened(0) && input.Triggered() {
+	} else if w.choosing && w.isOpened(0) && input.Triggered() {
 		_, h := sceneManager.Size()
 		ymax := h / scene.TileScale
-		ymin := ymax - len(b.choiceBalloons)*choiceBalloonHeight
+		ymin := ymax - len(w.choiceBalloons)*choiceBalloonHeight
 		_, y := input.Position()
 		y /= scene.TileScale
 		if y < ymin || ymax <= y {
 			return nil
 		}
 		// Close regular balloons
-		b.chosenIndex = (y - ymin) / choiceBalloonHeight
-		for i, balloon := range b.choiceBalloons {
-			if i == b.chosenIndex {
+		w.chosenIndex = (y - ymin) / choiceBalloonHeight
+		for i, b := range w.choiceBalloons {
+			if i == w.chosenIndex {
 				continue
 			}
-			balloon.close()
+			b.close()
 		}
-		b.chosenBalloonWaitingCount = chosenBalloonWaitingFrames
-		b.choosing = false
-		b.choosingInterpreterID = 0
-		b.hasChosenIndex = true
+		w.chosenBalloonWaitingCount = chosenBalloonWaitingFrames
+		w.choosing = false
+		w.choosingInterpreterID = 0
+		w.hasChosenIndex = true
 	}
-	for i, balloon := range b.balloons {
-		if balloon == nil {
+	for i, b := range w.balloons {
+		if b == nil {
 			continue
 		}
-		if err := balloon.update(); err != nil {
+		if err := b.update(); err != nil {
 			return err
 		}
-		if balloon.isClosed() {
-			b.balloons[i] = nil
+		if b.isClosed() {
+			w.balloons[i] = nil
 		}
 	}
-	for i, balloon := range b.choiceBalloons {
-		if balloon == nil {
+	for i, b := range w.choiceBalloons {
+		if b == nil {
 			continue
 		}
-		if err := balloon.update(); err != nil {
+		if err := b.update(); err != nil {
 			return err
 		}
-		if balloon.isClosed() {
-			b.choiceBalloons[i] = nil
+		if b.isClosed() {
+			w.choiceBalloons[i] = nil
 		}
 	}
 	return nil
 }
 
-func (b *Windows) Draw(screen *ebiten.Image) error {
-	for _, balloon := range b.balloons {
-		if balloon == nil {
+func (w *Windows) Draw(screen *ebiten.Image) error {
+	for _, b := range w.balloons {
+		if b == nil {
 			continue
 		}
-		if err := balloon.draw(screen); err != nil {
+		if err := b.draw(screen); err != nil {
 			return err
 		}
 	}
-	for _, balloon := range b.choiceBalloons {
-		if balloon == nil {
+	for _, b := range w.choiceBalloons {
+		if b == nil {
 			continue
 		}
-		if err := balloon.draw(screen); err != nil {
+		if err := b.draw(screen); err != nil {
 			return err
 		}
 	}
