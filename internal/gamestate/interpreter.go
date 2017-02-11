@@ -205,7 +205,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 			content := data.Current().Texts.Get(language.Und, args.ContentID)
 			if ch := i.character(args.EventID); ch != nil {
 				content = i.gameState.parseMessageSyntax(content)
-				i.gameState.windows.ShowMessage(content, ch, i.id)
+				i.gameState.windows.ShowMessage(content, ch.EventID(), i.id)
 				i.waitingCommand = true
 				return false, nil
 			}

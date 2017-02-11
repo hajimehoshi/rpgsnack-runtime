@@ -42,7 +42,7 @@ type balloon struct {
 	width          int
 	height         int
 	hasArrow       bool
-	character      *character.Character
+	eventID        int
 	content        string
 	contentOffsetX int
 	openingCount   int
@@ -95,12 +95,12 @@ func newBalloonCenter(content string, interpreterID int) *balloon {
 	return b
 }
 
-func newBalloonWithArrow(character *character.Character, content string, interpreterID int) *balloon {
+func newBalloonWithArrow(content string, eventID int, interpreterID int) *balloon {
 	b := &balloon{
 		interpreterID: interpreterID,
 		content:       content,
 		hasArrow:      true,
-		character:     character,
+		eventID:       eventID,
 	}
 	w, h, contentOffsetX := balloonSizeFromContent(content)
 	b.width = w
@@ -109,24 +109,24 @@ func newBalloonWithArrow(character *character.Character, content string, interpr
 	return b
 }
 
-func (b *balloon) arrowPosition(screenWidth int) (int, int) {
+func (b *balloon) arrowPosition(screenWidth int, character *character.Character) (int, int) {
 	if !b.hasArrow {
 		panic("not reach")
 	}
 	x := (screenWidth/scene.TileScale - scene.TileXNum*scene.TileSize) / 2
 	y := scene.GameMarginTop / scene.TileScale
-	cx, cy := b.character.DrawPosition()
-	w, _ := b.character.Size()
+	cx, cy := character.DrawPosition()
+	w, _ := character.Size()
 	x += cx + w/2
 	y += cy
 	return x, y
 }
 
-func (b *balloon) position(screenWidth int) (int, int) {
+func (b *balloon) position(screenWidth int, character *character.Character) (int, int) {
 	if !b.hasArrow {
 		return b.x, b.y
 	}
-	ax, ay := b.arrowPosition(screenWidth)
+	ax, ay := b.arrowPosition(screenWidth, character)
 	x := ax - b.width/2
 	if scene.TileXNum*scene.TileSize < x+b.width {
 		x = scene.TileXNum*scene.TileSize - b.width
@@ -138,11 +138,11 @@ func (b *balloon) position(screenWidth int) (int, int) {
 	return x, y
 }
 
-func (b *balloon) arrowFlip(screenWidth int) bool {
+func (b *balloon) arrowFlip(screenWidth int, character *character.Character) bool {
 	if !b.hasArrow {
 		return false
 	}
-	x, _ := b.position(screenWidth)
+	x, _ := b.position(screenWidth, character)
 	return scene.TileXNum*scene.TileSize == x+b.width
 }
 
@@ -170,6 +170,7 @@ func (b *balloon) close() {
 type balloonImageParts struct {
 	balloon     *balloon
 	screenWidth int
+	character   *character.Character
 }
 
 func (b *balloonImageParts) partsNum() (int, int) {
@@ -215,10 +216,10 @@ func (b *balloonImageParts) Dst(index int) (int, int, int, int) {
 		if !b.balloon.hasArrow {
 			return 0, 0, 0, 0
 		}
-		ax, ay := b.balloon.arrowPosition(b.screenWidth)
+		ax, ay := b.balloon.arrowPosition(b.screenWidth, b.character)
 		x := ax
 		y := ay - balloonArrowHeight
-		if b.balloon.arrowFlip(b.screenWidth) {
+		if b.balloon.arrowFlip(b.screenWidth, b.character) {
 			// TODO: 4 is an arbitrary number. Define a const.
 			x -= 4
 			return x, y, x - balloonArrowWidth, y + balloonArrowHeight
@@ -227,7 +228,7 @@ func (b *balloonImageParts) Dst(index int) (int, int, int, int) {
 		return x, y, x + balloonArrowWidth, y + balloonArrowHeight
 	}
 	w, _ := b.partsNum()
-	x, y := b.balloon.position(b.screenWidth)
+	x, y := b.balloon.position(b.screenWidth, b.character)
 	x += (index % w) * 4
 	y += (index / w) * 4
 	return x, y, x + 4, y + 4
@@ -247,7 +248,7 @@ func (b *balloon) update() error {
 	return nil
 }
 
-func (b *balloon) draw(screen *ebiten.Image) error {
+func (b *balloon) draw(screen *ebiten.Image, character *character.Character) error {
 	rate := 0.0
 	switch {
 	case b.opened:
@@ -261,14 +262,14 @@ func (b *balloon) draw(screen *ebiten.Image) error {
 	if rate > 0 {
 		img := assets.GetImage("balloon.png")
 		op := &ebiten.DrawImageOptions{}
-		x, y := b.position(sw)
+		x, y := b.position(sw, character)
 		dx := float64(x + b.width/2)
 		dy := float64(y + b.height/2)
 		if b.hasArrow {
-			ax, ay := b.arrowPosition(sw)
+			ax, ay := b.arrowPosition(sw, character)
 			dx = float64(ax)
 			dy = float64(ay) + balloonArrowHeight
-			if b.arrowFlip(sw) {
+			if b.arrowFlip(sw, character) {
 				dx -= 4
 			} else {
 				dx += 4
@@ -281,13 +282,14 @@ func (b *balloon) draw(screen *ebiten.Image) error {
 		op.ImageParts = &balloonImageParts{
 			balloon:     b,
 			screenWidth: sw,
+			character:   character,
 		}
 		if err := screen.DrawImage(img, op); err != nil {
 			return err
 		}
 	}
 	if b.opened {
-		x, y := b.position(sw)
+		x, y := b.position(sw, character)
 		x = (x + balloonMarginX + b.contentOffsetX) * scene.TileScale
 		y = (y + balloonMarginY) * scene.TileScale
 		if err := font.DrawText(screen, b.content, x, y, scene.TextScale, color.Black); err != nil {

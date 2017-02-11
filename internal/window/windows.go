@@ -15,6 +15,8 @@
 package window
 
 import (
+	"fmt"
+
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
@@ -46,12 +48,12 @@ func (w *Windows) HasChosenIndex() bool {
 	return w.hasChosenIndex
 }
 
-func (w *Windows) ShowMessage(content string, character *character.Character, interpreterID int) {
+func (w *Windows) ShowMessage(content string, eventID int, interpreterID int) {
 	if w.nextBalloon != nil {
 		panic("not reach")
 	}
 	// TODO: How to call newBalloonCenter?
-	w.nextBalloon = newBalloonWithArrow(character, content, interpreterID)
+	w.nextBalloon = newBalloonWithArrow(content, eventID, interpreterID)
 }
 
 func (w *Windows) ShowChoices(sceneManager *scene.Manager, choices []string, interpreterID int) {
@@ -238,12 +240,22 @@ func (w *Windows) Update(sceneManager *scene.Manager) error {
 	return nil
 }
 
-func (w *Windows) Draw(screen *ebiten.Image) error {
+func (w *Windows) Draw(screen *ebiten.Image, characters []*character.Character) error {
 	for _, b := range w.balloons {
 		if b == nil {
 			continue
 		}
-		if err := b.draw(screen); err != nil {
+		var c *character.Character
+		for _, cc := range characters {
+			if cc.EventID() == b.eventID {
+				c = cc
+				break
+			}
+		}
+		if c == nil {
+			return fmt.Errorf("windows: character (EventID=%d) not found", b.eventID)
+		}
+		if err := b.draw(screen, c); err != nil {
 			return err
 		}
 	}
@@ -251,7 +263,7 @@ func (w *Windows) Draw(screen *ebiten.Image) error {
 		if b == nil {
 			continue
 		}
-		if err := b.draw(screen); err != nil {
+		if err := b.draw(screen, nil); err != nil {
 			return err
 		}
 	}

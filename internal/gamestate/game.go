@@ -22,6 +22,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hajimehoshi/ebiten"
+
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/window"
@@ -171,4 +174,14 @@ func (g *Game) SetRandom(r Rand) {
 
 func (g *Game) randomValue(min, max int) int {
 	return min + g.rand.Intn(max-min)
+}
+
+func (g *Game) DrawWindows(screen *ebiten.Image) error {
+	cs := []*character.Character{}
+	cs = append(cs, g.currentMap.player)
+	cs = append(cs, g.currentMap.events...)
+	if err := g.windows.Draw(screen, cs); err != nil {
+		return err
+	}
+	return nil
 }
