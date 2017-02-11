@@ -18,7 +18,6 @@ import (
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/ui"
 )
@@ -36,16 +35,23 @@ func NewTitleScene() *TitleScene {
 }
 
 func (t *TitleScene) Update(sceneManager *scene.Manager) error {
-	if input.Triggered() {
+	w, _ := sceneManager.Size()
+	t.newGameButton.X = (w/scene.TileScale - t.newGameButton.Width) / 2
+	t.resumeGameButton.X = (w/scene.TileScale - t.resumeGameButton.Width) / 2
+	if err := t.newGameButton.Update(); err != nil {
+		return err
+	}
+	if err := t.resumeGameButton.Update(); err != nil {
+		return err
+	}
+	if t.newGameButton.Pressed() {
 		mapScene, err := NewMapScene()
 		if err != nil {
 			return err
 		}
 		sceneManager.GoTo(mapScene)
+		return nil
 	}
-	w, _ := sceneManager.Size()
-	t.newGameButton.X = (w/scene.TileScale - t.newGameButton.Width) / 2
-	t.resumeGameButton.X = (w/scene.TileScale - t.resumeGameButton.Width) / 2
 	return nil
 }
 

@@ -30,6 +30,10 @@ func Update() {
 	theInput.Update()
 }
 
+func Pressed() bool {
+	return theInput.Pressed()
+}
+
 func Triggered() bool {
 	return theInput.Triggered()
 }
@@ -53,6 +57,10 @@ func (i *input) Update() {
 	i.pressCount = 0
 	i.x = 0
 	i.y = 0
+}
+
+func (i *input) Pressed() bool {
+	return i.pressCount > 0
 }
 
 func (i *input) Triggered() bool {

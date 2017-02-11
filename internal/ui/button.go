@@ -21,6 +21,7 @@ import (
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/font"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
 
@@ -29,11 +30,13 @@ const (
 )
 
 type Button struct {
-	X      int
-	Y      int
-	Width  int
-	Height int
-	text   string
+	X        int
+	Y        int
+	Width    int
+	Height   int
+	text     string
+	pressing bool
+	pressed  bool
 }
 
 func NewButton(x, y, width, height int, text string) *Button {
@@ -44,6 +47,40 @@ func NewButton(x, y, width, height int, text string) *Button {
 		Height: height,
 		text:   text,
 	}
+}
+
+func (b *Button) Pressed() bool {
+	return b.pressed
+}
+
+func (b *Button) includesInput() bool {
+	x, y := input.Position()
+	x /= scene.TileScale
+	y /= scene.TileScale
+	if b.X <= x && x < b.X+b.Width && b.Y <= y && y < b.Y+b.Height {
+		return true
+	}
+	return false
+}
+
+func (b *Button) Update() error {
+	b.pressed = false
+	if !b.pressing {
+		if !input.Triggered() {
+			return nil
+		}
+	}
+	if !input.Pressed() {
+		b.pressing = false
+		b.pressed = true
+		return nil
+	}
+	if b.includesInput() {
+		b.pressing = true
+	} else {
+		b.pressing = false
+	}
+	return nil
 }
 
 type buttonParts struct {
@@ -85,12 +122,15 @@ func (b *buttonParts) Dst(index int) (int, int, int, int) {
 }
 
 func (b *Button) Draw(screen *ebiten.Image) error {
-	off := assets.GetImage("9patch_test_off.png")
+	img := assets.GetImage("9patch_test_off.png")
+	if b.pressing {
+		img = assets.GetImage("9patch_test_on.png")
+	}
 	op := &ebiten.DrawImageOptions{}
 	op.ImageParts = &buttonParts{b}
 	op.GeoM.Translate(float64(b.X), float64(b.Y))
 	op.GeoM.Scale(scene.TileScale, scene.TileScale)
-	if err := screen.DrawImage(off, op); err != nil {
+	if err := screen.DrawImage(img, op); err != nil {
 		return err
 	}
 	tw, th := font.MeasureSize(b.text)
