@@ -61,7 +61,7 @@ func (i *Interpreter) waitingRequestResponse() bool {
 }
 
 func (i *Interpreter) event() *character.Character {
-	if i.eventID == -1 {
+	if i.eventID == character.PlayerEventID {
 		return nil
 	}
 	if i.gameState.Map().mapID != i.mapID {
@@ -83,7 +83,7 @@ func (i *Interpreter) IsExecuting() bool {
 }
 
 func (i *Interpreter) character(id int) *character.Character {
-	if id == -1 {
+	if id == character.PlayerEventID {
 		return i.gameState.Map().player
 	}
 	if i.gameState.Map().mapID != i.mapID {

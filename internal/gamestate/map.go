@@ -97,7 +97,7 @@ func (m *Map) setRoomID(id int, interpreter *Interpreter) error {
 	for _, e := range m.CurrentRoom().Events {
 		event := character.NewEvent(e.ID, e.X, e.Y)
 		m.events = append(m.events, event)
-		m.eventPageIndices[event.EventID()] = -1
+		m.eventPageIndices[event.EventID()] = character.PlayerEventID
 		m.eventData[event.EventID()] = e
 	}
 	m.interpreters = map[int]*Interpreter{}
@@ -475,7 +475,7 @@ func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
 		{
 			Name: data.CommandNameSetRoute,
 			Args: &data.CommandArgsSetRoute{
-				EventID: -1,
+				EventID: character.PlayerEventID,
 				Repeat:  false,
 				Skip:    false,
 				Wait:    true,
@@ -493,7 +493,7 @@ func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
 		{
 			Name: data.CommandNameSetRoute,
 			Args: &data.CommandArgsSetRoute{
-				EventID:  -1,
+				EventID:  character.PlayerEventID,
 				Repeat:   false,
 				Skip:     false,
 				Wait:     true,
@@ -503,7 +503,7 @@ func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
 		{
 			Name: data.CommandNameSetRoute,
 			Args: &data.CommandArgsSetRoute{
-				EventID: -1,
+				EventID: character.PlayerEventID,
 				Repeat:  false,
 				Skip:    false,
 				Wait:    true,
@@ -598,7 +598,7 @@ func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
 			}
 		}
 	}
-	i := NewInterpreter(m.game, m.mapID, m.roomID, -1, commands)
+	i := NewInterpreter(m.game, m.mapID, m.roomID, character.PlayerEventID, commands)
 	m.addInterpreter(i)
 	m.playerInterpreterID = i.id
 	if event != nil {

@@ -22,6 +22,10 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
 
+const (
+	PlayerEventID = -1
+)
+
 type Character struct {
 	eventID       int
 	speed         data.Speed
@@ -45,7 +49,7 @@ type Character struct {
 
 func NewPlayer(x, y int) *Character {
 	return &Character{
-		eventID:    -1,
+		eventID:    PlayerEventID,
 		speed:      data.Speed3,
 		imageName:  "characters0.png",
 		imageIndex: 0,
