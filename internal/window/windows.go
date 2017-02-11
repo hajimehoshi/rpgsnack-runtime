@@ -17,6 +17,7 @@ package window
 import (
 	"github.com/hajimehoshi/ebiten"
 
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
@@ -25,11 +26,6 @@ const (
 	choiceBalloonHeight        = 20
 	chosenBalloonWaitingFrames = 5
 )
-
-type Character interface {
-	DrawPosition() (int, int)
-	Size() (int, int)
-}
 
 type Windows struct {
 	nextBalloon               *balloon
@@ -50,7 +46,7 @@ func (b *Windows) HasChosenIndex() bool {
 	return b.hasChosenIndex
 }
 
-func (b *Windows) ShowMessage(content string, character Character, interpreterID int) {
+func (b *Windows) ShowMessage(content string, character *character.Character, interpreterID int) {
 	if b.nextBalloon != nil {
 		panic("not reach")
 	}

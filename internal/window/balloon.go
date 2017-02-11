@@ -20,6 +20,7 @@ import (
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/font"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
@@ -41,7 +42,7 @@ type balloon struct {
 	width          int
 	height         int
 	hasArrow       bool
-	character      Character
+	character      *character.Character
 	content        string
 	contentOffsetX int
 	openingCount   int
@@ -94,7 +95,7 @@ func newBalloonCenter(content string, interpreterID int) *balloon {
 	return b
 }
 
-func newBalloonWithArrow(character Character, content string, interpreterID int) *balloon {
+func newBalloonWithArrow(character *character.Character, content string, interpreterID int) *balloon {
 	b := &balloon{
 		interpreterID: interpreterID,
 		content:       content,
