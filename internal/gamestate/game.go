@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/window"
 )
 
@@ -31,13 +32,14 @@ type Rand interface {
 }
 
 type Game struct {
-	variables     *Variables
-	screen        *Screen
-	windows       *window.Windows
-	currentMap    *Map
-	interpreterID int
-	lastRequestID int
-	rand          Rand
+	variables        *Variables
+	screen           *Screen
+	windows          *window.Windows
+	currentMap       *Map
+	interpreterID    int
+	lastRequestID    int
+	rand             Rand
+	waitingRequestID int
 }
 
 func NewGame() (*Game, error) {
@@ -65,6 +67,31 @@ func (g *Game) Windows() *window.Windows {
 
 func (g *Game) Map() *Map {
 	return g.currentMap
+}
+
+func (g *Game) Update(sceneManager *scene.Manager) error {
+	if g.waitingRequestID != 0 {
+		if sceneManager.HasFinishedRequestID(g.waitingRequestID) {
+			sceneManager.FinishRequestID(g.waitingRequestID)
+			g.waitingRequestID = 0
+		}
+	}
+	return nil
+}
+
+func (g *Game) RequestSave(sceneManager *scene.Manager) bool {
+	// If there is an unfinished request, stop saving the progress.
+	if g.waitingRequestID != 0 {
+		return false
+	}
+	if g.currentMap.waitingRequestResponse() {
+		return false
+	}
+	id := g.generateRequestID()
+	g.waitingRequestID = id
+	// TODO: Dump |g| as JSON
+	sceneManager.Requester().RequestSaveProgress(id, "{}")
+	return true
 }
 
 var reMessage = regexp.MustCompile(`\\([a-zA-Z])\[(\d+)\]`)

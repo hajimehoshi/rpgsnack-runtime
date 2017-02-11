@@ -56,6 +56,10 @@ func NewInterpreter(gameState *Game, mapID, roomID, eventID int, commands []*dat
 	}
 }
 
+func (i *Interpreter) waitingRequestResponse() bool {
+	return i.waitingRequestID != 0
+}
+
 func (i *Interpreter) event() *character.Character {
 	if i.eventID == -1 {
 		return nil

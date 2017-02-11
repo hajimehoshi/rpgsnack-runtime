@@ -25,6 +25,7 @@ func FinishUnlockAchievement(id int, achievements string, err string) {
 }
 
 func FinishSaveProgress(id int, err string) {
+	theGame.FinishSaveProgress(id, err)
 }
 
 func FinishPurchase(id int, productIDs string, err string) {

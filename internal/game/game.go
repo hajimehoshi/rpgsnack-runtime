@@ -118,3 +118,7 @@ func (g *Game) Size() (int, int) {
 func (g *Game) FinishUnlockAchievement(id int, achievements string, err string) {
 	g.sceneManager.FinishUnlockAchievement(id, achievements, err)
 }
+
+func (g *Game) FinishSaveProgress(id int, err string) {
+	g.sceneManager.FinishSaveProgress(id, err)
+}

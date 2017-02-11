@@ -118,3 +118,9 @@ func (m *Manager) FinishUnlockAchievement(id int, achievements string, err strin
 		return id
 	}
 }
+
+func (m *Manager) FinishSaveProgress(id int, err string) {
+	m.requestFinisher <- func() int {
+		return id
+	}
+}

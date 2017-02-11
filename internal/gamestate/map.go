@@ -70,6 +70,15 @@ func (m *Map) addInterpreter(interpreter *Interpreter) {
 	m.interpreters[interpreter.id] = interpreter
 }
 
+func (m *Map) waitingRequestResponse() bool {
+	for _, i := range m.interpreters {
+		if i.waitingRequestResponse() {
+			return true
+		}
+	}
+	return false
+}
+
 func (m *Map) TileSet() (*data.TileSet, error) {
 	id := m.currentMap().TileSetID
 	for _, t := range data.Current().TileSets {

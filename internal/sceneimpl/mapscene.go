@@ -89,11 +89,15 @@ func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) error {
 		m.triggeringFailed = true
 		return nil
 	}
+	m.gameState.RequestSave(sceneManager)
 	m.triggeringFailed = false
 	return nil
 }
 
 func (m *MapScene) Update(sceneManager *scene.Manager) error {
+	if err := m.gameState.Update(sceneManager); err != nil {
+		return err
+	}
 	if err := m.gameState.Screen().Update(); err != nil {
 		return err
 	}
