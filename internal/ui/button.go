@@ -29,19 +29,19 @@ const (
 )
 
 type Button struct {
-	x      int
-	y      int
-	width  int
-	height int
+	X      int
+	Y      int
+	Width  int
+	Height int
 	text   string
 }
 
 func NewButton(x, y, width, height int, text string) *Button {
 	return &Button{
-		x:      x,
-		y:      y,
-		width:  width,
-		height: height,
+		X:      x,
+		Y:      y,
+		Width:  width,
+		Height: height,
 		text:   text,
 	}
 }
@@ -51,12 +51,12 @@ type buttonParts struct {
 }
 
 func (b *buttonParts) Len() int {
-	return (b.button.width / partSize) * (b.button.height / partSize)
+	return (b.button.Width / partSize) * (b.button.Height / partSize)
 }
 
 func (b *buttonParts) Src(index int) (int, int, int, int) {
-	xn := b.button.width / partSize
-	yn := b.button.height / partSize
+	xn := b.button.Width / partSize
+	yn := b.button.Height / partSize
 	sx, sy := 0, 0
 	switch index % xn {
 	case 0:
@@ -78,7 +78,7 @@ func (b *buttonParts) Src(index int) (int, int, int, int) {
 }
 
 func (b *buttonParts) Dst(index int) (int, int, int, int) {
-	xn := b.button.width / partSize
+	xn := b.button.Width / partSize
 	dx := (index % xn) * partSize
 	dy := (index / xn) * partSize
 	return dx, dy, dx + partSize, dy + partSize
@@ -88,14 +88,14 @@ func (b *Button) Draw(screen *ebiten.Image) error {
 	off := assets.GetImage("9patch_test_off.png")
 	op := &ebiten.DrawImageOptions{}
 	op.ImageParts = &buttonParts{b}
-	op.GeoM.Translate(float64(b.x), float64(b.y))
+	op.GeoM.Translate(float64(b.X), float64(b.Y))
 	op.GeoM.Scale(scene.TileScale, scene.TileScale)
 	if err := screen.DrawImage(off, op); err != nil {
 		return err
 	}
 	tw, th := font.MeasureSize(b.text)
-	tx := b.x*scene.TileScale + (b.width*scene.TileScale-tw*scene.TextScale)/2
-	ty := b.y*scene.TileScale + (b.height*scene.TileScale-th*scene.TextScale)/2
+	tx := b.X*scene.TileScale + (b.Width*scene.TileScale-tw*scene.TextScale)/2
+	ty := b.Y*scene.TileScale + (b.Height*scene.TileScale-th*scene.TextScale)/2
 	if err := font.DrawText(screen, b.text, tx, ty, scene.TextScale, color.White); err != nil {
 		return err
 	}

@@ -24,12 +24,14 @@ import (
 )
 
 type TitleScene struct {
-	newGameButton *ui.Button
+	newGameButton    *ui.Button
+	resumeGameButton *ui.Button
 }
 
 func NewTitleScene() *TitleScene {
 	return &TitleScene{
-		newGameButton: ui.NewButton(20, 200, 120, 20, "New Game"),
+		newGameButton:    ui.NewButton(0, 184, 120, 20, "New Game"),
+		resumeGameButton: ui.NewButton(0, 208, 120, 20, "Resume Game"),
 	}
 }
 
@@ -41,6 +43,9 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 		}
 		sceneManager.GoTo(mapScene)
 	}
+	w, _ := sceneManager.Size()
+	t.newGameButton.X = (w/scene.TileScale - t.newGameButton.Width) / 2
+	t.resumeGameButton.X = (w/scene.TileScale - t.resumeGameButton.Width) / 2
 	return nil
 }
 
@@ -54,6 +59,9 @@ func (t *TitleScene) Draw(screen *ebiten.Image) error {
 		return err
 	}
 	if err := t.newGameButton.Draw(screen); err != nil {
+		return err
+	}
+	if err := t.resumeGameButton.Draw(screen); err != nil {
 		return err
 	}
 	return nil
