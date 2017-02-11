@@ -15,6 +15,7 @@
 package gamestate
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
@@ -25,6 +26,22 @@ type Variables struct {
 	selfSwitches   map[string][]bool
 	variables      []int
 	innerVariables map[string]int
+}
+
+func (v *Variables) MarshalJSON() ([]uint8, error) {
+	type tmpVariables struct {
+		Switches       []bool            `json:"switches"`
+		SelfSwitches   map[string][]bool `json:"selfSwitches"`
+		Variables      []int             `json:"variables"`
+		InnerVariables map[string]int    `json:"innerVariables"`
+	}
+	tmp := &tmpVariables{
+		Switches:       v.switches,
+		SelfSwitches:   v.selfSwitches,
+		Variables:      v.variables,
+		InnerVariables: v.innerVariables,
+	}
+	return json.Marshal(tmp)
 }
 
 func (v *Variables) SwitchValue(id int) bool {

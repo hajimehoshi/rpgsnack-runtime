@@ -15,6 +15,7 @@
 package gamestate
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
@@ -22,7 +23,6 @@ import (
 )
 
 type moveCharacterState struct {
-	gameState     *Game
 	mapID         int
 	roomID        int
 	eventID       int
@@ -32,6 +32,9 @@ type moveCharacterState struct {
 	path          []routeCommand
 	waiting       bool
 	terminated    bool
+
+	// Field that is not dumped
+	gameState *Game
 }
 
 func newMoveCharacterState(gameState *Game, mapID, roomID, eventID int, args *data.CommandArgsMoveCharacter, routeSkip bool) (*moveCharacterState, error) {
@@ -72,6 +75,32 @@ func newMoveCharacterState(gameState *Game, mapID, roomID, eventID int, args *da
 		panic("not reach")
 	}
 	return m, nil
+}
+
+func (m *moveCharacterState) MarshalJSON() ([]uint8, error) {
+	type tmpMoveCharacterState struct {
+		MapID         int                            `json:"mapId"`
+		RoomID        int                            `json:"roomId"`
+		EventID       int                            `json:"eventId"`
+		Args          *data.CommandArgsMoveCharacter `json:"args"`
+		RouteSkip     bool                           `json:"routeSkip"`
+		DistanceCount int                            `json:"distanceCount"`
+		Path          []routeCommand                 `json:"path"`
+		Waiting       bool                           `json:"waiting"`
+		Terminated    bool                           `json:"terminated"`
+	}
+	tmp := &tmpMoveCharacterState{
+		MapID:         m.mapID,
+		RoomID:        m.roomID,
+		EventID:       m.eventID,
+		Args:          m.args,
+		RouteSkip:     m.routeSkip,
+		DistanceCount: m.distanceCount,
+		Path:          m.path,
+		Waiting:       m.waiting,
+		Terminated:    m.terminated,
+	}
+	return json.Marshal(tmp)
 }
 
 func (m *moveCharacterState) character() *character.Character {

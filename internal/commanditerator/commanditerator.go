@@ -15,13 +15,17 @@
 package commanditerator
 
 import (
+	"encoding/json"
+
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 )
 
 type CommandIterator struct {
 	indices  []int // command index, branch index, command index, ...
 	commands []*data.Command
-	labels   map[string][]int
+
+	// Field that is not dumped
+	labels map[string][]int
 }
 
 func New(commands []*data.Command) *CommandIterator {
@@ -33,6 +37,18 @@ func New(commands []*data.Command) *CommandIterator {
 	c.unindentIfNeeded()
 	c.recordLabel(c.commands, []int{})
 	return c
+}
+
+func (c *CommandIterator) MarshalJSON() ([]uint8, error) {
+	type tmpCommandIterator struct {
+		Indices  []int           `json:"indices"`
+		Commands []*data.Command `json:"commands"`
+	}
+	tmp := &tmpCommandIterator{
+		Indices:  c.indices,
+		Commands: c.commands,
+	}
+	return json.Marshal(tmp)
 }
 
 func (c *CommandIterator) recordLabel(commands []*data.Command, pointer []int) {

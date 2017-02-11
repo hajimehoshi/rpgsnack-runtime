@@ -15,6 +15,7 @@
 package window
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/hajimehoshi/ebiten"
@@ -31,13 +32,37 @@ const (
 
 type Windows struct {
 	nextBalloon               *balloon
-	balloons                  []*balloon
+	balloons                  []*balloon // TODO: Rename?
 	choiceBalloons            []*balloon
 	chosenIndex               int
 	choosing                  bool
 	choosingInterpreterID     int
 	chosenBalloonWaitingCount int
 	hasChosenIndex            bool
+}
+
+func (w *Windows) MarshalJSON() ([]uint8, error) {
+	type tmpWindows struct {
+		NextBalloon               *balloon   `json:"nextBalloon"`
+		Balloons                  []*balloon `json:"balloons"`
+		ChoiceBalloons            []*balloon `json:"choiceBalloons"`
+		ChosenIndex               int        `json:"chosenIndex"`
+		Choosing                  bool       `json:"choosing"`
+		ChoosingInterpreterID     int        `json:"choosingInterpreterId"`
+		ChosenBalloonWaitingCount int        `json:"chosenBalloonWaitingCount"`
+		HasChosenIndex            bool       `json:"hasChosenIndex"`
+	}
+	tmp := &tmpWindows{
+		NextBalloon:               w.nextBalloon,
+		Balloons:                  w.balloons,
+		ChoiceBalloons:            w.choiceBalloons,
+		ChosenIndex:               w.chosenIndex,
+		Choosing:                  w.choosing,
+		ChoosingInterpreterID:     w.choosingInterpreterID,
+		ChosenBalloonWaitingCount: w.chosenBalloonWaitingCount,
+		HasChosenIndex:            w.hasChosenIndex,
+	}
+	return json.Marshal(tmp)
 }
 
 func (w *Windows) ChosenIndex() int {

@@ -15,6 +15,8 @@
 package gamestate
 
 import (
+	"encoding/json"
+
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
@@ -31,14 +33,14 @@ func init() {
 }
 
 type tint struct {
-	red   float64
-	green float64
-	blue  float64
-	gray  float64
+	Red   float64 `json:"red"`
+	Green float64 `json:"green"`
+	Blue  float64 `json:"blue"`
+	Gray  float64 `json:"gray"`
 }
 
 func (t *tint) isZero() bool {
-	return t.red == 0 && t.green == 0 && t.blue == 0 && t.gray == 0
+	return t.Red == 0 && t.Green == 0 && t.Blue == 0 && t.Gray == 0
 }
 
 type Screen struct {
@@ -54,15 +56,43 @@ type Screen struct {
 	fadedOut        bool
 }
 
+func (s *Screen) MarshalJSON() ([]uint8, error) {
+	type tmpScreen struct {
+		CurrentTint     tint `json:"currentTint"`
+		OrigTint        tint `json:"origTint"`
+		TargetTint      tint `json:"targetTint"`
+		TintCount       int  `json:"tintCount"`
+		TintMaxCount    int  `json:"tintMaxCount"`
+		FadeInCount     int  `json:"fadeInCount"`
+		FadeInMaxCount  int  `json:"fadeInMaxCount"`
+		FadeOutCount    int  `json:"fadeOutCount"`
+		FadeOutMaxCount int  `json:"fadeOutMaxCount"`
+		FadedOut        bool `json:"fadedOut"`
+	}
+	tmp := &tmpScreen{
+		CurrentTint:     s.currentTint,
+		OrigTint:        s.origTint,
+		TargetTint:      s.targetTint,
+		TintCount:       s.tintCount,
+		TintMaxCount:    s.tintMaxCount,
+		FadeInCount:     s.fadeInCount,
+		FadeInMaxCount:  s.fadeInMaxCount,
+		FadeOutCount:    s.fadeOutCount,
+		FadeOutMaxCount: s.fadeOutMaxCount,
+		FadedOut:        s.fadedOut,
+	}
+	return json.Marshal(tmp)
+}
+
 func (s *Screen) startTint(red, green, blue, gray float64, count int) {
-	s.origTint.red = s.currentTint.red
-	s.origTint.green = s.currentTint.green
-	s.origTint.blue = s.currentTint.blue
-	s.origTint.gray = s.currentTint.gray
-	s.targetTint.red = red
-	s.targetTint.green = green
-	s.targetTint.blue = blue
-	s.targetTint.gray = gray
+	s.origTint.Red = s.currentTint.Red
+	s.origTint.Green = s.currentTint.Green
+	s.origTint.Blue = s.currentTint.Blue
+	s.origTint.Gray = s.currentTint.Gray
+	s.targetTint.Red = red
+	s.targetTint.Green = green
+	s.targetTint.Blue = blue
+	s.targetTint.Gray = gray
 	s.tintCount = count
 	s.tintMaxCount = count
 }
@@ -96,29 +126,29 @@ func (s *Screen) Draw(screen *ebiten.Image, img *ebiten.Image, op *ebiten.DrawIm
 		fadeRate = 1
 	} else {
 		if !s.currentTint.isZero() {
-			if s.currentTint.gray != 0 {
-				op.ColorM.ChangeHSV(0, 1-s.currentTint.gray, 1)
+			if s.currentTint.Gray != 0 {
+				op.ColorM.ChangeHSV(0, 1-s.currentTint.Gray, 1)
 			}
 			rs, gs, bs := 1.0, 1.0, 1.0
-			if s.currentTint.red < 0 {
-				rs = 1 - -s.currentTint.red
+			if s.currentTint.Red < 0 {
+				rs = 1 - -s.currentTint.Red
 			}
-			if s.currentTint.green < 0 {
-				gs = 1 - -s.currentTint.green
+			if s.currentTint.Green < 0 {
+				gs = 1 - -s.currentTint.Green
 			}
-			if s.currentTint.blue < 0 {
-				bs = 1 - -s.currentTint.blue
+			if s.currentTint.Blue < 0 {
+				bs = 1 - -s.currentTint.Blue
 			}
 			op.ColorM.Scale(rs, gs, bs, 1)
 			rt, gt, bt := 0.0, 0.0, 0.0
-			if s.currentTint.red > 0 {
-				rt = s.currentTint.red
+			if s.currentTint.Red > 0 {
+				rt = s.currentTint.Red
 			}
-			if s.currentTint.green > 0 {
-				gt = s.currentTint.green
+			if s.currentTint.Green > 0 {
+				gt = s.currentTint.Green
 			}
-			if s.currentTint.blue > 0 {
-				bt = s.currentTint.blue
+			if s.currentTint.Blue > 0 {
+				bt = s.currentTint.Blue
 			}
 			op.ColorM.Translate(rt, gt, bt, 0)
 		}
@@ -156,15 +186,15 @@ func (s *Screen) Update() error {
 	if s.tintCount > 0 {
 		s.tintCount--
 		rate := 1 - float64(s.tintCount)/float64(s.tintMaxCount)
-		s.currentTint.red = s.origTint.red*(1-rate) + s.targetTint.red*rate
-		s.currentTint.green = s.origTint.green*(1-rate) + s.targetTint.green*rate
-		s.currentTint.blue = s.origTint.blue*(1-rate) + s.targetTint.blue*rate
-		s.currentTint.gray = s.origTint.gray*(1-rate) + s.targetTint.gray*rate
+		s.currentTint.Red = s.origTint.Red*(1-rate) + s.targetTint.Red*rate
+		s.currentTint.Green = s.origTint.Green*(1-rate) + s.targetTint.Green*rate
+		s.currentTint.Blue = s.origTint.Blue*(1-rate) + s.targetTint.Blue*rate
+		s.currentTint.Gray = s.origTint.Gray*(1-rate) + s.targetTint.Gray*rate
 	} else {
-		s.currentTint.red = s.targetTint.red
-		s.currentTint.green = s.targetTint.green
-		s.currentTint.blue = s.targetTint.blue
-		s.currentTint.gray = s.targetTint.gray
+		s.currentTint.Red = s.targetTint.Red
+		s.currentTint.Green = s.targetTint.Green
+		s.currentTint.Blue = s.targetTint.Blue
+		s.currentTint.Gray = s.targetTint.Gray
 	}
 	if s.fadeInCount > 0 {
 		s.fadeInCount--

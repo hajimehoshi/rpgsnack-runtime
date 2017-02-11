@@ -15,6 +15,7 @@
 package gamestate
 
 import (
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"regexp"
@@ -35,11 +36,13 @@ type Rand interface {
 }
 
 type Game struct {
-	variables        *Variables
-	screen           *Screen
-	windows          *window.Windows
-	currentMap       *Map
-	interpreterID    int
+	variables         *Variables
+	screen            *Screen
+	windows           *window.Windows
+	currentMap        *Map
+	lastInterpreterID int
+
+	// Fields that are not dumped
 	lastRequestID    int
 	rand             Rand
 	waitingRequestID int
@@ -58,6 +61,24 @@ func NewGame() (*Game, error) {
 	}
 	g.currentMap = m
 	return g, nil
+}
+
+func (g *Game) MarshalJSON() ([]uint8, error) {
+	type tmpGame struct {
+		Variables         *Variables      `json:"variables"`
+		Screen            *Screen         `json:"screen"`
+		Windows           *window.Windows `json:"windows"`
+		Map               *Map            `json:"map"`
+		LastInterpreterID int             `json:"lastInterpreterId"`
+	}
+	tmp := &tmpGame{
+		Variables:         g.variables,
+		Screen:            g.screen,
+		Windows:           g.windows,
+		Map:               g.currentMap,
+		LastInterpreterID: g.lastInterpreterID,
+	}
+	return json.Marshal(tmp)
 }
 
 func (g *Game) Screen() *Screen {
@@ -82,19 +103,22 @@ func (g *Game) Update(sceneManager *scene.Manager) error {
 	return nil
 }
 
-func (g *Game) RequestSave(sceneManager *scene.Manager) bool {
+func (g *Game) RequestSave(sceneManager *scene.Manager) (bool, error) {
 	// If there is an unfinished request, stop saving the progress.
 	if g.waitingRequestID != 0 {
-		return false
+		return false, nil
 	}
 	if g.currentMap.waitingRequestResponse() {
-		return false
+		return false, nil
 	}
 	id := g.generateRequestID()
 	g.waitingRequestID = id
-	// TODO: Dump |g| as JSON
-	sceneManager.Requester().RequestSaveProgress(id, "{}")
-	return true
+	j, err := json.Marshal(g)
+	if err != nil {
+		return false, err
+	}
+	sceneManager.Requester().RequestSaveProgress(id, string(j))
+	return true, nil
 }
 
 var reMessage = regexp.MustCompile(`\\([a-zA-Z])\[(\d+)\]`)
@@ -166,6 +190,11 @@ func (g *Game) meetsCondition(cond *data.Condition, eventID int) (bool, error) {
 func (g *Game) generateRequestID() int {
 	g.lastRequestID++
 	return g.lastRequestID
+}
+
+func (g *Game) generateInterpreterID() int {
+	g.lastInterpreterID++
+	return g.lastInterpreterID
 }
 
 func (g *Game) SetRandom(r Rand) {

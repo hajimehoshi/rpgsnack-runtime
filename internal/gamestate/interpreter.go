@@ -15,6 +15,7 @@
 package gamestate
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"golang.org/x/text/language"
@@ -28,7 +29,6 @@ import (
 
 type Interpreter struct {
 	id                 int
-	gameState          *Game
 	mapID              int // Note: This doesn't make sense when eventID == -1
 	roomID             int // Note: This doesn't make sense when eventID == -1
 	eventID            int
@@ -42,18 +42,56 @@ type Interpreter struct {
 	routeSkip          bool
 	shouldGoToTitle    bool
 	waitingRequestID   int // Note: When this is not 0, the game state can't be saved.
+
+	// Fields that are not dumped
+	gameState *Game
 }
 
 func NewInterpreter(gameState *Game, mapID, roomID, eventID int, commands []*data.Command) *Interpreter {
-	gameState.interpreterID++
 	return &Interpreter{
-		id:              gameState.interpreterID,
+		id:              gameState.generateInterpreterID(),
 		gameState:       gameState,
 		mapID:           mapID,
 		roomID:          roomID,
 		eventID:         eventID,
 		commandIterator: commanditerator.New(commands),
 	}
+}
+
+func (i *Interpreter) MarshalJSON() ([]uint8, error) {
+	type tmpInterpreter struct {
+		ID                 int                              `json:"id"`
+		MapID              int                              `json:"mapId"`
+		RoomID             int                              `json:"roomId"`
+		EventID            int                              `json:"eventId"`
+		CommandIterator    *commanditerator.CommandIterator `json:"commandIterator"`
+		WaitingCount       int                              `json:"waitingCount"`
+		WaitingCommand     bool                             `json:"waitingCommand"`
+		MoveCharacterState *moveCharacterState              `json:"moveCharacterState"`
+		Repeat             bool                             `json:"repeat"`
+		Sub                *Interpreter                     `json:"sub"`
+		Route              bool                             `json:"route"`
+		RouteSkip          bool                             `json:"routeSkip"`
+		ShouldGoToTitle    bool                             `json:"shouldGoToTitle"`
+		WaitingRequestID   int                              `json:"waitingRequestId"`
+	}
+	tmp := &tmpInterpreter{
+		ID:                 i.id,
+		MapID:              i.mapID,
+		RoomID:             i.roomID,
+		EventID:            i.eventID,
+		CommandIterator:    i.commandIterator,
+		WaitingCount:       i.waitingCount,
+		WaitingCommand:     i.waitingCommand,
+		MoveCharacterState: i.moveCharacterState,
+		Repeat:             i.repeat,
+		Sub:                i.sub,
+		Route:              i.route,
+		RouteSkip:          i.routeSkip,
+		ShouldGoToTitle:    i.shouldGoToTitle,
+		WaitingRequestID:   i.waitingRequestID,
+	}
+	return json.Marshal(tmp)
 }
 
 func (i *Interpreter) waitingRequestResponse() bool {

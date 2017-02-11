@@ -31,6 +31,7 @@ func (m *MockRequester) RequestUnlockAchievement(requestID int, achievementID in
 
 func (m *MockRequester) RequestSaveProgress(requestID int, data string) {
 	log.Printf("request save progress: requestID: %d", requestID)
+	println(data)
 	m.game.FinishSaveProgress(requestID, "")
 }
 

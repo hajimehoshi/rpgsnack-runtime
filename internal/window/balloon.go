@@ -15,6 +15,7 @@
 package window
 
 import (
+	"encoding/json"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten"
@@ -48,6 +49,38 @@ type balloon struct {
 	openingCount   int
 	closingCount   int
 	opened         bool
+}
+
+func (b *balloon) MarshalJSON() ([]uint8, error) {
+	type tmpBalloon struct {
+		InterpreterID  int    `json:"interpreterId"`
+		X              int    `json:"x"`
+		Y              int    `json:"y"`
+		Width          int    `json:"width"`
+		Height         int    `json:"height"`
+		HasArrow       bool   `json:"hasArrow"`
+		EventID        int    `json:"eventId"`
+		Content        string `json:"content"`
+		ContentOffsetX int    `json:"contentOffsetX"`
+		OpeningCount   int    `json:"openingCount"`
+		ClosingCount   int    `json:"closingCount"`
+		Opened         bool   `json:"opened"`
+	}
+	tmp := &tmpBalloon{
+		InterpreterID:  b.interpreterID,
+		X:              b.x,
+		Y:              b.y,
+		Width:          b.width,
+		Height:         b.height,
+		HasArrow:       b.hasArrow,
+		EventID:        b.eventID,
+		Content:        b.content,
+		ContentOffsetX: b.contentOffsetX,
+		OpeningCount:   b.openingCount,
+		ClosingCount:   b.closingCount,
+		Opened:         b.opened,
+	}
+	return json.Marshal(tmp)
 }
 
 func newBalloon(x, y, width, height int, content string, interpreterID int) *balloon {

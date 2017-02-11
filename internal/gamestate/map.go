@@ -15,6 +15,7 @@
 package gamestate
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"sort"
@@ -37,16 +38,18 @@ func (p *passableOnMap) At(x, y int) (bool, error) {
 }
 
 type Map struct {
-	game                        *Game
 	player                      *character.Character
 	mapID                       int
 	roomID                      int
 	events                      []*character.Character
 	eventPageIndices            map[int]int
-	eventData                   map[int]*data.Event
 	executingEventIDByUserInput int
 	interpreters                map[int]*Interpreter
 	playerInterpreterID         int
+
+	// Fields that are not dumped
+	game      *Game
+	eventData map[int]*data.Event
 }
 
 func NewMap(game *Game) (*Map, error) {
@@ -64,6 +67,30 @@ func NewMap(game *Game) (*Map, error) {
 	}
 	m.setRoomID(roomID, nil)
 	return m, nil
+}
+
+func (m *Map) MarshalJSON() ([]uint8, error) {
+	type tmpMap struct {
+		Player                      *character.Character   `json:"player"`
+		MapID                       int                    `json:"mapId"`
+		RoomID                      int                    `json:"roomId"`
+		Events                      []*character.Character `json:"events"`
+		EventPageIndices            map[int]int            `json:"eventPageIndices"`
+		ExecutingEventIDByUserInput int                    `json:"executingEventIdByUserInput"`
+		Interpreters                map[int]*Interpreter   `json:"interpreters"`
+		PlayerInterpreterID         int                    `json:"playerInterpreterId"`
+	}
+	tmp := &tmpMap{
+		Player:                      m.player,
+		MapID:                       m.mapID,
+		RoomID:                      m.roomID,
+		Events:                      m.events,
+		EventPageIndices:            m.eventPageIndices,
+		ExecutingEventIDByUserInput: m.executingEventIDByUserInput,
+		Interpreters:                m.interpreters,
+		PlayerInterpreterID:         m.playerInterpreterID,
+	}
+	return json.Marshal(tmp)
 }
 
 func (m *Map) addInterpreter(interpreter *Interpreter) {

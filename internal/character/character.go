@@ -15,6 +15,8 @@
 package character
 
 import (
+	"encoding/json"
+
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
@@ -73,6 +75,50 @@ func NewEvent(id int, x, y int) *Character {
 		visible: true,
 		walking: true,
 	}
+}
+
+func (c *Character) MarshalJSON() ([]uint8, error) {
+	type tmpCharacter struct {
+		EventID       int        `json:"eventId"`
+		Speed         data.Speed `json:"speed"`
+		ImageName     string     `json:"imageName"`
+		ImageIndex    int        `json:"imageIndex"`
+		Dir           data.Dir   `json:"dir"`
+		DirFix        bool       `json:"dirFix"`
+		Stepping      bool       `json:"stepping"`
+		SteppingCount int        `json:"steppingCount"`
+		Walking       bool       `json:"walking"`
+		WalkingCount  int        `json:"walkingCount"`
+		Frame         int        `json:"frame"`
+		PrevFrame     int        `json:"prevFrame"`
+		X             int        `json:"x"`
+		Y             int        `json:"y"`
+		MoveCount     int        `json:"moveCount"`
+		MoveDir       data.Dir   `json:"moveDir"`
+		Visible       bool       `json:"visible"`
+		Through       bool       `json:"through"`
+	}
+	tmp := &tmpCharacter{
+		EventID:       c.eventID,
+		Speed:         c.speed,
+		ImageName:     c.imageName,
+		ImageIndex:    c.imageIndex,
+		Dir:           c.dir,
+		DirFix:        c.dirFix,
+		Stepping:      c.stepping,
+		SteppingCount: c.steppingCount,
+		Walking:       c.walking,
+		WalkingCount:  c.walkingCount,
+		Frame:         c.frame,
+		PrevFrame:     c.prevFrame,
+		X:             c.x,
+		Y:             c.y,
+		MoveCount:     c.moveCount,
+		MoveDir:       c.moveDir,
+		Visible:       c.visible,
+		Through:       c.through,
+	}
+	return json.Marshal(tmp)
 }
 
 func (c *Character) EventID() int {
