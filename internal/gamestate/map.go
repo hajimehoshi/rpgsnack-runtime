@@ -89,6 +89,22 @@ func (m *Map) TileSet() (*data.TileSet, error) {
 	return nil, fmt.Errorf("mapscene: tile set not found: %d", id)
 }
 
+type eventsByID struct {
+	events []*character.Character
+}
+
+func (e *eventsByID) Len() int {
+	return len(e.events)
+}
+
+func (e *eventsByID) Less(i, j int) bool {
+	return e.events[i].EventID() < e.events[j].EventID()
+}
+
+func (e *eventsByID) Swap(i, j int) {
+	e.events[i], e.events[j] = e.events[j], e.events[i]
+}
+
 func (m *Map) setRoomID(id int, interpreter *Interpreter) error {
 	m.roomID = id
 	m.events = nil
@@ -100,6 +116,7 @@ func (m *Map) setRoomID(id int, interpreter *Interpreter) error {
 		m.eventPageIndices[event.EventID()] = character.PlayerEventID
 		m.eventData[event.EventID()] = e
 	}
+	sort.Sort(&eventsByID{m.events})
 	m.interpreters = map[int]*Interpreter{}
 	if interpreter != nil {
 		m.addInterpreter(interpreter)
@@ -260,22 +277,6 @@ func (m *Map) Update(sceneManager *scene.Manager) error {
 	return nil
 }
 
-type eventsById struct {
-	events []*character.Character
-}
-
-func (e *eventsById) Len() int {
-	return len(e.events)
-}
-
-func (e *eventsById) Less(i, j int) bool {
-	return e.events[i].EventID() < e.events[j].EventID()
-}
-
-func (e *eventsById) Swap(i, j int) {
-	e.events[i], e.events[j] = e.events[j], e.events[i]
-}
-
 func (m *Map) eventsAt(x, y int) []*character.Character {
 	es := []*character.Character{}
 	for _, e := range m.events {
@@ -284,9 +285,6 @@ func (m *Map) eventsAt(x, y int) []*character.Character {
 			es = append(es, e)
 		}
 	}
-	sort.Sort(&eventsById{
-		events: es,
-	})
 	return es
 }
 
