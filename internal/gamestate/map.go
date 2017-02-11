@@ -214,7 +214,7 @@ func (m *Map) Update(sceneManager *scene.Manager) error {
 		return nil
 	}
 	for _, e := range m.events {
-		index, err := m.calcPageIndex(e.ID())
+		index, err := m.calcPageIndex(e.EventID())
 		if err != nil {
 			return err
 		}
@@ -222,7 +222,7 @@ func (m *Map) Update(sceneManager *scene.Manager) error {
 		if p == index {
 			continue
 		}
-		m.removeRoutes(e.ID())
+		m.removeRoutes(e.EventID())
 		m.eventPageIndices[e] = index
 		page := m.currentPage(e)
 		if err := e.UpdateWithPage(page); err != nil {
@@ -247,7 +247,7 @@ func (m *Map) Update(sceneManager *scene.Manager) error {
 				},
 			},
 		}
-		interpreter := NewInterpreter(m.game, m.mapID, m.roomID, e.ID(), commands)
+		interpreter := NewInterpreter(m.game, m.mapID, m.roomID, e.EventID(), commands)
 		interpreter.route = true
 		m.addInterpreter(interpreter)
 	}
@@ -304,7 +304,7 @@ func (m *Map) tryRunAutoEvent() {
 		if page.Trigger != data.TriggerAuto {
 			continue
 		}
-		m.addInterpreter(NewInterpreter(m.game, m.mapID, m.roomID, e.ID(), page.Commands))
+		m.addInterpreter(NewInterpreter(m.game, m.mapID, m.roomID, e.EventID(), page.Commands))
 		break
 	}
 }
@@ -419,7 +419,7 @@ func (m *Map) TryRunDirectEvent(x, y int) (bool, error) {
 		if page.Trigger != data.TriggerDirect {
 			continue
 		}
-		i := NewInterpreter(m.game, m.mapID, m.roomID, e.ID(), page.Commands)
+		i := NewInterpreter(m.game, m.mapID, m.roomID, e.EventID(), page.Commands)
 		m.addInterpreter(i)
 		return true, nil
 	}
@@ -555,7 +555,7 @@ func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
 					&data.Command{
 						Name: data.CommandNameSetRoute,
 						Args: &data.CommandArgsSetRoute{
-							EventID: event.ID(),
+							EventID: event.EventID(),
 							Repeat:  false,
 							Skip:    false,
 							Wait:    true,
@@ -574,7 +574,7 @@ func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
 				&data.Command{
 					Name: data.CommandNameCallEvent,
 					Args: &data.CommandArgsCallEvent{
-						EventID:   event.ID(),
+						EventID:   event.EventID(),
 						PageIndex: m.eventPageIndices[event],
 					},
 				})
@@ -583,7 +583,7 @@ func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
 					&data.Command{
 						Name: data.CommandNameSetRoute,
 						Args: &data.CommandArgsSetRoute{
-							EventID: event.ID(),
+							EventID: event.EventID(),
 							Repeat:  false,
 							Skip:    false,
 							Wait:    true,
@@ -604,7 +604,7 @@ func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
 	m.addInterpreter(i)
 	m.playerInterpreterID = i.id
 	if event != nil {
-		m.executingEventIDByUserInput = event.ID()
+		m.executingEventIDByUserInput = event.EventID()
 	}
 	return true, nil
 }

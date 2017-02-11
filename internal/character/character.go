@@ -23,7 +23,7 @@ import (
 )
 
 type Character struct {
-	id            int
+	eventID       int
 	speed         data.Speed
 	imageName     string
 	imageIndex    int
@@ -45,7 +45,7 @@ type Character struct {
 
 func NewPlayer(x, y int) *Character {
 	return &Character{
-		id:         -1,
+		eventID:    -1,
 		speed:      data.Speed3,
 		imageName:  "characters0.png",
 		imageIndex: 0,
@@ -62,7 +62,7 @@ func NewPlayer(x, y int) *Character {
 
 func NewEvent(id int, x, y int) *Character {
 	return &Character{
-		id:      id,
+		eventID: id,
 		speed:   data.Speed3,
 		x:       x,
 		y:       y,
@@ -71,8 +71,8 @@ func NewEvent(id int, x, y int) *Character {
 	}
 }
 
-func (c *Character) ID() int {
-	return c.id
+func (c *Character) EventID() int {
+	return c.eventID
 }
 
 func (c *Character) Size() (int, int) {

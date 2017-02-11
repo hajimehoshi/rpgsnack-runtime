@@ -71,7 +71,7 @@ func (i *Interpreter) event() *character.Character {
 		return nil
 	}
 	for _, e := range i.gameState.Map().events {
-		if i.eventID == e.ID() {
+		if i.eventID == e.EventID() {
 			return e
 		}
 	}
@@ -96,7 +96,7 @@ func (i *Interpreter) character(id int) *character.Character {
 		id = i.eventID
 	}
 	for _, e := range i.gameState.Map().events {
-		if id == e.ID() {
+		if id == e.EventID() {
 			return e
 		}
 	}
