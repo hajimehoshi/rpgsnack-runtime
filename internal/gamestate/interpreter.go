@@ -200,7 +200,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 			args := c.Args.(*data.CommandArgsShowMessage)
 			content := data.Current().Texts.Get(language.Und, args.ContentID)
 			if ch := i.character(args.EventID); ch != nil {
-				content = i.gameState.ParseMessageSyntax(content)
+				content = i.gameState.parseMessageSyntax(content)
 				i.gameState.windows.ShowMessage(content, ch, i.id)
 				i.waitingCommand = true
 				return false, nil
@@ -221,7 +221,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 			choices := []string{}
 			for _, id := range c.Args.(*data.CommandArgsShowChoices).ChoiceIDs {
 				choice := data.Current().Texts.Get(language.Und, id)
-				choice = i.gameState.ParseMessageSyntax(choice)
+				choice = i.gameState.parseMessageSyntax(choice)
 				choices = append(choices, choice)
 			}
 			i.gameState.windows.ShowChoices(sceneManager, choices, i.id)

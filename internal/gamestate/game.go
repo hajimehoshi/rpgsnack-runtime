@@ -69,7 +69,7 @@ func (g *Game) Map() *Map {
 
 var reMessage = regexp.MustCompile(`\\([a-zA-Z])\[(\d+)\]`)
 
-func (g *Game) ParseMessageSyntax(str string) string {
+func (g *Game) parseMessageSyntax(str string) string {
 	return reMessage.ReplaceAllStringFunc(str, func(part string) string {
 		name := strings.ToLower(part[1:2])
 		id, err := strconv.Atoi(part[3 : len(part)-1])
