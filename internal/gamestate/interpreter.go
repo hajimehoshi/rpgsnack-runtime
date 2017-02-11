@@ -133,7 +133,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		conditions := c.Args.(*data.CommandArgsIf).Conditions
 		matches := true
 		for _, c := range conditions {
-			m, err := i.gameState.MeetsCondition(c, i.eventID)
+			m, err := i.gameState.meetsCondition(c, i.eventID)
 			if err != nil {
 				return false, err
 			}

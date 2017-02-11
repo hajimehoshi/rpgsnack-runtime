@@ -84,7 +84,7 @@ func (g *Game) ParseMessageSyntax(str string) string {
 	})
 }
 
-func (g *Game) MeetsCondition(cond *data.Condition, eventID int) (bool, error) {
+func (g *Game) meetsCondition(cond *data.Condition, eventID int) (bool, error) {
 	// TODO: Is it OK to allow null conditions?
 	if cond == nil {
 		return true, nil
