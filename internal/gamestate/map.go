@@ -42,8 +42,8 @@ type Map struct {
 	mapID                       int
 	roomID                      int
 	events                      []*character.Character
-	eventPageIndices            map[*character.Character]int
-	eventData                   map[*character.Character]*data.Event
+	eventPageIndices            map[int]int
+	eventData                   map[int]*data.Event
 	executingEventIDByUserInput int
 	interpreters                map[int]*Interpreter
 	playerInterpreterID         int
@@ -92,13 +92,13 @@ func (m *Map) TileSet() (*data.TileSet, error) {
 func (m *Map) setRoomID(id int, interpreter *Interpreter) error {
 	m.roomID = id
 	m.events = nil
-	m.eventPageIndices = map[*character.Character]int{}
-	m.eventData = map[*character.Character]*data.Event{}
+	m.eventPageIndices = map[int]int{}
+	m.eventData = map[int]*data.Event{}
 	for _, e := range m.CurrentRoom().Events {
 		event := character.NewEvent(e.ID, e.X, e.Y)
 		m.events = append(m.events, event)
-		m.eventPageIndices[event] = -1
-		m.eventData[event] = e
+		m.eventPageIndices[event.EventID()] = -1
+		m.eventData[event.EventID()] = e
 	}
 	m.interpreters = map[int]*Interpreter{}
 	if interpreter != nil {
@@ -157,11 +157,11 @@ func (m *Map) calcPageIndex(eventID int) (int, error) {
 }
 
 func (m *Map) currentPage(event *character.Character) *data.Page {
-	i := m.eventPageIndices[event]
+	i := m.eventPageIndices[event.EventID()]
 	if i == -1 {
 		return nil
 	}
-	return m.eventData[event].Pages[i]
+	return m.eventData[event.EventID()].Pages[i]
 }
 
 type interpretersByID []*Interpreter
@@ -218,12 +218,12 @@ func (m *Map) Update(sceneManager *scene.Manager) error {
 		if err != nil {
 			return err
 		}
-		p := m.eventPageIndices[e]
+		p := m.eventPageIndices[e.EventID()]
 		if p == index {
 			continue
 		}
 		m.removeRoutes(e.EventID())
-		m.eventPageIndices[e] = index
+		m.eventPageIndices[e.EventID()] = index
 		page := m.currentPage(e)
 		if err := e.UpdateWithPage(page); err != nil {
 			return err
@@ -261,8 +261,7 @@ func (m *Map) Update(sceneManager *scene.Manager) error {
 }
 
 type eventsById struct {
-	mapData *Map
-	events  []*character.Character
+	events []*character.Character
 }
 
 func (e *eventsById) Len() int {
@@ -270,7 +269,7 @@ func (e *eventsById) Len() int {
 }
 
 func (e *eventsById) Less(i, j int) bool {
-	return e.mapData.eventData[e.events[i]].ID < e.mapData.eventData[e.events[j]].ID
+	return e.events[i].EventID() < e.events[j].EventID()
 }
 
 func (e *eventsById) Swap(i, j int) {
@@ -286,8 +285,7 @@ func (m *Map) eventsAt(x, y int) []*character.Character {
 		}
 	}
 	sort.Sort(&eventsById{
-		events:  es,
-		mapData: m,
+		events: es,
 	})
 	return es
 }
@@ -575,7 +573,7 @@ func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
 					Name: data.CommandNameCallEvent,
 					Args: &data.CommandArgsCallEvent{
 						EventID:   event.EventID(),
-						PageIndex: m.eventPageIndices[event],
+						PageIndex: m.eventPageIndices[event.EventID()],
 					},
 				})
 			if !event.DirFix() {
