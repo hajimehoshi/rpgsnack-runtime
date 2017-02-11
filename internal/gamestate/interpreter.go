@@ -333,7 +333,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		// TODO: Remove this command in the future.
 		// Implement passive achievements instead.
 		args := c.Args.(*data.CommandArgsUnlockAchievement)
-		i.waitingRequestID = i.gameState.GenerateRequestID()
+		i.waitingRequestID = i.gameState.generateRequestID()
 		sceneManager.Requester().RequestUnlockAchievement(i.waitingRequestID, args.ID)
 		return false, nil
 	case data.CommandNameMoveCharacter:
@@ -519,7 +519,7 @@ func (i *Interpreter) setVariable(id int, op data.SetVariableOp, valueType data.
 		rhs = i.gameState.variables.VariableValue(value.(int))
 	case data.SetVariableValueTypeRandom:
 		v := value.(*data.SetVariableValueRandom)
-		rhs = i.gameState.RandomValue(v.Begin, v.End+1)
+		rhs = i.gameState.randomValue(v.Begin, v.End+1)
 	case data.SetVariableValueTypeCharacter:
 		args := value.(*data.SetVariableCharacterArgs)
 		ch := i.character(args.EventID)

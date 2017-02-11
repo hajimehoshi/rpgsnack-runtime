@@ -133,7 +133,7 @@ func (g *Game) meetsCondition(cond *data.Condition, eventID int) (bool, error) {
 	return false, nil
 }
 
-func (g *Game) GenerateRequestID() int {
+func (g *Game) generateRequestID() int {
 	g.lastRequestID++
 	return g.lastRequestID
 }
@@ -142,6 +142,6 @@ func (g *Game) SetRandom(r Rand) {
 	g.rand = r
 }
 
-func (g *Game) RandomValue(min, max int) int {
+func (g *Game) randomValue(min, max int) int {
 	return min + g.rand.Intn(max-min)
 }
