@@ -19,45 +19,35 @@ import (
 )
 
 type pointer struct {
-	commandIndices []int
-	branchIndices  []int
+	indices []int // command index, branch index, command index, ...
 }
 
 func (p *pointer) appendCommand(i int) *pointer {
-	ci := make([]int, len(p.commandIndices)+1)
-	copy(ci, p.commandIndices)
-	ci[len(ci)-1] = i
 	return &pointer{
-		commandIndices: ci,
-		branchIndices:  p.branchIndices,
+		indices: append(p.indices, i),
 	}
 }
 
 func (p *pointer) appendBranch(i int) *pointer {
-	bi := make([]int, len(p.branchIndices)+1)
-	copy(bi, p.branchIndices)
-	bi[len(bi)-1] = i
 	return &pointer{
-		commandIndices: p.commandIndices,
-		branchIndices:  bi,
+		indices: append(p.indices, i),
 	}
 }
 
 type CommandIterator struct {
-	commandIndices []int
-	branchIndices  []int
-	commands       []*data.Command
-	labels         map[string]*pointer
+	indices  []int
+	commands []*data.Command
+	labels   map[string]*pointer
 }
 
 func New(commands []*data.Command) *CommandIterator {
 	c := &CommandIterator{
-		commandIndices: []int{0},
-		commands:       commands,
-		labels:         map[string]*pointer{},
+		indices:  []int{0},
+		commands: commands,
+		labels:   map[string]*pointer{},
 	}
 	c.unindentIfNeeded()
-	c.recordLabel(c.commands, &pointer{[]int{}, []int{}})
+	c.recordLabel(c.commands, &pointer{[]int{}})
 	return c
 }
 
@@ -80,32 +70,32 @@ func (c *CommandIterator) recordLabel(commands []*data.Command, pointer *pointer
 }
 
 func (c *CommandIterator) Rewind() {
-	c.commandIndices = []int{0}
+	c.indices = []int{0}
 	c.unindentIfNeeded()
 }
 
 func (c *CommandIterator) IsTerminated() bool {
-	return len(c.commandIndices) == 0
+	return len(c.indices) == 0
 }
 
 func (c *CommandIterator) unindentIfNeeded() {
 loop:
-	for 0 < len(c.commandIndices) {
-		branch := c.commands
-		for i := 0; i < len(c.commandIndices); i++ {
-			if len(branch) <= c.commandIndices[i] {
-				c.commandIndices = c.commandIndices[:i]
-				if len(c.commandIndices) > 0 {
-					c.commandIndices[len(c.commandIndices)-1]++
+	for 0 < len(c.indices) {
+		cc := c.commands
+		for i := 0; i < (len(c.indices)+1)/2; i++ {
+			if len(cc) <= c.indices[i*2] {
+				if 0 < i*2-1 {
+					c.indices = c.indices[:i*2-1]
+				} else {
+					c.indices = []int{}
 				}
-				if i > 0 {
-					c.branchIndices = c.branchIndices[:i-1]
+				if len(c.indices) > 0 {
+					c.indices[len(c.indices)-1]++
 				}
 				continue loop
 			}
-			if i < len(c.commandIndices)-1 {
-				command := branch[c.commandIndices[i]]
-				branch = command.Branches[c.branchIndices[i]]
+			if i < (len(c.indices)+1)/2-1 {
+				cc = cc[c.indices[i*2]].Branches[c.indices[i*2+1]]
 				continue
 			}
 		}
@@ -114,22 +104,20 @@ loop:
 }
 
 func (c *CommandIterator) Command() *data.Command {
-	branch := c.commands
-	for i, bi := range c.branchIndices {
-		command := branch[c.commandIndices[i]]
-		branch = command.Branches[bi]
+	cc := c.commands
+	for i := 0; i < len(c.indices)/2; i++ {
+		cc = cc[c.indices[i*2]].Branches[c.indices[i*2+1]]
 	}
-	return branch[c.commandIndices[len(c.commandIndices)-1]]
+	return cc[c.indices[len(c.indices)-1]]
 }
 
 func (c *CommandIterator) Advance() {
-	c.commandIndices[len(c.commandIndices)-1]++
+	c.indices[len(c.indices)-1]++
 	c.unindentIfNeeded()
 }
 
 func (c *CommandIterator) Choose(branchIndex int) {
-	c.branchIndices = append(c.branchIndices, branchIndex)
-	c.commandIndices = append(c.commandIndices, 0)
+	c.indices = append(c.indices, branchIndex, 0)
 	c.unindentIfNeeded()
 }
 
@@ -139,7 +127,7 @@ func (c *CommandIterator) Goto(label string) bool {
 		// TODO: log error?
 		return false
 	}
-	c.commandIndices = p.commandIndices
-	c.branchIndices = p.branchIndices
+	// TODO: Copy?
+	c.indices = p.indices
 	return true
 }
