@@ -63,27 +63,24 @@ func (c *CommandIterator) IsTerminated() bool {
 }
 
 func (c *CommandIterator) unindentIfNeeded() {
-loop:
-	for 0 < len(c.indices) {
-		cc := c.commands
-		for i := 0; i < (len(c.indices)+1)/2; i++ {
-			if len(cc) <= c.indices[i*2] {
-				if 0 < i*2-1 {
-					c.indices = c.indices[:i*2-1]
-				} else {
-					c.indices = []int{}
-				}
-				if len(c.indices) > 0 {
-					c.indices[len(c.indices)-1]++
-				}
-				continue loop
-			}
-			if i < (len(c.indices)+1)/2-1 {
-				cc = cc[c.indices[i*2]].Branches[c.indices[i*2+1]]
-				continue
-			}
-		}
+	if len(c.indices) == 0 {
 		return
+	}
+loop:
+	cc := c.commands
+	for i := 0; i < (len(c.indices)+1)/2; i++ {
+		if len(cc) <= c.indices[i*2] {
+			if 0 < i*2-1 {
+				c.indices = c.indices[:i*2-1]
+				c.indices[len(c.indices)-1]++
+				goto loop
+			}
+			c.indices = []int{}
+			return
+		}
+		if i < (len(c.indices)+1)/2-1 {
+			cc = cc[c.indices[i*2]].Branches[c.indices[i*2+1]]
+		}
 	}
 }
 
