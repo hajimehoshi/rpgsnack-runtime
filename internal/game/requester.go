@@ -35,6 +35,9 @@ func (m *MockRequester) RequestSaveProgress(requestID int, data string) {
 	m.game.FinishSaveProgress(requestID, "")
 }
 
+func (m *MockRequester) RequestLoadProgress(requestID int) {
+}
+
 func (m *MockRequester) RequestPurchase(requestID int, productID string) {
 }
 

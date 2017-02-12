@@ -52,6 +52,18 @@ func NewMapScene() (*MapScene, error) {
 	return mapScene, nil
 }
 
+func NewMapSceneWithGame(game *gamestate.Game) (*MapScene, error) {
+	tilesImage, err := ebiten.NewImage(scene.TileXNum*scene.TileSize, scene.TileYNum*scene.TileSize, ebiten.FilterNearest)
+	if err != nil {
+		return nil, err
+	}
+	mapScene := &MapScene{
+		tilesImage: tilesImage,
+		gameState:  game,
+	}
+	return mapScene, nil
+}
+
 func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) error {
 	if m.gameState.Map().IsEventExecuting() {
 		m.triggeringFailed = false

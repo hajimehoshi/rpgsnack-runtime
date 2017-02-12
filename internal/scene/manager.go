@@ -39,6 +39,7 @@ type Manager struct {
 	current            scene
 	next               scene
 	lastRequestID      int
+	lastLoadedData     []uint8
 	requestFinisher    chan func() int
 	finishedRequestIDs map[int]struct{}
 }
@@ -46,6 +47,7 @@ type Manager struct {
 type Requester interface {
 	RequestUnlockAchievement(requestID int, achievementID int)
 	RequestSaveProgress(requestID int, data string)
+	RequestLoadProgress(requestID int)
 	RequestPurchase(requestID int, productID string)
 	RequestInterstitialAds(requestID int)
 	RequestRewardedAds(requestID int)
@@ -104,6 +106,10 @@ func (m *Manager) GoTo(next scene) {
 	m.next = next
 }
 
+func (m *Manager) LastLoadedData() []uint8 {
+	return m.lastLoadedData
+}
+
 func (m *Manager) GenerateRequestID() int {
 	m.lastRequestID++
 	return m.lastRequestID
@@ -127,6 +133,13 @@ func (m *Manager) FinishUnlockAchievement(id int, achievements string, err strin
 
 func (m *Manager) FinishSaveProgress(id int, err string) {
 	m.requestFinisher <- func() int {
+		return id
+	}
+}
+
+func (m *Manager) FinishLoadProgress(id int, data string, err string) {
+	m.requestFinisher <- func() int {
+		m.lastLoadedData = []uint8(data)
 		return id
 	}
 }

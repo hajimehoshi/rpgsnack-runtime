@@ -122,3 +122,7 @@ func (g *Game) FinishUnlockAchievement(id int, achievements string, err string) 
 func (g *Game) FinishSaveProgress(id int, err string) {
 	g.sceneManager.FinishSaveProgress(id, err)
 }
+
+func (g *Game) FinishLoadProgress(id int, data string, err string) {
+	g.sceneManager.FinishLoadProgress(id, data, err)
+}
