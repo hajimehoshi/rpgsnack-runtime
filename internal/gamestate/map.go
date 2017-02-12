@@ -479,7 +479,7 @@ func (m *Map) TryRunDirectEvent(x, y int) (bool, error) {
 	return false, nil
 }
 
-func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
+func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, x, y int) (bool, error) {
 	if m.IsEventExecuting() {
 		return false, nil
 	}
@@ -516,6 +516,9 @@ func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
 	if len(path) == 0 {
 		return false, nil
 	}
+	// The player can move. Let's save the state here just before starting moving.
+	m.game.RequestSave(sceneManager)
+
 	// The player's speed is never changed by another events during the player walks
 	// by user input.
 	origSpeed := m.player.Speed()

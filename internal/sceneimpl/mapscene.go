@@ -93,7 +93,7 @@ func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) error {
 		m.triggeringFailed = false
 		return nil
 	}
-	result, err = m.gameState.Map().TryMovePlayerByUserInput(tx, ty)
+	result, err = m.gameState.Map().TryMovePlayerByUserInput(sceneManager, tx, ty)
 	if err != nil {
 		return err
 	}
@@ -101,7 +101,6 @@ func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) error {
 		m.triggeringFailed = true
 		return nil
 	}
-	m.gameState.RequestSave(sceneManager)
 	m.triggeringFailed = false
 	return nil
 }
