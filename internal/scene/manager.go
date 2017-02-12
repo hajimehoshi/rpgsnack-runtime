@@ -38,6 +38,7 @@ type Manager struct {
 	requester          Requester
 	current            scene
 	next               scene
+	lastRequestID      int
 	requestFinisher    chan func() int
 	finishedRequestIDs map[int]struct{}
 }
@@ -101,6 +102,11 @@ func (m *Manager) Draw(screen *ebiten.Image) error {
 
 func (m *Manager) GoTo(next scene) {
 	m.next = next
+}
+
+func (m *Manager) GenerateRequestID() int {
+	m.lastRequestID++
+	return m.lastRequestID
 }
 
 func (m *Manager) HasFinishedRequestID(id int) bool {

@@ -43,7 +43,6 @@ type Game struct {
 	lastInterpreterID int
 
 	// Fields that are not dumped
-	lastRequestID    int
 	rand             Rand
 	waitingRequestID int
 }
@@ -111,7 +110,7 @@ func (g *Game) RequestSave(sceneManager *scene.Manager) (bool, error) {
 	if g.currentMap.waitingRequestResponse() {
 		return false, nil
 	}
-	id := g.generateRequestID()
+	id := sceneManager.GenerateRequestID()
 	g.waitingRequestID = id
 	j, err := json.Marshal(g)
 	if err != nil {
@@ -185,11 +184,6 @@ func (g *Game) meetsCondition(cond *data.Condition, eventID int) (bool, error) {
 		return false, fmt.Errorf("mapscene: invalid condition: %s", cond)
 	}
 	return false, nil
-}
-
-func (g *Game) generateRequestID() int {
-	g.lastRequestID++
-	return g.lastRequestID
 }
 
 func (g *Game) generateInterpreterID() int {
