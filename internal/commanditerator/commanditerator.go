@@ -18,42 +18,26 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 )
 
-type pointer struct {
-	indices []int // command index, branch index, command index, ...
-}
-
-func (p *pointer) appendCommand(i int) *pointer {
-	return &pointer{
-		indices: append(p.indices, i),
-	}
-}
-
-func (p *pointer) appendBranch(i int) *pointer {
-	return &pointer{
-		indices: append(p.indices, i),
-	}
-}
-
 type CommandIterator struct {
-	indices  []int
+	indices  []int // command index, branch index, command index, ...
 	commands []*data.Command
-	labels   map[string]*pointer
+	labels   map[string][]int
 }
 
 func New(commands []*data.Command) *CommandIterator {
 	c := &CommandIterator{
 		indices:  []int{0},
 		commands: commands,
-		labels:   map[string]*pointer{},
+		labels:   map[string][]int{},
 	}
 	c.unindentIfNeeded()
-	c.recordLabel(c.commands, &pointer{[]int{}})
+	c.recordLabel(c.commands, []int{})
 	return c
 }
 
-func (c *CommandIterator) recordLabel(commands []*data.Command, pointer *pointer) {
+func (c *CommandIterator) recordLabel(commands []*data.Command, pointer []int) {
 	for ci, command := range commands {
-		p := pointer.appendCommand(ci)
+		p := append(pointer, ci)
 		if command.Name == data.CommandNameLabel {
 			label := command.Args.(*data.CommandArgsLabel).Name
 			if _, ok := c.labels[label]; !ok {
@@ -64,7 +48,7 @@ func (c *CommandIterator) recordLabel(commands []*data.Command, pointer *pointer
 			continue
 		}
 		for bi, b := range command.Branches {
-			c.recordLabel(b, p.appendBranch(bi))
+			c.recordLabel(b, append(p, bi))
 		}
 	}
 }
@@ -127,7 +111,7 @@ func (c *CommandIterator) Goto(label string) bool {
 		// TODO: log error?
 		return false
 	}
-	c.indices = make([]int, len(p.indices))
-	copy(c.indices, p.indices)
+	c.indices = make([]int, len(p))
+	copy(c.indices, p)
 	return true
 }
