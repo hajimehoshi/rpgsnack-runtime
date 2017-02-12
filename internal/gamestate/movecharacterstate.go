@@ -23,7 +23,9 @@ import (
 
 type moveCharacterState struct {
 	gameState     *Game
-	character     *character.Character // TODO: Replace this with ID for saving
+	mapID         int
+	roomID        int
+	eventID       int
 	args          *data.CommandArgsMoveCharacter
 	routeSkip     bool
 	distanceCount int
@@ -32,10 +34,12 @@ type moveCharacterState struct {
 	terminated    bool
 }
 
-func newMoveCharacterState(gameState *Game, character *character.Character, args *data.CommandArgsMoveCharacter, routeSkip bool) (*moveCharacterState, error) {
+func newMoveCharacterState(gameState *Game, mapID, roomID, eventID int, args *data.CommandArgsMoveCharacter, routeSkip bool) (*moveCharacterState, error) {
 	m := &moveCharacterState{
 		gameState: gameState,
-		character: character,
+		mapID:     mapID,
+		roomID:    roomID,
+		eventID:   eventID,
 		args:      args,
 		routeSkip: routeSkip,
 	}
@@ -43,10 +47,10 @@ func newMoveCharacterState(gameState *Game, character *character.Character, args
 	case data.MoveCharacterTypeDirection, data.MoveCharacterTypeForward, data.MoveCharacterTypeBackward:
 		m.distanceCount = m.args.Distance
 	case data.MoveCharacterTypeTarget:
-		cx, cy := m.character.Position()
+		cx, cy := m.character().Position()
 		x, y := args.X, args.Y
 		path, lastX, lastY, err := calcPath(&passableOnMap{
-			through:          m.character.Through(),
+			through:          m.character().Through(),
 			m:                m.gameState.Map(),
 			ignoreCharacters: true,
 		}, cx, cy, x, y)
@@ -70,23 +74,35 @@ func newMoveCharacterState(gameState *Game, character *character.Character, args
 	return m, nil
 }
 
+func (m *moveCharacterState) character() *character.Character {
+	return m.gameState.character(m.mapID, m.roomID, m.eventID)
+}
+
 func (m *moveCharacterState) IsTerminated() bool {
-	if m.character.IsMoving() {
+	c := m.character()
+	if c == nil {
+		return true
+	}
+	if c.IsMoving() {
 		return false
 	}
 	return m.terminated
 }
 
 func (m *moveCharacterState) Update() error {
+	c := m.character()
+	if c == nil {
+		return nil
+	}
 	// Check IsMoving() first since the character might be moving at this time.
-	if m.character.IsMoving() {
+	if c.IsMoving() {
 		return nil
 	}
 	if m.terminated {
 		return nil
 	}
 	if m.distanceCount > 0 && !m.waiting {
-		dx, dy := m.character.Position()
+		dx, dy := c.Position()
 		var dir data.Dir
 		switch m.args.Type {
 		case data.MoveCharacterTypeDirection:
@@ -105,16 +121,16 @@ func (m *moveCharacterState) Update() error {
 				panic("not reach")
 			}
 		case data.MoveCharacterTypeForward:
-			dir = m.character.Dir()
+			dir = c.Dir()
 		case data.MoveCharacterTypeBackward:
 			println(fmt.Sprintf("not implemented yet (move_character): type %s", m.args.Type))
-			dir = m.character.Dir()
+			dir = c.Dir()
 		case data.MoveCharacterTypeToward:
 			println(fmt.Sprintf("not implemented yet (move_character): type %s", m.args.Type))
-			dir = m.character.Dir()
+			dir = c.Dir()
 		case data.MoveCharacterTypeRandom:
 			println(fmt.Sprintf("not implemented yet (move_character): type %s", m.args.Type))
-			dir = m.character.Dir()
+			dir = c.Dir()
 		default:
 			panic("not reach")
 		}
@@ -130,12 +146,12 @@ func (m *moveCharacterState) Update() error {
 		default:
 			panic("not reach")
 		}
-		p, err := m.gameState.Map().passable(m.character.Through(), dx, dy, false)
+		p, err := m.gameState.Map().passable(c.Through(), dx, dy, false)
 		if err != nil {
 			return err
 		}
 		if !p {
-			m.character.Turn(dir)
+			c.Turn(dir)
 			if !m.routeSkip {
 				return nil
 			}
@@ -145,7 +161,7 @@ func (m *moveCharacterState) Update() error {
 			// TODO: Can continue Update.
 			return nil
 		}
-		m.character.Move(dir)
+		c.Move(dir)
 		m.waiting = true
 		return nil
 	}

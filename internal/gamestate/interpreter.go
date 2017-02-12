@@ -332,7 +332,9 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		if i.moveCharacterState == nil {
 			m, err := newMoveCharacterState(
 				i.gameState,
-				ch,
+				i.mapID,
+				i.roomID,
+				i.eventID,
 				c.Args.(*data.CommandArgsMoveCharacter),
 				i.routeSkip)
 			if err != nil {
