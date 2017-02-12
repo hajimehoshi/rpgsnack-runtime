@@ -127,7 +127,7 @@ func (c *CommandIterator) Goto(label string) bool {
 		// TODO: log error?
 		return false
 	}
-	// TODO: Copy?
-	c.indices = p.indices
+	c.indices = make([]int, len(p.indices))
+	copy(c.indices, p.indices)
 	return true
 }
