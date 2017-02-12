@@ -39,11 +39,11 @@ func New(width, height int, requester scene.Requester) (*Game, error) {
 	return g, nil
 }
 
-func NewWithMockRequester(width, height int) (*Game, error) {
+func NewWithDefaultRequester(width, height int) (*Game, error) {
 	g := &Game{}
 	g.loadGameData()
 	initScene := sceneimpl.NewTitleScene()
-	g.sceneManager = scene.NewManager(width, height, &MockRequester{g}, initScene)
+	g.sceneManager = scene.NewManager(width, height, &Requester{g}, initScene)
 	return g, nil
 }
 

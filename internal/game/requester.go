@@ -19,36 +19,36 @@ import (
 	"strconv"
 )
 
-type MockRequester struct {
+type Requester struct {
 	game *Game
 }
 
-func (m *MockRequester) RequestUnlockAchievement(requestID int, achievementID int) {
+func (m *Requester) RequestUnlockAchievement(requestID int, achievementID int) {
 	log.Printf("request unlock achievement: requestID: %d, achievementID: %d", requestID, achievementID)
 	achievements := strconv.Itoa(achievementID)
 	m.game.FinishUnlockAchievement(requestID, achievements, "")
 }
 
-func (m *MockRequester) RequestSaveProgress(requestID int, data string) {
+func (m *Requester) RequestSaveProgress(requestID int, data string) {
 	log.Printf("request save progress: requestID: %d", requestID)
 	println(data)
 	m.game.FinishSaveProgress(requestID, "")
 }
 
-func (m *MockRequester) RequestLoadProgress(requestID int) {
+func (m *Requester) RequestLoadProgress(requestID int) {
 }
 
-func (m *MockRequester) RequestPurchase(requestID int, productID string) {
+func (m *Requester) RequestPurchase(requestID int, productID string) {
 }
 
-func (m *MockRequester) RequestInterstitialAds(requestID int) {
+func (m *Requester) RequestInterstitialAds(requestID int) {
 }
 
-func (m *MockRequester) RequestRewardedAds(requestID int) {
+func (m *Requester) RequestRewardedAds(requestID int) {
 }
 
-func (m *MockRequester) RequestOpenLink(requestID int, linkType string, data string) {
+func (m *Requester) RequestOpenLink(requestID int, linkType string, data string) {
 }
 
-func (m *MockRequester) RequestShareImage(requestID int, title string, message string, image string) {
+func (m *Requester) RequestShareImage(requestID int, title string, message string, image string) {
 }

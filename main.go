@@ -53,7 +53,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	g, err := game.NewWithMockRequester(sw, sh)
+	g, err := game.NewWithDefaultRequester(sw, sh)
 	if err != nil {
 		log.Fatal(err)
 	}
