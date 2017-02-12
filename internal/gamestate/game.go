@@ -185,3 +185,21 @@ func (g *Game) DrawWindows(screen *ebiten.Image) error {
 	}
 	return nil
 }
+
+func (g *Game) character(mapID, roomID, eventID int) *character.Character {
+	if eventID == character.PlayerEventID {
+		return g.currentMap.player
+	}
+	if g.currentMap.mapID != mapID {
+		return nil
+	}
+	if g.currentMap.roomID != roomID {
+		return nil
+	}
+	for _, e := range g.currentMap.events {
+		if eventID == e.EventID() {
+			return e
+		}
+	}
+	return nil
+}

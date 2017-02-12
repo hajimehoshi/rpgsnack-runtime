@@ -82,27 +82,6 @@ func (i *Interpreter) IsExecuting() bool {
 	return i.commandIterator != nil
 }
 
-func (i *Interpreter) character(id int) *character.Character {
-	if id == character.PlayerEventID {
-		return i.gameState.Map().player
-	}
-	if i.gameState.Map().mapID != i.mapID {
-		return nil
-	}
-	if i.gameState.Map().roomID != i.roomID {
-		return nil
-	}
-	if id == 0 {
-		id = i.eventID
-	}
-	for _, e := range i.gameState.Map().events {
-		if id == e.EventID() {
-			return e
-		}
-	}
-	return nil
-}
-
 func (i *Interpreter) createChild(eventID int, commands []*data.Command) *Interpreter {
 	child := NewInterpreter(i.gameState, i.mapID, i.roomID, eventID, commands)
 	child.route = i.route
@@ -203,7 +182,11 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		if !i.waitingCommand {
 			args := c.Args.(*data.CommandArgsShowMessage)
 			content := data.Current().Texts.Get(language.Und, args.ContentID)
-			if ch := i.character(args.EventID); ch != nil {
+			id := args.EventID
+			if id == 0 {
+				id = i.eventID
+			}
+			if ch := i.gameState.character(i.mapID, i.roomID, id); ch != nil {
 				content = i.gameState.parseMessageSyntax(content)
 				i.gameState.windows.ShowMessage(content, ch.EventID(), i.id)
 				i.waitingCommand = true
@@ -341,7 +324,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		sceneManager.Requester().RequestUnlockAchievement(i.waitingRequestID, args.ID)
 		return false, nil
 	case data.CommandNameMoveCharacter:
-		ch := i.character(i.eventID)
+		ch := i.gameState.character(i.mapID, i.roomID, i.eventID)
 		if ch == nil {
 			i.commandIterator.Advance()
 			return true, nil
@@ -366,7 +349,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		i.moveCharacterState = nil
 		i.commandIterator.Advance()
 	case data.CommandNameTurnCharacter:
-		ch := i.character(i.eventID)
+		ch := i.gameState.character(i.mapID, i.roomID, i.eventID)
 		if ch == nil {
 			i.commandIterator.Advance()
 			return true, nil
@@ -384,7 +367,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		i.waitingCommand = false
 		i.commandIterator.Advance()
 	case data.CommandNameRotateCharacter:
-		ch := i.character(i.eventID)
+		ch := i.gameState.character(i.mapID, i.roomID, i.eventID)
 		if ch == nil {
 			i.commandIterator.Advance()
 			return true, nil
@@ -441,7 +424,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		i.commandIterator.Advance()
 	case data.CommandNameSetCharacterProperty:
 		args := c.Args.(*data.CommandArgsSetCharacterProperty)
-		ch := i.character(i.eventID)
+		ch := i.gameState.character(i.mapID, i.roomID, i.eventID)
 		if ch == nil {
 			i.commandIterator.Advance()
 			return true, nil
@@ -465,7 +448,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		i.commandIterator.Advance()
 	case data.CommandNameSetCharacterImage:
 		args := c.Args.(*data.CommandArgsSetCharacterImage)
-		ch := i.character(i.eventID)
+		ch := i.gameState.character(i.mapID, i.roomID, i.eventID)
 		if ch == nil {
 			i.commandIterator.Advance()
 			return true, nil
@@ -526,7 +509,11 @@ func (i *Interpreter) setVariable(id int, op data.SetVariableOp, valueType data.
 		rhs = i.gameState.randomValue(v.Begin, v.End+1)
 	case data.SetVariableValueTypeCharacter:
 		args := value.(*data.SetVariableCharacterArgs)
-		ch := i.character(args.EventID)
+		id := args.EventID
+		if id == 0 {
+			id = i.eventID
+		}
+		ch := i.gameState.character(i.mapID, i.roomID, id)
 		if ch == nil {
 			// TODO: return error?
 			return
