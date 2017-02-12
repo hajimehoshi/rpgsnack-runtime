@@ -47,12 +47,16 @@ type Game struct {
 	waitingRequestID int
 }
 
+func generateDefaultRand() Rand {
+	return rand.New(rand.NewSource(time.Now().UnixNano()))
+}
+
 func NewGame() (*Game, error) {
 	g := &Game{
 		variables: &Variables{},
 		screen:    &Screen{},
 		windows:   &window.Windows{},
-		rand:      rand.New(rand.NewSource(time.Now().UnixNano())),
+		rand:      generateDefaultRand(),
 	}
 	m, err := NewMap(g)
 	if err != nil {
@@ -62,14 +66,15 @@ func NewGame() (*Game, error) {
 	return g, nil
 }
 
+type tmpGame struct {
+	Variables         *Variables      `json:"variables"`
+	Screen            *Screen         `json:"screen"`
+	Windows           *window.Windows `json:"windows"`
+	Map               *Map            `json:"map"`
+	LastInterpreterID int             `json:"lastInterpreterId"`
+}
+
 func (g *Game) MarshalJSON() ([]uint8, error) {
-	type tmpGame struct {
-		Variables         *Variables      `json:"variables"`
-		Screen            *Screen         `json:"screen"`
-		Windows           *window.Windows `json:"windows"`
-		Map               *Map            `json:"map"`
-		LastInterpreterID int             `json:"lastInterpreterId"`
-	}
 	tmp := &tmpGame{
 		Variables:         g.variables,
 		Screen:            g.screen,
@@ -78,6 +83,21 @@ func (g *Game) MarshalJSON() ([]uint8, error) {
 		LastInterpreterID: g.lastInterpreterID,
 	}
 	return json.Marshal(tmp)
+}
+
+func (g *Game) UnmarshalJSON(data []uint8) error {
+	var tmp *tmpGame
+	if err := json.Unmarshal(data, &tmp); err != nil {
+		return err
+	}
+	g.variables = tmp.Variables
+	g.screen = tmp.Screen
+	g.windows = tmp.Windows
+	g.currentMap = tmp.Map
+	g.currentMap.setGame(g)
+	g.lastInterpreterID = tmp.LastInterpreterID
+	g.rand = generateDefaultRand()
+	return nil
 }
 
 func (g *Game) Screen() *Screen {

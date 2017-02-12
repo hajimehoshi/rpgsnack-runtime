@@ -58,23 +58,24 @@ func NewInterpreter(gameState *Game, mapID, roomID, eventID int, commands []*dat
 	}
 }
 
+type tmpInterpreter struct {
+	ID                 int                              `json:"id"`
+	MapID              int                              `json:"mapId"`
+	RoomID             int                              `json:"roomId"`
+	EventID            int                              `json:"eventId"`
+	CommandIterator    *commanditerator.CommandIterator `json:"commandIterator"`
+	WaitingCount       int                              `json:"waitingCount"`
+	WaitingCommand     bool                             `json:"waitingCommand"`
+	MoveCharacterState *moveCharacterState              `json:"moveCharacterState"`
+	Repeat             bool                             `json:"repeat"`
+	Sub                *Interpreter                     `json:"sub"`
+	Route              bool                             `json:"route"`
+	RouteSkip          bool                             `json:"routeSkip"`
+	ShouldGoToTitle    bool                             `json:"shouldGoToTitle"`
+	WaitingRequestID   int                              `json:"waitingRequestId"`
+}
+
 func (i *Interpreter) MarshalJSON() ([]uint8, error) {
-	type tmpInterpreter struct {
-		ID                 int                              `json:"id"`
-		MapID              int                              `json:"mapId"`
-		RoomID             int                              `json:"roomId"`
-		EventID            int                              `json:"eventId"`
-		CommandIterator    *commanditerator.CommandIterator `json:"commandIterator"`
-		WaitingCount       int                              `json:"waitingCount"`
-		WaitingCommand     bool                             `json:"waitingCommand"`
-		MoveCharacterState *moveCharacterState              `json:"moveCharacterState"`
-		Repeat             bool                             `json:"repeat"`
-		Sub                *Interpreter                     `json:"sub"`
-		Route              bool                             `json:"route"`
-		RouteSkip          bool                             `json:"routeSkip"`
-		ShouldGoToTitle    bool                             `json:"shouldGoToTitle"`
-		WaitingRequestID   int                              `json:"waitingRequestId"`
-	}
 	tmp := &tmpInterpreter{
 		ID:                 i.id,
 		MapID:              i.mapID,
@@ -92,6 +93,35 @@ func (i *Interpreter) MarshalJSON() ([]uint8, error) {
 		WaitingRequestID:   i.waitingRequestID,
 	}
 	return json.Marshal(tmp)
+}
+
+func (i *Interpreter) UnmarshalJSON(data []uint8) error {
+	var tmp *tmpInterpreter
+	if err := json.Unmarshal(data, &tmp); err != nil {
+		return err
+	}
+	i.id = tmp.ID
+	i.mapID = tmp.MapID
+	i.roomID = tmp.RoomID
+	i.eventID = tmp.EventID
+	i.commandIterator = tmp.CommandIterator
+	i.waitingCount = tmp.WaitingCount
+	i.waitingCommand = tmp.WaitingCommand
+	i.moveCharacterState = tmp.MoveCharacterState
+	i.repeat = tmp.Repeat
+	i.sub = tmp.Sub
+	i.route = tmp.Route
+	i.routeSkip = tmp.RouteSkip
+	i.shouldGoToTitle = tmp.ShouldGoToTitle
+	i.waitingRequestID = tmp.WaitingRequestID
+	return nil
+}
+
+func (i *Interpreter) setGame(game *Game) {
+	i.gameState = game
+	if i.moveCharacterState != nil {
+		i.moveCharacterState.setGame(game)
+	}
 }
 
 func (i *Interpreter) waitingRequestResponse() bool {

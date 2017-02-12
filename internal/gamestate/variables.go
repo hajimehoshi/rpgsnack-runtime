@@ -28,13 +28,14 @@ type Variables struct {
 	innerVariables map[string]int
 }
 
+type tmpVariables struct {
+	Switches       []bool            `json:"switches"`
+	SelfSwitches   map[string][]bool `json:"selfSwitches"`
+	Variables      []int             `json:"variables"`
+	InnerVariables map[string]int    `json:"innerVariables"`
+}
+
 func (v *Variables) MarshalJSON() ([]uint8, error) {
-	type tmpVariables struct {
-		Switches       []bool            `json:"switches"`
-		SelfSwitches   map[string][]bool `json:"selfSwitches"`
-		Variables      []int             `json:"variables"`
-		InnerVariables map[string]int    `json:"innerVariables"`
-	}
 	tmp := &tmpVariables{
 		Switches:       v.switches,
 		SelfSwitches:   v.selfSwitches,
@@ -42,6 +43,18 @@ func (v *Variables) MarshalJSON() ([]uint8, error) {
 		InnerVariables: v.innerVariables,
 	}
 	return json.Marshal(tmp)
+}
+
+func (v *Variables) UnmarshalJSON(data []uint8) error {
+	var tmp *tmpVariables
+	if err := json.Unmarshal(data, &tmp); err != nil {
+		return err
+	}
+	v.switches = tmp.Switches
+	v.selfSwitches = tmp.SelfSwitches
+	v.variables = tmp.Variables
+	v.innerVariables = tmp.InnerVariables
+	return nil
 }
 
 func (v *Variables) SwitchValue(id int) bool {

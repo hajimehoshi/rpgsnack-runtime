@@ -69,17 +69,18 @@ func NewMap(game *Game) (*Map, error) {
 	return m, nil
 }
 
+type tmpMap struct {
+	Player                      *character.Character   `json:"player"`
+	MapID                       int                    `json:"mapId"`
+	RoomID                      int                    `json:"roomId"`
+	Events                      []*character.Character `json:"events"`
+	EventPageIndices            map[int]int            `json:"eventPageIndices"`
+	ExecutingEventIDByUserInput int                    `json:"executingEventIdByUserInput"`
+	Interpreters                map[int]*Interpreter   `json:"interpreters"`
+	PlayerInterpreterID         int                    `json:"playerInterpreterId"`
+}
+
 func (m *Map) MarshalJSON() ([]uint8, error) {
-	type tmpMap struct {
-		Player                      *character.Character   `json:"player"`
-		MapID                       int                    `json:"mapId"`
-		RoomID                      int                    `json:"roomId"`
-		Events                      []*character.Character `json:"events"`
-		EventPageIndices            map[int]int            `json:"eventPageIndices"`
-		ExecutingEventIDByUserInput int                    `json:"executingEventIdByUserInput"`
-		Interpreters                map[int]*Interpreter   `json:"interpreters"`
-		PlayerInterpreterID         int                    `json:"playerInterpreterId"`
-	}
 	tmp := &tmpMap{
 		Player:                      m.player,
 		MapID:                       m.mapID,
@@ -91,6 +92,35 @@ func (m *Map) MarshalJSON() ([]uint8, error) {
 		PlayerInterpreterID:         m.playerInterpreterID,
 	}
 	return json.Marshal(tmp)
+}
+
+func (m *Map) UnmarshalJSON(jsonData []uint8) error {
+	var tmp *tmpMap
+	if err := json.Unmarshal(jsonData, &tmp); err != nil {
+		return err
+	}
+	m.player = tmp.Player
+	m.mapID = tmp.MapID
+	m.roomID = tmp.RoomID
+	m.events = tmp.Events
+	m.eventPageIndices = tmp.EventPageIndices
+	m.executingEventIDByUserInput = tmp.ExecutingEventIDByUserInput
+	m.interpreters = tmp.Interpreters
+	m.playerInterpreterID = tmp.PlayerInterpreterID
+
+	m.eventData = map[int]*data.Event{}
+	for _, e := range m.CurrentRoom().Events {
+		m.eventData[e.ID] = e
+	}
+	return nil
+}
+
+// setGame sets the current game. This is called only when unmarshalzing.
+func (m *Map) setGame(game *Game) {
+	m.game = game
+	for _, i := range m.interpreters {
+		i.setGame(game)
+	}
 }
 
 func (m *Map) addInterpreter(interpreter *Interpreter) {

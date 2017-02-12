@@ -51,21 +51,22 @@ type balloon struct {
 	opened         bool
 }
 
+type tmpBalloon struct {
+	InterpreterID  int    `json:"interpreterId"`
+	X              int    `json:"x"`
+	Y              int    `json:"y"`
+	Width          int    `json:"width"`
+	Height         int    `json:"height"`
+	HasArrow       bool   `json:"hasArrow"`
+	EventID        int    `json:"eventId"`
+	Content        string `json:"content"`
+	ContentOffsetX int    `json:"contentOffsetX"`
+	OpeningCount   int    `json:"openingCount"`
+	ClosingCount   int    `json:"closingCount"`
+	Opened         bool   `json:"opened"`
+}
+
 func (b *balloon) MarshalJSON() ([]uint8, error) {
-	type tmpBalloon struct {
-		InterpreterID  int    `json:"interpreterId"`
-		X              int    `json:"x"`
-		Y              int    `json:"y"`
-		Width          int    `json:"width"`
-		Height         int    `json:"height"`
-		HasArrow       bool   `json:"hasArrow"`
-		EventID        int    `json:"eventId"`
-		Content        string `json:"content"`
-		ContentOffsetX int    `json:"contentOffsetX"`
-		OpeningCount   int    `json:"openingCount"`
-		ClosingCount   int    `json:"closingCount"`
-		Opened         bool   `json:"opened"`
-	}
 	tmp := &tmpBalloon{
 		InterpreterID:  b.interpreterID,
 		X:              b.x,
@@ -81,6 +82,26 @@ func (b *balloon) MarshalJSON() ([]uint8, error) {
 		Opened:         b.opened,
 	}
 	return json.Marshal(tmp)
+}
+
+func (b *balloon) UnmarshalJSON(data []uint8) error {
+	var tmp *tmpBalloon
+	if err := json.Unmarshal(data, &tmp); err != nil {
+		return err
+	}
+	b.interpreterID = tmp.InterpreterID
+	b.x = tmp.X
+	b.y = tmp.Y
+	b.width = tmp.Width
+	b.height = tmp.Height
+	b.hasArrow = tmp.HasArrow
+	b.eventID = tmp.EventID
+	b.content = tmp.Content
+	b.contentOffsetX = tmp.ContentOffsetX
+	b.openingCount = tmp.OpeningCount
+	b.closingCount = tmp.ClosingCount
+	b.opened = tmp.Opened
+	return nil
 }
 
 func newBalloon(x, y, width, height int, content string, interpreterID int) *balloon {

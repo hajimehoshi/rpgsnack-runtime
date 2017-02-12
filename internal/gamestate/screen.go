@@ -56,19 +56,20 @@ type Screen struct {
 	fadedOut        bool
 }
 
+type tmpScreen struct {
+	CurrentTint     tint `json:"currentTint"`
+	OrigTint        tint `json:"origTint"`
+	TargetTint      tint `json:"targetTint"`
+	TintCount       int  `json:"tintCount"`
+	TintMaxCount    int  `json:"tintMaxCount"`
+	FadeInCount     int  `json:"fadeInCount"`
+	FadeInMaxCount  int  `json:"fadeInMaxCount"`
+	FadeOutCount    int  `json:"fadeOutCount"`
+	FadeOutMaxCount int  `json:"fadeOutMaxCount"`
+	FadedOut        bool `json:"fadedOut"`
+}
+
 func (s *Screen) MarshalJSON() ([]uint8, error) {
-	type tmpScreen struct {
-		CurrentTint     tint `json:"currentTint"`
-		OrigTint        tint `json:"origTint"`
-		TargetTint      tint `json:"targetTint"`
-		TintCount       int  `json:"tintCount"`
-		TintMaxCount    int  `json:"tintMaxCount"`
-		FadeInCount     int  `json:"fadeInCount"`
-		FadeInMaxCount  int  `json:"fadeInMaxCount"`
-		FadeOutCount    int  `json:"fadeOutCount"`
-		FadeOutMaxCount int  `json:"fadeOutMaxCount"`
-		FadedOut        bool `json:"fadedOut"`
-	}
 	tmp := &tmpScreen{
 		CurrentTint:     s.currentTint,
 		OrigTint:        s.origTint,
@@ -82,6 +83,24 @@ func (s *Screen) MarshalJSON() ([]uint8, error) {
 		FadedOut:        s.fadedOut,
 	}
 	return json.Marshal(tmp)
+}
+
+func (s *Screen) UnmarshalJSON(data []uint8) error {
+	var tmp *tmpScreen
+	if err := json.Unmarshal(data, &tmp); err != nil {
+		return err
+	}
+	s.currentTint = tmp.CurrentTint
+	s.origTint = tmp.OrigTint
+	s.targetTint = tmp.TargetTint
+	s.tintCount = tmp.TintCount
+	s.tintMaxCount = tmp.TintMaxCount
+	s.fadeInCount = tmp.FadeInCount
+	s.fadeInMaxCount = tmp.FadeInMaxCount
+	s.fadeOutCount = tmp.FadeOutCount
+	s.fadeOutMaxCount = tmp.FadeOutMaxCount
+	s.fadedOut = tmp.FadedOut
+	return nil
 }
 
 func (s *Screen) startTint(red, green, blue, gray float64, count int) {

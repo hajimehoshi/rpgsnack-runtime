@@ -77,18 +77,19 @@ func newMoveCharacterState(gameState *Game, mapID, roomID, eventID int, args *da
 	return m, nil
 }
 
+type tmpMoveCharacterState struct {
+	MapID         int                            `json:"mapId"`
+	RoomID        int                            `json:"roomId"`
+	EventID       int                            `json:"eventId"`
+	Args          *data.CommandArgsMoveCharacter `json:"args"`
+	RouteSkip     bool                           `json:"routeSkip"`
+	DistanceCount int                            `json:"distanceCount"`
+	Path          []routeCommand                 `json:"path"`
+	Waiting       bool                           `json:"waiting"`
+	Terminated    bool                           `json:"terminated"`
+}
+
 func (m *moveCharacterState) MarshalJSON() ([]uint8, error) {
-	type tmpMoveCharacterState struct {
-		MapID         int                            `json:"mapId"`
-		RoomID        int                            `json:"roomId"`
-		EventID       int                            `json:"eventId"`
-		Args          *data.CommandArgsMoveCharacter `json:"args"`
-		RouteSkip     bool                           `json:"routeSkip"`
-		DistanceCount int                            `json:"distanceCount"`
-		Path          []routeCommand                 `json:"path"`
-		Waiting       bool                           `json:"waiting"`
-		Terminated    bool                           `json:"terminated"`
-	}
 	tmp := &tmpMoveCharacterState{
 		MapID:         m.mapID,
 		RoomID:        m.roomID,
@@ -101,6 +102,27 @@ func (m *moveCharacterState) MarshalJSON() ([]uint8, error) {
 		Terminated:    m.terminated,
 	}
 	return json.Marshal(tmp)
+}
+
+func (m *moveCharacterState) UnmarshalJSON(jsonData []uint8) error {
+	var tmp *tmpMoveCharacterState
+	if err := json.Unmarshal(jsonData, &tmp); err != nil {
+		return err
+	}
+	m.mapID = tmp.MapID
+	m.roomID = tmp.RoomID
+	m.eventID = tmp.EventID
+	m.args = tmp.Args
+	m.routeSkip = tmp.RouteSkip
+	m.distanceCount = tmp.DistanceCount
+	m.path = tmp.Path
+	m.waiting = tmp.Waiting
+	m.terminated = tmp.Terminated
+	return nil
+}
+
+func (m *moveCharacterState) setGame(game *Game) {
+	m.gameState = game
 }
 
 func (m *moveCharacterState) character() *character.Character {

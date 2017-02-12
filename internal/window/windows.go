@@ -41,17 +41,18 @@ type Windows struct {
 	hasChosenIndex            bool
 }
 
+type tmpWindows struct {
+	NextBalloon               *balloon   `json:"nextBalloon"`
+	Balloons                  []*balloon `json:"balloons"`
+	ChoiceBalloons            []*balloon `json:"choiceBalloons"`
+	ChosenIndex               int        `json:"chosenIndex"`
+	Choosing                  bool       `json:"choosing"`
+	ChoosingInterpreterID     int        `json:"choosingInterpreterId"`
+	ChosenBalloonWaitingCount int        `json:"chosenBalloonWaitingCount"`
+	HasChosenIndex            bool       `json:"hasChosenIndex"`
+}
+
 func (w *Windows) MarshalJSON() ([]uint8, error) {
-	type tmpWindows struct {
-		NextBalloon               *balloon   `json:"nextBalloon"`
-		Balloons                  []*balloon `json:"balloons"`
-		ChoiceBalloons            []*balloon `json:"choiceBalloons"`
-		ChosenIndex               int        `json:"chosenIndex"`
-		Choosing                  bool       `json:"choosing"`
-		ChoosingInterpreterID     int        `json:"choosingInterpreterId"`
-		ChosenBalloonWaitingCount int        `json:"chosenBalloonWaitingCount"`
-		HasChosenIndex            bool       `json:"hasChosenIndex"`
-	}
 	tmp := &tmpWindows{
 		NextBalloon:               w.nextBalloon,
 		Balloons:                  w.balloons,
@@ -63,6 +64,22 @@ func (w *Windows) MarshalJSON() ([]uint8, error) {
 		HasChosenIndex:            w.hasChosenIndex,
 	}
 	return json.Marshal(tmp)
+}
+
+func (w *Windows) UnmarshalJSON(data []uint8) error {
+	var tmp *tmpWindows
+	if err := json.Unmarshal(data, &tmp); err != nil {
+		return err
+	}
+	w.nextBalloon = tmp.NextBalloon
+	w.balloons = tmp.Balloons
+	w.choiceBalloons = tmp.ChoiceBalloons
+	w.chosenIndex = tmp.ChosenIndex
+	w.choosing = tmp.Choosing
+	w.choosingInterpreterID = tmp.ChoosingInterpreterID
+	w.chosenBalloonWaitingCount = tmp.ChosenBalloonWaitingCount
+	w.hasChosenIndex = tmp.HasChosenIndex
+	return nil
 }
 
 func (w *Windows) ChosenIndex() int {

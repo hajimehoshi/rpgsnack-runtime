@@ -39,16 +39,27 @@ func New(commands []*data.Command) *CommandIterator {
 	return c
 }
 
+type tmpCommandIterator struct {
+	Indices  []int           `json:"indices"`
+	Commands []*data.Command `json:"commands"`
+}
+
 func (c *CommandIterator) MarshalJSON() ([]uint8, error) {
-	type tmpCommandIterator struct {
-		Indices  []int           `json:"indices"`
-		Commands []*data.Command `json:"commands"`
-	}
 	tmp := &tmpCommandIterator{
 		Indices:  c.indices,
 		Commands: c.commands,
 	}
 	return json.Marshal(tmp)
+}
+
+func (c *CommandIterator) UnmarshalJSON(data []uint8) error {
+	var tmp *tmpCommandIterator
+	if err := json.Unmarshal(data, &tmp); err != nil {
+		return err
+	}
+	c.indices = tmp.Indices
+	c.commands = tmp.Commands
+	return nil
 }
 
 func (c *CommandIterator) recordLabel(commands []*data.Command, pointer []int) {

@@ -167,7 +167,12 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 		}
 		c.Args = args
 	case CommandNameSetInnerVariable:
-		fallthrough
+		// This happens when loading a save data.
+		var args *CommandArgsSetInnerVariable
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	default:
 		return fmt.Errorf("data: invalid command: %s", c.Name)
 	}
