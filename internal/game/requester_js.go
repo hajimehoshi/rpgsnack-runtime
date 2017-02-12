@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// +build js
+
 package game
 
 import (
@@ -31,11 +33,12 @@ func (m *Requester) RequestUnlockAchievement(requestID int, achievementID int) {
 
 func (m *Requester) RequestSaveProgress(requestID int, data string) {
 	log.Printf("request save progress: requestID: %d", requestID)
-	println(data)
 	m.game.FinishSaveProgress(requestID, "")
 }
 
 func (m *Requester) RequestLoadProgress(requestID int) {
+	log.Printf("request load progress: requestID: %d", requestID)
+	m.game.FinishLoadProgress(requestID, nil, "")
 }
 
 func (m *Requester) RequestPurchase(requestID int, productID string) {
