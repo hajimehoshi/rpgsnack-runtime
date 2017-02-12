@@ -23,7 +23,7 @@ import (
 
 type moveCharacterState struct {
 	gameState     *Game
-	character     *character.Character
+	character     *character.Character // TODO: Replace this with ID for saving
 	args          *data.CommandArgsMoveCharacter
 	routeSkip     bool
 	distanceCount int
@@ -46,7 +46,7 @@ func newMoveCharacterState(gameState *Game, character *character.Character, args
 		cx, cy := m.character.Position()
 		x, y := args.X, args.Y
 		path, lastX, lastY, err := calcPath(&passableOnMap{
-			self:             m.character,
+			through:          m.character.Through(),
 			m:                m.gameState.Map(),
 			ignoreCharacters: true,
 		}, cx, cy, x, y)
@@ -130,7 +130,7 @@ func (m *moveCharacterState) Update() error {
 		default:
 			panic("not reach")
 		}
-		p, err := m.gameState.Map().passable(m.character, dx, dy, false)
+		p, err := m.gameState.Map().passable(m.character.Through(), dx, dy, false)
 		if err != nil {
 			return err
 		}

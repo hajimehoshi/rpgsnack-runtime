@@ -27,13 +27,13 @@ import (
 )
 
 type passableOnMap struct {
-	self             *character.Character
+	through          bool
 	ignoreCharacters bool
 	m                *Map
 }
 
 func (p *passableOnMap) At(x, y int) (bool, error) {
-	return p.m.passable(p.self, x, y, p.ignoreCharacters)
+	return p.m.passable(p.through, x, y, p.ignoreCharacters)
 }
 
 type Map struct {
@@ -358,7 +358,7 @@ func (m *Map) passableTile(x, y int) (bool, error) {
 	return false, nil
 }
 
-func (m *Map) passable(self *character.Character, x, y int, ignoreCharacters bool) (bool, error) {
+func (m *Map) passable(through bool, x, y int, ignoreCharacters bool) (bool, error) {
 	if x < 0 {
 		return false, nil
 	}
@@ -371,7 +371,7 @@ func (m *Map) passable(self *character.Character, x, y int, ignoreCharacters boo
 	if scene.TileYNum <= y {
 		return false, nil
 	}
-	if self.Through() {
+	if through {
 		return true, nil
 	}
 	p, err := m.passableTile(x, y)
@@ -426,7 +426,7 @@ func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
 	if m.IsEventExecuting() {
 		return false, nil
 	}
-	p, err := m.passable(m.player, x, y, false)
+	p, err := m.passable(m.player.Through(), x, y, false)
 	if err != nil {
 		return false, err
 	}
@@ -450,8 +450,8 @@ func (m *Map) TryMovePlayerByUserInput(x, y int) (bool, error) {
 	}
 	px, py := m.player.Position()
 	path, lastPlayerX, lastPlayerY, err := calcPath(&passableOnMap{
-		self: m.player,
-		m:    m,
+		through: m.player.Through(),
+		m:       m,
 	}, px, py, x, y)
 	if err != nil {
 		return false, err
