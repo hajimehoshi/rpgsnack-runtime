@@ -14,39 +14,18 @@
 
 // +build !android
 // +build !ios
-// +build !js
 
-package data
+package game
 
 import (
-	"flag"
-	"io/ioutil"
-	"os"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/sceneimpl"
 )
 
-var (
-	dataPath = flag.String("data", "./data.json", "data path")
-	savePath = flag.String("save", "./save.json", "save path")
-)
-
-func SavePath() string {
-	return *savePath
-}
-
-func loadJSONData() (*jsonData, error) {
-	game, err := ioutil.ReadFile(*dataPath)
-	if err != nil {
-		return nil, err
-	}
-	progress, err := ioutil.ReadFile(*savePath)
-	if err != nil {
-		if !os.IsNotExist(err) {
-			return nil, err
-		}
-		progress = nil
-	}
-	return &jsonData{
-		Game:     game,
-		Progress: progress,
-	}, nil
+func NewWithDefaultRequester(width, height int) (*Game, error) {
+	g := &Game{}
+	g.loadGameData()
+	initScene := sceneimpl.NewTitleScene()
+	g.sceneManager = scene.NewManager(width, height, &Requester{g}, initScene)
+	return g, nil
 }

@@ -28,10 +28,6 @@ func FinishSaveProgress(id int, err string) {
 	theGame.FinishSaveProgress(id, err)
 }
 
-func FinishLoadProgress(id int, data string, err string) {
-	theGame.FinishLoadProgress(id, data, err)
-}
-
 func FinishPurchase(id int, productIDs string, err string) {
 }
 

@@ -52,15 +52,34 @@ func unmarshalJSON(data []uint8, v interface{}) error {
 	return nil
 }
 
+var (
+	current  *Game
+	progress []uint8
+)
+
+func Current() *Game {
+	return current
+}
+
+func Progress() []uint8 {
+	return progress
+}
+
+type jsonData struct {
+	Game     []uint8
+	Progress []uint8
+}
+
 func Load() error {
-	dataJson, err := loadJSON()
+	data, err := loadJSONData()
 	if err != nil {
 		return err
 	}
 	var gameData *Game
-	if err := unmarshalJSON(dataJson, &gameData); err != nil {
+	if err := unmarshalJSON(data.Game, &gameData); err != nil {
 		return err
 	}
 	current = gameData
+	progress = data.Progress
 	return nil
 }

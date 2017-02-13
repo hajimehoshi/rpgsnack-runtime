@@ -18,13 +18,16 @@
 package data
 
 var (
-	dataCh = make(chan []uint8, 1)
+	dataCh = make(chan *jsonData, 1)
 )
 
-func loadJSON() ([]uint8, error) {
+func loadJSONData() (*jsonData, error) {
 	return <-dataCh, nil
 }
 
-func SetData(data []uint8) {
-	dataCh <- data
+func SetData(game []uint8, progress []uint8) {
+	dataCh <- &jsonData{
+		Game:     game,
+		Progress: progress,
+	}
 }

@@ -20,15 +20,15 @@ import (
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/gamestate"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/ui"
 )
 
 type TitleScene struct {
-	newGameButton        *ui.Button
-	resumeGameButton     *ui.Button
-	waitingLoadRequestID int
+	newGameButton    *ui.Button
+	resumeGameButton *ui.Button
 }
 
 func NewTitleScene() *TitleScene {
@@ -39,31 +39,16 @@ func NewTitleScene() *TitleScene {
 }
 
 func (t *TitleScene) Update(sceneManager *scene.Manager) error {
-	if t.waitingLoadRequestID != 0 {
-		if sceneManager.HasFinishedRequestID(t.waitingLoadRequestID) {
-			sceneManager.FinishRequestID(t.waitingLoadRequestID)
-			t.waitingLoadRequestID = 0
-			data := sceneManager.LastLoadedData()
-			var game *gamestate.Game
-			if err := json.Unmarshal(data, &game); err != nil {
-				return err
-			}
-			mapScene, err := NewMapSceneWithGame(game)
-			if err != nil {
-				return err
-			}
-			sceneManager.GoTo(mapScene)
-		}
-		return nil
-	}
 	w, _ := sceneManager.Size()
 	t.newGameButton.X = (w/scene.TileScale - t.newGameButton.Width) / 2
 	t.resumeGameButton.X = (w/scene.TileScale - t.resumeGameButton.Width) / 2
 	if err := t.newGameButton.Update(); err != nil {
 		return err
 	}
-	if err := t.resumeGameButton.Update(); err != nil {
-		return err
+	if data.Progress() != nil {
+		if err := t.resumeGameButton.Update(); err != nil {
+			return err
+		}
 	}
 	if t.newGameButton.Pressed() {
 		mapScene, err := NewMapScene()
@@ -73,10 +58,16 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 		sceneManager.GoTo(mapScene)
 		return nil
 	}
-	if t.resumeGameButton.Pressed() {
-		id := sceneManager.GenerateRequestID()
-		t.waitingLoadRequestID = id
-		sceneManager.Requester().RequestLoadProgress(id)
+	if data.Progress() != nil && t.resumeGameButton.Pressed() {
+		var game *gamestate.Game
+		if err := json.Unmarshal(data.Progress(), &game); err != nil {
+			return err
+		}
+		mapScene, err := NewMapSceneWithGame(game)
+		if err != nil {
+			return err
+		}
+		sceneManager.GoTo(mapScene)
 		return nil
 	}
 	return nil
@@ -94,8 +85,10 @@ func (t *TitleScene) Draw(screen *ebiten.Image) error {
 	if err := t.newGameButton.Draw(screen); err != nil {
 		return err
 	}
-	if err := t.resumeGameButton.Draw(screen); err != nil {
-		return err
+	if data.Progress() != nil {
+		if err := t.resumeGameButton.Draw(screen); err != nil {
+			return err
+		}
 	}
 	return nil
 }

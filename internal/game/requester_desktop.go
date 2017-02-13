@@ -12,20 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// +build !android
+// +build !ios
 // +build !js
 
 package game
 
 import (
-	"flag"
-	"io/ioutil"
 	"log"
 	"os"
 	"strconv"
-)
 
-var (
-	savePath = flag.String("save", "./save.json", "save path")
+	datapkg "github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 )
 
 type Requester struct {
@@ -41,7 +39,7 @@ func (m *Requester) RequestUnlockAchievement(requestID int, achievementID int) {
 func (m *Requester) RequestSaveProgress(requestID int, data string) {
 	log.Printf("request save progress: requestID: %d", requestID)
 	go func() {
-		f, err := os.Create(*savePath)
+		f, err := os.Create(datapkg.SavePath())
 		if err != nil {
 			// TODO: Should pass err instead of string?
 			m.game.FinishSaveProgress(requestID, err.Error())
@@ -53,18 +51,6 @@ func (m *Requester) RequestSaveProgress(requestID int, data string) {
 			return
 		}
 		m.game.FinishSaveProgress(requestID, "")
-	}()
-}
-
-func (m *Requester) RequestLoadProgress(requestID int) {
-	log.Printf("request load progress: requestID: %d", requestID)
-	go func() {
-		data, err := ioutil.ReadFile(*savePath)
-		if err != nil {
-			m.game.FinishLoadProgress(requestID, "", err.Error())
-			return
-		}
-		m.game.FinishLoadProgress(requestID, string(data), "")
 	}()
 }
 

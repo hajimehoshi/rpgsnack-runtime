@@ -24,12 +24,6 @@ type Game struct {
 	System       *System        `json:"system"`
 }
 
-var current *Game
-
-func Current() *Game {
-	return current
-}
-
 type Achievement struct {
 	ID    int    `json:"id"`
 	Name  UUID   `json:"name"`

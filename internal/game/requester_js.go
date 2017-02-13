@@ -36,11 +36,6 @@ func (m *Requester) RequestSaveProgress(requestID int, data string) {
 	m.game.FinishSaveProgress(requestID, "")
 }
 
-func (m *Requester) RequestLoadProgress(requestID int) {
-	log.Printf("request load progress: requestID: %d", requestID)
-	m.game.FinishLoadProgress(requestID, nil, "")
-}
-
 func (m *Requester) RequestPurchase(requestID int, productID string) {
 }
 

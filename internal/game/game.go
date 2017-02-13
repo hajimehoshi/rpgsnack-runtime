@@ -39,14 +39,6 @@ func New(width, height int, requester scene.Requester) (*Game, error) {
 	return g, nil
 }
 
-func NewWithDefaultRequester(width, height int) (*Game, error) {
-	g := &Game{}
-	g.loadGameData()
-	initScene := sceneimpl.NewTitleScene()
-	g.sceneManager = scene.NewManager(width, height, &Requester{g}, initScene)
-	return g, nil
-}
-
 func (g *Game) loadGameData() {
 	ch := make(chan error)
 	go func() {
@@ -121,8 +113,4 @@ func (g *Game) FinishUnlockAchievement(id int, achievements string, err string) 
 
 func (g *Game) FinishSaveProgress(id int, err string) {
 	g.sceneManager.FinishSaveProgress(id, err)
-}
-
-func (g *Game) FinishLoadProgress(id int, data string, err string) {
-	g.sceneManager.FinishLoadProgress(id, data, err)
 }

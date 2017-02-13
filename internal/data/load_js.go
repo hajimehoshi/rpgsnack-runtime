@@ -20,7 +20,7 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 )
 
-func loadJSON() ([]uint8, error) {
+func loadJSONData() (*jsonData, error) {
 	if js.Global.Get("_data") == nil {
 		ch := make(chan struct{})
 		js.Global.Set("_dataNotify", func() {
@@ -31,5 +31,8 @@ func loadJSON() ([]uint8, error) {
 	println(js.Global.Get("_data"))
 	dataJsonStr := js.Global.Get("JSON").Call("stringify", js.Global.Get("_data"))
 	dataJson := ([]uint8)(dataJsonStr.String())
-	return dataJson, nil
+	return &jsonData{
+		Game:     dataJson,
+		Progress: nil, // TODO: Implement this
+	}, nil
 }

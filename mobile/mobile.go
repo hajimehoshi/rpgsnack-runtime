@@ -26,12 +26,17 @@ var (
 	theGame *game.Game
 )
 
-func SetData(jsonData []uint8) {
+func SetData(game []uint8, progress []uint8) {
 	// Copy data here since the given data is just a reference and might be
 	// broken in the mobile side.
-	d := make([]uint8, len(jsonData))
-	copy(d, jsonData)
-	data.SetData(d)
+	g := make([]uint8, len(game))
+	copy(g, game)
+	var p []uint8
+	if progress != nil {
+		p = make([]uint8, len(progress))
+		copy(p, progress)
+	}
+	data.SetData(g, p)
 }
 
 func IsRunning() bool {
