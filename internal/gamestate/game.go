@@ -137,6 +137,7 @@ func (g *Game) RequestSave(sceneManager *scene.Manager) (bool, error) {
 		return false, err
 	}
 	sceneManager.Requester().RequestSaveProgress(id, j)
+	data.UpdateProgress(j)
 	return true, nil
 }
 

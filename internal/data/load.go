@@ -65,6 +65,10 @@ func Progress() []uint8 {
 	return progress
 }
 
+func UpdateProgress(p []uint8) {
+	progress = p
+}
+
 type jsonData struct {
 	Game     []uint8
 	Progress []uint8
