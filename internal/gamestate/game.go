@@ -136,7 +136,7 @@ func (g *Game) RequestSave(sceneManager *scene.Manager) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	sceneManager.Requester().RequestSaveProgress(id, string(j))
+	sceneManager.Requester().RequestSaveProgress(id, j)
 	return true, nil
 }
 

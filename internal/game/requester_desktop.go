@@ -36,7 +36,7 @@ func (m *Requester) RequestUnlockAchievement(requestID int, achievementID int) {
 	m.game.FinishUnlockAchievement(requestID, achievements, "")
 }
 
-func (m *Requester) RequestSaveProgress(requestID int, data string) {
+func (m *Requester) RequestSaveProgress(requestID int, data []uint8) {
 	log.Printf("request save progress: requestID: %d", requestID)
 	go func() {
 		f, err := os.Create(datapkg.SavePath())
@@ -46,7 +46,7 @@ func (m *Requester) RequestSaveProgress(requestID int, data string) {
 			return
 		}
 		defer f.Close()
-		if _, err := f.Write([]uint8(data)); err != nil {
+		if _, err := f.Write(data); err != nil {
 			m.game.FinishSaveProgress(requestID, err.Error())
 			return
 		}

@@ -31,7 +31,7 @@ func (m *Requester) RequestUnlockAchievement(requestID int, achievementID int) {
 	m.game.FinishUnlockAchievement(requestID, achievements, "")
 }
 
-func (m *Requester) RequestSaveProgress(requestID int, data string) {
+func (m *Requester) RequestSaveProgress(requestID int, data []uint8) {
 	log.Printf("request save progress: requestID: %d", requestID)
 	m.game.FinishSaveProgress(requestID, "")
 }
