@@ -114,8 +114,7 @@ func (g *Game) Map() *Map {
 
 func (g *Game) Update(sceneManager *scene.Manager) error {
 	if g.waitingRequestID != 0 {
-		if sceneManager.HasFinishedRequestID(g.waitingRequestID) {
-			sceneManager.FinishRequestID(g.waitingRequestID)
+		if sceneManager.ReceiveResultIfExists(g.waitingRequestID) != nil {
 			g.waitingRequestID = 0
 		}
 	}

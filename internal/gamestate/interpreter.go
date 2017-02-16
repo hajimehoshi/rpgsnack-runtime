@@ -171,10 +171,9 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		return false, nil
 	}
 	if i.waitingRequestID != 0 {
-		if !sceneManager.HasFinishedRequestID(i.waitingRequestID) {
+		if sceneManager.ReceiveResultIfExists(i.waitingRequestID) == nil {
 			return false, nil
 		}
-		sceneManager.FinishRequestID(i.waitingRequestID)
 		i.waitingRequestID = 0
 		i.commandIterator.Advance()
 		return true, nil

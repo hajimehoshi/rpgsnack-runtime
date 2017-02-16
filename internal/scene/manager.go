@@ -33,14 +33,14 @@ type scene interface {
 }
 
 type Manager struct {
-	width              int
-	height             int
-	requester          Requester
-	current            scene
-	next               scene
-	lastRequestID      int
-	requestFinisher    chan func() int
-	finishedRequestIDs map[int]struct{}
+	width         int
+	height        int
+	requester     Requester
+	current       scene
+	next          scene
+	lastRequestID int
+	resultCh      chan RequestResult
+	results       map[int]*RequestResult
 }
 
 type Requester interface {
@@ -53,14 +53,19 @@ type Requester interface {
 	RequestShareImage(requestID int, title string, message string, image string)
 }
 
+type RequestResult struct {
+	ID        int
+	Succeeded bool
+}
+
 func NewManager(width, height int, requester Requester, initScene scene) *Manager {
 	return &Manager{
-		width:              width,
-		height:             height,
-		requester:          requester,
-		current:            initScene,
-		requestFinisher:    make(chan func() int, 1),
-		finishedRequestIDs: map[int]struct{}{},
+		width:     width,
+		height:    height,
+		requester: requester,
+		current:   initScene,
+		resultCh:  make(chan RequestResult, 1),
+		results:   map[int]*RequestResult{},
 	}
 }
 
@@ -78,9 +83,8 @@ func (m *Manager) MapOffsetX() int {
 
 func (m *Manager) Update() error {
 	select {
-	case f := <-m.requestFinisher:
-		id := f()
-		m.finishedRequestIDs[id] = struct{}{}
+	case r := <-m.resultCh:
+		m.results[r.ID] = &r
 	default:
 	}
 	if m.next != nil {
@@ -109,54 +113,38 @@ func (m *Manager) GenerateRequestID() int {
 	return m.lastRequestID
 }
 
-func (m *Manager) HasFinishedRequestID(id int) bool {
-	_, ok := m.finishedRequestIDs[id]
-	return ok
-}
-
-func (m *Manager) FinishRequestID(id int) {
-	delete(m.finishedRequestIDs, id)
+func (m *Manager) ReceiveResultIfExists(id int) *RequestResult {
+	if r, ok := m.results[id]; ok {
+		delete(m.results, id)
+		return r
+	}
+	return nil
 }
 
 func (m *Manager) FinishUnlockAchievement(id int) {
-	m.requestFinisher <- func() int {
-		// TODO: Implement this
-		return id
-	}
+	m.resultCh <- RequestResult{id, true}
 }
 
 func (m *Manager) FinishSaveProgress(id int) {
-	m.requestFinisher <- func() int {
-		return id
-	}
+	m.resultCh <- RequestResult{id, true}
 }
 
 func (m *Manager) FinishPurchase(id int, success bool) {
-	m.requestFinisher <- func() int {
-		return id
-	}
+	m.resultCh <- RequestResult{id, success}
 }
 
 func (m *Manager) FinishInterstitialAds(id int) {
-	m.requestFinisher <- func() int {
-		return id
-	}
+	m.resultCh <- RequestResult{id, true}
 }
 
 func (m *Manager) FinishRewardedAds(id int, success bool) {
-	m.requestFinisher <- func() int {
-		return id
-	}
+	m.resultCh <- RequestResult{id, success}
 }
 
 func (m *Manager) FinishOpenLink(id int) {
-	m.requestFinisher <- func() int {
-		return id
-	}
+	m.resultCh <- RequestResult{id, true}
 }
 
 func (m *Manager) FinishShareImage(id int) {
-	m.requestFinisher <- func() int {
-		return id
-	}
+	m.resultCh <- RequestResult{id, true}
 }
