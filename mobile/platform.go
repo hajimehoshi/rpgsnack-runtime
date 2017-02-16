@@ -20,25 +20,25 @@ import (
 
 type Requester scene.Requester
 
-func FinishUnlockAchievement(id int, achievements string, err string) {
-	theGame.FinishUnlockAchievement(id, achievements, err)
+func FinishUnlockAchievement(id int) {
+	theGame.FinishUnlockAchievement(id)
 }
 
-func FinishSaveProgress(id int, err string) {
-	theGame.FinishSaveProgress(id, err)
+func FinishSaveProgress(id int) {
+	theGame.FinishSaveProgress(id)
 }
 
-func FinishPurchase(id int, err string) {
+func FinishPurchase(id int, success bool) {
 }
 
-func FinishInterstitialAds(id int, err string) {
+func FinishInterstitialAds(id int) {
 }
 
-func FinishRewardedAds(id int, err string) {
+func FinishRewardedAds(id int, success bool) {
 }
 
-func FinishOpenLink(id int, err string) {
+func FinishOpenLink(id int) {
 }
 
-func FinishShareImage(id int, err string) {
+func FinishShareImage(id int) {
 }

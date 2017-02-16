@@ -21,7 +21,6 @@ package game
 import (
 	"log"
 	"os"
-	"strconv"
 
 	datapkg "github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 )
@@ -32,8 +31,7 @@ type Requester struct {
 
 func (m *Requester) RequestUnlockAchievement(requestID int, achievementID int) {
 	log.Printf("request unlock achievement: requestID: %d, achievementID: %d", requestID, achievementID)
-	achievements := strconv.Itoa(achievementID)
-	m.game.FinishUnlockAchievement(requestID, achievements, "")
+	m.game.FinishUnlockAchievement(requestID)
 }
 
 func (m *Requester) RequestSaveProgress(requestID int, data []uint8) {
@@ -42,15 +40,15 @@ func (m *Requester) RequestSaveProgress(requestID int, data []uint8) {
 		f, err := os.Create(datapkg.SavePath())
 		if err != nil {
 			// TODO: Should pass err instead of string?
-			m.game.FinishSaveProgress(requestID, err.Error())
+			m.game.FinishSaveProgress(requestID)
 			return
 		}
 		defer f.Close()
 		if _, err := f.Write(data); err != nil {
-			m.game.FinishSaveProgress(requestID, err.Error())
+			m.game.FinishSaveProgress(requestID)
 			return
 		}
-		m.game.FinishSaveProgress(requestID, "")
+		m.game.FinishSaveProgress(requestID)
 	}()
 }
 

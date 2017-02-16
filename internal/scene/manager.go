@@ -118,14 +118,14 @@ func (m *Manager) FinishRequestID(id int) {
 	delete(m.finishedRequestIDs, id)
 }
 
-func (m *Manager) FinishUnlockAchievement(id int, achievements string, err string) {
+func (m *Manager) FinishUnlockAchievement(id int) {
 	m.requestFinisher <- func() int {
 		// TODO: Implement this
 		return id
 	}
 }
 
-func (m *Manager) FinishSaveProgress(id int, err string) {
+func (m *Manager) FinishSaveProgress(id int) {
 	m.requestFinisher <- func() int {
 		return id
 	}

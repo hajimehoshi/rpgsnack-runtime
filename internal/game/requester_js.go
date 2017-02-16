@@ -28,12 +28,12 @@ type Requester struct {
 func (m *Requester) RequestUnlockAchievement(requestID int, achievementID int) {
 	log.Printf("request unlock achievement: requestID: %d, achievementID: %d", requestID, achievementID)
 	achievements := strconv.Itoa(achievementID)
-	m.game.FinishUnlockAchievement(requestID, achievements, "")
+	m.game.FinishUnlockAchievement(requestID)
 }
 
 func (m *Requester) RequestSaveProgress(requestID int, data []uint8) {
 	log.Printf("request save progress: requestID: %d", requestID)
-	m.game.FinishSaveProgress(requestID, "")
+	m.game.FinishSaveProgress(requestID)
 }
 
 func (m *Requester) RequestPurchase(requestID int, productID string) {
