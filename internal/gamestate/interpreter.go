@@ -177,6 +177,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		sceneManager.FinishRequestID(i.waitingRequestID)
 		i.waitingRequestID = 0
 		i.commandIterator.Advance()
+		return false, nil
 	}
 	c := i.commandIterator.Command()
 	switch c.Name {
