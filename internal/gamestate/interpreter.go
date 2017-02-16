@@ -402,16 +402,17 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 	case data.CommandShowAds:
 		args := c.Args.(*data.CommandArgsShowAds)
 		i.waitingRequestID = sceneManager.GenerateRequestID()
-		if args.Type == "rewarded" {
+		switch args.Type {
+		case data.ShowAdsTypeRewarded:
 			sceneManager.Requester().RequestRewardedAds(i.waitingRequestID)
-		}
-		if args.Type == "interstitial" {
+		case data.ShowAdsTypeInterstitial:
 			sceneManager.Requester().RequestInterstitialAds(i.waitingRequestID)
 		}
 		return false, nil
 	case data.CommandOpenLink:
 		args := c.Args.(*data.CommandArgsOpenLink)
 		i.waitingRequestID = sceneManager.GenerateRequestID()
+		// TODO: Define data.OpenLinkType
 		sceneManager.Requester().RequestOpenLink(i.waitingRequestID, args.Type, args.Data)
 		return false, nil
 	case data.CommandNameMoveCharacter:

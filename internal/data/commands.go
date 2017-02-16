@@ -130,6 +130,30 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 		c.Args = args
 	case CommandNameStopBGM:
 	case CommandNameGotoTitle:
+	case CommandUnlockAchievement:
+		var args *CommandArgsUnlockAchievement
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
+	case CommandPurchase:
+		var args *CommandArgsPurchase
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
+	case CommandShowAds:
+		var args *CommandArgsShowAds
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
+	case CommandOpenLink:
+		var args *CommandArgsOpenLink
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	case CommandNameMoveCharacter:
 		var args *CommandArgsMoveCharacter
 		if err := unmarshalJSON(tmp.Args, &args); err != nil {
@@ -156,30 +180,6 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 		c.Args = args
 	case CommandNameSetCharacterImage:
 		var args *CommandArgsSetCharacterImage
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandUnlockAchievement:
-		var args *CommandArgsUnlockAchievement
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandPurchase:
-		var args *CommandArgsPurchase
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandShowAds:
-		var args *CommandArgsShowAds
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandOpenLink:
-		var args *CommandArgsOpenLink
 		if err := unmarshalJSON(tmp.Args, &args); err != nil {
 			return err
 		}
@@ -368,7 +368,7 @@ type CommandArgsPurchase struct {
 }
 
 type CommandArgsShowAds struct {
-	Type string `json:"type"`
+	Type ShowAdsType `json:"type"`
 }
 
 type CommandArgsOpenLink struct {
@@ -497,6 +497,13 @@ type SetVariableCharacterType string
 
 const (
 	SetVariableCharacterTypeDirection SetVariableCharacterType = "direction"
+)
+
+type ShowAdsType string
+
+const (
+	ShowAdsTypeRewarded     ShowAdsType = "rewarded"
+	ShowAdsTypeInterstitial ShowAdsType = "interstitial"
 )
 
 type MoveCharacterType string
