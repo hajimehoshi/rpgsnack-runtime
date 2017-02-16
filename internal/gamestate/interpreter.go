@@ -171,11 +171,21 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		return false, nil
 	}
 	if i.waitingRequestID != 0 {
-		if sceneManager.ReceiveResultIfExists(i.waitingRequestID) == nil {
+		r := sceneManager.ReceiveResultIfExists(i.waitingRequestID)
+		if r == nil {
 			return false, nil
 		}
 		i.waitingRequestID = 0
-		i.commandIterator.Advance()
+		switch r.Type {
+		case scene.RequestTypePurchase, scene.RequestTypeRewardedAds:
+			if r.Succeeded {
+				i.commandIterator.Choose(0)
+			} else {
+				i.commandIterator.Choose(1)
+			}
+		default:
+			i.commandIterator.Advance()
+		}
 		return true, nil
 	}
 	c := i.commandIterator.Command()

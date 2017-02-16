@@ -53,8 +53,21 @@ type Requester interface {
 	RequestShareImage(requestID int, title string, message string, image string)
 }
 
+type RequestType int
+
+const (
+	RequestTypeUnlockAchievement RequestType = iota
+	RequestTypeSaveProgress
+	RequestTypePurchase
+	RequestTypeInterstitialAds
+	RequestTypeRewardedAds
+	RequestTypeOpenLink
+	RequestTypeShareImage
+)
+
 type RequestResult struct {
 	ID        int
+	Type      RequestType
 	Succeeded bool
 }
 
@@ -122,29 +135,52 @@ func (m *Manager) ReceiveResultIfExists(id int) *RequestResult {
 }
 
 func (m *Manager) FinishUnlockAchievement(id int) {
-	m.resultCh <- RequestResult{id, true}
+	m.resultCh <- RequestResult{
+		ID:   id,
+		Type: RequestTypeUnlockAchievement,
+	}
 }
 
 func (m *Manager) FinishSaveProgress(id int) {
-	m.resultCh <- RequestResult{id, true}
+	m.resultCh <- RequestResult{
+		ID:   id,
+		Type: RequestTypeSaveProgress,
+	}
 }
 
 func (m *Manager) FinishPurchase(id int, success bool) {
-	m.resultCh <- RequestResult{id, success}
+	m.resultCh <- RequestResult{
+		ID:        id,
+		Type:      RequestTypePurchase,
+		Succeeded: success,
+	}
 }
 
 func (m *Manager) FinishInterstitialAds(id int) {
-	m.resultCh <- RequestResult{id, true}
+	m.resultCh <- RequestResult{
+		ID:   id,
+		Type: RequestTypeInterstitialAds,
+	}
 }
 
 func (m *Manager) FinishRewardedAds(id int, success bool) {
-	m.resultCh <- RequestResult{id, success}
+	m.resultCh <- RequestResult{
+		ID:        id,
+		Type:      RequestTypeRewardedAds,
+		Succeeded: success,
+	}
 }
 
 func (m *Manager) FinishOpenLink(id int) {
-	m.resultCh <- RequestResult{id, true}
+	m.resultCh <- RequestResult{
+		ID:   id,
+		Type: RequestTypeOpenLink,
+	}
 }
 
 func (m *Manager) FinishShareImage(id int) {
-	m.resultCh <- RequestResult{id, true}
+	m.resultCh <- RequestResult{
+		ID:   id,
+		Type: RequestTypeShareImage,
+	}
 }
