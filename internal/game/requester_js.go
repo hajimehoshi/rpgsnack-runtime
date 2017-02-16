@@ -37,16 +37,26 @@ func (m *Requester) RequestSaveProgress(requestID int, data []uint8) {
 }
 
 func (m *Requester) RequestPurchase(requestID int, productID string) {
+	log.Printf("request purchase: requestID: %d, productID: %s", requestID, productID)
+	m.game.FinishPurchase(requestID, true)
 }
 
 func (m *Requester) RequestInterstitialAds(requestID int) {
+	log.Printf("request interstitial ads: requestID: %d", requestID)
+	m.game.FinishInterstitialAds(requestID)
 }
 
 func (m *Requester) RequestRewardedAds(requestID int) {
+	log.Printf("request rewarded ads: requestID: %d", requestID)
+	m.game.FinishRewardedAds(requestID, true)
 }
 
 func (m *Requester) RequestOpenLink(requestID int, linkType string, data string) {
+	log.Printf("request open link: requestID: %d", requestID)
+	m.game.FinishOpenLink(requestID)
 }
 
 func (m *Requester) RequestShareImage(requestID int, title string, message string, image string) {
+	log.Printf("request share image: requestID: %d, title: %s, message: %s, image: %s", requestID, title, message, image)
+	m.game.FinishShareImage(requestID)
 }

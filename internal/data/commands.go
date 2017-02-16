@@ -166,6 +166,24 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 			return err
 		}
 		c.Args = args
+	case CommandPurchase:
+		var args *CommandArgsPurchase
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
+	case CommandShowAds:
+		var args *CommandArgsShowAds
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
+	case CommandOpenLink:
+		var args *CommandArgsOpenLink
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	case CommandNameSetInnerVariable:
 		// This happens when loading a save data.
 		var args *CommandArgsSetInnerVariable
@@ -200,6 +218,9 @@ const (
 	CommandNameStopBGM       CommandName = "stop_bgm"
 	CommandNameGotoTitle     CommandName = "goto_title"
 	CommandUnlockAchievement CommandName = "unlock_achievement"
+	CommandPurchase          CommandName = "start_iap"
+	CommandShowAds           CommandName = "show_ads"
+	CommandOpenLink          CommandName = "open_link"
 
 	// Route commands
 	CommandNameMoveCharacter        CommandName = "move_character"
@@ -340,6 +361,19 @@ type CommandArgsPlayBGM struct {
 
 type CommandArgsUnlockAchievement struct {
 	ID int `json:"id"`
+}
+
+type CommandArgsPurchase struct {
+	ID int `json:"id"`
+}
+
+type CommandArgsShowAds struct {
+	Type string `json:"type"`
+}
+
+type CommandArgsOpenLink struct {
+	Type string `json:"type"`
+	Data string `json:"data"`
 }
 
 type CommandArgsMoveCharacter struct {

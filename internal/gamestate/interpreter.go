@@ -392,6 +392,28 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		i.waitingRequestID = sceneManager.GenerateRequestID()
 		sceneManager.Requester().RequestUnlockAchievement(i.waitingRequestID, args.ID)
 		return false, nil
+	case data.CommandPurchase:
+		// args := c.Args.(*data.CommandArgsPurchase)
+		i.waitingRequestID = sceneManager.GenerateRequestID()
+
+		// TODO: Retrieve productID from purchases database via args.ID
+		sceneManager.Requester().RequestPurchase(i.waitingRequestID, "test_productId")
+		return false, nil
+	case data.CommandShowAds:
+		args := c.Args.(*data.CommandArgsShowAds)
+		i.waitingRequestID = sceneManager.GenerateRequestID()
+		if args.Type == "rewarded" {
+			sceneManager.Requester().RequestRewardedAds(i.waitingRequestID)
+		}
+		if args.Type == "interstitial" {
+			sceneManager.Requester().RequestInterstitialAds(i.waitingRequestID)
+		}
+		return false, nil
+	case data.CommandOpenLink:
+		args := c.Args.(*data.CommandArgsOpenLink)
+		i.waitingRequestID = sceneManager.GenerateRequestID()
+		sceneManager.Requester().RequestOpenLink(i.waitingRequestID, args.Type, args.Data)
+		return false, nil
 	case data.CommandNameMoveCharacter:
 		ch := i.gameState.character(i.mapID, i.roomID, i.eventID)
 		if ch == nil {
@@ -536,7 +558,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		i.gameState.variables.SetInnerVariableValue(args.Name, args.Value)
 		i.commandIterator.Advance()
 	default:
-		return false, fmt.Errorf("invaid command: %s", c.Name)
+		return false, fmt.Errorf("invalid command: %s", c.Name)
 	}
 	return true, nil
 }

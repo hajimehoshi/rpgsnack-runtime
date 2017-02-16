@@ -114,3 +114,23 @@ func (g *Game) FinishUnlockAchievement(id int) {
 func (g *Game) FinishSaveProgress(id int) {
 	g.sceneManager.FinishSaveProgress(id)
 }
+
+func (g *Game) FinishPurchase(id int, success bool) {
+	g.sceneManager.FinishPurchase(id, success)
+}
+
+func (g *Game) FinishInterstitialAds(id int) {
+	g.sceneManager.FinishInterstitialAds(id)
+}
+
+func (g *Game) FinishRewardedAds(id int, success bool) {
+	g.sceneManager.FinishRewardedAds(id, success)
+}
+
+func (g *Game) FinishOpenLink(id int) {
+	g.sceneManager.FinishOpenLink(id)
+}
+
+func (g *Game) FinishShareImage(id int) {
+	g.sceneManager.FinishShareImage(id)
+}

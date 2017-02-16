@@ -130,3 +130,33 @@ func (m *Manager) FinishSaveProgress(id int) {
 		return id
 	}
 }
+
+func (m *Manager) FinishPurchase(id int, success bool) {
+	m.requestFinisher <- func() int {
+		return id
+	}
+}
+
+func (m *Manager) FinishInterstitialAds(id int) {
+	m.requestFinisher <- func() int {
+		return id
+	}
+}
+
+func (m *Manager) FinishRewardedAds(id int, success bool) {
+	m.requestFinisher <- func() int {
+		return id
+	}
+}
+
+func (m *Manager) FinishOpenLink(id int) {
+	m.requestFinisher <- func() int {
+		return id
+	}
+}
+
+func (m *Manager) FinishShareImage(id int) {
+	m.requestFinisher <- func() int {
+		return id
+	}
+}

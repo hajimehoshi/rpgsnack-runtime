@@ -32,7 +32,8 @@
       "828e2dd3-a0c9-4aad-88f6-d9c6f0a1d79e": "タイトルへ戻ります",
       "3d1e6c63-983a-46da-88de-036fd651ca7d": "選択肢A",
       "66a533ed-7556-4063-af8a-5d96bbfccc6e": "選択肢B",
-      "b384c510-c28a-4248-90fb-1148afd3694c": "キャンセル"
+      "b384c510-c28a-4248-90fb-1148afd3694c": "キャンセル",
+      "b384c510-c28a-4248-90fb-1148afd3694d": "リワードビデオ"
     }
   },
   "maps": [
@@ -654,6 +655,53 @@
                   ]
                 }
               ]
+            },
+            {
+              "id": 7,
+              "x": 3,
+              "y": 5,
+              "pages": [
+                {
+                  "commands": [
+                    {
+                      "name": "show_message",
+                      "args":    {
+                        "content": "b384c510-c28a-4248-90fb-1148afd3694d",
+                        "eventId": 0
+                      }
+                    },
+                    {
+                      "name": "show_ads",
+                      "args": {
+                        "type": "rewarded"
+                      },
+                      "branches": [
+                        [],
+                        []
+                      ]
+                    }
+                  ],
+                  "route": null,
+                  "conditions": [
+                    null,
+                    null
+                  ],
+                  "image": "TimeOver_chara.png",
+                  "imageIndex": 1,
+                  "width": 1,
+                  "height": 1,
+                  "anchor": "center",
+                  "priority": 1,
+                  "trigger": "player",
+                  "dir": 2,
+                  "frame": 1,
+                  "dirFix": false,
+                  "stepping": false,
+                  "through": false,
+                  "walking": true
+                }
+              ],
+              "name": "Event4"
             }
           ]
         },

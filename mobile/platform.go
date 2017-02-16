@@ -29,16 +29,21 @@ func FinishSaveProgress(id int) {
 }
 
 func FinishPurchase(id int, success bool) {
+	theGame.FinishPurchase(id, success)
 }
 
 func FinishInterstitialAds(id int) {
+	theGame.FinishInterstitialAds(id)
 }
 
 func FinishRewardedAds(id int, success bool) {
+	theGame.FinishRewardedAds(id, success)
 }
 
 func FinishOpenLink(id int) {
+	theGame.FinishOpenLink(id)
 }
 
 func FinishShareImage(id int) {
+	theGame.FinishShareImage(id)
 }
