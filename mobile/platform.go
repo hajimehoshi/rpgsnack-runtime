@@ -28,7 +28,7 @@ func FinishSaveProgress(id int, err string) {
 	theGame.FinishSaveProgress(id, err)
 }
 
-func FinishPurchase(id int, productIDs string, err string) {
+func FinishPurchase(id int, err string) {
 }
 
 func FinishInterstitialAds(id int, err string) {
