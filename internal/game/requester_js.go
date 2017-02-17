@@ -18,7 +18,6 @@ package game
 
 import (
 	"log"
-	"strconv"
 )
 
 type Requester struct {
@@ -27,7 +26,6 @@ type Requester struct {
 
 func (m *Requester) RequestUnlockAchievement(requestID int, achievementID int) {
 	log.Printf("request unlock achievement: requestID: %d, achievementID: %d", requestID, achievementID)
-	achievements := strconv.Itoa(achievementID)
 	m.game.FinishUnlockAchievement(requestID)
 }
 
