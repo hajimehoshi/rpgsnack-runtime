@@ -29,12 +29,22 @@ import (
 type TitleScene struct {
 	newGameButton    *ui.Button
 	resumeGameButton *ui.Button
+	warning          bool
+	warningLabel     *ui.Label
+	warningYesButton *ui.Button
+	warningNoButton  *ui.Button
 }
 
 func NewTitleScene() *TitleScene {
+	const warning = `You have a on-going game data.
+Do you want to clear the progress
+to start a new game?`
 	return &TitleScene{
 		newGameButton:    ui.NewButton(0, 184, 120, 20, "New Game"),
 		resumeGameButton: ui.NewButton(0, 208, 120, 20, "Resume Game"),
+		warningLabel:     ui.NewLabel(4, 4, warning),
+		warningYesButton: ui.NewButton(0, 184, 120, 20, "Yes"),
+		warningNoButton:  ui.NewButton(0, 208, 120, 20, "No"),
 	}
 }
 
@@ -42,6 +52,29 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 	w, _ := sceneManager.Size()
 	t.newGameButton.X = (w/scene.TileScale - t.newGameButton.Width) / 2
 	t.resumeGameButton.X = (w/scene.TileScale - t.resumeGameButton.Width) / 2
+	t.warningYesButton.X = (w/scene.TileScale - t.warningYesButton.Width) / 2
+	t.warningNoButton.X = (w/scene.TileScale - t.warningNoButton.Width) / 2
+	if t.warning {
+		if err := t.warningYesButton.Update(); err != nil {
+			return err
+		}
+		if err := t.warningNoButton.Update(); err != nil {
+			return err
+		}
+		if t.warningYesButton.Pressed() {
+			mapScene, err := NewMapScene()
+			if err != nil {
+				return err
+			}
+			sceneManager.GoTo(mapScene)
+			return nil
+		}
+		if t.warningNoButton.Pressed() {
+			t.warning = false
+			return nil
+		}
+		return nil
+	}
 	if err := t.newGameButton.Update(); err != nil {
 		return err
 	}
@@ -51,11 +84,15 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 		}
 	}
 	if t.newGameButton.Pressed() {
-		mapScene, err := NewMapScene()
-		if err != nil {
-			return err
+		if data.Progress() != nil {
+			t.warning = true
+		} else {
+			mapScene, err := NewMapScene()
+			if err != nil {
+				return err
+			}
+			sceneManager.GoTo(mapScene)
 		}
-		sceneManager.GoTo(mapScene)
 		return nil
 	}
 	if data.Progress() != nil && t.resumeGameButton.Pressed() {
@@ -74,6 +111,18 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 }
 
 func (t *TitleScene) Draw(screen *ebiten.Image) error {
+	if t.warning {
+		if err := t.warningLabel.Draw(screen); err != nil {
+			return err
+		}
+		if err := t.warningYesButton.Draw(screen); err != nil {
+			return err
+		}
+		if err := t.warningNoButton.Draw(screen); err != nil {
+			return err
+		}
+		return nil
+	}
 	timg := assets.GetImage("title.png")
 	tw, _ := timg.Size()
 	sw, _ := screen.Size()
