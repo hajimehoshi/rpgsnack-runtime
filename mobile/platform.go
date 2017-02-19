@@ -47,3 +47,11 @@ func FinishOpenLink(id int) {
 func FinishShareImage(id int) {
 	theGame.FinishShareImage(id)
 }
+
+func MarkInterstitialAdsLoaded() {
+	theGame.MarkInterstitialAdsLoaded()
+}
+
+func MarkRewardedAdsLoaded() {
+	theGame.MarkRewardedAdsLoaded()
+}

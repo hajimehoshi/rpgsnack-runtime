@@ -134,3 +134,11 @@ func (g *Game) FinishOpenLink(id int) {
 func (g *Game) FinishShareImage(id int) {
 	g.sceneManager.FinishShareImage(id)
 }
+
+func (g *Game) MarkInterstitialAdsLoaded() {
+	g.sceneManager.MarkInterstitialAdsLoaded()
+}
+
+func (g *Game) MarkRewardedAdsLoaded() {
+	g.sceneManager.MarkRewardedAdsLoaded()
+}

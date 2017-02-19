@@ -184,3 +184,11 @@ func (m *Manager) FinishShareImage(id int) {
 		Type: RequestTypeShareImage,
 	}
 }
+
+func (m *Manager) MarkInterstitialAdsLoaded() {
+	// TODO Mark interstitial ads loaded
+}
+
+func (m *Manager) MarkRewardedAdsLoaded() {
+	// TODO Save interstitial ads loaded
+}
