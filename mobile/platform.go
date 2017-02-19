@@ -32,6 +32,10 @@ func FinishPurchase(id int, success bool) {
 	theGame.FinishPurchase(id, success)
 }
 
+func FinishRestorePurchases(id int, purchases []uint8) {
+	theGame.FinishRestorePurchases(id, purchases)
+}
+
 func FinishInterstitialAds(id int) {
 	theGame.FinishInterstitialAds(id)
 }

@@ -119,6 +119,10 @@ func (g *Game) FinishPurchase(id int, success bool) {
 	g.sceneManager.FinishPurchase(id, success)
 }
 
+func (g *Game) FinishRestorePurchases(id int, purchases []uint8) {
+	g.sceneManager.FinishRestorePurchases(id, purchases)
+}
+
 func (g *Game) FinishInterstitialAds(id int) {
 	g.sceneManager.FinishInterstitialAds(id)
 }

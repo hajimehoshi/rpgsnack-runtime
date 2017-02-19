@@ -58,6 +58,11 @@ func (m *Requester) RequestPurchase(requestID int, productID string) {
 	m.game.FinishPurchase(requestID, true)
 }
 
+func (m *Requester) RequestRestorePurchases(requestID int) {
+	log.Printf("request restore purchase: requestID: %d", requestID)
+	m.game.FinishRestorePurchases(requestID, nil)
+}
+
 func (m *Requester) RequestInterstitialAds(requestID int) {
 	log.Printf("request interstitial ads: requestID: %d", requestID)
 	m.game.FinishInterstitialAds(requestID)

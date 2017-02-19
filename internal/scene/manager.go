@@ -47,6 +47,7 @@ type Requester interface {
 	RequestUnlockAchievement(requestID int, achievementID int)
 	RequestSaveProgress(requestID int, data []uint8)
 	RequestPurchase(requestID int, productID string)
+	RequestRestorePurchases(requestID int)
 	RequestInterstitialAds(requestID int)
 	RequestRewardedAds(requestID int)
 	RequestOpenLink(requestID int, linkType string, data string)
@@ -59,6 +60,7 @@ const (
 	RequestTypeUnlockAchievement RequestType = iota
 	RequestTypeSaveProgress
 	RequestTypePurchase
+	RequestTypeRestorePurchases
 	RequestTypeInterstitialAds
 	RequestTypeRewardedAds
 	RequestTypeOpenLink
@@ -69,6 +71,7 @@ type RequestResult struct {
 	ID        int
 	Type      RequestType
 	Succeeded bool
+	Data      []uint8
 }
 
 func NewManager(width, height int, requester Requester, initScene scene) *Manager {
@@ -153,6 +156,15 @@ func (m *Manager) FinishPurchase(id int, success bool) {
 		ID:        id,
 		Type:      RequestTypePurchase,
 		Succeeded: success,
+	}
+}
+
+func (m *Manager) FinishRestorePurchases(id int, purchases []uint8) {
+	m.resultCh <- RequestResult{
+		ID:        id,
+		Type:      RequestTypeRestorePurchases,
+		Succeeded: true,
+		Data:      purchases,
 	}
 }
 
