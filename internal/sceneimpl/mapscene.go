@@ -34,6 +34,7 @@ type MapScene struct {
 	moveDstY         int
 	tilesImage       *ebiten.Image
 	triggeringFailed bool
+	initialState     bool
 }
 
 func NewMapScene() (*MapScene, error) {
@@ -46,8 +47,9 @@ func NewMapScene() (*MapScene, error) {
 		return nil, err
 	}
 	mapScene := &MapScene{
-		tilesImage: tilesImage,
-		gameState:  state,
+		tilesImage:   tilesImage,
+		gameState:    state,
+		initialState: true,
 	}
 	return mapScene, nil
 }
@@ -106,6 +108,12 @@ func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) error {
 }
 
 func (m *MapScene) Update(sceneManager *scene.Manager) error {
+	if m.initialState {
+		if _, err := m.gameState.RequestSave(sceneManager); err != nil {
+			return err
+		}
+	}
+	m.initialState = false
 	if err := m.gameState.Update(sceneManager); err != nil {
 		return err
 	}
