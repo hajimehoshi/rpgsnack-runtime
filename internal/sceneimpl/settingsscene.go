@@ -69,6 +69,10 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 	if err := s.closeButton.Update(); err != nil {
 		return err
 	}
+	if s.closeButton.Pressed() {
+		sceneManager.GoTo(NewTitleScene())
+		return nil
+	}
 	return nil
 }
 
