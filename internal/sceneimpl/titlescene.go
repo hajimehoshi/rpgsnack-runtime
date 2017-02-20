@@ -29,6 +29,7 @@ import (
 type TitleScene struct {
 	newGameButton    *ui.Button
 	resumeGameButton *ui.Button
+	settingsButton   *ui.Button
 	warning          bool
 	warningLabel     *ui.Label
 	warningYesButton *ui.Button
@@ -42,6 +43,7 @@ to start a new game?`
 	return &TitleScene{
 		newGameButton:    ui.NewButton(0, 184, 120, 20, "New Game"),
 		resumeGameButton: ui.NewButton(0, 208, 120, 20, "Resume Game"),
+		settingsButton:   ui.NewImageButton(0, 0, assets.GetImage("icon_settings.png")),
 		warningLabel:     ui.NewLabel(4, 4, warning),
 		warningYesButton: ui.NewButton(0, 184, 120, 20, "Yes"),
 		warningNoButton:  ui.NewButton(0, 208, 120, 20, "No"),
@@ -49,11 +51,13 @@ to start a new game?`
 }
 
 func (t *TitleScene) Update(sceneManager *scene.Manager) error {
-	w, _ := sceneManager.Size()
+	w, h := sceneManager.Size()
 	t.newGameButton.X = (w/scene.TileScale - t.newGameButton.Width) / 2
 	t.resumeGameButton.X = (w/scene.TileScale - t.resumeGameButton.Width) / 2
 	t.warningYesButton.X = (w/scene.TileScale - t.warningYesButton.Width) / 2
 	t.warningNoButton.X = (w/scene.TileScale - t.warningNoButton.Width) / 2
+	t.settingsButton.X = w/scene.TileScale - 16
+	t.settingsButton.Y = h/scene.TileScale - 16
 	if t.warning {
 		if err := t.warningYesButton.Update(); err != nil {
 			return err
@@ -83,6 +87,9 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 			return err
 		}
 	}
+	if err := t.settingsButton.Update(); err != nil {
+		return err
+	}
 	if t.newGameButton.Pressed() {
 		if data.Progress() != nil {
 			t.warning = true
@@ -105,6 +112,10 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 			return err
 		}
 		sceneManager.GoTo(mapScene)
+		return nil
+	}
+	if t.settingsButton.Pressed() {
+		sceneManager.GoTo(NewSettingsScene())
 		return nil
 	}
 	return nil
@@ -138,6 +149,9 @@ func (t *TitleScene) Draw(screen *ebiten.Image) error {
 		if err := t.resumeGameButton.Draw(screen); err != nil {
 			return err
 		}
+	}
+	if err := t.settingsButton.Draw(screen); err != nil {
+		return err
 	}
 	return nil
 }

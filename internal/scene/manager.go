@@ -74,15 +74,21 @@ type RequestResult struct {
 	Data      []uint8
 }
 
-func NewManager(width, height int, requester Requester, initScene scene) *Manager {
+func NewManager(width, height int, requester Requester) *Manager {
 	return &Manager{
 		width:     width,
 		height:    height,
 		requester: requester,
-		current:   initScene,
 		resultCh:  make(chan RequestResult, 1),
 		results:   map[int]*RequestResult{},
 	}
+}
+
+func (m *Manager) InitScene(scene scene) {
+	if m.current != nil {
+		panic("not reach")
+	}
+	m.current = scene
 }
 
 func (m *Manager) Size() (int, int) {

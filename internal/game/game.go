@@ -34,8 +34,7 @@ type Game struct {
 func New(width, height int, requester scene.Requester) (*Game, error) {
 	g := &Game{}
 	g.loadGameData()
-	initScene := sceneimpl.NewTitleScene()
-	g.sceneManager = scene.NewManager(width, height, requester, initScene)
+	g.sceneManager = scene.NewManager(width, height, requester)
 	return g, nil
 }
 
@@ -62,7 +61,6 @@ func (g *Game) Update(screen *ebiten.Image) error {
 		return err
 	}
 	return nil
-
 }
 
 func (g *Game) update() error {
@@ -78,6 +76,7 @@ func (g *Game) update() error {
 			if !ok {
 				g.loadingCh = nil
 			}
+			g.sceneManager.InitScene(sceneimpl.NewTitleScene())
 		default:
 			return nil
 		}

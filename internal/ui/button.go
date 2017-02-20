@@ -35,6 +35,7 @@ type Button struct {
 	Width    int
 	Height   int
 	text     string
+	image    *ebiten.Image
 	pressing bool
 	pressed  bool
 }
@@ -46,6 +47,17 @@ func NewButton(x, y, width, height int, text string) *Button {
 		Width:  width,
 		Height: height,
 		text:   text,
+	}
+}
+
+func NewImageButton(x, y int, image *ebiten.Image) *Button {
+	w, h := image.Size()
+	return &Button{
+		X:      x,
+		Y:      y,
+		Width:  w,
+		Height: h,
+		image:  image,
 	}
 }
 
@@ -122,6 +134,15 @@ func (b *buttonParts) Dst(index int) (int, int, int, int) {
 }
 
 func (b *Button) Draw(screen *ebiten.Image) error {
+	if b.image != nil {
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(float64(b.X), float64(b.Y))
+		op.GeoM.Scale(scene.TileScale, scene.TileScale)
+		if err := screen.DrawImage(b.image, op); err != nil {
+			return err
+		}
+		return nil
+	}
 	img := assets.GetImage("9patch_test_off.png")
 	if b.pressing {
 		img = assets.GetImage("9patch_test_on.png")
