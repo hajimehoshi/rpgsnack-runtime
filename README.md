@@ -21,3 +21,8 @@ Run `go run main.go /path/to/json/file`
 
 1. Install gomobile with `go get golang.org/x/mobile/cmd/...`
 2. Run `gomobile bind -target android -javapkg net.rpgsnack.runtime -o ./rpgsnack_runtime.aar github.com/hajimehoshi/rpgsnack-runtime/mobile`
+
+## How to pack resources
+```
+go generate ./...
+```
