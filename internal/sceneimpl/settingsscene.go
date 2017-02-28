@@ -51,22 +51,22 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 	s.restorePurchasesButton.X = (w/scene.TileScale - s.restorePurchasesButton.Width) / 2
 	s.moreGamesButton.X = (w/scene.TileScale - s.moreGamesButton.Width) / 2
 	s.closeButton.X = (w/scene.TileScale - s.closeButton.Width) / 2
-	if err := s.creditButton.Update(); err != nil {
+	if err := s.creditButton.Update(0, 0); err != nil {
 		return err
 	}
-	if err := s.removeAdsButton.Update(); err != nil {
+	if err := s.removeAdsButton.Update(0, 0); err != nil {
 		return err
 	}
-	if err := s.reviewThisAppButton.Update(); err != nil {
+	if err := s.reviewThisAppButton.Update(0, 0); err != nil {
 		return err
 	}
-	if err := s.restorePurchasesButton.Update(); err != nil {
+	if err := s.restorePurchasesButton.Update(0, 0); err != nil {
 		return err
 	}
-	if err := s.moreGamesButton.Update(); err != nil {
+	if err := s.moreGamesButton.Update(0, 0); err != nil {
 		return err
 	}
-	if err := s.closeButton.Update(); err != nil {
+	if err := s.closeButton.Update(0, 0); err != nil {
 		return err
 	}
 	if s.closeButton.Pressed() {

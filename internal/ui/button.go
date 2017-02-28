@@ -25,10 +25,6 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
 
-const (
-	partSize = 4
-)
-
 type Button struct {
 	X        int
 	Y        int
@@ -65,17 +61,19 @@ func (b *Button) Pressed() bool {
 	return b.pressed
 }
 
-func (b *Button) includesInput() bool {
+func (b *Button) includesInput(offsetX, offsetY int) bool {
 	x, y := input.Position()
 	x /= scene.TileScale
 	y /= scene.TileScale
+	x -= offsetX
+	y -= offsetY
 	if b.X <= x && x < b.X+b.Width && b.Y <= y && y < b.Y+b.Height {
 		return true
 	}
 	return false
 }
 
-func (b *Button) Update() error {
+func (b *Button) Update(offsetX, offsetY int) error {
 	b.pressed = false
 	if !b.pressing {
 		if !input.Triggered() {
@@ -87,50 +85,12 @@ func (b *Button) Update() error {
 		b.pressed = true
 		return nil
 	}
-	if b.includesInput() {
+	if b.includesInput(offsetX, offsetY) {
 		b.pressing = true
 	} else {
 		b.pressing = false
 	}
 	return nil
-}
-
-type buttonParts struct {
-	button *Button
-}
-
-func (b *buttonParts) Len() int {
-	return (b.button.Width / partSize) * (b.button.Height / partSize)
-}
-
-func (b *buttonParts) Src(index int) (int, int, int, int) {
-	xn := b.button.Width / partSize
-	yn := b.button.Height / partSize
-	sx, sy := 0, 0
-	switch index % xn {
-	case 0:
-		sx = 0
-	case xn - 1:
-		sx = 2 * partSize
-	default:
-		sx = 1 * partSize
-	}
-	switch index / xn {
-	case 0:
-		sy = 0
-	case yn - 1:
-		sy = 2 * partSize
-	default:
-		sy = 1 * partSize
-	}
-	return sx, sy, sx + partSize, sy + partSize
-}
-
-func (b *buttonParts) Dst(index int) (int, int, int, int) {
-	xn := b.button.Width / partSize
-	dx := (index % xn) * partSize
-	dy := (index / xn) * partSize
-	return dx, dy, dx + partSize, dy + partSize
 }
 
 func (b *Button) Draw(screen *ebiten.Image) error {
@@ -148,7 +108,7 @@ func (b *Button) Draw(screen *ebiten.Image) error {
 		img = assets.GetImage("9patch_test_on.png")
 	}
 	op := &ebiten.DrawImageOptions{}
-	op.ImageParts = &buttonParts{b}
+	op.ImageParts = &ninePatchParts{b.Width, b.Height}
 	op.GeoM.Translate(float64(b.X), float64(b.Y))
 	op.GeoM.Scale(scene.TileScale, scene.TileScale)
 	if err := screen.DrawImage(img, op); err != nil {

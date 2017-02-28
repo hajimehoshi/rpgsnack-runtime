@@ -37,7 +37,7 @@ func NewLabel(x, y int, text string) *Label {
 	}
 }
 
-func (l *Label) Update() error {
+func (l *Label) Update(offsetX, offsetY int) error {
 	return nil
 }
 
