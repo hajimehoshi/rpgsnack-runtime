@@ -281,6 +281,43 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 			i.gameState.windows.CloseAll()
 		}
 		i.waitingCommand = false
+	case data.CommandNameShowHint:
+		if !i.waitingCommand {
+			args := c.Args.(*data.CommandArgsShowHint)
+			hintId := i.gameState.hints.ActiveHintId()
+			// next time it shows next available hint
+			i.gameState.hints.ReadHint(hintId)
+
+			var hintText data.UUID
+			for _, h := range data.Current().Hints {
+				if h.ID == hintId {
+					hintText = h.Text
+					break
+				}
+			}
+
+			var content string
+			if hintText.String() == "" {
+				content = "Undefined"
+			} else {
+				content = data.Current().Texts.Get(language.Und, hintText)
+			}
+
+			id := args.EventID
+			if id == 0 {
+				id = i.eventID
+			}
+			if ch := i.gameState.character(i.mapID, i.roomID, id); ch != nil {
+				content = i.gameState.parseMessageSyntax(content)
+				i.gameState.windows.ShowMessage(content, ch.EventID(), i.id)
+				i.waitingCommand = true
+				return false, nil
+			}
+		}
+
+		i.commandIterator.Advance()
+		i.gameState.windows.CloseAll()
+		i.waitingCommand = false
 	case data.CommandNameShowChoices:
 		if !i.waitingCommand {
 			choices := []string{}
@@ -401,6 +438,18 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		i.waitingRequestID = sceneManager.GenerateRequestID()
 		sceneManager.Requester().RequestUnlockAchievement(i.waitingRequestID, args.ID)
 		return false, nil
+	case data.CommandControlHint:
+		args := c.Args.(*data.CommandArgsControlHint)
+
+		switch args.Type {
+		case data.ControlHintPause:
+			i.gameState.hints.Pause(args.ID)
+		case data.ControlHintStart:
+			i.gameState.hints.Activate(args.ID)
+		case data.ControlHintComplete:
+			i.gameState.hints.Complete(args.ID)
+		}
+		i.commandIterator.Advance()
 	case data.CommandPurchase:
 		// args := c.Args.(*data.CommandArgsPurchase)
 		i.waitingRequestID = sceneManager.GenerateRequestID()
@@ -638,6 +687,14 @@ func (i *Interpreter) setVariable(id int, op data.SetVariableOp, valueType data.
 			}
 		default:
 			println(fmt.Sprintf("not implemented yet (set_variable): type %s", args.Type))
+		}
+	case data.SetVariableValueTypeSystem:
+		systemVariableType := value.(data.SystemVariableType)
+		switch systemVariableType {
+		case data.SystemVariableHintCount:
+			rhs = i.gameState.hints.ActiveHintCount()
+		default:
+			println(fmt.Sprintf("not implemented yet (set_variable): systemVariableType %s", systemVariableType))
 		}
 	}
 	switch op {

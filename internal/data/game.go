@@ -32,9 +32,8 @@ type Achievement struct {
 }
 
 type Hint struct {
-	ID         int          `json:"id"`
-	Text       UUID         `json:"text"`
-	Conditions []*Condition `json:"conditions"`
+	ID   int  `json:"id"`
+	Text UUID `json:"text"`
 }
 
 type IAPProduct struct {

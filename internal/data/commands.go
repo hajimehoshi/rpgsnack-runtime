@@ -74,6 +74,12 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 			return err
 		}
 		c.Args = args
+	case CommandNameShowHint:
+		var args *CommandArgsShowHint
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	case CommandNameShowChoices:
 		var args *CommandArgsShowChoices
 		if err := unmarshalJSON(tmp.Args, &args); err != nil {
@@ -132,6 +138,12 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 	case CommandNameGotoTitle:
 	case CommandUnlockAchievement:
 		var args *CommandArgsUnlockAchievement
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
+	case CommandControlHint:
+		var args *CommandArgsControlHint
 		if err := unmarshalJSON(tmp.Args, &args); err != nil {
 			return err
 		}
@@ -206,6 +218,7 @@ const (
 	CommandNameCallEvent     CommandName = "call_event"
 	CommandNameWait          CommandName = "wait"
 	CommandNameShowMessage   CommandName = "show_message"
+	CommandNameShowHint      CommandName = "show_hint"
 	CommandNameShowChoices   CommandName = "show_choices"
 	CommandNameSetSwitch     CommandName = "set_switch"
 	CommandNameSetSelfSwitch CommandName = "set_self_switch"
@@ -218,6 +231,7 @@ const (
 	CommandNameStopBGM       CommandName = "stop_bgm"
 	CommandNameGotoTitle     CommandName = "goto_title"
 	CommandUnlockAchievement CommandName = "unlock_achievement"
+	CommandControlHint       CommandName = "control_hint"
 	CommandPurchase          CommandName = "start_iap"
 	CommandShowAds           CommandName = "show_ads"
 	CommandOpenLink          CommandName = "open_link"
@@ -254,9 +268,15 @@ type CommandArgsWait struct {
 	Time int `json:"time"`
 }
 
+// TODO add Type, BalloonType
 type CommandArgsShowMessage struct {
 	EventID   int  `json:"eventId"`
 	ContentID UUID `json:"content"`
+}
+
+// TODO add Type, BalloonType
+type CommandArgsShowHint struct {
+	EventID int `json:"eventId"`
 }
 
 type CommandArgsShowChoices struct {
@@ -319,6 +339,12 @@ func (c *CommandArgsSetVariable) UnmarshalJSON(data []uint8) error {
 			return err
 		}
 		c.Value = v
+	case SetVariableValueTypeSystem:
+		var v SystemVariableType
+		if err := unmarshalJSON(tmp.Value, &v); err != nil {
+			return err
+		}
+		c.Value = v
 	default:
 		return fmt.Errorf("data: invalid type: %s", c.ValueType)
 	}
@@ -361,6 +387,11 @@ type CommandArgsPlayBGM struct {
 
 type CommandArgsUnlockAchievement struct {
 	ID int `json:"id"`
+}
+
+type CommandArgsControlHint struct {
+	ID   int             `json:"id"`
+	Type ControlHintType `json:"type"`
 }
 
 type CommandArgsPurchase struct {
@@ -481,6 +512,7 @@ const (
 	SetVariableValueTypeVariable  SetVariableValueType = "variable"
 	SetVariableValueTypeRandom    SetVariableValueType = "random"
 	SetVariableValueTypeCharacter SetVariableValueType = "character"
+	SetVariableValueTypeSystem    SetVariableValueType = "system"
 )
 
 type SetVariableValueRandom struct {
@@ -489,6 +521,11 @@ type SetVariableValueRandom struct {
 }
 
 type SetVariableCharacterArgs struct {
+	Type    SetVariableCharacterType `json:"type"`
+	EventID int                      `json:"eventId"`
+}
+
+type SetVariableSystem struct {
 	Type    SetVariableCharacterType `json:"type"`
 	EventID int                      `json:"eventId"`
 }
@@ -526,4 +563,18 @@ const (
 	SetCharacterPropertyTypeThrough    SetCharacterPropertyType = "through"
 	SetCharacterPropertyTypeWalking    SetCharacterPropertyType = "walking"
 	SetCharacterPropertyTypeSpeed      SetCharacterPropertyType = "speed"
+)
+
+type ControlHintType string
+
+const (
+	ControlHintPause    ControlHintType = "pause"
+	ControlHintStart    ControlHintType = "start"
+	ControlHintComplete ControlHintType = "complete"
+)
+
+type SystemVariableType string
+
+const (
+	SystemVariableHintCount SystemVariableType = "hint_count"
 )

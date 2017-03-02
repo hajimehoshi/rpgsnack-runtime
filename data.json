@@ -35,7 +35,15 @@
       "b384c510-c28a-4248-90fb-1148afd3694c": "キャンセル",
       "97bcb748-637d-4daa-86c0-859ff64dc1a7": "リワードビデオ",
       "5d846559-2fb0-4c8f-b27c-f68ee0c38bc5": "成功したよ",
-      "a9f76927-ab03-4cc3-91f0-c0641cddd32d": "失敗したよ"
+      "a9f76927-ab03-4cc3-91f0-c0641cddd32d": "失敗したよ",
+      "243084c3-597a-4a50-bd97-8ee2a45cbf9b": "ヒント１内容",
+      "2000b37d-adbb-4ff5-8a73-e0e0b340914b": "ヒント２内容",
+      "3d1e6c63-983a-46da-88de-036fd651ca71": "ヒント1 スタート",
+      "66a533ed-7556-4063-af8a-5d96bbfccc62": "ヒント1　終了",
+      "3d1e6c63-983a-46da-88de-036fd651ca73": "ヒント2 スタート",
+      "66a533ed-7556-4063-af8a-5d96bbfccc64": "ヒント2　終了",
+      "b384c510-c28a-4248-90fb-1148afd36943": "ヒント表示",
+      "ab610c8c-578a-4876-92db-6398931087b8": "現在\\v[3]個のヒントがあるよ"
     }
   },
   "maps": [
@@ -666,34 +674,101 @@
                 {
                   "commands": [
                     {
-                      "name": "show_message",
-                      "args":    {
-                        "content": "97bcb748-637d-4daa-86c0-859ff64dc1a7",
-                        "eventId": 0
-                      }
-                    },
-                    {
-                      "name": "show_ads",
+                      "name": "show_choices",
                       "args": {
-                        "type": "rewarded"
+                        "choices": [
+                          "3d1e6c63-983a-46da-88de-036fd651ca71",
+                          "66a533ed-7556-4063-af8a-5d96bbfccc62",
+                          "3d1e6c63-983a-46da-88de-036fd651ca73",
+                          "66a533ed-7556-4063-af8a-5d96bbfccc64",
+                          "b384c510-c28a-4248-90fb-1148afd36943"
+                        ]
                       },
                       "branches": [
                         [
-                          {
-                            "name": "show_message",
-                            "args":    {
-                              "content": "5d846559-2fb0-4c8f-b27c-f68ee0c38bc5",
-                              "eventId": 0
+                            {
+                              "name": "control_hint",
+                              "args": {
+                                "id": 1,
+                                "type": "start"
+                              }
                             }
-                          }
+                        ],
+                        [
+                            {
+                              "name": "control_hint",
+                              "args": {
+                                "id": 1,
+                                "type": "complete"
+                              }
+                            }
+                        ],
+                        [
+                            {
+                              "name": "control_hint",
+                              "args": {
+                                "id": 2,
+                                "type": "start"
+                              }
+                            }
+                        ],
+                        [
+                            {
+                              "name": "control_hint",
+                              "args": {
+                                "id": 2,
+                                "type": "complete"
+                              }
+                            }
                         ],
                         [
                           {
+                            "args": {
+                              "valueType": "system",
+                              "id": 3,
+                              "value": "active_hint_count",
+                              "op": "="
+                            },
+                            "name": "set_variable"
+                          },
+                          {
                             "name": "show_message",
                             "args":    {
-                              "content": "a9f76927-ab03-4cc3-91f0-c0641cddd32d",
+                              "content": "ab610c8c-578a-4876-92db-6398931087b8",
                               "eventId": 0
                             }
+                          },
+                          {
+                            "name": "show_message",
+                            "args":    {
+                              "content": "97bcb748-637d-4daa-86c0-859ff64dc1a7",
+                              "eventId": 0
+                            }
+                          },
+                          {
+                            "name": "show_ads",
+                            "args": {
+                              "type": "rewarded"
+                            },
+                            "branches": [
+                              [
+                                {
+                                  "name": "show_hint",
+                                  "args":    {
+                                    "eventId": 0
+                                  }
+                                }
+                              ],
+                              [
+                                {
+                                  "name": "show_message",
+                                  "args":    {
+                                    "content": "a9f76927-ab03-4cc3-91f0-c0641cddd32d",
+                                    "eventId": 0
+                                  }
+                                }
+                              ]
+                            ]
                           }
                         ]
                       ]
@@ -780,6 +855,16 @@
           0, 0, 0, 0, 0, 1, 0, 1
         ]
       ]
+    }
+  ],
+  "hints": [
+    {
+      "id": 1,
+      "text": "243084c3-597a-4a50-bd97-8ee2a45cbf9b"
+    },
+    {
+      "id": 2,
+      "text": "2000b37d-adbb-4ff5-8a73-e0e0b340914b"
     }
   ]
 }
