@@ -576,5 +576,5 @@ const (
 type SystemVariableType string
 
 const (
-	SystemVariableHintCount SystemVariableType = "hint_count"
+	SystemVariableHintCount SystemVariableType = "active_hint_count"
 )
