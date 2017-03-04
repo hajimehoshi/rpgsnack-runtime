@@ -342,6 +342,7 @@ func (c *Character) UpdateWithPage(page *data.Page) error {
 	c.dir = page.Dir
 	c.frame = page.Frame
 	c.stepping = page.Stepping
+	c.walking = page.Walking
 	c.through = page.Through
 	return nil
 }
