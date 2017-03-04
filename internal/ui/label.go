@@ -37,15 +37,12 @@ func NewLabel(x, y int, text string) *Label {
 	}
 }
 
-func (l *Label) Update(offsetX, offsetY int) error {
-	return nil
+func (l *Label) Update(offsetX, offsetY int) {
+	return
 }
 
-func (l *Label) Draw(screen *ebiten.Image) error {
+func (l *Label) Draw(screen *ebiten.Image) {
 	tx := l.X * scene.TileScale
 	ty := l.Y * scene.TileScale
-	if err := font.DrawText(screen, l.text, tx, ty, scene.TextScale, color.White); err != nil {
-		return err
-	}
-	return nil
+	font.DrawText(screen, l.text, tx, ty, scene.TextScale, color.White)
 }

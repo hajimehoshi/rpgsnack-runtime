@@ -288,7 +288,7 @@ func (b *balloonImageParts) Dst(index int) (int, int, int, int) {
 	return x, y, x + 4, y + 4
 }
 
-func (b *balloon) update() error {
+func (b *balloon) update() {
 	if b.closingCount > 0 {
 		b.closingCount--
 		b.opened = false
@@ -299,10 +299,9 @@ func (b *balloon) update() error {
 			b.opened = true
 		}
 	}
-	return nil
 }
 
-func (b *balloon) draw(screen *ebiten.Image, character *character.Character) error {
+func (b *balloon) draw(screen *ebiten.Image, character *character.Character) {
 	rate := 0.0
 	switch {
 	case b.opened:
@@ -338,17 +337,12 @@ func (b *balloon) draw(screen *ebiten.Image, character *character.Character) err
 			screenWidth: sw,
 			character:   character,
 		}
-		if err := screen.DrawImage(img, op); err != nil {
-			return err
-		}
+		screen.DrawImage(img, op)
 	}
 	if b.opened {
 		x, y := b.position(sw, character)
 		x = (x + balloonMarginX + b.contentOffsetX) * scene.TileScale
 		y = (y + balloonMarginY) * scene.TileScale
-		if err := font.DrawText(screen, b.content, x, y, scene.TextScale, color.Black); err != nil {
-			return err
-		}
+		font.DrawText(screen, b.content, x, y, scene.TextScale, color.Black)
 	}
-	return nil
 }

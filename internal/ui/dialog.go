@@ -22,8 +22,8 @@ import (
 )
 
 type Widget interface {
-	Update(offsetX, offsetY int) error
-	Draw(screen *ebiten.Image) error
+	Update(offsetX, offsetY int)
+	Draw(screen *ebiten.Image)
 }
 
 type Dialog struct {
@@ -49,62 +49,42 @@ func (d *Dialog) AddChild(widget Widget) {
 	d.widgets = append(d.widgets, widget)
 }
 
-func (d *Dialog) Update() error {
+func (d *Dialog) Update() {
 	if !d.Visible {
-		return nil
+		return
 	}
 	for _, w := range d.widgets {
-		if err := w.Update(d.X, d.Y); err != nil {
-			return err
-		}
+		w.Update(d.X, d.Y)
 	}
-	return nil
 }
 
-func (d *Dialog) Draw(screen *ebiten.Image) error {
+func (d *Dialog) Draw(screen *ebiten.Image) {
 	if !d.Visible {
-		return nil
+		return
 	}
 	if d.Width == 0 || d.Height == 0 {
-		return nil
+		return
 	}
 	if d.offscreen == nil {
-		i, err := ebiten.NewImage(d.Width*scene.TileScale, d.Height*scene.TileScale, ebiten.FilterNearest)
-		if err != nil {
-			return err
-		}
+		i, _ := ebiten.NewImage(d.Width*scene.TileScale, d.Height*scene.TileScale, ebiten.FilterNearest)
 		d.offscreen = i
 	} else {
 		w, h := d.offscreen.Size()
 		if d.Width != w || d.Height != h {
-			if err := d.offscreen.Dispose(); err != nil {
-				return err
-			}
-			i, err := ebiten.NewImage(d.Width*scene.TileScale, d.Height*scene.TileScale, ebiten.FilterNearest)
-			if err != nil {
-				return err
-			}
+			d.offscreen.Dispose()
+			i, _ := ebiten.NewImage(d.Width*scene.TileScale, d.Height*scene.TileScale, ebiten.FilterNearest)
 			d.offscreen = i
 		}
 	}
-	if err := d.offscreen.Clear(); err != nil {
-		return err
-	}
+	d.offscreen.Clear()
 	op := &ebiten.DrawImageOptions{}
 	op.ImageParts = &ninePatchParts{d.Width, d.Height}
 	op.GeoM.Scale(scene.TileScale, scene.TileScale)
-	if err := d.offscreen.DrawImage(assets.GetImage("9patch_test_off.png"), op); err != nil {
-		return err
-	}
+	d.offscreen.DrawImage(assets.GetImage("9patch_test_off.png"), op)
 	for _, w := range d.widgets {
-		if err := w.Draw(d.offscreen); err != nil {
-			return err
-		}
+		w.Draw(d.offscreen)
 	}
 	op = &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(d.X)*scene.TileScale, float64(d.Y)*scene.TileScale)
-	if err := screen.DrawImage(d.offscreen, op); err != nil {
-		return err
-	}
-	return nil
+	screen.DrawImage(d.offscreen, op)
 }

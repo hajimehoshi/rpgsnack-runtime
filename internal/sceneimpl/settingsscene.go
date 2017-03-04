@@ -51,24 +51,12 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 	s.restorePurchasesButton.X = (w/scene.TileScale - s.restorePurchasesButton.Width) / 2
 	s.moreGamesButton.X = (w/scene.TileScale - s.moreGamesButton.Width) / 2
 	s.closeButton.X = (w/scene.TileScale - s.closeButton.Width) / 2
-	if err := s.creditButton.Update(0, 0); err != nil {
-		return err
-	}
-	if err := s.removeAdsButton.Update(0, 0); err != nil {
-		return err
-	}
-	if err := s.reviewThisAppButton.Update(0, 0); err != nil {
-		return err
-	}
-	if err := s.restorePurchasesButton.Update(0, 0); err != nil {
-		return err
-	}
-	if err := s.moreGamesButton.Update(0, 0); err != nil {
-		return err
-	}
-	if err := s.closeButton.Update(0, 0); err != nil {
-		return err
-	}
+	s.creditButton.Update(0, 0)
+	s.removeAdsButton.Update(0, 0)
+	s.reviewThisAppButton.Update(0, 0)
+	s.restorePurchasesButton.Update(0, 0)
+	s.moreGamesButton.Update(0, 0)
+	s.closeButton.Update(0, 0)
 	if s.closeButton.Pressed() {
 		sceneManager.GoTo(NewTitleScene())
 		return nil
@@ -77,26 +65,12 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 }
 
 func (s *SettingsScene) Draw(screen *ebiten.Image) error {
-	if err := s.infoLabel.Draw(screen); err != nil {
-		return err
-	}
-	if err := s.creditButton.Draw(screen); err != nil {
-		return err
-	}
-	if err := s.removeAdsButton.Draw(screen); err != nil {
-		return err
-	}
-	if err := s.reviewThisAppButton.Draw(screen); err != nil {
-		return err
-	}
-	if err := s.restorePurchasesButton.Draw(screen); err != nil {
-		return err
-	}
-	if err := s.moreGamesButton.Draw(screen); err != nil {
-		return err
-	}
-	if err := s.closeButton.Draw(screen); err != nil {
-		return err
-	}
+	s.infoLabel.Draw(screen)
+	s.creditButton.Draw(screen)
+	s.removeAdsButton.Draw(screen)
+	s.reviewThisAppButton.Draw(screen)
+	s.restorePurchasesButton.Draw(screen)
+	s.moreGamesButton.Draw(screen)
+	s.closeButton.Draw(screen)
 	return nil
 }

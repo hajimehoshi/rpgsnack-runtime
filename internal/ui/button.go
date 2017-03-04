@@ -73,35 +73,32 @@ func (b *Button) includesInput(offsetX, offsetY int) bool {
 	return false
 }
 
-func (b *Button) Update(offsetX, offsetY int) error {
+func (b *Button) Update(offsetX, offsetY int) {
 	b.pressed = false
 	if !b.pressing {
 		if !input.Triggered() {
-			return nil
+			return
 		}
 	}
 	if !input.Pressed() {
 		b.pressing = false
 		b.pressed = true
-		return nil
+		return
 	}
 	if b.includesInput(offsetX, offsetY) {
 		b.pressing = true
 	} else {
 		b.pressing = false
 	}
-	return nil
 }
 
-func (b *Button) Draw(screen *ebiten.Image) error {
+func (b *Button) Draw(screen *ebiten.Image) {
 	if b.image != nil {
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(b.X), float64(b.Y))
 		op.GeoM.Scale(scene.TileScale, scene.TileScale)
-		if err := screen.DrawImage(b.image, op); err != nil {
-			return err
-		}
-		return nil
+		screen.DrawImage(b.image, op)
+		return
 	}
 	img := assets.GetImage("9patch_test_off.png")
 	if b.pressing {
@@ -111,14 +108,9 @@ func (b *Button) Draw(screen *ebiten.Image) error {
 	op.ImageParts = &ninePatchParts{b.Width, b.Height}
 	op.GeoM.Translate(float64(b.X), float64(b.Y))
 	op.GeoM.Scale(scene.TileScale, scene.TileScale)
-	if err := screen.DrawImage(img, op); err != nil {
-		return err
-	}
+	screen.DrawImage(img, op)
 	tw, th := font.MeasureSize(b.text)
 	tx := b.X*scene.TileScale + (b.Width*scene.TileScale-tw*scene.TextScale)/2
 	ty := b.Y*scene.TileScale + (b.Height*scene.TileScale-th*scene.TextScale)/2
-	if err := font.DrawText(screen, b.text, tx, ty, scene.TextScale, color.White); err != nil {
-		return err
-	}
-	return nil
+	font.DrawText(screen, b.text, tx, ty, scene.TextScale, color.White)
 }

@@ -213,7 +213,7 @@ func (w *Windows) isAnimating(interpreterID int) bool {
 	return false
 }
 
-func (w *Windows) Update(sceneManager *scene.Manager) error {
+func (w *Windows) Update(sceneManager *scene.Manager) {
 	if !w.choosing {
 		// 0 means to check all balloons.
 		// TODO: Don't use magic numbers.
@@ -242,7 +242,7 @@ func (w *Windows) Update(sceneManager *scene.Manager) error {
 		_, y := input.Position()
 		y /= scene.TileScale
 		if y < ymin || ymax <= y {
-			return nil
+			return
 		}
 		// Close regular balloons
 		w.chosenIndex = (y - ymin) / choiceBalloonHeight
@@ -261,9 +261,7 @@ func (w *Windows) Update(sceneManager *scene.Manager) error {
 		if b == nil {
 			continue
 		}
-		if err := b.update(); err != nil {
-			return err
-		}
+		b.update()
 		if b.isClosed() {
 			w.balloons[i] = nil
 		}
@@ -272,14 +270,11 @@ func (w *Windows) Update(sceneManager *scene.Manager) error {
 		if b == nil {
 			continue
 		}
-		if err := b.update(); err != nil {
-			return err
-		}
+		b.update()
 		if b.isClosed() {
 			w.choiceBalloons[i] = nil
 		}
 	}
-	return nil
 }
 
 func (w *Windows) Draw(screen *ebiten.Image, characters []*character.Character) error {
@@ -297,17 +292,13 @@ func (w *Windows) Draw(screen *ebiten.Image, characters []*character.Character) 
 		if c == nil {
 			return fmt.Errorf("windows: character (EventID=%d) not found", b.eventID)
 		}
-		if err := b.draw(screen, c); err != nil {
-			return err
-		}
+		b.draw(screen, c)
 	}
 	for _, b := range w.choiceBalloons {
 		if b == nil {
 			continue
 		}
-		if err := b.draw(screen, nil); err != nil {
-			return err
-		}
+		b.draw(screen, nil)
 	}
 	return nil
 }

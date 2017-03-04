@@ -120,9 +120,7 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 	if err := m.gameState.Screen().Update(); err != nil {
 		return err
 	}
-	if err := m.gameState.Windows().Update(sceneManager); err != nil {
-		return err
-	}
+	m.gameState.Windows().Update(sceneManager)
 	if err := m.gameState.Map().Update(sceneManager); err != nil {
 		if err == gamestate.GoToTitle {
 			sceneManager.GoTo(NewTitleScene())
@@ -171,9 +169,7 @@ func (t *tilesImageParts) Dst(index int) (int, int, int, int) {
 }
 
 func (m *MapScene) Draw(screen *ebiten.Image) error {
-	if err := m.tilesImage.Fill(color.Black); err != nil {
-		return err
-	}
+	m.tilesImage.Fill(color.Black)
 	tileset, err := m.gameState.Map().TileSet()
 	if err != nil {
 		return err
@@ -184,18 +180,14 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 		tileSet: tileset,
 		layer:   0,
 	}
-	if err := m.tilesImage.DrawImage(assets.GetImage(tileset.Images[0]), op); err != nil {
-		return err
-	}
+	m.tilesImage.DrawImage(assets.GetImage(tileset.Images[0]), op)
 	op.ImageParts = &tilesImageParts{
 		room:     m.gameState.Map().CurrentRoom(),
 		tileSet:  tileset,
 		layer:    1,
 		overOnly: false,
 	}
-	if err := m.tilesImage.DrawImage(assets.GetImage(tileset.Images[1]), op); err != nil {
-		return err
-	}
+	m.tilesImage.DrawImage(assets.GetImage(tileset.Images[1]), op)
 	if err := m.gameState.Map().DrawCharacters(m.tilesImage); err != nil {
 		return err
 	}
@@ -210,17 +202,13 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 		layer:    1,
 		overOnly: true,
 	}
-	if err := m.tilesImage.DrawImage(assets.GetImage(tileset.Images[1]), op); err != nil {
-		return err
-	}
+	m.tilesImage.DrawImage(assets.GetImage(tileset.Images[1]), op)
 	op = &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(scene.TileScale, scene.TileScale)
 	sw, _ := screen.Size()
 	tx := (float64(sw) - scene.TileXNum*scene.TileSize*scene.TileScale) / 2
 	op.GeoM.Translate(tx, scene.GameMarginTop)
-	if err := m.gameState.Screen().Draw(screen, m.tilesImage, op); err != nil {
-		return err
-	}
+	m.gameState.Screen().Draw(screen, m.tilesImage, op)
 	if m.gameState.Map().IsPlayerMovingByUserInput() || m.triggeringFailed {
 		x, y := m.moveDstX, m.moveDstY
 		op := &ebiten.DrawImageOptions{}
@@ -235,8 +223,6 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 		return err
 	}
 	msg := fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS())
-	if err := font.DrawText(screen, msg, 0, 0, scene.TextScale, color.White); err != nil {
-		return err
-	}
+	font.DrawText(screen, msg, 0, 0, scene.TextScale, color.White)
 	return nil
 }

@@ -116,7 +116,7 @@ func MeasureSize(text string) (int, int) {
 	return w, h
 }
 
-func DrawText(screen *ebiten.Image, text string, x, y int, scale int, color color.Color) error {
+func DrawText(screen *ebiten.Image, text string, x, y int, scale int, color color.Color) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(float64(scale), float64(scale))
 	op.GeoM.Translate(float64(x), float64(y))
@@ -124,8 +124,5 @@ func DrawText(screen *ebiten.Image, text string, x, y int, scale int, color colo
 	op.ColorM.Scale(float64(r>>8)/255, float64(g>>8)/255, float64(b>>8)/255, float64(a>>8)/255)
 	op.ImageParts = &textImageParts{[]rune(text)}
 	mplusImage := assets.GetImage("mplus.compacted.png")
-	if err := screen.DrawImage(mplusImage, op); err != nil {
-		return err
-	}
-	return nil
+	screen.DrawImage(mplusImage, op)
 }
