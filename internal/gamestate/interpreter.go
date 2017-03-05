@@ -700,15 +700,15 @@ func (i *Interpreter) setVariable(id int, op data.SetVariableOp, valueType data.
 	switch op {
 	case data.SetVariableOpAssign:
 	case data.SetVariableOpAdd:
-		rhs += i.gameState.variables.VariableValue(id)
+		rhs = i.gameState.variables.VariableValue(id) + rhs
 	case data.SetVariableOpSub:
-		rhs -= i.gameState.variables.VariableValue(id)
+		rhs = i.gameState.variables.VariableValue(id) - rhs
 	case data.SetVariableOpMul:
-		rhs *= i.gameState.variables.VariableValue(id)
+		rhs = i.gameState.variables.VariableValue(id) * rhs
 	case data.SetVariableOpDiv:
-		rhs /= i.gameState.variables.VariableValue(id)
+		rhs = i.gameState.variables.VariableValue(id) / rhs
 	case data.SetVariableOpMod:
-		rhs %= i.gameState.variables.VariableValue(id)
+		rhs = i.gameState.variables.VariableValue(id) % rhs
 	}
 	i.gameState.variables.SetVariableValue(id, rhs)
 }
