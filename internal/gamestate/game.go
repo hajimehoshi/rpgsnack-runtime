@@ -220,7 +220,7 @@ func (g *Game) SetRandom(r Rand) {
 	g.rand = r
 }
 
-func (g *Game) randomValue(min, max int) int {
+func (g *Game) RandomValue(min, max int) int {
 	return min + g.rand.Intn(max-min)
 }
 
