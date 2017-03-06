@@ -32,10 +32,10 @@ const (
 )
 
 type passable interface {
-	At(x, y int) (bool, error)
+	At(x, y int) bool
 }
 
-func calcPath(passable passable, startX, startY, goalX, goalY int) ([]routeCommand, int, int, error) {
+func calcPath(passable passable, startX, startY, goalX, goalY int) ([]routeCommand, int, int) {
 	type pos struct {
 		X, Y int
 	}
@@ -51,11 +51,7 @@ func calcPath(passable passable, startX, startY, goalX, goalY int) ([]routeComma
 				{p.X, p.Y - 1},
 			}
 			for _, s := range successors {
-				pa, err := passable.At(s.X, s.Y)
-				if err != nil {
-					return nil, 0, 0, err
-				}
-				if !pa {
+				if !passable.At(s.X, s.Y) {
 					// It's OK even if the final destination is not passable so far.
 					if s.X != goalX || s.Y != goalY {
 						continue
@@ -79,7 +75,7 @@ func calcPath(passable passable, startX, startY, goalX, goalY int) ([]routeComma
 		parent, ok := parents[p]
 		// There is no path.
 		if !ok {
-			return nil, 0, 0, nil
+			return nil, 0, 0
 		}
 		switch {
 		case parent.X == p.X-1:
@@ -110,10 +106,7 @@ func calcPath(passable passable, startX, startY, goalX, goalY int) ([]routeComma
 			panic("not reach")
 		}
 	}
-	lastP, err := passable.At(goalX, goalY)
-	if err != nil {
-		return nil, 0, 0, err
-	}
+	lastP := passable.At(goalX, goalY)
 	lastX, lastY := goalX, goalY
 	if !lastP && len(path) > 0 {
 		switch path[len(path)-1] {
@@ -133,7 +126,7 @@ func calcPath(passable passable, startX, startY, goalX, goalY int) ([]routeComma
 			panic("not reach")
 		}
 	}
-	return path, lastX, lastY, nil
+	return path, lastX, lastY
 }
 
 func routeCommandsToEventCommands(path []routeCommand) []*data.Command {

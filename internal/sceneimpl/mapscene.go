@@ -87,19 +87,11 @@ func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) error {
 	}
 	m.moveDstX = tx
 	m.moveDstY = ty
-	result, err := m.gameState.Map().TryRunDirectEvent(tx, ty)
-	if err != nil {
-		return err
-	}
-	if result {
+	if m.gameState.Map().TryRunDirectEvent(tx, ty) {
 		m.triggeringFailed = false
 		return nil
 	}
-	result, err = m.gameState.Map().TryMovePlayerByUserInput(sceneManager, tx, ty)
-	if err != nil {
-		return err
-	}
-	if !result {
+	if !m.gameState.Map().TryMovePlayerByUserInput(sceneManager, tx, ty) {
 		m.triggeringFailed = true
 		return nil
 	}
@@ -109,9 +101,7 @@ func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) error {
 
 func (m *MapScene) Update(sceneManager *scene.Manager) error {
 	if m.initialState {
-		if _, err := m.gameState.RequestSave(sceneManager); err != nil {
-			return err
-		}
+		m.gameState.RequestSave(sceneManager)
 	}
 	m.initialState = false
 	if err := m.gameState.Update(sceneManager); err != nil {

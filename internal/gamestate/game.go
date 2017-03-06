@@ -126,23 +126,23 @@ func (g *Game) Update(sceneManager *scene.Manager) error {
 	return nil
 }
 
-func (g *Game) RequestSave(sceneManager *scene.Manager) (bool, error) {
+func (g *Game) RequestSave(sceneManager *scene.Manager) bool {
 	// If there is an unfinished request, stop saving the progress.
 	if g.waitingRequestID != 0 {
-		return false, nil
+		return false
 	}
 	if g.currentMap.waitingRequestResponse() {
-		return false, nil
+		return false
 	}
 	id := sceneManager.GenerateRequestID()
 	g.waitingRequestID = id
 	j, err := json.Marshal(g)
 	if err != nil {
-		return false, err
+		panic(fmt.Sprintf("gamestate: JSON encoding error: %v", err))
 	}
 	sceneManager.Requester().RequestSaveProgress(id, j)
 	data.UpdateProgress(j)
-	return true, nil
+	return true
 }
 
 var reMessage = regexp.MustCompile(`\\([a-zA-Z])\[(\d+)\]`)

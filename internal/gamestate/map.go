@@ -33,7 +33,7 @@ type passableOnMap struct {
 	m                *Map
 }
 
-func (p *passableOnMap) At(x, y int) (bool, error) {
+func (p *passableOnMap) At(x, y int) bool {
 	return p.m.passable(p.through, x, y, p.ignoreCharacters)
 }
 
@@ -389,15 +389,15 @@ func (m *Map) IsPlayerMovingByUserInput() bool {
 	return m.game.variables.InnerVariableValue("is_player_moving_by_user_input") != 0
 }
 
-func (m *Map) passableTile(x, y int) (bool, error) {
+func (m *Map) passableTile(x, y int) bool {
 	tileSet := m.TileSet()
 	layer := 1
 	tile := m.CurrentRoom().Tiles[layer][y*scene.TileXNum+x]
 	switch tileSet.PassageTypes[layer][tile] {
 	case data.PassageTypeBlock:
-		return false, nil
+		return false
 	case data.PassageTypePassable:
-		return true, nil
+		return true
 	case data.PassageTypeWall:
 		panic("not implemented")
 	case data.PassageTypeOver:
@@ -407,55 +407,51 @@ func (m *Map) passableTile(x, y int) (bool, error) {
 	layer = 0
 	tile = m.CurrentRoom().Tiles[layer][y*scene.TileXNum+x]
 	if tileSet.PassageTypes[layer][tile] == data.PassageTypePassable {
-		return true, nil
+		return true
 	}
-	return false, nil
+	return false
 }
 
-func (m *Map) passable(through bool, x, y int, ignoreCharacters bool) (bool, error) {
+func (m *Map) passable(through bool, x, y int, ignoreCharacters bool) bool {
 	if x < 0 {
-		return false, nil
+		return false
 	}
 	if y < 0 {
-		return false, nil
+		return false
 	}
 	if scene.TileXNum <= x {
-		return false, nil
+		return false
 	}
 	if scene.TileYNum <= y {
-		return false, nil
+		return false
 	}
 	if through {
-		return true, nil
+		return true
 	}
-	p, err := m.passableTile(x, y)
-	if err != nil {
-		return false, err
-	}
-	if !p {
-		return false, nil
+	if !m.passableTile(x, y) {
+		return false
 	}
 	if ignoreCharacters {
-		return true, nil
+		return true
 	}
 	es := m.eventsAt(x, y)
 	if len(es) > 0 {
 		if e := es[0]; !e.Through() {
 			if page := m.currentPage(e); page != nil && page.Priority == data.PrioritySameAsCharacters {
-				return false, nil
+				return false
 			}
 		}
 	}
 	px, py := m.player.Position()
 	if x == px && y == py {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
-func (m *Map) TryRunDirectEvent(x, y int) (bool, error) {
+func (m *Map) TryRunDirectEvent(x, y int) bool {
 	if m.IsEventExecuting() {
-		return false, nil
+		return false
 	}
 	es := m.eventsAt(x, y)
 	for _, e := range es {
@@ -471,21 +467,17 @@ func (m *Map) TryRunDirectEvent(x, y int) (bool, error) {
 		}
 		i := NewInterpreter(m.game, m.mapID, m.roomID, e.EventID(), page.Commands)
 		m.addInterpreter(i)
-		return true, nil
+		return true
 	}
-	return false, nil
+	return false
 }
 
-func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, x, y int) (bool, error) {
+func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, x, y int) bool {
 	if m.IsEventExecuting() {
-		return false, nil
-	}
-	p, err := m.passable(m.player.Through(), x, y, false)
-	if err != nil {
-		return false, err
+		return false
 	}
 	var event *character.Character
-	if !p {
+	if !m.passable(m.player.Through(), x, y, false) {
 		for _, e := range m.eventsAt(x, y) {
 			if page := m.currentPage(e); page != nil {
 				if len(page.Commands) == 0 {
@@ -499,24 +491,19 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, x, y int) (b
 			break
 		}
 		if event == nil {
-			return false, nil
+			return false
 		}
 	}
 	px, py := m.player.Position()
-	path, lastPlayerX, lastPlayerY, err := calcPath(&passableOnMap{
+	path, lastPlayerX, lastPlayerY := calcPath(&passableOnMap{
 		through: m.player.Through(),
 		m:       m,
 	}, px, py, x, y)
-	if err != nil {
-		return false, err
-	}
 	if len(path) == 0 {
-		return false, nil
+		return false
 	}
 	// The player can move. Let's save the state here just before starting moving.
-	if _, err := m.game.RequestSave(sceneManager); err != nil {
-		return false, err
-	}
+	m.game.RequestSave(sceneManager)
 
 	// The player's speed is never changed by another events during the player walks
 	// by user input.
@@ -661,7 +648,7 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, x, y int) (b
 	if event != nil {
 		m.executingEventIDByUserInput = event.EventID()
 	}
-	return true, nil
+	return true
 }
 
 type charactersByY []*character.Character

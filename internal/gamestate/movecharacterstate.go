@@ -52,14 +52,11 @@ func newMoveCharacterState(gameState *Game, mapID, roomID, eventID int, args *da
 	case data.MoveCharacterTypeTarget:
 		cx, cy := m.character().Position()
 		x, y := args.X, args.Y
-		path, lastX, lastY, err := calcPath(&passableOnMap{
+		path, lastX, lastY := calcPath(&passableOnMap{
 			through:          m.character().Through(),
 			m:                m.gameState.Map(),
 			ignoreCharacters: true,
 		}, cx, cy, x, y)
-		if err != nil {
-			return nil, err
-		}
 		m.path = path
 		m.distanceCount = len(path)
 		if x != lastX || y != lastY {
@@ -197,11 +194,7 @@ func (m *moveCharacterState) Update() error {
 		default:
 			panic("not reach")
 		}
-		p, err := m.gameState.Map().passable(c.Through(), dx, dy, false)
-		if err != nil {
-			return err
-		}
-		if !p {
+		if !m.gameState.Map().passable(c.Through(), dx, dy, false) {
 			c.Turn(dir)
 			if !m.routeSkip {
 				return nil
