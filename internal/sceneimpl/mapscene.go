@@ -168,41 +168,32 @@ func (t *tilesImageParts) Dst(index int) (int, int, int, int) {
 	return x, y, x + scene.TileSize, y + scene.TileSize
 }
 
-func (m *MapScene) Draw(screen *ebiten.Image) error {
+func (m *MapScene) Draw(screen *ebiten.Image) {
 	m.tilesImage.Fill(color.Black)
-	tileset, err := m.gameState.Map().TileSet()
-	if err != nil {
-		return err
-	}
+	tileSet := m.gameState.Map().TileSet()
 	op := &ebiten.DrawImageOptions{}
 	op.ImageParts = &tilesImageParts{
 		room:    m.gameState.Map().CurrentRoom(),
-		tileSet: tileset,
+		tileSet: tileSet,
 		layer:   0,
 	}
-	m.tilesImage.DrawImage(assets.GetImage(tileset.Images[0]), op)
+	m.tilesImage.DrawImage(assets.GetImage(tileSet.Images[0]), op)
 	op.ImageParts = &tilesImageParts{
 		room:     m.gameState.Map().CurrentRoom(),
-		tileSet:  tileset,
+		tileSet:  tileSet,
 		layer:    1,
 		overOnly: false,
 	}
-	m.tilesImage.DrawImage(assets.GetImage(tileset.Images[1]), op)
-	if err := m.gameState.Map().DrawCharacters(m.tilesImage); err != nil {
-		return err
-	}
+	m.tilesImage.DrawImage(assets.GetImage(tileSet.Images[1]), op)
+	m.gameState.Map().DrawCharacters(m.tilesImage)
 	op = &ebiten.DrawImageOptions{}
-	tileSet, err := m.gameState.Map().TileSet()
-	if err != nil {
-		return err
-	}
 	op.ImageParts = &tilesImageParts{
 		room:     m.gameState.Map().CurrentRoom(),
 		tileSet:  tileSet,
 		layer:    1,
 		overOnly: true,
 	}
-	m.tilesImage.DrawImage(assets.GetImage(tileset.Images[1]), op)
+	m.tilesImage.DrawImage(assets.GetImage(tileSet.Images[1]), op)
 	op = &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(scene.TileScale, scene.TileScale)
 	sw, _ := screen.Size()
@@ -215,14 +206,9 @@ func (m *MapScene) Draw(screen *ebiten.Image) error {
 		op.GeoM.Translate(float64(x*scene.TileSize), float64(y*scene.TileSize))
 		op.GeoM.Scale(scene.TileScale, scene.TileScale)
 		op.GeoM.Translate(tx, scene.GameMarginTop)
-		if err := screen.DrawImage(assets.GetImage("marker.png"), op); err != nil {
-			return err
-		}
+		screen.DrawImage(assets.GetImage("marker.png"), op)
 	}
-	if err := m.gameState.DrawWindows(screen); err != nil {
-		return err
-	}
+	m.gameState.DrawWindows(screen)
 	msg := fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS())
 	font.DrawText(screen, msg, 0, 0, scene.TextScale, color.White)
-	return nil
 }

@@ -115,20 +115,17 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 	return nil
 }
 
-func (t *TitleScene) Draw(screen *ebiten.Image) error {
+func (t *TitleScene) Draw(screen *ebiten.Image) {
 	timg := assets.GetImage("title.png")
 	tw, _ := timg.Size()
 	sw, _ := screen.Size()
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate((float64(sw)-float64(tw))/2, 0)
-	if err := screen.DrawImage(timg, op); err != nil {
-		return err
-	}
+	screen.DrawImage(timg, op)
 	t.newGameButton.Draw(screen)
 	if data.Progress() != nil {
 		t.resumeGameButton.Draw(screen)
 	}
 	t.settingsButton.Draw(screen)
 	t.warningDialog.Draw(screen)
-	return nil
 }

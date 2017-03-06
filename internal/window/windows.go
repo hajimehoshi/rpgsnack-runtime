@@ -277,7 +277,7 @@ func (w *Windows) Update(sceneManager *scene.Manager) {
 	}
 }
 
-func (w *Windows) Draw(screen *ebiten.Image, characters []*character.Character) error {
+func (w *Windows) Draw(screen *ebiten.Image, characters []*character.Character) {
 	for _, b := range w.balloons {
 		if b == nil {
 			continue
@@ -290,7 +290,8 @@ func (w *Windows) Draw(screen *ebiten.Image, characters []*character.Character) 
 			}
 		}
 		if c == nil {
-			return fmt.Errorf("windows: character (EventID=%d) not found", b.eventID)
+			// TODO: Just log here?
+			panic(fmt.Sprintf("windows: character (EventID=%d) not found", b.eventID))
 		}
 		b.draw(screen, c)
 	}
@@ -300,5 +301,4 @@ func (w *Windows) Draw(screen *ebiten.Image, characters []*character.Character) 
 		}
 		b.draw(screen, nil)
 	}
-	return nil
 }

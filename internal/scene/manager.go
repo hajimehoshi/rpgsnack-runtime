@@ -29,7 +29,7 @@ const (
 
 type scene interface {
 	Update(manager *Manager) error
-	Draw(screen *ebiten.Image) error
+	Draw(screen *ebiten.Image)
 }
 
 type Manager struct {
@@ -119,11 +119,8 @@ func (m *Manager) Update() error {
 	return nil
 }
 
-func (m *Manager) Draw(screen *ebiten.Image) error {
-	if err := m.current.Draw(screen); err != nil {
-		return err
-	}
-	return nil
+func (m *Manager) Draw(screen *ebiten.Image) {
+	m.current.Draw(screen)
 }
 
 func (m *Manager) GoTo(next scene) {

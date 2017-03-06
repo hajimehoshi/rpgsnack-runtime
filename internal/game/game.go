@@ -57,9 +57,7 @@ func (g *Game) Update(screen *ebiten.Image) error {
 	if ebiten.IsRunningSlowly() {
 		return nil
 	}
-	if err := g.draw(screen); err != nil {
-		return err
-	}
+	g.draw(screen)
 	return nil
 }
 
@@ -88,14 +86,12 @@ func (g *Game) update() error {
 	return g.sceneManager.Update()
 }
 
-func (g *Game) draw(screen *ebiten.Image) error {
+func (g *Game) draw(screen *ebiten.Image) {
 	if assets.IsLoading() || g.loadingCh != nil {
-		if err := ebitenutil.DebugPrint(screen, "Now Loading..."); err != nil {
-			return err
-		}
-		return nil
+		ebitenutil.DebugPrint(screen, "Now Loading...")
+		return
 	}
-	return g.sceneManager.Draw(screen)
+	g.sceneManager.Draw(screen)
 }
 
 func Title() string {

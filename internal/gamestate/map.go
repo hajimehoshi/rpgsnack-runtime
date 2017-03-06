@@ -136,14 +136,14 @@ func (m *Map) waitingRequestResponse() bool {
 	return false
 }
 
-func (m *Map) TileSet() (*data.TileSet, error) {
+func (m *Map) TileSet() *data.TileSet {
 	id := m.currentMap().TileSetID
 	for _, t := range data.Current().TileSets {
 		if t.ID == id {
-			return t, nil
+			return t
 		}
 	}
-	return nil, fmt.Errorf("mapscene: tile set not found: %d", id)
+	panic(fmt.Sprintf("gamestate: tile set not found: tile set id: %d", id))
 }
 
 type eventsByID struct {
@@ -390,10 +390,7 @@ func (m *Map) IsPlayerMovingByUserInput() bool {
 }
 
 func (m *Map) passableTile(x, y int) (bool, error) {
-	tileSet, err := m.TileSet()
-	if err != nil {
-		return false, err
-	}
+	tileSet := m.TileSet()
 	layer := 1
 	tile := m.CurrentRoom().Tiles[layer][y*scene.TileXNum+x]
 	switch tileSet.PassageTypes[layer][tile] {
@@ -677,16 +674,13 @@ func (c charactersByY) Less(i, j int) bool {
 }
 func (c charactersByY) Swap(i, j int) { c[i], c[j] = c[j], c[i] }
 
-func (m *Map) DrawCharacters(screen *ebiten.Image) error {
+func (m *Map) DrawCharacters(screen *ebiten.Image) {
 	chars := []*character.Character{m.player}
 	for _, e := range m.events {
 		chars = append(chars, e)
 	}
 	sort.Sort(charactersByY(chars))
 	for _, c := range chars {
-		if err := c.Draw(screen); err != nil {
-			return err
-		}
+		c.Draw(screen)
 	}
-	return nil
 }

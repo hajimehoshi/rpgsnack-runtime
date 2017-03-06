@@ -64,7 +64,7 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 	return nil
 }
 
-func (s *SettingsScene) Draw(screen *ebiten.Image) error {
+func (s *SettingsScene) Draw(screen *ebiten.Image) {
 	s.infoLabel.Draw(screen)
 	s.creditButton.Draw(screen)
 	s.removeAdsButton.Draw(screen)
@@ -72,5 +72,4 @@ func (s *SettingsScene) Draw(screen *ebiten.Image) error {
 	s.restorePurchasesButton.Draw(screen)
 	s.moreGamesButton.Draw(screen)
 	s.closeButton.Draw(screen)
-	return nil
 }

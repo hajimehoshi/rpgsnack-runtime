@@ -224,14 +224,11 @@ func (g *Game) randomValue(min, max int) int {
 	return min + g.rand.Intn(max-min)
 }
 
-func (g *Game) DrawWindows(screen *ebiten.Image) error {
+func (g *Game) DrawWindows(screen *ebiten.Image) {
 	cs := []*character.Character{}
 	cs = append(cs, g.currentMap.player)
 	cs = append(cs, g.currentMap.events...)
-	if err := g.windows.Draw(screen, cs); err != nil {
-		return err
-	}
-	return nil
+	g.windows.Draw(screen, cs)
 }
 
 func (g *Game) character(mapID, roomID, eventID int) *character.Character {
