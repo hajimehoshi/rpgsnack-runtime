@@ -30,6 +30,7 @@ type Button struct {
 	Y        int
 	Width    int
 	Height   int
+	Visible  bool
 	text     string
 	image    *ebiten.Image
 	pressing bool
@@ -38,22 +39,24 @@ type Button struct {
 
 func NewButton(x, y, width, height int, text string) *Button {
 	return &Button{
-		X:      x,
-		Y:      y,
-		Width:  width,
-		Height: height,
-		text:   text,
+		X:       x,
+		Y:       y,
+		Width:   width,
+		Height:  height,
+		Visible: true,
+		text:    text,
 	}
 }
 
 func NewImageButton(x, y int, image *ebiten.Image) *Button {
 	w, h := image.Size()
 	return &Button{
-		X:      x,
-		Y:      y,
-		Width:  w,
-		Height: h,
-		image:  image,
+		X:       x,
+		Y:       y,
+		Width:   w,
+		Height:  h,
+		Visible: true,
+		image:   image,
 	}
 }
 
@@ -73,8 +76,14 @@ func (b *Button) includesInput(offsetX, offsetY int) bool {
 	return false
 }
 
-func (b *Button) Update(offsetX, offsetY int) {
+func (b *Button) update(visible bool, offsetX, offsetY int) {
 	b.pressed = false
+	if !visible {
+		return
+	}
+	if !b.Visible {
+		return
+	}
 	if !b.pressing {
 		if !input.Triggered() {
 			return
@@ -92,7 +101,18 @@ func (b *Button) Update(offsetX, offsetY int) {
 	}
 }
 
+func (b *Button) Update() {
+	b.update(true, 0, 0)
+}
+
+func (b *Button) UpdateAsChild(visible bool, offsetX, offsetY int) {
+	b.update(visible, offsetX, offsetY)
+}
+
 func (b *Button) Draw(screen *ebiten.Image) {
+	if !b.Visible {
+		return
+	}
 	if b.image != nil {
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(b.X), float64(b.Y))

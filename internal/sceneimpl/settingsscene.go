@@ -51,12 +51,12 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 	s.restorePurchasesButton.X = (w/scene.TileScale - s.restorePurchasesButton.Width) / 2
 	s.moreGamesButton.X = (w/scene.TileScale - s.moreGamesButton.Width) / 2
 	s.closeButton.X = (w/scene.TileScale - s.closeButton.Width) / 2
-	s.creditButton.Update(0, 0)
-	s.removeAdsButton.Update(0, 0)
-	s.reviewThisAppButton.Update(0, 0)
-	s.restorePurchasesButton.Update(0, 0)
-	s.moreGamesButton.Update(0, 0)
-	s.closeButton.Update(0, 0)
+	s.creditButton.Update()
+	s.removeAdsButton.Update()
+	s.reviewThisAppButton.Update()
+	s.restorePurchasesButton.Update()
+	s.moreGamesButton.Update()
+	s.closeButton.Update()
 	if s.closeButton.Pressed() {
 		sceneManager.GoTo(NewTitleScene())
 		return nil

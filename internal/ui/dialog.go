@@ -22,7 +22,7 @@ import (
 )
 
 type Widget interface {
-	Update(offsetX, offsetY int)
+	UpdateAsChild(visible bool, offsetX, offsetY int)
 	Draw(screen *ebiten.Image)
 }
 
@@ -50,11 +50,8 @@ func (d *Dialog) AddChild(widget Widget) {
 }
 
 func (d *Dialog) Update() {
-	if !d.Visible {
-		return
-	}
 	for _, w := range d.widgets {
-		w.Update(d.X, d.Y)
+		w.UpdateAsChild(d.Visible, d.X, d.Y)
 	}
 }
 

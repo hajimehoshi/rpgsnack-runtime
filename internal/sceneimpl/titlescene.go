@@ -64,26 +64,25 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 	t.warningYesButton.X = (t.warningDialog.Width - t.warningYesButton.Width) / 2
 	t.warningNoButton.X = (t.warningDialog.Width - t.warningNoButton.Width) / 2
 	t.warningDialog.Update()
-	if t.warningDialog.Visible {
-		if t.warningYesButton.Pressed() {
-			mapScene, err := NewMapScene()
-			if err != nil {
-				return err
-			}
-			sceneManager.GoTo(mapScene)
-			return nil
+	if t.warningYesButton.Pressed() {
+		mapScene, err := NewMapScene()
+		if err != nil {
+			return err
 		}
-		if t.warningNoButton.Pressed() {
-			t.warningDialog.Visible = false
-			return nil
-		}
+		sceneManager.GoTo(mapScene)
 		return nil
 	}
-	t.newGameButton.Update(0, 0)
-	if data.Progress() != nil {
-		t.resumeGameButton.Update(0, 0)
+	if t.warningNoButton.Pressed() {
+		t.warningDialog.Visible = false
+		return nil
 	}
-	t.settingsButton.Update(0, 0)
+	if t.warningDialog.Visible {
+		return nil
+	}
+	t.resumeGameButton.Visible = data.Progress() != nil
+	t.newGameButton.Update()
+	t.resumeGameButton.Update()
+	t.settingsButton.Update()
 	if t.newGameButton.Pressed() {
 		if data.Progress() != nil {
 			t.warningDialog.Visible = true
@@ -123,9 +122,7 @@ func (t *TitleScene) Draw(screen *ebiten.Image) {
 	op.GeoM.Translate((float64(sw)-float64(tw))/2, 0)
 	screen.DrawImage(timg, op)
 	t.newGameButton.Draw(screen)
-	if data.Progress() != nil {
-		t.resumeGameButton.Draw(screen)
-	}
+	t.resumeGameButton.Draw(screen)
 	t.settingsButton.Draw(screen)
 	t.warningDialog.Draw(screen)
 }

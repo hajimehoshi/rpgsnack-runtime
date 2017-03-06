@@ -37,8 +37,10 @@ func NewLabel(x, y int, text string) *Label {
 	}
 }
 
-func (l *Label) Update(offsetX, offsetY int) {
-	return
+func (l *Label) Update() {
+}
+
+func (l *Label) UpdateAsChild(visible bool, offsetX, offsetY int) {
 }
 
 func (l *Label) Draw(screen *ebiten.Image) {
