@@ -63,7 +63,13 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 	t.warningDialog.X = (w/scene.TileScale-160)/2 + 4
 	t.warningYesButton.X = (t.warningDialog.Width - t.warningYesButton.Width) / 2
 	t.warningNoButton.X = (t.warningDialog.Width - t.warningNoButton.Width) / 2
+	t.resumeGameButton.Visible = data.Progress() != nil
 	t.warningDialog.Update()
+	if !t.warningDialog.Visible {
+		t.newGameButton.Update()
+		t.resumeGameButton.Update()
+		t.settingsButton.Update()
+	}
 	if t.warningYesButton.Pressed() {
 		mapScene, err := NewMapScene()
 		if err != nil {
@@ -79,10 +85,6 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 	if t.warningDialog.Visible {
 		return nil
 	}
-	t.resumeGameButton.Visible = data.Progress() != nil
-	t.newGameButton.Update()
-	t.resumeGameButton.Update()
-	t.settingsButton.Update()
 	if t.newGameButton.Pressed() {
 		if data.Progress() != nil {
 			t.warningDialog.Visible = true
@@ -95,7 +97,7 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 		}
 		return nil
 	}
-	if data.Progress() != nil && t.resumeGameButton.Pressed() {
+	if t.resumeGameButton.Pressed() {
 		var game *gamestate.Game
 		if err := json.Unmarshal(data.Progress(), &game); err != nil {
 			return err
