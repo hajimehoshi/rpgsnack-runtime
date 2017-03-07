@@ -73,6 +73,7 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 		if err := unmarshalJSON(tmp.Args, &args); err != nil {
 			return err
 		}
+
 		c.Args = args
 	case CommandNameShowHint:
 		var args *CommandArgsShowHint
@@ -268,15 +269,20 @@ type CommandArgsWait struct {
 	Time int `json:"time"`
 }
 
-// TODO add Type, BalloonType
 type CommandArgsShowMessage struct {
-	EventID   int  `json:"eventId"`
-	ContentID UUID `json:"content"`
+	Type         ShowMessageType     `json:"type"`
+	EventID      int                 `json:"eventId"`
+	ContentID    UUID                `json:"content"`
+	BalloonType  BalloonType         `json:"balloonType"`
+	PositionType MessagePositionType `json:"positionType"`
 }
 
-// TODO add Type, BalloonType
 type CommandArgsShowHint struct {
-	EventID int `json:"eventId"`
+	Type         ShowMessageType     `json:"type"`
+	EventID      int                 `json:"eventId"`
+	ContentID    UUID                `json:"content"`
+	BalloonType  BalloonType         `json:"balloonType"`
+	PositionType MessagePositionType `json:"positionType"`
 }
 
 type CommandArgsShowChoices struct {
@@ -573,8 +579,31 @@ const (
 	ControlHintComplete ControlHintType = "complete"
 )
 
+type ShowMessageType string
+
+const (
+	ShowMessageBalloon ShowMessageType = "balloon"
+	ShowMessageBanner  ShowMessageType = "banner"
+)
+
+type BalloonType string
+
+const (
+	BalloonTypeNormal BalloonType = "normal"
+	BalloonTypeThink  BalloonType = "think"
+	BalloonTypeShout  BalloonType = "shout"
+)
+
 type SystemVariableType string
 
 const (
 	SystemVariableHintCount SystemVariableType = "active_hint_count"
+)
+
+type MessagePositionType string
+
+const (
+	MessagePositionBottom MessagePositionType = "bottom"
+	MessagePositionMiddle MessagePositionType = "middle"
+	MessagePositionTop    MessagePositionType = "top"
 )

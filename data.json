@@ -9,7 +9,7 @@
   },
   "texts": {
     "und": {
-      "bffe5c73-6109-486d-b445-834847833947": "イベントのテストです。",
+      "bffe5c73-6109-486d-b445-834847833947": "イベントのテストです。ついでにバナー表示",
       "4fe345d6-05bc-43d7-9a79-03e40b1b6d34": "念願のアイスソードを\n手に入れたぞ",
       "c7beef37-b69e-4098-9b5e-ea0f2713c9ab": "そう、関係ないね",
       "6380b657-c558-447a-861c-dd0f98f62464": "殺してでもうばいとる",
@@ -105,14 +105,17 @@
                       "name": "show_message",
                       "args":    {
                         "content": "bffe5c73-6109-486d-b445-834847833947",
-                        "eventId": 0
+                        "type": "banner",
+                        "positionType": "middle"
                       }
                     },
                     {
                       "name": "show_message",
                       "args":    {
                         "content": "4fe345d6-05bc-43d7-9a79-03e40b1b6d34",
-                        "eventId": 0
+                        "eventId": 0,
+                        "type": "balloon",
+                        "balloonType": "normal"
                       }
                     },
                     {
@@ -131,7 +134,9 @@
                             "name": "show_message",
                             "args": {
                               "content": "b39503f3-d957-4009-bea7-b6b2ffb929a4",
-                              "eventId": 0
+                              "eventId": 0,
+                              "type": "balloon",
+                              "balloonType": "normal"
                             }
                           },
                           {
@@ -145,7 +150,9 @@
                             "name": "show_message",
                             "args": {
                               "content":  "574d044b-ca90-43d6-80ba-bcb17865b57e",
-                              "eventId": -1
+                              "eventId": -1,
+                              "type": "balloon",
+                              "balloonType": "normal"
                             }
                           }
                         ],
@@ -154,28 +161,36 @@
                             "name": "show_message",
                             "args": {
                               "content": "a91632df-e7a7-4c4c-b4e9-516fe52d8fd8",
-                              "eventId": 0
+                              "eventId": 0,
+                              "type": "balloon",
+                              "balloonType": "normal"
                             }
                           },
                           {
                             "name": "show_message",
                             "args": {
                               "content":  "b3ad76be-571d-4eea-90cd-a4ede3abaf06",
-                              "eventId": -1
+                              "eventId": -1,
+                              "type": "balloon",
+                              "balloonType": "normal"
                             }
                           },
                           {
                             "name": "show_message",
                             "args": {
                               "content": "b315852a-9b09-4087-ad3e-b4ef6d258156",
-                              "eventId": 0
+                              "eventId": 0,
+                              "type": "balloon",
+                              "balloonType": "normal"
                             }
                           },
                           {
                             "name": "show_message",
                             "args": {
                               "content": "a038b9c5-deec-46de-973e-a10e27ebe5ca",
-                              "eventId": 0
+                              "eventId": 0,
+                              "type": "balloon",
+                              "balloonType": "normal"
                             }
                           }
                         ]
@@ -185,7 +200,9 @@
                       "name": "show_message",
                       "args": {
                         "content": "05dc0051-2a8d-4412-b561-9343b99a3690",
-                        "eventId": 0
+                        "eventId": 0,
+                        "type": "balloon",
+                        "balloonType": "normal"
                       }
                     }
                   ]
@@ -234,7 +251,9 @@
                       "name": "show_message",
                       "args":    {
                         "content": "e6796850-08a3-4f07-a316-a013d6f8c6b0",
-                        "eventId": 0
+                        "eventId": 0,
+                        "type": "balloon",
+                        "balloonType": "normal"
                       }
                     },
                     {
@@ -282,7 +301,9 @@
                       "name": "show_message",
                       "args":    {
                         "content": "b3a1e097-3d60-4d24-99a6-1502f605eec6",
-                        "eventId": 0
+                        "eventId": 0,
+                        "type": "balloon",
+                        "balloonType": "normal"
                       }
                     },
                     {
@@ -295,7 +316,9 @@
                       "name": "show_message",
                       "args":    {
                         "content": "0c639091-d17f-405d-a2e4-7387d5311701",
-                        "eventId": 0
+                        "eventId": 0,
+                        "type": "balloon",
+                        "balloonType": "normal"
                       }
                     },
                     {
@@ -313,7 +336,9 @@
                       "name": "show_message",
                       "args":    {
                         "content": "67024f79-87c3-4368-b345-081d605ad894",
-                        "eventId": 0
+                        "eventId": 0,
+                        "type": "balloon",
+                        "balloonType": "normal"
                       }
                     },
                     {
@@ -328,7 +353,9 @@
                       "name": "show_message",
                       "args":    {
                         "content": "8ea36699-81b8-485f-914c-ca94aeefebcc",
-                        "eventId": 0
+                        "eventId": 0,
+                        "type": "balloon",
+                        "balloonType": "normal"
                       }
                     },
                     {
@@ -368,7 +395,9 @@
                       "name": "show_message",
                       "args":    {
                         "content": "0a64a375-260f-4e0e-9538-ef5b64ecb501",
-                        "eventId": -1
+                        "eventId": -1,
+                        "type": "balloon",
+                        "balloonType": "normal"
                       }
                     },
                     {
@@ -481,7 +510,9 @@
                       "name": "show_message",
                       "args": {
                         "content": "ab610c8c-578a-4876-92db-6398931087b7",
-                        "eventId": -1
+                        "eventId": -1,
+                        "type": "balloon",
+                        "balloonType": "normal"
                       }
                     },
                     {
@@ -537,7 +568,9 @@
                       "name": "show_message",
                       "args": {
                         "content": "7d7bb542-cead-4989-96c5-3ab0e48710fd",
-                        "eventId": 0
+                        "eventId": 0,
+                        "type": "balloon",
+                        "balloonType": "normal"
                       }
                     },
                     {
@@ -605,7 +638,9 @@
                       "name": "show_message",
                       "args": {
                         "content": "828e2dd3-a0c9-4aad-88f6-d9c6f0a1d79e",
-                        "eventId": -1
+                        "eventId": -1,
+                        "type": "balloon",
+                        "balloonType": "normal"
                       }
                     },
                     {
@@ -647,7 +682,9 @@
                           {
                             "name": "show_message",
                             "args": {
-                              "content": "3d1e6c63-983a-46da-88de-036fd651ca7d"
+                              "content": "3d1e6c63-983a-46da-88de-036fd651ca7d",
+                              "type": "balloon",
+                              "balloonType": "normal"
                             }
                           }
                         ],
@@ -655,7 +692,9 @@
                           {
                             "name": "show_message",
                             "args": {
-                              "content": "66a533ed-7556-4063-af8a-5d96bbfccc6e"
+                              "content": "66a533ed-7556-4063-af8a-5d96bbfccc6e",
+                              "type": "balloon",
+                              "balloonType": "normal"
                             }
                           }
                         ],
@@ -735,14 +774,18 @@
                             "name": "show_message",
                             "args":    {
                               "content": "ab610c8c-578a-4876-92db-6398931087b8",
-                              "eventId": 0
+                              "eventId": 0,
+                              "type": "balloon",
+                              "balloonType": "normal"
                             }
                           },
                           {
                             "name": "show_message",
                             "args":    {
                               "content": "97bcb748-637d-4daa-86c0-859ff64dc1a7",
-                              "eventId": 0
+                              "eventId": 0,
+                              "type": "balloon",
+                              "balloonType": "normal"
                             }
                           },
                           {
@@ -764,7 +807,9 @@
                                   "name": "show_message",
                                   "args":    {
                                     "content": "a9f76927-ab03-4cc3-91f0-c0641cddd32d",
-                                    "eventId": 0
+                                    "eventId": 0,
+                                    "type": "balloon",
+                                    "balloonType": "normal"
                                   }
                                 }
                               ]

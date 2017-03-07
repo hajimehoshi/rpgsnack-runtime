@@ -266,7 +266,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 			}
 			if ch := i.gameState.character(i.mapID, i.roomID, id); ch != nil {
 				content = i.gameState.parseMessageSyntax(content)
-				i.gameState.windows.ShowMessage(content, ch.EventID(), i.id)
+				i.gameState.windows.ShowMessage(args.Type, content, args.BalloonType, args.PositionType, ch.EventID(), i.id)
 				i.waitingCommand = true
 				return false, nil
 			}
@@ -309,7 +309,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 			}
 			if ch := i.gameState.character(i.mapID, i.roomID, id); ch != nil {
 				content = i.gameState.parseMessageSyntax(content)
-				i.gameState.windows.ShowMessage(content, ch.EventID(), i.id)
+				i.gameState.windows.ShowMessage(args.Type, content, args.BalloonType, args.PositionType, ch.EventID(), i.id)
 				i.waitingCommand = true
 				return false, nil
 			}

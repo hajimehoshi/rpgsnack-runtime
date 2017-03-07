@@ -21,6 +21,7 @@ import (
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
@@ -34,6 +35,7 @@ type Windows struct {
 	nextBalloon               *balloon
 	balloons                  []*balloon // TODO: Rename?
 	choiceBalloons            []*balloon
+	banner                    *banner
 	chosenIndex               int
 	choosing                  bool
 	choosingInterpreterID     int
@@ -45,6 +47,7 @@ type tmpWindows struct {
 	NextBalloon               *balloon   `json:"nextBalloon"`
 	Balloons                  []*balloon `json:"balloons"`
 	ChoiceBalloons            []*balloon `json:"choiceBalloons"`
+	Banner                    *banner    `json:"banner"`
 	ChosenIndex               int        `json:"chosenIndex"`
 	Choosing                  bool       `json:"choosing"`
 	ChoosingInterpreterID     int        `json:"choosingInterpreterId"`
@@ -57,6 +60,7 @@ func (w *Windows) MarshalJSON() ([]uint8, error) {
 		NextBalloon:               w.nextBalloon,
 		Balloons:                  w.balloons,
 		ChoiceBalloons:            w.choiceBalloons,
+		Banner:                    w.banner,
 		ChosenIndex:               w.chosenIndex,
 		Choosing:                  w.choosing,
 		ChoosingInterpreterID:     w.choosingInterpreterID,
@@ -74,6 +78,7 @@ func (w *Windows) UnmarshalJSON(data []uint8) error {
 	w.nextBalloon = tmp.NextBalloon
 	w.balloons = tmp.Balloons
 	w.choiceBalloons = tmp.ChoiceBalloons
+	w.banner = tmp.Banner
 	w.chosenIndex = tmp.ChosenIndex
 	w.choosing = tmp.Choosing
 	w.choosingInterpreterID = tmp.ChoosingInterpreterID
@@ -90,12 +95,20 @@ func (w *Windows) HasChosenIndex() bool {
 	return w.hasChosenIndex
 }
 
-func (w *Windows) ShowMessage(content string, eventID int, interpreterID int) {
-	if w.nextBalloon != nil {
-		panic("not reach")
+func (w *Windows) ShowMessage(messageType data.ShowMessageType, content string, balloonType data.BalloonType, positionType data.MessagePositionType, eventID int, interpreterID int) {
+	switch messageType {
+	case data.ShowMessageBalloon:
+		if w.nextBalloon != nil {
+			panic("not reach")
+		}
+		// TODO: How to call newBalloonCenter?
+		w.nextBalloon = newBalloonWithArrow(content, eventID, interpreterID)
+	case data.ShowMessageBanner:
+		w.banner = newBanner(content, positionType, interpreterID)
+		w.banner.open()
+	default:
+		fmt.Errorf("data: invalid messageType: %s", messageType)
 	}
-	// TODO: How to call newBalloonCenter?
-	w.nextBalloon = newBalloonWithArrow(content, eventID, interpreterID)
 }
 
 func (w *Windows) ShowChoices(sceneManager *scene.Manager, choices []string, interpreterID int) {
@@ -127,6 +140,9 @@ func (w *Windows) CloseAll() {
 			continue
 		}
 		b.close()
+	}
+	if w.banner != nil {
+		w.banner.close()
 	}
 }
 
@@ -184,6 +200,9 @@ func (w *Windows) isOpened(interpreterID int) bool {
 			return true
 		}
 	}
+	if w.banner != nil {
+		return true
+	}
 	return false
 }
 
@@ -207,6 +226,11 @@ func (w *Windows) isAnimating(interpreterID int) bool {
 			continue
 		}
 		if b.isAnimating() {
+			return true
+		}
+	}
+	if w.banner != nil {
+		if w.banner.isAnimating() {
 			return true
 		}
 	}
@@ -275,6 +299,12 @@ func (w *Windows) Update(sceneManager *scene.Manager) {
 			w.choiceBalloons[i] = nil
 		}
 	}
+	if w.banner != nil {
+		w.banner.update()
+		if w.banner.isClosed() {
+			w.banner = nil
+		}
+	}
 }
 
 func (w *Windows) Draw(screen *ebiten.Image, characters []*character.Character) {
@@ -300,5 +330,9 @@ func (w *Windows) Draw(screen *ebiten.Image, characters []*character.Character) 
 			continue
 		}
 		b.draw(screen, nil)
+	}
+
+	if w.banner != nil {
+		w.banner.draw(screen, nil)
 	}
 }
