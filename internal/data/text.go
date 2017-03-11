@@ -19,7 +19,8 @@ import (
 )
 
 type Texts struct {
-	data map[language.Tag]map[UUID]string
+	data      map[language.Tag]map[UUID]string
+	languages []language.Tag
 }
 
 func (t *Texts) UnmarshalJSON(data []uint8) error {
@@ -27,15 +28,25 @@ func (t *Texts) UnmarshalJSON(data []uint8) error {
 	if err := unmarshalJSON(data, &orig); err != nil {
 		return err
 	}
+	langs := map[language.Tag]struct{}{}
+	t.languages = []language.Tag{}
 	t.data = map[language.Tag]map[UUID]string{}
 	for langStr, text := range orig {
 		lang, err := language.Parse(langStr)
 		if err != nil {
 			return err
 		}
+		if _, ok := langs[lang]; !ok {
+			t.languages = append(t.languages, lang)
+			langs[lang] = struct{}{}
+		}
 		t.data[lang] = text
 	}
 	return nil
+}
+
+func (t *Texts) Languages() []language.Tag {
+	return t.languages
 }
 
 func (t *Texts) Get(lang language.Tag, uuid UUID) string {

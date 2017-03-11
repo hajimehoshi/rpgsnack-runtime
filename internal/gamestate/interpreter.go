@@ -18,8 +18,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"golang.org/x/text/language"
-
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/commanditerator"
@@ -259,7 +257,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 	case data.CommandNameShowMessage:
 		if !i.waitingCommand {
 			args := c.Args.(*data.CommandArgsShowMessage)
-			content := data.Current().Texts.Get(language.Und, args.ContentID)
+			content := data.Current().Texts.Get(sceneManager.Language(), args.ContentID)
 			id := args.EventID
 			if id == 0 {
 				id = i.eventID
@@ -300,7 +298,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 			if hintText.String() == "" {
 				content = "Undefined"
 			} else {
-				content = data.Current().Texts.Get(language.Und, hintText)
+				content = data.Current().Texts.Get(sceneManager.Language(), hintText)
 			}
 
 			id := args.EventID
@@ -322,7 +320,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		if !i.waitingCommand {
 			choices := []string{}
 			for _, id := range c.Args.(*data.CommandArgsShowChoices).ChoiceIDs {
-				choice := data.Current().Texts.Get(language.Und, id)
+				choice := data.Current().Texts.Get(sceneManager.Language(), id)
 				choice = i.gameState.parseMessageSyntax(choice)
 				choices = append(choices, choice)
 			}

@@ -15,6 +15,8 @@
 package scene
 
 import (
+	"golang.org/x/text/language"
+
 	"github.com/hajimehoshi/ebiten"
 )
 
@@ -41,6 +43,7 @@ type Manager struct {
 	lastRequestID int
 	resultCh      chan RequestResult
 	results       map[int]*RequestResult
+	language      language.Tag
 }
 
 type Requester interface {
@@ -81,6 +84,7 @@ func NewManager(width, height int, requester Requester) *Manager {
 		requester: requester,
 		resultCh:  make(chan RequestResult, 1),
 		results:   map[int]*RequestResult{},
+		language:  language.Und,
 	}
 }
 
@@ -121,6 +125,14 @@ func (m *Manager) Update() error {
 
 func (m *Manager) Draw(screen *ebiten.Image) {
 	m.current.Draw(screen)
+}
+
+func (m *Manager) Language() language.Tag {
+	return m.language
+}
+
+func (m *Manager) SetLanguage(language language.Tag) {
+	m.language = language
 }
 
 func (m *Manager) GoTo(next scene) {
