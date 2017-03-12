@@ -26,6 +26,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/gamestate"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/ui"
 )
 
 type MapScene struct {
@@ -35,23 +36,31 @@ type MapScene struct {
 	tilesImage       *ebiten.Image
 	triggeringFailed bool
 	initialState     bool
+	cameraButton     *ui.Button
+	cameraTaking     bool
+	screenShotImage  *ebiten.Image
+	screenShotDialog *ui.Dialog
 }
 
 func NewMapScene() (*MapScene, error) {
-	tilesImage, err := ebiten.NewImage(scene.TileXNum*scene.TileSize, scene.TileYNum*scene.TileSize, ebiten.FilterNearest)
-	if err != nil {
-		return nil, err
-	}
+	tilesImage, _ := ebiten.NewImage(scene.TileXNum*scene.TileSize, scene.TileYNum*scene.TileSize, ebiten.FilterNearest)
 	state, err := gamestate.NewGame()
 	if err != nil {
 		return nil, err
 	}
-	mapScene := &MapScene{
-		tilesImage:   tilesImage,
-		gameState:    state,
-		initialState: true,
+	screenShotImage, _ := ebiten.NewImage(480, 720, ebiten.FilterLinear)
+	camera, _ := ebiten.NewImage(12, 12, ebiten.FilterNearest)
+	camera.Fill(color.RGBA{0xff, 0, 0, 0xff})
+	m := &MapScene{
+		tilesImage:       tilesImage,
+		gameState:        state,
+		initialState:     true,
+		cameraButton:     ui.NewImageButton(0, 0, camera),
+		screenShotImage:  screenShotImage,
+		screenShotDialog: ui.NewDialog(0, 4, 152, 232),
 	}
-	return mapScene, nil
+	m.screenShotDialog.AddChild(ui.NewImage(8, 8, 1.0/scene.TileScale/2, m.screenShotImage))
+	return m, nil
 }
 
 func NewMapSceneWithGame(game *gamestate.Game) (*MapScene, error) {
@@ -100,10 +109,17 @@ func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) error {
 }
 
 func (m *MapScene) Update(sceneManager *scene.Manager) error {
+	w, _ := sceneManager.Size()
+	m.screenShotDialog.X = (w/scene.TileScale-160)/2 + 4
 	if m.initialState {
 		m.gameState.RequestSave(sceneManager)
 	}
 	m.initialState = false
+	m.screenShotDialog.Update()
+	if m.screenShotDialog.Visible {
+		return nil
+	}
+	m.cameraButton.Update()
 	if err := m.gameState.Update(sceneManager); err != nil {
 		return err
 	}
@@ -120,6 +136,10 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 	}
 	if err := m.runEventIfNeeded(sceneManager); err != nil {
 		return err
+	}
+	if m.cameraButton.Pressed() {
+		m.cameraTaking = true
+		m.screenShotDialog.Visible = true
 	}
 	return nil
 }
@@ -160,6 +180,7 @@ func (t *tilesImageParts) Dst(index int) (int, int, int, int) {
 
 func (m *MapScene) Draw(screen *ebiten.Image) {
 	m.tilesImage.Fill(color.Black)
+	m.cameraButton.Draw(screen)
 	tileSet := m.gameState.Map().TileSet()
 	op := &ebiten.DrawImageOptions{}
 	op.ImageParts = &tilesImageParts{
@@ -201,4 +222,14 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	m.gameState.DrawWindows(screen)
 	msg := fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS())
 	font.DrawText(screen, msg, 0, 0, scene.TextScale, color.White)
+	if m.cameraTaking {
+		m.cameraTaking = false
+		m.screenShotImage.Clear()
+		op := &ebiten.DrawImageOptions{}
+		sw, _ := screen.Size()
+		w, _ := m.screenShotImage.Size()
+		op.GeoM.Translate((float64(w)-float64(sw))/2, 0)
+		m.screenShotImage.DrawImage(screen, nil)
+	}
+	m.screenShotDialog.Draw(screen)
 }
