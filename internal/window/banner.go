@@ -31,6 +31,7 @@ const (
 	bannerMaxCount = 4
 	bannerWidth    = 160
 	bannerHeight   = 60
+	bannerMarginX  = 4
 	bannerMarginY  = 12
 )
 
@@ -163,7 +164,7 @@ func (b *banner) draw(screen *ebiten.Image, character *character.Character) {
 	}
 	if b.opened {
 		x, y := b.position(sh)
-		x = x * scene.TileScale
+		x = (x + bannerMarginX) * scene.TileScale
 		y = (y + bannerMarginY) * scene.TileScale
 		font.DrawText(screen, b.content, x, y, scene.TextScale, color.White)
 	}
