@@ -150,12 +150,15 @@ func (b *banner) draw(screen *ebiten.Image, character *character.Character) {
 	_, sh := screen.Size()
 	if rate > 0 {
 		img := assets.GetImage("banner.png")
+		w, h := img.Size()
 		x, y := b.position(sh)
 		dx := float64(x)
 		dy := float64(y)
 		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(dx, dy)
-		op.GeoM.Scale(rate*scene.TileScale, rate*scene.TileScale)
+		op.GeoM.Translate(-float64(w)/2, -float64(h)/2)
+		op.GeoM.Scale(rate, rate)
+		op.GeoM.Translate(dx+float64(w)/2, dy+float64(h)/2)
+		op.GeoM.Scale(scene.TileScale, scene.TileScale)
 		screen.DrawImage(img, op)
 	}
 	if b.opened {
