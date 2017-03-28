@@ -43,7 +43,7 @@ type Manager struct {
 	lastRequestID      int
 	resultCh           chan RequestResult
 	results            map[int]*RequestResult
-	PlatformDataValues map[PlatformDataKey]int
+	platformDataValues map[PlatformDataKey]int
 	language           language.Tag
 }
 
@@ -92,7 +92,7 @@ func NewManager(width, height int, requester Requester) *Manager {
 		requester:          requester,
 		resultCh:           make(chan RequestResult, 1),
 		results:            map[int]*RequestResult{},
-		PlatformDataValues: map[PlatformDataKey]int{},
+		platformDataValues: map[PlatformDataKey]int{},
 		language:           language.Und,
 	}
 }
@@ -222,11 +222,11 @@ func (m *Manager) FinishShareImage(id int) {
 }
 
 func (m *Manager) SetPlatformData(key PlatformDataKey, value int) {
-	m.PlatformDataValues[key] = value
+	m.platformDataValues[key] = value
 }
 
 func (m *Manager) GetPlatformDataValue(key PlatformDataKey) int {
-	val, ok := m.PlatformDataValues[key]
+	val, ok := m.platformDataValues[key]
 	if ok {
 		return val
 	} else {
