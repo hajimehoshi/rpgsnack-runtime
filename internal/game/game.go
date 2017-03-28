@@ -133,3 +133,7 @@ func (g *Game) FinishOpenLink(id int) {
 func (g *Game) FinishShareImage(id int) {
 	g.sceneManager.FinishShareImage(id)
 }
+
+func (g *Game) SetPlatformData(key scene.PlatformDataKey, value int) {
+	g.sceneManager.SetPlatformData(key, value)
+}

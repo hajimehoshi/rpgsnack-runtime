@@ -597,7 +597,9 @@ const (
 type SystemVariableType string
 
 const (
-	SystemVariableHintCount SystemVariableType = "active_hint_count"
+	SystemInterstitialAdsLoaded SystemVariableType = "interstitial_ads_loaded"
+	SystemRewardedAdsLoaded     SystemVariableType = "rewarded_ads_loaded"
+	SystemVariableHintCount     SystemVariableType = "active_hint_count"
 )
 
 type MessagePositionType string

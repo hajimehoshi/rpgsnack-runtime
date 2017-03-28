@@ -348,7 +348,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		return false, nil
 	case data.CommandNameSetVariable:
 		args := c.Args.(*data.CommandArgsSetVariable)
-		i.setVariable(args.ID, args.Op, args.ValueType, args.Value)
+		i.setVariable(sceneManager, args.ID, args.Op, args.ValueType, args.Value)
 		i.commandIterator.Advance()
 		// Suspend executing to give other events chances to update their pages.
 		return false, nil
@@ -647,7 +647,7 @@ func (i *Interpreter) Update(sceneManager *scene.Manager) error {
 	return nil
 }
 
-func (i *Interpreter) setVariable(id int, op data.SetVariableOp, valueType data.SetVariableValueType, value interface{}) {
+func (i *Interpreter) setVariable(sceneManager *scene.Manager, id int, op data.SetVariableOp, valueType data.SetVariableValueType, value interface{}) {
 	rhs := 0
 	switch valueType {
 	case data.SetVariableValueTypeConstant:
@@ -691,6 +691,14 @@ func (i *Interpreter) setVariable(id int, op data.SetVariableOp, valueType data.
 		switch systemVariableType {
 		case data.SystemVariableHintCount:
 			rhs = i.gameState.hints.ActiveHintCount()
+		case data.SystemInterstitialAdsLoaded:
+			if sceneManager.GetPlatformDataValue(scene.PlatformDataKeyIntersitialAdsLoaded) == 1 {
+				rhs = 1
+			}
+		case data.SystemRewardedAdsLoaded:
+			if sceneManager.GetPlatformDataValue(scene.PlatformDataKeyRewardedAdsLoaded) == 1 {
+				rhs = 1
+			}
 		default:
 			println(fmt.Sprintf("not implemented yet (set_variable): systemVariableType %s", systemVariableType))
 		}

@@ -53,3 +53,7 @@ func FinishOpenLink(id int) {
 func FinishShareImage(id int) {
 	theGame.FinishShareImage(id)
 }
+
+func SetPlatformData(key string, value int) {
+	theGame.SetPlatformData(scene.PlatformDataKey(key), int(value))
+}
