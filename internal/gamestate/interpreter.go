@@ -691,12 +691,8 @@ func (i *Interpreter) setVariable(sceneManager *scene.Manager, id int, op data.S
 		switch systemVariableType {
 		case data.SystemVariableHintCount:
 			rhs = i.gameState.hints.ActiveHintCount()
-		case data.SystemInterstitialAdsLoaded:
-			if sceneManager.GetPlatformDataValue(scene.PlatformDataKeyIntersitialAdsLoaded) == 1 {
-				rhs = 1
-			}
-		case data.SystemRewardedAdsLoaded:
-			if sceneManager.GetPlatformDataValue(scene.PlatformDataKeyRewardedAdsLoaded) == 1 {
+		case data.SystemVariableInterstitialAdsLoaded, data.SystemVariableRewardedAdsLoaded:
+			if i.gameState.variables.InnerVariableValue(string(systemVariableType)) == 1 {
 				rhs = 1
 			}
 		default:

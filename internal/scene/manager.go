@@ -35,16 +35,15 @@ type scene interface {
 }
 
 type Manager struct {
-	width              int
-	height             int
-	requester          Requester
-	current            scene
-	next               scene
-	lastRequestID      int
-	resultCh           chan RequestResult
-	results            map[int]*RequestResult
-	platformDataValues map[PlatformDataKey]int
-	language           language.Tag
+	width         int
+	height        int
+	requester     Requester
+	current       scene
+	next          scene
+	lastRequestID int
+	resultCh      chan RequestResult
+	results       map[int]*RequestResult
+	language      language.Tag
 }
 
 type Requester interface {
@@ -78,22 +77,14 @@ type RequestResult struct {
 	Data      []uint8
 }
 
-type PlatformDataKey string
-
-const (
-	PlatformDataKeyIntersitialAdsLoaded PlatformDataKey = "interstitial_ads_loaded"
-	PlatformDataKeyRewardedAdsLoaded    PlatformDataKey = "rewarded_ads_loaded"
-)
-
 func NewManager(width, height int, requester Requester) *Manager {
 	return &Manager{
-		width:              width,
-		height:             height,
-		requester:          requester,
-		resultCh:           make(chan RequestResult, 1),
-		results:            map[int]*RequestResult{},
-		platformDataValues: map[PlatformDataKey]int{},
-		language:           language.Und,
+		width:     width,
+		height:    height,
+		requester: requester,
+		resultCh:  make(chan RequestResult, 1),
+		results:   map[int]*RequestResult{},
+		language:  language.Und,
 	}
 }
 
@@ -218,18 +209,5 @@ func (m *Manager) FinishShareImage(id int) {
 	m.resultCh <- RequestResult{
 		ID:   id,
 		Type: RequestTypeShareImage,
-	}
-}
-
-func (m *Manager) SetPlatformData(key PlatformDataKey, value int) {
-	m.platformDataValues[key] = value
-}
-
-func (m *Manager) GetPlatformDataValue(key PlatformDataKey) int {
-	val, ok := m.platformDataValues[key]
-	if ok {
-		return val
-	} else {
-		return 0
 	}
 }
