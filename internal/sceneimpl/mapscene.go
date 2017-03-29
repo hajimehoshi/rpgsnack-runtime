@@ -42,32 +42,25 @@ type MapScene struct {
 	screenShotDialog *ui.Dialog
 }
 
-func NewMapScene() (*MapScene, error) {
+func NewMapScene() *MapScene {
 	tilesImage, _ := ebiten.NewImage(scene.TileXNum*scene.TileSize, scene.TileYNum*scene.TileSize, ebiten.FilterNearest)
-	state, err := gamestate.NewGame()
-	if err != nil {
-		return nil, err
-	}
 	m := &MapScene{
 		tilesImage:   tilesImage,
-		gameState:    state,
+		gameState:    gamestate.NewGame(),
 		initialState: true,
 	}
 	m.initUI()
-	return m, nil
+	return m
 }
 
-func NewMapSceneWithGame(game *gamestate.Game) (*MapScene, error) {
-	tilesImage, err := ebiten.NewImage(scene.TileXNum*scene.TileSize, scene.TileYNum*scene.TileSize, ebiten.FilterNearest)
-	if err != nil {
-		return nil, err
-	}
+func NewMapSceneWithGame(game *gamestate.Game) *MapScene {
+	tilesImage, _ := ebiten.NewImage(scene.TileXNum*scene.TileSize, scene.TileYNum*scene.TileSize, ebiten.FilterNearest)
 	m := &MapScene{
 		tilesImage: tilesImage,
 		gameState:  game,
 	}
 	m.initUI()
-	return m, nil
+	return m
 }
 
 func (m *MapScene) initUI() {

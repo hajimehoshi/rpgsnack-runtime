@@ -52,7 +52,7 @@ func generateDefaultRand() Rand {
 	return rand.New(rand.NewSource(time.Now().UnixNano()))
 }
 
-func NewGame() (*Game, error) {
+func NewGame() *Game {
 	g := &Game{
 		hints:     &Hints{},
 		variables: &Variables{},
@@ -60,12 +60,8 @@ func NewGame() (*Game, error) {
 		windows:   &window.Windows{},
 		rand:      generateDefaultRand(),
 	}
-	m, err := NewMap(g)
-	if err != nil {
-		return nil, err
-	}
-	g.currentMap = m
-	return g, nil
+	g.currentMap = NewMap(g)
+	return g
 }
 
 type tmpGame struct {

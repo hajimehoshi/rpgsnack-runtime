@@ -71,11 +71,7 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 		t.settingsButton.Update()
 	}
 	if t.warningYesButton.Pressed() {
-		mapScene, err := NewMapScene()
-		if err != nil {
-			return err
-		}
-		sceneManager.GoTo(mapScene)
+		sceneManager.GoTo(NewMapScene())
 		return nil
 	}
 	if t.warningNoButton.Pressed() {
@@ -89,11 +85,7 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 		if data.Progress() != nil {
 			t.warningDialog.Visible = true
 		} else {
-			mapScene, err := NewMapScene()
-			if err != nil {
-				return err
-			}
-			sceneManager.GoTo(mapScene)
+			sceneManager.GoTo(NewMapScene())
 		}
 		return nil
 	}
@@ -102,11 +94,7 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 		if err := json.Unmarshal(data.Progress(), &game); err != nil {
 			return err
 		}
-		mapScene, err := NewMapSceneWithGame(game)
-		if err != nil {
-			return err
-		}
-		sceneManager.GoTo(mapScene)
+		sceneManager.GoTo(NewMapSceneWithGame(game))
 		return nil
 	}
 	if t.settingsButton.Pressed() {

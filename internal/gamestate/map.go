@@ -52,7 +52,7 @@ type Map struct {
 	eventData map[int]*data.Event
 }
 
-func NewMap(game *Game) (*Map, error) {
+func NewMap(game *Game) *Map {
 	pos := data.Current().System.InitialPosition
 	x, y, roomID := 0, 0, 1
 	if pos != nil {
@@ -66,7 +66,7 @@ func NewMap(game *Game) (*Map, error) {
 		interpreters: map[int]*Interpreter{},
 	}
 	m.setRoomID(roomID, nil)
-	return m, nil
+	return m
 }
 
 type tmpMap struct {
