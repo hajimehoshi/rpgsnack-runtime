@@ -20,8 +20,6 @@ import (
 	"golang.org/x/text/language"
 
 	"github.com/hajimehoshi/ebiten"
-
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 )
 
 const (
@@ -82,6 +80,13 @@ type RequestResult struct {
 	Succeeded bool
 	Data      []uint8
 }
+
+type PlatformDataKey string
+
+const (
+	PlatformDataKeyInterstitialAdsLoaded PlatformDataKey = "interstitial_ads_loaded"
+	PlatformDataKeyRewardedAdsLoaded     PlatformDataKey = "rewarded_ads_loaded"
+)
 
 func NewManager(width, height int, requester Requester) *Manager {
 	return &Manager{
@@ -218,14 +223,14 @@ func (m *Manager) FinishShareImage(id int) {
 	}
 }
 
-func (m *Manager) SetPlatformData(key string, value int) {
-	switch data.PlatformDataKey(key) {
-	case data.PlatformDataKeyInterstitialAdsLoaded:
+func (m *Manager) SetPlatformData(key PlatformDataKey, value int) {
+	switch key {
+	case PlatformDataKeyInterstitialAdsLoaded:
 		m.interstitialAdsLoaded = false
 		if value != 0 {
 			m.interstitialAdsLoaded = true
 		}
-	case data.PlatformDataKeyRewardedAdsLoaded:
+	case PlatformDataKeyRewardedAdsLoaded:
 		m.rewardedAdsLoaded = false
 		if value != 0 {
 			m.rewardedAdsLoaded = true
