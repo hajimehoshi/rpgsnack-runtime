@@ -17,6 +17,7 @@ package gamestate
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
@@ -171,13 +172,13 @@ func (m *moveCharacterState) Update() error {
 		case data.MoveCharacterTypeForward:
 			dir = c.Dir()
 		case data.MoveCharacterTypeBackward:
-			println(fmt.Sprintf("not implemented yet (move_character): type %s", m.args.Type))
+			log.Printf("not implemented yet (move_character): type %s", m.args.Type)
 			dir = c.Dir()
 		case data.MoveCharacterTypeToward:
-			println(fmt.Sprintf("not implemented yet (move_character): type %s", m.args.Type))
+			log.Printf("not implemented yet (move_character): type %s", m.args.Type)
 			dir = c.Dir()
 		case data.MoveCharacterTypeRandom:
-			println(fmt.Sprintf("not implemented yet (move_character): type %s", m.args.Type))
+			log.Printf("not implemented yet (move_character): type %s", m.args.Type)
 			dir = c.Dir()
 		default:
 			panic("not reach")

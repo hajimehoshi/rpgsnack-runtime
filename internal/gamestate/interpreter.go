@@ -17,6 +17,7 @@ package gamestate
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
@@ -418,7 +419,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 			return false, err
 		}
 		if args.FadeTime > 0 {
-			println(fmt.Sprintf("fade time is not used so far: %d"), args.FadeTime)
+			log.Printf("fade time is not used so far: %d", args.FadeTime)
 		}
 		i.commandIterator.Advance()
 	case data.CommandNameStopBGM:
@@ -684,7 +685,7 @@ func (i *Interpreter) setVariable(sceneManager *scene.Manager, id int, op data.S
 				panic("not reach")
 			}
 		default:
-			println(fmt.Sprintf("not implemented yet (set_variable): type %s", args.Type))
+			log.Printf("not implemented yet (set_variable): type %s", args.Type)
 		}
 	case data.SetVariableValueTypeSystem:
 		systemVariableType := value.(data.SystemVariableType)
@@ -696,7 +697,7 @@ func (i *Interpreter) setVariable(sceneManager *scene.Manager, id int, op data.S
 				rhs = 1
 			}
 		default:
-			println(fmt.Sprintf("not implemented yet (set_variable): systemVariableType %s", systemVariableType))
+			log.Printf("not implemented yet (set_variable): systemVariableType %s", systemVariableType)
 		}
 	}
 	switch op {
