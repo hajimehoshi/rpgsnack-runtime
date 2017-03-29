@@ -609,3 +609,10 @@ const (
 	MessagePositionMiddle MessagePositionType = "middle"
 	MessagePositionTop    MessagePositionType = "top"
 )
+
+type PlatformDataKey string
+
+const (
+	PlatformDataKeyInterstitialAdsLoaded PlatformDataKey = "interstitial_ads_loaded"
+	PlatformDataKeyRewardedAdsLoaded     PlatformDataKey = "rewarded_ads_loaded"
+)

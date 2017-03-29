@@ -55,5 +55,5 @@ func FinishShareImage(id int) {
 }
 
 func SetPlatformData(key string, value int) {
-	theGame.SetPlatformData(scene.PlatformDataKey(key), int(value))
+	theGame.SetPlatformData(key, value)
 }

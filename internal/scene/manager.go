@@ -15,9 +15,13 @@
 package scene
 
 import (
+	"log"
+
 	"golang.org/x/text/language"
 
 	"github.com/hajimehoshi/ebiten"
+
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 )
 
 const (
@@ -35,15 +39,17 @@ type scene interface {
 }
 
 type Manager struct {
-	width         int
-	height        int
-	requester     Requester
-	current       scene
-	next          scene
-	lastRequestID int
-	resultCh      chan RequestResult
-	results       map[int]*RequestResult
-	language      language.Tag
+	width                 int
+	height                int
+	requester             Requester
+	current               scene
+	next                  scene
+	lastRequestID         int
+	resultCh              chan RequestResult
+	results               map[int]*RequestResult
+	language              language.Tag
+	interstitialAdsLoaded bool
+	rewardedAdsLoaded     bool
 }
 
 type Requester interface {
@@ -210,4 +216,29 @@ func (m *Manager) FinishShareImage(id int) {
 		ID:   id,
 		Type: RequestTypeShareImage,
 	}
+}
+
+func (m *Manager) SetPlatformData(key string, value int) {
+	switch data.PlatformDataKey(key) {
+	case data.PlatformDataKeyInterstitialAdsLoaded:
+		m.interstitialAdsLoaded = false
+		if value != 0 {
+			m.interstitialAdsLoaded = true
+		}
+	case data.PlatformDataKeyRewardedAdsLoaded:
+		m.rewardedAdsLoaded = false
+		if value != 0 {
+			m.rewardedAdsLoaded = true
+		}
+	default:
+		log.Printf("platform data key not implemented: %s", key)
+	}
+}
+
+func (m *Manager) InterstitialAdsLoaded() bool {
+	return m.interstitialAdsLoaded
+}
+
+func (m *Manager) RewardedAdsLoaded() bool {
+	return m.rewardedAdsLoaded
 }
