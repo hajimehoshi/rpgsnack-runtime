@@ -48,18 +48,12 @@ func NewMapScene() (*MapScene, error) {
 	if err != nil {
 		return nil, err
 	}
-	screenShotImage, _ := ebiten.NewImage(480, 720, ebiten.FilterLinear)
-	camera, _ := ebiten.NewImage(12, 12, ebiten.FilterNearest)
-	camera.Fill(color.RGBA{0xff, 0, 0, 0xff})
 	m := &MapScene{
-		tilesImage:       tilesImage,
-		gameState:        state,
-		initialState:     true,
-		cameraButton:     ui.NewImageButton(0, 0, camera),
-		screenShotImage:  screenShotImage,
-		screenShotDialog: ui.NewDialog(0, 4, 152, 232),
+		tilesImage:   tilesImage,
+		gameState:    state,
+		initialState: true,
 	}
-	m.screenShotDialog.AddChild(ui.NewImage(8, 8, 1.0/scene.TileScale/2, m.screenShotImage))
+	m.initUI()
 	return m, nil
 }
 
@@ -68,11 +62,22 @@ func NewMapSceneWithGame(game *gamestate.Game) (*MapScene, error) {
 	if err != nil {
 		return nil, err
 	}
-	mapScene := &MapScene{
+	m := &MapScene{
 		tilesImage: tilesImage,
 		gameState:  game,
 	}
-	return mapScene, nil
+	m.initUI()
+	return m, nil
+}
+
+func (m *MapScene) initUI() {
+	screenShotImage, _ := ebiten.NewImage(480, 720, ebiten.FilterLinear)
+	camera, _ := ebiten.NewImage(12, 12, ebiten.FilterNearest)
+	camera.Fill(color.RGBA{0xff, 0, 0, 0xff})
+	m.cameraButton = ui.NewImageButton(0, 0, camera)
+	m.screenShotImage = screenShotImage
+	m.screenShotDialog = ui.NewDialog(0, 4, 152, 232)
+	m.screenShotDialog.AddChild(ui.NewImage(8, 8, 1.0/scene.TileScale/2, m.screenShotImage))
 }
 
 func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) error {
