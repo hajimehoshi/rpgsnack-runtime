@@ -19,6 +19,7 @@
 package game
 
 import (
+	"encoding/json"
 	"log"
 	"os"
 
@@ -54,8 +55,38 @@ func (m *Requester) RequestSaveProgress(requestID int, data []uint8) {
 
 func (m *Requester) RequestPurchase(requestID int, productID string) {
 	log.Printf("request purchase: requestID: %d, productID: %s", requestID, productID)
-	// TODO: Save purchase data
-	m.game.FinishPurchase(requestID, true)
+	// Add new purchase if unique
+	var purchases []string
+	json.Unmarshal(datapkg.Purchases(), &purchases)
+
+	isNew := true
+	for _, p := range purchases {
+		if p == productID {
+			isNew = false
+			break
+		}
+	}
+
+	if isNew {
+		purchases = append(purchases, productID)
+	}
+
+	newPurchases, _ := json.Marshal(purchases)
+
+	go func() {
+		f, err := os.Create(datapkg.PurchasesPath())
+		if err != nil {
+			// TODO: Should pass err instead of string?
+			m.game.FinishPurchase(requestID, true, newPurchases)
+			return
+		}
+		defer f.Close()
+		if _, err := f.Write(newPurchases); err != nil {
+			m.game.FinishPurchase(requestID, true, newPurchases)
+			return
+		}
+		m.game.FinishPurchase(requestID, true, newPurchases)
+	}()
 }
 
 func (m *Requester) RequestRestorePurchases(requestID int) {

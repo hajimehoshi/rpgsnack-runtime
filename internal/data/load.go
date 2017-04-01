@@ -53,8 +53,9 @@ func unmarshalJSON(data []uint8, v interface{}) error {
 }
 
 var (
-	current  *Game
-	progress []uint8
+	current   *Game
+	progress  []uint8
+	purchases []uint8
 )
 
 func Current() *Game {
@@ -65,13 +66,22 @@ func Progress() []uint8 {
 	return progress
 }
 
+func Purchases() []uint8 {
+	return purchases
+}
+
 func UpdateProgress(p []uint8) {
 	progress = p
 }
 
+func UpdatePurchases(p []uint8) {
+	purchases = p
+}
+
 type jsonData struct {
-	Game     []uint8
-	Progress []uint8
+	Purchases []uint8
+	Game      []uint8
+	Progress  []uint8
 }
 
 func Load() error {
@@ -85,5 +95,6 @@ func Load() error {
 	}
 	current = gameData
 	progress = data.Progress
+	purchases = data.Purchases
 	return nil
 }

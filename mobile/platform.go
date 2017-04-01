@@ -30,12 +30,22 @@ func FinishSaveProgress(id int) {
 	theGame.FinishSaveProgress(id)
 }
 
-func FinishPurchase(id int, success bool) {
-	theGame.FinishPurchase(id, success)
+func FinishPurchase(id int, success bool, purchases []uint8) {
+	var p []uint8
+	if purchases != nil {
+		p = make([]uint8, len(purchases))
+		copy(p, purchases)
+	}
+	theGame.FinishPurchase(id, success, p)
 }
 
 func FinishRestorePurchases(id int, purchases []uint8) {
-	theGame.FinishRestorePurchases(id, purchases)
+	var p []uint8
+	if purchases != nil {
+		p = make([]uint8, len(purchases))
+		copy(p, purchases)
+	}
+	theGame.FinishRestorePurchases(id, p)
 }
 
 func FinishInterstitialAds(id int) {

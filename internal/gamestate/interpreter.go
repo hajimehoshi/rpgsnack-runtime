@@ -450,11 +450,18 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		}
 		i.commandIterator.Advance()
 	case data.CommandPurchase:
-		// args := c.Args.(*data.CommandArgsPurchase)
+		args := c.Args.(*data.CommandArgsPurchase)
 		i.waitingRequestID = sceneManager.GenerateRequestID()
 
-		// TODO: Retrieve productID from purchases database via args.ID
-		sceneManager.Requester().RequestPurchase(i.waitingRequestID, "test_productId")
+		var key string
+		for _, i := range data.Current().IAPProducts {
+			if i.ID == args.ID {
+				key = i.Key
+				break
+			}
+		}
+
+		sceneManager.Requester().RequestPurchase(i.waitingRequestID, key)
 		return false, nil
 	case data.CommandShowAds:
 		args := c.Args.(*data.CommandArgsShowAds)
@@ -686,6 +693,32 @@ func (i *Interpreter) setVariable(sceneManager *scene.Manager, id int, op data.S
 			}
 		default:
 			log.Printf("not implemented yet (set_variable): type %s", args.Type)
+		}
+	case data.SetVariableValueTypeIAPProduct:
+		rhs = 0
+		id := value.(int)
+		var key string
+		for _, i := range data.Current().IAPProducts {
+			if i.ID == id {
+				key = i.Key
+				break
+			}
+		}
+
+		// check whether the IAPProduct is purchased
+		var purchases []string
+		if data.Purchases() != nil {
+			if err := json.Unmarshal(data.Purchases(), &purchases); err != nil {
+				panic(err)
+			}
+		}
+
+		rhs = 0
+		for _, p := range purchases {
+			if p == key {
+				rhs = 1
+				break
+			}
 		}
 	case data.SetVariableValueTypeSystem:
 		systemVariableType := value.(data.SystemVariableType)

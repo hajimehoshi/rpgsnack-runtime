@@ -28,17 +28,22 @@ var (
 	theGame *game.Game
 )
 
-func SetData(game []uint8, progress []uint8) {
+func SetData(game []uint8, progress []uint8, purchases []uint8) {
 	// Copy data here since the given data is just a reference and might be
 	// broken in the mobile side.
 	g := make([]uint8, len(game))
 	copy(g, game)
-	var p []uint8
+	var p1 []uint8
 	if progress != nil {
-		p = make([]uint8, len(progress))
-		copy(p, progress)
+		p1 = make([]uint8, len(progress))
+		copy(p1, progress)
 	}
-	data.SetData(g, p)
+	var p2 []uint8
+	if purchases != nil {
+		p2 = make([]uint8, len(purchases))
+		copy(p2, purchases)
+	}
+	data.SetData(g, p1, p2)
 }
 
 func IsRunning() bool {

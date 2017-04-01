@@ -177,11 +177,12 @@ func (m *Manager) FinishSaveProgress(id int) {
 	}
 }
 
-func (m *Manager) FinishPurchase(id int, success bool) {
+func (m *Manager) FinishPurchase(id int, success bool, purchases []uint8) {
 	m.resultCh <- RequestResult{
 		ID:        id,
 		Type:      RequestTypePurchase,
 		Succeeded: success,
+		Data:      purchases,
 	}
 }
 

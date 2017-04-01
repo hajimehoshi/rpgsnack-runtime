@@ -36,7 +36,7 @@ func (m *Requester) RequestSaveProgress(requestID int, data []uint8) {
 
 func (m *Requester) RequestPurchase(requestID int, productID string) {
 	log.Printf("request purchase: requestID: %d, productID: %s", requestID, productID)
-	m.game.FinishPurchase(requestID, true)
+	m.game.FinishPurchase(requestID, true, nil)
 }
 
 func (m *Requester) RequestRestorePurchases(requestID int) {

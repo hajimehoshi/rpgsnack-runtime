@@ -110,12 +110,14 @@ func (g *Game) FinishSaveProgress(id int) {
 	g.sceneManager.FinishSaveProgress(id)
 }
 
-func (g *Game) FinishPurchase(id int, success bool) {
-	g.sceneManager.FinishPurchase(id, success)
+func (g *Game) FinishPurchase(id int, success bool, purchases []uint8) {
+	g.sceneManager.FinishPurchase(id, success, purchases)
+	data.UpdatePurchases(purchases)
 }
 
 func (g *Game) FinishRestorePurchases(id int, purchases []uint8) {
 	g.sceneManager.FinishRestorePurchases(id, purchases)
+	data.UpdatePurchases(purchases)
 }
 
 func (g *Game) FinishInterstitialAds(id int) {

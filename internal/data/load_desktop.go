@@ -25,9 +25,14 @@ import (
 )
 
 var (
-	dataPath = flag.String("data", "./data.json", "data path")
-	savePath = flag.String("save", "./save.json", "save path")
+	dataPath      = flag.String("data", "./data.json", "data path")
+	purchasesPath = flag.String("purchases", "./purchases.json", "purchases path")
+	savePath      = flag.String("save", "./save.json", "save path")
 )
+
+func PurchasesPath() string {
+	return *purchasesPath
+}
 
 func SavePath() string {
 	return *savePath
@@ -45,8 +50,16 @@ func loadJSONData() (*jsonData, error) {
 		}
 		progress = nil
 	}
+	purchases, err := ioutil.ReadFile(*purchasesPath)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			return nil, err
+		}
+		purchases = nil
+	}
 	return &jsonData{
-		Game:     game,
-		Progress: progress,
+		Game:      game,
+		Progress:  progress,
+		Purchases: purchases,
 	}, nil
 }

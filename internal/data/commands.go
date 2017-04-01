@@ -345,6 +345,12 @@ func (c *CommandArgsSetVariable) UnmarshalJSON(data []uint8) error {
 			return err
 		}
 		c.Value = v
+	case SetVariableValueTypeIAPProduct:
+		v := 0
+		if err := unmarshalJSON(tmp.Value, &v); err != nil {
+			return err
+		}
+		c.Value = v
 	case SetVariableValueTypeSystem:
 		var v SystemVariableType
 		if err := unmarshalJSON(tmp.Value, &v); err != nil {
@@ -514,11 +520,12 @@ const (
 type SetVariableValueType string
 
 const (
-	SetVariableValueTypeConstant  SetVariableValueType = "constant"
-	SetVariableValueTypeVariable  SetVariableValueType = "variable"
-	SetVariableValueTypeRandom    SetVariableValueType = "random"
-	SetVariableValueTypeCharacter SetVariableValueType = "character"
-	SetVariableValueTypeSystem    SetVariableValueType = "system"
+	SetVariableValueTypeConstant   SetVariableValueType = "constant"
+	SetVariableValueTypeVariable   SetVariableValueType = "variable"
+	SetVariableValueTypeRandom     SetVariableValueType = "random"
+	SetVariableValueTypeCharacter  SetVariableValueType = "character"
+	SetVariableValueTypeIAPProduct SetVariableValueType = "iap_product"
+	SetVariableValueTypeSystem     SetVariableValueType = "system"
 )
 
 type SetVariableValueRandom struct {
