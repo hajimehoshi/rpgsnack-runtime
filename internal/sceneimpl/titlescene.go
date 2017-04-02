@@ -88,7 +88,7 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 		if err := audio.StopBGM(); err != nil {
 			return err
 		}
-		sceneManager.GoTo(NewMapScene())
+		sceneManager.GoToWithFading(NewMapScene(), 60)
 		return nil
 	}
 	if t.warningNoButton.Pressed() {
@@ -105,7 +105,7 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 			if err := audio.StopBGM(); err != nil {
 				return err
 			}
-			sceneManager.GoTo(NewMapScene())
+			sceneManager.GoToWithFading(NewMapScene(), 60)
 		}
 		return nil
 	}
@@ -117,7 +117,7 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 		if err := audio.StopBGM(); err != nil {
 			return err
 		}
-		sceneManager.GoTo(NewMapSceneWithGame(game))
+		sceneManager.GoToWithFading(NewMapSceneWithGame(game), 60)
 		return nil
 	}
 	if t.settingsButton.Pressed() {

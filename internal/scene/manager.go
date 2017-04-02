@@ -15,6 +15,7 @@
 package scene
 
 import (
+	"image/color"
 	"log"
 
 	"golang.org/x/text/language"
@@ -42,12 +43,15 @@ type Manager struct {
 	requester             Requester
 	current               scene
 	next                  scene
+	fadingCountMax        int
+	fadingCount           int
 	lastRequestID         int
 	resultCh              chan RequestResult
 	results               map[int]*RequestResult
 	language              language.Tag
 	interstitialAdsLoaded bool
 	rewardedAdsLoaded     bool
+	blackImage            *ebiten.Image
 }
 
 type Requester interface {
@@ -89,7 +93,7 @@ const (
 )
 
 func NewManager(width, height int, requester Requester) *Manager {
-	return &Manager{
+	m := &Manager{
 		width:     width,
 		height:    height,
 		requester: requester,
@@ -97,6 +101,9 @@ func NewManager(width, height int, requester Requester) *Manager {
 		results:   map[int]*RequestResult{},
 		language:  language.Und,
 	}
+	m.blackImage, _ = ebiten.NewImage(16, 16, ebiten.FilterNearest)
+	m.blackImage.Fill(color.Black)
+	return m
 }
 
 func (m *Manager) InitScene(scene scene) {
@@ -125,17 +132,41 @@ func (m *Manager) Update() error {
 	default:
 	}
 	if m.next != nil {
-		m.current = m.next
-		m.next = nil
+		if m.fadingCount > 0 {
+			if m.fadingCount <= m.fadingCountMax/2 {
+				m.current = m.next
+				m.next = nil
+			}
+		} else {
+			m.current = m.next
+			m.next = nil
+		}
 	}
 	if err := m.current.Update(m); err != nil {
 		return err
+	}
+	if 0 < m.fadingCount {
+		m.fadingCount--
 	}
 	return nil
 }
 
 func (m *Manager) Draw(screen *ebiten.Image) {
 	m.current.Draw(screen)
+	if 0 < m.fadingCount {
+		alpha := 0.0
+		if m.fadingCount > m.fadingCountMax/2 {
+			alpha = 1 - float64(m.fadingCount-m.fadingCountMax/2)/float64(m.fadingCountMax/2)
+		} else {
+			alpha = float64(m.fadingCount) / float64(m.fadingCountMax/2)
+		}
+		sw, sh := screen.Size()
+		w, h := m.blackImage.Size()
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Scale(float64(sw)/float64(w), float64(sh)/float64(h))
+		op.ColorM.Scale(1, 1, 1, alpha)
+		screen.DrawImage(m.blackImage, op)
+	}
 }
 
 func (m *Manager) Language() language.Tag {
@@ -147,7 +178,17 @@ func (m *Manager) SetLanguage(language language.Tag) {
 }
 
 func (m *Manager) GoTo(next scene) {
+	m.GoToWithFading(next, 0)
+}
+
+func (m *Manager) GoToWithFading(next scene, frames int) {
+	if 0 < m.fadingCount {
+		// TODO: Should panic here?
+		return
+	}
 	m.next = next
+	m.fadingCount = frames
+	m.fadingCountMax = frames
 }
 
 func (m *Manager) GenerateRequestID() int {

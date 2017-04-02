@@ -127,7 +127,7 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 	m.gameState.Windows().Update(sceneManager)
 	if err := m.gameState.Map().Update(sceneManager); err != nil {
 		if err == gamestate.GoToTitle {
-			sceneManager.GoTo(NewTitleScene())
+			sceneManager.GoToWithFading(NewTitleScene(), 60)
 			return nil
 		}
 		return err
