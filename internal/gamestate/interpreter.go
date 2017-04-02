@@ -286,7 +286,6 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 			hintId := i.gameState.hints.ActiveHintId()
 			// next time it shows next available hint
 			i.gameState.hints.ReadHint(hintId)
-
 			var hintText data.UUID
 			for _, h := range data.Current().Hints {
 				if h.ID == hintId {
@@ -294,14 +293,10 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 					break
 				}
 			}
-
-			var content string
-			if hintText.String() == "" {
-				content = "Undefined"
-			} else {
+			content := "Undefined"
+			if hintText.String() != "" {
 				content = data.Current().Texts.Get(sceneManager.Language(), hintText)
 			}
-
 			id := args.EventID
 			if id == 0 {
 				id = i.eventID
@@ -313,7 +308,6 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 				return false, nil
 			}
 		}
-
 		i.commandIterator.Advance()
 		i.gameState.windows.CloseAll()
 		i.waitingCommand = false
