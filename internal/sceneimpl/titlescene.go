@@ -38,7 +38,6 @@ type TitleScene struct {
 }
 
 func NewTitleScene() *TitleScene {
-	const warning = ``
 	t := &TitleScene{
 		newGameButton:    ui.NewButton(0, 184, 120, 20),
 		resumeGameButton: ui.NewButton(0, 208, 120, 20),
