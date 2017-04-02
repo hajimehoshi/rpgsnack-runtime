@@ -31,7 +31,7 @@ type Button struct {
 	Width    int
 	Height   int
 	Visible  bool
-	text     string
+	Text     string
 	image    *ebiten.Image
 	pressing bool
 	pressed  bool
@@ -44,7 +44,7 @@ func NewButton(x, y, width, height int, text string) *Button {
 		Width:   width,
 		Height:  height,
 		Visible: true,
-		text:    text,
+		Text:    text,
 	}
 }
 
@@ -129,8 +129,8 @@ func (b *Button) Draw(screen *ebiten.Image) {
 	op.GeoM.Translate(float64(b.X), float64(b.Y))
 	op.GeoM.Scale(scene.TileScale, scene.TileScale)
 	screen.DrawImage(img, op)
-	tw, th := font.MeasureSize(b.text)
+	tw, th := font.MeasureSize(b.Text)
 	tx := b.X*scene.TileScale + (b.Width*scene.TileScale-tw*scene.TextScale)/2
 	ty := b.Y*scene.TileScale + (b.Height*scene.TileScale-th*scene.TextScale)/2
-	font.DrawText(screen, b.text, tx, ty, scene.TextScale, color.White)
+	font.DrawText(screen, b.Text, tx, ty, scene.TextScale, color.White)
 }

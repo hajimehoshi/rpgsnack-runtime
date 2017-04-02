@@ -23,6 +23,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/gamestate"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/texts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/ui"
 )
 
@@ -55,6 +56,11 @@ to start a new game?`
 }
 
 func (t *TitleScene) Update(sceneManager *scene.Manager) error {
+	t.newGameButton.Text = texts.Text(sceneManager.Language(), texts.TextIDNewGame)
+	t.resumeGameButton.Text = texts.Text(sceneManager.Language(), texts.TextIDResumeGame)
+	t.warningYesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDYes)
+	t.warningNoButton.Text = texts.Text(sceneManager.Language(), texts.TextIDNo)
+
 	w, h := sceneManager.Size()
 	t.newGameButton.X = (w/scene.TileScale - t.newGameButton.Width) / 2
 	t.resumeGameButton.X = (w/scene.TileScale - t.resumeGameButton.Width) / 2
