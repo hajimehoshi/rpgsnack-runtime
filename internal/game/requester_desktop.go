@@ -57,7 +57,9 @@ func (m *Requester) RequestPurchase(requestID int, productID string) {
 	log.Printf("request purchase: requestID: %d, productID: %s", requestID, productID)
 	// Add new purchase if unique
 	var purchases []string
-	json.Unmarshal(datapkg.Purchases(), &purchases)
+	if err := json.Unmarshal(datapkg.Purchases(), &purchases); err != nil {
+		panic(err)
+	}
 
 	isNew := true
 	for _, p := range purchases {
@@ -71,7 +73,10 @@ func (m *Requester) RequestPurchase(requestID int, productID string) {
 		purchases = append(purchases, productID)
 	}
 
-	newPurchases, _ := json.Marshal(purchases)
+	newPurchases, err := json.Marshal(purchases)
+	if err != nil {
+		panic(err)
+	}
 
 	go func() {
 		f, err := os.Create(datapkg.PurchasesPath())
