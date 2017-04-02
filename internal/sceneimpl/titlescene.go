@@ -42,12 +42,12 @@ func NewTitleScene() *TitleScene {
 Do you want to clear the progress
 to start a new game?`
 	t := &TitleScene{
-		newGameButton:    ui.NewButton(0, 184, 120, 20, "New Game"),
-		resumeGameButton: ui.NewButton(0, 208, 120, 20, "Resume Game"),
+		newGameButton:    ui.NewButton(0, 184, 120, 20),
+		resumeGameButton: ui.NewButton(0, 208, 120, 20),
 		settingsButton:   ui.NewImageButton(0, 0, assets.GetImage("icon_settings.png")),
 		warningDialog:    ui.NewDialog(0, 4, 152, 232),
-		warningYesButton: ui.NewButton(0, 180, 120, 20, "Yes"),
-		warningNoButton:  ui.NewButton(0, 204, 120, 20, "No"),
+		warningYesButton: ui.NewButton(0, 180, 120, 20),
+		warningNoButton:  ui.NewButton(0, 204, 120, 20),
 	}
 	t.warningDialog.AddChild(ui.NewLabel(8, 8, warning))
 	t.warningDialog.AddChild(t.warningYesButton)

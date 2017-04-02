@@ -22,6 +22,7 @@ import (
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/texts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/ui"
 )
 
@@ -42,13 +43,13 @@ func NewSettingsScene() *SettingsScene {
 	const d = 24
 	s := &SettingsScene{
 		infoLabel:              ui.NewLabel(4, 4, "Info"),
-		languageButton:         ui.NewButton(0, 4+1*d, 120, 20, "Language"),
-		creditButton:           ui.NewButton(0, 4+2*d, 120, 20, "Credit"),
-		removeAdsButton:        ui.NewButton(0, 4+3*d, 120, 20, "Remove Ads"),
-		reviewThisAppButton:    ui.NewButton(0, 4+4*d, 120, 20, "Review This App"),
-		restorePurchasesButton: ui.NewButton(0, 4+5*d, 120, 20, "Restore Purchases"),
-		moreGamesButton:        ui.NewButton(0, 4+6*d, 120, 20, "More Games"),
-		closeButton:            ui.NewButton(0, 4+7*d, 120, 20, "Close"),
+		languageButton:         ui.NewButton(0, 4+1*d, 120, 20),
+		creditButton:           ui.NewButton(0, 4+2*d, 120, 20),
+		removeAdsButton:        ui.NewButton(0, 4+3*d, 120, 20),
+		reviewThisAppButton:    ui.NewButton(0, 4+4*d, 120, 20),
+		restorePurchasesButton: ui.NewButton(0, 4+5*d, 120, 20),
+		moreGamesButton:        ui.NewButton(0, 4+6*d, 120, 20),
+		closeButton:            ui.NewButton(0, 4+7*d, 120, 20),
 		languageDialog:         ui.NewDialog(0, 4, 152, 232),
 	}
 	for i, l := range data.Current().Texts.Languages() {
@@ -56,7 +57,8 @@ func NewSettingsScene() *SettingsScene {
 		if l != language.Und {
 			n = display.Self.Name(l)
 		}
-		b := ui.NewButton(0, 8+i*d, 120, 20, n)
+		b := ui.NewButton(0, 8+i*d, 120, 20)
+		b.Text = n
 		s.languageDialog.AddChild(b)
 		s.languageButtons = append(s.languageButtons, b)
 	}
@@ -64,6 +66,14 @@ func NewSettingsScene() *SettingsScene {
 }
 
 func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
+	s.languageButton.Text = texts.Text(sceneManager.Language(), texts.TextIDLanguage)
+	s.creditButton.Text = texts.Text(sceneManager.Language(), texts.TextIDCredit)
+	s.removeAdsButton.Text = texts.Text(sceneManager.Language(), texts.TextIDRemoveAds)
+	s.reviewThisAppButton.Text = texts.Text(sceneManager.Language(), texts.TextIDReviewThisApp)
+	s.restorePurchasesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDRestorePurchases)
+	s.moreGamesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDMoreGames)
+	s.closeButton.Text = texts.Text(sceneManager.Language(), texts.TextIDClose)
+
 	w, _ := sceneManager.Size()
 	s.languageButton.X = (w/scene.TileScale - s.languageButton.Width) / 2
 	s.creditButton.X = (w/scene.TileScale - s.creditButton.Width) / 2

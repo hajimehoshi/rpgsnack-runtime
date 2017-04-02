@@ -37,14 +37,13 @@ type Button struct {
 	pressed  bool
 }
 
-func NewButton(x, y, width, height int, text string) *Button {
+func NewButton(x, y, width, height int) *Button {
 	return &Button{
 		X:       x,
 		Y:       y,
 		Width:   width,
 		Height:  height,
 		Visible: true,
-		Text:    text,
 	}
 }
 
