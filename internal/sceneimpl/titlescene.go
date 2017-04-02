@@ -20,6 +20,7 @@ import (
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/gamestate"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
@@ -28,6 +29,7 @@ import (
 )
 
 type TitleScene struct {
+	init             bool
 	newGameButton    *ui.Button
 	resumeGameButton *ui.Button
 	settingsButton   *ui.Button
@@ -54,6 +56,13 @@ func NewTitleScene() *TitleScene {
 }
 
 func (t *TitleScene) Update(sceneManager *scene.Manager) error {
+	if !t.init {
+		if err := audio.PlayBGM("tick", 1); err != nil {
+			return err
+		}
+		t.init = true
+	}
+
 	t.newGameButton.Text = texts.Text(sceneManager.Language(), texts.TextIDNewGame)
 	t.resumeGameButton.Text = texts.Text(sceneManager.Language(), texts.TextIDResumeGame)
 	t.warningLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDNewGameWarning)
@@ -76,6 +85,9 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 		t.settingsButton.Update()
 	}
 	if t.warningYesButton.Pressed() {
+		if err := audio.StopBGM(); err != nil {
+			return err
+		}
 		sceneManager.GoTo(NewMapScene())
 		return nil
 	}
@@ -90,6 +102,9 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 		if data.Progress() != nil {
 			t.warningDialog.Visible = true
 		} else {
+			if err := audio.StopBGM(); err != nil {
+				return err
+			}
 			sceneManager.GoTo(NewMapScene())
 		}
 		return nil
@@ -99,10 +114,16 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 		if err := json.Unmarshal(data.Progress(), &game); err != nil {
 			return err
 		}
+		if err := audio.StopBGM(); err != nil {
+			return err
+		}
 		sceneManager.GoTo(NewMapSceneWithGame(game))
 		return nil
 	}
 	if t.settingsButton.Pressed() {
+		if err := audio.StopBGM(); err != nil {
+			return err
+		}
 		sceneManager.GoTo(NewSettingsScene())
 		return nil
 	}
