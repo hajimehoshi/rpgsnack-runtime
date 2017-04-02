@@ -256,8 +256,8 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		}
 		return false, nil
 	case data.CommandNameShowMessage:
+		args := c.Args.(*data.CommandArgsShowMessage)
 		if !i.waitingCommand {
-			args := c.Args.(*data.CommandArgsShowMessage)
 			content := data.Current().Texts.Get(sceneManager.Language(), args.ContentID)
 			id := args.EventID
 			if id == 0 {
@@ -273,7 +273,8 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		// Advance command index first and check the next command.
 		i.commandIterator.Advance()
 		if !i.commandIterator.IsTerminated() {
-			if i.commandIterator.Command().Name != data.CommandNameShowChoices {
+			if (i.commandIterator.Command().Name != data.CommandNameShowChoices) ||
+				(args.Type != data.ShowMessageBalloon) {
 				i.gameState.windows.CloseAll()
 			}
 		} else {
