@@ -25,10 +25,11 @@ func loadJSONData() (*jsonData, error) {
 	return <-dataCh, nil
 }
 
-func SetData(game []uint8, progress []uint8, purchases []uint8) {
+func SetData(game []uint8, progress []uint8, purchases []uint8, defaultLanguage string) {
 	dataCh <- &jsonData{
-		Game:      game,
-		Progress:  progress,
-		Purchases: purchases,
+		Game:            game,
+		Progress:        progress,
+		Purchases:       purchases,
+		DefaultLanguage: defaultLanguage,
 	}
 }

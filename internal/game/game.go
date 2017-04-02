@@ -46,6 +46,8 @@ func (g *Game) loadGameData() {
 			ch <- err
 			return
 		}
+
+		g.sceneManager.SetLanguage(data.DefaultLanguage())
 	}()
 	g.loadingCh = ch
 }

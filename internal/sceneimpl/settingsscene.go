@@ -15,7 +15,6 @@
 package sceneimpl
 
 import (
-	"golang.org/x/text/language"
 	"golang.org/x/text/language/display"
 
 	"github.com/hajimehoshi/ebiten"
@@ -53,10 +52,7 @@ func NewSettingsScene() *SettingsScene {
 		languageDialog:         ui.NewDialog(0, 4, 152, 232),
 	}
 	for i, l := range data.Current().Texts.Languages() {
-		n := "Default"
-		if l != language.Und {
-			n = display.Self.Name(l)
-		}
+		n := display.Self.Name(l)
 		b := ui.NewButton(0, 8+i*d, 120, 20)
 		b.Text = n
 		s.languageDialog.AddChild(b)

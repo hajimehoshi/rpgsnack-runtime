@@ -17,6 +17,8 @@ package data
 import (
 	"encoding/json"
 	"fmt"
+
+	"golang.org/x/text/language"
 )
 
 func min(a, b int) int {
@@ -53,9 +55,10 @@ func unmarshalJSON(data []uint8, v interface{}) error {
 }
 
 var (
-	current   *Game
-	progress  []uint8
-	purchases []uint8
+	current         *Game
+	progress        []uint8
+	purchases       []uint8
+	defaultLanguage language.Tag
 )
 
 func Current() *Game {
@@ -70,6 +73,10 @@ func Purchases() []uint8 {
 	return purchases
 }
 
+func DefaultLanguage() language.Tag {
+	return defaultLanguage
+}
+
 func UpdateProgress(p []uint8) {
 	progress = p
 }
@@ -79,9 +86,10 @@ func UpdatePurchases(p []uint8) {
 }
 
 type jsonData struct {
-	Purchases []uint8
-	Game      []uint8
-	Progress  []uint8
+	Game            []uint8
+	Progress        []uint8
+	Purchases       []uint8
+	DefaultLanguage string
 }
 
 func Load() error {
@@ -96,5 +104,11 @@ func Load() error {
 	current = gameData
 	progress = data.Progress
 	purchases = data.Purchases
+
+	tag, err := language.Parse(data.DefaultLanguage)
+	if err != nil {
+		panic(err)
+	}
+	defaultLanguage = tag
 	return nil
 }

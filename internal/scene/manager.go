@@ -99,7 +99,7 @@ func NewManager(width, height int, requester Requester) *Manager {
 		requester: requester,
 		resultCh:  make(chan RequestResult, 1),
 		results:   map[int]*RequestResult{},
-		language:  language.Und,
+		language:  language.English,
 	}
 	m.blackImage, _ = ebiten.NewImage(16, 16, ebiten.FilterNearest)
 	m.blackImage.Fill(color.Black)
