@@ -38,18 +38,17 @@ type TitleScene struct {
 }
 
 func NewTitleScene() *TitleScene {
-	const warning = `You have a on-going game data.
-Do you want to clear the progress
-to start a new game?`
+	const warning = ``
 	t := &TitleScene{
 		newGameButton:    ui.NewButton(0, 184, 120, 20),
 		resumeGameButton: ui.NewButton(0, 208, 120, 20),
 		settingsButton:   ui.NewImageButton(0, 0, assets.GetImage("icon_settings.png")),
 		warningDialog:    ui.NewDialog(0, 4, 152, 232),
+		warningLabel:     ui.NewLabel(8, 8),
 		warningYesButton: ui.NewButton(0, 180, 120, 20),
 		warningNoButton:  ui.NewButton(0, 204, 120, 20),
 	}
-	t.warningDialog.AddChild(ui.NewLabel(8, 8, warning))
+	t.warningDialog.AddChild(t.warningLabel)
 	t.warningDialog.AddChild(t.warningYesButton)
 	t.warningDialog.AddChild(t.warningNoButton)
 	return t
@@ -58,6 +57,7 @@ to start a new game?`
 func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 	t.newGameButton.Text = texts.Text(sceneManager.Language(), texts.TextIDNewGame)
 	t.resumeGameButton.Text = texts.Text(sceneManager.Language(), texts.TextIDResumeGame)
+	t.warningLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDNewGameWarning)
 	t.warningYesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDYes)
 	t.warningNoButton.Text = texts.Text(sceneManager.Language(), texts.TextIDNo)
 

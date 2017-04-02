@@ -23,8 +23,10 @@ type TextID int
 const (
 	TextIDNewGame TextID = iota
 	TextIDResumeGame
+	TextIDNewGameWarning
 	TextIDYes
 	TextIDNo
+	TextIDInfo
 	TextIDLanguage
 	TextIDCredit
 	TextIDRemoveAds
@@ -47,6 +49,7 @@ var texts = map[language.Tag]map[TextID]string{
 		TextIDResumeGame:       "Resume Game",
 		TextIDYes:              "Yes",
 		TextIDNo:               "No",
+		TextIDInfo:             "Info",
 		TextIDLanguage:         "Language",
 		TextIDCredit:           "Credit",
 		TextIDRemoveAds:        "Remove Ads",
@@ -54,12 +57,17 @@ var texts = map[language.Tag]map[TextID]string{
 		TextIDRestorePurchases: "Restore Purchases",
 		TextIDMoreGames:        "More Games",
 		TextIDClose:            "Close",
+
+		TextIDNewGameWarning: `You have a on-going game data.
+Do you want to clear the progress
+to start a new game?`,
 	},
 	language.Japanese: {
 		TextIDNewGame:          "初めから",
 		TextIDResumeGame:       "続きから",
 		TextIDYes:              "はい",
 		TextIDNo:               "いいえ",
+		TextIDInfo:             "インフォ",
 		TextIDLanguage:         "言語",
 		TextIDCredit:           "クレジット",
 		TextIDRemoveAds:        "広告を非表示にする",
@@ -67,5 +75,9 @@ var texts = map[language.Tag]map[TextID]string{
 		TextIDRestorePurchases: "購入情報再取得",
 		TextIDMoreGames:        "ほかのゲーム",
 		TextIDClose:            "閉じる",
+
+		TextIDNewGameWarning: `進行中のゲームデータがあります。
+進行中のゲームデータを消して、
+新しいゲームを開始しますか?`,
 	},
 }

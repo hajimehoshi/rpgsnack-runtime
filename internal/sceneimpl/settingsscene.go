@@ -42,7 +42,7 @@ type SettingsScene struct {
 func NewSettingsScene() *SettingsScene {
 	const d = 24
 	s := &SettingsScene{
-		infoLabel:              ui.NewLabel(4, 4, "Info"),
+		infoLabel:              ui.NewLabel(4, 4),
 		languageButton:         ui.NewButton(0, 4+1*d, 120, 20),
 		creditButton:           ui.NewButton(0, 4+2*d, 120, 20),
 		removeAdsButton:        ui.NewButton(0, 4+3*d, 120, 20),
@@ -66,6 +66,7 @@ func NewSettingsScene() *SettingsScene {
 }
 
 func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
+	s.infoLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDInfo)
 	s.languageButton.Text = texts.Text(sceneManager.Language(), texts.TextIDLanguage)
 	s.creditButton.Text = texts.Text(sceneManager.Language(), texts.TextIDCredit)
 	s.removeAdsButton.Text = texts.Text(sceneManager.Language(), texts.TextIDRemoveAds)
