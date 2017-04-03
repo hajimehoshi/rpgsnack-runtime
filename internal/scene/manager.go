@@ -21,6 +21,8 @@ import (
 	"golang.org/x/text/language"
 
 	"github.com/hajimehoshi/ebiten"
+
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 )
 
 const (
@@ -174,7 +176,13 @@ func (m *Manager) Language() language.Tag {
 }
 
 func (m *Manager) SetLanguage(language language.Tag) {
-	m.language = language
+	for _, l := range data.Current().Texts.Languages() {
+		if l == language {
+			m.language = language
+			return
+		}
+	}
+	m.language = data.Current().Texts.Languages()[0]
 }
 
 func (m *Manager) GoTo(next scene) {

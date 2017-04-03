@@ -73,6 +73,7 @@ func Purchases() []uint8 {
 	return purchases
 }
 
+// DefaultLanguage represents a default language in the environment the player is playing on.
 func DefaultLanguage() language.Tag {
 	return defaultLanguage
 }
