@@ -15,8 +15,31 @@
 package data
 
 import (
+	"sort"
+
 	"golang.org/x/text/language"
 )
+
+type languagesByAlphabet []language.Tag
+
+func (l languagesByAlphabet) Len() int {
+	return len(l)
+}
+
+func (l languagesByAlphabet) Less(i, j int) bool {
+	// English first
+	if l[i] == language.English {
+		return true
+	}
+	if l[j] == language.English {
+		return false
+	}
+	return l[i].String() < l[j].String()
+}
+
+func (l languagesByAlphabet) Swap(i, j int) {
+	l[i], l[j] = l[j], l[i]
+}
 
 type Texts struct {
 	data      map[language.Tag]map[UUID]string
@@ -42,6 +65,7 @@ func (t *Texts) UnmarshalJSON(data []uint8) error {
 		}
 		t.data[lang] = text
 	}
+	sort.Sort(languagesByAlphabet(t.languages))
 	return nil
 }
 
