@@ -106,6 +106,7 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 				}
 			}
 		}
+		return nil
 	}
 	s.settingsLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDSettings)
 	s.languageButton.Text = texts.Text(sceneManager.Language(), texts.TextIDLanguage)
