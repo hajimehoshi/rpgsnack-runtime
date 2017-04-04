@@ -425,6 +425,9 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 			return false, err
 		}
 		i.commandIterator.Advance()
+	case data.CommandNameSave:
+		i.gameState.RequestSave(sceneManager)
+		i.commandIterator.Advance()
 	case data.CommandNameGotoTitle:
 		i.shouldGoToTitle = true
 		return false, GoToTitle
@@ -437,7 +440,6 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		return false, nil
 	case data.CommandControlHint:
 		args := c.Args.(*data.CommandArgsControlHint)
-
 		switch args.Type {
 		case data.ControlHintPause:
 			i.gameState.hints.Pause(args.ID)

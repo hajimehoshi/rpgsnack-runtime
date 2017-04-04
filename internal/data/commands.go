@@ -136,6 +136,7 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 		}
 		c.Args = args
 	case CommandNameStopBGM:
+	case CommandNameSave:
 	case CommandNameGotoTitle:
 	case CommandUnlockAchievement:
 		var args *CommandArgsUnlockAchievement
@@ -230,6 +231,7 @@ const (
 	CommandNamePlaySE        CommandName = "play_se"
 	CommandNamePlayBGM       CommandName = "play_bgm"
 	CommandNameStopBGM       CommandName = "stop_bgm"
+	CommandNameSave          CommandName = "save"
 	CommandNameGotoTitle     CommandName = "goto_title"
 	CommandUnlockAchievement CommandName = "unlock_achievement"
 	CommandControlHint       CommandName = "control_hint"

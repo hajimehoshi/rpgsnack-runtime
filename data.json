@@ -31,6 +31,7 @@
       "8ea36699-81b8-485f-914c-ca94aeefebcc": "場所移動後のテスト。",
       "0a64a375-260f-4e0e-9538-ef5b64ecb501": "自動イベントのテストで\nございます",
       "ab610c8c-578a-4876-92db-6398931087b7": "変数テスト: Constant: \\v[1] Random: \\v[2]",
+      "7358e3ad-c1ea-4198-a6a4-38e74bfcc90c": "セーブのテスト",
       "7d7bb542-cead-4989-96c5-3ab0e48710fd": "スキップありのルート指定のテスト\nVisibilityも変わるよ",
       "828e2dd3-a0c9-4aad-88f6-d9c6f0a1d79e": "タイトルへ戻ります",
       "3d1e6c63-983a-46da-88de-036fd651ca7d": "選択肢A",
@@ -584,6 +585,18 @@
                       "args": {
                         "id": 12345
                       }
+                    },
+                    {
+                      "name": "show_message",
+                      "args": {
+                        "content": "7358e3ad-c1ea-4198-a6a4-38e74bfcc90c",
+                        "eventId": -1,
+                        "type": "balloon",
+                        "balloonType": "normal"
+                      }
+                    },
+                    {
+                      "name": "save"
                     },
                     {
                       "name": "show_message",
