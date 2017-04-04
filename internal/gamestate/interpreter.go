@@ -39,7 +39,6 @@ type Interpreter struct {
 	sub                *Interpreter
 	route              bool // True when used for event routing property.
 	routeSkip          bool
-	shouldGoToTitle    bool
 	waitingRequestID   int // Note: When this is not 0, the game state can't be saved.
 
 	// Fields that are not dumped
@@ -70,7 +69,6 @@ type tmpInterpreter struct {
 	Sub                *Interpreter                     `json:"sub"`
 	Route              bool                             `json:"route"`
 	RouteSkip          bool                             `json:"routeSkip"`
-	ShouldGoToTitle    bool                             `json:"shouldGoToTitle"`
 	WaitingRequestID   int                              `json:"waitingRequestId"`
 }
 
@@ -88,7 +86,6 @@ func (i *Interpreter) MarshalJSON() ([]uint8, error) {
 		Sub:                i.sub,
 		Route:              i.route,
 		RouteSkip:          i.routeSkip,
-		ShouldGoToTitle:    i.shouldGoToTitle,
 		WaitingRequestID:   i.waitingRequestID,
 	}
 	return json.Marshal(tmp)
@@ -111,7 +108,6 @@ func (i *Interpreter) UnmarshalJSON(data []uint8) error {
 	i.sub = tmp.Sub
 	i.route = tmp.Route
 	i.routeSkip = tmp.RouteSkip
-	i.shouldGoToTitle = tmp.ShouldGoToTitle
 	i.waitingRequestID = tmp.WaitingRequestID
 	return nil
 }
@@ -429,7 +425,6 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		i.gameState.RequestSave(sceneManager)
 		i.commandIterator.Advance()
 	case data.CommandNameGotoTitle:
-		i.shouldGoToTitle = true
 		return false, GoToTitle
 	case data.CommandUnlockAchievement:
 		// TODO: Remove this command in the future.
