@@ -118,6 +118,9 @@ func (i *Interpreter) UnmarshalJSON(data []uint8) error {
 
 func (i *Interpreter) setGame(game *Game) {
 	i.gameState = game
+	if i.sub != nil {
+		i.sub.setGame(game)
+	}
 	if i.moveCharacterState != nil {
 		i.moveCharacterState.setGame(game)
 	}
