@@ -26,7 +26,7 @@ const (
 	TextIDNewGameWarning
 	TextIDYes
 	TextIDNo
-	TextIDInfo
+	TextIDSettings
 	TextIDLanguage
 	TextIDCredit
 	TextIDRemoveAds
@@ -50,7 +50,7 @@ var texts = map[language.Tag]map[TextID]string{
 		TextIDResumeGame:       "Resume Game",
 		TextIDYes:              "Yes",
 		TextIDNo:               "No",
-		TextIDInfo:             "Info",
+		TextIDSettings:         "Settings",
 		TextIDLanguage:         "Language",
 		TextIDCredit:           "Credit",
 		TextIDRemoveAds:        "Remove Ads",
@@ -69,7 +69,7 @@ to start a new game?`,
 		TextIDResumeGame:       "続きから",
 		TextIDYes:              "はい",
 		TextIDNo:               "いいえ",
-		TextIDInfo:             "インフォ",
+		TextIDSettings:         "設定",
 		TextIDLanguage:         "言語",
 		TextIDCredit:           "クレジット",
 		TextIDRemoveAds:        "広告を非表示にする",

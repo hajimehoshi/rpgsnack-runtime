@@ -27,11 +27,11 @@ import (
 
 const (
 	buttonOffsetX = 4
-	buttonDeltaY = 24
+	buttonDeltaY  = 24
 )
 
 type SettingsScene struct {
-	infoLabel              *ui.Label
+	settingsLabel          *ui.Label
 	languageButton         *ui.Button
 	creditButton           *ui.Button
 	removeAdsButton        *ui.Button
@@ -46,7 +46,7 @@ type SettingsScene struct {
 
 func NewSettingsScene() *SettingsScene {
 	s := &SettingsScene{
-		infoLabel:              ui.NewLabel(4, 4),
+		settingsLabel:          ui.NewLabel(4, 4),
 		languageButton:         ui.NewButton(0, 0, 120, 20),
 		creditButton:           ui.NewButton(0, 0, 120, 20),
 		removeAdsButton:        ui.NewButton(0, 0, 120, 20),
@@ -70,7 +70,6 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 	if s.waitingRequestID != 0 {
 		s.waitingRequestID = 0
 		r := sceneManager.ReceiveResultIfExists(s.waitingRequestID)
-
 		switch r.Type {
 		case scene.RequestTypeRestorePurchases:
 			if r.Succeeded {
@@ -80,8 +79,7 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 			}
 		}
 	}
-
-	s.infoLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDInfo)
+	s.settingsLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDSettings)
 	s.languageButton.Text = texts.Text(sceneManager.Language(), texts.TextIDLanguage)
 	s.creditButton.Text = texts.Text(sceneManager.Language(), texts.TextIDCredit)
 	s.removeAdsButton.Text = texts.Text(sceneManager.Language(), texts.TextIDRemoveAds)
@@ -91,25 +89,25 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 	s.closeButton.Text = texts.Text(sceneManager.Language(), texts.TextIDClose)
 
 	buttonIndex := 1
-	s.languageButton.Y = buttonOffsetX+buttonIndex*buttonDeltaY
+	s.languageButton.Y = buttonOffsetX + buttonIndex*buttonDeltaY
 	buttonIndex++
-	s.creditButton.Y = buttonOffsetX+buttonIndex*buttonDeltaY
+	s.creditButton.Y = buttonOffsetX + buttonIndex*buttonDeltaY
 	buttonIndex++
 
 	// TODO: Once an ads is removed, hide the button
 	if true {
-		s.removeAdsButton.Y = buttonOffsetX+buttonIndex*buttonDeltaY
+		s.removeAdsButton.Y = buttonOffsetX + buttonIndex*buttonDeltaY
 		buttonIndex++
 	} else {
 		s.removeAdsButton.Y = -1000 // Invisible
 	}
-	s.reviewThisAppButton.Y = buttonOffsetX+buttonIndex*buttonDeltaY
+	s.reviewThisAppButton.Y = buttonOffsetX + buttonIndex*buttonDeltaY
 	buttonIndex++
-	s.restorePurchasesButton.Y = buttonOffsetX+buttonIndex*buttonDeltaY
+	s.restorePurchasesButton.Y = buttonOffsetX + buttonIndex*buttonDeltaY
 	buttonIndex++
-	s.moreGamesButton.Y = buttonOffsetX+buttonIndex*buttonDeltaY
+	s.moreGamesButton.Y = buttonOffsetX + buttonIndex*buttonDeltaY
 	buttonIndex++
-	s.closeButton.Y = buttonOffsetX+buttonIndex*buttonDeltaY
+	s.closeButton.Y = buttonOffsetX + buttonIndex*buttonDeltaY
 
 	w, _ := sceneManager.Size()
 	s.languageButton.X = (w/scene.TileScale - s.languageButton.Width) / 2
@@ -173,7 +171,7 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 }
 
 func (s *SettingsScene) Draw(screen *ebiten.Image) {
-	s.infoLabel.Draw(screen)
+	s.settingsLabel.Draw(screen)
 	s.languageButton.Draw(screen)
 	s.creditButton.Draw(screen)
 	s.removeAdsButton.Draw(screen)
