@@ -15,6 +15,8 @@
 package sceneimpl
 
 import (
+	"encoding/json"
+
 	"golang.org/x/text/language/display"
 
 	"github.com/hajimehoshi/ebiten"
@@ -42,6 +44,7 @@ type SettingsScene struct {
 	languageDialog         *ui.Dialog
 	languageButtons        []*ui.Button
 	waitingRequestID       int
+	isAdsRemoved           bool
 }
 
 func NewSettingsScene() *SettingsScene {
@@ -63,19 +66,44 @@ func NewSettingsScene() *SettingsScene {
 		s.languageDialog.AddChild(b)
 		s.languageButtons = append(s.languageButtons, b)
 	}
+	s.UpdatePurchasesState()
 	return s
+}
+
+// TODO: Move this method to load.go?
+func (s *SettingsScene) isPurchased(key string) bool {
+	var purchases []string
+	if data.Purchases() != nil {
+		if err := json.Unmarshal(data.Purchases(), &purchases); err != nil {
+			panic(err)
+		}
+	}
+
+	for _, p := range purchases {
+		if p == key {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (s *SettingsScene) UpdatePurchasesState() {
+	s.isAdsRemoved = s.isPurchased("ads_removal")
 }
 
 func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 	if s.waitingRequestID != 0 {
-		s.waitingRequestID = 0
 		r := sceneManager.ReceiveResultIfExists(s.waitingRequestID)
-		switch r.Type {
-		case scene.RequestTypeRestorePurchases:
-			if r.Succeeded {
-				// Success
-			} else {
-				// Fail
+		if r != nil {
+			s.waitingRequestID = 0
+			switch r.Type {
+			case scene.RequestTypeRestorePurchases:
+				// Note: Ideally we should show a notification toast to notify users about the result
+				// For now, the notifications are handled on the native platform side
+				if r.Succeeded {
+					s.UpdatePurchasesState()
+				}
 			}
 		}
 	}
@@ -94,12 +122,10 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 	s.creditButton.Y = buttonOffsetX + buttonIndex*buttonDeltaY
 	buttonIndex++
 
-	// TODO: Once an ads is removed, hide the button
-	if true {
+	s.removeAdsButton.Visible = !s.isAdsRemoved
+	if !s.isAdsRemoved {
 		s.removeAdsButton.Y = buttonOffsetX + buttonIndex*buttonDeltaY
 		buttonIndex++
-	} else {
-		s.removeAdsButton.Y = -1000 // Invisible
 	}
 	s.reviewThisAppButton.Y = buttonOffsetX + buttonIndex*buttonDeltaY
 	buttonIndex++
