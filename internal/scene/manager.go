@@ -235,11 +235,11 @@ func (m *Manager) FinishPurchase(id int, success bool, purchases []uint8) {
 	}
 }
 
-func (m *Manager) FinishRestorePurchases(id int, purchases []uint8) {
+func (m *Manager) FinishRestorePurchases(id int, success bool, purchases []uint8) {
 	m.resultCh <- RequestResult{
 		ID:        id,
 		Type:      RequestTypeRestorePurchases,
-		Succeeded: true,
+		Succeeded: success,
 		Data:      purchases,
 	}
 }

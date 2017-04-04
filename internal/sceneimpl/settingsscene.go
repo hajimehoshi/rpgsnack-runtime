@@ -25,6 +25,11 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/ui"
 )
 
+const (
+	buttonOffsetX = 4
+	buttonDeltaY = 24
+)
+
 type SettingsScene struct {
 	infoLabel              *ui.Label
 	languageButton         *ui.Button
@@ -36,24 +41,24 @@ type SettingsScene struct {
 	closeButton            *ui.Button
 	languageDialog         *ui.Dialog
 	languageButtons        []*ui.Button
+	waitingRequestID       int
 }
 
 func NewSettingsScene() *SettingsScene {
-	const d = 24
 	s := &SettingsScene{
 		infoLabel:              ui.NewLabel(4, 4),
-		languageButton:         ui.NewButton(0, 4+1*d, 120, 20),
-		creditButton:           ui.NewButton(0, 4+2*d, 120, 20),
-		removeAdsButton:        ui.NewButton(0, 4+3*d, 120, 20),
-		reviewThisAppButton:    ui.NewButton(0, 4+4*d, 120, 20),
-		restorePurchasesButton: ui.NewButton(0, 4+5*d, 120, 20),
-		moreGamesButton:        ui.NewButton(0, 4+6*d, 120, 20),
-		closeButton:            ui.NewButton(0, 4+7*d, 120, 20),
+		languageButton:         ui.NewButton(0, 0, 120, 20),
+		creditButton:           ui.NewButton(0, 0, 120, 20),
+		removeAdsButton:        ui.NewButton(0, 0, 120, 20),
+		reviewThisAppButton:    ui.NewButton(0, 0, 120, 20),
+		restorePurchasesButton: ui.NewButton(0, 0, 120, 20),
+		moreGamesButton:        ui.NewButton(0, 0, 120, 20),
+		closeButton:            ui.NewButton(0, 0, 120, 20),
 		languageDialog:         ui.NewDialog(0, 4, 152, 232),
 	}
 	for i, l := range data.Current().Texts.Languages() {
 		n := display.Self.Name(l)
-		b := ui.NewButton(0, 8+i*d, 120, 20)
+		b := ui.NewButton(0, 8+i*buttonDeltaY, 120, 20)
 		b.Text = n
 		s.languageDialog.AddChild(b)
 		s.languageButtons = append(s.languageButtons, b)
@@ -62,6 +67,20 @@ func NewSettingsScene() *SettingsScene {
 }
 
 func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
+	if s.waitingRequestID != 0 {
+		s.waitingRequestID = 0
+		r := sceneManager.ReceiveResultIfExists(s.waitingRequestID)
+
+		switch r.Type {
+		case scene.RequestTypeRestorePurchases:
+			if r.Succeeded {
+				// Success
+			} else {
+				// Fail
+			}
+		}
+	}
+
 	s.infoLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDInfo)
 	s.languageButton.Text = texts.Text(sceneManager.Language(), texts.TextIDLanguage)
 	s.creditButton.Text = texts.Text(sceneManager.Language(), texts.TextIDCredit)
@@ -70,6 +89,27 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 	s.restorePurchasesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDRestorePurchases)
 	s.moreGamesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDMoreGames)
 	s.closeButton.Text = texts.Text(sceneManager.Language(), texts.TextIDClose)
+
+	buttonIndex := 1
+	s.languageButton.Y = buttonOffsetX+buttonIndex*buttonDeltaY
+	buttonIndex++
+	s.creditButton.Y = buttonOffsetX+buttonIndex*buttonDeltaY
+	buttonIndex++
+
+	// TODO: Once an ads is removed, hide the button
+	if true {
+		s.removeAdsButton.Y = buttonOffsetX+buttonIndex*buttonDeltaY
+		buttonIndex++
+	} else {
+		s.removeAdsButton.Y = -1000 // Invisible
+	}
+	s.reviewThisAppButton.Y = buttonOffsetX+buttonIndex*buttonDeltaY
+	buttonIndex++
+	s.restorePurchasesButton.Y = buttonOffsetX+buttonIndex*buttonDeltaY
+	buttonIndex++
+	s.moreGamesButton.Y = buttonOffsetX+buttonIndex*buttonDeltaY
+	buttonIndex++
+	s.closeButton.Y = buttonOffsetX+buttonIndex*buttonDeltaY
 
 	w, _ := sceneManager.Size()
 	s.languageButton.X = (w/scene.TileScale - s.languageButton.Width) / 2
@@ -103,6 +143,26 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 	}
 	if s.languageButton.Pressed() {
 		s.languageDialog.Visible = true
+		return nil
+	}
+	if s.removeAdsButton.Pressed() {
+		s.waitingRequestID = sceneManager.GenerateRequestID()
+		sceneManager.Requester().RequestPurchase(s.waitingRequestID, "ads_removal")
+		return nil
+	}
+	if s.reviewThisAppButton.Pressed() {
+		s.waitingRequestID = sceneManager.GenerateRequestID()
+		sceneManager.Requester().RequestOpenLink(s.waitingRequestID, "review", "")
+		return nil
+	}
+	if s.restorePurchasesButton.Pressed() {
+		s.waitingRequestID = sceneManager.GenerateRequestID()
+		sceneManager.Requester().RequestRestorePurchases(s.waitingRequestID)
+		return nil
+	}
+	if s.moreGamesButton.Pressed() {
+		s.waitingRequestID = sceneManager.GenerateRequestID()
+		sceneManager.Requester().RequestOpenLink(s.waitingRequestID, "more", "")
 		return nil
 	}
 	if s.closeButton.Pressed() {

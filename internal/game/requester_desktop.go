@@ -58,7 +58,7 @@ func (m *Requester) RequestPurchase(requestID int, productID string) {
 	// Add new purchase if unique
 	var purchases []string
 	if err := json.Unmarshal(datapkg.Purchases(), &purchases); err != nil {
-		panic(err)
+		log.Printf("no valid purchases.json exist")
 	}
 
 	isNew := true
@@ -96,7 +96,7 @@ func (m *Requester) RequestPurchase(requestID int, productID string) {
 
 func (m *Requester) RequestRestorePurchases(requestID int) {
 	log.Printf("request restore purchase: requestID: %d", requestID)
-	m.game.FinishRestorePurchases(requestID, nil)
+	m.game.FinishRestorePurchases(requestID, true, nil)
 }
 
 func (m *Requester) RequestInterstitialAds(requestID int) {

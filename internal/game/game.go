@@ -119,8 +119,8 @@ func (g *Game) FinishPurchase(id int, success bool, purchases []uint8) {
 	}
 }
 
-func (g *Game) FinishRestorePurchases(id int, purchases []uint8) {
-	g.sceneManager.FinishRestorePurchases(id, purchases)
+func (g *Game) FinishRestorePurchases(id int, success bool, purchases []uint8) {
+	g.sceneManager.FinishRestorePurchases(id, success, purchases)
 	data.UpdatePurchases(purchases)
 }
 

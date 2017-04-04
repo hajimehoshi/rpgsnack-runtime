@@ -39,13 +39,13 @@ func FinishPurchase(id int, success bool, purchases []uint8) {
 	theGame.FinishPurchase(id, success, p)
 }
 
-func FinishRestorePurchases(id int, purchases []uint8) {
+func FinishRestorePurchases(id int, success bool, purchases []uint8) {
 	var p []uint8
 	if purchases != nil {
 		p = make([]uint8, len(purchases))
 		copy(p, purchases)
 	}
-	theGame.FinishRestorePurchases(id, p)
+	theGame.FinishRestorePurchases(id, success, p)
 }
 
 func FinishInterstitialAds(id int) {

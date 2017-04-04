@@ -41,7 +41,7 @@ func (m *Requester) RequestPurchase(requestID int, productID string) {
 
 func (m *Requester) RequestRestorePurchases(requestID int) {
 	log.Printf("request restore purchase: requestID: %d", requestID)
-	m.game.FinishRestorePurchases(requestID, nil)
+	m.game.FinishRestorePurchases(requestID, true, nil)
 }
 
 func (m *Requester) RequestInterstitialAds(requestID int) {
