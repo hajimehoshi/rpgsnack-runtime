@@ -74,6 +74,9 @@ func (m *MapScene) initUI() {
 	m.screenShotDialog = ui.NewDialog(0, 4, 152, 232)
 	m.screenShotDialog.AddChild(ui.NewImage(8, 8, 1.0/scene.TileScale/2, m.screenShotImage))
 	m.titleButton = ui.NewButton(4, 4, 40, 12)
+
+	// TODO: Implement the camera functionality later
+	m.cameraButton.Visible = false
 }
 
 func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) error {
