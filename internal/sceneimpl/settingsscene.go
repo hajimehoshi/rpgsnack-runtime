@@ -98,7 +98,7 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 		if r != nil {
 			s.waitingRequestID = 0
 			switch r.Type {
-			case scene.RequestTypeRestorePurchases:
+			case scene.RequestTypePurchase, scene.RequestTypeRestorePurchases:
 				// Note: Ideally we should show a notification toast to notify users about the result
 				// For now, the notifications are handled on the native platform side
 				if r.Succeeded {
