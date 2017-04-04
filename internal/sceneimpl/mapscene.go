@@ -26,6 +26,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/gamestate"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/texts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/ui"
 )
 
@@ -38,6 +39,7 @@ type MapScene struct {
 	initialState     bool
 	cameraButton     *ui.Button
 	cameraTaking     bool
+	titleButton      *ui.Button
 	screenShotImage  *ebiten.Image
 	screenShotDialog *ui.Dialog
 }
@@ -71,6 +73,7 @@ func (m *MapScene) initUI() {
 	m.screenShotImage = screenShotImage
 	m.screenShotDialog = ui.NewDialog(0, 4, 152, 232)
 	m.screenShotDialog.AddChild(ui.NewImage(8, 8, 1.0/scene.TileScale/2, m.screenShotImage))
+	m.titleButton = ui.NewButton(4, 4, 40, 12)
 }
 
 func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) error {
@@ -139,6 +142,12 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 		m.cameraTaking = true
 		m.screenShotDialog.Visible = true
 	}
+
+	m.titleButton.Text = texts.Text(sceneManager.Language(), texts.TextIDTitle)
+	m.titleButton.Update()
+	if m.titleButton.Pressed() {
+		sceneManager.GoToWithFading(NewTitleScene(), 30)
+	}
 	return nil
 }
 
@@ -179,6 +188,7 @@ func (t *tilesImageParts) Dst(index int) (int, int, int, int) {
 func (m *MapScene) Draw(screen *ebiten.Image) {
 	m.tilesImage.Fill(color.Black)
 	m.cameraButton.Draw(screen)
+	m.titleButton.Draw(screen)
 	tileSet := m.gameState.Map().TileSet()
 	op := &ebiten.DrawImageOptions{}
 	op.ImageParts = &tilesImageParts{

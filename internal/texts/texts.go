@@ -34,6 +34,7 @@ const (
 	TextIDRestorePurchases
 	TextIDMoreGames
 	TextIDClose
+	TextIDTitle
 )
 
 func Text(lang language.Tag, id TextID) string {
@@ -57,6 +58,7 @@ var texts = map[language.Tag]map[TextID]string{
 		TextIDRestorePurchases: "Restore Purchases",
 		TextIDMoreGames:        "More Games",
 		TextIDClose:            "Close",
+		TextIDTitle:            "Title",
 
 		TextIDNewGameWarning: `You have a on-going game data.
 Do you want to clear the progress
@@ -75,6 +77,7 @@ to start a new game?`,
 		TextIDRestorePurchases: "購入情報再取得",
 		TextIDMoreGames:        "ほかのゲーム",
 		TextIDClose:            "閉じる",
+		TextIDTitle:            "タイトル",
 
 		TextIDNewGameWarning: `進行中のゲームデータがあります。
 進行中のゲームデータを消して、
