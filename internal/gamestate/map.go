@@ -473,6 +473,9 @@ func (m *Map) TryRunDirectEvent(x, y int) bool {
 }
 
 func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, x, y int) bool {
+	if !m.game.isPlayerControlEnabled() {
+		return false
+	}
 	if m.IsEventExecuting() {
 		return false
 	}

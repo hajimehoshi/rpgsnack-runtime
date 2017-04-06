@@ -538,6 +538,18 @@
                       }
                     },
                     {
+                      "name": "player_control",
+                      "args": {
+                        "enabled": false
+                      }
+                    },
+                    {
+                      "name": "player_control",
+                      "args": {
+                        "enabled": true
+                      }
+                    },
+                    {
                       "name": "set_route",
                       "args": {
                         "eventId":  0,

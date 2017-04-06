@@ -36,12 +36,13 @@ type Rand interface {
 }
 
 type Game struct {
-	hints             *Hints
-	variables         *Variables
-	screen            *Screen
-	windows           *window.Windows
-	currentMap        *Map
-	lastInterpreterID int
+	hints                *Hints
+	variables            *Variables
+	screen               *Screen
+	windows              *window.Windows
+	currentMap           *Map
+	lastInterpreterID    int
+	playerControlEnabled bool
 
 	// Fields that are not dumped
 	rand             Rand
@@ -54,33 +55,36 @@ func generateDefaultRand() Rand {
 
 func NewGame() *Game {
 	g := &Game{
-		hints:     &Hints{},
-		variables: &Variables{},
-		screen:    &Screen{},
-		windows:   &window.Windows{},
-		rand:      generateDefaultRand(),
+		hints:                &Hints{},
+		variables:            &Variables{},
+		screen:               &Screen{},
+		windows:              &window.Windows{},
+		rand:                 generateDefaultRand(),
+		playerControlEnabled: true,
 	}
 	g.currentMap = NewMap(g)
 	return g
 }
 
 type tmpGame struct {
-	Hints             *Hints          `json:"hints"`
-	Variables         *Variables      `json:"variables"`
-	Screen            *Screen         `json:"screen"`
-	Windows           *window.Windows `json:"windows"`
-	Map               *Map            `json:"map"`
-	LastInterpreterID int             `json:"lastInterpreterId"`
+	Hints                *Hints          `json:"hints"`
+	Variables            *Variables      `json:"variables"`
+	Screen               *Screen         `json:"screen"`
+	Windows              *window.Windows `json:"windows"`
+	Map                  *Map            `json:"map"`
+	LastInterpreterID    int             `json:"lastInterpreterId"`
+	PlayerControlEnabled bool            `json:"playerControlEnabled"`
 }
 
 func (g *Game) MarshalJSON() ([]uint8, error) {
 	tmp := &tmpGame{
-		Hints:             g.hints,
-		Variables:         g.variables,
-		Screen:            g.screen,
-		Windows:           g.windows,
-		Map:               g.currentMap,
-		LastInterpreterID: g.lastInterpreterID,
+		Hints:                g.hints,
+		Variables:            g.variables,
+		Screen:               g.screen,
+		Windows:              g.windows,
+		Map:                  g.currentMap,
+		LastInterpreterID:    g.lastInterpreterID,
+		PlayerControlEnabled: g.playerControlEnabled,
 	}
 	return json.Marshal(tmp)
 }
@@ -97,6 +101,7 @@ func (g *Game) UnmarshalJSON(data []uint8) error {
 	g.currentMap = tmp.Map
 	g.currentMap.setGame(g)
 	g.lastInterpreterID = tmp.LastInterpreterID
+	g.playerControlEnabled = tmp.PlayerControlEnabled
 	g.rand = generateDefaultRand()
 	return nil
 }
@@ -120,6 +125,14 @@ func (g *Game) Update(sceneManager *scene.Manager) error {
 		}
 	}
 	return nil
+}
+
+func (g *Game) setPlayerControlEnabled(enabled bool) {
+	g.playerControlEnabled = enabled
+}
+
+func (g *Game) isPlayerControlEnabled() bool {
+	return g.playerControlEnabled
 }
 
 func (g *Game) RequestSave(sceneManager *scene.Manager) bool {
