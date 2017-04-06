@@ -115,7 +115,7 @@ func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) error {
 func (m *MapScene) Update(sceneManager *scene.Manager) error {
 	w, _ := sceneManager.Size()
 	m.screenShotDialog.X = (w/scene.TileScale-160)/2 + 4
-	if m.initialState {
+	if m.initialState && m.gameState.IsAutoSaveEnabled() {
 		m.gameState.RequestSave(sceneManager)
 	}
 	m.initialState = false

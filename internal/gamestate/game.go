@@ -42,6 +42,7 @@ type Game struct {
 	windows              *window.Windows
 	currentMap           *Map
 	lastInterpreterID    int
+	autoSaveEnabled      bool
 	playerControlEnabled bool
 
 	// Fields that are not dumped
@@ -60,6 +61,7 @@ func NewGame() *Game {
 		screen:               &Screen{},
 		windows:              &window.Windows{},
 		rand:                 generateDefaultRand(),
+		autoSaveEnabled:      true,
 		playerControlEnabled: true,
 	}
 	g.currentMap = NewMap(g)
@@ -73,6 +75,7 @@ type tmpGame struct {
 	Windows              *window.Windows `json:"windows"`
 	Map                  *Map            `json:"map"`
 	LastInterpreterID    int             `json:"lastInterpreterId"`
+	AutoSaveEnabled      bool            `json:"autoSaveEnabled"`
 	PlayerControlEnabled bool            `json:"playerControlEnabled"`
 }
 
@@ -84,6 +87,7 @@ func (g *Game) MarshalJSON() ([]uint8, error) {
 		Windows:              g.windows,
 		Map:                  g.currentMap,
 		LastInterpreterID:    g.lastInterpreterID,
+		AutoSaveEnabled:      g.autoSaveEnabled,
 		PlayerControlEnabled: g.playerControlEnabled,
 	}
 	return json.Marshal(tmp)
@@ -101,6 +105,7 @@ func (g *Game) UnmarshalJSON(data []uint8) error {
 	g.currentMap = tmp.Map
 	g.currentMap.setGame(g)
 	g.lastInterpreterID = tmp.LastInterpreterID
+	g.autoSaveEnabled = tmp.AutoSaveEnabled
 	g.playerControlEnabled = tmp.PlayerControlEnabled
 	g.rand = generateDefaultRand()
 	return nil
@@ -125,6 +130,14 @@ func (g *Game) Update(sceneManager *scene.Manager) error {
 		}
 	}
 	return nil
+}
+
+func (g *Game) setAutoSaveEnabled(enabled bool) {
+	g.autoSaveEnabled = enabled
+}
+
+func (g *Game) IsAutoSaveEnabled() bool {
+	return g.autoSaveEnabled
 }
 
 func (g *Game) setPlayerControlEnabled(enabled bool) {

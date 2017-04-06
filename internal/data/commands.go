@@ -144,6 +144,12 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 			return err
 		}
 		c.Args = args
+	case CommandNameAutoSave:
+		var args *CommandArgsAutoSave
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	case CommandNamePlayerControl:
 		var args *CommandArgsPlayerControl
 		if err := unmarshalJSON(tmp.Args, &args); err != nil {
@@ -239,6 +245,7 @@ const (
 	CommandNameStopBGM       CommandName = "stop_bgm"
 	CommandNameSave          CommandName = "save"
 	CommandNameGotoTitle     CommandName = "goto_title"
+	CommandNameAutoSave      CommandName = "autosave"
 	CommandNamePlayerControl CommandName = "player_control"
 	CommandUnlockAchievement CommandName = "unlock_achievement"
 	CommandControlHint       CommandName = "control_hint"
@@ -426,6 +433,10 @@ type CommandArgsShowAds struct {
 type CommandArgsOpenLink struct {
 	Type string `json:"type"`
 	Data string `json:"data"`
+}
+
+type CommandArgsAutoSave struct {
+	Enabled bool `json:"enabled"`
 }
 
 type CommandArgsPlayerControl struct {

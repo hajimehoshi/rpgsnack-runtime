@@ -506,7 +506,9 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, x, y int) bo
 		return false
 	}
 	// The player can move. Let's save the state here just before starting moving.
-	m.game.RequestSave(sceneManager)
+	if m.game.IsAutoSaveEnabled() {
+		m.game.RequestSave(sceneManager)
+	}
 
 	// The player's speed is never changed by another events during the player walks
 	// by user input.

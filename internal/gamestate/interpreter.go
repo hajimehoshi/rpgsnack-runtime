@@ -424,6 +424,10 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 	case data.CommandNameSave:
 		i.gameState.RequestSave(sceneManager)
 		i.commandIterator.Advance()
+	case data.CommandNameAutoSave:
+		args := c.Args.(*data.CommandArgsAutoSave)
+		i.gameState.setAutoSaveEnabled(args.Enabled)
+		i.commandIterator.Advance()
 	case data.CommandNamePlayerControl:
 		args := c.Args.(*data.CommandArgsPlayerControl)
 		i.gameState.setPlayerControlEnabled(args.Enabled)
