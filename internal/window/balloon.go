@@ -22,6 +22,7 @@ import (
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/font"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
@@ -49,21 +50,23 @@ type balloon struct {
 	openingCount   int
 	closingCount   int
 	opened         bool
+	balloonType    data.BalloonType
 }
 
 type tmpBalloon struct {
-	InterpreterID  int    `json:"interpreterId"`
-	X              int    `json:"x"`
-	Y              int    `json:"y"`
-	Width          int    `json:"width"`
-	Height         int    `json:"height"`
-	HasArrow       bool   `json:"hasArrow"`
-	EventID        int    `json:"eventId"`
-	Content        string `json:"content"`
-	ContentOffsetX int    `json:"contentOffsetX"`
-	OpeningCount   int    `json:"openingCount"`
-	ClosingCount   int    `json:"closingCount"`
-	Opened         bool   `json:"opened"`
+	InterpreterID  int              `json:"interpreterId"`
+	X              int              `json:"x"`
+	Y              int              `json:"y"`
+	Width          int              `json:"width"`
+	Height         int              `json:"height"`
+	HasArrow       bool             `json:"hasArrow"`
+	EventID        int              `json:"eventId"`
+	Content        string           `json:"content"`
+	ContentOffsetX int              `json:"contentOffsetX"`
+	OpeningCount   int              `json:"openingCount"`
+	ClosingCount   int              `json:"closingCount"`
+	Opened         bool             `json:"opened"`
+	BalloonType    data.BalloonType `json:"balloonType"`
 }
 
 func (b *balloon) MarshalJSON() ([]uint8, error) {
@@ -80,6 +83,7 @@ func (b *balloon) MarshalJSON() ([]uint8, error) {
 		OpeningCount:   b.openingCount,
 		ClosingCount:   b.closingCount,
 		Opened:         b.opened,
+		BalloonType:    b.balloonType,
 	}
 	return json.Marshal(tmp)
 }
@@ -104,7 +108,7 @@ func (b *balloon) UnmarshalJSON(data []uint8) error {
 	return nil
 }
 
-func newBalloon(x, y, width, height int, content string, interpreterID int) *balloon {
+func newBalloon(x, y, width, height int, content string, balloonType data.BalloonType, interpreterID int) *balloon {
 	b := &balloon{
 		interpreterID: interpreterID,
 		content:       content,
@@ -112,6 +116,7 @@ func newBalloon(x, y, width, height int, content string, interpreterID int) *bal
 		y:             y,
 		width:         ((width + 3) / 4) * 4,
 		height:        ((height + 3) / 4) * 4,
+		balloonType:   balloonType,
 	}
 	return b
 }
@@ -131,7 +136,7 @@ func balloonSizeFromContent(content string) (int, int, int) {
 	return w, h, contentOffsetX
 }
 
-func newBalloonCenter(content string, interpreterID int) *balloon {
+func newBalloonCenter(content string, balloonType data.BalloonType, interpreterID int) *balloon {
 	sw := scene.TileXNum * scene.TileSize
 	sh := scene.TileYNum*scene.TileSize + scene.GameMarginTop/scene.TileScale
 	w, h, contentOffsetX := balloonSizeFromContent(content)
@@ -145,16 +150,18 @@ func newBalloonCenter(content string, interpreterID int) *balloon {
 		y:              y,
 		width:          w,
 		height:         h,
+		balloonType:    balloonType,
 	}
 	return b
 }
 
-func newBalloonWithArrow(content string, eventID int, interpreterID int) *balloon {
+func newBalloonWithArrow(content string, balloonType data.BalloonType, eventID int, interpreterID int) *balloon {
 	b := &balloon{
 		interpreterID: interpreterID,
 		content:       content,
 		hasArrow:      true,
 		eventID:       eventID,
+		balloonType:   balloonType,
 	}
 	w, h, contentOffsetX := balloonSizeFromContent(content)
 	b.width = w
@@ -223,6 +230,7 @@ func (b *balloon) close() {
 
 type balloonImageParts struct {
 	balloon     *balloon
+	balloonType data.BalloonType
 	screenWidth int
 	character   *character.Character
 }
@@ -231,23 +239,38 @@ func (b *balloonImageParts) partsNum() (int, int) {
 	return b.balloon.width / 4, b.balloon.height / 4
 }
 
+func (b *balloonImageParts) getArrowSrcRect() (int, int, int, int) {
+	if b.balloonType == data.BalloonTypeNormal {
+		return 12, 0, 12 + balloonArrowWidth, balloonArrowHeight
+	}
+	if b.balloonType == data.BalloonTypeThink {
+		return 18, 0, 18 + balloonArrowWidth, balloonArrowHeight
+	}
+	return 0, 0, 0, 0
+}
+
+func (b *balloonImageParts) getBalloonSrcStartPos() (int, int) {
+	if b.balloonType == data.BalloonTypeShout {
+		return 0, 12
+	}
+	return 0, 0
+}
+
 func (b *balloonImageParts) Len() int {
 	w, h := b.partsNum()
 	return w*h + 1
 }
-
 func (b *balloonImageParts) Src(index int) (int, int, int, int) {
 	if index == b.Len()-1 {
 		if !b.balloon.hasArrow {
 			return 0, 0, 0, 0
 		}
-		return 12, 0, 12 + balloonArrowWidth, balloonArrowHeight
+		return b.getArrowSrcRect()
 	}
 	w, h := b.partsNum()
 	x := index % w
 	y := index / w
-	sx := 0
-	sy := 0
+	sx, sy := b.getBalloonSrcStartPos()
 	switch {
 	case x == 0:
 	default:
@@ -336,6 +359,7 @@ func (b *balloon) draw(screen *ebiten.Image, character *character.Character) {
 			balloon:     b,
 			screenWidth: sw,
 			character:   character,
+			balloonType: b.balloonType,
 		}
 		screen.DrawImage(img, op)
 	}

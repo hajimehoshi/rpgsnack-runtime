@@ -102,7 +102,7 @@ func (w *Windows) ShowMessage(messageType data.ShowMessageType, content string, 
 			panic("not reach")
 		}
 		// TODO: How to call newBalloonCenter?
-		w.nextBalloon = newBalloonWithArrow(content, eventID, interpreterID)
+		w.nextBalloon = newBalloonWithArrow(content, balloonType, eventID, interpreterID)
 	case data.ShowMessageBanner:
 		w.banner = newBanner(content, positionType, interpreterID)
 		w.banner.open()
@@ -119,7 +119,7 @@ func (w *Windows) ShowChoices(sceneManager *scene.Manager, choices []string, int
 		x := sceneManager.MapOffsetX() / scene.TileScale
 		y := i*choiceBalloonHeight + ymin
 		width := scene.TileXNum * scene.TileSize
-		balloon := newBalloon(x, y, width, choiceBalloonHeight, choice, interpreterID)
+		balloon := newBalloon(x, y, width, choiceBalloonHeight, choice, data.BalloonTypeNormal, interpreterID)
 		w.choiceBalloons = append(w.choiceBalloons, balloon)
 		balloon.open()
 	}

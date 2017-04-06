@@ -419,7 +419,7 @@
                         "content": "0a64a375-260f-4e0e-9538-ef5b64ecb501",
                         "eventId": -1,
                         "type": "balloon",
-                        "balloonType": "normal"
+                        "balloonType": "shout"
                       }
                     },
                     {
@@ -810,7 +810,7 @@
                               "content": "9b8f5a14-d3b0-47b9-93ea-1157026d52f0",
                               "eventId": 0,
                               "type": "balloon",
-                              "balloonType": "normal"
+                              "balloonType": "think"
                             }
                           },
                           {
@@ -819,7 +819,7 @@
                               "content": "97bcb748-637d-4daa-86c0-859ff64dc1a7",
                               "eventId": 0,
                               "type": "balloon",
-                              "balloonType": "normal"
+                              "balloonType": "think"
                             }
                           },
                           {
