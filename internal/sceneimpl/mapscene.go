@@ -42,6 +42,10 @@ type MapScene struct {
 	titleButton      *ui.Button
 	screenShotImage  *ebiten.Image
 	screenShotDialog *ui.Dialog
+	quitDialog       *ui.Dialog
+	quitLabel        *ui.Label
+	quitYesButton    *ui.Button
+	quitNoButton     *ui.Button
 }
 
 func NewMapScene() *MapScene {
@@ -77,6 +81,15 @@ func (m *MapScene) initUI() {
 
 	// TODO: Implement the camera functionality later
 	m.cameraButton.Visible = false
+
+	m.quitDialog = ui.NewDialog(0, 64, 152, 100)
+	m.quitLabel = ui.NewLabel(16, 16)
+	m.quitYesButton = ui.NewButton(0, 35, 120, 20)
+	m.quitNoButton = ui.NewButton(0, 60, 120, 20)
+
+	m.quitDialog.AddChild(m.quitLabel)
+	m.quitDialog.AddChild(m.quitYesButton)
+	m.quitDialog.AddChild(m.quitNoButton)
 }
 
 func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) error {
@@ -114,6 +127,28 @@ func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) error {
 
 func (m *MapScene) Update(sceneManager *scene.Manager) error {
 	w, _ := sceneManager.Size()
+
+	m.quitLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDBackToTitle)
+	m.quitYesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDYes)
+	m.quitNoButton.Text = texts.Text(sceneManager.Language(), texts.TextIDNo)
+
+	m.quitDialog.X = (w/scene.TileScale - 160)
+	m.quitYesButton.X = (m.quitDialog.Width - m.quitYesButton.Width) / 2
+	m.quitNoButton.X = (m.quitDialog.Width - m.quitNoButton.Width) / 2
+
+	m.quitDialog.Update()
+	if m.quitYesButton.Pressed() {
+		sceneManager.GoToWithFading(NewTitleScene(), 30)
+		return nil
+	}
+	if m.quitNoButton.Pressed() {
+		m.quitDialog.Visible = false
+		return nil
+	}
+	if m.quitDialog.Visible {
+		return nil
+	}
+
 	m.screenShotDialog.X = (w/scene.TileScale-160)/2 + 4
 	if m.initialState && m.gameState.IsAutoSaveEnabled() {
 		m.gameState.RequestSave(sceneManager)
@@ -149,7 +184,7 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 	m.titleButton.Text = texts.Text(sceneManager.Language(), texts.TextIDTitle)
 	m.titleButton.Update()
 	if m.titleButton.Pressed() {
-		sceneManager.GoToWithFading(NewTitleScene(), 30)
+		m.quitDialog.Visible = true
 	}
 	return nil
 }
@@ -243,4 +278,5 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		m.screenShotImage.DrawImage(screen, nil)
 	}
 	m.screenShotDialog.Draw(screen)
+	m.quitDialog.Draw(screen)
 }

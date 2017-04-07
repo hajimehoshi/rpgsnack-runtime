@@ -33,6 +33,7 @@ const (
 	TextIDReviewThisApp
 	TextIDRestorePurchases
 	TextIDMoreGames
+	TextIDBackToTitle
 	TextIDClose
 	TextIDTitle
 )
@@ -63,10 +64,11 @@ var texts = map[language.Tag]map[TextID]string{
 		TextIDNewGameWarning: `You have a on-going game data.
 Do you want to clear the progress
 to start a new game?`,
+		TextIDBackToTitle: "Do you want to go back to title?",
 	},
 	language.Japanese: {
-		TextIDNewGame:          "初めから",
-		TextIDResumeGame:       "続きから",
+		TextIDNewGame:          "はじめから",
+		TextIDResumeGame:       "つづきから",
 		TextIDYes:              "はい",
 		TextIDNo:               "いいえ",
 		TextIDSettings:         "設定",
@@ -74,7 +76,7 @@ to start a new game?`,
 		TextIDCredit:           "クレジット",
 		TextIDRemoveAds:        "広告を非表示にする",
 		TextIDReviewThisApp:    "このアプリをレビューする",
-		TextIDRestorePurchases: "購入情報再取得",
+		TextIDRestorePurchases: "購入情報のリストア",
 		TextIDMoreGames:        "ほかのゲーム",
 		TextIDClose:            "閉じる",
 		TextIDTitle:            "タイトル",
@@ -82,5 +84,6 @@ to start a new game?`,
 		TextIDNewGameWarning: `進行中のゲームデータがあります。
 進行中のゲームデータを消して、
 新しいゲームを開始しますか?`,
+		TextIDBackToTitle: "タイトル画面にもどりますか？",
 	},
 }
