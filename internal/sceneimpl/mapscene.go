@@ -132,7 +132,7 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 	m.quitYesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDYes)
 	m.quitNoButton.Text = texts.Text(sceneManager.Language(), texts.TextIDNo)
 
-	m.quitDialog.X = (w/scene.TileScale - 160)
+	m.quitDialog.X = (w/scene.TileScale - 160) + 4
 	m.quitYesButton.X = (m.quitDialog.Width - m.quitYesButton.Width) / 2
 	m.quitNoButton.X = (m.quitDialog.Width - m.quitNoButton.Width) / 2
 
