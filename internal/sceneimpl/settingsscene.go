@@ -44,6 +44,7 @@ type SettingsScene struct {
 	languageDialog         *ui.Dialog
 	languageButtons        []*ui.Button
 	creditDialog           *ui.Dialog
+	creditLabel            *ui.Label
 	creditCloseButton      *ui.Button
 	waitingRequestID       int
 	isAdsRemoved           bool
@@ -61,6 +62,7 @@ func NewSettingsScene() *SettingsScene {
 		closeButton:            ui.NewButton(0, 0, 120, 20),
 		languageDialog:         ui.NewDialog(0, 4, 152, 232),
 		creditDialog:           ui.NewDialog(0, 4, 152, 232),
+		creditLabel:            ui.NewLabel(8, 8),
 		creditCloseButton:      ui.NewButton(0, 204, 120, 20),
 	}
 	for i, l := range data.Current().Texts.Languages() {
@@ -70,6 +72,7 @@ func NewSettingsScene() *SettingsScene {
 		s.languageDialog.AddChild(b)
 		s.languageButtons = append(s.languageButtons, b)
 	}
+	s.creditDialog.AddChild(s.creditLabel)
 	s.creditDialog.AddChild(s.creditCloseButton)
 	s.UpdatePurchasesState()
 	return s
@@ -98,6 +101,19 @@ func (s *SettingsScene) UpdatePurchasesState() {
 }
 
 func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
+	const creditText = `Story
+  Daigo Sato
+
+Engineering
+  Hajime Hoshi
+
+Title Logo
+  Akari Yamashita
+
+Powered By
+  Ebiten
+`
+
 	if s.waitingRequestID != 0 {
 		r := sceneManager.ReceiveResultIfExists(s.waitingRequestID)
 		if r != nil {
@@ -121,6 +137,7 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 	s.restorePurchasesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDRestorePurchases)
 	s.moreGamesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDMoreGames)
 	s.closeButton.Text = texts.Text(sceneManager.Language(), texts.TextIDClose)
+	s.creditLabel.Text = creditText
 	s.creditCloseButton.Text = texts.Text(sceneManager.Language(), texts.TextIDClose)
 
 	buttonIndex := 1
