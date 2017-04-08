@@ -245,6 +245,7 @@ func (m *Manager) FinishRestorePurchases(id int, success bool, purchases []uint8
 }
 
 func (m *Manager) FinishInterstitialAds(id int) {
+	m.interstitialAdsLoaded = false
 	m.resultCh <- RequestResult{
 		ID:   id,
 		Type: RequestTypeInterstitialAds,
@@ -252,6 +253,7 @@ func (m *Manager) FinishInterstitialAds(id int) {
 }
 
 func (m *Manager) FinishRewardedAds(id int, success bool) {
+	m.rewardedAdsLoaded = false
 	m.resultCh <- RequestResult{
 		ID:        id,
 		Type:      RequestTypeRewardedAds,
@@ -276,15 +278,9 @@ func (m *Manager) FinishShareImage(id int) {
 func (m *Manager) SetPlatformData(key PlatformDataKey, value int) {
 	switch key {
 	case PlatformDataKeyInterstitialAdsLoaded:
-		m.interstitialAdsLoaded = false
-		if value != 0 {
-			m.interstitialAdsLoaded = true
-		}
+		m.interstitialAdsLoaded = true
 	case PlatformDataKeyRewardedAdsLoaded:
-		m.rewardedAdsLoaded = false
-		if value != 0 {
-			m.rewardedAdsLoaded = true
-		}
+		m.rewardedAdsLoaded = true
 	default:
 		log.Printf("platform data key not implemented: %s", key)
 	}
