@@ -275,7 +275,7 @@ func (m *Manager) FinishShareImage(id int) {
 	}
 }
 
-func (m *Manager) SetPlatformData(key PlatformDataKey, value int) {
+func (m *Manager) SetPlatformData(key PlatformDataKey, value string) {
 	switch key {
 	case PlatformDataKeyInterstitialAdsLoaded:
 		m.interstitialAdsLoaded = true

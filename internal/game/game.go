@@ -140,6 +140,6 @@ func (g *Game) FinishShareImage(id int) {
 	g.sceneManager.FinishShareImage(id)
 }
 
-func (g *Game) SetPlatformData(key scene.PlatformDataKey, value int) {
+func (g *Game) SetPlatformData(key scene.PlatformDataKey, value string) {
 	g.sceneManager.SetPlatformData(key, value)
 }
