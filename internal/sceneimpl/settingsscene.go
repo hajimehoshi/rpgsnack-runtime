@@ -43,6 +43,8 @@ type SettingsScene struct {
 	closeButton            *ui.Button
 	languageDialog         *ui.Dialog
 	languageButtons        []*ui.Button
+	creditDialog           *ui.Dialog
+	creditCloseButton      *ui.Button
 	waitingRequestID       int
 	isAdsRemoved           bool
 }
@@ -58,6 +60,8 @@ func NewSettingsScene() *SettingsScene {
 		moreGamesButton:        ui.NewButton(0, 0, 120, 20),
 		closeButton:            ui.NewButton(0, 0, 120, 20),
 		languageDialog:         ui.NewDialog(0, 4, 152, 232),
+		creditDialog:           ui.NewDialog(0, 4, 152, 232),
+		creditCloseButton:      ui.NewButton(0, 204, 120, 20),
 	}
 	for i, l := range data.Current().Texts.Languages() {
 		n := display.Self.Name(l)
@@ -66,6 +70,7 @@ func NewSettingsScene() *SettingsScene {
 		s.languageDialog.AddChild(b)
 		s.languageButtons = append(s.languageButtons, b)
 	}
+	s.creditDialog.AddChild(s.creditCloseButton)
 	s.UpdatePurchasesState()
 	return s
 }
@@ -116,6 +121,7 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 	s.restorePurchasesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDRestorePurchases)
 	s.moreGamesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDMoreGames)
 	s.closeButton.Text = texts.Text(sceneManager.Language(), texts.TextIDClose)
+	s.creditCloseButton.Text = texts.Text(sceneManager.Language(), texts.TextIDClose)
 
 	buttonIndex := 1
 	s.languageButton.Y = buttonOffsetX + buttonIndex*buttonDeltaY
@@ -148,8 +154,12 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 	for _, b := range s.languageButtons {
 		b.X = (s.languageDialog.Width - b.Width) / 2
 	}
+	s.creditDialog.X = (w/scene.TileScale-160)/2 + 4
+	s.creditCloseButton.X = (s.creditDialog.Width - s.creditCloseButton.Width) / 2
+
 	s.languageDialog.Update()
-	if !s.languageDialog.Visible {
+	s.creditDialog.Update()
+	if !s.languageDialog.Visible && !s.creditDialog.Visible {
 		s.languageButton.Update()
 		s.creditButton.Update()
 		s.removeAdsButton.Update()
@@ -158,6 +168,7 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 		s.moreGamesButton.Update()
 		s.closeButton.Update()
 	}
+
 	for i, b := range s.languageButtons {
 		if b.Pressed() {
 			s.languageDialog.Visible = false
@@ -166,8 +177,16 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 			return nil
 		}
 	}
+	if s.creditCloseButton.Pressed() {
+		s.creditDialog.Visible = false
+		return nil
+	}
 	if s.languageButton.Pressed() {
 		s.languageDialog.Visible = true
+		return nil
+	}
+	if s.creditButton.Pressed() {
+		s.creditDialog.Visible = true
 		return nil
 	}
 	if s.removeAdsButton.Pressed() {
@@ -207,4 +226,5 @@ func (s *SettingsScene) Draw(screen *ebiten.Image) {
 	s.moreGamesButton.Draw(screen)
 	s.closeButton.Draw(screen)
 	s.languageDialog.Draw(screen)
+	s.creditDialog.Draw(screen)
 }
