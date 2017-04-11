@@ -41,13 +41,13 @@ type TitleScene struct {
 
 func NewTitleScene() *TitleScene {
 	t := &TitleScene{
-		newGameButton:    ui.NewButton(0, 184, 120, 20),
-		resumeGameButton: ui.NewButton(0, 208, 120, 20),
-		settingsButton:   ui.NewImageButton(0, 0, assets.GetImage("icon_settings.png")),
+		newGameButton:    ui.NewButton(0, 184, 120, 20, "click"),
+		resumeGameButton: ui.NewButton(0, 208, 120, 20, "click"),
+		settingsButton:   ui.NewImageButton(0, 0, assets.GetImage("icon_settings.png"), "click"),
 		warningDialog:    ui.NewDialog(0, 4, 152, 232),
 		warningLabel:     ui.NewLabel(8, 8),
-		warningYesButton: ui.NewButton(0, 180, 120, 20),
-		warningNoButton:  ui.NewButton(0, 204, 120, 20),
+		warningYesButton: ui.NewButton(0, 180, 120, 20, "click"),
+		warningNoButton:  ui.NewButton(0, 204, 120, 20, "cancel"),
 	}
 	t.warningDialog.AddChild(t.warningLabel)
 	t.warningDialog.AddChild(t.warningYesButton)

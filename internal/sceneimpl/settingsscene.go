@@ -53,21 +53,21 @@ type SettingsScene struct {
 func NewSettingsScene() *SettingsScene {
 	s := &SettingsScene{
 		settingsLabel:          ui.NewLabel(4, 4),
-		languageButton:         ui.NewButton(0, 0, 120, 20),
-		creditButton:           ui.NewButton(0, 0, 120, 20),
-		removeAdsButton:        ui.NewButton(0, 0, 120, 20),
-		reviewThisAppButton:    ui.NewButton(0, 0, 120, 20),
-		restorePurchasesButton: ui.NewButton(0, 0, 120, 20),
-		moreGamesButton:        ui.NewButton(0, 0, 120, 20),
-		closeButton:            ui.NewButton(0, 0, 120, 20),
+		languageButton:         ui.NewButton(0, 0, 120, 20, "click"),
+		creditButton:           ui.NewButton(0, 0, 120, 20, "click"),
+		removeAdsButton:        ui.NewButton(0, 0, 120, 20, "click"),
+		reviewThisAppButton:    ui.NewButton(0, 0, 120, 20, "click"),
+		restorePurchasesButton: ui.NewButton(0, 0, 120, 20, "click"),
+		moreGamesButton:        ui.NewButton(0, 0, 120, 20, "click"),
+		closeButton:            ui.NewButton(0, 0, 120, 20, "cancel"),
 		languageDialog:         ui.NewDialog(0, 4, 152, 232),
 		creditDialog:           ui.NewDialog(0, 4, 152, 232),
 		creditLabel:            ui.NewLabel(8, 8),
-		creditCloseButton:      ui.NewButton(0, 204, 120, 20),
+		creditCloseButton:      ui.NewButton(0, 204, 120, 20, "cancel"),
 	}
 	for i, l := range data.Current().Texts.Languages() {
 		n := display.Self.Name(l)
-		b := ui.NewButton(0, 8+i*buttonDeltaY, 120, 20)
+		b := ui.NewButton(0, 8+i*buttonDeltaY, 120, 20, "click")
 		b.Text = n
 		s.languageDialog.AddChild(b)
 		s.languageButtons = append(s.languageButtons, b)

@@ -73,19 +73,19 @@ func (m *MapScene) initUI() {
 	screenShotImage, _ := ebiten.NewImage(480, 720, ebiten.FilterLinear)
 	camera, _ := ebiten.NewImage(12, 12, ebiten.FilterNearest)
 	camera.Fill(color.RGBA{0xff, 0, 0, 0xff})
-	m.cameraButton = ui.NewImageButton(0, 0, camera)
+	m.cameraButton = ui.NewImageButton(0, 0, camera, "click")
 	m.screenShotImage = screenShotImage
 	m.screenShotDialog = ui.NewDialog(0, 4, 152, 232)
 	m.screenShotDialog.AddChild(ui.NewImage(8, 8, 1.0/scene.TileScale/2, m.screenShotImage))
-	m.titleButton = ui.NewButton(4, 4, 40, 12)
+	m.titleButton = ui.NewButton(4, 4, 40, 12, "click")
 
 	// TODO: Implement the camera functionality later
 	m.cameraButton.Visible = false
 
 	m.quitDialog = ui.NewDialog(0, 64, 152, 100)
 	m.quitLabel = ui.NewLabel(16, 16)
-	m.quitYesButton = ui.NewButton(0, 35, 120, 20)
-	m.quitNoButton = ui.NewButton(0, 60, 120, 20)
+	m.quitYesButton = ui.NewButton(0, 35, 120, 20, "click")
+	m.quitNoButton = ui.NewButton(0, 60, 120, 20, "cancel")
 
 	m.quitDialog.AddChild(m.quitLabel)
 	m.quitDialog.AddChild(m.quitYesButton)

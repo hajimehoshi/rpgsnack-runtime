@@ -20,42 +20,46 @@ import (
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/font"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
 
 type Button struct {
-	X        int
-	Y        int
-	Width    int
-	Height   int
-	Visible  bool
-	Text     string
-	image    *ebiten.Image
-	pressing bool
-	pressed  bool
+	X         int
+	Y         int
+	Width     int
+	Height    int
+	Visible   bool
+	Text      string
+	image     *ebiten.Image
+	pressing  bool
+	pressed   bool
+	soundName string
 }
 
-func NewButton(x, y, width, height int) *Button {
+func NewButton(x, y, width, height int, soundName string) *Button {
 	return &Button{
-		X:       x,
-		Y:       y,
-		Width:   width,
-		Height:  height,
-		Visible: true,
+		X:         x,
+		Y:         y,
+		Width:     width,
+		Height:    height,
+		Visible:   true,
+		soundName: soundName,
 	}
 }
 
-func NewImageButton(x, y int, image *ebiten.Image) *Button {
+func NewImageButton(x, y int, image *ebiten.Image, soundName string) *Button {
 	w, h := image.Size()
 	return &Button{
-		X:       x,
-		Y:       y,
-		Width:   w,
-		Height:  h,
-		Visible: true,
-		image:   image,
+		X:         x,
+		Y:         y,
+		Width:     w,
+		Height:    h,
+		Visible:   true,
+		image:     image,
+		soundName: soundName,
 	}
 }
 
@@ -91,6 +95,7 @@ func (b *Button) update(visible bool, offsetX, offsetY int) {
 	if !input.Pressed() {
 		b.pressing = false
 		b.pressed = true
+		audio.PlaySE(b.soundName, 1.0)
 		return
 	}
 	if b.includesInput(offsetX, offsetY) {
