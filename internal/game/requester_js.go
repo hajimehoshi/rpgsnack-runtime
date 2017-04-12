@@ -63,3 +63,8 @@ func (m *Requester) RequestShareImage(requestID int, title string, message strin
 	log.Printf("request share image: requestID: %d, title: %s, message: %s, image: %s", requestID, title, message, image)
 	m.game.FinishShareImage(requestID)
 }
+
+func (m *Requester) RequestGetIAPPrices(requestID int) {
+	log.Printf("request IAP prices: requestID: %d", requestID)
+	m.game.FinishGetIAPPrices(requestID, true, []byte("{\"ads_removal\": \"$0.99\"}"))
+}

@@ -30,6 +30,7 @@ const (
 	TextIDLanguage
 	TextIDCredit
 	TextIDRemoveAds
+	TextIDRemoveAdsDesc
 	TextIDReviewThisApp
 	TextIDRestorePurchases
 	TextIDMoreGames
@@ -47,14 +48,16 @@ func Text(lang language.Tag, id TextID) string {
 
 var texts = map[language.Tag]map[TextID]string{
 	language.English: {
-		TextIDNewGame:          "New Game",
-		TextIDResumeGame:       "Resume Game",
-		TextIDYes:              "Yes",
-		TextIDNo:               "No",
-		TextIDSettings:         "Settings",
-		TextIDLanguage:         "Language",
-		TextIDCredit:           "Credit",
-		TextIDRemoveAds:        "Remove Ads",
+		TextIDNewGame:    "New Game",
+		TextIDResumeGame: "Resume Game",
+		TextIDYes:        "Yes",
+		TextIDNo:         "No",
+		TextIDSettings:   "Settings",
+		TextIDLanguage:   "Language",
+		TextIDCredit:     "Credit",
+		TextIDRemoveAds:  "Remove Ads",
+		TextIDRemoveAdsDesc: `Would you like to pay %s
+to remove ads from the game?`,
 		TextIDReviewThisApp:    "Review This App",
 		TextIDRestorePurchases: "Restore Purchases",
 		TextIDMoreGames:        "More Games",
@@ -67,14 +70,16 @@ to start a new game?`,
 		TextIDBackToTitle: "Do you want to go back to title?",
 	},
 	language.Japanese: {
-		TextIDNewGame:          "はじめから",
-		TextIDResumeGame:       "つづきから",
-		TextIDYes:              "はい",
-		TextIDNo:               "いいえ",
-		TextIDSettings:         "設定",
-		TextIDLanguage:         "言語",
-		TextIDCredit:           "クレジット",
-		TextIDRemoveAds:        "広告を非表示にする",
+		TextIDNewGame:    "はじめから",
+		TextIDResumeGame: "つづきから",
+		TextIDYes:        "はい",
+		TextIDNo:         "いいえ",
+		TextIDSettings:   "設定",
+		TextIDLanguage:   "言語",
+		TextIDCredit:     "クレジット",
+		TextIDRemoveAds:  "広告を消す",
+		TextIDRemoveAdsDesc: `%sを支払って、
+広告を消去しますか？`,
 		TextIDReviewThisApp:    "このアプリをレビューする",
 		TextIDRestorePurchases: "購入情報のリストア",
 		TextIDMoreGames:        "ほかのゲーム",

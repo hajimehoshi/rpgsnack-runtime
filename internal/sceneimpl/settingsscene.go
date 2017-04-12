@@ -15,8 +15,6 @@
 package sceneimpl
 
 import (
-	"encoding/json"
-
 	"golang.org/x/text/language/display"
 
 	"github.com/hajimehoshi/ebiten"
@@ -36,7 +34,6 @@ type SettingsScene struct {
 	settingsLabel          *ui.Label
 	languageButton         *ui.Button
 	creditButton           *ui.Button
-	removeAdsButton        *ui.Button
 	reviewThisAppButton    *ui.Button
 	restorePurchasesButton *ui.Button
 	moreGamesButton        *ui.Button
@@ -47,7 +44,6 @@ type SettingsScene struct {
 	creditLabel            *ui.Label
 	creditCloseButton      *ui.Button
 	waitingRequestID       int
-	isAdsRemoved           bool
 }
 
 func NewSettingsScene() *SettingsScene {
@@ -55,7 +51,6 @@ func NewSettingsScene() *SettingsScene {
 		settingsLabel:          ui.NewLabel(4, 4),
 		languageButton:         ui.NewButton(0, 0, 120, 20, "click"),
 		creditButton:           ui.NewButton(0, 0, 120, 20, "click"),
-		removeAdsButton:        ui.NewButton(0, 0, 120, 20, "click"),
 		reviewThisAppButton:    ui.NewButton(0, 0, 120, 20, "click"),
 		restorePurchasesButton: ui.NewButton(0, 0, 120, 20, "click"),
 		moreGamesButton:        ui.NewButton(0, 0, 120, 20, "click"),
@@ -74,30 +69,7 @@ func NewSettingsScene() *SettingsScene {
 	}
 	s.creditDialog.AddChild(s.creditLabel)
 	s.creditDialog.AddChild(s.creditCloseButton)
-	s.UpdatePurchasesState()
 	return s
-}
-
-// TODO: Move this method to load.go?
-func (s *SettingsScene) isPurchased(key string) bool {
-	var purchases []string
-	if data.Purchases() != nil {
-		if err := json.Unmarshal(data.Purchases(), &purchases); err != nil {
-			panic(err)
-		}
-	}
-
-	for _, p := range purchases {
-		if p == key {
-			return true
-		}
-	}
-
-	return false
-}
-
-func (s *SettingsScene) UpdatePurchasesState() {
-	s.isAdsRemoved = s.isPurchased("ads_removal")
 }
 
 func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
@@ -118,21 +90,13 @@ Powered By
 		r := sceneManager.ReceiveResultIfExists(s.waitingRequestID)
 		if r != nil {
 			s.waitingRequestID = 0
-			switch r.Type {
-			case scene.RequestTypePurchase, scene.RequestTypeRestorePurchases:
-				// Note: Ideally we should show a notification toast to notify users about the result
-				// For now, the notifications are handled on the native platform side
-				if r.Succeeded {
-					s.UpdatePurchasesState()
-				}
-			}
 		}
 		return nil
 	}
+
 	s.settingsLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDSettings)
 	s.languageButton.Text = texts.Text(sceneManager.Language(), texts.TextIDLanguage)
 	s.creditButton.Text = texts.Text(sceneManager.Language(), texts.TextIDCredit)
-	s.removeAdsButton.Text = texts.Text(sceneManager.Language(), texts.TextIDRemoveAds)
 	s.reviewThisAppButton.Text = texts.Text(sceneManager.Language(), texts.TextIDReviewThisApp)
 	s.restorePurchasesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDRestorePurchases)
 	s.moreGamesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDMoreGames)
@@ -146,11 +110,6 @@ Powered By
 	s.creditButton.Y = buttonOffsetX + buttonIndex*buttonDeltaY
 	buttonIndex++
 
-	s.removeAdsButton.Visible = !s.isAdsRemoved
-	if !s.isAdsRemoved {
-		s.removeAdsButton.Y = buttonOffsetX + buttonIndex*buttonDeltaY
-		buttonIndex++
-	}
 	s.reviewThisAppButton.Y = buttonOffsetX + buttonIndex*buttonDeltaY
 	buttonIndex++
 	s.restorePurchasesButton.Y = buttonOffsetX + buttonIndex*buttonDeltaY
@@ -162,7 +121,6 @@ Powered By
 	w, _ := sceneManager.Size()
 	s.languageButton.X = (w/scene.TileScale - s.languageButton.Width) / 2
 	s.creditButton.X = (w/scene.TileScale - s.creditButton.Width) / 2
-	s.removeAdsButton.X = (w/scene.TileScale - s.removeAdsButton.Width) / 2
 	s.reviewThisAppButton.X = (w/scene.TileScale - s.reviewThisAppButton.Width) / 2
 	s.restorePurchasesButton.X = (w/scene.TileScale - s.restorePurchasesButton.Width) / 2
 	s.moreGamesButton.X = (w/scene.TileScale - s.moreGamesButton.Width) / 2
@@ -179,7 +137,6 @@ Powered By
 	if !s.languageDialog.Visible && !s.creditDialog.Visible {
 		s.languageButton.Update()
 		s.creditButton.Update()
-		s.removeAdsButton.Update()
 		s.reviewThisAppButton.Update()
 		s.restorePurchasesButton.Update()
 		s.moreGamesButton.Update()
@@ -204,11 +161,6 @@ Powered By
 	}
 	if s.creditButton.Pressed() {
 		s.creditDialog.Visible = true
-		return nil
-	}
-	if s.removeAdsButton.Pressed() {
-		s.waitingRequestID = sceneManager.GenerateRequestID()
-		sceneManager.Requester().RequestPurchase(s.waitingRequestID, "ads_removal")
 		return nil
 	}
 	if s.reviewThisAppButton.Pressed() {
@@ -237,7 +189,6 @@ func (s *SettingsScene) Draw(screen *ebiten.Image) {
 	s.settingsLabel.Draw(screen)
 	s.languageButton.Draw(screen)
 	s.creditButton.Draw(screen)
-	s.removeAdsButton.Draw(screen)
 	s.reviewThisAppButton.Draw(screen)
 	s.restorePurchasesButton.Draw(screen)
 	s.moreGamesButton.Draw(screen)

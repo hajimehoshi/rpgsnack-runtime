@@ -65,6 +65,7 @@ type Requester interface {
 	RequestRewardedAds(requestID int)
 	RequestOpenLink(requestID int, linkType string, data string)
 	RequestShareImage(requestID int, title string, message string, image string)
+	RequestGetIAPPrices(requestID int)
 }
 
 type RequestType int
@@ -78,6 +79,7 @@ const (
 	RequestTypeRewardedAds
 	RequestTypeOpenLink
 	RequestTypeShareImage
+	RequestTypeIAPPrices
 )
 
 type RequestResult struct {
@@ -272,6 +274,15 @@ func (m *Manager) FinishShareImage(id int) {
 	m.resultCh <- RequestResult{
 		ID:   id,
 		Type: RequestTypeShareImage,
+	}
+}
+
+func (m *Manager) FinishGetIAPPrices(id int, success bool, prices []uint8) {
+	m.resultCh <- RequestResult{
+		ID:        id,
+		Succeeded: success,
+		Type:      RequestTypeIAPPrices,
+		Data:      prices,
 	}
 }
 
