@@ -168,33 +168,35 @@ func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) error {
 func (m *MapScene) Update(sceneManager *scene.Manager) error {
 	if m.waitingRequestID != 0 {
 		r := sceneManager.ReceiveResultIfExists(m.waitingRequestID)
-		if r != nil {
-			m.waitingRequestID = 0
-			switch r.Type {
-			case scene.RequestTypeIAPPrices:
-				fmt.Printf("RequestTypeIAPPrices %s", r.Data)
-				fmt.Printf("RequestTypeIAPPrices %b", r.Succeeded)
-				if r.Succeeded {
-					priceText := "???"
-					var prices map[string]string
-					if err := json.Unmarshal(r.Data, &prices); err != nil {
-						panic(err)
-					}
-					text := texts.Text(sceneManager.Language(), texts.TextIDRemoveAdsDesc)
-					if _, ok := prices["ads_removal"]; ok {
-						priceText = prices["ads_removal"]
-					}
-					m.removeAdsLabel.Text = fmt.Sprintf(text, priceText)
-					m.removeAdsDialog.Visible = true
-				}
-			case scene.RequestTypePurchase:
-				// Note: Ideally we should show a notification toast to notify users about the result
-				// For now, the notifications are handled on the native platform side
-				if r.Succeeded {
-					m.UpdatePurchasesState()
-				}
-				m.removeAdsDialog.Visible = false
+		if r == nil {
+			return nil
+		}
+		m.waitingRequestID = 0
+		switch r.Type {
+		case scene.RequestTypeIAPPrices:
+			fmt.Printf("RequestTypeIAPPrices %s", r.Data)
+			fmt.Printf("RequestTypeIAPPrices %b", r.Succeeded)
+			if !r.Succeeded {
+				break
 			}
+			priceText := "???"
+			var prices map[string]string
+			if err := json.Unmarshal(r.Data, &prices); err != nil {
+				panic(err)
+			}
+			text := texts.Text(sceneManager.Language(), texts.TextIDRemoveAdsDesc)
+			if _, ok := prices["ads_removal"]; ok {
+				priceText = prices["ads_removal"]
+			}
+			m.removeAdsLabel.Text = fmt.Sprintf(text, priceText)
+			m.removeAdsDialog.Visible = true
+		case scene.RequestTypePurchase:
+			// Note: Ideally we should show a notification toast to notify users about the result
+			// For now, the notifications are handled on the native platform side
+			if r.Succeeded {
+				m.UpdatePurchasesState()
+			}
+			m.removeAdsDialog.Visible = false
 		}
 		return nil
 	}
