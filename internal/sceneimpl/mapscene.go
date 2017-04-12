@@ -138,6 +138,9 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 
 	m.quitDialog.Update()
 	if m.quitYesButton.Pressed() {
+		if m.gameState.IsAutoSaveEnabled() {
+			m.gameState.RequestSave(sceneManager)
+		}
 		sceneManager.GoToWithFading(NewTitleScene(), 30)
 		return nil
 	}
