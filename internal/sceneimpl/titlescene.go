@@ -41,8 +41,8 @@ type TitleScene struct {
 
 func NewTitleScene() *TitleScene {
 	t := &TitleScene{
-		newGameButton:    ui.NewButton(0, 184, 120, 20, "click"),
-		resumeGameButton: ui.NewButton(0, 208, 120, 20, "click"),
+		resumeGameButton: ui.NewButton(0, 184, 120, 20, "click"),
+		newGameButton:    ui.NewButton(0, 208, 120, 20, "click"),
 		settingsButton:   ui.NewImageButton(0, 0, assets.GetImage("icon_settings.png"), "click"),
 		warningDialog:    ui.NewDialog(0, 4, 152, 232),
 		warningLabel:     ui.NewLabel(8, 8),
@@ -77,7 +77,16 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 	t.warningDialog.X = (w/scene.TileScale-160)/2 + 4
 	t.warningYesButton.X = (t.warningDialog.Width - t.warningYesButton.Width) / 2
 	t.warningNoButton.X = (t.warningDialog.Width - t.warningNoButton.Width) / 2
-	t.resumeGameButton.Visible = data.Progress() != nil
+
+	if data.Progress() == nil {
+		t.resumeGameButton.Visible = false
+		t.newGameButton.Y = 184
+	} else {
+		t.resumeGameButton.Visible = true
+		t.resumeGameButton.Y = 184
+		t.newGameButton.Y = 208
+	}
+
 	t.warningDialog.Update()
 	if !t.warningDialog.Visible {
 		t.newGameButton.Update()
