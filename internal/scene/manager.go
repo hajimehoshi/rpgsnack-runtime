@@ -280,8 +280,8 @@ func (m *Manager) FinishShareImage(id int) {
 func (m *Manager) FinishGetIAPPrices(id int, success bool, prices []uint8) {
 	m.resultCh <- RequestResult{
 		ID:        id,
-		Succeeded: success,
 		Type:      RequestTypeIAPPrices,
+		Succeeded: success,
 		Data:      prices,
 	}
 }

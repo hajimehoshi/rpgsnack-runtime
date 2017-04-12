@@ -141,7 +141,7 @@ func (g *Game) FinishShareImage(id int) {
 }
 
 func (g *Game) FinishGetIAPPrices(id int, success bool, prices []uint8) {
-	g.sceneManager.FinishGetIAPPrices(id, true, prices)
+	g.sceneManager.FinishGetIAPPrices(id, success, prices)
 }
 
 func (g *Game) SetPlatformData(key scene.PlatformDataKey, value string) {

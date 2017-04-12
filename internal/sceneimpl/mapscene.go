@@ -175,8 +175,6 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 		m.waitingRequestID = 0
 		switch r.Type {
 		case scene.RequestTypeIAPPrices:
-			log.Printf("RequestTypeIAPPrices %s", r.Data)
-			log.Printf("RequestTypeIAPPrices %b", r.Succeeded)
 			if !r.Succeeded {
 				break
 			}

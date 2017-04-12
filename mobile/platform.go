@@ -64,6 +64,15 @@ func FinishShareImage(id int) {
 	theGame.FinishShareImage(id)
 }
 
+func FinishGetIAPPrices(id int, success bool, prices []uint8) {
+	var p []uint8
+	if prices != nil {
+		p = make([]uint8, len(prices))
+		copy(p, prices)
+	}
+	theGame.FinishGetIAPPrices(id, success, prices)
+}
+
 func SetPlatformData(key string, value string) {
 	theGame.SetPlatformData(scene.PlatformDataKey(key), value)
 }
