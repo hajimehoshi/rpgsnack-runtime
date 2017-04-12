@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"image/color"
+	"log"
 
 	"github.com/hajimehoshi/ebiten"
 
@@ -174,8 +175,8 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 		m.waitingRequestID = 0
 		switch r.Type {
 		case scene.RequestTypeIAPPrices:
-			fmt.Printf("RequestTypeIAPPrices %s", r.Data)
-			fmt.Printf("RequestTypeIAPPrices %b", r.Succeeded)
+			log.Printf("RequestTypeIAPPrices %s", r.Data)
+			log.Printf("RequestTypeIAPPrices %b", r.Succeeded)
 			if !r.Succeeded {
 				break
 			}
