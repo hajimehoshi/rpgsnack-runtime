@@ -284,12 +284,14 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 	}
 
 	m.titleButton.Text = texts.Text(sceneManager.Language(), texts.TextIDTitle)
+	m.titleButton.Disabled = m.gameState.Map().IsEventExecuting()
 	m.titleButton.Update()
 	if m.titleButton.Pressed() {
 		m.quitDialog.Visible = true
 	}
 
 	m.removeAdsButton.Text = texts.Text(sceneManager.Language(), texts.TextIDRemoveAds)
+	m.removeAdsButton.Disabled = m.gameState.Map().IsEventExecuting()
 	m.removeAdsButton.Update()
 	if m.removeAdsButton.Pressed() {
 		m.waitingRequestID = sceneManager.GenerateRequestID()

@@ -33,6 +33,7 @@ type Button struct {
 	Height    int
 	Visible   bool
 	Text      string
+	Disabled  bool
 	image     *ebiten.Image
 	pressing  bool
 	pressed   bool
@@ -87,6 +88,9 @@ func (b *Button) update(visible bool, offsetX, offsetY int) {
 	if !b.Visible {
 		return
 	}
+	if b.Disabled {
+		return
+	}
 	if !b.pressing {
 		if !input.Triggered() {
 			return
@@ -121,6 +125,10 @@ func (b *Button) Draw(screen *ebiten.Image) {
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(b.X), float64(b.Y))
 		op.GeoM.Scale(scene.TileScale, scene.TileScale)
+		if b.Disabled {
+			op.ColorM.ChangeHSV(0, 0, 1)
+			op.ColorM.Scale(0.5, 0.5, 0.5, 1)
+		}
 		screen.DrawImage(b.image, op)
 		return
 	}
@@ -132,9 +140,17 @@ func (b *Button) Draw(screen *ebiten.Image) {
 	op.ImageParts = &ninePatchParts{b.Width, b.Height}
 	op.GeoM.Translate(float64(b.X), float64(b.Y))
 	op.GeoM.Scale(scene.TileScale, scene.TileScale)
+	if b.Disabled {
+		op.ColorM.ChangeHSV(0, 0, 1)
+		op.ColorM.Scale(0.5, 0.5, 0.5, 1)
+	}
 	screen.DrawImage(img, op)
 	tw, th := font.MeasureSize(b.Text)
 	tx := b.X*scene.TileScale + (b.Width*scene.TileScale-tw*scene.TextScale)/2
 	ty := b.Y*scene.TileScale + (b.Height*scene.TileScale-th*scene.TextScale)/2
-	font.DrawText(screen, b.Text, tx, ty, scene.TextScale, color.White)
+	var c color.Color = color.White
+	if b.Disabled {
+		c = color.RGBA{0x80, 0x80, 0x80, 0xff}
+	}
+	font.DrawText(screen, b.Text, tx, ty, scene.TextScale, c)
 }
