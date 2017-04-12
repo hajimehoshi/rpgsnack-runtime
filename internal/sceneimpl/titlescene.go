@@ -44,10 +44,10 @@ func NewTitleScene() *TitleScene {
 		resumeGameButton: ui.NewButton(0, 184, 120, 20, "click"),
 		newGameButton:    ui.NewButton(0, 208, 120, 20, "click"),
 		settingsButton:   ui.NewImageButton(0, 0, assets.GetImage("icon_settings.png"), "click"),
-		warningDialog:    ui.NewDialog(0, 4, 152, 232),
-		warningLabel:     ui.NewLabel(8, 8),
-		warningYesButton: ui.NewButton(0, 180, 120, 20, "click"),
-		warningNoButton:  ui.NewButton(0, 204, 120, 20, "cancel"),
+		warningDialog:    ui.NewDialog(0, 64, 152, 125),
+		warningLabel:     ui.NewLabel(16, 16),
+		warningYesButton: ui.NewButton(0, 60, 120, 20, "click"),
+		warningNoButton:  ui.NewButton(0, 85, 120, 20, "cancel"),
 	}
 	t.warningDialog.AddChild(t.warningLabel)
 	t.warningDialog.AddChild(t.warningYesButton)
@@ -146,8 +146,12 @@ func (t *TitleScene) Draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate((float64(sw)-float64(tw))/2, 0)
 	screen.DrawImage(timg, op)
-	t.newGameButton.Draw(screen)
-	t.resumeGameButton.Draw(screen)
-	t.settingsButton.Draw(screen)
+
+	// TODO: hide buttons to avoid visual conflicts between the dialog and the buttons
+	if !t.warningDialog.Visible {
+		t.newGameButton.Draw(screen)
+		t.resumeGameButton.Draw(screen)
+		t.settingsButton.Draw(screen)
+	}
 	t.warningDialog.Draw(screen)
 }
