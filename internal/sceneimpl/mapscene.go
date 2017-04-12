@@ -18,7 +18,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"image/color"
-	"log"
 
 	"github.com/hajimehoshi/ebiten"
 
