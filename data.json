@@ -30,6 +30,8 @@
       "67024f79-87c3-4368-b345-081d605ad894": "場所移動のテスト。",
       "8ea36699-81b8-485f-914c-ca94aeefebcc": "場所移動後のテスト。",
       "0a64a375-260f-4e0e-9538-ef5b64ecb501": "自動イベントのテストで\nございます",
+      "2799b323-8b04-4aef-abc7-875703f51864": "シャウト1行",
+      "d96f39f6-8fb4-4b28-80c2-5404a6f5d91a": "シャウト3行\nだよ\nだよ",
       "ab610c8c-578a-4876-92db-6398931087b7": "変数テスト: Constant: \\v[1] Random: \\v[2]",
       "7358e3ad-c1ea-4198-a6a4-38e74bfcc90c": "セーブのテスト",
       "7d7bb542-cead-4989-96c5-3ab0e48710fd": "スキップありのルート指定のテスト\nVisibilityも変わるよ",
@@ -417,6 +419,24 @@
                       "name": "show_message",
                       "args":    {
                         "content": "0a64a375-260f-4e0e-9538-ef5b64ecb501",
+                        "eventId": -1,
+                        "type": "balloon",
+                        "balloonType": "shout"
+                      }
+                    },
+                    {
+                      "name": "show_message",
+                      "args":    {
+                        "content": "2799b323-8b04-4aef-abc7-875703f51864",
+                        "eventId": -1,
+                        "type": "balloon",
+                        "balloonType": "shout"
+                      }
+                    },
+                    {
+                      "name": "show_message",
+                      "args":    {
+                        "content": "d96f39f6-8fb4-4b28-80c2-5404a6f5d91a",
                         "eventId": -1,
                         "type": "balloon",
                         "balloonType": "shout"
