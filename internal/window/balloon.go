@@ -105,6 +105,7 @@ func (b *balloon) UnmarshalJSON(data []uint8) error {
 	b.openingCount = tmp.OpeningCount
 	b.closingCount = tmp.ClosingCount
 	b.opened = tmp.Opened
+	b.balloonType = tmp.BalloonType
 	return nil
 }
 
