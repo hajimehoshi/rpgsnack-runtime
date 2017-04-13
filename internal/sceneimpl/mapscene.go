@@ -86,7 +86,7 @@ func (m *MapScene) initUI() {
 	m.screenShotImage = screenShotImage
 	m.screenShotDialog = ui.NewDialog(0, 4, 152, 232)
 	m.screenShotDialog.AddChild(ui.NewImage(8, 8, 1.0/scene.TileScale/2, m.screenShotImage))
-	m.titleButton = ui.NewButton(4, 4, 40, 12, "click")
+	m.titleButton = ui.NewButton(4, 8, 40, 12, "click")
 
 	// TODO: Implement the camera functionality later
 	m.cameraButton.Visible = false
@@ -99,7 +99,7 @@ func (m *MapScene) initUI() {
 	m.quitDialog.AddChild(m.quitYesButton)
 	m.quitDialog.AddChild(m.quitNoButton)
 
-	m.removeAdsButton = ui.NewButton(104, 4, 52, 12, "click")
+	m.removeAdsButton = ui.NewButton(104, 8, 52, 12, "click")
 	m.removeAdsDialog = ui.NewDialog(0, 64, 152, 100)
 	m.removeAdsLabel = ui.NewLabel(16, 8)
 	m.removeAdsYesButton = ui.NewButton(0, 45, 120, 20, "click")
