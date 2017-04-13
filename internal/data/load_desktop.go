@@ -28,10 +28,15 @@ var (
 	dataPath      = flag.String("data", "./data.json", "data path")
 	purchasesPath = flag.String("purchases", "./purchases.json", "purchases path")
 	savePath      = flag.String("save", "./save.json", "save path")
+	languagePath  = flag.String("language", "./language.json", "language path")
 )
 
 func PurchasesPath() string {
 	return *purchasesPath
+}
+
+func LanguagePath() string {
+	return *languagePath
 }
 
 func SavePath() string {
@@ -58,10 +63,21 @@ func loadJSONData() (*jsonData, error) {
 		purchases = nil
 	}
 
+	var langId string
+	langData, err := ioutil.ReadFile(*languagePath)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			return nil, err
+		}
+		langId = "en"
+	} else {
+		langId = string(langData)
+	}
+
 	return &jsonData{
 		Game:            game,
 		Progress:        progress,
 		Purchases:       purchases,
-		DefaultLanguage: "en",
+		DefaultLanguage: langId,
 	}, nil
 }

@@ -86,14 +86,6 @@ Powered By
   Ebiten
 `
 
-	if s.waitingRequestID != 0 {
-		r := sceneManager.ReceiveResultIfExists(s.waitingRequestID)
-		if r != nil {
-			s.waitingRequestID = 0
-		}
-		return nil
-	}
-
 	s.settingsLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDSettings)
 	s.languageButton.Text = texts.Text(sceneManager.Language(), texts.TextIDLanguage)
 	s.creditButton.Text = texts.Text(sceneManager.Language(), texts.TextIDCredit)
@@ -103,6 +95,14 @@ Powered By
 	s.closeButton.Text = texts.Text(sceneManager.Language(), texts.TextIDClose)
 	s.creditLabel.Text = creditText
 	s.creditCloseButton.Text = texts.Text(sceneManager.Language(), texts.TextIDClose)
+
+	if s.waitingRequestID != 0 {
+		r := sceneManager.ReceiveResultIfExists(s.waitingRequestID)
+		if r != nil {
+			s.waitingRequestID = 0
+		}
+		return nil
+	}
 
 	buttonIndex := 1
 	s.languageButton.Y = buttonOffsetX + buttonIndex*buttonDeltaY
@@ -148,6 +148,10 @@ Powered By
 			s.languageDialog.Visible = false
 			lang := data.Current().Texts.Languages()[i]
 			sceneManager.SetLanguage(lang)
+
+			base, _ := lang.Base()
+			s.waitingRequestID = sceneManager.GenerateRequestID()
+			sceneManager.Requester().RequestChangeLanguage(s.waitingRequestID, base.String())
 			return nil
 		}
 	}

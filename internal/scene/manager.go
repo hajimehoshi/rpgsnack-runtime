@@ -65,6 +65,7 @@ type Requester interface {
 	RequestRewardedAds(requestID int)
 	RequestOpenLink(requestID int, linkType string, data string)
 	RequestShareImage(requestID int, title string, message string, image string)
+	RequestChangeLanguage(requestID int, lang string)
 	RequestGetIAPPrices(requestID int)
 }
 
@@ -79,6 +80,7 @@ const (
 	RequestTypeRewardedAds
 	RequestTypeOpenLink
 	RequestTypeShareImage
+	RequestTypeChangeLanguage
 	RequestTypeIAPPrices
 )
 
@@ -274,6 +276,13 @@ func (m *Manager) FinishShareImage(id int) {
 	m.resultCh <- RequestResult{
 		ID:   id,
 		Type: RequestTypeShareImage,
+	}
+}
+
+func (m *Manager) FinishChangeLanguage(id int) {
+	m.resultCh <- RequestResult{
+		ID:   id,
+		Type: RequestTypeChangeLanguage,
 	}
 }
 

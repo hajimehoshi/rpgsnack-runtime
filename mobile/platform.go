@@ -64,6 +64,10 @@ func FinishShareImage(id int) {
 	theGame.FinishShareImage(id)
 }
 
+func FinishChangeLanguage(id int) {
+	theGame.FinishChangeLanguage(id)
+}
+
 func FinishGetIAPPrices(id int, success bool, prices []uint8) {
 	var p []uint8
 	if prices != nil {

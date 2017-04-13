@@ -140,6 +140,10 @@ func (g *Game) FinishShareImage(id int) {
 	g.sceneManager.FinishShareImage(id)
 }
 
+func (g *Game) FinishChangeLanguage(id int) {
+	g.sceneManager.FinishChangeLanguage(id)
+}
+
 func (g *Game) FinishGetIAPPrices(id int, success bool, prices []uint8) {
 	g.sceneManager.FinishGetIAPPrices(id, success, prices)
 }

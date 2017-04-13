@@ -119,6 +119,24 @@ func (m *Requester) RequestShareImage(requestID int, title string, message strin
 	m.game.FinishShareImage(requestID)
 }
 
+func (m *Requester) RequestChangeLanguage(requestID int, lang string) {
+	log.Printf("request change language: requestID: %d, lang: %s", requestID, lang)
+	go func() {
+		f, err := os.Create(datapkg.LanguagePath())
+		if err != nil {
+			// TODO: Should pass err instead of string?
+			m.game.FinishChangeLanguage(requestID)
+			return
+		}
+		defer f.Close()
+		if _, err := f.Write([]byte(lang)); err != nil {
+			m.game.FinishChangeLanguage(requestID)
+			return
+		}
+		m.game.FinishChangeLanguage(requestID)
+	}()
+}
+
 func (m *Requester) RequestGetIAPPrices(requestID int) {
 	log.Printf("request IAP prices: requestID: %d", requestID)
 	m.game.FinishGetIAPPrices(requestID, true, []byte("{\"ads_removal\": \"$0.99\"}"))
