@@ -26,6 +26,7 @@ const (
 	TextIDNewGameWarning
 	TextIDYes
 	TextIDNo
+	TextIDOK
 	TextIDSettings
 	TextIDLanguage
 	TextIDCredit
@@ -38,6 +39,7 @@ const (
 	TextIDClose
 	TextIDTitle
 	TextIDQuitGame
+	TextIDStoreError
 )
 
 func Text(lang language.Tag, id TextID) string {
@@ -53,6 +55,7 @@ var texts = map[language.Tag]map[TextID]string{
 		TextIDResumeGame: "Resume Game",
 		TextIDYes:        "Yes",
 		TextIDNo:         "No",
+		TextIDOK:         "OK",
 		TextIDSettings:   "Settings",
 		TextIDLanguage:   "Language",
 		TextIDCredit:     "Credit",
@@ -70,12 +73,16 @@ Do you want to clear the progress
 to start a new game?`,
 		TextIDBackToTitle: "Do you want to go back to title?",
 		TextIDQuitGame:    "Do you want to quit the game?",
+		TextIDStoreError: `Failed to connect to the store.
+Please make sure to sign in
+and connect to the network`,
 	},
 	language.Japanese: {
 		TextIDNewGame:    "はじめから",
 		TextIDResumeGame: "つづきから",
 		TextIDYes:        "はい",
 		TextIDNo:         "いいえ",
+		TextIDOK:         "OK",
 		TextIDSettings:   "設定",
 		TextIDLanguage:   "言語",
 		TextIDCredit:     "クレジット",
@@ -93,5 +100,8 @@ to start a new game?`,
 新しいゲームを開始しますか?`,
 		TextIDBackToTitle: "タイトル画面にもどりますか？",
 		TextIDQuitGame:    "ゲームを終了しますか？",
+		TextIDStoreError: `ストアへの接続に失敗しました。
+ネットワークに接続しているか
+確認してください`,
 	},
 }

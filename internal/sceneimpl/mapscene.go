@@ -48,6 +48,9 @@ type MapScene struct {
 	quitLabel          *ui.Label
 	quitYesButton      *ui.Button
 	quitNoButton       *ui.Button
+	storeErrorDialog   *ui.Dialog
+	storeErrorLabel    *ui.Label
+	storeErrorOkButton *ui.Button
 	removeAdsButton    *ui.Button
 	removeAdsDialog    *ui.Dialog
 	removeAdsLabel     *ui.Label
@@ -98,6 +101,12 @@ func (m *MapScene) initUI() {
 	m.quitDialog.AddChild(m.quitLabel)
 	m.quitDialog.AddChild(m.quitYesButton)
 	m.quitDialog.AddChild(m.quitNoButton)
+
+	m.storeErrorDialog = ui.NewDialog(0, 64, 152, 80)
+	m.storeErrorLabel = ui.NewLabel(16, 8)
+	m.storeErrorOkButton = ui.NewButton(0, 50, 120, 20, "click")
+	m.storeErrorDialog.AddChild(m.storeErrorLabel)
+	m.storeErrorDialog.AddChild(m.storeErrorOkButton)
 
 	m.removeAdsButton = ui.NewButton(104, 8, 52, 12, "click")
 	m.removeAdsDialog = ui.NewDialog(0, 64, 152, 100)
@@ -176,6 +185,7 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 		switch r.Type {
 		case scene.RequestTypeIAPPrices:
 			if !r.Succeeded {
+				m.storeErrorDialog.Visible = true
 				break
 			}
 			priceText := "???"
@@ -230,6 +240,21 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 		if m.quitDialog.Visible {
 			return nil
 		}
+	}
+
+	if m.storeErrorDialog.Visible {
+		m.storeErrorOkButton.X = (m.storeErrorDialog.Width - m.storeErrorOkButton.Width) / 2
+		m.storeErrorLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDStoreError)
+		m.storeErrorOkButton.Text = texts.Text(sceneManager.Language(), texts.TextIDOK)
+
+		m.storeErrorDialog.X = (w/scene.TileScale - 160) + 4
+
+		m.storeErrorDialog.Update()
+		if m.storeErrorOkButton.Pressed() {
+			m.storeErrorDialog.Visible = false
+			return nil
+		}
+		return nil
 	}
 
 	if m.removeAdsDialog.Visible {
@@ -306,6 +331,12 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 }
 
 func (m *MapScene) handleBackButton() {
+	if m.storeErrorDialog.Visible {
+		audio.PlaySE("cancel", 1.0)
+		m.storeErrorDialog.Visible = false
+		return
+	}
+
 	if m.quitDialog.Visible {
 		audio.PlaySE("cancel", 1.0)
 		m.quitDialog.Visible = false
@@ -414,5 +445,6 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	}
 	m.screenShotDialog.Draw(screen)
 	m.quitDialog.Draw(screen)
+	m.storeErrorDialog.Draw(screen)
 	m.removeAdsDialog.Draw(screen)
 }
