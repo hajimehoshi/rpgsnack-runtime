@@ -318,6 +318,9 @@ func (b *balloonImageParts) Src(index int) (int, int, int, int) {
 func (b *balloonImageParts) Dst(index int) (int, int, int, int) {
 	s := b.balloon.partSize()
 	if index == b.Len()-1 {
+		if b.balloon.balloonType == data.BalloonTypeShout {
+			return 0, 0, 0, 0
+		}
 		if !b.balloon.hasArrow {
 			return 0, 0, 0, 0
 		}
