@@ -370,7 +370,8 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	tx := (float64(sw) - scene.TileXNum*scene.TileSize*scene.TileScale) / 2
 	op.GeoM.Translate(tx, scene.GameMarginTop)
 	m.gameState.Screen().Draw(screen, m.tilesImage, op)
-	if m.gameState.Map().IsPlayerMovingByUserInput() || m.triggeringFailed {
+
+	if m.gameState.IsPlayerControlEnabled() && (m.gameState.Map().IsPlayerMovingByUserInput() || m.triggeringFailed) {
 		x, y := m.moveDstX, m.moveDstY
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(x*scene.TileSize), float64(y*scene.TileSize))

@@ -144,7 +144,7 @@ func (g *Game) setPlayerControlEnabled(enabled bool) {
 	g.playerControlEnabled = enabled
 }
 
-func (g *Game) isPlayerControlEnabled() bool {
+func (g *Game) IsPlayerControlEnabled() bool {
 	return g.playerControlEnabled
 }
 
