@@ -23,6 +23,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/gamestate"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/texts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/ui"
@@ -37,6 +38,10 @@ type TitleScene struct {
 	warningLabel     *ui.Label
 	warningYesButton *ui.Button
 	warningNoButton  *ui.Button
+	quitDialog       *ui.Dialog
+	quitLabel        *ui.Label
+	quitYesButton    *ui.Button
+	quitNoButton     *ui.Button
 }
 
 func NewTitleScene() *TitleScene {
@@ -48,10 +53,18 @@ func NewTitleScene() *TitleScene {
 		warningLabel:     ui.NewLabel(16, 16),
 		warningYesButton: ui.NewButton(0, 60, 120, 20, "click"),
 		warningNoButton:  ui.NewButton(0, 85, 120, 20, "cancel"),
+		quitDialog:       ui.NewDialog(0, 64, 152, 125),
+		quitLabel:        ui.NewLabel(16, 16),
+		quitYesButton:    ui.NewButton(0, 60, 120, 20, "click"),
+		quitNoButton:     ui.NewButton(0, 85, 120, 20, "cancel"),
 	}
 	t.warningDialog.AddChild(t.warningLabel)
 	t.warningDialog.AddChild(t.warningYesButton)
 	t.warningDialog.AddChild(t.warningNoButton)
+
+	t.quitDialog.AddChild(t.quitLabel)
+	t.quitDialog.AddChild(t.quitYesButton)
+	t.quitDialog.AddChild(t.quitNoButton)
 	return t
 }
 
@@ -63,11 +76,18 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 		t.init = true
 	}
 
+	if input.BackButtonPressed() {
+		t.handleBackButton()
+	}
+
 	t.newGameButton.Text = texts.Text(sceneManager.Language(), texts.TextIDNewGame)
 	t.resumeGameButton.Text = texts.Text(sceneManager.Language(), texts.TextIDResumeGame)
 	t.warningLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDNewGameWarning)
 	t.warningYesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDYes)
 	t.warningNoButton.Text = texts.Text(sceneManager.Language(), texts.TextIDNo)
+	t.quitLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDQuitGame)
+	t.quitYesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDYes)
+	t.quitNoButton.Text = texts.Text(sceneManager.Language(), texts.TextIDNo)
 
 	w, h := sceneManager.Size()
 	t.newGameButton.X = (w/scene.TileScale - t.newGameButton.Width) / 2
@@ -77,6 +97,9 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 	t.warningDialog.X = (w/scene.TileScale-160)/2 + 4
 	t.warningYesButton.X = (t.warningDialog.Width - t.warningYesButton.Width) / 2
 	t.warningNoButton.X = (t.warningDialog.Width - t.warningNoButton.Width) / 2
+	t.quitDialog.X = (w/scene.TileScale-160)/2 + 4
+	t.quitYesButton.X = (t.quitDialog.Width - t.quitYesButton.Width) / 2
+	t.quitNoButton.X = (t.quitDialog.Width - t.quitNoButton.Width) / 2
 
 	if data.Progress() == nil {
 		t.resumeGameButton.Visible = false
@@ -88,7 +111,7 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 	}
 
 	t.warningDialog.Update()
-	if !t.warningDialog.Visible {
+	if !t.warningDialog.Visible && !t.quitDialog.Visible {
 		t.newGameButton.Update()
 		t.resumeGameButton.Update()
 		t.settingsButton.Update()
@@ -107,6 +130,20 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 	if t.warningDialog.Visible {
 		return nil
 	}
+
+	t.quitDialog.Update()
+	if t.quitYesButton.Pressed() {
+		sceneManager.Requester().RequestTerminateGame()
+		return nil
+	}
+	if t.quitNoButton.Pressed() {
+		t.quitDialog.Visible = false
+		return nil
+	}
+	if t.quitDialog.Visible {
+		return nil
+	}
+
 	if t.newGameButton.Pressed() {
 		if data.Progress() != nil {
 			t.warningDialog.Visible = true
@@ -139,6 +176,22 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 	return nil
 }
 
+func (t *TitleScene) handleBackButton() {
+	if t.warningDialog.Visible {
+		audio.PlaySE("cancel", 1.0)
+		t.warningDialog.Visible = false
+		return
+	}
+	if t.quitDialog.Visible {
+		audio.PlaySE("cancel", 1.0)
+		t.quitDialog.Visible = false
+		return
+	}
+
+	audio.PlaySE("click", 1.0)
+	t.quitDialog.Visible = true
+}
+
 func (t *TitleScene) Draw(screen *ebiten.Image) {
 	timg := assets.GetImage("title.png")
 	tw, _ := timg.Size()
@@ -148,10 +201,11 @@ func (t *TitleScene) Draw(screen *ebiten.Image) {
 	screen.DrawImage(timg, op)
 
 	// TODO: hide buttons to avoid visual conflicts between the dialog and the buttons
-	if !t.warningDialog.Visible {
+	if !t.warningDialog.Visible && !t.quitDialog.Visible {
 		t.newGameButton.Draw(screen)
 		t.resumeGameButton.Draw(screen)
 		t.settingsButton.Draw(screen)
 	}
 	t.warningDialog.Draw(screen)
+	t.quitDialog.Draw(screen)
 }

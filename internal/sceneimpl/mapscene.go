@@ -22,6 +22,7 @@ import (
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/font"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/gamestate"
@@ -201,6 +202,10 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 
 	w, _ := sceneManager.Size()
 
+	if input.BackButtonPressed() {
+		m.handleBackButton()
+	}
+
 	if m.quitDialog.Visible {
 		m.quitLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDBackToTitle)
 		m.quitYesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDYes)
@@ -298,6 +303,22 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 		sceneManager.Requester().RequestGetIAPPrices(m.waitingRequestID)
 	}
 	return nil
+}
+
+func (m *MapScene) handleBackButton() {
+	if m.quitDialog.Visible {
+		audio.PlaySE("cancel", 1.0)
+		m.quitDialog.Visible = false
+		return
+	}
+	if m.quitDialog.Visible {
+		audio.PlaySE("cancel", 1.0)
+		m.quitDialog.Visible = false
+		return
+	}
+
+	audio.PlaySE("click", 1.0)
+	m.quitDialog.Visible = true
 }
 
 type tilesImageParts struct {

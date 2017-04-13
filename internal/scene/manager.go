@@ -23,6 +23,7 @@ import (
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 )
 
 const (
@@ -65,6 +66,7 @@ type Requester interface {
 	RequestRewardedAds(requestID int)
 	RequestOpenLink(requestID int, linkType string, data string)
 	RequestShareImage(requestID int, title string, message string, image string)
+	RequestTerminateGame()
 	RequestChangeLanguage(requestID int, lang string)
 	RequestGetIAPPrices(requestID int)
 }
@@ -96,6 +98,7 @@ type PlatformDataKey string
 const (
 	PlatformDataKeyInterstitialAdsLoaded PlatformDataKey = "interstitial_ads_loaded"
 	PlatformDataKeyRewardedAdsLoaded     PlatformDataKey = "rewarded_ads_loaded"
+	PlatformDataKeyBackButton            PlatformDataKey = "backbutton"
 )
 
 func NewManager(width, height int, requester Requester) *Manager {
@@ -301,6 +304,8 @@ func (m *Manager) SetPlatformData(key PlatformDataKey, value string) {
 		m.interstitialAdsLoaded = true
 	case PlatformDataKeyRewardedAdsLoaded:
 		m.rewardedAdsLoaded = true
+	case PlatformDataKeyBackButton:
+		input.TriggerBackButton()
 	default:
 		log.Printf("platform data key not implemented: %s", key)
 	}

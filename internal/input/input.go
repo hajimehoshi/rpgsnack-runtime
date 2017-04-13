@@ -21,9 +21,10 @@ import (
 var theInput = &input{}
 
 type input struct {
-	pressCount int
-	x          int
-	y          int
+	pressCount     int
+	x              int
+	y              int
+	backPressCount int
 }
 
 func Update() {
@@ -32,6 +33,14 @@ func Update() {
 
 func Pressed() bool {
 	return theInput.Pressed()
+}
+
+func BackButtonPressed() bool {
+	return theInput.BackButtonPressed()
+}
+
+func TriggerBackButton() {
+	theInput.TriggerBackButton()
 }
 
 func Triggered() bool {
@@ -57,6 +66,9 @@ func (i *input) Update() {
 	i.pressCount = 0
 	i.x = 0
 	i.y = 0
+	if i.backPressCount > 0 {
+		i.backPressCount--
+	}
 }
 
 func (i *input) Pressed() bool {
@@ -69,4 +81,14 @@ func (i *input) Triggered() bool {
 
 func (i *input) Position() (int, int) {
 	return i.x, i.y
+}
+
+func (i *input) BackButtonPressed() bool {
+	return i.backPressCount > 0
+}
+
+func (i *input) TriggerBackButton() {
+	// TODO: due to the timing backbutton is triggered,
+	// we need to give extra frame for the backPressCount
+	i.backPressCount = 2
 }

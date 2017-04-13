@@ -37,6 +37,7 @@ const (
 	TextIDBackToTitle
 	TextIDClose
 	TextIDTitle
+	TextIDQuitGame
 )
 
 func Text(lang language.Tag, id TextID) string {
@@ -68,6 +69,7 @@ to remove ads from the game?`,
 Do you want to clear the progress
 to start a new game?`,
 		TextIDBackToTitle: "Do you want to go back to title?",
+		TextIDQuitGame:    "Do you want to quit the game?",
 	},
 	language.Japanese: {
 		TextIDNewGame:    "はじめから",
@@ -90,5 +92,6 @@ to start a new game?`,
 進行中のゲームデータを消して、
 新しいゲームを開始しますか?`,
 		TextIDBackToTitle: "タイトル画面にもどりますか？",
+		TextIDQuitGame:    "ゲームを終了しますか？",
 	},
 }

@@ -19,7 +19,9 @@ import (
 
 	"github.com/hajimehoshi/ebiten"
 
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/texts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/ui"
@@ -85,6 +87,10 @@ Title Logo
 Powered By
   Ebiten
 `
+
+	if input.BackButtonPressed() {
+		s.handleBackButton(sceneManager)
+	}
 
 	s.settingsLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDSettings)
 	s.languageButton.Text = texts.Text(sceneManager.Language(), texts.TextIDLanguage)
@@ -187,6 +193,22 @@ Powered By
 		return nil
 	}
 	return nil
+}
+
+func (s *SettingsScene) handleBackButton(sceneManager *scene.Manager) {
+	if s.languageDialog.Visible {
+		audio.PlaySE("cancel", 1.0)
+		s.languageDialog.Visible = false
+		return
+	}
+	if s.creditDialog.Visible {
+		audio.PlaySE("cancel", 1.0)
+		s.creditDialog.Visible = false
+		return
+	}
+
+	audio.PlaySE("cancel", 1.0)
+	sceneManager.GoTo(NewTitleScene())
 }
 
 func (s *SettingsScene) Draw(screen *ebiten.Image) {

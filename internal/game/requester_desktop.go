@@ -141,3 +141,7 @@ func (m *Requester) RequestGetIAPPrices(requestID int) {
 	log.Printf("request IAP prices: requestID: %d", requestID)
 	m.game.FinishGetIAPPrices(requestID, true, []byte("{\"ads_removal\": \"$0.99\"}"))
 }
+
+func (m *Requester) RequestTerminateGame() {
+	log.Printf("request terminate game")
+}

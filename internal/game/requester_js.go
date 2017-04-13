@@ -64,6 +64,10 @@ func (m *Requester) RequestShareImage(requestID int, title string, message strin
 	m.game.FinishShareImage(requestID)
 }
 
+func (m *Requester) RequestTerminateGame() {
+	log.Printf("request terminate game")
+}
+
 func (m *Requester) RequestChangeLanguage(requestID int, lang string) {
 	log.Printf("request change language: requestID: %d, lang: %s", requestID, lang)
 	m.game.FinishChangeLanguage(requestID)
