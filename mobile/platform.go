@@ -74,7 +74,7 @@ func FinishGetIAPPrices(id int, success bool, prices []uint8) {
 		p = make([]uint8, len(prices))
 		copy(p, prices)
 	}
-	theGame.FinishGetIAPPrices(id, success, prices)
+	theGame.FinishGetIAPPrices(id, success, p)
 }
 
 func SetPlatformData(key string, value string) {
