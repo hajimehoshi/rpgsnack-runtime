@@ -113,18 +113,10 @@ func (g *Game) FinishSaveProgress(id int) {
 
 func (g *Game) FinishPurchase(id int, success bool, purchases []uint8) {
 	g.sceneManager.FinishPurchase(id, success, purchases)
-	if success {
-		// TODO: Accessing purchases should be synced.
-		data.UpdatePurchases(purchases)
-	}
 }
 
 func (g *Game) FinishRestorePurchases(id int, success bool, purchases []uint8) {
 	g.sceneManager.FinishRestorePurchases(id, success, purchases)
-	if success {
-		// TODO: Accessing purchases should be synced.
-		data.UpdatePurchases(purchases)
-	}
 }
 
 func (g *Game) FinishInterstitialAds(id int) {

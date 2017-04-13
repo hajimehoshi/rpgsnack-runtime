@@ -150,6 +150,10 @@ func (m *Manager) Update() error {
 			m.interstitialAdsLoaded = false
 		case RequestTypeRewardedAds:
 			m.rewardedAdsLoaded = false
+		case RequestTypePurchase, RequestTypeRestorePurchases:
+			if r.Succeeded {
+				data.UpdatePurchases(r.Data)
+			}
 		}
 	case a := <-m.setPlatformDataCh:
 		switch a.key {
