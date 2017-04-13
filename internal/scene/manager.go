@@ -40,6 +40,11 @@ type scene interface {
 	Draw(screen *ebiten.Image)
 }
 
+type setPlatformDataArgs struct {
+	key   PlatformDataKey
+	value string
+}
+
 type Manager struct {
 	width                 int
 	height                int
@@ -51,6 +56,7 @@ type Manager struct {
 	lastRequestID         int
 	resultCh              chan RequestResult
 	results               map[int]*RequestResult
+	setPlatformDataCh     chan setPlatformDataArgs
 	language              language.Tag
 	interstitialAdsLoaded bool
 	rewardedAdsLoaded     bool
@@ -103,12 +109,13 @@ const (
 
 func NewManager(width, height int, requester Requester) *Manager {
 	m := &Manager{
-		width:     width,
-		height:    height,
-		requester: requester,
-		resultCh:  make(chan RequestResult, 1),
-		results:   map[int]*RequestResult{},
-		language:  language.English,
+		width:             width,
+		height:            height,
+		requester:         requester,
+		resultCh:          make(chan RequestResult, 1),
+		results:           map[int]*RequestResult{},
+		setPlatformDataCh: make(chan setPlatformDataArgs, 1),
+		language:          language.English,
 	}
 	m.blackImage, _ = ebiten.NewImage(16, 16, ebiten.FilterNearest)
 	m.blackImage.Fill(color.Black)
@@ -138,6 +145,23 @@ func (m *Manager) Update() error {
 	select {
 	case r := <-m.resultCh:
 		m.results[r.ID] = &r
+		switch r.Type {
+		case RequestTypeInterstitialAds:
+			m.interstitialAdsLoaded = false
+		case RequestTypeRewardedAds:
+			m.rewardedAdsLoaded = false
+		}
+	case a := <-m.setPlatformDataCh:
+		switch a.key {
+		case PlatformDataKeyInterstitialAdsLoaded:
+			m.interstitialAdsLoaded = true
+		case PlatformDataKeyRewardedAdsLoaded:
+			m.rewardedAdsLoaded = true
+		case PlatformDataKeyBackButton:
+			input.TriggerBackButton()
+		default:
+			log.Printf("platform data key not implemented: %s", a.key)
+		}
 	default:
 	}
 	if m.next != nil {
@@ -252,7 +276,6 @@ func (m *Manager) FinishRestorePurchases(id int, success bool, purchases []uint8
 }
 
 func (m *Manager) FinishInterstitialAds(id int) {
-	m.interstitialAdsLoaded = false
 	m.resultCh <- RequestResult{
 		ID:   id,
 		Type: RequestTypeInterstitialAds,
@@ -260,7 +283,6 @@ func (m *Manager) FinishInterstitialAds(id int) {
 }
 
 func (m *Manager) FinishRewardedAds(id int, success bool) {
-	m.rewardedAdsLoaded = false
 	m.resultCh <- RequestResult{
 		ID:        id,
 		Type:      RequestTypeRewardedAds,
@@ -299,15 +321,9 @@ func (m *Manager) FinishGetIAPPrices(id int, success bool, prices []uint8) {
 }
 
 func (m *Manager) SetPlatformData(key PlatformDataKey, value string) {
-	switch key {
-	case PlatformDataKeyInterstitialAdsLoaded:
-		m.interstitialAdsLoaded = true
-	case PlatformDataKeyRewardedAdsLoaded:
-		m.rewardedAdsLoaded = true
-	case PlatformDataKeyBackButton:
-		input.TriggerBackButton()
-	default:
-		log.Printf("platform data key not implemented: %s", key)
+	m.setPlatformDataCh <- setPlatformDataArgs{
+		key:   key,
+		value: value,
 	}
 }
 

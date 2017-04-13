@@ -51,7 +51,7 @@ func Position() (int, int) {
 	return theInput.Position()
 }
 
-func (i *input) Update() {
+func (i *input) updatePointerDevices() {
 	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
 		i.pressCount++
 		i.x, i.y = ebiten.CursorPosition()
@@ -66,6 +66,10 @@ func (i *input) Update() {
 	i.pressCount = 0
 	i.x = 0
 	i.y = 0
+}
+
+func (i *input) Update() {
+	i.updatePointerDevices()
 	if i.backPressCount > 0 {
 		i.backPressCount--
 	}
@@ -88,7 +92,5 @@ func (i *input) BackButtonPressed() bool {
 }
 
 func (i *input) TriggerBackButton() {
-	// TODO: due to the timing backbutton is triggered,
-	// we need to give extra frame for the backPressCount
-	i.backPressCount = 2
+	i.backPressCount = 1
 }
