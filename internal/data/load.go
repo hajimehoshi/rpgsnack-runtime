@@ -58,6 +58,7 @@ var (
 	current         *Game
 	progress        []uint8
 	purchases       []uint8
+	prices          map[string]string// TODO: We want to use https://godoc.org/golang.org/x/text/currency
 	defaultLanguage language.Tag
 )
 
@@ -73,6 +74,13 @@ func Purchases() []uint8 {
 	return purchases
 }
 
+func Price(productId string) string {
+	if _, ok := prices[productId]; ok {
+		return prices[productId]
+	}
+	return ""
+}
+
 // DefaultLanguage represents a default language in the environment the player is playing on.
 func DefaultLanguage() language.Tag {
 	return defaultLanguage
@@ -84,6 +92,10 @@ func UpdateProgress(p []uint8) {
 
 func UpdatePurchases(p []uint8) {
 	purchases = p
+}
+
+func UpdatePrices(p map[string]string) {
+	prices = p
 }
 
 type jsonData struct {

@@ -181,6 +181,17 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 			} else {
 				i.commandIterator.Choose(1)
 			}
+		case scene.RequestTypeIAPPrices:
+			if r.Succeeded {
+				var prices map[string]string
+				if err := json.Unmarshal(r.Data, &prices); err != nil {
+					panic(err)
+				}
+				data.UpdatePrices(prices)
+				i.commandIterator.Choose(0)
+			} else {
+				i.commandIterator.Choose(1)
+			}
 		default:
 			i.commandIterator.Advance()
 		}
@@ -441,6 +452,10 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		i.commandIterator.Advance()
 	case data.CommandNameGotoTitle:
 		return false, GoToTitle
+	case data.CommandNameSyncIAP:
+		i.waitingRequestID = sceneManager.GenerateRequestID()
+		sceneManager.Requester().RequestGetIAPPrices(i.waitingRequestID)
+		return false, nil
 	case data.CommandUnlockAchievement:
 		// TODO: Remove this command in the future.
 		// Implement passive achievements instead.
@@ -633,7 +648,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		i.gameState.variables.SetInnerVariableValue(args.Name, args.Value)
 		i.commandIterator.Advance()
 	default:
-		return false, fmt.Errorf("invalid command: %s", c.Name)
+		return false, fmt.Errorf("interpreter: invalid command: %s", c.Name)
 	}
 	return true, nil
 }

@@ -139,6 +139,7 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 	case CommandNameStopBGM:
 	case CommandNameSave:
 	case CommandNameGotoTitle:
+	case CommandNameSyncIAP:
 	case CommandUnlockAchievement:
 		var args *CommandArgsUnlockAchievement
 		if err := unmarshalJSON(tmp.Args, &args); err != nil {
@@ -253,6 +254,7 @@ const (
 	CommandUnlockAchievement CommandName = "unlock_achievement"
 	CommandControlHint       CommandName = "control_hint"
 	CommandPurchase          CommandName = "start_iap"
+	CommandNameSyncIAP       CommandName = "sync_iap" // TODO: We might be able to remove this later
 	CommandShowAds           CommandName = "show_ads"
 	CommandOpenLink          CommandName = "open_link"
 

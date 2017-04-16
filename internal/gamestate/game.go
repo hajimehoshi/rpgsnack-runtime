@@ -167,17 +167,21 @@ func (g *Game) RequestSave(sceneManager *scene.Manager) bool {
 	return true
 }
 
-var reMessage = regexp.MustCompile(`\\([a-zA-Z])\[(\d+)\]`)
+var reMessage = regexp.MustCompile(`\\([a-zA-Z])\[([^\]]+)\]`)
 
 func (g *Game) parseMessageSyntax(str string) string {
 	return reMessage.ReplaceAllStringFunc(str, func(part string) string {
 		name := strings.ToLower(part[1:2])
-		id, err := strconv.Atoi(part[3 : len(part)-1])
-		if err != nil {
-			panic(fmt.Sprintf("not reach: %s", err))
-		}
+		args := part[3 : len(part)-1]
+
 		switch name {
+		case "p":
+			return data.Price(args)
 		case "v":
+			id, err := strconv.Atoi(args)
+			if err != nil {
+				panic(fmt.Sprintf("not reach: %s", err))
+			}
 			return strconv.Itoa(g.variables.VariableValue(id))
 		}
 		return str
