@@ -74,7 +74,6 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 		if err := unmarshalJSON(tmp.Args, &args); err != nil {
 			return err
 		}
-
 		c.Args = args
 	case CommandNameShowHint:
 		var args *CommandArgsShowHint
