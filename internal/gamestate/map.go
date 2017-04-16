@@ -435,11 +435,12 @@ func (m *Map) passable(through bool, x, y int, ignoreCharacters bool) bool {
 		return true
 	}
 	es := m.eventsAt(x, y)
-	if len(es) > 0 {
-		if e := es[0]; !e.Through() {
-			if page := m.currentPage(e); page != nil && page.Priority == data.PrioritySameAsCharacters {
-				return false
-			}
+	for _, e := range es {
+		if e.Through() {
+			continue
+		}
+		if page := m.currentPage(e); page != nil && page.Priority == data.PrioritySameAsCharacters {
+			return false
 		}
 	}
 	px, py := m.player.Position()
