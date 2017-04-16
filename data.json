@@ -36,7 +36,7 @@
       "7358e3ad-c1ea-4198-a6a4-38e74bfcc90c": "セーブのテスト",
       "7d7bb542-cead-4989-96c5-3ab0e48710fd": "スキップありのルート指定のテスト\nVisibilityも変わるよ",
       "828e2dd3-a0c9-4aad-88f6-d9c6f0a1d79e": "タイトルへ戻ります",
-      "3d1e6c63-983a-46da-88de-036fd651ca7d": "選択肢A",
+      "3d1e6c63-983a-46da-88de-036fd651ca7d": "選択肢A 場所移動",
       "66a533ed-7556-4063-af8a-5d96bbfccc6e": "選択肢B",
       "b384c510-c28a-4248-90fb-1148afd3694c": "キャンセル",
       "97bcb748-637d-4daa-86c0-859ff64dc1a7": "リワードビデオ",
@@ -53,7 +53,8 @@
       "9d5fbc98-2855-483e-85f6-cb03c138034c": "Purchase bonus_episode_01 Success",
       "11fe6a36-56ec-42cb-b2e7-af8a1fc7ee56": "Purchase bonus_episode_01 Fail",
       "e9276828-ac80-4b7a-8d3f-3c656c6ad458": "bonus_episode_01 is already purchased",
-      "fa1986cf-1cbc-4318-93ce-d322a17475cd": "決して表示されることのないメッセージ"
+      "fa1986cf-1cbc-4318-93ce-d322a17475cd": "決して表示されることのないメッセージ",
+      "8b1eb7f2-078d-4157-80d7-1910179fdb27": "一時的に消えます"
     }
   },
   "maps": [
@@ -753,6 +754,14 @@
                               "type": "balloon",
                               "balloonType": "normal"
                             }
+                          },
+                          {
+                            "name": "transfer",
+                            "args": {
+                              "roomId": 1,
+                              "x": 2,
+                              "y": 2
+                            }
                           }
                         ],
                         [
@@ -1031,6 +1040,41 @@
                 }
               ],
               "name": "Event4"
+            },
+            {
+              "id": 9,
+              "x":  9,
+              "y":  8,
+              "pages": [
+                {
+                  "conditions": [],
+                  "image":      "characters0.png",
+                  "imageIndex": 1,
+                  "frame":      1,
+                  "dir":        3,
+                  "dirFix":     false,
+                  "walking":    false,
+                  "stepping":   true,
+                  "through":    false,
+                  "priority":   1,
+                  "trigger":    "player",
+                  "commands": [
+                    {
+                      "name": "show_message",
+                      "args": {
+                        "type":        "balloon",
+                        "content":     "8b1eb7f2-078d-4157-80d7-1910179fdb27",
+                        "eventId":     0,
+                        "balloonType": "normal"
+                      }
+                    },
+                    {
+                      "name": "erase_event",
+                      "args": {}
+                    }
+                  ]
+                }
+              ]
             }
           ]
         },
