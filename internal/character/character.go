@@ -47,6 +47,7 @@ type Character struct {
 	moveDir       data.Dir
 	visible       bool
 	through       bool
+	erased        bool
 }
 
 func NewPlayer(x, y int) *Character {
@@ -96,6 +97,7 @@ type tmpCharacter struct {
 	MoveDir       data.Dir   `json:"moveDir"`
 	Visible       bool       `json:"visible"`
 	Through       bool       `json:"through"`
+	Erased        bool       `json:"erased"`
 }
 
 func (c *Character) MarshalJSON() ([]uint8, error) {
@@ -118,6 +120,7 @@ func (c *Character) MarshalJSON() ([]uint8, error) {
 		MoveDir:       c.moveDir,
 		Visible:       c.visible,
 		Through:       c.through,
+		Erased:        c.erased,
 	}
 	return json.Marshal(tmp)
 }
@@ -145,6 +148,7 @@ func (c *Character) UnmarshalJSON(data []uint8) error {
 	c.moveDir = tmp.MoveDir
 	c.visible = tmp.Visible
 	c.through = tmp.Through
+	c.erased = tmp.Erased
 	return nil
 }
 
@@ -235,7 +239,7 @@ func (c *Character) DirFix() bool {
 }
 
 func (c *Character) Through() bool {
-	return c.through
+	return c.through || c.erased
 }
 
 func (c *Character) SetSpeed(speed data.Speed) {
@@ -326,6 +330,14 @@ func (c *Character) TransferImmediately(x, y int) {
 	c.moveCount = 0
 }
 
+func (c *Character) Erase() {
+	c.erased = true
+}
+
+func (c *Character) Erased() bool {
+	return c.erased
+}
+
 func (c *Character) UpdateWithPage(page *data.Page) error {
 	if page == nil {
 		c.imageName = ""
@@ -348,6 +360,9 @@ func (c *Character) UpdateWithPage(page *data.Page) error {
 }
 
 func (c *Character) Update() error {
+	if c.erased {
+		return nil
+	}
 	if c.stepping {
 		switch {
 		case c.steppingCount < 15:
@@ -402,7 +417,7 @@ func (c *Character) Update() error {
 }
 
 func (c *Character) Draw(screen *ebiten.Image) error {
-	if c.imageName == "" || !c.visible {
+	if c.imageName == "" || !c.visible || c.erased {
 		return nil
 	}
 	op := &ebiten.DrawImageOptions{}

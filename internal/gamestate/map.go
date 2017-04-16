@@ -206,10 +206,13 @@ func (m *Map) meetsPageCondition(page *data.Page, eventID int) (bool, error) {
 	return true, nil
 }
 
-func (m *Map) calcPageIndex(eventID int) (int, error) {
+func (m *Map) calcPageIndex(ch *character.Character) (int, error) {
+	if ch.Erased() {
+		return -1, nil
+	}
 	var event *data.Event
 	for _, e := range m.CurrentRoom().Events {
-		if e.ID == eventID {
+		if e.ID == ch.EventID() {
 			event = e
 			break
 		}
@@ -288,7 +291,7 @@ func (m *Map) Update(sceneManager *scene.Manager) error {
 		return nil
 	}
 	for _, e := range m.events {
-		index, err := m.calcPageIndex(e.EventID())
+		index, err := m.calcPageIndex(e)
 		if err != nil {
 			return err
 		}

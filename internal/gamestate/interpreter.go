@@ -215,8 +215,6 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		if !i.commandIterator.Goto(label) {
 			i.commandIterator.Advance()
 		}
-	case data.CommandNameReturn:
-		i.commandIterator.Terminate()
 	case data.CommandNameCallEvent:
 		args := c.Args.(*data.CommandArgsCallEvent)
 		eventID := args.EventID
@@ -240,6 +238,13 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		page := event.Pages[args.PageIndex]
 		commands := page.Commands
 		i.sub = i.createChild(eventID, commands)
+	case data.CommandNameReturn:
+		i.commandIterator.Terminate()
+	case data.CommandNameEraseEvent:
+		i.commandIterator.Terminate()
+		if ch := i.gameState.character(i.mapID, i.roomID, i.eventID); ch != nil {
+			ch.Erase()
+		}
 	case data.CommandNameWait:
 		if i.waitingCount == 0 {
 			time := c.Args.(*data.CommandArgsWait).Time

@@ -63,6 +63,7 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 		}
 		c.Args = args
 	case CommandNameReturn:
+	case CommandNameEraseEvent:
 	case CommandNameWait:
 		var args *CommandArgsWait
 		if err := unmarshalJSON(tmp.Args, &args); err != nil {
@@ -231,6 +232,7 @@ const (
 	CommandNameGoto          CommandName = "goto"
 	CommandNameCallEvent     CommandName = "call_event"
 	CommandNameReturn        CommandName = "return"
+	CommandNameEraseEvent    CommandName = "erase_event"
 	CommandNameWait          CommandName = "wait"
 	CommandNameShowMessage   CommandName = "show_message"
 	CommandNameShowHint      CommandName = "show_hint"
