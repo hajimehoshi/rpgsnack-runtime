@@ -215,6 +215,8 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		if !i.commandIterator.Goto(label) {
 			i.commandIterator.Advance()
 		}
+	case data.CommandNameReturn:
+		i.commandIterator.Terminate()
 	case data.CommandNameCallEvent:
 		args := c.Args.(*data.CommandArgsCallEvent)
 		eventID := args.EventID

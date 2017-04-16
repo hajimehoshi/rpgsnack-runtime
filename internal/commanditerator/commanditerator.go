@@ -85,6 +85,10 @@ func (c *CommandIterator) Rewind() {
 	c.unindentIfNeeded()
 }
 
+func (c *CommandIterator) Terminate() {
+	c.indices = []int{}
+}
+
 func (c *CommandIterator) IsTerminated() bool {
 	return len(c.indices) == 0
 }

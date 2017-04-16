@@ -52,7 +52,8 @@
       "9b8f5a14-d3b0-47b9-93ea-1157026d52f0": "現在\\v[3]個のヒントがあるよ",
       "9d5fbc98-2855-483e-85f6-cb03c138034c": "Purchase bonus_episode_01 Success",
       "11fe6a36-56ec-42cb-b2e7-af8a1fc7ee56": "Purchase bonus_episode_01 Fail",
-      "e9276828-ac80-4b7a-8d3f-3c656c6ad458": "bonus_episode_01 is already purchased"
+      "e9276828-ac80-4b7a-8d3f-3c656c6ad458": "bonus_episode_01 is already purchased",
+      "fa1986cf-1cbc-4318-93ce-d322a17475cd": "決して表示されることのないメッセージ"
     }
   },
   "maps": [
@@ -993,6 +994,20 @@
                           }
                         ]
                       ]
+                    },
+                    {
+                      "name": "return",
+                      "args": {},
+                      "branches": []
+                    },
+                    {
+                      "name": "show_message",
+                      "args": {
+                        "type": "balloon",
+                        "content": "fa1986cf-1cbc-4318-93ce-d322a17475cd",
+                        "eventId": 0,
+                        "balloonType": "normal"
+                      }
                     }
                   ],
                   "route": null,
