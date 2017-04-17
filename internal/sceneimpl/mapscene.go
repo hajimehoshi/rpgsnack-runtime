@@ -398,6 +398,10 @@ func (t *tilesImageParts) Dst(index int) (int, int, int, int) {
 func (m *MapScene) Draw(screen *ebiten.Image) {
 	m.tilesImage.Fill(color.Black)
 
+	m.cameraButton.Draw(screen)
+	m.titleButton.Draw(screen)
+	m.removeAdsButton.Draw(screen)
+
 	tileSet := m.gameState.Map().TileSet()
 	op := &ebiten.DrawImageOptions{}
 	op.ImageParts = &tilesImageParts{
@@ -448,10 +452,6 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		op.GeoM.Translate((float64(w)-float64(sw))/2, 0)
 		m.screenShotImage.DrawImage(screen, nil)
 	}
-
-	m.cameraButton.Draw(screen)
-	m.titleButton.Draw(screen)
-	m.removeAdsButton.Draw(screen)
 
 	m.screenShotDialog.Draw(screen)
 	m.quitDialog.Draw(screen)
