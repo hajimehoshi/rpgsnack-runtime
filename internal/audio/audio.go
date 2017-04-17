@@ -80,7 +80,8 @@ func (a *audio) PlaySE(name string, volume float64) error {
 		return err
 	}
 	p.SetVolume(volume)
-	return p.Play()
+	p.Play()
+	return nil
 }
 
 func (a *audio) PlayBGM(name string, volume float64) error {
@@ -106,9 +107,7 @@ func (a *audio) PlayBGM(name string, volume float64) error {
 	if err := p.Rewind(); err != nil {
 		return err
 	}
-	if err := p.Play(); err != nil {
-		return err
-	}
+	p.Play()
 	p.SetVolume(volume)
 	a.playing = p
 	a.playingName = name
