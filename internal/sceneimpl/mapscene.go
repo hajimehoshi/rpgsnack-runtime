@@ -98,25 +98,25 @@ func (m *MapScene) initUI() {
 	// TODO: Implement the camera functionality later
 	m.cameraButton.Visible = false
 
-	m.quitDialog = ui.NewDialog(0, 64, 152, 100)
+	m.quitDialog = ui.NewDialog(0, 64, 152, 124)
 	m.quitLabel = ui.NewLabel(16, 8)
-	m.quitYesButton = ui.NewButton(0, 35, 120, 20, "click")
-	m.quitNoButton = ui.NewButton(0, 60, 120, 20, "cancel")
+	m.quitYesButton = ui.NewButton(0, 72, 120, 20, "click")
+	m.quitNoButton = ui.NewButton(0, 96, 120, 20, "cancel")
 	m.quitDialog.AddChild(m.quitLabel)
 	m.quitDialog.AddChild(m.quitYesButton)
 	m.quitDialog.AddChild(m.quitNoButton)
 
-	m.storeErrorDialog = ui.NewDialog(0, 64, 152, 80)
+	m.storeErrorDialog = ui.NewDialog(0, 64, 152, 124)
 	m.storeErrorLabel = ui.NewLabel(16, 8)
-	m.storeErrorOkButton = ui.NewButton(0, 50, 120, 20, "click")
+	m.storeErrorOkButton = ui.NewButton(0, 96, 120, 20, "click")
 	m.storeErrorDialog.AddChild(m.storeErrorLabel)
 	m.storeErrorDialog.AddChild(m.storeErrorOkButton)
 
 	m.removeAdsButton = ui.NewButton(0, 8, 52, 12, "click")
-	m.removeAdsDialog = ui.NewDialog(0, 64, 152, 100)
+	m.removeAdsDialog = ui.NewDialog(0, 64, 152, 124)
 	m.removeAdsLabel = ui.NewLabel(16, 8)
-	m.removeAdsYesButton = ui.NewButton(0, 45, 120, 20, "click")
-	m.removeAdsNoButton = ui.NewButton(0, 70, 120, 20, "cancel")
+	m.removeAdsYesButton = ui.NewButton(0, 72, 120, 20, "click")
+	m.removeAdsNoButton = ui.NewButton(0, 96, 120, 20, "cancel")
 	m.removeAdsDialog.AddChild(m.removeAdsLabel)
 	m.removeAdsDialog.AddChild(m.removeAdsYesButton)
 	m.removeAdsDialog.AddChild(m.removeAdsNoButton)

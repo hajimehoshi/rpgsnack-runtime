@@ -49,14 +49,14 @@ func NewTitleScene() *TitleScene {
 		resumeGameButton: ui.NewButton(0, 184, 120, 20, "click"),
 		newGameButton:    ui.NewButton(0, 208, 120, 20, "click"),
 		settingsButton:   ui.NewImageButton(0, 0, assets.GetImage("icon_settings.png"), "click"),
-		warningDialog:    ui.NewDialog(0, 64, 152, 125),
-		warningLabel:     ui.NewLabel(16, 16),
-		warningYesButton: ui.NewButton(0, 60, 120, 20, "click"),
-		warningNoButton:  ui.NewButton(0, 85, 120, 20, "cancel"),
-		quitDialog:       ui.NewDialog(0, 64, 152, 125),
-		quitLabel:        ui.NewLabel(16, 16),
-		quitYesButton:    ui.NewButton(0, 60, 120, 20, "click"),
-		quitNoButton:     ui.NewButton(0, 85, 120, 20, "cancel"),
+		warningDialog:    ui.NewDialog(0, 64, 152, 124),
+		warningLabel:     ui.NewLabel(16, 8),
+		warningYesButton: ui.NewButton(0, 72, 120, 20, "click"),
+		warningNoButton:  ui.NewButton(0, 96, 120, 20, "cancel"),
+		quitDialog:       ui.NewDialog(0, 64, 152, 124),
+		quitLabel:        ui.NewLabel(16, 8),
+		quitYesButton:    ui.NewButton(0, 72, 120, 20, "click"),
+		quitNoButton:     ui.NewButton(0, 96, 120, 20, "cancel"),
 	}
 	t.warningDialog.AddChild(t.warningLabel)
 	t.warningDialog.AddChild(t.warningYesButton)
