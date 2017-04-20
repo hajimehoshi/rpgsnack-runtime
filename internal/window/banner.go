@@ -119,7 +119,6 @@ func (b *banner) update() error {
 			b.opened = true
 		}
 	}
-
 	return nil
 }
 
@@ -134,7 +133,6 @@ func (b *banner) position(screenHeight int) (int, int) {
 	case data.MessagePositionTop:
 		y = 0
 	}
-
 	return x, y
 }
 
@@ -148,24 +146,27 @@ func (b *banner) draw(screen *ebiten.Image, character *character.Character) {
 	case b.closingCount > 0:
 		rate = float64(b.closingCount) / float64(bannerMaxCount)
 	}
-	_, sh := screen.Size()
+	sw, sh := screen.Size()
+	dx := (sw - scene.TileXNum*scene.TileSize*scene.TileScale) / 2
+	dy := 0
 	if rate > 0 {
 		img := assets.GetImage("banner.png")
 		w, h := img.Size()
 		x, y := b.position(sh)
-		dx := float64(x)
-		dy := float64(y)
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(-float64(w)/2, -float64(h)/2)
 		op.GeoM.Scale(rate, rate)
-		op.GeoM.Translate(dx+float64(w)/2, dy+float64(h)/2)
+		op.GeoM.Translate(float64(x)+float64(w)/2, float64(y)+float64(h)/2)
 		op.GeoM.Scale(scene.TileScale, scene.TileScale)
+		op.GeoM.Translate(float64(dx), float64(dy))
 		screen.DrawImage(img, op)
 	}
 	if b.opened {
 		x, y := b.position(sh)
 		x = (x + bannerMarginX) * scene.TileScale
 		y = (y + bannerMarginY) * scene.TileScale
+		x += dx
+		y += dy
 		font.DrawText(screen, b.content, x, y, scene.TextScale, color.White)
 	}
 }

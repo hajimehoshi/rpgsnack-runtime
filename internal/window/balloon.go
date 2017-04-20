@@ -198,6 +198,8 @@ func (b *balloon) arrowPosition(screenWidth int, character *character.Character)
 	if !b.hasArrow {
 		panic("not reach")
 	}
+	// TODO: This margin should be calculated lately so that we can avoid strange margin
+	// when the screen width is like 500 that can't be divide by 3 (title scale).
 	x := (screenWidth/scene.TileScale - scene.TileXNum*scene.TileSize) / 2
 	y := scene.GameMarginTop / scene.TileScale
 	cx, cy := character.DrawPosition()
