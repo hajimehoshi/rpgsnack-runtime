@@ -28,7 +28,7 @@ import (
 )
 
 const (
-	bannerMaxCount = 4
+	bannerMaxCount = 8
 	bannerWidth    = 160
 	bannerHeight   = 60
 	bannerMarginX  = 4
@@ -101,11 +101,11 @@ func (b *banner) isAnimating() bool {
 }
 
 func (b *banner) open() {
-	b.openingCount = balloonMaxCount
+	b.openingCount = bannerMaxCount
 }
 
 func (b *banner) close() {
-	b.closingCount = balloonMaxCount
+	b.closingCount = bannerMaxCount
 }
 
 func (b *banner) update() error {
@@ -151,14 +151,12 @@ func (b *banner) draw(screen *ebiten.Image, character *character.Character) {
 	dy := 0
 	if rate > 0 {
 		img := assets.GetImage("banner.png")
-		w, h := img.Size()
 		x, y := b.position(sh)
 		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(-float64(w)/2, -float64(h)/2)
-		op.GeoM.Scale(rate, rate)
-		op.GeoM.Translate(float64(x)+float64(w)/2, float64(y)+float64(h)/2)
+		op.GeoM.Translate(float64(x), float64(y))
 		op.GeoM.Scale(scene.TileScale, scene.TileScale)
 		op.GeoM.Translate(float64(dx), float64(dy))
+		op.ColorM.Scale(1, 1, 1, rate)
 		screen.DrawImage(img, op)
 	}
 	if b.opened {
