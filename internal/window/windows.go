@@ -113,10 +113,10 @@ func (w *Windows) ShowMessage(messageType data.ShowMessageType, content string, 
 
 func (w *Windows) ShowChoices(sceneManager *scene.Manager, choices []string, interpreterID int) {
 	_, h := sceneManager.Size()
-	ymin := h/scene.TileScale - len(choices)*choiceBalloonHeight
+	ymin := h/scene.TileScale - scene.GameMarginTop/scene.TileScale - len(choices)*choiceBalloonHeight
 	w.choiceBalloons = nil
 	for i, choice := range choices {
-		x := sceneManager.MapOffsetX() / scene.TileScale
+		x := 0
 		y := i*choiceBalloonHeight + ymin
 		width := scene.TileXNum * scene.TileSize
 		balloon := newBalloon(x, y, width, choiceBalloonHeight, choice, data.BalloonTypeNormal, interpreterID)

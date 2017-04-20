@@ -158,26 +158,6 @@ func balloonSizeFromContent(content string, balloonType data.BalloonType) (int, 
 	return w, h, contentOffsetX, contentOffsetY
 }
 
-func newBalloonCenter(content string, balloonType data.BalloonType, interpreterID int) *balloon {
-	sw := scene.TileXNum * scene.TileSize
-	sh := scene.TileYNum*scene.TileSize + scene.GameMarginTop/scene.TileScale
-	w, h, contentOffsetX, contentOffsetY := balloonSizeFromContent(content, balloonType)
-	x := (sw - w) / 2
-	y := (sh - h) / 2
-	b := &balloon{
-		interpreterID:  interpreterID,
-		content:        content,
-		contentOffsetX: contentOffsetX,
-		contentOffsetY: contentOffsetY,
-		x:              x,
-		y:              y,
-		width:          w,
-		height:         h,
-		balloonType:    balloonType,
-	}
-	return b
-}
-
 func newBalloonWithArrow(content string, balloonType data.BalloonType, eventID int, interpreterID int) *balloon {
 	b := &balloon{
 		interpreterID: interpreterID,
@@ -198,14 +178,10 @@ func (b *balloon) arrowPosition(screenWidth int, character *character.Character)
 	if !b.hasArrow {
 		panic("not reach")
 	}
-	// TODO: This margin should be calculated lately so that we can avoid strange margin
-	// when the screen width is like 500 that can't be divide by 3 (title scale).
-	x := (screenWidth/scene.TileScale - scene.TileXNum*scene.TileSize) / 2
-	y := scene.GameMarginTop / scene.TileScale
 	cx, cy := character.DrawPosition()
 	w, _ := character.Size()
-	x += cx + w/2
-	y += cy
+	x := cx + w/2
+	y := cy
 	return x, y
 }
 
@@ -368,6 +344,8 @@ func (b *balloon) draw(screen *ebiten.Image, character *character.Character) {
 		rate = float64(b.closingCount) / float64(balloonMaxCount)
 	}
 	sw, _ := screen.Size()
+	dx := (sw - scene.TileXNum*scene.TileSize*scene.TileScale) / 2
+	dy := scene.GameMarginTop
 	if rate > 0 {
 		img := assets.GetImage("balloon.png")
 		if b.balloonType == data.BalloonTypeShout {
@@ -375,22 +353,23 @@ func (b *balloon) draw(screen *ebiten.Image, character *character.Character) {
 		}
 		op := &ebiten.DrawImageOptions{}
 		x, y := b.position(sw, character)
-		dx := float64(x + b.width/2)
-		dy := float64(y + b.height/2)
+		cx := float64(x + b.width/2)
+		cy := float64(y + b.height/2)
 		if b.hasArrow {
 			ax, ay := b.arrowPosition(sw, character)
-			dx = float64(ax)
-			dy = float64(ay) + balloonArrowHeight
+			cx = float64(ax)
+			cy = float64(ay) + balloonArrowHeight
 			if b.arrowFlip(sw, character) {
-				dx -= 4
+				cx -= 4
 			} else {
-				dx += 4
+				cx += 4
 			}
 		}
-		op.GeoM.Translate(-dx, -dy)
+		op.GeoM.Translate(-cx, -cy)
 		op.GeoM.Scale(rate, rate)
-		op.GeoM.Translate(dx, dy)
+		op.GeoM.Translate(cx, cy)
 		op.GeoM.Scale(scene.TileScale, scene.TileScale)
+		op.GeoM.Translate(float64(dx), float64(dy))
 		op.ImageParts = &balloonImageParts{
 			balloon:     b,
 			screenWidth: sw,
@@ -404,6 +383,8 @@ func (b *balloon) draw(screen *ebiten.Image, character *character.Character) {
 		mx, my := b.margin()
 		x = (x + mx + b.contentOffsetX) * scene.TileScale
 		y = (y + my + b.contentOffsetY) * scene.TileScale
+		x += dx
+		y += dy
 		font.DrawText(screen, b.content, x, y, scene.TextScale, color.Black)
 	}
 }
