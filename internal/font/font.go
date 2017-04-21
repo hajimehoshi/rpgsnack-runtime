@@ -22,6 +22,14 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 )
 
+type TextAlign int
+
+const (
+	TextAlignLeft TextAlign = iota
+	TextAlignCenter
+	TextAlignRight
+)
+
 var positions = map[rune]int{}
 
 func init() {
@@ -42,7 +50,50 @@ const (
 )
 
 type textImageParts struct {
-	runes []rune
+	runes      []rune
+	align      TextAlign
+	lineWidths []int
+	width      int
+}
+
+func runeWidth(r rune) int {
+	if r < 0x100 {
+		return charHalfWidth
+	}
+	return charFullWidth
+}
+
+func newTextImageParts(text string, align TextAlign) *textImageParts {
+	t := &textImageParts{
+		runes: ([]rune)(text),
+		align: align,
+	}
+	x := 0
+	for i, r := range t.runes {
+		if t.runes[i] == '\n' {
+			t.lineWidths = append(t.lineWidths, x)
+			x = 0
+			continue
+		}
+		x += runeWidth(r)
+	}
+	t.lineWidths = append(t.lineWidths, x)
+	for _, w := range t.lineWidths {
+		if t.width < w {
+			t.width = w
+		}
+	}
+	return t
+}
+
+func (t *textImageParts) line(index int) int {
+	l := 0
+	for i := 0; i < index; i++ {
+		if t.runes[i] == '\n' {
+			l++
+		}
+	}
+	return l
 }
 
 func (t *textImageParts) Len() int {
@@ -77,16 +128,21 @@ func (t *textImageParts) Dst(index int) (int, int, int, int) {
 			y += renderingLineHeight
 			continue
 		}
-		if t.runes[i] < 0x100 {
-			x += charHalfWidth
-			continue
-		}
-		x += charFullWidth
+		x += runeWidth(t.runes[i])
 	}
 	w := charFullWidth
 	h := lineHeight
 	if t.runes[index] < 0x100 {
 		w = charHalfWidth
+	}
+	if t.align != TextAlignLeft {
+		lw := t.lineWidths[t.line(index)]
+		switch t.align {
+		case TextAlignCenter:
+			x -= lw / 2
+		case TextAlignRight:
+			x -= lw
+		}
 	}
 	return x, y, x + w, y + h
 }
@@ -116,13 +172,13 @@ func MeasureSize(text string) (int, int) {
 	return w, h
 }
 
-func DrawText(screen *ebiten.Image, text string, x, y int, scale int, color color.Color) {
+func DrawText(screen *ebiten.Image, text string, x, y int, scale int, textAlign TextAlign, color color.Color) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(float64(scale), float64(scale))
 	op.GeoM.Translate(float64(x), float64(y))
 	r, g, b, a := color.RGBA()
 	op.ColorM.Scale(float64(r>>8)/255, float64(g>>8)/255, float64(b>>8)/255, float64(a>>8)/255)
-	op.ImageParts = &textImageParts{[]rune(text)}
+	op.ImageParts = newTextImageParts(text, textAlign)
 	mplusImage := assets.GetImage("mplus.compacted.png")
 	screen.DrawImage(mplusImage, op)
 }

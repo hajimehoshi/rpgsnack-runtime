@@ -45,5 +45,5 @@ func (l *Label) UpdateAsChild(visible bool, offsetX, offsetY int) {
 func (l *Label) Draw(screen *ebiten.Image) {
 	tx := l.X * scene.TileScale
 	ty := l.Y * scene.TileScale
-	font.DrawText(screen, l.Text, tx, ty, scene.TextScale, color.White)
+	font.DrawText(screen, l.Text, tx, ty, scene.TextScale, font.TextAlignLeft, color.White)
 }

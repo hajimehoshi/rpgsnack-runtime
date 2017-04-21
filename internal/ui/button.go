@@ -145,12 +145,12 @@ func (b *Button) Draw(screen *ebiten.Image) {
 		op.ColorM.Scale(0.5, 0.5, 0.5, 1)
 	}
 	screen.DrawImage(img, op)
-	tw, th := font.MeasureSize(b.Text)
-	tx := b.X*scene.TileScale + (b.Width*scene.TileScale-tw*scene.TextScale)/2
+	_, th := font.MeasureSize(b.Text)
+	tx := b.X*scene.TileScale + b.Width*scene.TileScale/2
 	ty := b.Y*scene.TileScale + (b.Height*scene.TileScale-th*scene.TextScale)/2
 	var c color.Color = color.White
 	if b.Disabled {
 		c = color.RGBA{0x80, 0x80, 0x80, 0xff}
 	}
-	font.DrawText(screen, b.Text, tx, ty, scene.TextScale, c)
+	font.DrawText(screen, b.Text, tx, ty, scene.TextScale, font.TextAlignCenter, c)
 }

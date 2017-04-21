@@ -165,6 +165,6 @@ func (b *banner) draw(screen *ebiten.Image, character *character.Character) {
 		y = (y + bannerMarginY) * scene.TileScale
 		x += dx
 		y += dy
-		font.DrawText(screen, b.content, x, y, scene.TextScale, color.White)
+		font.DrawText(screen, b.content, x, y, scene.TextScale, font.TextAlignLeft, color.White)
 	}
 }
