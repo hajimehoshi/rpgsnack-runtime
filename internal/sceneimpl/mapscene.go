@@ -121,6 +121,8 @@ func (m *MapScene) initUI() {
 	m.removeAdsDialog.AddChild(m.removeAdsYesButton)
 	m.removeAdsDialog.AddChild(m.removeAdsNoButton)
 
+	m.removeAdsButton.Visible = false // TODO: Clock of Atonement does not need this feature, so turn it off for now
+
 	m.UpdatePurchasesState()
 }
 
@@ -283,7 +285,7 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 			return nil
 		}
 	}
-	m.removeAdsButton.Visible = !m.isAdsRemoved
+	// m.removeAdsButton.Visible = !m.isAdsRemoved
 
 	// TODO: All UI parts' origin should be defined correctly
 	// so that we don't need to adjust X positions here.
