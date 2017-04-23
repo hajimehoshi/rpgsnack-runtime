@@ -95,7 +95,7 @@ func (w *Windows) HasChosenIndex() bool {
 	return w.hasChosenIndex
 }
 
-func (w *Windows) ShowMessage(messageType data.ShowMessageType, content string, balloonType data.BalloonType, positionType data.MessagePositionType, eventID int, interpreterID int) {
+func (w *Windows) ShowMessage(messageType data.ShowMessageType, content string, balloonType data.BalloonType, positionType data.MessagePositionType, textAlign data.TextAlign, eventID int, interpreterID int) {
 	switch messageType {
 	case data.ShowMessageBalloon:
 		if w.nextBalloon != nil {
@@ -104,7 +104,7 @@ func (w *Windows) ShowMessage(messageType data.ShowMessageType, content string, 
 		// TODO: How to call newBalloonCenter?
 		w.nextBalloon = newBalloonWithArrow(content, balloonType, eventID, interpreterID)
 	case data.ShowMessageBanner:
-		w.banner = newBanner(content, positionType, interpreterID)
+		w.banner = newBanner(content, positionType, textAlign, interpreterID)
 		w.banner.open()
 	default:
 		fmt.Errorf("data: invalid messageType: %s", messageType)

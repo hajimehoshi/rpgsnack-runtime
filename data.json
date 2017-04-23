@@ -118,7 +118,26 @@
                       "args":    {
                         "content": "bffe5c73-6109-486d-b445-834847833947",
                         "type": "banner",
-                        "positionType": "middle"
+                        "positionType": "middle",
+                        "textAlign": "left"
+                      }
+                    },
+                    {
+                      "name": "show_message",
+                      "args":    {
+                        "content": "bffe5c73-6109-486d-b445-834847833947",
+                        "type": "banner",
+                        "positionType": "middle",
+                        "textAlign": "center"
+                      }
+                    },
+                    {
+                      "name": "show_message",
+                      "args":    {
+                        "content": "bffe5c73-6109-486d-b445-834847833947",
+                        "type": "banner",
+                        "positionType": "middle",
+                        "textAlign": "right"
                       }
                     },
                     {

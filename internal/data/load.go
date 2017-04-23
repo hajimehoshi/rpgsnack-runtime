@@ -58,7 +58,7 @@ var (
 	current         *Game
 	progress        []uint8
 	purchases       []uint8
-	prices          map[string]string// TODO: We want to use https://godoc.org/golang.org/x/text/currency
+	prices          map[string]string // TODO: We want to use https://godoc.org/golang.org/x/text/currency
 	defaultLanguage language.Tag
 )
 

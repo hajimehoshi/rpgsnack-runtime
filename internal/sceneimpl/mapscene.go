@@ -444,7 +444,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	}
 	m.gameState.DrawWindows(screen)
 	msg := fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS())
-	font.DrawText(screen, msg, 0, 0, scene.TextScale, font.TextAlignLeft, color.White)
+	font.DrawText(screen, msg, 0, 0, scene.TextScale, data.TextAlignLeft, color.White)
 	if m.cameraTaking {
 		m.cameraTaking = false
 		m.screenShotImage.Clear()

@@ -75,6 +75,9 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 		if err := unmarshalJSON(tmp.Args, &args); err != nil {
 			return err
 		}
+		if args.TextAlign == "" {
+			args.TextAlign = TextAlignLeft
+		}
 		c.Args = args
 	case CommandNameShowHint:
 		var args *CommandArgsShowHint
@@ -296,6 +299,7 @@ type CommandArgsShowMessage struct {
 	ContentID    UUID                `json:"content"`
 	BalloonType  BalloonType         `json:"balloonType"`
 	PositionType MessagePositionType `json:"positionType"`
+	TextAlign    TextAlign           `json:"textAlign"`
 }
 
 type CommandArgsShowHint struct {
@@ -620,6 +624,14 @@ type ShowMessageType string
 const (
 	ShowMessageBalloon ShowMessageType = "balloon"
 	ShowMessageBanner  ShowMessageType = "banner"
+)
+
+type TextAlign string
+
+const (
+	TextAlignLeft   TextAlign = "left"
+	TextAlignCenter TextAlign = "center"
+	TextAlignRight  TextAlign = "right"
 )
 
 type BalloonType string

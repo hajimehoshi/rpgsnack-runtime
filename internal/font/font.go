@@ -20,14 +20,7 @@ import (
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
-)
-
-type TextAlign int
-
-const (
-	TextAlignLeft TextAlign = iota
-	TextAlignCenter
-	TextAlignRight
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 )
 
 var positions = map[rune]int{}
@@ -51,7 +44,7 @@ const (
 
 type textImageParts struct {
 	runes      []rune
-	align      TextAlign
+	align      data.TextAlign
 	lineWidths []int
 	width      int
 }
@@ -63,7 +56,7 @@ func runeWidth(r rune) int {
 	return charFullWidth
 }
 
-func newTextImageParts(text string, align TextAlign) *textImageParts {
+func newTextImageParts(text string, align data.TextAlign) *textImageParts {
 	t := &textImageParts{
 		runes: ([]rune)(text),
 		align: align,
@@ -135,12 +128,12 @@ func (t *textImageParts) Dst(index int) (int, int, int, int) {
 	if t.runes[index] < 0x100 {
 		w = charHalfWidth
 	}
-	if t.align != TextAlignLeft {
+	if t.align != data.TextAlignLeft {
 		lw := t.lineWidths[t.line(index)]
 		switch t.align {
-		case TextAlignCenter:
+		case data.TextAlignCenter:
 			x -= lw / 2
-		case TextAlignRight:
+		case data.TextAlignRight:
 			x -= lw
 		}
 	}
@@ -172,7 +165,7 @@ func MeasureSize(text string) (int, int) {
 	return w, h
 }
 
-func DrawText(screen *ebiten.Image, text string, x, y int, scale int, textAlign TextAlign, color color.Color) {
+func DrawText(screen *ebiten.Image, text string, x, y int, scale int, textAlign data.TextAlign, color color.Color) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(float64(scale), float64(scale))
 	op.GeoM.Translate(float64(x), float64(y))

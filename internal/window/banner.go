@@ -42,6 +42,7 @@ type banner struct {
 	closingCount  int
 	opened        bool
 	positionType  data.MessagePositionType
+	textAlign     data.TextAlign
 }
 
 type tmpBanner struct {
@@ -51,6 +52,7 @@ type tmpBanner struct {
 	ClosingCount  int                      `json:"closingCount"`
 	Opened        bool                     `json:"opened"`
 	PositionType  data.MessagePositionType `json:"positionType"`
+	TextAlign     data.TextAlign           `json:"textAlign"`
 }
 
 func (b *banner) MarshalJSON() ([]uint8, error) {
@@ -61,6 +63,7 @@ func (b *banner) MarshalJSON() ([]uint8, error) {
 		OpeningCount:  b.openingCount,
 		ClosingCount:  b.closingCount,
 		PositionType:  b.positionType,
+		TextAlign:     b.textAlign,
 	}
 	return json.Marshal(tmp)
 }
@@ -76,14 +79,16 @@ func (b *banner) UnmarshalJSON(data []uint8) error {
 	b.openingCount = tmp.OpeningCount
 	b.closingCount = tmp.ClosingCount
 	b.positionType = tmp.PositionType
+	b.textAlign = tmp.TextAlign
 	return nil
 }
 
-func newBanner(content string, positionType data.MessagePositionType, interpreterID int) *banner {
+func newBanner(content string, positionType data.MessagePositionType, textAlign data.TextAlign, interpreterID int) *banner {
 	b := &banner{
 		interpreterID: interpreterID,
 		content:       content,
 		positionType:  positionType,
+		textAlign:     textAlign,
 	}
 	return b
 }
@@ -163,8 +168,15 @@ func (b *banner) draw(screen *ebiten.Image, character *character.Character) {
 		x, y := b.position(sh)
 		x = (x + bannerMarginX) * scene.TileScale
 		y = (y + bannerMarginY) * scene.TileScale
+		switch b.textAlign {
+		case data.TextAlignLeft:
+		case data.TextAlignCenter:
+			x += (scene.TileXNum*scene.TileSize - 2*bannerMarginX) * scene.TileScale / 2
+		case data.TextAlignRight:
+			x += (scene.TileXNum*scene.TileSize - 2*bannerMarginX) * scene.TileScale
+		}
 		x += dx
 		y += dy
-		font.DrawText(screen, b.content, x, y, scene.TextScale, font.TextAlignLeft, color.White)
+		font.DrawText(screen, b.content, x, y, scene.TextScale, b.textAlign, color.White)
 	}
 }

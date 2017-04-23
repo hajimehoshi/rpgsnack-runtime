@@ -21,6 +21,7 @@ import (
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/font"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
@@ -152,5 +153,5 @@ func (b *Button) Draw(screen *ebiten.Image) {
 	if b.Disabled {
 		c = color.RGBA{0x80, 0x80, 0x80, 0xff}
 	}
-	font.DrawText(screen, b.Text, tx, ty, scene.TextScale, font.TextAlignCenter, c)
+	font.DrawText(screen, b.Text, tx, ty, scene.TextScale, data.TextAlignCenter, c)
 }
