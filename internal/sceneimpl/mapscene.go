@@ -222,15 +222,13 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 		m.handleBackButton()
 	}
 
+	m.quitLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDBackToTitle)
+	m.quitYesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDYes)
+	m.quitNoButton.Text = texts.Text(sceneManager.Language(), texts.TextIDNo)
+	m.quitDialog.X = (w/scene.TileScale-160)/2 + 4
+	m.quitYesButton.X = (m.quitDialog.Width - m.quitYesButton.Width) / 2
+	m.quitNoButton.X = (m.quitDialog.Width - m.quitNoButton.Width) / 2
 	if m.quitDialog.Visible {
-		m.quitLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDBackToTitle)
-		m.quitYesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDYes)
-		m.quitNoButton.Text = texts.Text(sceneManager.Language(), texts.TextIDNo)
-
-		m.quitDialog.X = (w/scene.TileScale-160)/2 + 4
-		m.quitYesButton.X = (m.quitDialog.Width - m.quitYesButton.Width) / 2
-		m.quitNoButton.X = (m.quitDialog.Width - m.quitNoButton.Width) / 2
-
 		m.quitDialog.Update()
 		if m.quitYesButton.Pressed() {
 			if m.gameState.IsAutoSaveEnabled() {
@@ -248,13 +246,11 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 		}
 	}
 
+	m.storeErrorOkButton.X = (m.storeErrorDialog.Width - m.storeErrorOkButton.Width) / 2
+	m.storeErrorLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDStoreError)
+	m.storeErrorOkButton.Text = texts.Text(sceneManager.Language(), texts.TextIDOK)
+	m.storeErrorDialog.X = (w/scene.TileScale-160)/2 + 4
 	if m.storeErrorDialog.Visible {
-		m.storeErrorOkButton.X = (m.storeErrorDialog.Width - m.storeErrorOkButton.Width) / 2
-		m.storeErrorLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDStoreError)
-		m.storeErrorOkButton.Text = texts.Text(sceneManager.Language(), texts.TextIDOK)
-
-		m.storeErrorDialog.X = (w/scene.TileScale-160)/2 + 4
-
 		m.storeErrorDialog.Update()
 		if m.storeErrorOkButton.Pressed() {
 			m.storeErrorDialog.Visible = false
@@ -263,14 +259,12 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 		return nil
 	}
 
+	m.removeAdsYesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDYes)
+	m.removeAdsNoButton.Text = texts.Text(sceneManager.Language(), texts.TextIDNo)
+	m.removeAdsDialog.X = (w/scene.TileScale-160)/2 + 4
+	m.removeAdsYesButton.X = (m.removeAdsDialog.Width - m.removeAdsYesButton.Width) / 2
+	m.removeAdsNoButton.X = (m.removeAdsDialog.Width - m.removeAdsNoButton.Width) / 2
 	if m.removeAdsDialog.Visible {
-		m.removeAdsYesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDYes)
-		m.removeAdsNoButton.Text = texts.Text(sceneManager.Language(), texts.TextIDNo)
-
-		m.removeAdsDialog.X = (w/scene.TileScale-160)/2 + 4
-		m.removeAdsYesButton.X = (m.removeAdsDialog.Width - m.removeAdsYesButton.Width) / 2
-		m.removeAdsNoButton.X = (m.removeAdsDialog.Width - m.removeAdsNoButton.Width) / 2
-
 		m.removeAdsDialog.Update()
 		if m.removeAdsYesButton.Pressed() {
 			m.waitingRequestID = sceneManager.GenerateRequestID()
