@@ -55,7 +55,7 @@ func (m *Requester) RequestRewardedAds(requestID int) {
 }
 
 func (m *Requester) RequestOpenLink(requestID int, linkType string, data string) {
-	log.Printf("request open link: requestID: %d", requestID)
+	log.Printf("request open link: requestID: %d %s %s", requestID, linkType, data)
 	m.game.FinishOpenLink(requestID)
 }
 
