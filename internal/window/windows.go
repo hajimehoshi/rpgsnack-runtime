@@ -147,7 +147,7 @@ func (w *Windows) CloseAll() {
 }
 
 func (w *Windows) IsBusy(interpreterID int) bool {
-	if w.isAnimating(interpreterID) {
+	if w.IsAnimating(interpreterID) {
 		return true
 	}
 	if w.choosingInterpreterID == interpreterID {
@@ -206,7 +206,7 @@ func (w *Windows) isOpened(interpreterID int) bool {
 	return false
 }
 
-func (w *Windows) isAnimating(interpreterID int) bool {
+func (w *Windows) IsAnimating(interpreterID int) bool {
 	for _, b := range w.balloons {
 		if b == nil {
 			continue
@@ -241,7 +241,7 @@ func (w *Windows) Update(sceneManager *scene.Manager) {
 	if !w.choosing {
 		// 0 means to check all balloons.
 		// TODO: Don't use magic numbers.
-		if w.nextBalloon != nil && !w.isAnimating(0) && !w.isOpened(0) {
+		if w.nextBalloon != nil && !w.IsAnimating(0) && !w.isOpened(0) {
 			w.balloons = []*balloon{w.nextBalloon}
 			w.balloons[0].open()
 			w.nextBalloon = nil

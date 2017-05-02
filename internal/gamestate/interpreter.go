@@ -287,6 +287,9 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 				return false, nil
 			}
 		}
+		if i.gameState.windows.IsAnimating(i.id) {
+			return false, nil
+		}
 		// Advance command index first and check the next command.
 		i.commandIterator.Advance()
 		if !i.commandIterator.IsTerminated() {
