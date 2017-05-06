@@ -449,6 +449,9 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		args := c.Args.(*data.CommandArgsAutoSave)
 		i.gameState.setAutoSaveEnabled(args.Enabled)
 		i.commandIterator.Advance()
+	case data.CommandNameGameClear:
+		i.gameState.cleared = true
+		i.commandIterator.Advance()
 	case data.CommandNamePlayerControl:
 		args := c.Args.(*data.CommandArgsPlayerControl)
 		i.gameState.setPlayerControlEnabled(args.Enabled)

@@ -253,6 +253,7 @@ const (
 	CommandNameSave          CommandName = "save"
 	CommandNameGotoTitle     CommandName = "goto_title"
 	CommandNameAutoSave      CommandName = "autosave"
+	CommandNameGameClear     CommandName = "game_clear"
 	CommandNamePlayerControl CommandName = "player_control"
 	CommandUnlockAchievement CommandName = "unlock_achievement"
 	CommandControlHint       CommandName = "control_hint"

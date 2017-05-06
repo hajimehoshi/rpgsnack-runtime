@@ -44,6 +44,7 @@ type Game struct {
 	lastInterpreterID    int
 	autoSaveEnabled      bool
 	playerControlEnabled bool
+	cleared              bool
 
 	// Fields that are not dumped
 	rand             Rand
@@ -77,6 +78,7 @@ type tmpGame struct {
 	LastInterpreterID    int             `json:"lastInterpreterId"`
 	AutoSaveEnabled      bool            `json:"autoSaveEnabled"`
 	PlayerControlEnabled bool            `json:"playerControlEnabled"`
+	Cleared              bool            `json:"cleared"`
 }
 
 func (g *Game) MarshalJSON() ([]uint8, error) {
@@ -89,6 +91,7 @@ func (g *Game) MarshalJSON() ([]uint8, error) {
 		LastInterpreterID:    g.lastInterpreterID,
 		AutoSaveEnabled:      g.autoSaveEnabled,
 		PlayerControlEnabled: g.playerControlEnabled,
+		Cleared:              g.cleared,
 	}
 	return json.Marshal(tmp)
 }
@@ -107,6 +110,7 @@ func (g *Game) UnmarshalJSON(data []uint8) error {
 	g.lastInterpreterID = tmp.LastInterpreterID
 	g.autoSaveEnabled = tmp.AutoSaveEnabled
 	g.playerControlEnabled = tmp.PlayerControlEnabled
+	g.cleared = tmp.Cleared
 	g.rand = generateDefaultRand()
 	return nil
 }
