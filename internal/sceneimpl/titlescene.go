@@ -34,6 +34,7 @@ type TitleScene struct {
 	newGameButton    *ui.Button
 	resumeGameButton *ui.Button
 	settingsButton   *ui.Button
+	moregamesButton  *ui.Button
 	warningDialog    *ui.Dialog
 	warningLabel     *ui.Label
 	warningYesButton *ui.Button
@@ -42,6 +43,7 @@ type TitleScene struct {
 	quitLabel        *ui.Label
 	quitYesButton    *ui.Button
 	quitNoButton     *ui.Button
+	waitingRequestID int
 }
 
 func NewTitleScene() *TitleScene {
@@ -49,6 +51,7 @@ func NewTitleScene() *TitleScene {
 		resumeGameButton: ui.NewButton(0, 184, 120, 20, "click"),
 		newGameButton:    ui.NewButton(0, 208, 120, 20, "click"),
 		settingsButton:   ui.NewImageButton(0, 0, assets.GetImage("icon_settings.png"), "click"),
+		moregamesButton:  ui.NewImageButton(0, 0, assets.GetImage("icon_moregames.png"), "click"),
 		warningDialog:    ui.NewDialog(0, 64, 152, 124),
 		warningLabel:     ui.NewLabel(16, 8),
 		warningYesButton: ui.NewButton(0, 72, 120, 20, "click"),
@@ -69,6 +72,14 @@ func NewTitleScene() *TitleScene {
 }
 
 func (t *TitleScene) Update(sceneManager *scene.Manager) error {
+	if t.waitingRequestID != 0 {
+		r := sceneManager.ReceiveResultIfExists(t.waitingRequestID)
+		if r != nil {
+			t.waitingRequestID = 0
+		}
+		return nil
+	}
+
 	if !t.init {
 		if err := audio.PlayBGM("tick", 1); err != nil {
 			return err
@@ -94,6 +105,8 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 	t.resumeGameButton.X = (w/scene.TileScale - t.resumeGameButton.Width) / 2
 	t.settingsButton.X = w/scene.TileScale - 16
 	t.settingsButton.Y = h/scene.TileScale - 16
+	t.moregamesButton.X = 4
+	t.moregamesButton.Y = h/scene.TileScale - 16
 	t.warningDialog.X = (w/scene.TileScale-160)/2 + 4
 	t.warningYesButton.X = (t.warningDialog.Width - t.warningYesButton.Width) / 2
 	t.warningNoButton.X = (t.warningDialog.Width - t.warningNoButton.Width) / 2
@@ -115,6 +128,7 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 		t.newGameButton.Update()
 		t.resumeGameButton.Update()
 		t.settingsButton.Update()
+		t.moregamesButton.Update()
 	}
 	if t.warningYesButton.Pressed() {
 		if err := audio.StopBGM(); err != nil {
@@ -173,6 +187,11 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 		sceneManager.GoTo(NewSettingsScene())
 		return nil
 	}
+	if t.moregamesButton.Pressed() {
+		t.waitingRequestID = sceneManager.GenerateRequestID()
+		sceneManager.Requester().RequestOpenLink(t.waitingRequestID, "more", "")
+		return nil
+	}
 	return nil
 }
 
@@ -205,6 +224,7 @@ func (t *TitleScene) Draw(screen *ebiten.Image) {
 		t.newGameButton.Draw(screen)
 		t.resumeGameButton.Draw(screen)
 		t.settingsButton.Draw(screen)
+		t.moregamesButton.Draw(screen)
 	}
 	t.warningDialog.Draw(screen)
 	t.quitDialog.Draw(screen)
