@@ -19,7 +19,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten"
 
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 )
 
 var emptyImage *ebiten.Image
@@ -188,10 +188,10 @@ func (s *Screen) Draw(screen *ebiten.Image, img *ebiten.Image, op *ebiten.DrawIm
 		sx := float64(targetW) / float64(w)
 		sy := float64(targetH) / float64(h)
 		op.GeoM.Scale(sx, sy)
-		op.GeoM.Scale(scene.TileScale, scene.TileScale)
+		op.GeoM.Scale(consts.TileScale, consts.TileScale)
 		sw, _ := screen.Size()
-		tx := (float64(sw) - scene.TileXNum*scene.TileSize*scene.TileScale) / 2
-		op.GeoM.Translate(tx, scene.GameMarginTop)
+		tx := (float64(sw) - consts.TileXNum*consts.TileSize*consts.TileScale) / 2
+		op.GeoM.Translate(tx, consts.GameMarginTop)
 		op.ColorM.Translate(0, 0, 0, 1)
 		op.ColorM.Scale(1, 1, 1, fadeRate)
 		if err := screen.DrawImage(emptyImage, op); err != nil {

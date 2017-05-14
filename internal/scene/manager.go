@@ -22,17 +22,9 @@ import (
 
 	"github.com/hajimehoshi/ebiten"
 
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
-)
-
-const (
-	TileSize      = 16
-	TileXNum      = 10
-	TileYNum      = 10
-	TileScale     = 3
-	GameMarginTop = 2 * TileSize * TileScale
-	TextScale     = 2
 )
 
 type scene interface {
@@ -138,7 +130,7 @@ func (m *Manager) Requester() Requester {
 }
 
 func (m *Manager) MapOffsetX() int {
-	return (m.width - TileXNum*TileSize*TileScale) / 2
+	return (m.width - consts.TileXNum*consts.TileSize*consts.TileScale) / 2
 }
 
 func (m *Manager) Update() error {

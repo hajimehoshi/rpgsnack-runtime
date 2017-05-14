@@ -20,6 +20,7 @@ import (
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
@@ -125,17 +126,17 @@ Powered By
 	s.closeButton.Y = buttonOffsetX + buttonIndex*buttonDeltaY
 
 	w, _ := sceneManager.Size()
-	s.languageButton.X = (w/scene.TileScale - s.languageButton.Width) / 2
-	s.creditButton.X = (w/scene.TileScale - s.creditButton.Width) / 2
-	s.reviewThisAppButton.X = (w/scene.TileScale - s.reviewThisAppButton.Width) / 2
-	s.restorePurchasesButton.X = (w/scene.TileScale - s.restorePurchasesButton.Width) / 2
-	s.moreGamesButton.X = (w/scene.TileScale - s.moreGamesButton.Width) / 2
-	s.closeButton.X = (w/scene.TileScale - s.closeButton.Width) / 2
-	s.languageDialog.X = (w/scene.TileScale-160)/2 + 4
+	s.languageButton.X = (w/consts.TileScale - s.languageButton.Width) / 2
+	s.creditButton.X = (w/consts.TileScale - s.creditButton.Width) / 2
+	s.reviewThisAppButton.X = (w/consts.TileScale - s.reviewThisAppButton.Width) / 2
+	s.restorePurchasesButton.X = (w/consts.TileScale - s.restorePurchasesButton.Width) / 2
+	s.moreGamesButton.X = (w/consts.TileScale - s.moreGamesButton.Width) / 2
+	s.closeButton.X = (w/consts.TileScale - s.closeButton.Width) / 2
+	s.languageDialog.X = (w/consts.TileScale-160)/2 + 4
 	for _, b := range s.languageButtons {
 		b.X = (s.languageDialog.Width - b.Width) / 2
 	}
-	s.creditDialog.X = (w/scene.TileScale-160)/2 + 4
+	s.creditDialog.X = (w/consts.TileScale-160)/2 + 4
 	s.creditCloseButton.X = (s.creditDialog.Width - s.creditCloseButton.Width) / 2
 
 	s.languageDialog.Update()

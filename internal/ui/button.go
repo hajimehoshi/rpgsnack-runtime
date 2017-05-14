@@ -21,10 +21,10 @@ import (
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/font"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
 
 type Button struct {
@@ -71,8 +71,8 @@ func (b *Button) Pressed() bool {
 
 func (b *Button) includesInput(offsetX, offsetY int) bool {
 	x, y := input.Position()
-	x /= scene.TileScale
-	y /= scene.TileScale
+	x /= consts.TileScale
+	y /= consts.TileScale
 	x -= offsetX
 	y -= offsetY
 	if b.X <= x && x < b.X+b.Width && b.Y <= y && y < b.Y+b.Height {
@@ -125,7 +125,7 @@ func (b *Button) Draw(screen *ebiten.Image) {
 	if b.image != nil {
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(b.X), float64(b.Y))
-		op.GeoM.Scale(scene.TileScale, scene.TileScale)
+		op.GeoM.Scale(consts.TileScale, consts.TileScale)
 		if b.Disabled {
 			op.ColorM.ChangeHSV(0, 0, 1)
 			op.ColorM.Scale(0.5, 0.5, 0.5, 1)
@@ -140,18 +140,18 @@ func (b *Button) Draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 	op.ImageParts = &ninePatchParts{b.Width, b.Height}
 	op.GeoM.Translate(float64(b.X), float64(b.Y))
-	op.GeoM.Scale(scene.TileScale, scene.TileScale)
+	op.GeoM.Scale(consts.TileScale, consts.TileScale)
 	if b.Disabled {
 		op.ColorM.ChangeHSV(0, 0, 1)
 		op.ColorM.Scale(0.5, 0.5, 0.5, 1)
 	}
 	screen.DrawImage(img, op)
 	_, th := font.MeasureSize(b.Text)
-	tx := b.X*scene.TileScale + b.Width*scene.TileScale/2
-	ty := b.Y*scene.TileScale + (b.Height*scene.TileScale-th*scene.TextScale)/2
+	tx := b.X*consts.TileScale + b.Width*consts.TileScale/2
+	ty := b.Y*consts.TileScale + (b.Height*consts.TileScale-th*consts.TextScale)/2
 	var c color.Color = color.White
 	if b.Disabled {
 		c = color.RGBA{0x80, 0x80, 0x80, 0xff}
 	}
-	font.DrawText(screen, b.Text, tx, ty, scene.TextScale, data.TextAlignCenter, c)
+	font.DrawText(screen, b.Text, tx, ty, consts.TextScale, data.TextAlignCenter, c)
 }

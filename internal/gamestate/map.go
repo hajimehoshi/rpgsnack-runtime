@@ -23,6 +23,7 @@ import (
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
@@ -395,7 +396,7 @@ func (m *Map) IsPlayerMovingByUserInput() bool {
 func (m *Map) passableTile(x, y int) bool {
 	tileSet := m.TileSet()
 	layer := 1
-	tile := m.CurrentRoom().Tiles[layer][y*scene.TileXNum+x]
+	tile := m.CurrentRoom().Tiles[layer][y*consts.TileXNum+x]
 	switch tileSet.PassageTypes[layer][tile] {
 	case data.PassageTypeBlock:
 		return false
@@ -408,7 +409,7 @@ func (m *Map) passableTile(x, y int) bool {
 		panic("not reach")
 	}
 	layer = 0
-	tile = m.CurrentRoom().Tiles[layer][y*scene.TileXNum+x]
+	tile = m.CurrentRoom().Tiles[layer][y*consts.TileXNum+x]
 	if tileSet.PassageTypes[layer][tile] == data.PassageTypePassable {
 		return true
 	}
@@ -422,10 +423,10 @@ func (m *Map) passable(through bool, x, y int, ignoreCharacters bool) bool {
 	if y < 0 {
 		return false
 	}
-	if scene.TileXNum <= x {
+	if consts.TileXNum <= x {
 		return false
 	}
-	if scene.TileYNum <= y {
+	if consts.TileYNum <= y {
 		return false
 	}
 	if through {

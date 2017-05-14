@@ -21,6 +21,7 @@ import (
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
@@ -113,12 +114,12 @@ func (w *Windows) ShowMessage(messageType data.ShowMessageType, content string, 
 
 func (w *Windows) ShowChoices(sceneManager *scene.Manager, choices []string, interpreterID int) {
 	_, h := sceneManager.Size()
-	ymin := h/scene.TileScale - scene.GameMarginTop/scene.TileScale - len(choices)*choiceBalloonHeight
+	ymin := h/consts.TileScale - consts.GameMarginTop/consts.TileScale - len(choices)*choiceBalloonHeight
 	w.choiceBalloons = nil
 	for i, choice := range choices {
 		x := 0
 		y := i*choiceBalloonHeight + ymin
-		width := scene.TileXNum * scene.TileSize
+		width := consts.TileXNum * consts.TileSize
 		balloon := newBalloon(x, y, width, choiceBalloonHeight, choice, data.BalloonTypeNormal, interpreterID)
 		w.choiceBalloons = append(w.choiceBalloons, balloon)
 		balloon.open()
@@ -261,10 +262,10 @@ func (w *Windows) Update(sceneManager *scene.Manager) {
 		}
 	} else if w.choosing && w.isOpened(0) && input.Triggered() {
 		_, h := sceneManager.Size()
-		ymax := h / scene.TileScale
+		ymax := h / consts.TileScale
 		ymin := ymax - len(w.choiceBalloons)*choiceBalloonHeight
 		_, y := input.Position()
-		y /= scene.TileScale
+		y /= consts.TileScale
 		if y < ymin || ymax <= y {
 			return
 		}

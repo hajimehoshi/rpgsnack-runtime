@@ -23,6 +23,7 @@ import (
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/font"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/gamestate"
@@ -61,7 +62,7 @@ type MapScene struct {
 }
 
 func NewMapScene() *MapScene {
-	tilesImage, _ := ebiten.NewImage(scene.TileXNum*scene.TileSize, scene.TileYNum*scene.TileSize, ebiten.FilterNearest)
+	tilesImage, _ := ebiten.NewImage(consts.TileXNum*consts.TileSize, consts.TileYNum*consts.TileSize, ebiten.FilterNearest)
 	m := &MapScene{
 		tilesImage:   tilesImage,
 		gameState:    gamestate.NewGame(),
@@ -72,7 +73,7 @@ func NewMapScene() *MapScene {
 }
 
 func NewMapSceneWithGame(game *gamestate.Game) *MapScene {
-	tilesImage, _ := ebiten.NewImage(scene.TileXNum*scene.TileSize, scene.TileYNum*scene.TileSize, ebiten.FilterNearest)
+	tilesImage, _ := ebiten.NewImage(consts.TileXNum*consts.TileSize, consts.TileYNum*consts.TileSize, ebiten.FilterNearest)
 	m := &MapScene{
 		tilesImage: tilesImage,
 		gameState:  game,
@@ -82,7 +83,7 @@ func NewMapSceneWithGame(game *gamestate.Game) *MapScene {
 }
 
 func (m *MapScene) offsetX(screenWidth int) float64 {
-	return (float64(screenWidth) - scene.TileXNum*scene.TileSize*scene.TileScale) / 2
+	return (float64(screenWidth) - consts.TileXNum*consts.TileSize*consts.TileScale) / 2
 }
 
 func (m *MapScene) initUI() {
@@ -92,7 +93,7 @@ func (m *MapScene) initUI() {
 	m.cameraButton = ui.NewImageButton(0, 0, camera, "click")
 	m.screenShotImage = screenShotImage
 	m.screenShotDialog = ui.NewDialog(0, 4, 152, 232)
-	m.screenShotDialog.AddChild(ui.NewImage(8, 8, 1.0/scene.TileScale/2, m.screenShotImage))
+	m.screenShotDialog.AddChild(ui.NewImage(8, 8, 1.0/consts.TileScale/2, m.screenShotImage))
 	m.titleButton = ui.NewButton(0, 8, 40, 12, "click")
 
 	// TODO: Implement the camera functionality later
@@ -158,13 +159,13 @@ func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) error {
 	}
 	x, y := input.Position()
 	x -= sceneManager.MapOffsetX()
-	y -= scene.GameMarginTop
+	y -= consts.GameMarginTop
 	if x < 0 || y < 0 {
 		return nil
 	}
-	tx := x / scene.TileSize / scene.TileScale
-	ty := y / scene.TileSize / scene.TileScale
-	if tx < 0 || scene.TileXNum <= tx || ty < 0 || scene.TileYNum <= ty {
+	tx := x / consts.TileSize / consts.TileScale
+	ty := y / consts.TileSize / consts.TileScale
+	if tx < 0 || consts.TileXNum <= tx || ty < 0 || consts.TileYNum <= ty {
 		return nil
 	}
 	m.moveDstX = tx
@@ -225,7 +226,7 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 	m.quitLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDBackToTitle)
 	m.quitYesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDYes)
 	m.quitNoButton.Text = texts.Text(sceneManager.Language(), texts.TextIDNo)
-	m.quitDialog.X = (w/scene.TileScale-160)/2 + 4
+	m.quitDialog.X = (w/consts.TileScale-160)/2 + 4
 	m.quitYesButton.X = (m.quitDialog.Width - m.quitYesButton.Width) / 2
 	m.quitNoButton.X = (m.quitDialog.Width - m.quitNoButton.Width) / 2
 	if m.quitDialog.Visible {
@@ -249,7 +250,7 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 	m.storeErrorOkButton.X = (m.storeErrorDialog.Width - m.storeErrorOkButton.Width) / 2
 	m.storeErrorLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDStoreError)
 	m.storeErrorOkButton.Text = texts.Text(sceneManager.Language(), texts.TextIDOK)
-	m.storeErrorDialog.X = (w/scene.TileScale-160)/2 + 4
+	m.storeErrorDialog.X = (w/consts.TileScale-160)/2 + 4
 	if m.storeErrorDialog.Visible {
 		m.storeErrorDialog.Update()
 		if m.storeErrorOkButton.Pressed() {
@@ -261,7 +262,7 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 
 	m.removeAdsYesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDYes)
 	m.removeAdsNoButton.Text = texts.Text(sceneManager.Language(), texts.TextIDNo)
-	m.removeAdsDialog.X = (w/scene.TileScale-160)/2 + 4
+	m.removeAdsDialog.X = (w/consts.TileScale-160)/2 + 4
 	m.removeAdsYesButton.X = (m.removeAdsDialog.Width - m.removeAdsYesButton.Width) / 2
 	m.removeAdsNoButton.X = (m.removeAdsDialog.Width - m.removeAdsNoButton.Width) / 2
 	if m.removeAdsDialog.Visible {
@@ -283,10 +284,10 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 
 	// TODO: All UI parts' origin should be defined correctly
 	// so that we don't need to adjust X positions here.
-	m.titleButton.X = 4 + int(m.offsetX(w)/scene.TileScale)
-	m.removeAdsButton.X = 104 + int(m.offsetX(w)/scene.TileScale)
+	m.titleButton.X = 4 + int(m.offsetX(w)/consts.TileScale)
+	m.removeAdsButton.X = 104 + int(m.offsetX(w)/consts.TileScale)
 
-	m.screenShotDialog.X = (w/scene.TileScale-160)/2 + 4
+	m.screenShotDialog.X = (w/consts.TileScale-160)/2 + 4
 	if m.initialState && m.gameState.IsAutoSaveEnabled() {
 		m.gameState.RequestSave(sceneManager)
 	}
@@ -365,7 +366,7 @@ type tilesImageParts struct {
 }
 
 func (t *tilesImageParts) Len() int {
-	return scene.TileXNum * scene.TileYNum
+	return consts.TileXNum * consts.TileYNum
 }
 
 func (t *tilesImageParts) Src(index int) (int, int, int, int) {
@@ -380,15 +381,15 @@ func (t *tilesImageParts) Src(index int) (int, int, int, int) {
 		}
 	}
 	// TODO: 8 is a magic number and should be replaced.
-	x := tile % 8 * scene.TileSize
-	y := tile / 8 * scene.TileSize
-	return x, y, x + scene.TileSize, y + scene.TileSize
+	x := tile % 8 * consts.TileSize
+	y := tile / 8 * consts.TileSize
+	return x, y, x + consts.TileSize, y + consts.TileSize
 }
 
 func (t *tilesImageParts) Dst(index int) (int, int, int, int) {
-	x := index % scene.TileXNum * scene.TileSize
-	y := index / scene.TileXNum * scene.TileSize
-	return x, y, x + scene.TileSize, y + scene.TileSize
+	x := index % consts.TileXNum * consts.TileSize
+	y := index / consts.TileXNum * consts.TileSize
+	return x, y, x + consts.TileSize, y + consts.TileSize
 }
 
 func (m *MapScene) Draw(screen *ebiten.Image) {
@@ -424,21 +425,21 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	m.tilesImage.DrawImage(assets.GetImage(tileSet.Images[1]), op)
 	sw, _ := screen.Size()
 	op = &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(scene.TileScale, scene.TileScale)
-	op.GeoM.Translate(m.offsetX(sw), scene.GameMarginTop)
+	op.GeoM.Scale(consts.TileScale, consts.TileScale)
+	op.GeoM.Translate(m.offsetX(sw), consts.GameMarginTop)
 	m.gameState.Screen().Draw(screen, m.tilesImage, op)
 
 	if m.gameState.IsPlayerControlEnabled() && (m.gameState.Map().IsPlayerMovingByUserInput() || m.triggeringFailed) {
 		x, y := m.moveDstX, m.moveDstY
 		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(float64(x*scene.TileSize), float64(y*scene.TileSize))
-		op.GeoM.Scale(scene.TileScale, scene.TileScale)
-		op.GeoM.Translate(m.offsetX(sw), scene.GameMarginTop)
+		op.GeoM.Translate(float64(x*consts.TileSize), float64(y*consts.TileSize))
+		op.GeoM.Scale(consts.TileScale, consts.TileScale)
+		op.GeoM.Translate(m.offsetX(sw), consts.GameMarginTop)
 		screen.DrawImage(assets.GetImage("marker.png"), op)
 	}
 	m.gameState.DrawWindows(screen)
 	msg := fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS())
-	font.DrawText(screen, msg, 0, 0, scene.TextScale, data.TextAlignLeft, color.White)
+	font.DrawText(screen, msg, 0, 0, consts.TextScale, data.TextAlignLeft, color.White)
 	if m.cameraTaking {
 		m.cameraTaking = false
 		m.screenShotImage.Clear()

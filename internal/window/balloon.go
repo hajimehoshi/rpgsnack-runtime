@@ -22,9 +22,9 @@ import (
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/font"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
 
 const (
@@ -141,8 +141,8 @@ func balloonMargin(balloonType data.BalloonType) (int, int) {
 func balloonSizeFromContent(content string, balloonType data.BalloonType) (int, int, int, int) {
 	// content is already parsed here.
 	tw, th := font.MeasureSize(content)
-	tw = tw * scene.TextScale / scene.TileScale
-	th = th * scene.TextScale / scene.TileScale
+	tw = tw * consts.TextScale / consts.TileScale
+	th = th * consts.TextScale / consts.TileScale
 	mx, my := balloonMargin(balloonType)
 	w := tw + 2*mx
 	h := th + 2*my
@@ -191,8 +191,8 @@ func (b *balloon) position(screenWidth int, character *character.Character) (int
 	}
 	ax, ay := b.arrowPosition(screenWidth, character)
 	x := ax - b.width/2
-	if scene.TileXNum*scene.TileSize < x+b.width {
-		x = scene.TileXNum*scene.TileSize - b.width
+	if consts.TileXNum*consts.TileSize < x+b.width {
+		x = consts.TileXNum*consts.TileSize - b.width
 	}
 	if x < 0 {
 		x = 0
@@ -206,7 +206,7 @@ func (b *balloon) arrowFlip(screenWidth int, character *character.Character) boo
 		return false
 	}
 	x, _ := b.position(screenWidth, character)
-	return scene.TileXNum*scene.TileSize == x+b.width
+	return consts.TileXNum*consts.TileSize == x+b.width
 }
 
 func (b *balloon) isClosed() bool {
@@ -344,8 +344,8 @@ func (b *balloon) draw(screen *ebiten.Image, character *character.Character) {
 		rate = float64(b.closingCount) / float64(balloonMaxCount)
 	}
 	sw, _ := screen.Size()
-	dx := (sw - scene.TileXNum*scene.TileSize*scene.TileScale) / 2
-	dy := scene.GameMarginTop
+	dx := (sw - consts.TileXNum*consts.TileSize*consts.TileScale) / 2
+	dy := consts.GameMarginTop
 	if rate > 0 {
 		img := assets.GetImage("balloon.png")
 		if b.balloonType == data.BalloonTypeShout {
@@ -368,7 +368,7 @@ func (b *balloon) draw(screen *ebiten.Image, character *character.Character) {
 		op.GeoM.Translate(-cx, -cy)
 		op.GeoM.Scale(rate, rate)
 		op.GeoM.Translate(cx, cy)
-		op.GeoM.Scale(scene.TileScale, scene.TileScale)
+		op.GeoM.Scale(consts.TileScale, consts.TileScale)
 		op.GeoM.Translate(float64(dx), float64(dy))
 		op.ImageParts = &balloonImageParts{
 			balloon:     b,
@@ -381,10 +381,10 @@ func (b *balloon) draw(screen *ebiten.Image, character *character.Character) {
 	if b.opened {
 		x, y := b.position(sw, character)
 		mx, my := b.margin()
-		x = (x + mx + b.contentOffsetX) * scene.TileScale
-		y = (y + my + b.contentOffsetY) * scene.TileScale
+		x = (x + mx + b.contentOffsetX) * consts.TileScale
+		y = (y + my + b.contentOffsetY) * consts.TileScale
 		x += dx
 		y += dy
-		font.DrawText(screen, b.content, x, y, scene.TextScale, data.TextAlignLeft, color.Black)
+		font.DrawText(screen, b.content, x, y, consts.TextScale, data.TextAlignLeft, color.Black)
 	}
 }

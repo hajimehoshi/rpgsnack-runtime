@@ -19,9 +19,9 @@ import (
 
 	"github.com/hajimehoshi/ebiten"
 
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/font"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
 
 type Label struct {
@@ -44,7 +44,7 @@ func (l *Label) UpdateAsChild(visible bool, offsetX, offsetY int) {
 }
 
 func (l *Label) Draw(screen *ebiten.Image) {
-	tx := l.X * scene.TileScale
-	ty := l.Y * scene.TileScale
-	font.DrawText(screen, l.Text, tx, ty, scene.TextScale, data.TextAlignLeft, color.White)
+	tx := l.X * consts.TileScale
+	ty := l.Y * consts.TileScale
+	font.DrawText(screen, l.Text, tx, ty, consts.TextScale, data.TextAlignLeft, color.White)
 }

@@ -22,9 +22,9 @@ import (
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/font"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
 
 const (
@@ -132,9 +132,9 @@ func (b *banner) position(screenHeight int) (int, int) {
 	y := 0
 	switch b.positionType {
 	case data.MessagePositionBottom:
-		y = screenHeight / scene.TileScale
+		y = screenHeight / consts.TileScale
 	case data.MessagePositionMiddle:
-		y = screenHeight / (scene.TileScale * 2)
+		y = screenHeight / (consts.TileScale * 2)
 	case data.MessagePositionTop:
 		y = 0
 	}
@@ -152,31 +152,31 @@ func (b *banner) draw(screen *ebiten.Image, character *character.Character) {
 		rate = float64(b.closingCount) / float64(bannerMaxCount)
 	}
 	sw, sh := screen.Size()
-	dx := (sw - scene.TileXNum*scene.TileSize*scene.TileScale) / 2
+	dx := (sw - consts.TileXNum*consts.TileSize*consts.TileScale) / 2
 	dy := 0
 	if rate > 0 {
 		img := assets.GetImage("banner.png")
 		x, y := b.position(sh)
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(x), float64(y))
-		op.GeoM.Scale(scene.TileScale, scene.TileScale)
+		op.GeoM.Scale(consts.TileScale, consts.TileScale)
 		op.GeoM.Translate(float64(dx), float64(dy))
 		op.ColorM.Scale(1, 1, 1, rate)
 		screen.DrawImage(img, op)
 	}
 	if b.opened {
 		x, y := b.position(sh)
-		x = (x + bannerMarginX) * scene.TileScale
-		y = (y + bannerMarginY) * scene.TileScale
+		x = (x + bannerMarginX) * consts.TileScale
+		y = (y + bannerMarginY) * consts.TileScale
 		switch b.textAlign {
 		case data.TextAlignLeft:
 		case data.TextAlignCenter:
-			x += (scene.TileXNum*scene.TileSize - 2*bannerMarginX) * scene.TileScale / 2
+			x += (consts.TileXNum*consts.TileSize - 2*bannerMarginX) * consts.TileScale / 2
 		case data.TextAlignRight:
-			x += (scene.TileXNum*scene.TileSize - 2*bannerMarginX) * scene.TileScale
+			x += (consts.TileXNum*consts.TileSize - 2*bannerMarginX) * consts.TileScale
 		}
 		x += dx
 		y += dy
-		font.DrawText(screen, b.content, x, y, scene.TextScale, b.textAlign, color.White)
+		font.DrawText(screen, b.content, x, y, consts.TextScale, b.textAlign, color.White)
 	}
 }

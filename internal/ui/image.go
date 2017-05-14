@@ -17,7 +17,7 @@ package ui
 import (
 	"github.com/hajimehoshi/ebiten"
 
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 )
 
 type Image struct {
@@ -44,7 +44,7 @@ func (i *Image) UpdateAsChild(visible bool, offsetX, offsetY int) {
 
 func (i *Image) Draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(i.Scale*scene.TileScale, i.Scale*scene.TileScale)
-	op.GeoM.Translate(float64(i.X)*scene.TileScale, float64(i.Y)*scene.TileScale)
+	op.GeoM.Scale(i.Scale*consts.TileScale, i.Scale*consts.TileScale)
+	op.GeoM.Translate(float64(i.X)*consts.TileScale, float64(i.Y)*consts.TileScale)
 	screen.DrawImage(i.image, op)
 }

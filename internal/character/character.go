@@ -20,8 +20,8 @@ import (
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
 
 const (
@@ -188,10 +188,10 @@ func (c *Character) Position() (int, int) {
 
 func (c *Character) DrawPosition() (int, int) {
 	charW, charH := c.Size()
-	x := c.x*scene.TileSize + scene.TileSize/2 - charW/2
-	y := (c.y+1)*scene.TileSize - charH
+	x := c.x*consts.TileSize + consts.TileSize/2 - charW/2
+	y := (c.y+1)*consts.TileSize - charH
 	if c.moveCount > 0 {
-		d := (c.speed.Frames() - c.moveCount) * scene.TileSize / c.speed.Frames()
+		d := (c.speed.Frames() - c.moveCount) * consts.TileSize / c.speed.Frames()
 		switch c.moveDir {
 		case data.DirLeft:
 			x -= d
