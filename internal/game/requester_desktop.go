@@ -129,7 +129,11 @@ func (m *Requester) RequestChangeLanguage(requestID int, lang string) {
 			return
 		}
 		defer f.Close()
-		if _, err := f.Write([]byte(lang)); err != nil {
+		j, err := json.Marshal(lang)
+		if err != nil {
+			panic(err)
+		}
+		if _, err := f.Write(j); err != nil {
 			m.game.FinishChangeLanguage(requestID)
 			return
 		}
