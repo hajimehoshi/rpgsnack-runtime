@@ -211,7 +211,7 @@ func (g *Game) meetsCondition(cond *data.Condition, eventID int) (bool, error) {
 	case data.ConditionTypeVariable:
 		id := cond.ID
 		v := g.variables.VariableValue(id)
-		rhs := cond.Value.(int)
+		rhs := int(cond.Value.(float64))
 		switch cond.ValueType {
 		case data.ConditionValueTypeConstant:
 		case data.ConditionValueTypeVariable:

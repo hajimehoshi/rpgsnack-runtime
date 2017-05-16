@@ -15,38 +15,11 @@
 package data
 
 type Condition struct {
-	Type      ConditionType
-	ID        int
-	Comp      ConditionComp
-	ValueType ConditionValueType
-	Value     interface{}
-}
-
-func (c *Condition) UnmarshalJSON(data []uint8) error {
-	type tmpCondition struct {
-		Type      ConditionType      `json:"type"`
-		ID        int                `json:"id"`
-		Comp      ConditionComp      `json:"comp"`
-		ValueType ConditionValueType `json:"valueType"`
-		Value     interface{}        `json:"value"`
-	}
-	var tmp *tmpCondition
-	if err := unmarshalJSON(data, &tmp); err != nil {
-		return err
-	}
-	c.Type = tmp.Type
-	c.ID = tmp.ID
-	c.Comp = tmp.Comp
-	c.ValueType = tmp.ValueType
-	switch c.Type {
-	case ConditionTypeSwitch:
-		c.Value = tmp.Value.(bool)
-	case ConditionTypeSelfSwitch:
-		c.Value = tmp.Value.(bool)
-	case ConditionTypeVariable:
-		c.Value = int(tmp.Value.(float64))
-	}
-	return nil
+	Type      ConditionType      `json:"type"`
+	ID        int                `json:"id"`
+	Comp      ConditionComp      `json:"comp"`
+	ValueType ConditionValueType `json:"valueType"`
+	Value     interface{}        `json:"value"`
 }
 
 type ConditionType string
