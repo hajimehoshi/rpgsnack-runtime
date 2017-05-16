@@ -217,7 +217,7 @@ func (g *Game) meetsCondition(cond *data.Condition, eventID int) (bool, error) {
 		case data.ConditionValueTypeVariable:
 			rhs = g.variables.VariableValue(rhs)
 		default:
-			return false, fmt.Errorf("mapscene: invalid value type: %s", cond.ValueType)
+			return false, fmt.Errorf("gamestate: invalid value type: %s", cond.ValueType)
 		}
 		switch cond.Comp {
 		case data.ConditionCompEqualTo:
@@ -233,10 +233,10 @@ func (g *Game) meetsCondition(cond *data.Condition, eventID int) (bool, error) {
 		case data.ConditionCompLessThan:
 			return v < rhs, nil
 		default:
-			return false, fmt.Errorf("mapscene: invalid comp: %s", cond.Comp)
+			return false, fmt.Errorf("gamestate: invalid comp: %s", cond.Comp)
 		}
 	default:
-		return false, fmt.Errorf("mapscene: invalid condition: %s", cond)
+		return false, fmt.Errorf("gamestate: invalid condition: %s", cond)
 	}
 	return false, nil
 }
