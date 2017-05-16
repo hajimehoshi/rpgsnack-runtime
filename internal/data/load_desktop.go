@@ -19,6 +19,7 @@
 package data
 
 import (
+	"encoding/json"
 	"flag"
 	"io/ioutil"
 	"os"
@@ -71,7 +72,9 @@ func loadJSONData() (*jsonData, error) {
 		}
 		langId = "en"
 	} else {
-		langId = string(langData)
+		if err := json.Unmarshal(langData, &langId); err != nil {
+			return nil, err
+		}
 	}
 
 	return &jsonData{
