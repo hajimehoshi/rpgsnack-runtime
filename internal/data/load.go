@@ -120,7 +120,7 @@ func Load() error {
 
 	tag, err := language.Parse(data.DefaultLanguage)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	defaultLanguage = tag
 	return nil
