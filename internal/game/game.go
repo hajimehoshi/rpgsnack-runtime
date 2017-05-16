@@ -31,11 +31,11 @@ type Game struct {
 	loadingCh    chan error
 }
 
-func New(width, height int, requester scene.Requester) (*Game, error) {
+func New(width, height int, requester scene.Requester) *Game {
 	g := &Game{}
 	g.loadGameData()
 	g.sceneManager = scene.NewManager(width, height, requester)
-	return g, nil
+	return g
 }
 
 func (g *Game) loadGameData() {

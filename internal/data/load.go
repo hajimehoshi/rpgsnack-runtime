@@ -74,9 +74,9 @@ func Purchases() []uint8 {
 	return purchases
 }
 
-func Price(productId string) string {
-	if _, ok := prices[productId]; ok {
-		return prices[productId]
+func Price(productID string) string {
+	if _, ok := prices[productID]; ok {
+		return prices[productID]
 	}
 	return ""
 }

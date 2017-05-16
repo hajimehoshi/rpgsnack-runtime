@@ -52,10 +52,7 @@ func IsRunning() bool {
 
 func Start(screenWidth int, screenHeight int, scale float64, requester Requester) error {
 	running = true
-	g, err := game.New(screenWidth, screenHeight, requester)
-	if err != nil {
-		return err
-	}
+	g := game.New(screenWidth, screenHeight, requester)
 	if err := mobile.Start(g.Update, screenWidth, screenHeight, scale, game.Title()); err != nil {
 		return err
 	}

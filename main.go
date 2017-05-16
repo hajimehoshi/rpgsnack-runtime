@@ -53,10 +53,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	g, err := game.NewWithDefaultRequester(sw, sh)
-	if err != nil {
-		log.Fatal(err)
-	}
+	g := game.NewWithDefaultRequester(sw, sh)
 	if err := ebiten.Run(g.Update, sw, sh, game.Scale(), game.Title()); err != nil {
 		log.Fatal(err)
 	}
