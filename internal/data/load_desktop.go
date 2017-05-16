@@ -78,9 +78,9 @@ func loadJSONData() (*jsonData, error) {
 	}
 
 	return &jsonData{
-		Game:            game,
-		Progress:        progress,
-		Purchases:       purchases,
-		DefaultLanguage: langId,
+		Game:      game,
+		Progress:  progress,
+		Purchases: purchases,
+		Language:  langId,
 	}, nil
 }

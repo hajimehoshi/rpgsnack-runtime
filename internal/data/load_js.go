@@ -32,9 +32,9 @@ func loadJSONData() (*jsonData, error) {
 	dataJsonStr := js.Global.Get("JSON").Call("stringify", js.Global.Get("_data"))
 	dataJson := ([]uint8)(dataJsonStr.String())
 	return &jsonData{
-		Game:            dataJson,
-		Progress:        nil, // TODO: Implement this
-		Purchases:       nil, // TODO: Implement this
-		DefaultLanguage: "en",
+		Game:      dataJson,
+		Progress:  nil, // TODO: Implement this
+		Purchases: nil, // TODO: Implement this
+		Language:  "en",
 	}, nil
 }

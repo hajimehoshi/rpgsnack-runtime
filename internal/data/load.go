@@ -18,7 +18,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"golang.org/x/text/language"
+	languagepkg "golang.org/x/text/language"
 )
 
 func min(a, b int) int {
@@ -55,11 +55,11 @@ func unmarshalJSON(data []uint8, v interface{}) error {
 }
 
 var (
-	current         *Game
-	progress        []uint8
-	purchases       []uint8
-	prices          map[string]string // TODO: We want to use https://godoc.org/golang.org/x/text/currency
-	defaultLanguage language.Tag
+	current   *Game
+	progress  []uint8
+	purchases []uint8
+	prices    map[string]string // TODO: We want to use https://godoc.org/golang.org/x/text/currency
+	language  languagepkg.Tag
 )
 
 func Current() *Game {
@@ -81,9 +81,8 @@ func Price(productID string) string {
 	return ""
 }
 
-// DefaultLanguage represents a default language in the environment the player is playing on.
-func DefaultLanguage() language.Tag {
-	return defaultLanguage
+func Language() languagepkg.Tag {
+	return language
 }
 
 func UpdateProgress(p []uint8) {
@@ -99,10 +98,10 @@ func UpdatePrices(p map[string]string) {
 }
 
 type jsonData struct {
-	Game            []uint8
-	Progress        []uint8
-	Purchases       []uint8
-	DefaultLanguage string
+	Game      []uint8
+	Progress  []uint8
+	Purchases []uint8
+	Language  string
 }
 
 func Load() error {
@@ -118,10 +117,10 @@ func Load() error {
 	progress = data.Progress
 	purchases = data.Purchases
 
-	tag, err := language.Parse(data.DefaultLanguage)
+	tag, err := languagepkg.Parse(data.Language)
 	if err != nil {
 		return err
 	}
-	defaultLanguage = tag
+	language = tag
 	return nil
 }

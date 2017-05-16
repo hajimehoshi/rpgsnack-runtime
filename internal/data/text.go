@@ -17,10 +17,10 @@ package data
 import (
 	"sort"
 
-	"golang.org/x/text/language"
+	languagepkg "golang.org/x/text/language"
 )
 
-type languagesByAlphabet []language.Tag
+type languagesByAlphabet []languagepkg.Tag
 
 func (l languagesByAlphabet) Len() int {
 	return len(l)
@@ -28,10 +28,10 @@ func (l languagesByAlphabet) Len() int {
 
 func (l languagesByAlphabet) Less(i, j int) bool {
 	// English first
-	if l[i] == language.English {
+	if l[i] == languagepkg.English {
 		return true
 	}
-	if l[j] == language.English {
+	if l[j] == languagepkg.English {
 		return false
 	}
 	return l[i].String() < l[j].String()
@@ -42,8 +42,8 @@ func (l languagesByAlphabet) Swap(i, j int) {
 }
 
 type Texts struct {
-	data      map[language.Tag]map[UUID]string
-	languages []language.Tag
+	data      map[languagepkg.Tag]map[UUID]string
+	languages []languagepkg.Tag
 }
 
 func (t *Texts) UnmarshalJSON(data []uint8) error {
@@ -51,11 +51,11 @@ func (t *Texts) UnmarshalJSON(data []uint8) error {
 	if err := unmarshalJSON(data, &orig); err != nil {
 		return err
 	}
-	langs := map[language.Tag]struct{}{}
-	t.languages = []language.Tag{}
-	t.data = map[language.Tag]map[UUID]string{}
+	langs := map[languagepkg.Tag]struct{}{}
+	t.languages = []languagepkg.Tag{}
+	t.data = map[languagepkg.Tag]map[UUID]string{}
 	for langStr, text := range orig {
-		lang, err := language.Parse(langStr)
+		lang, err := languagepkg.Parse(langStr)
 		if err != nil {
 			return err
 		}
@@ -69,10 +69,10 @@ func (t *Texts) UnmarshalJSON(data []uint8) error {
 	return nil
 }
 
-func (t *Texts) Languages() []language.Tag {
+func (t *Texts) Languages() []languagepkg.Tag {
 	return t.languages
 }
 
-func (t *Texts) Get(lang language.Tag, uuid UUID) string {
+func (t *Texts) Get(lang languagepkg.Tag, uuid UUID) string {
 	return t.data[lang][uuid]
 }
