@@ -114,7 +114,7 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 	t.quitYesButton.X = (t.quitDialog.Width - t.quitYesButton.Width) / 2
 	t.quitNoButton.X = (t.quitDialog.Width - t.quitNoButton.Width) / 2
 
-	if sceneManager.Progress() == nil {
+	if !sceneManager.HasProgress() {
 		t.resumeGameButton.Visible = false
 		t.newGameButton.Y = 184
 	} else {
@@ -159,7 +159,7 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 	}
 
 	if t.newGameButton.Pressed() {
-		if sceneManager.Progress() != nil {
+		if sceneManager.HasProgress() {
 			t.warningDialog.Visible = true
 		} else {
 			if err := audio.StopBGM(); err != nil {

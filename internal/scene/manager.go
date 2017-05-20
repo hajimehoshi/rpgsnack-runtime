@@ -213,6 +213,10 @@ func (m *Manager) Game() *data.Game {
 	return m.game
 }
 
+func (m *Manager) HasProgress() bool {
+	return m.progress != nil
+}
+
 func (m *Manager) Progress() []uint8 {
 	return m.progress
 }
