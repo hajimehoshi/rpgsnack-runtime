@@ -22,7 +22,6 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/gamestate"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
@@ -115,7 +114,7 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 	t.quitYesButton.X = (t.quitDialog.Width - t.quitYesButton.Width) / 2
 	t.quitNoButton.X = (t.quitDialog.Width - t.quitNoButton.Width) / 2
 
-	if data.Progress() == nil {
+	if sceneManager.Progress() == nil {
 		t.resumeGameButton.Visible = false
 		t.newGameButton.Y = 184
 	} else {
@@ -160,7 +159,7 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 	}
 
 	if t.newGameButton.Pressed() {
-		if data.Progress() != nil {
+		if sceneManager.Progress() != nil {
 			t.warningDialog.Visible = true
 		} else {
 			if err := audio.StopBGM(); err != nil {
@@ -172,7 +171,7 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 	}
 	if t.resumeGameButton.Pressed() {
 		var game *gamestate.Game
-		if err := json.Unmarshal(data.Progress(), &game); err != nil {
+		if err := json.Unmarshal(sceneManager.Progress(), &game); err != nil {
 			return err
 		}
 		if err := audio.StopBGM(); err != nil {

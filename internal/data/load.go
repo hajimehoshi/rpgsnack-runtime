@@ -55,20 +55,11 @@ func unmarshalJSON(data []uint8, v interface{}) error {
 }
 
 var (
-	progress  []uint8
 	purchases []string
 )
 
-func Progress() []uint8 {
-	return progress
-}
-
 func Purchases() []string {
 	return purchases
-}
-
-func UpdateProgress(p []uint8) {
-	progress = p
 }
 
 func UpdatePurchases(p []string) {
@@ -84,6 +75,7 @@ type jsonData struct {
 
 type LoadedData struct {
 	Game     *Game
+	Progress []uint8
 	Language language.Tag
 }
 
@@ -96,7 +88,6 @@ func Load() (*LoadedData, error) {
 	if err := unmarshalJSON(data.Game, &gameData); err != nil {
 		return nil, err
 	}
-	progress = data.Progress
 	if data.Purchases != nil {
 		if err := unmarshalJSON(data.Purchases, &purchases); err != nil {
 			return nil, err
@@ -111,6 +102,7 @@ func Load() (*LoadedData, error) {
 	}
 	return &LoadedData{
 		Game:     gameData,
+		Progress: data.Progress,
 		Language: tag,
 	}, nil
 }

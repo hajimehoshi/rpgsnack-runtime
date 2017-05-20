@@ -48,6 +48,7 @@ func (g *Game) loadGameData() {
 			return
 		}
 		g.sceneManager.SetGame(d.Game)
+		g.sceneManager.SetProgress(d.Progress)
 		// TODO: Now this call must be followed by SetGame. Unify these functions.
 		g.sceneManager.SetLanguage(d.Language)
 	}()

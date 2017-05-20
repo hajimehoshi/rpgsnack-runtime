@@ -168,7 +168,7 @@ func (g *Game) RequestSave(sceneManager *scene.Manager) bool {
 		panic(fmt.Sprintf("gamestate: JSON encoding error: %v", err))
 	}
 	sceneManager.Requester().RequestSaveProgress(id, j)
-	data.UpdateProgress(j)
+	sceneManager.SetProgress(j)
 	return true
 }
 

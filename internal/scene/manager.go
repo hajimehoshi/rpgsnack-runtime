@@ -51,6 +51,7 @@ type Manager struct {
 	results               map[int]*RequestResult
 	setPlatformDataCh     chan setPlatformDataArgs
 	game                  *data.Game
+	progress              []uint8
 	language              language.Tag
 	interstitialAdsLoaded bool
 	rewardedAdsLoaded     bool
@@ -210,6 +211,14 @@ func (m *Manager) Game() *data.Game {
 
 func (m *Manager) SetGame(game *data.Game) {
 	m.game = game
+}
+
+func (m *Manager) Progress() []uint8 {
+	return m.progress
+}
+
+func (m *Manager) SetProgress(progress []uint8) {
+	m.progress = progress
 }
 
 func (m *Manager) Language() language.Tag {
