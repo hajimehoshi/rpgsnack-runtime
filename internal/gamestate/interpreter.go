@@ -735,13 +735,9 @@ func (i *Interpreter) setVariable(sceneManager *scene.Manager, id int, op data.S
 				break
 			}
 		}
-		// check whether the IAPProduct is purchased
 		rhs = 0
-		for _, p := range data.Purchases() {
-			if p == key {
-				rhs = 1
-				break
-			}
+		if sceneManager.IsPurchased(key) {
+			rhs = 1
 		}
 	case data.SetVariableValueTypeSystem:
 		systemVariableType := value.(data.SystemVariableType)

@@ -49,6 +49,7 @@ func (g *Game) loadGameData() {
 		}
 		g.sceneManager.SetGame(d.Game)
 		g.sceneManager.SetProgress(d.Progress)
+		g.sceneManager.SetPurchases(d.Purchases)
 		// TODO: Now this call must be followed by SetGame. Unify these functions.
 		g.sceneManager.SetLanguage(d.Language)
 	}()

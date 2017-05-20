@@ -52,6 +52,7 @@ type Manager struct {
 	setPlatformDataCh     chan setPlatformDataArgs
 	game                  *data.Game
 	progress              []uint8
+	purchases             []string
 	language              language.Tag
 	interstitialAdsLoaded bool
 	rewardedAdsLoaded     bool
@@ -151,7 +152,7 @@ func (m *Manager) Update() error {
 				if err := json.Unmarshal(r.Data, &purchases); err != nil {
 					return err
 				}
-				data.UpdatePurchases(purchases)
+				m.purchases = purchases
 			}
 		}
 	case a := <-m.setPlatformDataCh:
@@ -219,6 +220,19 @@ func (m *Manager) Progress() []uint8 {
 
 func (m *Manager) SetProgress(progress []uint8) {
 	m.progress = progress
+}
+
+func (m *Manager) IsPurchased(key string) bool {
+	for _, p := range m.purchases {
+		if p == key {
+			return true
+		}
+	}
+	return false
+}
+
+func (m *Manager) SetPurchases(purchases []string) {
+	m.purchases = purchases
 }
 
 func (m *Manager) Language() language.Tag {
