@@ -20,6 +20,7 @@ package game
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"log"
 	"os"
 
@@ -55,36 +56,36 @@ func (m *Requester) RequestSaveProgress(requestID int, data []uint8) {
 
 func (m *Requester) RequestPurchase(requestID int, productID string) {
 	log.Printf("request purchase: requestID: %d, productID: %s", requestID, productID)
-	// Add new purchase if unique
-	purchases := make([]string, len(datapkg.Purchases()))
-	copy(purchases, datapkg.Purchases())
-	isNew := true
-	for _, p := range purchases {
-		if p == productID {
-			isNew = false
-			break
-		}
-	}
-	if isNew {
-		purchases = append(purchases, productID)
-	}
-	newPurchases, err := json.Marshal(purchases)
-	if err != nil {
-		panic(err)
-	}
 	go func() {
-		f, err := os.Create(datapkg.PurchasesPath())
+		result := ([]uint8)("[]")
+		defer func() {
+			m.game.FinishPurchase(requestID, true, result)
+		}()
+		var purchases []string
+		b, err := ioutil.ReadFile(datapkg.PurchasesPath())
+		if err != nil && !os.IsNotExist(err) {
+			return
+		}
+		if b != nil {
+			result = b
+			if err := json.Unmarshal(b, &purchases); err != nil {
+				return
+			}
+			for _, p := range purchases {
+				if p == productID {
+					return
+				}
+			}
+		}
+		purchases = append(purchases, productID)
+		b, err = json.Marshal(purchases)
 		if err != nil {
-			// TODO: Should pass err instead of string?
-			m.game.FinishPurchase(requestID, true, newPurchases)
+			panic(err)
+		}
+		result = b
+		if err := ioutil.WriteFile(datapkg.PurchasesPath(), b, 0666); err != nil {
 			return
 		}
-		defer f.Close()
-		if _, err := f.Write(newPurchases); err != nil {
-			m.game.FinishPurchase(requestID, true, newPurchases)
-			return
-		}
-		m.game.FinishPurchase(requestID, true, newPurchases)
 	}()
 }
 
