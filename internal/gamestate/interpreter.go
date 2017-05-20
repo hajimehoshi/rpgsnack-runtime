@@ -275,7 +275,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 	case data.CommandNameShowMessage:
 		args := c.Args.(*data.CommandArgsShowMessage)
 		if !i.waitingCommand {
-			content := data.Current().Texts.Get(sceneManager.Language(), args.ContentID)
+			content := sceneManager.Game().Texts.Get(sceneManager.Language(), args.ContentID)
 			id := args.EventID
 			if id == 0 {
 				id = i.eventID
@@ -308,7 +308,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 			// next time it shows next available hint
 			i.gameState.hints.ReadHint(hintId)
 			var hintText data.UUID
-			for _, h := range data.Current().Hints {
+			for _, h := range sceneManager.Game().Hints {
 				if h.ID == hintId {
 					hintText = h.Text
 					break
@@ -316,7 +316,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 			}
 			content := "Undefined"
 			if hintText.String() != "" {
-				content = data.Current().Texts.Get(sceneManager.Language(), hintText)
+				content = sceneManager.Game().Texts.Get(sceneManager.Language(), hintText)
 			}
 			id := args.EventID
 			if id == 0 {
@@ -336,7 +336,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		if !i.waitingCommand {
 			choices := []string{}
 			for _, id := range c.Args.(*data.CommandArgsShowChoices).ChoiceIDs {
-				choice := data.Current().Texts.Get(sceneManager.Language(), id)
+				choice := sceneManager.Game().Texts.Get(sceneManager.Language(), id)
 				choice = i.gameState.parseMessageSyntax(choice)
 				choices = append(choices, choice)
 			}
@@ -485,7 +485,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		i.waitingRequestID = sceneManager.GenerateRequestID()
 
 		var key string
-		for _, i := range data.Current().IAPProducts {
+		for _, i := range sceneManager.Game().IAPProducts {
 			if i.ID == args.ID {
 				key = i.Key
 				break
@@ -729,7 +729,7 @@ func (i *Interpreter) setVariable(sceneManager *scene.Manager, id int, op data.S
 		rhs = 0
 		id := value.(int)
 		var key string
-		for _, i := range data.Current().IAPProducts {
+		for _, i := range sceneManager.Game().IAPProducts {
 			if i.ID == id {
 				key = i.Key
 				break

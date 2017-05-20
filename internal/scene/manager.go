@@ -49,6 +49,7 @@ type Manager struct {
 	resultCh              chan RequestResult
 	results               map[int]*RequestResult
 	setPlatformDataCh     chan setPlatformDataArgs
+	game                  *data.Game
 	language              language.Tag
 	interstitialAdsLoaded bool
 	rewardedAdsLoaded     bool
@@ -198,18 +199,26 @@ func (m *Manager) Draw(screen *ebiten.Image) {
 	}
 }
 
+func (m *Manager) Game() *data.Game {
+	return m.game
+}
+
+func (m *Manager) SetGame(game *data.Game) {
+	m.game = game
+}
+
 func (m *Manager) Language() language.Tag {
 	return m.language
 }
 
 func (m *Manager) SetLanguage(language language.Tag) {
-	for _, l := range data.Current().Texts.Languages() {
+	for _, l := range m.game.Texts.Languages() {
 		if l == language {
 			m.language = language
 			return
 		}
 	}
-	m.language = data.Current().Texts.Languages()[0]
+	m.language = m.game.Texts.Languages()[0]
 }
 
 func (m *Manager) GoTo(next scene) {

@@ -21,7 +21,6 @@ import (
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/texts"
@@ -63,19 +62,21 @@ func NewSettingsScene() *SettingsScene {
 		creditLabel:            ui.NewLabel(16, 8),
 		creditCloseButton:      ui.NewButton(0, 204, 120, 20, "cancel"),
 	}
-	for i, l := range data.Current().Texts.Languages() {
-		n := display.Self.Name(l)
-		b := ui.NewButton(0, 8+i*buttonDeltaY, 120, 20, "click")
-		b.Text = n
-		s.languageDialog.AddChild(b)
-		s.languageButtons = append(s.languageButtons, b)
-	}
 	s.creditDialog.AddChild(s.creditLabel)
 	s.creditDialog.AddChild(s.creditCloseButton)
 	return s
 }
 
 func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
+	if s.languageButtons == nil {
+		for i, l := range sceneManager.Game().Texts.Languages() {
+			n := display.Self.Name(l)
+			b := ui.NewButton(0, 8+i*buttonDeltaY, 120, 20, "click")
+			b.Text = n
+			s.languageDialog.AddChild(b)
+			s.languageButtons = append(s.languageButtons, b)
+		}
+	}
 	const creditText = `Story
   Daigo Sato
 
@@ -153,7 +154,7 @@ Powered By
 	for i, b := range s.languageButtons {
 		if b.Pressed() {
 			s.languageDialog.Visible = false
-			lang := data.Current().Texts.Languages()[i]
+			lang := sceneManager.Game().Texts.Languages()[i]
 			sceneManager.SetLanguage(lang)
 
 			base, _ := lang.Base()

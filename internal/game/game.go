@@ -42,11 +42,14 @@ func (g *Game) loadGameData() {
 	ch := make(chan error)
 	go func() {
 		defer close(ch)
-		if err := data.Load(); err != nil {
+		d, err := data.Load()
+		if err != nil {
 			ch <- err
 			return
 		}
-		g.sceneManager.SetLanguage(data.Language())
+		g.sceneManager.SetGame(d.Game)
+		// TODO: Now this call must be followed by SetGame. Unify these functions.
+		g.sceneManager.SetLanguage(d.Language)
 	}()
 	g.loadingCh = ch
 }

@@ -49,24 +49,16 @@ type Map struct {
 	playerInterpreterID         int
 
 	// Fields that are not dumped
-	game      *Game
-	eventData map[int]*data.Event
+	game     *Game
+	gameData *data.Game
 }
 
 func NewMap(game *Game) *Map {
-	pos := data.Current().System.InitialPosition
-	x, y, roomID := 0, 0, 1
-	if pos != nil {
-		x, y, roomID = pos.X, pos.Y, pos.RoomID
-	}
-	player := character.NewPlayer(x, y)
 	m := &Map{
 		game:         game,
-		player:       player,
 		mapID:        1,
 		interpreters: map[int]*Interpreter{},
 	}
-	m.setRoomID(roomID, nil)
 	return m
 }
 
@@ -108,11 +100,6 @@ func (m *Map) UnmarshalJSON(jsonData []uint8) error {
 	m.executingEventIDByUserInput = tmp.ExecutingEventIDByUserInput
 	m.interpreters = tmp.Interpreters
 	m.playerInterpreterID = tmp.PlayerInterpreterID
-
-	m.eventData = map[int]*data.Event{}
-	for _, e := range m.CurrentRoom().Events {
-		m.eventData[e.ID] = e
-	}
 	return nil
 }
 
@@ -139,7 +126,7 @@ func (m *Map) waitingRequestResponse() bool {
 
 func (m *Map) TileSet() *data.TileSet {
 	id := m.currentMap().TileSetID
-	for _, t := range data.Current().TileSets {
+	for _, t := range m.gameData.TileSets {
 		if t.ID == id {
 			return t
 		}
@@ -167,12 +154,10 @@ func (m *Map) setRoomID(id int, interpreter *Interpreter) error {
 	m.roomID = id
 	m.events = nil
 	m.eventPageIndices = map[int]int{}
-	m.eventData = map[int]*data.Event{}
 	for _, e := range m.CurrentRoom().Events {
 		event := character.NewEvent(e.ID, e.X, e.Y)
 		m.events = append(m.events, event)
 		m.eventPageIndices[event.EventID()] = character.PlayerEventID
-		m.eventData[event.EventID()] = e
 	}
 	sort.Sort(&eventsByID{m.events})
 	m.interpreters = map[int]*Interpreter{}
@@ -239,7 +224,12 @@ func (m *Map) currentPage(event *character.Character) *data.Page {
 	if i == -1 {
 		return nil
 	}
-	return m.eventData[event.EventID()].Pages[i]
+	for _, e := range m.CurrentRoom().Events {
+		if e.ID == event.EventID() {
+			return e.Pages[i]
+		}
+	}
+	panic("not reached")
 }
 
 type interpretersByID []*Interpreter
@@ -263,6 +253,18 @@ func (m *Map) removeRoutes(eventID int) {
 }
 
 func (m *Map) Update(sceneManager *scene.Manager) error {
+	// TODO: This is a temporary hack for TileSet and currentMap.
+	// Remove this if possible.
+	m.gameData = sceneManager.Game()
+	if m.player == nil {
+		pos := sceneManager.Game().System.InitialPosition
+		x, y, roomID := 0, 0, 1
+		if pos != nil {
+			x, y, roomID = pos.X, pos.Y, pos.RoomID
+		}
+		m.player = character.NewPlayer(x, y)
+		m.setRoomID(roomID, nil)
+	}
 	is := []*Interpreter{}
 	for _, i := range m.interpreters {
 		is = append(is, i)
@@ -372,7 +374,7 @@ func (m *Map) transferPlayerImmediately(roomID, x, y int, interpreter *Interpret
 }
 
 func (m *Map) currentMap() *data.Map {
-	for _, d := range data.Current().Maps {
+	for _, d := range m.gameData.Maps {
 		if d.ID == m.mapID {
 			return d
 		}
