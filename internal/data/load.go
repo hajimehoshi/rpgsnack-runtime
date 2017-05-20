@@ -58,7 +58,6 @@ var (
 	current   *Game
 	progress  []uint8
 	purchases []uint8
-	prices    map[string]string // TODO: We want to use https://godoc.org/golang.org/x/text/currency
 	language  languagepkg.Tag
 )
 
@@ -74,13 +73,6 @@ func Purchases() []uint8 {
 	return purchases
 }
 
-func Price(productID string) string {
-	if _, ok := prices[productID]; ok {
-		return prices[productID]
-	}
-	return ""
-}
-
 func Language() languagepkg.Tag {
 	return language
 }
@@ -91,10 +83,6 @@ func UpdateProgress(p []uint8) {
 
 func UpdatePurchases(p []uint8) {
 	purchases = p
-}
-
-func UpdatePrices(p map[string]string) {
-	prices = p
 }
 
 type jsonData struct {

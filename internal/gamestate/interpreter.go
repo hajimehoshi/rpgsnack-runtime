@@ -187,7 +187,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 				if err := json.Unmarshal(r.Data, &prices); err != nil {
 					panic(err)
 				}
-				data.UpdatePrices(prices)
+				i.gameState.updatePrices(prices)
 				i.commandIterator.Choose(0)
 			} else {
 				i.commandIterator.Choose(1)

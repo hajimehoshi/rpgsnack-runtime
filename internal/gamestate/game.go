@@ -49,6 +49,7 @@ type Game struct {
 	// Fields that are not dumped
 	rand             Rand
 	waitingRequestID int
+	prices           map[string]string // TODO: We want to use https://godoc.org/golang.org/x/text/currency
 }
 
 func generateDefaultRand() Rand {
@@ -180,7 +181,7 @@ func (g *Game) parseMessageSyntax(str string) string {
 
 		switch name {
 		case "p":
-			return data.Price(args)
+			return g.price(args)
 		case "v":
 			id, err := strconv.Atoi(args)
 			if err != nil {
@@ -277,4 +278,15 @@ func (g *Game) character(mapID, roomID, eventID int) *character.Character {
 		}
 	}
 	return nil
+}
+
+func (g *Game) price(productID string) string {
+	if _, ok := g.prices[productID]; ok {
+		return g.prices[productID]
+	}
+	return ""
+}
+
+func (g *Game) updatePrices(p map[string]string) {
+	g.prices = p
 }
