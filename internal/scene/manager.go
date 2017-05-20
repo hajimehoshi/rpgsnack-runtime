@@ -15,6 +15,7 @@
 package scene
 
 import (
+	"encoding/json"
 	"image/color"
 	"log"
 
@@ -145,7 +146,11 @@ func (m *Manager) Update() error {
 			m.rewardedAdsLoaded = false
 		case RequestTypePurchase, RequestTypeRestorePurchases:
 			if r.Succeeded {
-				data.UpdatePurchases(r.Data)
+				var purchases []string
+				if err := json.Unmarshal(r.Data, &purchases); err != nil {
+					return err
+				}
+				data.UpdatePurchases(purchases)
 			}
 		}
 	case a := <-m.setPlatformDataCh:

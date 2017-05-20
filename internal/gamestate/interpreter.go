@@ -735,19 +735,9 @@ func (i *Interpreter) setVariable(sceneManager *scene.Manager, id int, op data.S
 				break
 			}
 		}
-
 		// check whether the IAPProduct is purchased
-		// TODO: We should move the following logic to another class
-		// in order to avoid duplicated codes
-		var purchases []string
-		if data.Purchases() != nil {
-			if err := json.Unmarshal(data.Purchases(), &purchases); err != nil {
-				panic(err)
-			}
-		}
-
 		rhs = 0
-		for _, p := range purchases {
+		for _, p := range data.Purchases() {
 			if p == key {
 				rhs = 1
 				break

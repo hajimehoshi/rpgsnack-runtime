@@ -129,19 +129,11 @@ func (m *MapScene) initUI() {
 
 // TODO: Move this method to load.go?
 func (m *MapScene) isPurchased(key string) bool {
-	var purchases []string
-	if data.Purchases() != nil {
-		if err := json.Unmarshal(data.Purchases(), &purchases); err != nil {
-			panic(err)
-		}
-	}
-
-	for _, p := range purchases {
+	for _, p := range data.Purchases() {
 		if p == key {
 			return true
 		}
 	}
-
 	return false
 }
 

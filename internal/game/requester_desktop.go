@@ -56,11 +56,8 @@ func (m *Requester) RequestSaveProgress(requestID int, data []uint8) {
 func (m *Requester) RequestPurchase(requestID int, productID string) {
 	log.Printf("request purchase: requestID: %d, productID: %s", requestID, productID)
 	// Add new purchase if unique
-	var purchases []string
-	if err := json.Unmarshal(datapkg.Purchases(), &purchases); err != nil {
-		log.Printf("no valid purchases.json exist")
-	}
-
+	purchases := make([]string, len(datapkg.Purchases()))
+	copy(purchases, datapkg.Purchases())
 	isNew := true
 	for _, p := range purchases {
 		if p == productID {
@@ -68,16 +65,13 @@ func (m *Requester) RequestPurchase(requestID int, productID string) {
 			break
 		}
 	}
-
 	if isNew {
 		purchases = append(purchases, productID)
 	}
-
 	newPurchases, err := json.Marshal(purchases)
 	if err != nil {
 		panic(err)
 	}
-
 	go func() {
 		f, err := os.Create(datapkg.PurchasesPath())
 		if err != nil {

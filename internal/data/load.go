@@ -56,14 +56,14 @@ func unmarshalJSON(data []uint8, v interface{}) error {
 
 var (
 	progress  []uint8
-	purchases []uint8
+	purchases []string
 )
 
 func Progress() []uint8 {
 	return progress
 }
 
-func Purchases() []uint8 {
+func Purchases() []string {
 	return purchases
 }
 
@@ -71,7 +71,7 @@ func UpdateProgress(p []uint8) {
 	progress = p
 }
 
-func UpdatePurchases(p []uint8) {
+func UpdatePurchases(p []string) {
 	purchases = p
 }
 
@@ -97,7 +97,13 @@ func Load() (*LoadedData, error) {
 		return nil, err
 	}
 	progress = data.Progress
-	purchases = data.Purchases
+	if data.Purchases != nil {
+		if err := unmarshalJSON(data.Purchases, &purchases); err != nil {
+			return nil, err
+		}
+	} else {
+		purchases = []string{}
+	}
 
 	tag, err := language.Parse(data.Language)
 	if err != nil {
