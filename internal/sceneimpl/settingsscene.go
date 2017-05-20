@@ -77,6 +77,7 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 			s.languageButtons = append(s.languageButtons, b)
 		}
 	}
+	// TODO: This stirng should be given from outside.
 	const creditText = `Story
   Daigo Sato
 
