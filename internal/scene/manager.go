@@ -103,7 +103,7 @@ const (
 	PlatformDataKeyBackButton            PlatformDataKey = "backbutton"
 )
 
-func NewManager(width, height int, requester Requester) *Manager {
+func NewManager(width, height int, requester Requester, game *data.Game, progress []uint8, purchases []string, language language.Tag) *Manager {
 	m := &Manager{
 		width:             width,
 		height:            height,
@@ -111,10 +111,13 @@ func NewManager(width, height int, requester Requester) *Manager {
 		resultCh:          make(chan RequestResult, 1),
 		results:           map[int]*RequestResult{},
 		setPlatformDataCh: make(chan setPlatformDataArgs, 1),
-		language:          language.English,
+		game:              game,
+		progress:          progress,
+		purchases:         purchases,
 	}
 	m.blackImage, _ = ebiten.NewImage(16, 16, ebiten.FilterNearest)
 	m.blackImage.Fill(color.Black)
+	m.SetLanguage(language)
 	return m
 }
 
@@ -210,10 +213,6 @@ func (m *Manager) Game() *data.Game {
 	return m.game
 }
 
-func (m *Manager) SetGame(game *data.Game) {
-	m.game = game
-}
-
 func (m *Manager) Progress() []uint8 {
 	return m.progress
 }
@@ -229,10 +228,6 @@ func (m *Manager) IsPurchased(key string) bool {
 		}
 	}
 	return false
-}
-
-func (m *Manager) SetPurchases(purchases []string) {
-	m.purchases = purchases
 }
 
 func (m *Manager) Language() language.Tag {

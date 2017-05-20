@@ -27,14 +27,20 @@ import (
 )
 
 type Game struct {
+	width        int
+	height       int
+	requester    scene.Requester
 	sceneManager *scene.Manager
 	loadingCh    chan error
 }
 
 func New(width, height int, requester scene.Requester) *Game {
-	g := &Game{}
+	g := &Game{
+		width:     width,
+		height:    height,
+		requester: requester,
+	}
 	g.loadGameData()
-	g.sceneManager = scene.NewManager(width, height, requester)
 	return g
 }
 
@@ -47,11 +53,7 @@ func (g *Game) loadGameData() {
 			ch <- err
 			return
 		}
-		g.sceneManager.SetGame(d.Game)
-		g.sceneManager.SetProgress(d.Progress)
-		g.sceneManager.SetPurchases(d.Purchases)
-		// TODO: Now this call must be followed by SetGame. Unify these functions.
-		g.sceneManager.SetLanguage(d.Language)
+		g.sceneManager = scene.NewManager(g.width, g.height, g.requester, d.Game, d.Progress, d.Purchases, d.Language)
 	}()
 	g.loadingCh = ch
 }

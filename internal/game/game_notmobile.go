@@ -17,13 +17,12 @@
 
 package game
 
-import (
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
-)
-
 func NewWithDefaultRequester(width, height int) *Game {
-	g := &Game{}
+	g := &Game{
+		width:  width,
+		height: height,
+	}
 	g.loadGameData()
-	g.sceneManager = scene.NewManager(width, height, &Requester{g})
+	g.requester = &Requester{g}
 	return g
 }
