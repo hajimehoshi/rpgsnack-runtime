@@ -17,7 +17,7 @@ package assets
 import (
 	"bytes"
 	"image/png"
-	"path/filepath"
+	"path"
 	"strings"
 
 	"github.com/hajimehoshi/ebiten"
@@ -62,5 +62,5 @@ func GetResource(path string) []uint8 {
 }
 
 func GetImage(path string) *ebiten.Image {
-	return theResources.images[filepath.Join("images", path)]
+	return theResources.images[path.Join("images", path)]
 }

@@ -22,6 +22,7 @@ import (
 	"flag"
 	"io/ioutil"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -59,12 +60,11 @@ func loadResources() ([]uint8, error) {
 			if strings.HasPrefix(i.Name(), ".") {
 				continue
 			}
-			k := filepath.Join(dir, i.Name())
-			b, err := ioutil.ReadFile(filepath.Join(*resourcesPath, k))
+			b, err := ioutil.ReadFile(filepath.Join(*resourcesPath, dir, i.Name()))
 			if err != nil {
 				return nil, err
 			}
-			resources[k] = b
+			resources[path.Join(dir, i.Name())] = b
 		}
 	}
 	b, err := msgpack.Marshal(resources)
