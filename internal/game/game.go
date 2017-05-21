@@ -32,6 +32,7 @@ type Game struct {
 	requester    scene.Requester
 	sceneManager *scene.Manager
 	loadingCh    chan error
+	loadedData   *data.LoadedData
 }
 
 func New(width, height int, requester scene.Requester) *Game {
@@ -53,7 +54,7 @@ func (g *Game) loadGameData() {
 			ch <- err
 			return
 		}
-		g.sceneManager = scene.NewManager(g.width, g.height, g.requester, d.Game, d.Progress, d.Purchases, d.Language)
+		g.loadedData = d
 	}()
 	g.loadingCh = ch
 }
@@ -70,9 +71,6 @@ func (g *Game) Update(screen *ebiten.Image) error {
 }
 
 func (g *Game) update() error {
-	if assets.IsLoading() {
-		return nil
-	}
 	if g.loadingCh != nil {
 		select {
 		case err, ok := <-g.loadingCh:
@@ -82,6 +80,9 @@ func (g *Game) update() error {
 			if !ok {
 				g.loadingCh = nil
 			}
+			d := g.loadedData
+			assets.SetResources(d.Resources)
+			g.sceneManager = scene.NewManager(g.width, g.height, g.requester, d.Game, d.Progress, d.Purchases, d.Language)
 			g.sceneManager.InitScene(sceneimpl.NewTitleScene())
 		default:
 			return nil
@@ -95,7 +96,7 @@ func (g *Game) update() error {
 }
 
 func (g *Game) draw(screen *ebiten.Image) {
-	if assets.IsLoading() || g.loadingCh != nil {
+	if g.loadingCh != nil {
 		ebitenutil.DebugPrint(screen, "Now Loading...")
 		return
 	}

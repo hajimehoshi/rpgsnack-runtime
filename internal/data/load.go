@@ -19,6 +19,7 @@ import (
 	"fmt"
 
 	"golang.org/x/text/language"
+	"gopkg.in/vmihailenco/msgpack.v2"
 )
 
 func min(a, b int) int {
@@ -56,6 +57,7 @@ func unmarshalJSON(data []uint8, v interface{}) error {
 
 type rawData struct {
 	Game      []uint8
+	Resources []uint8
 	Progress  []uint8
 	Purchases []uint8
 	Language  []uint8
@@ -63,6 +65,7 @@ type rawData struct {
 
 type LoadedData struct {
 	Game      *Game
+	Resources map[string][]uint8
 	Progress  []uint8
 	Purchases []string
 	Language  language.Tag
@@ -77,6 +80,10 @@ func Load() (*LoadedData, error) {
 	if err := unmarshalJSON(data.Game, &gameData); err != nil {
 		return nil, err
 	}
+	var resources map[string][]uint8
+	if err := msgpack.Unmarshal(data.Resources, &resources); err != nil {
+		return nil, fmt.Errorf("data: msgpack.Unmarshal error: %s", err.Error())
+	}
 	var purchases []string
 	if data.Purchases != nil {
 		if err := unmarshalJSON(data.Purchases, &purchases); err != nil {
@@ -86,7 +93,7 @@ func Load() (*LoadedData, error) {
 		purchases = []string{}
 	}
 	var langId string
-	if err := json.Unmarshal(data.Language, &langId); err != nil {
+	if err := unmarshalJSON(data.Language, &langId); err != nil {
 		return nil, err
 	}
 	tag, err := language.Parse(langId)
@@ -95,6 +102,7 @@ func Load() (*LoadedData, error) {
 	}
 	return &LoadedData{
 		Game:      gameData,
+		Resources: resources,
 		Purchases: purchases,
 		Progress:  data.Progress,
 		Language:  tag,

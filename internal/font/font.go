@@ -24,17 +24,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 )
 
-var positions = map[rune]int{}
-
-func init() {
-	// TODO: This doesn't treat spaces well.
-	b := assets.MustAsset("images/mplus_positions")
-	for i := 0; i < len(b)/4; i++ {
-		r := rune(b[4*i]) + rune(b[4*i+1])<<8
-		pos := int(b[4*i+2]) + int(b[4*i+3])<<8
-		positions[r] = pos
-	}
-}
+var positions map[rune]int
 
 const (
 	charHalfWidth       = 6
@@ -73,7 +63,15 @@ func MeasureSize(text string) (int, int) {
 }
 
 func DrawText(screen *ebiten.Image, text string, ox, oy int, scale int, textAlign data.TextAlign, color color.Color) {
-	mplusImage := assets.GetImage("mplus.compacted.png")
+	if positions == nil {
+		positions = map[rune]int{}
+		b := assets.GetResource("images/mplus_positions")
+		for i := 0; i < len(b)/4; i++ {
+			r := rune(b[4*i]) + rune(b[4*i+1])<<8
+			pos := int(b[4*i+2]) + int(b[4*i+3])<<8
+			positions[r] = pos
+		}
+	}
 	op := &ebiten.DrawImageOptions{}
 	r, g, b, a := color.RGBA()
 	op.ColorM.Scale(float64(r)/65535, float64(g)/65535, float64(b)/65535, float64(a)/65535)
@@ -130,7 +128,7 @@ func DrawText(screen *ebiten.Image, text string, ox, oy int, scale int, textAlig
 		}
 		op.GeoM.Scale(float64(scale), float64(scale))
 		op.GeoM.Translate(float64(ox), float64(oy))
-		screen.DrawImage(mplusImage, op)
+		screen.DrawImage(assets.GetImage("mplus.compacted.png"), op)
 		dx += w
 	}
 }

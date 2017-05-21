@@ -22,10 +22,15 @@ import (
 	"flag"
 	"io/ioutil"
 	"os"
+	"path/filepath"
+	"strings"
+
+	"gopkg.in/vmihailenco/msgpack.v2"
 )
 
 var (
 	dataPath      = flag.String("data", "./data.json", "data path")
+	resourcesPath = flag.String("resources", "./internal/assets", "resources directory path")
 	purchasesPath = flag.String("purchases", "./purchases.json", "purchases path")
 	savePath      = flag.String("save", "./save.json", "save path")
 	languagePath  = flag.String("language", "./language.json", "language path")
@@ -43,6 +48,32 @@ func SavePath() string {
 	return *savePath
 }
 
+func loadResources() ([]uint8, error) {
+	resources := map[string][]uint8{}
+	for _, dir := range []string{"images"} {
+		images, err := ioutil.ReadDir(filepath.Join(*resourcesPath, dir))
+		if err != nil {
+			return nil, err
+		}
+		for _, i := range images {
+			if strings.HasPrefix(i.Name(), ".") {
+				continue
+			}
+			k := filepath.Join(dir, i.Name())
+			b, err := ioutil.ReadFile(filepath.Join(*resourcesPath, k))
+			if err != nil {
+				return nil, err
+			}
+			resources[k] = b
+		}
+	}
+	b, err := msgpack.Marshal(resources)
+	if err != nil {
+		return nil, err
+	}
+	return b, nil
+}
+
 func loadRawData() (*rawData, error) {
 	game, err := ioutil.ReadFile(*dataPath)
 	if err != nil {
@@ -54,6 +85,10 @@ func loadRawData() (*rawData, error) {
 			return nil, err
 		}
 		progress = nil
+	}
+	resources, err := loadResources()
+	if err != nil {
+		return nil, err
 	}
 	purchases, err := ioutil.ReadFile(*purchasesPath)
 	if err != nil {
@@ -73,6 +108,7 @@ func loadRawData() (*rawData, error) {
 
 	return &rawData{
 		Game:      game,
+		Resources: resources,
 		Progress:  progress,
 		Purchases: purchases,
 		Language:  langData,

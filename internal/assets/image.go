@@ -17,13 +17,13 @@ package assets
 import (
 	"bytes"
 	"image/png"
+	"path/filepath"
 	"strings"
 
 	"github.com/hajimehoshi/ebiten"
 )
 
-func loadImage(path string, filter ebiten.Filter) (*ebiten.Image, error) {
-	bin := MustAsset(path)
+func loadImage(path string, bin []uint8, filter ebiten.Filter) (*ebiten.Image, error) {
 	img, err := png.Decode(bytes.NewReader(bin))
 	if err != nil {
 		return nil, err
@@ -35,72 +35,32 @@ func loadImage(path string, filter ebiten.Filter) (*ebiten.Image, error) {
 	return eimg, nil
 }
 
-func initImageCache(imageCache *imageCache) error {
-	files, err := AssetDir("images")
-	if err != nil {
-		return err
-	}
-	for _, file := range files {
-		if !strings.HasSuffix(file, ".png") {
-			continue
+func SetResources(resources map[string][]uint8) error {
+	theResources.resources = resources
+	theResources.images = map[string]*ebiten.Image{}
+	for file, bin := range resources {
+		if strings.HasSuffix(file, ".png") {
+			img, err := loadImage(file, bin, ebiten.FilterNearest)
+			if err != nil {
+				return err
+			}
+			theResources.images[file] = img
 		}
-		img, err := loadImage("images/"+file, ebiten.FilterNearest)
-		if err != nil {
-			return err
-		}
-		imageCache.cache[file] = img
 	}
 	return nil
 }
 
-var theImageCache *imageCache
+var theResources = &resources{}
 
-func init() {
-	theImageCache = &imageCache{
-		cache: map[string]*ebiten.Image{},
-	}
-	ch := make(chan error)
-	go func() {
-		defer close(ch)
-		if err := initImageCache(theImageCache); err != nil {
-			ch <- err
-			return
-		}
-	}()
-	theImageCache.loadingCh = ch
+type resources struct {
+	resources map[string][]uint8
+	images    map[string]*ebiten.Image
 }
 
-type imageCache struct {
-	cache     map[string]*ebiten.Image
-	loadingCh chan error
-}
-
-func (i *imageCache) Get(path string) *ebiten.Image {
-	return i.cache[path]
-}
-
-func (i *imageCache) IsLoading() bool {
-	if i.loadingCh == nil {
-		return false
-	}
-	select {
-	case err, ok := <-i.loadingCh:
-		if err != nil {
-			panic(err)
-		}
-		if !ok {
-			i.loadingCh = nil
-			return true
-		}
-	default:
-	}
-	return true
-}
-
-func IsLoading() bool {
-	return theImageCache.IsLoading()
+func GetResource(path string) []uint8 {
+	return theResources.resources[path]
 }
 
 func GetImage(path string) *ebiten.Image {
-	return theImageCache.Get(path)
+	return theResources.images[filepath.Join("images", path)]
 }
