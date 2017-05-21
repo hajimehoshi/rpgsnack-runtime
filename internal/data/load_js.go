@@ -20,7 +20,7 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 )
 
-func loadJSONData() (*rawData, error) {
+func loadRawData() (*rawData, error) {
 	if js.Global.Get("_data") == nil {
 		ch := make(chan struct{})
 		js.Global.Set("_dataNotify", func() {

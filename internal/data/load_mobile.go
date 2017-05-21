@@ -21,7 +21,7 @@ var (
 	dataCh = make(chan *rawData, 1)
 )
 
-func loadJSONData() (*rawData, error) {
+func loadRawData() (*rawData, error) {
 	return <-dataCh, nil
 }
 

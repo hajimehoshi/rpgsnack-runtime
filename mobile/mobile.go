@@ -28,7 +28,7 @@ var (
 	theGame *game.Game
 )
 
-func SetData(game []uint8, progress []uint8, purchases []uint8, defaultLanguage string) {
+func SetData(game []uint8, progress []uint8, purchases []uint8, language string) {
 	// Copy data here since the given data is just a reference and might be
 	// broken in the mobile side.
 	g := make([]uint8, len(game))
@@ -43,7 +43,7 @@ func SetData(game []uint8, progress []uint8, purchases []uint8, defaultLanguage 
 		p2 = make([]uint8, len(purchases))
 		copy(p2, purchases)
 	}
-	data.SetData(g, p1, p2, defaultLanguage)
+	data.SetData(g, p1, p2, language)
 }
 
 func IsRunning() bool {

@@ -69,7 +69,7 @@ type LoadedData struct {
 }
 
 func Load() (*LoadedData, error) {
-	data, err := loadJSONData()
+	data, err := loadRawData()
 	if err != nil {
 		return nil, err
 	}

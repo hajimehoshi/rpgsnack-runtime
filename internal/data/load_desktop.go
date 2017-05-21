@@ -44,7 +44,7 @@ func SavePath() string {
 	return *savePath
 }
 
-func loadJSONData() (*rawData, error) {
+func loadRawData() (*rawData, error) {
 	game, err := ioutil.ReadFile(*dataPath)
 	if err != nil {
 		return nil, err
