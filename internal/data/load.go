@@ -58,7 +58,7 @@ type rawData struct {
 	Game      []uint8
 	Progress  []uint8
 	Purchases []uint8
-	Language  string
+	Language  []uint8
 }
 
 type LoadedData struct {
@@ -85,7 +85,11 @@ func Load() (*LoadedData, error) {
 	} else {
 		purchases = []string{}
 	}
-	tag, err := language.Parse(data.Language)
+	var langId string
+	if err := json.Unmarshal(data.Language, &langId); err != nil {
+		return nil, err
+	}
+	tag, err := language.Parse(langId)
 	if err != nil {
 		return nil, err
 	}

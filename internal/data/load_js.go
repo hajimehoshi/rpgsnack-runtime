@@ -34,6 +34,6 @@ func loadRawData() (*rawData, error) {
 		Game:      dataJson,
 		Progress:  nil, // TODO: Implement this
 		Purchases: nil, // TODO: Implement this
-		Language:  `"en"`,
+		Language:  []uint8(`"en"`),
 	}, nil
 }

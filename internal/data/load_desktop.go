@@ -19,7 +19,6 @@
 package data
 
 import (
-	"encoding/json"
 	"flag"
 	"io/ioutil"
 	"os"
@@ -64,23 +63,18 @@ func loadRawData() (*rawData, error) {
 		purchases = nil
 	}
 
-	var langId string
 	langData, err := ioutil.ReadFile(*languagePath)
 	if err != nil {
 		if !os.IsNotExist(err) {
 			return nil, err
 		}
-		langId = "en"
-	} else {
-		if err := json.Unmarshal(langData, &langId); err != nil {
-			return nil, err
-		}
+		langData = []uint8(`"en"`)
 	}
 
 	return &rawData{
 		Game:      game,
 		Progress:  progress,
 		Purchases: purchases,
-		Language:  langId,
+		Language:  langData,
 	}, nil
 }
