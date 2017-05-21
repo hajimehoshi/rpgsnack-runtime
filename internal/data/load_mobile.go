@@ -17,6 +17,10 @@
 
 package data
 
+import (
+	"encoding/json"
+)
+
 var (
 	dataCh = make(chan *rawData, 1)
 )
