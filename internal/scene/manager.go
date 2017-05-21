@@ -238,14 +238,15 @@ func (m *Manager) Language() language.Tag {
 	return m.language
 }
 
-func (m *Manager) SetLanguage(language language.Tag) {
+func (m *Manager) SetLanguage(language language.Tag) language.Tag {
 	for _, l := range m.game.Texts.Languages() {
 		if l == language {
 			m.language = language
-			return
+			return language
 		}
 	}
 	m.language = m.game.Texts.Languages()[0]
+	return m.language
 }
 
 func (m *Manager) GoTo(next scene) {

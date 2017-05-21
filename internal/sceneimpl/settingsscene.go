@@ -156,7 +156,7 @@ Powered By
 		if b.Pressed() {
 			s.languageDialog.Visible = false
 			lang := sceneManager.Game().Texts.Languages()[i]
-			sceneManager.SetLanguage(lang)
+			lang = sceneManager.SetLanguage(lang)
 
 			base, _ := lang.Base()
 			s.waitingRequestID = sceneManager.GenerateRequestID()
