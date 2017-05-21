@@ -382,14 +382,16 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 
 	tileSet := m.gameState.Map().TileSet()
 	op := &ebiten.DrawImageOptions{}
+	// TODO: This accesses *data.Game, but is it OK?
+	room := m.gameState.Map().CurrentRoom()
 	op.ImageParts = &tilesImageParts{
-		room:    m.gameState.Map().CurrentRoom(),
+		room:    room,
 		tileSet: tileSet,
 		layer:   0,
 	}
 	m.tilesImage.DrawImage(assets.GetImage(tileSet.Images[0]), op)
 	op.ImageParts = &tilesImageParts{
-		room:     m.gameState.Map().CurrentRoom(),
+		room:     room,
 		tileSet:  tileSet,
 		layer:    1,
 		overOnly: false,
@@ -398,7 +400,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	m.gameState.Map().DrawCharacters(m.tilesImage)
 	op = &ebiten.DrawImageOptions{}
 	op.ImageParts = &tilesImageParts{
-		room:     m.gameState.Map().CurrentRoom(),
+		room:     room,
 		tileSet:  tileSet,
 		layer:    1,
 		overOnly: true,
