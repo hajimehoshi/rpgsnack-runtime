@@ -61,6 +61,6 @@ func GetResource(path string) []uint8 {
 	return theResources.resources[path]
 }
 
-func GetImage(path string) *ebiten.Image {
-	return theResources.images[path.Join("images", path)]
+func GetImage(key string) *ebiten.Image {
+	return theResources.images[path.Join("images", key)]
 }

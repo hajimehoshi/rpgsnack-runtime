@@ -51,7 +51,7 @@ func SavePath() string {
 
 func loadResources() ([]uint8, error) {
 	resources := map[string][]uint8{}
-	for _, dir := range []string{"images"} {
+	for _, dir := range []string{filepath.Join("audio", "bgm"), filepath.Join("audio", "se"), "images"} {
 		images, err := ioutil.ReadDir(filepath.Join(*resourcesPath, dir))
 		if err != nil {
 			return nil, err
@@ -64,7 +64,9 @@ func loadResources() ([]uint8, error) {
 			if err != nil {
 				return nil, err
 			}
-			resources[path.Join(dir, i.Name())] = b
+			l := filepath.SplitList(dir)
+			l = append(l, i.Name())
+			resources[path.Join(l...)] = b
 		}
 	}
 	b, err := msgpack.Marshal(resources)
