@@ -54,7 +54,7 @@ func unmarshalJSON(data []uint8, v interface{}) error {
 	return nil
 }
 
-type jsonData struct {
+type rawData struct {
 	Game      []uint8
 	Progress  []uint8
 	Purchases []uint8
