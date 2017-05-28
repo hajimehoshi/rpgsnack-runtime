@@ -17,6 +17,7 @@ package sceneimpl
 import (
 	"encoding/json"
 	"fmt"
+	"image"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten"
@@ -339,40 +340,6 @@ func (m *MapScene) handleBackButton() {
 	m.quitDialog.Visible = true
 }
 
-type tilesImageParts struct {
-	room     *data.Room
-	tileSet  *data.TileSet
-	layer    int
-	overOnly bool
-}
-
-func (t *tilesImageParts) Len() int {
-	return consts.TileXNum * consts.TileYNum
-}
-
-func (t *tilesImageParts) Src(index int) (int, int, int, int) {
-	tile := t.room.Tiles[t.layer][index]
-	if t.layer == 1 {
-		p := t.tileSet.PassageTypes[t.layer][tile]
-		if !t.overOnly && p == data.PassageTypeOver {
-			return 0, 0, 0, 0
-		}
-		if t.overOnly && p != data.PassageTypeOver {
-			return 0, 0, 0, 0
-		}
-	}
-	// TODO: 8 is a magic number and should be replaced.
-	x := tile % 8 * consts.TileSize
-	y := tile / 8 * consts.TileSize
-	return x, y, x + consts.TileSize, y + consts.TileSize
-}
-
-func (t *tilesImageParts) Dst(index int) (int, int, int, int) {
-	x := index % consts.TileXNum * consts.TileSize
-	y := index / consts.TileXNum * consts.TileSize
-	return x, y, x + consts.TileSize, y + consts.TileSize
-}
-
 func (m *MapScene) Draw(screen *ebiten.Image) {
 	m.tilesImage.Fill(color.Black)
 
@@ -384,28 +351,39 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 	// TODO: This accesses *data.Game, but is it OK?
 	room := m.gameState.Map().CurrentRoom()
-	op.ImageParts = &tilesImageParts{
-		room:    room,
-		tileSet: tileSet,
-		layer:   0,
+	for k := 0; k < 3; k++ {
+		for j := 0; j < consts.TileYNum; j++ {
+			for i := 0; i < consts.TileXNum; i++ {
+				layer := 0
+				if k >= 1 {
+					layer = 1
+				}
+				tile := room.Tiles[layer][j*consts.TileXNum+i]
+				if layer == 1 {
+					p := tileSet.PassageTypes[layer][tile]
+					if k == 1 && p == data.PassageTypeOver {
+						continue
+					}
+					if k == 2 && p != data.PassageTypeOver {
+						continue
+					}
+				}
+				// TODO: 8 is a magic number and should be replaced.
+				sx := tile % 8 * consts.TileSize
+				sy := tile / 8 * consts.TileSize
+				r := image.Rect(sx, sy, sx+consts.TileSize, sy+consts.TileSize)
+				op.SourceRect = &r
+				dx := i * consts.TileSize
+				dy := j * consts.TileSize
+				op.GeoM.Reset()
+				op.GeoM.Translate(float64(dx), float64(dy))
+				m.tilesImage.DrawImage(assets.GetImage(tileSet.Images[layer]), op)
+			}
+		}
+		if k == 1 {
+			m.gameState.Map().DrawCharacters(m.tilesImage)
+		}
 	}
-	m.tilesImage.DrawImage(assets.GetImage(tileSet.Images[0]), op)
-	op.ImageParts = &tilesImageParts{
-		room:     room,
-		tileSet:  tileSet,
-		layer:    1,
-		overOnly: false,
-	}
-	m.tilesImage.DrawImage(assets.GetImage(tileSet.Images[1]), op)
-	m.gameState.Map().DrawCharacters(m.tilesImage)
-	op = &ebiten.DrawImageOptions{}
-	op.ImageParts = &tilesImageParts{
-		room:     room,
-		tileSet:  tileSet,
-		layer:    1,
-		overOnly: true,
-	}
-	m.tilesImage.DrawImage(assets.GetImage(tileSet.Images[1]), op)
 	sw, _ := screen.Size()
 	op = &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(consts.TileScale, consts.TileScale)
