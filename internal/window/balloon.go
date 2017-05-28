@@ -252,7 +252,7 @@ func (b *balloon) update() {
 	}
 }
 
-func (b *balloon) geoMForRate(screen *ebiten.Image, dx, dy int, character *character.Character) *ebiten.GeoM {
+func (b *balloon) geoMForRate(screen *ebiten.Image, character *character.Character) *ebiten.GeoM {
 	sw, _ := screen.Size()
 	x, y := b.position(sw, character)
 	cx := float64(x + b.width/2)
@@ -273,7 +273,6 @@ func (b *balloon) geoMForRate(screen *ebiten.Image, dx, dy int, character *chara
 	g.Scale(rate, rate)
 	g.Translate(cx, cy)
 	g.Scale(consts.TileScale, consts.TileScale)
-	g.Translate(float64(dx), float64(dy))
 	return &g
 }
 
@@ -300,7 +299,8 @@ func (b *balloon) draw(screen *ebiten.Image, character *character.Character) {
 			img = assets.GetImage("shout.png")
 		}
 		op := &ebiten.DrawImageOptions{}
-		g := b.geoMForRate(screen, dx, dy, character)
+		g := b.geoMForRate(screen, character)
+		g.Translate(float64(dx), float64(dy))
 		pw, ph := b.width/b.partSize(), b.height/b.partSize()
 		for j := 0; j < ph; j++ {
 			for i := 0; i < pw; i++ {
@@ -331,9 +331,8 @@ func (b *balloon) draw(screen *ebiten.Image, character *character.Character) {
 				screen.DrawImage(img, op)
 			}
 		}
-		if b.hasArrow &&
-			(b.balloonType == data.BalloonTypeNormal ||
-				b.balloonType == data.BalloonTypeThink) {
+		if b.hasArrow && (b.balloonType == data.BalloonTypeNormal ||
+			b.balloonType == data.BalloonTypeThink) {
 			op := &ebiten.DrawImageOptions{}
 			switch b.balloonType {
 			case data.BalloonTypeNormal:
