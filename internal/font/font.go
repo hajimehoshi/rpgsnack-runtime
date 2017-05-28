@@ -27,6 +27,7 @@ import (
 var positions = map[rune]int{}
 
 func init() {
+	// TODO: This doesn't treat spaces well.
 	b := assets.MustAsset("images/mplus_positions")
 	for i := 0; i < len(b)/4; i++ {
 		r := rune(b[4*i]) + rune(b[4*i+1])<<8
@@ -97,6 +98,11 @@ func DrawText(screen *ebiten.Image, text string, ox, oy int, scale int, textAlig
 			dx = 0
 			dy += renderingLineHeight
 			l++
+			continue
+		}
+		// TODO: Use unicode package to detect space
+		if r == ' ' || r == '　' {
+			dx += runeWidth(r)
 			continue
 		}
 		pos, ok := positions[r]
