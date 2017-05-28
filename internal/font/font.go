@@ -15,6 +15,7 @@
 package font
 
 import (
+	"image"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten"
@@ -42,102 +43,11 @@ const (
 	renderingLineHeight = 18
 )
 
-type textImageParts struct {
-	runes      []rune
-	align      data.TextAlign
-	lineWidths []int
-	width      int
-}
-
 func runeWidth(r rune) int {
 	if r < 0x100 {
 		return charHalfWidth
 	}
 	return charFullWidth
-}
-
-func newTextImageParts(text string, align data.TextAlign) *textImageParts {
-	t := &textImageParts{
-		runes: ([]rune)(text),
-		align: align,
-	}
-	x := 0
-	for i, r := range t.runes {
-		if t.runes[i] == '\n' {
-			t.lineWidths = append(t.lineWidths, x)
-			x = 0
-			continue
-		}
-		x += runeWidth(r)
-	}
-	t.lineWidths = append(t.lineWidths, x)
-	for _, w := range t.lineWidths {
-		if t.width < w {
-			t.width = w
-		}
-	}
-	return t
-}
-
-func (t *textImageParts) line(index int) int {
-	l := 0
-	for i := 0; i < index; i++ {
-		if t.runes[i] == '\n' {
-			l++
-		}
-	}
-	return l
-}
-
-func (t *textImageParts) Len() int {
-	return len(t.runes)
-}
-
-func (t *textImageParts) Src(index int) (int, int, int, int) {
-	r := t.runes[index]
-	pos, ok := positions[r]
-	if !ok {
-		return 0, 0, 0, 0
-	}
-	x := pos % 256 * charFullWidth
-	y := pos / 256 * lineHeight
-	w := charHalfWidth
-	h := lineHeight
-	if r == '\n' {
-		return 0, 0, 0, 0
-	}
-	if 0x100 <= r {
-		w = charFullWidth
-	}
-	return x, y, x + w, y + h
-}
-
-func (t *textImageParts) Dst(index int) (int, int, int, int) {
-	x := 0
-	y := (renderingLineHeight - lineHeight) / 2
-	for i := 0; i < index; i++ {
-		if t.runes[i] == '\n' {
-			x = 0
-			y += renderingLineHeight
-			continue
-		}
-		x += runeWidth(t.runes[i])
-	}
-	w := charFullWidth
-	h := lineHeight
-	if t.runes[index] < 0x100 {
-		w = charHalfWidth
-	}
-	if t.align != data.TextAlignLeft {
-		lw := t.lineWidths[t.line(index)]
-		switch t.align {
-		case data.TextAlignCenter:
-			x -= lw / 2
-		case data.TextAlignRight:
-			x -= lw
-		}
-	}
-	return x, y, x + w, y + h
 }
 
 func MeasureSize(text string) (int, int) {
@@ -153,11 +63,7 @@ func MeasureSize(text string) (int, int) {
 			h += renderingLineHeight
 			continue
 		}
-		if r < 0x100 {
-			cw += charHalfWidth
-			continue
-		}
-		cw += charFullWidth
+		cw += runeWidth(r)
 	}
 	if w < cw {
 		w = cw
@@ -165,13 +71,60 @@ func MeasureSize(text string) (int, int) {
 	return w, h
 }
 
-func DrawText(screen *ebiten.Image, text string, x, y int, scale int, textAlign data.TextAlign, color color.Color) {
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(float64(scale), float64(scale))
-	op.GeoM.Translate(float64(x), float64(y))
-	r, g, b, a := color.RGBA()
-	op.ColorM.Scale(float64(r>>8)/255, float64(g>>8)/255, float64(b>>8)/255, float64(a>>8)/255)
-	op.ImageParts = newTextImageParts(text, textAlign)
+func DrawText(screen *ebiten.Image, text string, ox, oy int, scale int, textAlign data.TextAlign, color color.Color) {
 	mplusImage := assets.GetImage("mplus.compacted.png")
-	screen.DrawImage(mplusImage, op)
+	op := &ebiten.DrawImageOptions{}
+	r, g, b, a := color.RGBA()
+	op.ColorM.Scale(float64(r)/65535, float64(g)/65535, float64(b)/65535, float64(a)/65535)
+
+	x := 0
+	lineWidths := []int{}
+	for _, r := range text {
+		if r == '\n' {
+			lineWidths = append(lineWidths, x)
+			x = 0
+			continue
+		}
+		x += runeWidth(r)
+	}
+	lineWidths = append(lineWidths, x)
+
+	dx := 0
+	dy := (renderingLineHeight - lineHeight) / 2
+	l := 0
+	for _, r := range text {
+		if r == '\n' {
+			dx = 0
+			dy += renderingLineHeight
+			l++
+			continue
+		}
+		pos, ok := positions[r]
+		if !ok {
+			continue
+		}
+		x := pos % 256 * charFullWidth
+		y := pos / 256 * lineHeight
+		w := runeWidth(r)
+		h := lineHeight
+		src := image.Rect(x, y, x+w, y+h)
+		op.SourceRect = &src
+
+		lw := lineWidths[l]
+		op.GeoM.Reset()
+		switch textAlign {
+		case data.TextAlignLeft:
+			op.GeoM.Translate(float64(dx), float64(dy))
+		case data.TextAlignCenter:
+			op.GeoM.Translate(float64(dx-lw/2), float64(dy))
+		case data.TextAlignRight:
+			op.GeoM.Translate(float64(dx-lw), float64(dy))
+		default:
+			panic("not reached")
+		}
+		op.GeoM.Scale(float64(scale), float64(scale))
+		op.GeoM.Translate(float64(ox), float64(oy))
+		screen.DrawImage(mplusImage, op)
+		dx += w
+	}
 }
