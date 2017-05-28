@@ -16,6 +16,7 @@ package character
 
 import (
 	"encoding/json"
+	"image"
 
 	"github.com/hajimehoshi/ebiten"
 
@@ -280,50 +281,6 @@ func (c *Character) SetDir(dir data.Dir) {
 	c.dir = dir
 }
 
-type characterImageParts struct {
-	charWidth  int
-	charHeight int
-	index      int
-	frame      int
-	dir        data.Dir
-}
-
-func (c *characterImageParts) Len() int {
-	return 1
-}
-
-func (c *characterImageParts) Src(index int) (int, int, int, int) {
-	const characterXNum = 3
-	const characterYNum = 4
-	x := (c.index % 4) * characterXNum * c.charWidth
-	y := (c.index / 4) * characterYNum * c.charHeight
-	switch c.frame {
-	case 0:
-	case 1:
-		x += c.charWidth
-	case 2:
-		x += 2 * c.charWidth
-	default:
-		panic("not reach")
-	}
-	switch c.dir {
-	case data.DirUp:
-	case data.DirRight:
-		y += c.charHeight
-	case data.DirDown:
-		y += 2 * c.charHeight
-	case data.DirLeft:
-		y += 3 * c.charHeight
-	default:
-		panic("not reach")
-	}
-	return x, y, x + c.charWidth, y + c.charHeight
-}
-
-func (c *characterImageParts) Dst(index int) (int, int, int, int) {
-	return 0, 0, c.charWidth, c.charHeight
-}
-
 func (c *Character) TransferImmediately(x, y int) {
 	c.x = x
 	c.y = y
@@ -424,12 +381,31 @@ func (c *Character) Draw(screen *ebiten.Image) {
 	x, y := c.DrawPosition()
 	op.GeoM.Translate(float64(x), float64(y))
 	charW, charH := c.Size()
-	op.ImageParts = &characterImageParts{
-		charWidth:  charW,
-		charHeight: charH,
-		index:      c.imageIndex,
-		dir:        c.dir,
-		frame:      c.frame,
+	const characterXNum = 3
+	const characterYNum = 4
+	sx := (c.imageIndex % 4) * characterXNum * charW
+	sy := (c.imageIndex / 4) * characterYNum * charH
+	switch c.frame {
+	case 0:
+	case 1:
+		sx += charW
+	case 2:
+		sx += 2 * charW
+	default:
+		panic("not reached")
 	}
+	switch c.dir {
+	case data.DirUp:
+	case data.DirRight:
+		sy += charH
+	case data.DirDown:
+		sy += 2 * charH
+	case data.DirLeft:
+		sy += 3 * charH
+	default:
+		panic("not reached")
+	}
+	r := image.Rect(sx, sy, sx+charW, sy+charH)
+	op.SourceRect = &r
 	screen.DrawImage(assets.GetImage(c.imageName), op)
 }
