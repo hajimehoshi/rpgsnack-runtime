@@ -16,6 +16,7 @@ package window
 
 import (
 	"encoding/json"
+	"image"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten"
@@ -238,88 +239,6 @@ func (b *balloon) margin() (int, int) {
 	return balloonMargin(b.balloonType)
 }
 
-type balloonImageParts struct {
-	balloon     *balloon
-	balloonType data.BalloonType
-	screenWidth int
-	character   *character.Character
-}
-
-func (b *balloonImageParts) partsNum() (int, int) {
-	s := b.balloon.partSize()
-	return b.balloon.width / s, b.balloon.height / s
-}
-
-func (b *balloonImageParts) getArrowSrcRect() (int, int, int, int) {
-	if b.balloonType == data.BalloonTypeNormal {
-		return 12, 0, 12 + balloonArrowWidth, balloonArrowHeight
-	}
-	if b.balloonType == data.BalloonTypeThink {
-		return 18, 0, 18 + balloonArrowWidth, balloonArrowHeight
-	}
-	return 0, 0, 0, 0
-}
-
-func (b *balloonImageParts) Len() int {
-	w, h := b.partsNum()
-	return w*h + 1
-}
-func (b *balloonImageParts) Src(index int) (int, int, int, int) {
-	if index == b.Len()-1 {
-		if !b.balloon.hasArrow {
-			return 0, 0, 0, 0
-		}
-		return b.getArrowSrcRect()
-	}
-	w, h := b.partsNum()
-	x := index % w
-	y := index / w
-	sx, sy := 0, 0
-	s := b.balloon.partSize()
-	switch {
-	case x == 0:
-	default:
-		sx += s
-	case x == w-1:
-		sx += s * 2
-	}
-	switch {
-	case y == 0:
-	default:
-		sy += s
-	case y == h-1:
-		sy += s * 2
-	}
-	return sx, sy, sx + s, sy + s
-}
-
-func (b *balloonImageParts) Dst(index int) (int, int, int, int) {
-	s := b.balloon.partSize()
-	if index == b.Len()-1 {
-		if b.balloon.balloonType == data.BalloonTypeShout {
-			return 0, 0, 0, 0
-		}
-		if !b.balloon.hasArrow {
-			return 0, 0, 0, 0
-		}
-		ax, ay := b.balloon.arrowPosition(b.screenWidth, b.character)
-		x := ax
-		y := ay - balloonArrowHeight
-		if b.balloon.arrowFlip(b.screenWidth, b.character) {
-			// TODO: 4 is an arbitrary number. Define a const.
-			x -= 4
-			return x, y, x - balloonArrowWidth, y + balloonArrowHeight
-		}
-		x += s
-		return x, y, x + balloonArrowWidth, y + balloonArrowHeight
-	}
-	w, _ := b.partsNum()
-	x, y := b.balloon.position(b.screenWidth, b.character)
-	x += (index % w) * s
-	y += (index / w) * s
-	return x, y, x + s, y + s
-}
-
 func (b *balloon) update() {
 	if b.closingCount > 0 {
 		b.closingCount--
@@ -365,18 +284,69 @@ func (b *balloon) draw(screen *ebiten.Image, character *character.Character) {
 				cx += 4
 			}
 		}
-		op.GeoM.Translate(-cx, -cy)
-		op.GeoM.Scale(rate, rate)
-		op.GeoM.Translate(cx, cy)
-		op.GeoM.Scale(consts.TileScale, consts.TileScale)
-		op.GeoM.Translate(float64(dx), float64(dy))
-		op.ImageParts = &balloonImageParts{
-			balloon:     b,
-			screenWidth: sw,
-			character:   character,
-			balloonType: b.balloonType,
+		g := ebiten.GeoM{}
+		g.Translate(-cx, -cy)
+		g.Scale(rate, rate)
+		g.Translate(cx, cy)
+		g.Scale(consts.TileScale, consts.TileScale)
+		g.Translate(float64(dx), float64(dy))
+		pw, ph := b.width/b.partSize(), b.height/b.partSize()
+		for j := 0; j < ph; j++ {
+			for i := 0; i < pw; i++ {
+				s := b.partSize()
+				op.GeoM.Reset()
+				sx, sy := 0, 0
+				switch {
+				case i == 0:
+				default:
+					sx += s
+				case i == pw-1:
+					sx += s * 2
+				}
+				switch {
+				case j == 0:
+				default:
+					sy += s
+				case j == ph-1:
+					sy += s * 2
+				}
+				r := image.Rect(sx, sy, sx+s, sy+s)
+				op.SourceRect = &r
+				dx, dy := b.position(sw, character)
+				dx += i * s
+				dy += j * s
+				op.GeoM.Translate(float64(dx), float64(dy))
+				op.GeoM.Concat(g)
+				screen.DrawImage(img, op)
+			}
 		}
-		screen.DrawImage(img, op)
+		if b.hasArrow &&
+			(b.balloonType == data.BalloonTypeNormal ||
+				b.balloonType == data.BalloonTypeThink) {
+			op := &ebiten.DrawImageOptions{}
+			switch b.balloonType {
+			case data.BalloonTypeNormal:
+				r := image.Rect(12, 0, 12+balloonArrowWidth, balloonArrowHeight)
+				op.SourceRect = &r
+			case data.BalloonTypeThink:
+				r := image.Rect(18, 0, 18+balloonArrowWidth, balloonArrowHeight)
+				op.SourceRect = &r
+			default:
+				panic("not reached")
+			}
+			ax, ay := b.arrowPosition(sw, character)
+			dx := ax
+			dy := ay - balloonArrowHeight
+			if b.arrowFlip(sw, character) {
+				// TODO: 4 is an arbitrary number. Define a const.
+				dx -= 4
+			} else {
+				dx += b.partSize()
+			}
+			op.GeoM.Translate(float64(dx), float64(dy))
+			op.GeoM.Concat(g)
+			screen.DrawImage(img, op)
+		}
 	}
 	if b.opened {
 		x, y := b.position(sw, character)
