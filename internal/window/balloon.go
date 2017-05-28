@@ -252,44 +252,55 @@ func (b *balloon) update() {
 	}
 }
 
-func (b *balloon) draw(screen *ebiten.Image, character *character.Character) {
-	rate := 0.0
+func (b *balloon) geoMForRate(screen *ebiten.Image, dx, dy int, character *character.Character) *ebiten.GeoM {
+	sw, _ := screen.Size()
+	x, y := b.position(sw, character)
+	cx := float64(x + b.width/2)
+	cy := float64(y + b.height/2)
+	if b.hasArrow {
+		ax, ay := b.arrowPosition(sw, character)
+		cx = float64(ax)
+		cy = float64(ay) + balloonArrowHeight
+		if b.arrowFlip(sw, character) {
+			cx -= 4
+		} else {
+			cx += 4
+		}
+	}
+	g := ebiten.GeoM{}
+	g.Translate(-cx, -cy)
+	rate := b.openingRate()
+	g.Scale(rate, rate)
+	g.Translate(cx, cy)
+	g.Scale(consts.TileScale, consts.TileScale)
+	g.Translate(float64(dx), float64(dy))
+	return &g
+}
+
+func (b *balloon) openingRate() float64 {
 	switch {
 	case b.opened:
-		rate = 1
+		return 1
 	case b.openingCount > 0:
-		rate = 1 - float64(b.openingCount)/float64(balloonMaxCount)
+		return 1 - float64(b.openingCount)/float64(balloonMaxCount)
 	case b.closingCount > 0:
-		rate = float64(b.closingCount) / float64(balloonMaxCount)
+		return float64(b.closingCount) / float64(balloonMaxCount)
+	default:
+		return 0
 	}
+}
+
+func (b *balloon) draw(screen *ebiten.Image, character *character.Character) {
 	sw, _ := screen.Size()
 	dx := (sw - consts.TileXNum*consts.TileSize*consts.TileScale) / 2
 	dy := consts.GameMarginTop
-	if rate > 0 {
+	if b.openingRate() > 0 {
 		img := assets.GetImage("balloon.png")
 		if b.balloonType == data.BalloonTypeShout {
 			img = assets.GetImage("shout.png")
 		}
 		op := &ebiten.DrawImageOptions{}
-		x, y := b.position(sw, character)
-		cx := float64(x + b.width/2)
-		cy := float64(y + b.height/2)
-		if b.hasArrow {
-			ax, ay := b.arrowPosition(sw, character)
-			cx = float64(ax)
-			cy = float64(ay) + balloonArrowHeight
-			if b.arrowFlip(sw, character) {
-				cx -= 4
-			} else {
-				cx += 4
-			}
-		}
-		g := ebiten.GeoM{}
-		g.Translate(-cx, -cy)
-		g.Scale(rate, rate)
-		g.Translate(cx, cy)
-		g.Scale(consts.TileScale, consts.TileScale)
-		g.Translate(float64(dx), float64(dy))
+		g := b.geoMForRate(screen, dx, dy, character)
 		pw, ph := b.width/b.partSize(), b.height/b.partSize()
 		for j := 0; j < ph; j++ {
 			for i := 0; i < pw; i++ {
@@ -316,7 +327,7 @@ func (b *balloon) draw(screen *ebiten.Image, character *character.Character) {
 				dx += i * s
 				dy += j * s
 				op.GeoM.Translate(float64(dx), float64(dy))
-				op.GeoM.Concat(g)
+				op.GeoM.Concat(*g)
 				screen.DrawImage(img, op)
 			}
 		}
@@ -344,7 +355,7 @@ func (b *balloon) draw(screen *ebiten.Image, character *character.Character) {
 				dx += b.partSize()
 			}
 			op.GeoM.Translate(float64(dx), float64(dy))
-			op.GeoM.Concat(g)
+			op.GeoM.Concat(*g)
 			screen.DrawImage(img, op)
 		}
 	}
