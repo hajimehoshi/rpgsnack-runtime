@@ -416,9 +416,9 @@ func (c *Character) Update() error {
 	return nil
 }
 
-func (c *Character) Draw(screen *ebiten.Image) error {
+func (c *Character) Draw(screen *ebiten.Image) {
 	if c.imageName == "" || !c.visible || c.erased {
-		return nil
+		return
 	}
 	op := &ebiten.DrawImageOptions{}
 	x, y := c.DrawPosition()
@@ -431,8 +431,5 @@ func (c *Character) Draw(screen *ebiten.Image) error {
 		dir:        c.dir,
 		frame:      c.frame,
 	}
-	if err := screen.DrawImage(assets.GetImage(c.imageName), op); err != nil {
-		return err
-	}
-	return nil
+	screen.DrawImage(assets.GetImage(c.imageName), op)
 }
