@@ -17,10 +17,11 @@
 
 package game
 
-func NewWithDefaultRequester(width, height int) *Game {
+func NewWithDefaultRequester(projectPath string, width, height int) *Game {
 	g := &Game{
-		width:  width,
-		height: height,
+		projectPath: projectPath,
+		width:       width,
+		height:      height,
 	}
 	g.loadGameData()
 	g.requester = &Requester{g}

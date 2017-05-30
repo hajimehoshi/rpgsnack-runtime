@@ -71,8 +71,8 @@ type LoadedData struct {
 	Language  language.Tag
 }
 
-func Load() (*LoadedData, error) {
-	data, err := loadRawData()
+func Load(projectPath string) (*LoadedData, error) {
+	data, err := loadRawData(projectPath)
 	if err != nil {
 		return nil, err
 	}

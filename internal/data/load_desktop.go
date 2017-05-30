@@ -30,8 +30,6 @@ import (
 )
 
 var (
-	dataPath      = flag.String("data", "./data.json", "data path")
-	resourcesPath = flag.String("resources", "./internal/assets", "resources directory path")
 	purchasesPath = flag.String("purchases", "./purchases.json", "purchases path")
 	savePath      = flag.String("save", "./save.json", "save path")
 	languagePath  = flag.String("language", "./language.json", "language path")
@@ -49,10 +47,16 @@ func SavePath() string {
 	return *savePath
 }
 
-func loadResources() ([]uint8, error) {
+func loadResources(projectPath string) ([]uint8, error) {
 	resources := map[string][]uint8{}
-	for _, dir := range []string{filepath.Join("audio", "bgm"), filepath.Join("audio", "se"), "images"} {
-		images, err := ioutil.ReadDir(filepath.Join(*resourcesPath, dir))
+	dirs := []string{
+		filepath.Join("audio", "bgm"),
+		filepath.Join("audio", "se"),
+		filepath.Join("images", "characters"),
+		filepath.Join("images", "tilesets"),
+	}
+	for _, dir := range dirs {
+		images, err := ioutil.ReadDir(filepath.Join(projectPath, "assets", dir))
 		if err != nil {
 			return nil, err
 		}
@@ -60,7 +64,7 @@ func loadResources() ([]uint8, error) {
 			if strings.HasPrefix(i.Name(), ".") {
 				continue
 			}
-			b, err := ioutil.ReadFile(filepath.Join(*resourcesPath, dir, i.Name()))
+			b, err := ioutil.ReadFile(filepath.Join(projectPath, "assets", dir, i.Name()))
 			if err != nil {
 				return nil, err
 			}
@@ -76,8 +80,8 @@ func loadResources() ([]uint8, error) {
 	return b, nil
 }
 
-func loadRawData() (*rawData, error) {
-	game, err := ioutil.ReadFile(*dataPath)
+func loadRawData(projectPath string) (*rawData, error) {
+	game, err := ioutil.ReadFile(filepath.Join(projectPath, "project.json"))
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +92,7 @@ func loadRawData() (*rawData, error) {
 		}
 		progress = nil
 	}
-	resources, err := loadResources()
+	resources, err := loadResources(projectPath)
 	if err != nil {
 		return nil, err
 	}

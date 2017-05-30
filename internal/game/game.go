@@ -27,6 +27,7 @@ import (
 )
 
 type Game struct {
+	projectPath  string
 	width        int
 	height       int
 	requester    scene.Requester
@@ -49,7 +50,7 @@ func (g *Game) loadGameData() {
 	ch := make(chan error)
 	go func() {
 		defer close(ch)
-		d, err := data.Load()
+		d, err := data.Load(g.projectPath)
 		if err != nil {
 			ch <- err
 			return
