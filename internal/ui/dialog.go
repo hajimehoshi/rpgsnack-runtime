@@ -77,7 +77,7 @@ func (d *Dialog) Draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 	op.ImageParts = &ninePatchParts{d.Width, d.Height}
 	op.GeoM.Scale(consts.TileScale, consts.TileScale)
-	d.offscreen.DrawImage(assets.GetImage("9patch_test_off.png"), op)
+	d.offscreen.DrawImage(assets.GetImage("system/9patch_test_off.png"), op)
 	for _, w := range d.widgets {
 		w.Draw(d.offscreen)
 	}
