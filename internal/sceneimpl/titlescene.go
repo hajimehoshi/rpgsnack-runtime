@@ -50,8 +50,8 @@ func NewTitleScene() *TitleScene {
 	t := &TitleScene{
 		resumeGameButton: ui.NewButton(0, 184, 120, 20, "click"),
 		newGameButton:    ui.NewButton(0, 208, 120, 20, "click"),
-		settingsButton:   ui.NewImageButton(0, 0, assets.GetImage("icon_settings.png"), "click"),
-		moregamesButton:  ui.NewImageButton(0, 0, assets.GetImage("icon_moregames.png"), "click"),
+		settingsButton:   ui.NewImageButton(0, 0, assets.GetImage("system/icon_settings.png"), "click"),
+		moregamesButton:  ui.NewImageButton(0, 0, assets.GetImage("system/icon_moregames.png"), "click"),
 		warningDialog:    ui.NewDialog(0, 64, 152, 124),
 		warningLabel:     ui.NewLabel(16, 8),
 		warningYesButton: ui.NewButton(0, 72, 120, 20, "click"),
@@ -212,7 +212,7 @@ func (t *TitleScene) handleBackButton() {
 }
 
 func (t *TitleScene) Draw(screen *ebiten.Image) {
-	timg := assets.GetImage("title.png")
+	timg := assets.GetImage("titles/title.png")
 	tw, _ := timg.Size()
 	sw, _ := screen.Size()
 	op := &ebiten.DrawImageOptions{}

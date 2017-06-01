@@ -239,7 +239,6 @@ func (m *Manager) Language() language.Tag {
 }
 
 func (m *Manager) SetLanguage(language language.Tag) language.Tag {
-	println(m.game.Texts)
 	for _, l := range m.game.Texts.Languages() {
 		if l == language {
 			m.language = language

@@ -133,9 +133,9 @@ func (b *Button) Draw(screen *ebiten.Image) {
 		screen.DrawImage(b.image, op)
 		return
 	}
-	img := assets.GetImage("9patch_test_off.png")
+	img := assets.GetImage("system/9patch_test_off.png")
 	if b.pressing {
-		img = assets.GetImage("9patch_test_on.png")
+		img = assets.GetImage("system/9patch_test_on.png")
 	}
 	op := &ebiten.DrawImageOptions{}
 	op.ImageParts = &ninePatchParts{b.Width, b.Height}

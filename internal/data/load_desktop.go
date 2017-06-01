@@ -53,7 +53,9 @@ func loadResources(projectPath string) ([]uint8, error) {
 		filepath.Join("audio", "bgm"),
 		filepath.Join("audio", "se"),
 		filepath.Join("images", "characters"),
+		filepath.Join("images", "system"),
 		filepath.Join("images", "tilesets"),
+		filepath.Join("images", "titles"),
 	}
 	for _, dir := range dirs {
 		images, err := ioutil.ReadDir(filepath.Join(projectPath, "assets", dir))

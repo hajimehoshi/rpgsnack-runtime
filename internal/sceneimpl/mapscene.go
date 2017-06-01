@@ -380,7 +380,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 				dy := j * consts.TileSize
 				op.GeoM.Reset()
 				op.GeoM.Translate(float64(dx), float64(dy))
-				m.tilesImage.DrawImage(assets.GetImage(tileSet.Name+".png"), op)
+				m.tilesImage.DrawImage(assets.GetImage("tilesets/"+tileSet.Name+".png"), op)
 			}
 		}
 		if k == 1 {
@@ -399,7 +399,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		op.GeoM.Translate(float64(x*consts.TileSize), float64(y*consts.TileSize))
 		op.GeoM.Scale(consts.TileScale, consts.TileScale)
 		op.GeoM.Translate(m.offsetX(sw), consts.GameMarginTop)
-		screen.DrawImage(assets.GetImage("marker.png"), op)
+		screen.DrawImage(assets.GetImage("system/marker.png"), op)
 	}
 	m.gameState.DrawWindows(screen)
 	msg := fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS())

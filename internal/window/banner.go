@@ -155,7 +155,7 @@ func (b *banner) draw(screen *ebiten.Image, character *character.Character) {
 	dx := (sw - consts.TileXNum*consts.TileSize*consts.TileScale) / 2
 	dy := 0
 	if rate > 0 {
-		img := assets.GetImage("banner.png")
+		img := assets.GetImage("system/banner.png")
 		x, y := b.position(sh)
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(x), float64(y))
