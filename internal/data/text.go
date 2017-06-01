@@ -42,28 +42,35 @@ func (l languagesByAlphabet) Swap(i, j int) {
 }
 
 type Texts struct {
-	data      map[languagepkg.Tag]map[UUID]string
+	data      map[UUID]map[languagepkg.Tag]string
 	languages []languagepkg.Tag
 }
 
 func (t *Texts) UnmarshalJSON(data []uint8) error {
-	orig := map[string]map[UUID]string{}
+	type TextData struct {
+		Data map[string]string `json:data`
+		// ignore "meta" key.
+	}
+	orig := map[UUID]TextData{}
 	if err := unmarshalJSON(data, &orig); err != nil {
 		return err
 	}
 	langs := map[languagepkg.Tag]struct{}{}
 	t.languages = []languagepkg.Tag{}
-	t.data = map[languagepkg.Tag]map[UUID]string{}
-	for langStr, text := range orig {
-		lang, err := languagepkg.Parse(langStr)
-		if err != nil {
-			return err
+	t.data = map[UUID]map[languagepkg.Tag]string{}
+	for id, textData := range orig {
+		t.data[id] = map[languagepkg.Tag]string{}
+		for langStr, text := range textData.Data {
+			lang, err := languagepkg.Parse(langStr)
+			if err != nil {
+				return err
+			}
+			if _, ok := langs[lang]; !ok {
+				t.languages = append(t.languages, lang)
+				langs[lang] = struct{}{}
+			}
+			t.data[id][lang] = text
 		}
-		if _, ok := langs[lang]; !ok {
-			t.languages = append(t.languages, lang)
-			langs[lang] = struct{}{}
-		}
-		t.data[lang] = text
 	}
 	sort.Sort(languagesByAlphabet(t.languages))
 	return nil
@@ -74,5 +81,5 @@ func (t *Texts) Languages() []languagepkg.Tag {
 }
 
 func (t *Texts) Get(lang languagepkg.Tag, uuid UUID) string {
-	return t.data[lang][uuid]
+	return t.data[uuid][lang]
 }
