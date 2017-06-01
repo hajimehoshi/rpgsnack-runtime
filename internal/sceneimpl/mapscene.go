@@ -347,7 +347,6 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	m.titleButton.Draw(screen)
 	m.removeAdsButton.Draw(screen)
 
-	tileSet := m.gameState.Map().TileSet()
 	op := &ebiten.DrawImageOptions{}
 	// TODO: This accesses *data.Game, but is it OK?
 	room := m.gameState.Map().CurrentRoom()
@@ -358,9 +357,13 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 				if k >= 1 {
 					layer = 1
 				}
+				tileSet := m.gameState.Map().TileSet(layer)
+				if tileSet == nil {
+					continue
+				}
 				tile := room.Tiles[layer][j*consts.TileXNum+i]
 				if layer == 1 {
-					p := tileSet.PassageTypes[layer][tile]
+					p := tileSet.PassageTypes[tile]
 					if k == 1 && p == data.PassageTypeOver {
 						continue
 					}
@@ -377,7 +380,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 				dy := j * consts.TileSize
 				op.GeoM.Reset()
 				op.GeoM.Translate(float64(dx), float64(dy))
-				m.tilesImage.DrawImage(assets.GetImage(tileSet.Images[layer]), op)
+				m.tilesImage.DrawImage(assets.GetImage(tileSet.Name+".png"), op)
 			}
 		}
 		if k == 1 {

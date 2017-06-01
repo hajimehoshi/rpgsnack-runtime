@@ -17,7 +17,6 @@ package gamestate
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"sort"
 
 	"github.com/hajimehoshi/ebiten"
@@ -124,14 +123,15 @@ func (m *Map) waitingRequestResponse() bool {
 	return false
 }
 
-func (m *Map) TileSet() *data.TileSet {
-	id := m.currentMap().TileSetID
+func (m *Map) TileSet(layer int) *data.TileSet {
+	tileSetName := m.CurrentRoom().TileSets[layer]
 	for _, t := range m.gameData.TileSets {
-		if t.ID == id {
+		if t.Name == tileSetName {
 			return t
 		}
 	}
-	panic(fmt.Sprintf("gamestate: tile set not found: tile set id: %d", id))
+
+	return nil
 }
 
 type eventsByID struct {
@@ -396,24 +396,28 @@ func (m *Map) IsPlayerMovingByUserInput() bool {
 }
 
 func (m *Map) passableTile(x, y int) bool {
-	tileSet := m.TileSet()
 	layer := 1
-	tile := m.CurrentRoom().Tiles[layer][y*consts.TileXNum+x]
-	switch tileSet.PassageTypes[layer][tile] {
-	case data.PassageTypeBlock:
-		return false
-	case data.PassageTypePassable:
-		return true
-	case data.PassageTypeWall:
-		panic("not implemented")
-	case data.PassageTypeOver:
-	default:
-		panic("not reach")
+	tileSetTop := m.TileSet(layer)
+	if tileSetTop != nil {
+		tile := m.CurrentRoom().Tiles[layer][y*consts.TileXNum+x]
+		switch tileSetTop.PassageTypes[tile] {
+		case data.PassageTypeBlock:
+			return false
+		case data.PassageTypePassable:
+			return true
+		case data.PassageTypeOver:
+		default:
+			panic("not reach")
+		}
 	}
+
 	layer = 0
-	tile = m.CurrentRoom().Tiles[layer][y*consts.TileXNum+x]
-	if tileSet.PassageTypes[layer][tile] == data.PassageTypePassable {
-		return true
+	tileSetBottom := m.TileSet(layer)
+	if tileSetBottom != nil {
+		tile := m.CurrentRoom().Tiles[layer][y*consts.TileXNum+x]
+		if tileSetBottom.PassageTypes[tile] == data.PassageTypePassable {
+			return true
+		}
 	}
 	return false
 }

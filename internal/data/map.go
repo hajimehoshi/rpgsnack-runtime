@@ -15,16 +15,16 @@
 package data
 
 type Map struct {
-	ID        int     `json:"id"`
-	Name      string  `json:"name"`
-	TileSetID int     `json:"tileSetId"`
-	Rooms     []*Room `json:"rooms"`
+	ID    int     `json:"id"`
+	Name  string  `json:"name"`
+	Rooms []*Room `json:"rooms"`
 }
 
 type Room struct {
-	ID     int      `json:"id"`
-	X      int      `json:"x"`
-	Y      int      `json:"y"`
-	Tiles  [][]int  `json:"tiles"`
-	Events []*Event `json:"events"`
+	ID       int      `json:"id"`
+	X        int      `json:"x"`
+	Y        int      `json:"y"`
+	Tiles    [][]int  `json:"tiles"`
+	TileSets []string `json:"tileSets"`
+	Events   []*Event `json:"events"`
 }

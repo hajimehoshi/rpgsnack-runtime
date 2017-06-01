@@ -17,15 +17,12 @@ package data
 type PassageType int
 
 const (
-	PassageTypeBlock PassageType = iota
-	PassageTypePassable
-	PassageTypeWall
+	PassageTypePassable PassageType = iota
+	PassageTypeBlock
 	PassageTypeOver
 )
 
 type TileSet struct {
-	ID           int             `json:"id"`
-	Name         string          `json:"name"`
-	Images       []string        `json:"images"`
-	PassageTypes [][]PassageType `json:"passageTypes"`
+	Name         string        `json:"name"`
+	PassageTypes []PassageType `json:"passageTypes"`
 }
