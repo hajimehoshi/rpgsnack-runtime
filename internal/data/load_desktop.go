@@ -81,7 +81,7 @@ func loadResources(projectPath string) ([]uint8, error) {
 }
 
 func loadRawData(projectPath string) (*rawData, error) {
-	game, err := ioutil.ReadFile(filepath.Join(projectPath, "project.json"))
+	project, err := ioutil.ReadFile(filepath.Join(projectPath, "project.json"))
 	if err != nil {
 		return nil, err
 	}
@@ -113,7 +113,7 @@ func loadRawData(projectPath string) (*rawData, error) {
 	}
 
 	return &rawData{
-		Game:      game,
+		Project:   project,
 		Resources: resources,
 		Progress:  progress,
 		Purchases: purchases,
