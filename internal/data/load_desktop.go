@@ -53,6 +53,7 @@ func loadResources(projectPath string) ([]uint8, error) {
 		filepath.Join("audio", "bgm"),
 		filepath.Join("audio", "se"),
 		filepath.Join("images", "characters"),
+		filepath.Join("images", "fonts"),
 		filepath.Join("images", "system"),
 		filepath.Join("images", "tilesets"),
 		filepath.Join("images", "titles"),

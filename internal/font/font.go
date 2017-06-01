@@ -65,7 +65,7 @@ func MeasureSize(text string) (int, int) {
 func DrawText(screen *ebiten.Image, text string, ox, oy int, scale int, textAlign data.TextAlign, color color.Color) {
 	if positions == nil {
 		positions = map[rune]int{}
-		b := assets.GetResource("images/mplus_positions")
+		b := assets.GetResource("images/fonts/mplus_positions")
 		for i := 0; i < len(b)/4; i++ {
 			r := rune(b[4*i]) + rune(b[4*i+1])<<8
 			pos := int(b[4*i+2]) + int(b[4*i+3])<<8
@@ -128,7 +128,7 @@ func DrawText(screen *ebiten.Image, text string, ox, oy int, scale int, textAlig
 		}
 		op.GeoM.Scale(float64(scale), float64(scale))
 		op.GeoM.Translate(float64(ox), float64(oy))
-		screen.DrawImage(assets.GetImage("mplus.compacted.png"), op)
+		screen.DrawImage(assets.GetImage("fonts/mplus.compacted.png"), op)
 		dx += w
 	}
 }
