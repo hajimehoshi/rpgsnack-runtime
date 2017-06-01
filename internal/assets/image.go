@@ -16,6 +16,7 @@ package assets
 
 import (
 	"bytes"
+	"fmt"
 	"image/png"
 	"path"
 	"strings"
@@ -62,5 +63,9 @@ func GetResource(path string) []uint8 {
 }
 
 func GetImage(key string) *ebiten.Image {
-	return theResources.images[path.Join("images", key)]
+	img, ok := theResources.images[path.Join("images", key)]
+	if !ok {
+		panic(fmt.Sprintf("assets: image %s not found", key))
+	}
+	return img
 }
