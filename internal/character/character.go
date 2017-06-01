@@ -55,7 +55,7 @@ func NewPlayer(x, y int) *Character {
 	return &Character{
 		eventID:    PlayerEventID,
 		speed:      data.Speed3,
-		imageName:  "characters0.png",
+		imageName:  "",
 		imageIndex: 0,
 		x:          x,
 		y:          y,
