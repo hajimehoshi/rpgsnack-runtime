@@ -15,7 +15,7 @@
 package data
 
 type System struct {
-	InitialPosition *Position `json:"initialPosition"`
+	InitialPosition *Position `json:"player"`
 }
 
 type Position struct {
