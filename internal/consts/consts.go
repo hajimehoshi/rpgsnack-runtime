@@ -15,6 +15,7 @@
 package consts
 
 const (
+	PaletteWidth  = 10
 	TileSize      = 16
 	TileXNum      = 10
 	TileYNum      = 10

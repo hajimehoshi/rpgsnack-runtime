@@ -371,9 +371,8 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 						continue
 					}
 				}
-				// TODO: 8 is a magic number and should be replaced.
-				sx := tile % 8 * consts.TileSize
-				sy := tile / 8 * consts.TileSize
+				sx := tile % consts.PaletteWidth * consts.TileSize
+				sy := tile / consts.PaletteWidth * consts.TileSize
 				r := image.Rect(sx, sy, sx+consts.TileSize, sy+consts.TileSize)
 				op.SourceRect = &r
 				dx := i * consts.TileSize
