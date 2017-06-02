@@ -161,7 +161,7 @@ func (c *Character) Size() (int, int) {
 	if c.imageName == "" {
 		return 0, 0
 	}
-	imageW, imageH := assets.GetImage("characters/" + c.imageName).Size()
+	imageW, imageH := assets.GetImage("characters/" + c.imageName + ".png").Size()
 	w := imageW / 4 / 3
 	h := imageH / 2 / 4
 	return w, h
@@ -407,5 +407,5 @@ func (c *Character) Draw(screen *ebiten.Image) {
 	}
 	r := image.Rect(sx, sy, sx+charW, sy+charH)
 	op.SourceRect = &r
-	screen.DrawImage(assets.GetImage("characters/"+c.imageName), op)
+	screen.DrawImage(assets.GetImage("characters/"+c.imageName+".png"), op)
 }
