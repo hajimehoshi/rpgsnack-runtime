@@ -347,9 +347,14 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	m.titleButton.Draw(screen)
 	m.removeAdsButton.Draw(screen)
 
-	op := &ebiten.DrawImageOptions{}
 	// TODO: This accesses *data.Game, but is it OK?
 	room := m.gameState.Map().CurrentRoom()
+
+	if room.Background.Name != "" {
+		op := &ebiten.DrawImageOptions{}
+		m.tilesImage.DrawImage(assets.GetImage("backgrounds/"+room.Background.Name+".png"), op)
+	}
+	op := &ebiten.DrawImageOptions{}
 	for k := 0; k < 3; k++ {
 		for j := 0; j < consts.TileYNum; j++ {
 			for i := 0; i < consts.TileXNum; i++ {
@@ -386,6 +391,11 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 			m.gameState.Map().DrawCharacters(m.tilesImage)
 		}
 	}
+	if room.Foreground.Name != "" {
+		op := &ebiten.DrawImageOptions{}
+		m.tilesImage.DrawImage(assets.GetImage("foregrounds/"+room.Foreground.Name+".png"), op)
+	}
+
 	sw, _ := screen.Size()
 	op = &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(consts.TileScale, consts.TileScale)

@@ -396,10 +396,21 @@ func (m *Map) IsPlayerMovingByUserInput() bool {
 }
 
 func (m *Map) passableTile(x, y int) bool {
+	tileIndex := y*consts.TileXNum + x
+	passageTypeOverrides := m.CurrentRoom().PassageTypeOverrides
+	if passageTypeOverrides != nil {
+		switch passageTypeOverrides[tileIndex] {
+		case data.PassageOverrideTypePassable:
+			return true
+		case data.PassageOverrideTypeBlock:
+			return false
+		}
+	}
+
 	layer := 1
 	tileSetTop := m.TileSet(layer)
 	if tileSetTop != nil {
-		tile := m.CurrentRoom().Tiles[layer][y*consts.TileXNum+x]
+		tile := m.CurrentRoom().Tiles[layer][tileIndex]
 		switch tileSetTop.PassageTypes[tile] {
 		case data.PassageTypeBlock:
 			return false
@@ -414,12 +425,12 @@ func (m *Map) passableTile(x, y int) bool {
 	layer = 0
 	tileSetBottom := m.TileSet(layer)
 	if tileSetBottom != nil {
-		tile := m.CurrentRoom().Tiles[layer][y*consts.TileXNum+x]
-		if tileSetBottom.PassageTypes[tile] == data.PassageTypePassable {
-			return true
+		tile := m.CurrentRoom().Tiles[layer][tileIndex]
+		if tileSetBottom.PassageTypes[tile] == data.PassageTypeBlock {
+			return false
 		}
 	}
-	return false
+	return true
 }
 
 func (m *Map) passable(through bool, x, y int, ignoreCharacters bool) bool {
