@@ -60,6 +60,7 @@ func generateDefaultRand() Rand {
 func NewGame() *Game {
 	g := &Game{
 		hints:                &Hints{},
+		items:                &Items{},
 		variables:            &Variables{},
 		screen:               &Screen{},
 		windows:              &window.Windows{},
@@ -73,6 +74,7 @@ func NewGame() *Game {
 
 type tmpGame struct {
 	Hints                *Hints          `json:"hints"`
+	Items                *Items          `json:"items"`
 	Variables            *Variables      `json:"variables"`
 	Screen               *Screen         `json:"screen"`
 	Windows              *window.Windows `json:"windows"`
@@ -86,6 +88,7 @@ type tmpGame struct {
 func (g *Game) MarshalJSON() ([]uint8, error) {
 	tmp := &tmpGame{
 		Hints:                g.hints,
+		Items:                g.items,
 		Variables:            g.variables,
 		Screen:               g.screen,
 		Windows:              g.windows,
@@ -104,6 +107,7 @@ func (g *Game) UnmarshalJSON(data []uint8) error {
 		return err
 	}
 	g.hints = tmp.Hints
+	g.items = tmp.Items
 	g.variables = tmp.Variables
 	g.screen = tmp.Screen
 	g.windows = tmp.Windows
