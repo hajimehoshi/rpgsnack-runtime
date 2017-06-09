@@ -21,6 +21,7 @@ type Game struct {
 	Achievements []*Achievement `json:"achievements"`
 	Hints        []*Hint        `json:"hints"`
 	IAPProducts  []*IAPProduct  `json:"iapProducts"`
+	Items        []*Item        `json:"items"`
 	System       *System        `json:"system"`
 }
 
@@ -39,4 +40,11 @@ type Hint struct {
 type IAPProduct struct {
 	ID  int    `json:"id"`
 	Key string `json:"key"`
+}
+
+type Item struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+	Desc string `json:"desc"`
+	Icon string `json:"icon"`
 }
