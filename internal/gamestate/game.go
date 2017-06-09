@@ -37,6 +37,7 @@ type Rand interface {
 
 type Game struct {
 	hints                *Hints
+	items                *Items
 	variables            *Variables
 	screen               *Screen
 	windows              *window.Windows
