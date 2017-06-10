@@ -28,6 +28,7 @@ const (
 	ConditionTypeSwitch     ConditionType = "switch"
 	ConditionTypeSelfSwitch ConditionType = "self_switch"
 	ConditionTypeVariable   ConditionType = "variable"
+	ConditionTypeItem       ConditionType = "item"
 )
 
 type ConditionComp string
@@ -46,4 +47,12 @@ type ConditionValueType string
 const (
 	ConditionValueTypeConstant ConditionValueType = "constant"
 	ConditionValueTypeVariable ConditionValueType = "variable"
+)
+
+type ConditionItemValue string
+
+const (
+	ConditionItemOwn    ConditionItemValue = "own"
+	ConditionItemNotOwn ConditionItemValue = "not_own"
+	ConditionItemActive ConditionItemValue = "active"
 )

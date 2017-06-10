@@ -241,6 +241,21 @@ func (g *Game) meetsCondition(cond *data.Condition, eventID int) (bool, error) {
 		default:
 			return false, fmt.Errorf("gamestate: invalid comp: %s", cond.Comp)
 		}
+	case data.ConditionTypeItem:
+		id := cond.ID
+		itemValue := cond.Value.(data.ConditionItemValue)
+
+		switch itemValue {
+		case data.ConditionItemOwn:
+			return g.items.Includes(id), nil
+		case data.ConditionItemNotOwn:
+			return !g.items.Includes(id), nil
+		case data.ConditionItemActive:
+			return id == g.items.ActiveItem(), nil
+
+		default:
+			return false, fmt.Errorf("gamestate: invalid item value: %s", itemValue)
+		}
 	default:
 		return false, fmt.Errorf("gamestate: invalid condition: %s", cond)
 	}
