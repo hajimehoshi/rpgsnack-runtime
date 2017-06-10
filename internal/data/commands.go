@@ -222,6 +222,18 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 			return err
 		}
 		c.Args = args
+	case CommandAddItem:
+		var args *CommandArgsAddItem
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
+	case CommandRemoveItem:
+		var args *CommandArgsRemoveItem
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	default:
 		return fmt.Errorf("data: invalid command: %s", c.Name)
 	}
@@ -261,6 +273,8 @@ const (
 	CommandNameSyncIAP       CommandName = "sync_iap" // TODO: We might be able to remove this later
 	CommandShowAds           CommandName = "show_ads"
 	CommandOpenLink          CommandName = "open_link"
+	CommandAddItem           CommandName = "add_item"
+	CommandRemoveItem        CommandName = "remove_item"
 
 	// Route commands
 	CommandNameMoveCharacter        CommandName = "move_character"
@@ -538,6 +552,14 @@ type CommandArgsSetCharacterImage struct {
 type CommandArgsSetInnerVariable struct {
 	Name  string `json:name`
 	Value int    `json:value`
+}
+
+type CommandArgsAddItem struct {
+	ID int `json:"id"`
+}
+
+type CommandArgsRemoveItem struct {
+	ID int `json:"id"`
 }
 
 type SetVariableOp string

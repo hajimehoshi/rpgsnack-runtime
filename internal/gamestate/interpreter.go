@@ -649,6 +649,16 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		}
 		i.commandIterator.Advance()
 
+	case data.CommandAddItem:
+		args := c.Args.(*data.CommandArgsAddItem)
+		i.gameState.items.Add(args.ID)
+		i.commandIterator.Advance()
+
+	case data.CommandRemoveItem:
+		args := c.Args.(*data.CommandArgsRemoveItem)
+		i.gameState.items.Remove(args.ID)
+		i.commandIterator.Advance()
+
 	case data.CommandNameSetInnerVariable:
 		args := c.Args.(*data.CommandArgsSetInnerVariable)
 		i.gameState.variables.SetInnerVariableValue(args.Name, args.Value)
