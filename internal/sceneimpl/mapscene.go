@@ -58,12 +58,13 @@ type MapScene struct {
 	removeAdsLabel     *ui.Label
 	removeAdsYesButton *ui.Button
 	removeAdsNoButton  *ui.Button
+	inventory          *ui.Inventory
 	waitingRequestID   int
 	isAdsRemoved       bool
 }
 
 func NewMapScene() *MapScene {
-	tilesImage, _ := ebiten.NewImage(consts.TileXNum*consts.TileSize, consts.TileYNum*consts.TileSize, ebiten.FilterNearest)
+	tilesImage, _ := ebiten.NewImage(consts.TileXNum*consts.TileSize, (consts.TileYNum+consts.InventoryOffset)*consts.TileSize, ebiten.FilterNearest)
 	m := &MapScene{
 		tilesImage:   tilesImage,
 		gameState:    gamestate.NewGame(),
@@ -74,7 +75,7 @@ func NewMapScene() *MapScene {
 }
 
 func NewMapSceneWithGame(game *gamestate.Game) *MapScene {
-	tilesImage, _ := ebiten.NewImage(consts.TileXNum*consts.TileSize, consts.TileYNum*consts.TileSize, ebiten.FilterNearest)
+	tilesImage, _ := ebiten.NewImage(consts.TileXNum*consts.TileSize, (consts.TileYNum+consts.InventoryOffset)*consts.TileSize, ebiten.FilterNearest)
 	m := &MapScene{
 		tilesImage: tilesImage,
 		gameState:  game,
@@ -95,7 +96,7 @@ func (m *MapScene) initUI() {
 	m.screenShotImage = screenShotImage
 	m.screenShotDialog = ui.NewDialog(0, 4, 152, 232)
 	m.screenShotDialog.AddChild(ui.NewImage(8, 8, 1.0/consts.TileScale/2, m.screenShotImage))
-	m.titleButton = ui.NewButton(0, 8, 40, 12, "click")
+	m.titleButton = ui.NewButton(0, 2, 40, 12, "click")
 
 	// TODO: Implement the camera functionality later
 	m.cameraButton.Visible = false
@@ -122,7 +123,7 @@ func (m *MapScene) initUI() {
 	m.removeAdsDialog.AddChild(m.removeAdsLabel)
 	m.removeAdsDialog.AddChild(m.removeAdsYesButton)
 	m.removeAdsDialog.AddChild(m.removeAdsNoButton)
-
+	m.inventory = ui.NewInventory(0, consts.TileYNum*consts.TileSize-2)
 	m.removeAdsButton.Visible = false // TODO: Clock of Atonement does not need this feature, so turn it off for now
 }
 
@@ -197,6 +198,30 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 			m.removeAdsDialog.Visible = false
 		}
 		return nil
+	}
+
+	if m.inventory.Visible {
+		// TODO creating array for each loop does not seem to be the right thing
+		items := []*data.Item{}
+		for _, itemId := range m.gameState.Items().Items() {
+			for _, item := range sceneManager.Game().Items {
+				if itemId == item.ID {
+					items = append(items, item)
+				}
+			}
+		}
+		m.inventory.SetItems(items)
+		m.inventory.Update()
+		if m.inventory.PressedSlotIndex >= 0 && m.inventory.PressedSlotIndex < len(m.gameState.Items().Items()) {
+			itemID := m.gameState.Items().Items()[m.inventory.PressedSlotIndex]
+			if itemID == m.gameState.Items().ActiveItem() {
+				m.gameState.Items().Deactivate()
+			} else {
+				m.gameState.Items().Activate(itemID)
+			}
+
+			m.inventory.SetActiveItemID(m.gameState.Items().ActiveItem())
+		}
 	}
 
 	w, _ := sceneManager.Size()
@@ -396,6 +421,8 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		m.tilesImage.DrawImage(assets.GetImage("foregrounds/"+room.Foreground.Name+".png"), op)
 	}
 
+	m.inventory.Draw(m.tilesImage)
+
 	sw, _ := screen.Size()
 	op = &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(consts.TileScale, consts.TileScale)
@@ -410,9 +437,10 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		op.GeoM.Translate(m.offsetX(sw), consts.GameMarginTop)
 		screen.DrawImage(assets.GetImage("system/marker.png"), op)
 	}
+
 	m.gameState.DrawWindows(screen)
 	msg := fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS())
-	font.DrawText(screen, msg, 0, 0, consts.TextScale, data.TextAlignLeft, color.White)
+	font.DrawText(screen, msg, 160, 8, consts.TextScale, data.TextAlignLeft, color.White)
 	if m.cameraTaking {
 		m.cameraTaking = false
 		m.screenShotImage.Clear()

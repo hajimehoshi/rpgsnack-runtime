@@ -125,6 +125,10 @@ func (g *Game) Screen() *Screen {
 	return g.screen
 }
 
+func (g *Game) Items() *Items {
+	return g.items
+}
+
 func (g *Game) Windows() *window.Windows {
 	return g.windows
 }
