@@ -44,7 +44,7 @@ type IAPProduct struct {
 
 type Item struct {
 	ID   int    `json:"id"`
-	Name string `json:"name"`
-	Desc string `json:"desc"`
+	Name UUID   `json:"name"`
+	Desc UUID   `json:"desc"`
 	Icon string `json:"icon"`
 }
