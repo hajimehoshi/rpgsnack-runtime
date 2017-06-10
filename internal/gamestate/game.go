@@ -247,7 +247,7 @@ func (g *Game) meetsCondition(cond *data.Condition, eventID int) (bool, error) {
 		}
 	case data.ConditionTypeItem:
 		id := cond.ID
-		itemValue := cond.Value.(data.ConditionItemValue)
+		itemValue := data.ConditionItemValue(cond.Value.(string))
 
 		switch itemValue {
 		case data.ConditionItemOwn:
