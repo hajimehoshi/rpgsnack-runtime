@@ -258,6 +258,7 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 			}
 		}
 		m.inventory.SetItems(items)
+		m.inventory.SetActiveItemID(m.gameState.Items().ActiveItem())
 		m.inventory.Update()
 		if m.inventory.PressedSlotIndex >= 0 && m.inventory.PressedSlotIndex < len(m.gameState.Items().Items()) {
 			itemID := m.gameState.Items().Items()[m.inventory.PressedSlotIndex]
@@ -278,8 +279,6 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 			} else {
 				m.gameState.Items().Activate(itemID)
 			}
-
-			m.inventory.SetActiveItemID(m.gameState.Items().ActiveItem())
 		}
 	}
 
