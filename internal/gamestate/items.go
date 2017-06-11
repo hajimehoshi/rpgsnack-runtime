@@ -97,6 +97,10 @@ func (i *Items) Remove(id int) {
 	if index >= 0 {
 		i.items = append(i.items[:index], i.items[(index+1):]...)
 	}
+
+	if id == i.activeItem {
+		i.activeItem = 0
+	}
 }
 
 func (i *Items) Activate(id int) {

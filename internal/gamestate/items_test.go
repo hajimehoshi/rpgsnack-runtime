@@ -110,6 +110,17 @@ func TestItemRemove(t *testing.T) {
 	}
 }
 
+func TestItemRemoveActiveItem(t *testing.T) {
+	items := gamestate.Items{}
+	items.Add(1)
+	items.Activate(1)
+	items.Remove(1)
+
+	if items.ActiveItem() != 0 {
+		t.Errorf("output: %d, want %d", items.ActiveItem(), 0)
+	}
+}
+
 func TestItemActivate(t *testing.T) {
 	items := gamestate.Items{}
 	items.Add(1)
