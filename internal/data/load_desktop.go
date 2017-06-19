@@ -77,7 +77,7 @@ func loadResources(projectPath string) ([]uint8, error) {
 			if err != nil {
 				return nil, err
 			}
-			l := filepath.SplitList(dir)
+			l := strings.Split(dir, string(filepath.Separator))
 			l = append(l, i.Name())
 			resources[path.Join(l...)] = b
 		}
