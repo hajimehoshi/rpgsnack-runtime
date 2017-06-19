@@ -64,6 +64,9 @@ func loadResources(projectPath string) ([]uint8, error) {
 	for _, dir := range dirs {
 		images, err := ioutil.ReadDir(filepath.Join(projectPath, "assets", dir))
 		if err != nil {
+			if os.IsNotExist(err) {
+				continue
+			}
 			return nil, err
 		}
 		for _, i := range images {
