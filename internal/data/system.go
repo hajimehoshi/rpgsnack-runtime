@@ -14,8 +14,31 @@
 
 package data
 
+import (
+	"golang.org/x/text/language"
+)
+
 type System struct {
-	InitialPosition *Position `json:"player"`
+	InitialPosition *Position
+	DefaultLanguage language.Tag
+}
+
+func (s *System) UnmarshalJSON(data []uint8) error {
+	type tmpSystem struct {
+		InitialPosition *Position `json:"player"`
+		DefualtLanguage string    `json:"defaultLanguage"`
+	}
+	var tmp *tmpSystem
+	if err := unmarshalJSON(data, &tmp); err != nil {
+		return err
+	}
+	s.InitialPosition = tmp.InitialPosition
+	l, err := language.Parse(tmp.DefualtLanguage)
+	if err != nil {
+		return err
+	}
+	s.DefaultLanguage = l
+	return nil
 }
 
 type Position struct {

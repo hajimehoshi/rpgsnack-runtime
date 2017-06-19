@@ -97,13 +97,18 @@ func Load(projectPath string) (*LoadedData, error) {
 	} else {
 		purchases = []string{}
 	}
-	var langId string
-	if err := unmarshalJSON(data.Language, &langId); err != nil {
-		return nil, err
-	}
-	tag, err := language.Parse(langId)
-	if err != nil {
-		return nil, err
+	var tag language.Tag
+	if data.Language != nil {
+		var langId string
+		if err := unmarshalJSON(data.Language, &langId); err != nil {
+			return nil, err
+		}
+		tag, err = language.Parse(langId)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		tag = gameData.System.DefaultLanguage
 	}
 	return &LoadedData{
 		Game:      gameData,

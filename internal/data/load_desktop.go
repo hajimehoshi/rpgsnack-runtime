@@ -118,7 +118,7 @@ func loadRawData(projectPath string) (*rawData, error) {
 		if !os.IsNotExist(err) {
 			return nil, err
 		}
-		langData = []uint8(`"en"`)
+		langData = nil
 	}
 
 	return &rawData{
