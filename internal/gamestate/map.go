@@ -502,22 +502,20 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, x, y int) bo
 		return false
 	}
 	var event *character.Character
-	if !m.passable(m.player.Through(), x, y, false) {
-		for _, e := range m.eventsAt(x, y) {
-			if page := m.currentPage(e); page != nil {
-				if len(page.Commands) == 0 {
-					continue
-				}
-				if page.Trigger != data.TriggerPlayer {
-					continue
-				}
+	for _, e := range m.eventsAt(x, y) {
+		if page := m.currentPage(e); page != nil {
+			if len(page.Commands) == 0 {
+				continue
 			}
-			event = e
-			break
+			if page.Trigger != data.TriggerPlayer {
+				continue
+			}
 		}
-		if event == nil {
-			return false
-		}
+		event = e
+		break
+	}
+	if !m.passable(m.player.Through(), x, y, false) && event == nil {
+		return false
 	}
 	px, py := m.player.Position()
 	path, lastPlayerX, lastPlayerY := calcPath(&passableOnMap{
