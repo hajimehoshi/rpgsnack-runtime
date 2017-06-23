@@ -12,30 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package gamestate
+package path
 
 import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 )
 
-type routeCommand int
+type RouteCommand int
 
 const (
-	routeCommandMoveUp routeCommand = iota
-	routeCommandMoveRight
-	routeCommandMoveDown
-	routeCommandMoveLeft
-	routeCommandTurnUp
-	routeCommandTurnRight
-	routeCommandTurnDown
-	routeCommandTurnLeft
+	RouteCommandMoveUp RouteCommand = iota
+	RouteCommandMoveRight
+	RouteCommandMoveDown
+	RouteCommandMoveLeft
+	RouteCommandTurnUp
+	RouteCommandTurnRight
+	RouteCommandTurnDown
+	RouteCommandTurnLeft
 )
 
-type passable interface {
+type Passable interface {
 	At(x, y int) bool
 }
 
-func calcPath(passable passable, startX, startY, goalX, goalY int) ([]routeCommand, int, int) {
+func Calc(passable Passable, startX, startY, goalX, goalY int) ([]RouteCommand, int, int) {
 	type pos struct {
 		X, Y int
 	}
@@ -91,17 +91,17 @@ func calcPath(passable passable, startX, startY, goalX, goalY int) ([]routeComma
 		}
 		p = parent
 	}
-	path := make([]routeCommand, len(dirs))
+	path := make([]RouteCommand, len(dirs))
 	for i, d := range dirs {
 		switch d {
 		case data.DirUp:
-			path[len(dirs)-i-1] = routeCommandMoveUp
+			path[len(dirs)-i-1] = RouteCommandMoveUp
 		case data.DirRight:
-			path[len(dirs)-i-1] = routeCommandMoveRight
+			path[len(dirs)-i-1] = RouteCommandMoveRight
 		case data.DirDown:
-			path[len(dirs)-i-1] = routeCommandMoveDown
+			path[len(dirs)-i-1] = RouteCommandMoveDown
 		case data.DirLeft:
-			path[len(dirs)-i-1] = routeCommandMoveLeft
+			path[len(dirs)-i-1] = RouteCommandMoveLeft
 		default:
 			panic("not reach")
 		}
@@ -110,17 +110,17 @@ func calcPath(passable passable, startX, startY, goalX, goalY int) ([]routeComma
 	lastX, lastY := goalX, goalY
 	if !lastP && len(path) > 0 {
 		switch path[len(path)-1] {
-		case routeCommandMoveUp:
-			path[len(path)-1] = routeCommandTurnUp
+		case RouteCommandMoveUp:
+			path[len(path)-1] = RouteCommandTurnUp
 			lastY++
-		case routeCommandMoveRight:
-			path[len(path)-1] = routeCommandTurnRight
+		case RouteCommandMoveRight:
+			path[len(path)-1] = RouteCommandTurnRight
 			lastX--
-		case routeCommandMoveDown:
-			path[len(path)-1] = routeCommandTurnDown
+		case RouteCommandMoveDown:
+			path[len(path)-1] = RouteCommandTurnDown
 			lastY--
-		case routeCommandMoveLeft:
-			path[len(path)-1] = routeCommandTurnLeft
+		case RouteCommandMoveLeft:
+			path[len(path)-1] = RouteCommandTurnLeft
 			lastX++
 		default:
 			panic("not reach")
@@ -129,11 +129,11 @@ func calcPath(passable passable, startX, startY, goalX, goalY int) ([]routeComma
 	return path, lastX, lastY
 }
 
-func routeCommandsToEventCommands(path []routeCommand) []*data.Command {
+func RouteCommandsToEventCommands(path []RouteCommand) []*data.Command {
 	commands := []*data.Command{}
 	for _, r := range path {
 		switch r {
-		case routeCommandMoveUp:
+		case RouteCommandMoveUp:
 			commands = append(commands, &data.Command{
 				Name: data.CommandNameMoveCharacter,
 				Args: &data.CommandArgsMoveCharacter{
@@ -142,7 +142,7 @@ func routeCommandsToEventCommands(path []routeCommand) []*data.Command {
 					Distance: 1,
 				},
 			})
-		case routeCommandMoveRight:
+		case RouteCommandMoveRight:
 			commands = append(commands, &data.Command{
 				Name: data.CommandNameMoveCharacter,
 				Args: &data.CommandArgsMoveCharacter{
@@ -151,7 +151,7 @@ func routeCommandsToEventCommands(path []routeCommand) []*data.Command {
 					Distance: 1,
 				},
 			})
-		case routeCommandMoveDown:
+		case RouteCommandMoveDown:
 			commands = append(commands, &data.Command{
 				Name: data.CommandNameMoveCharacter,
 				Args: &data.CommandArgsMoveCharacter{
@@ -160,7 +160,7 @@ func routeCommandsToEventCommands(path []routeCommand) []*data.Command {
 					Distance: 1,
 				},
 			})
-		case routeCommandMoveLeft:
+		case RouteCommandMoveLeft:
 			commands = append(commands, &data.Command{
 				Name: data.CommandNameMoveCharacter,
 				Args: &data.CommandArgsMoveCharacter{
@@ -169,28 +169,28 @@ func routeCommandsToEventCommands(path []routeCommand) []*data.Command {
 					Distance: 1,
 				},
 			})
-		case routeCommandTurnUp:
+		case RouteCommandTurnUp:
 			commands = append(commands, &data.Command{
 				Name: data.CommandNameTurnCharacter,
 				Args: &data.CommandArgsTurnCharacter{
 					Dir: data.DirUp,
 				},
 			})
-		case routeCommandTurnRight:
+		case RouteCommandTurnRight:
 			commands = append(commands, &data.Command{
 				Name: data.CommandNameTurnCharacter,
 				Args: &data.CommandArgsTurnCharacter{
 					Dir: data.DirRight,
 				},
 			})
-		case routeCommandTurnDown:
+		case RouteCommandTurnDown:
 			commands = append(commands, &data.Command{
 				Name: data.CommandNameTurnCharacter,
 				Args: &data.CommandArgsTurnCharacter{
 					Dir: data.DirDown,
 				},
 			})
-		case routeCommandTurnLeft:
+		case RouteCommandTurnLeft:
 			commands = append(commands, &data.Command{
 				Name: data.CommandNameTurnCharacter,
 				Args: &data.CommandArgsTurnCharacter{

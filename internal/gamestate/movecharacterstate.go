@@ -21,6 +21,7 @@ import (
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/path"
 )
 
 type moveCharacterState struct {
@@ -30,7 +31,7 @@ type moveCharacterState struct {
 	args          *data.CommandArgsMoveCharacter
 	routeSkip     bool
 	distanceCount int
-	path          []routeCommand
+	path          []path.RouteCommand
 	waiting       bool
 	terminated    bool
 
@@ -53,7 +54,7 @@ func newMoveCharacterState(gameState *Game, mapID, roomID, eventID int, args *da
 	case data.MoveCharacterTypeTarget:
 		cx, cy := m.character().Position()
 		x, y := args.X, args.Y
-		path, lastX, lastY := calcPath(&passableOnMap{
+		path, lastX, lastY := path.Calc(&passableOnMap{
 			through:          m.character().Through(),
 			m:                m.gameState.Map(),
 			ignoreCharacters: true,
@@ -82,7 +83,7 @@ type tmpMoveCharacterState struct {
 	Args          *data.CommandArgsMoveCharacter `json:"args"`
 	RouteSkip     bool                           `json:"routeSkip"`
 	DistanceCount int                            `json:"distanceCount"`
-	Path          []routeCommand                 `json:"path"`
+	Path          []path.RouteCommand            `json:"path"`
 	Waiting       bool                           `json:"waiting"`
 	Terminated    bool                           `json:"terminated"`
 }
@@ -158,13 +159,13 @@ func (m *moveCharacterState) Update() error {
 			dir = m.args.Dir
 		case data.MoveCharacterTypeTarget:
 			switch m.path[len(m.path)-m.distanceCount] {
-			case routeCommandMoveUp:
+			case path.RouteCommandMoveUp:
 				dir = data.DirUp
-			case routeCommandMoveRight:
+			case path.RouteCommandMoveRight:
 				dir = data.DirRight
-			case routeCommandMoveDown:
+			case path.RouteCommandMoveDown:
 				dir = data.DirDown
-			case routeCommandMoveLeft:
+			case path.RouteCommandMoveLeft:
 				dir = data.DirLeft
 			default:
 				panic("not reach")

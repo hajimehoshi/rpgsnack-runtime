@@ -24,6 +24,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
+	pathpkg "github.com/hajimehoshi/rpgsnack-runtime/internal/path"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
 
@@ -518,7 +519,7 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, x, y int) bo
 		return false
 	}
 	px, py := m.player.Position()
-	path, lastPlayerX, lastPlayerY := calcPath(&passableOnMap{
+	path, lastPlayerX, lastPlayerY := pathpkg.Calc(&passableOnMap{
 		through: m.player.Through(),
 		m:       m,
 	}, px, py, x, y)
@@ -566,7 +567,7 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, x, y int) bo
 				Repeat:   false,
 				Skip:     false,
 				Wait:     true,
-				Commands: routeCommandsToEventCommands(path),
+				Commands: pathpkg.RouteCommandsToEventCommands(path),
 			},
 		},
 		{
