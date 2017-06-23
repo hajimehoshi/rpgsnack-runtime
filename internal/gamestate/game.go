@@ -28,6 +28,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/variables"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/window"
 )
 
@@ -38,7 +39,7 @@ type Rand interface {
 type Game struct {
 	hints                *Hints
 	items                *Items
-	variables            *Variables
+	variables            *variables.Variables
 	screen               *Screen
 	windows              *window.Windows
 	currentMap           *Map
@@ -61,7 +62,7 @@ func NewGame() *Game {
 	g := &Game{
 		hints:                &Hints{},
 		items:                &Items{},
-		variables:            &Variables{},
+		variables:            &variables.Variables{},
 		screen:               &Screen{},
 		windows:              &window.Windows{},
 		rand:                 generateDefaultRand(),
@@ -73,16 +74,16 @@ func NewGame() *Game {
 }
 
 type tmpGame struct {
-	Hints                *Hints          `json:"hints"`
-	Items                *Items          `json:"items"`
-	Variables            *Variables      `json:"variables"`
-	Screen               *Screen         `json:"screen"`
-	Windows              *window.Windows `json:"windows"`
-	Map                  *Map            `json:"map"`
-	LastInterpreterID    int             `json:"lastInterpreterId"`
-	AutoSaveEnabled      bool            `json:"autoSaveEnabled"`
-	PlayerControlEnabled bool            `json:"playerControlEnabled"`
-	Cleared              bool            `json:"cleared"`
+	Hints                *Hints               `json:"hints"`
+	Items                *Items               `json:"items"`
+	Variables            *variables.Variables `json:"variables"`
+	Screen               *Screen              `json:"screen"`
+	Windows              *window.Windows      `json:"windows"`
+	Map                  *Map                 `json:"map"`
+	LastInterpreterID    int                  `json:"lastInterpreterId"`
+	AutoSaveEnabled      bool                 `json:"autoSaveEnabled"`
+	PlayerControlEnabled bool                 `json:"playerControlEnabled"`
+	Cleared              bool                 `json:"cleared"`
 }
 
 func (g *Game) MarshalJSON() ([]uint8, error) {

@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package gamestate_test
+package variables_test
 
 import (
 	"testing"
 
-	. "github.com/hajimehoshi/rpgsnack-runtime/internal/gamestate"
+	. "github.com/hajimehoshi/rpgsnack-runtime/internal/variables"
 )
 
 func TestSelfSwitches(t *testing.T) {
