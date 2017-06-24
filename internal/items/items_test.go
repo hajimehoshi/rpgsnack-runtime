@@ -12,37 +12,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package gamestate_test
+package items_test
 
 import (
 	"testing"
 
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/gamestate"
+	. "github.com/hajimehoshi/rpgsnack-runtime/internal/items"
 )
 
 func TestItemDefaultIncludes(t *testing.T) {
-	items := gamestate.Items{}
+	items := Items{}
 	if items.Includes(0) {
 		t.Errorf("output: %b, want %b", true, false)
 	}
 }
 
 func TestItemActiveItem(t *testing.T) {
-	items := gamestate.Items{}
+	items := Items{}
 	if items.ActiveItem() != 0 {
 		t.Errorf("output: %d, want %d", items.ActiveItem(), 0)
 	}
 }
 
 func TestItemDefaultCount(t *testing.T) {
-	items := gamestate.Items{}
+	items := Items{}
 	if len(items.Items()) != 0 {
 		t.Errorf("output: %d, want %d", len(items.Items()), 0)
 	}
 }
 
 func TestItemDefaultAdd(t *testing.T) {
-	items := gamestate.Items{}
+	items := Items{}
 	items.Add(1)
 	if len(items.Items()) != 1 {
 		t.Errorf("output: %d, want %d", len(items.Items()), 1)
@@ -58,7 +58,7 @@ func TestItemDefaultAdd(t *testing.T) {
 }
 
 func TestItemDefaultRemove(t *testing.T) {
-	items := gamestate.Items{}
+	items := Items{}
 	items.Remove(0)
 	if len(items.Items()) != 0 {
 		t.Errorf("output: %d, want %d", len(items.Items()), 0)
@@ -66,14 +66,14 @@ func TestItemDefaultRemove(t *testing.T) {
 }
 
 func TestItemDefaultActiveItem(t *testing.T) {
-	items := gamestate.Items{}
+	items := Items{}
 	if items.ActiveItem() != 0 {
 		t.Errorf("output: %d, want %d", items.ActiveItem(), 0)
 	}
 }
 
 func TestItemAddTwiceUnique(t *testing.T) {
-	items := gamestate.Items{}
+	items := Items{}
 	items.Add(1)
 	items.Add(2)
 	if len(items.Items()) != 2 {
@@ -82,7 +82,7 @@ func TestItemAddTwiceUnique(t *testing.T) {
 }
 
 func TestItemAddTwiceDupe(t *testing.T) {
-	items := gamestate.Items{}
+	items := Items{}
 	items.Add(1)
 	items.Add(1)
 	i := items.Items()
@@ -92,7 +92,7 @@ func TestItemAddTwiceDupe(t *testing.T) {
 }
 
 func TestItemRemove(t *testing.T) {
-	items := gamestate.Items{}
+	items := Items{}
 	items.Add(1)
 	items.Add(3)
 	items.Add(2)
@@ -111,7 +111,7 @@ func TestItemRemove(t *testing.T) {
 }
 
 func TestItemRemoveActiveItem(t *testing.T) {
-	items := gamestate.Items{}
+	items := Items{}
 	items.Add(1)
 	items.Activate(1)
 	items.Remove(1)
@@ -122,7 +122,7 @@ func TestItemRemoveActiveItem(t *testing.T) {
 }
 
 func TestItemActivate(t *testing.T) {
-	items := gamestate.Items{}
+	items := Items{}
 	items.Add(1)
 	items.Activate(1)
 	if items.ActiveItem() != 1 {
@@ -135,13 +135,13 @@ func TestItemActivate(t *testing.T) {
 }
 
 func TestItemMarshalAndUnmarshal(t *testing.T) {
-	items := gamestate.NewItems([]int{1, 2, 3}, 2)
+	items := NewItems([]int{1, 2, 3}, 2)
 	out, err := items.MarshalJSON()
 	if err != nil {
 		t.Errorf("error %s", err)
 	}
 
-	newItems := gamestate.NewItems([]int{1}, 1)
+	newItems := NewItems([]int{1}, 1)
 	err = newItems.UnmarshalJSON(out)
 	if err != nil {
 		t.Errorf("error %s", err)

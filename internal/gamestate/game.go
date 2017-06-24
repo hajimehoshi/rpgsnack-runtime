@@ -27,6 +27,7 @@ import (
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/items"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/variables"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/window"
@@ -38,7 +39,7 @@ type Rand interface {
 
 type Game struct {
 	hints                *Hints
-	items                *Items
+	items                *items.Items
 	variables            *variables.Variables
 	screen               *Screen
 	windows              *window.Windows
@@ -61,7 +62,7 @@ func generateDefaultRand() Rand {
 func NewGame() *Game {
 	g := &Game{
 		hints:                &Hints{},
-		items:                &Items{},
+		items:                &items.Items{},
 		variables:            &variables.Variables{},
 		screen:               &Screen{},
 		windows:              &window.Windows{},
@@ -75,7 +76,7 @@ func NewGame() *Game {
 
 type tmpGame struct {
 	Hints                *Hints               `json:"hints"`
-	Items                *Items               `json:"items"`
+	Items                *items.Items         `json:"items"`
 	Variables            *variables.Variables `json:"variables"`
 	Screen               *Screen              `json:"screen"`
 	Windows              *window.Windows      `json:"windows"`
@@ -126,7 +127,7 @@ func (g *Game) Screen() *Screen {
 	return g.screen
 }
 
-func (g *Game) Items() *Items {
+func (g *Game) Items() *items.Items {
 	return g.items
 }
 
