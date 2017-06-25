@@ -36,6 +36,7 @@ type Page struct {
 	Stepping   bool                 `json:"stepping"`
 	Through    bool                 `json:"through"`
 	Priority   Priority             `json:"priority"`
+	Speed      Speed                `json:"speed"`
 	Trigger    Trigger              `json:"trigger"`
 	Route      *CommandArgsSetRoute `json:"route"`
 	Commands   []*Command           `json:"commands"`

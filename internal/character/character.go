@@ -303,6 +303,7 @@ func (c *Character) UpdateWithPage(page *data.Page) error {
 		c.dir = data.Dir(0)
 		c.frame = 1
 		c.stepping = false
+		c.speed = data.Speed3
 		return nil
 	}
 	c.imageName = page.Image
@@ -313,6 +314,7 @@ func (c *Character) UpdateWithPage(page *data.Page) error {
 	c.stepping = page.Stepping
 	c.walking = page.Walking
 	c.through = page.Through
+	c.speed = page.Speed
 	return nil
 }
 
