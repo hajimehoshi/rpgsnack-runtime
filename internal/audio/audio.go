@@ -15,7 +15,10 @@
 package audio
 
 import (
+	"fmt"
+
 	eaudio "github.com/hajimehoshi/ebiten/audio"
+	"github.com/hajimehoshi/ebiten/audio/mp3"
 	"github.com/hajimehoshi/ebiten/audio/wav"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
@@ -87,12 +90,26 @@ func (a *audio) PlaySE(name string, volume float64) error {
 func (a *audio) PlayBGM(name string, volume float64) error {
 	p, ok := a.players[name]
 	if !ok {
-		bin := assets.GetResource("audio/bgm/" + name + ".wav")
-		s, err := wav.Decode(a.context, eaudio.BytesReadSeekCloser(bin))
-		if err != nil {
-			return err
+		mp3Path := "audio/bgm/" + name + ".mp3"
+		wavPath := "audio/bgm/" + name + ".wav"
+		var ss eaudio.ReadSeekCloser
+		if assets.Exists(mp3Path) {
+			bin := assets.GetResource(mp3Path)
+			s, err := mp3.Decode(a.context, eaudio.BytesReadSeekCloser(bin))
+			if err != nil {
+				return err
+			}
+			ss = eaudio.NewInfiniteLoop(s, s.Size())
+		} else if assets.Exists(wavPath) {
+			bin := assets.GetResource(wavPath)
+			s, err := wav.Decode(a.context, eaudio.BytesReadSeekCloser(bin))
+			if err != nil {
+				return err
+			}
+			ss = eaudio.NewInfiniteLoop(s, s.Size())
+		} else {
+			return fmt.Errorf("audio: %s not found", name)
 		}
-		ss := eaudio.NewInfiniteLoop(s, s.Size())
 		player, err := eaudio.NewPlayer(a.context, ss)
 		if err != nil {
 			return err

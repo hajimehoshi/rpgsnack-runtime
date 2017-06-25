@@ -58,6 +58,11 @@ type resources struct {
 	images    map[string]*ebiten.Image
 }
 
+func Exists(path string) bool {
+	_, ok := theResources.resources[path]
+	return ok
+}
+
 func GetResource(path string) []uint8 {
 	return theResources.resources[path]
 }
