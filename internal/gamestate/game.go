@@ -285,7 +285,7 @@ func (g *Game) generateInterpreterID() int {
 	return g.lastInterpreterID
 }
 
-func (g *Game) SetRandom(r Rand) {
+func (g *Game) SetRandomForTesting(r Rand) {
 	g.rand = r
 }
 

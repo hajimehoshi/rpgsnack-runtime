@@ -34,7 +34,7 @@ func (p *pseudoRand) Intn(n int) int {
 func TestRandomValue(t *testing.T) {
 	values := []int{-1, 0, 3, 4}
 	g := &Game{}
-	g.SetRandom(&pseudoRand{values, 0})
+	g.SetRandomForTesting(&pseudoRand{values, 0})
 	for range values {
 		got := g.RandomValue(1, 4)
 		if got <= 0 || got >= 4 {
