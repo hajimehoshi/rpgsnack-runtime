@@ -328,3 +328,24 @@ func (g *Game) price(productID string) string {
 func (g *Game) updatePrices(p map[string]string) {
 	g.prices = p
 }
+
+func (g *Game) SetSwitchValue(id int, value bool) {
+	g.variables.SetSwitchValue(id, value)
+}
+
+func (g *Game) SetSelfSwitchValue(eventID int, id int, value bool) {
+	m, r := g.currentMap.mapID, g.currentMap.roomID
+	g.variables.SetSelfSwitchValue(m, r, eventID, id, value)
+}
+
+func (g *Game) VariableValue(id int) int {
+	return g.variables.VariableValue(id)
+}
+
+func (g *Game) SetVariableValue(id int, value int) {
+	g.variables.SetVariableValue(id, value)
+}
+
+func (g *Game) SetInnerVariableValue(name string, value int) {
+	g.variables.SetInnerVariableValue(name, value)
+}
