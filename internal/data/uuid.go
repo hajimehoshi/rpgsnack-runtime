@@ -43,6 +43,15 @@ func (u *UUID) String() string {
 		hex.EncodeToString(u[10:16]))
 }
 
+func (u *UUID) isZero() bool {
+	for _, v := range u {
+		if v != 0 {
+			return false
+		}
+	}
+	return true
+}
+
 func (u *UUID) MarshalText() ([]uint8, error) {
 	return []uint8(u.String()), nil
 }
@@ -66,6 +75,9 @@ func (u *UUID) UnmarshalText(text []uint8) error {
 	}
 	if _, err := hex.Decode(u[10:16], []uint8(m[5])); err != nil {
 		return err
+	}
+	if u.isZero() {
+		return nil
 	}
 	if u[6]>>4 != 4 {
 		return fmt.Errorf("data: UUID version must be 4: %s", text)
