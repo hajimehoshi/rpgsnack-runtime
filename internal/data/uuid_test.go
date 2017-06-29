@@ -30,6 +30,11 @@ func TestUUID(t *testing.T) {
 			valid: true,
 		},
 		{
+			// Nil
+			str:   "00000000-0000-0000-0000-000000000000",
+			valid: true,
+		},
+		{
 			// Not version 4
 			str:   "dfe7edf6-c217-11e6-a4a6-cec0c932ce01",
 			valid: false,
