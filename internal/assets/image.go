@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"image/png"
 	"path"
-	"strings"
 
 	"github.com/hajimehoshi/ebiten"
 )
@@ -34,37 +33,6 @@ func loadImage(path string, bin []uint8, filter ebiten.Filter) (*ebiten.Image, e
 		return nil, err
 	}
 	return eimg, nil
-}
-
-var theAssets = &assets{}
-
-func Set(assets map[string][]uint8) error {
-	theAssets.assets = assets
-	theAssets.images = map[string]*ebiten.Image{}
-	for file, bin := range assets {
-		if strings.HasSuffix(file, ".png") {
-			img, err := loadImage(file, bin, ebiten.FilterNearest)
-			if err != nil {
-				return err
-			}
-			theAssets.images[file] = img
-		}
-	}
-	return nil
-}
-
-type assets struct {
-	assets map[string][]uint8
-	images map[string]*ebiten.Image
-}
-
-func Exists(path string) bool {
-	_, ok := theAssets.assets[path]
-	return ok
-}
-
-func GetResource(path string) []uint8 {
-	return theAssets.assets[path]
 }
 
 func GetImage(key string) *ebiten.Image {
