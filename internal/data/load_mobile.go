@@ -29,14 +29,14 @@ func loadRawData() (*rawData, error) {
 	return <-dataCh, nil
 }
 
-func SetData(game []uint8, resources []uint8, progress []uint8, purchases []uint8, language string) {
+func SetData(game []uint8, assets []uint8, progress []uint8, purchases []uint8, language string) {
 	l, err := json.Marshal(language)
 	if err != nil {
 		panic(err)
 	}
 	dataCh <- &rawData{
 		Game:      game,
-		Resources: resources,
+		Assets:    assets,
 		Progress:  progress,
 		Purchases: purchases,
 		Language:  l,

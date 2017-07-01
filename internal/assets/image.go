@@ -36,39 +36,39 @@ func loadImage(path string, bin []uint8, filter ebiten.Filter) (*ebiten.Image, e
 	return eimg, nil
 }
 
-func SetResources(resources map[string][]uint8) error {
-	theResources.resources = resources
-	theResources.images = map[string]*ebiten.Image{}
-	for file, bin := range resources {
+var theAssets = &assets{}
+
+func Set(assets map[string][]uint8) error {
+	theAssets.assets = assets
+	theAssets.images = map[string]*ebiten.Image{}
+	for file, bin := range assets {
 		if strings.HasSuffix(file, ".png") {
 			img, err := loadImage(file, bin, ebiten.FilterNearest)
 			if err != nil {
 				return err
 			}
-			theResources.images[file] = img
+			theAssets.images[file] = img
 		}
 	}
 	return nil
 }
 
-var theResources = &resources{}
-
-type resources struct {
-	resources map[string][]uint8
-	images    map[string]*ebiten.Image
+type assets struct {
+	assets map[string][]uint8
+	images map[string]*ebiten.Image
 }
 
 func Exists(path string) bool {
-	_, ok := theResources.resources[path]
+	_, ok := theAssets.assets[path]
 	return ok
 }
 
 func GetResource(path string) []uint8 {
-	return theResources.resources[path]
+	return theAssets.assets[path]
 }
 
 func GetImage(key string) *ebiten.Image {
-	img, ok := theResources.images[path.Join("images", key)]
+	img, ok := theAssets.images[path.Join("images", key)]
 	if !ok {
 		panic(fmt.Sprintf("assets: image %s not found", key))
 	}

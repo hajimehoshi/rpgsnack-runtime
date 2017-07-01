@@ -82,7 +82,7 @@ func (g *Game) update() error {
 				g.loadingCh = nil
 			}
 			d := g.loadedData
-			assets.SetResources(d.Resources)
+			assets.Set(d.Assets)
 			g.sceneManager = scene.NewManager(g.width, g.height, g.requester, d.Game, d.Progress, d.Purchases, d.Language)
 			g.sceneManager.InitScene(sceneimpl.NewTitleScene())
 		default:

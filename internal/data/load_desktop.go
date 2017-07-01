@@ -47,8 +47,8 @@ func SavePath() string {
 	return *savePath
 }
 
-func loadResources(projectPath string) ([]uint8, error) {
-	resources := map[string][]uint8{}
+func loadAssets(projectPath string) ([]uint8, error) {
+	assets := map[string][]uint8{}
 	dirs := []string{
 		filepath.Join("audio", "bgm"),
 		filepath.Join("audio", "se"),
@@ -79,10 +79,10 @@ func loadResources(projectPath string) ([]uint8, error) {
 			}
 			l := strings.Split(dir, string(filepath.Separator))
 			l = append(l, i.Name())
-			resources[path.Join(l...)] = b
+			assets[path.Join(l...)] = b
 		}
 	}
-	b, err := msgpack.Marshal(resources)
+	b, err := msgpack.Marshal(assets)
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +101,7 @@ func loadRawData(projectPath string) (*rawData, error) {
 		}
 		progress = nil
 	}
-	resources, err := loadResources(projectPath)
+	assets, err := loadAssets(projectPath)
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +123,7 @@ func loadRawData(projectPath string) (*rawData, error) {
 
 	return &rawData{
 		Project:   project,
-		Resources: resources,
+		Assets:    assets,
 		Progress:  progress,
 		Purchases: purchases,
 		Language:  langData,
