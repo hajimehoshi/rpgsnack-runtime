@@ -409,16 +409,17 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	}
 	op := &ebiten.DrawImageOptions{}
 	for k := 0; k < 3; k++ {
+		layer := 0
+		if k >= 1 {
+			layer = 1
+		}
+		tileSet := m.gameState.Map().TileSet(layer)
+		if tileSet == nil {
+			continue
+		}
+		tileSetImg := assets.GetImage("tilesets/" + tileSet.Name + ".png")
 		for j := 0; j < consts.TileYNum; j++ {
 			for i := 0; i < consts.TileXNum; i++ {
-				layer := 0
-				if k >= 1 {
-					layer = 1
-				}
-				tileSet := m.gameState.Map().TileSet(layer)
-				if tileSet == nil {
-					continue
-				}
 				tile := room.Tiles[layer][j*consts.TileXNum+i]
 				if layer == 1 {
 					p := tileSet.PassageTypes[tile]
@@ -437,7 +438,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 				dy := j * consts.TileSize
 				op.GeoM.Reset()
 				op.GeoM.Translate(float64(dx), float64(dy))
-				m.tilesImage.DrawImage(assets.GetImage("tilesets/"+tileSet.Name+".png"), op)
+				m.tilesImage.DrawImage(tileSetImg, op)
 			}
 		}
 		if k == 1 {
