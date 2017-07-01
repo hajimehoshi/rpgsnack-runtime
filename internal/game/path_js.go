@@ -12,25 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// +build !android
-// +build !ios
+// +build js
 
 package game
 
-import (
-	"fmt"
-)
-
-func NewWithDefaultRequester(width, height int) (*Game, error) {
-	if projectPath() == "" {
-		return nil, fmt.Errorf("game: no project directory is specified")
-	}
-	g := &Game{
-		projectPath: projectPath(),
-		width:       width,
-		height:      height,
-	}
-	g.loadGameData()
-	g.requester = &Requester{g}
-	return g, nil
+func projectPath() string {
+	return "."
 }

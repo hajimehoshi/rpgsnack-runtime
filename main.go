@@ -16,7 +16,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"os"
 	"runtime/pprof"
@@ -35,11 +34,6 @@ var (
 
 func main() {
 	flag.Parse()
-	projectPath := flag.Arg(0)
-	if projectPath == "" {
-		fmt.Fprintln(os.Stderr, "no project directory is specified")
-		os.Exit(1)
-	}
 	if *cpuProfile != "" {
 		f, err := os.Create(*cpuProfile)
 		if err != nil {
@@ -59,7 +53,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	g := game.NewWithDefaultRequester(projectPath, sw, sh)
+	g, err := game.NewWithDefaultRequester(sw, sh)
+	if err != nil {
+		log.Fatal(err)
+	}
 	if err := ebiten.Run(g.Update, sw, sh, game.Scale(), game.Title()); err != nil {
 		log.Fatal(err)
 	}

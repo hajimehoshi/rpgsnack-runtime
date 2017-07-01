@@ -17,21 +17,26 @@
 package data
 
 import (
+	"path"
+
 	"github.com/gopherjs/gopherjs/js"
 )
 
+func fetch(path string) <-chan []uint8 {
+	ch := make(chan []uint8)
+	js.Global.Call("fetch", path).Call("then", func(res *js.Object) *js.Object {
+		return res.Call("arrayBuffer")
+	}).Call("then", func(buf *js.Object) {
+		ch <- js.Global.Get("Uint8Array").New(buf).Interface().([]uint8)
+		close(ch)
+	})
+	return ch
+}
+
 func loadRawData(projectPath string) (*rawData, error) {
-	if js.Global.Get("_data") == nil {
-		ch := make(chan struct{})
-		js.Global.Set("_dataNotify", func() {
-			close(ch)
-		})
-		<-ch
-	}
-	dataJsonStr := js.Global.Get("JSON").Call("stringify", js.Global.Get("_data"))
-	dataJson := ([]uint8)(dataJsonStr.String())
 	return &rawData{
-		Project:   dataJson,
+		Project:   <-fetch(path.Join(projectPath, "project.json")),
+		Assets:    <-fetch(path.Join(projectPath, "assets.msgpack")),
 		Progress:  nil, // TODO: Implement this
 		Purchases: nil, // TODO: Implement this
 		Language:  []uint8(`"en"`),
