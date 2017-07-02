@@ -135,22 +135,6 @@ func (m *Map) TileSet(layer int) *data.TileSet {
 	return nil
 }
 
-type eventsByID struct {
-	events []*character.Character
-}
-
-func (e *eventsByID) Len() int {
-	return len(e.events)
-}
-
-func (e *eventsByID) Less(i, j int) bool {
-	return e.events[i].EventID() < e.events[j].EventID()
-}
-
-func (e *eventsByID) Swap(i, j int) {
-	e.events[i], e.events[j] = e.events[j], e.events[i]
-}
-
 func (m *Map) setRoomID(id int, interpreter *Interpreter) error {
 	m.roomID = id
 	m.events = nil
@@ -160,7 +144,9 @@ func (m *Map) setRoomID(id int, interpreter *Interpreter) error {
 		m.events = append(m.events, event)
 		m.eventPageIndices[event.EventID()] = character.PlayerEventID
 	}
-	sort.Sort(&eventsByID{m.events})
+	sort.Slice(m.events, func(i, j int) bool {
+		return m.events[i].EventID() < m.events[j].EventID()
+	})
 	m.interpreters = map[int]*Interpreter{}
 	if interpreter != nil {
 		m.addInterpreter(interpreter)
@@ -233,12 +219,6 @@ func (m *Map) currentPage(event *character.Character) *data.Page {
 	panic("not reached")
 }
 
-type interpretersByID []*Interpreter
-
-func (i interpretersByID) Len() int           { return len(i) }
-func (i interpretersByID) Less(a, b int) bool { return i[a].id < i[b].id }
-func (i interpretersByID) Swap(a, b int)      { i[a], i[b] = i[b], i[a] }
-
 var GoToTitle = errors.New("go to title")
 
 func (m *Map) removeRoutes(eventID int) {
@@ -270,7 +250,9 @@ func (m *Map) Update(sceneManager *scene.Manager) error {
 	for _, i := range m.interpreters {
 		is = append(is, i)
 	}
-	sort.Sort(interpretersByID(is))
+	sort.Slice(is, func(i, j int) bool {
+		return is[i].id < is[j].id
+	})
 	for _, i := range is {
 		if m.IsPlayerMovingByUserInput() && i.id != m.playerInterpreterID {
 			continue
@@ -679,20 +661,16 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, x, y int) bo
 
 type charactersByY []*character.Character
 
-func (c charactersByY) Len() int { return len(c) }
-func (c charactersByY) Less(i, j int) bool {
-	_, yi := c[i].Position()
-	_, yj := c[j].Position()
-	return yi < yj
-}
-func (c charactersByY) Swap(i, j int) { c[i], c[j] = c[j], c[i] }
-
 func (m *Map) DrawCharacters(screen *ebiten.Image) {
 	chars := []*character.Character{m.player}
 	for _, e := range m.events {
 		chars = append(chars, e)
 	}
-	sort.Sort(charactersByY(chars))
+	sort.Slice(chars, func(i, j int) bool {
+		_, yi := chars[i].Position()
+		_, yj := chars[j].Position()
+		return yi < yj
+	})
 	for _, c := range chars {
 		c.Draw(screen)
 	}
