@@ -302,9 +302,9 @@ func (b *balloon) draw(screen *ebiten.Image, character *character.Character) {
 		g := b.geoMForRate(screen, character)
 		g.Translate(float64(dx), float64(dy))
 		pw, ph := b.width/b.partSize(), b.height/b.partSize()
+		s := b.partSize()
 		for j := 0; j < ph; j++ {
 			for i := 0; i < pw; i++ {
-				s := b.partSize()
 				op.GeoM.Reset()
 				sx, sy := 0, 0
 				switch {

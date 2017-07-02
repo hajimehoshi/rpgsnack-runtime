@@ -49,6 +49,10 @@ type Character struct {
 	visible       bool
 	through       bool
 	erased        bool
+
+	// Not dumped
+	sizeW int
+	sizeH int
 }
 
 func NewPlayer(x, y int) *Character {
@@ -161,10 +165,12 @@ func (c *Character) Size() (int, int) {
 	if c.imageName == "" {
 		return 0, 0
 	}
-	imageW, imageH := assets.GetImage("characters/" + c.imageName + ".png").Size()
-	w := imageW / 4 / 3
-	h := imageH / 2 / 4
-	return w, h
+	if c.sizeW == 0 || c.sizeH == 0 {
+		imageW, imageH := assets.GetImage("characters/" + c.imageName + ".png").Size()
+		c.sizeW = imageW / 4 / 3
+		c.sizeH = imageH / 2 / 4
+	}
+	return c.sizeW, c.sizeH
 }
 
 func (c *Character) Position() (int, int) {
