@@ -659,8 +659,6 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, x, y int) bo
 	return true
 }
 
-type charactersByY []*character.Character
-
 func (m *Map) DrawCharacters(screen *ebiten.Image) {
 	chars := []*character.Character{m.player}
 	for _, e := range m.events {
