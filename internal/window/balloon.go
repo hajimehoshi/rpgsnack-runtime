@@ -303,30 +303,28 @@ func (b *balloon) draw(screen *ebiten.Image, character *character.Character) {
 		g.Translate(float64(dx), float64(dy))
 		pw, ph := b.width/b.partSize(), b.height/b.partSize()
 		s := b.partSize()
+		dx, dy := b.position(sw, character)
 		for j := 0; j < ph; j++ {
 			for i := 0; i < pw; i++ {
 				op.GeoM.Reset()
 				sx, sy := 0, 0
-				switch {
-				case i == 0:
+				switch i {
+				case 0:
 				default:
 					sx += s
-				case i == pw-1:
+				case pw - 1:
 					sx += s * 2
 				}
-				switch {
-				case j == 0:
+				switch j {
+				case 0:
 				default:
 					sy += s
-				case j == ph-1:
+				case ph - 1:
 					sy += s * 2
 				}
 				r := image.Rect(sx, sy, sx+s, sy+s)
 				op.SourceRect = &r
-				dx, dy := b.position(sw, character)
-				dx += i * s
-				dy += j * s
-				op.GeoM.Translate(float64(dx), float64(dy))
+				op.GeoM.Translate(float64(dx+i*s), float64(dy+j*s))
 				op.GeoM.Concat(*g)
 				screen.DrawImage(img, op)
 			}
