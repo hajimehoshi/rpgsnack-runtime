@@ -34,6 +34,8 @@ type Game struct {
 	sceneManager *scene.Manager
 	loadingCh    chan error
 	loadedData   *data.LoadedData
+	count        int
+	prevScreen   *ebiten.Image
 }
 
 func New(width, height int, requester scene.Requester) *Game {
@@ -64,10 +66,23 @@ func (g *Game) Update(screen *ebiten.Image) error {
 	if err := g.update(); err != nil {
 		return err
 	}
-	if ebiten.IsRunningSlowly() {
-		return nil
+	if !ebiten.IsRunningSlowly() {
+		switch g.count % 2 {
+		case 0:
+			g.draw(screen)
+			if g.prevScreen == nil {
+				w, h := screen.Size()
+				g.prevScreen, _ = ebiten.NewImage(w, h, ebiten.FilterNearest)
+			}
+			g.prevScreen.Clear()
+			g.prevScreen.DrawImage(screen, nil)
+		case 1:
+			if g.prevScreen != nil {
+				screen.DrawImage(g.prevScreen, nil)
+			}
+		}
 	}
-	g.draw(screen)
+	g.count++
 	return nil
 }
 
