@@ -276,6 +276,8 @@ func (c *Character) SetThrough(through bool) {
 func (c *Character) SetImage(imageName string, imageIndex int) {
 	c.imageName = imageName
 	c.imageIndex = imageIndex
+	c.sizeW = 0
+	c.sizeH = 0
 }
 
 func (c *Character) SetFrame(frame int) {
@@ -302,6 +304,8 @@ func (c *Character) Erased() bool {
 }
 
 func (c *Character) UpdateWithPage(page *data.Page) error {
+	c.sizeW = 0
+	c.sizeH = 0
 	if page == nil {
 		c.imageName = ""
 		c.imageIndex = 0
