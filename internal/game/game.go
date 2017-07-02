@@ -69,13 +69,13 @@ func (g *Game) Update(screen *ebiten.Image) error {
 	if !ebiten.IsRunningSlowly() {
 		switch g.count % 2 {
 		case 0:
-			g.draw(screen)
 			if g.prevScreen == nil {
 				w, h := screen.Size()
 				g.prevScreen, _ = ebiten.NewImage(w, h, ebiten.FilterNearest)
 			}
 			g.prevScreen.Clear()
-			g.prevScreen.DrawImage(screen, nil)
+			g.draw(g.prevScreen)
+			screen.DrawImage(g.prevScreen, nil)
 		case 1:
 			if g.prevScreen != nil {
 				screen.DrawImage(g.prevScreen, nil)
