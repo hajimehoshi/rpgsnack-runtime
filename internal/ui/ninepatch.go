@@ -14,45 +14,52 @@
 
 package ui
 
+import (
+	"image"
+
+	"github.com/hajimehoshi/ebiten"
+)
+
 const (
 	partSize = 4
 )
 
-type ninePatchParts struct {
-	width  int
-	height int
-}
-
-func (n *ninePatchParts) Len() int {
-	return (n.width / partSize) * (n.height / partSize)
-}
-
-func (n *ninePatchParts) Src(index int) (int, int, int, int) {
-	xn := n.width / partSize
-	yn := n.height / partSize
-	sx, sy := 0, 0
-	switch index % xn {
-	case 0:
-		sx = 0
-	case xn - 1:
-		sx = 2 * partSize
-	default:
-		sx = 1 * partSize
+func drawNinePatches(dst, src *ebiten.Image, width, height int, geoM *ebiten.GeoM, colorM *ebiten.ColorM) {
+	xn, yn := width/partSize, height/partSize
+	r := &image.Rectangle{}
+	op := &ebiten.DrawImageOptions{}
+	if colorM != nil {
+		op.ColorM.Concat(*colorM)
 	}
-	switch index / xn {
-	case 0:
-		sy = 0
-	case yn - 1:
-		sy = 2 * partSize
-	default:
-		sy = 1 * partSize
+	for j := 0; j < yn; j++ {
+		sy := 0
+		switch j {
+		case 0:
+			sy = 0
+		case yn - 1:
+			sy = 2 * partSize
+		default:
+			sy = 1 * partSize
+		}
+		for i := 0; i < xn; i++ {
+			sx := 0
+			switch i {
+			case 0:
+				sx = 0
+			case xn - 1:
+				sx = 2 * partSize
+			default:
+				sx = 1 * partSize
+			}
+			r.Min.X = sx
+			r.Min.Y = sy
+			r.Max.X = sx + partSize
+			r.Max.Y = sy + partSize
+			op.SourceRect = r
+			op.GeoM.Reset()
+			op.GeoM.Translate(float64(i*partSize), float64(j*partSize))
+			op.GeoM.Concat(*geoM)
+			dst.DrawImage(src, op)
+		}
 	}
-	return sx, sy, sx + partSize, sy + partSize
-}
-
-func (n *ninePatchParts) Dst(index int) (int, int, int, int) {
-	xn := n.width / partSize
-	dx := (index % xn) * partSize
-	dy := (index / xn) * partSize
-	return dx, dy, dx + partSize, dy + partSize
 }

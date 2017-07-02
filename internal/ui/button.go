@@ -137,15 +137,16 @@ func (b *Button) Draw(screen *ebiten.Image) {
 	if b.pressing {
 		img = assets.GetImage("system/9patch_test_on.png")
 	}
-	op := &ebiten.DrawImageOptions{}
-	op.ImageParts = &ninePatchParts{b.Width, b.Height}
-	op.GeoM.Translate(float64(b.X), float64(b.Y))
-	op.GeoM.Scale(consts.TileScale, consts.TileScale)
+	geoM := &ebiten.GeoM{}
+	geoM.Translate(float64(b.X), float64(b.Y))
+	geoM.Scale(consts.TileScale, consts.TileScale)
+	colorM := &ebiten.ColorM{}
 	if b.Disabled {
-		op.ColorM.ChangeHSV(0, 0, 1)
-		op.ColorM.Scale(0.5, 0.5, 0.5, 1)
+		colorM.ChangeHSV(0, 0, 1)
+		colorM.Scale(0.5, 0.5, 0.5, 1)
 	}
-	screen.DrawImage(img, op)
+	drawNinePatches(screen, img, b.Width, b.Height, geoM, colorM)
+
 	_, th := font.MeasureSize(b.Text)
 	tx := b.X*consts.TileScale + b.Width*consts.TileScale/2
 	ty := b.Y*consts.TileScale + (b.Height*consts.TileScale-th*consts.TextScale)/2
