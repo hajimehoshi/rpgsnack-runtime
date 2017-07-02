@@ -23,13 +23,18 @@ import (
 )
 
 func fetch(path string) <-chan []uint8 {
+	// TODO: Use fetch API in the future.
 	ch := make(chan []uint8)
-	js.Global.Call("fetch", path).Call("then", func(res *js.Object) *js.Object {
-		return res.Call("arrayBuffer")
-	}).Call("then", func(buf *js.Object) {
-		ch <- js.Global.Get("Uint8Array").New(buf).Interface().([]uint8)
+	xhr := js.Global.Get("XMLHttpRequest").New()
+	xhr.Set("responseType", "arraybuffer")
+	xhr.Call("addEventListener", "load", func() {
+		res := xhr.Get("response")
+		println(res)
+		ch <- js.Global.Get("Uint8Array").New(res).Interface().([]uint8)
 		close(ch)
 	})
+	xhr.Call("open", "GET", path)
+	xhr.Call("send")
 	return ch
 }
 
