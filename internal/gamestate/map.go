@@ -17,7 +17,6 @@ package gamestate
 import (
 	"encoding/json"
 	"errors"
-	"sort"
 
 	"github.com/hajimehoshi/ebiten"
 
@@ -26,6 +25,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	pathpkg "github.com/hajimehoshi/rpgsnack-runtime/internal/path"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/sort"
 )
 
 type passableOnMap struct {

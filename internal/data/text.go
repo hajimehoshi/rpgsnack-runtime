@@ -15,9 +15,9 @@
 package data
 
 import (
-	"sort"
-
 	languagepkg "golang.org/x/text/language"
+
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/sort"
 )
 
 type Texts struct {
