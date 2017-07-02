@@ -91,6 +91,7 @@ func DrawText(screen *ebiten.Image, text string, ox, oy int, scale int, textAlig
 	dx := 0
 	dy := (renderingLineHeight - lineHeight) / 2
 	l := 0
+	img := assets.GetImage("fonts/mplus.compacted.png")
 	for _, r := range text {
 		if r == '\n' {
 			dx = 0
@@ -128,7 +129,7 @@ func DrawText(screen *ebiten.Image, text string, ox, oy int, scale int, textAlig
 		}
 		op.GeoM.Scale(float64(scale), float64(scale))
 		op.GeoM.Translate(float64(ox), float64(oy))
-		screen.DrawImage(assets.GetImage("fonts/mplus.compacted.png"), op)
+		screen.DrawImage(img, op)
 		dx += w
 	}
 }

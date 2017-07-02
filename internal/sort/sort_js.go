@@ -34,8 +34,8 @@ func Slice(slice interface{}, comp func(i, j int) bool) {
 	for i := 0; i < indices.Length(); i++ {
 		indices.SetIndex(i, i)
 	}
-	indices.Call("sort", func(i, j *js.Object) int {
-		if comp(i.Int(), j.Int()) {
+	indices.Call("sort", func(i, j int) int {
+		if comp(i, j) {
 			return -1
 		} else {
 			return 1
