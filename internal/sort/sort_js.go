@@ -20,6 +20,11 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 )
 
+var (
+	neg = js.InternalObject(-1)
+	pos = js.InternalObject(1)
+)
+
 func Slice(slice interface{}, comp func(i, j int) bool) {
 	// The standard package's sort.Sort is slow on browsers.
 	// Let's use native Array.prototype.sort for performance.
@@ -34,11 +39,11 @@ func Slice(slice interface{}, comp func(i, j int) bool) {
 	for i := 0; i < indices.Length(); i++ {
 		indices.SetIndex(i, i)
 	}
-	indices.Call("sort", func(i, j int) int {
-		if comp(i, j) {
-			return -1
+	indices.Call("sort", func(i, j *js.Object) *js.Object {
+		if comp(i.Int(), j.Int()) {
+			return neg
 		} else {
-			return 1
+			return pos
 		}
 	})
 	for i := 0; i < indices.Length(); i++ {
