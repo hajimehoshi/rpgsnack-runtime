@@ -29,7 +29,6 @@ func fetch(path string) <-chan []uint8 {
 	xhr.Set("responseType", "arraybuffer")
 	xhr.Call("addEventListener", "load", func() {
 		res := xhr.Get("response")
-		println(res)
 		ch <- js.Global.Get("Uint8Array").New(res).Interface().([]uint8)
 		close(ch)
 	})
