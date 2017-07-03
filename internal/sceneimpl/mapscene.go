@@ -414,31 +414,30 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 			layer = 1
 		}
 		tileSet := m.gameState.Map().TileSet(layer)
-		if tileSet == nil {
-			continue
-		}
-		tileSetImg := assets.GetImage("tilesets/" + tileSet.Name + ".png")
-		for j := 0; j < consts.TileYNum; j++ {
-			for i := 0; i < consts.TileXNum; i++ {
-				tile := room.Tiles[layer][j*consts.TileXNum+i]
-				if layer == 1 {
-					p := tileSet.PassageTypes[tile]
-					if k == 1 && p == data.PassageTypeOver {
-						continue
+		if tileSet != nil {
+			tileSetImg := assets.GetImage("tilesets/" + tileSet.Name + ".png")
+			for j := 0; j < consts.TileYNum; j++ {
+				for i := 0; i < consts.TileXNum; i++ {
+					tile := room.Tiles[layer][j*consts.TileXNum+i]
+					if layer == 1 {
+						p := tileSet.PassageTypes[tile]
+						if k == 1 && p == data.PassageTypeOver {
+							continue
+						}
+						if k == 2 && p != data.PassageTypeOver {
+							continue
+						}
 					}
-					if k == 2 && p != data.PassageTypeOver {
-						continue
-					}
+					sx := tile % consts.PaletteWidth * consts.TileSize
+					sy := tile / consts.PaletteWidth * consts.TileSize
+					r := image.Rect(sx, sy, sx+consts.TileSize, sy+consts.TileSize)
+					op.SourceRect = &r
+					dx := i * consts.TileSize
+					dy := j * consts.TileSize
+					op.GeoM.Reset()
+					op.GeoM.Translate(float64(dx), float64(dy))
+					m.tilesImage.DrawImage(tileSetImg, op)
 				}
-				sx := tile % consts.PaletteWidth * consts.TileSize
-				sy := tile / consts.PaletteWidth * consts.TileSize
-				r := image.Rect(sx, sy, sx+consts.TileSize, sy+consts.TileSize)
-				op.SourceRect = &r
-				dx := i * consts.TileSize
-				dy := j * consts.TileSize
-				op.GeoM.Reset()
-				op.GeoM.Translate(float64(dx), float64(dy))
-				m.tilesImage.DrawImage(tileSetImg, op)
 			}
 		}
 		if k == 1 {
