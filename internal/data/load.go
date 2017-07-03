@@ -18,8 +18,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/vmihailenco/msgpack"
 	"golang.org/x/text/language"
-	"gopkg.in/vmihailenco/msgpack.v2"
 )
 
 func min(a, b int) int {

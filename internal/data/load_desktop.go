@@ -26,7 +26,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"gopkg.in/vmihailenco/msgpack.v2"
+	"github.com/vmihailenco/msgpack"
 )
 
 var (

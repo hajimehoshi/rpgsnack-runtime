@@ -23,7 +23,7 @@ import (
 	"regexp"
 	"strings"
 
-	"gopkg.in/vmihailenco/msgpack.v2"
+	"github.com/vmihailenco/msgpack"
 )
 
 func showUsage() {
