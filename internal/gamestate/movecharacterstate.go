@@ -19,8 +19,11 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/vmihailenco/msgpack"
+
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/path"
 )
 
@@ -103,6 +106,45 @@ func (m *moveCharacterState) MarshalJSON() ([]uint8, error) {
 	return json.Marshal(tmp)
 }
 
+func (m *moveCharacterState) EncodeMsgpack(enc *msgpack.Encoder) error {
+	e := easymsgpack.NewEncoder(enc)
+	e.BeginMap()
+
+	e.EncodeString("mapId")
+	e.EncodeInt(m.mapID)
+
+	e.EncodeString("roomId")
+	e.EncodeInt(m.roomID)
+
+	e.EncodeString("eventId")
+	e.EncodeInt(m.eventID)
+
+	e.EncodeString("args")
+	e.EncodeInterface(m.args)
+
+	e.EncodeString("routeSkip")
+	e.EncodeBool(m.routeSkip)
+
+	e.EncodeString("distanceCount")
+	e.EncodeInt(m.distanceCount)
+
+	e.EncodeString("path")
+	e.BeginArray()
+	for _, r := range m.path {
+		e.EncodeInt(int(r))
+	}
+	e.EndArray()
+
+	e.EncodeString("waiting")
+	e.EncodeBool(m.waiting)
+
+	e.EncodeString("terminated")
+	e.EncodeBool(m.terminated)
+
+	e.EndMap()
+	return e.Flush()
+}
+
 func (m *moveCharacterState) UnmarshalJSON(jsonData []uint8) error {
 	var tmp *tmpMoveCharacterState
 	if err := json.Unmarshal(jsonData, &tmp); err != nil {
@@ -117,6 +159,46 @@ func (m *moveCharacterState) UnmarshalJSON(jsonData []uint8) error {
 	m.path = tmp.Path
 	m.waiting = tmp.Waiting
 	m.terminated = tmp.Terminated
+	return nil
+}
+
+func (m *moveCharacterState) DecodeMsgpack(dec *msgpack.Decoder) error {
+	d := easymsgpack.NewDecoder(dec)
+	n := d.DecodeMapLen()
+	for i := 0; i < n; i++ {
+		switch d.DecodeString() {
+		case "mapId":
+			m.mapID = d.DecodeInt()
+		case "roomId":
+			m.roomID = d.DecodeInt()
+		case "eventId":
+			m.eventID = d.DecodeInt()
+		case "args":
+			if !d.SkipCodeIfNil() {
+				m.args = &data.CommandArgsMoveCharacter{}
+				d.DecodeInterface(m.args)
+			}
+		case "routeSkip":
+			m.routeSkip = d.DecodeBool()
+		case "distanceCount":
+			m.distanceCount = d.DecodeInt()
+		case "path":
+			if !d.SkipCodeIfNil() {
+				n := d.DecodeArrayLen()
+				m.path = make([]path.RouteCommand, n)
+				for i := 0; i < n; i++ {
+					m.path[i] = path.RouteCommand(d.DecodeInt())
+				}
+			}
+		case "waiting":
+			m.waiting = d.DecodeBool()
+		case "terminated":
+			m.terminated = d.DecodeBool()
+		}
+	}
+	if err := d.Error(); err != nil {
+		return fmt.Errorf("gamestate: moveCharacterState.DecodeMsgpack failed: %v", err)
+	}
 	return nil
 }
 

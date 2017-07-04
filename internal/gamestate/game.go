@@ -24,9 +24,11 @@ import (
 	"time"
 
 	"github.com/hajimehoshi/ebiten"
+	"github.com/vmihailenco/msgpack"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/items"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/variables"
@@ -103,6 +105,44 @@ func (g *Game) MarshalJSON() ([]uint8, error) {
 	return json.Marshal(tmp)
 }
 
+func (g *Game) EncodeMsgpack(enc *msgpack.Encoder) error {
+	e := easymsgpack.NewEncoder(enc)
+	e.BeginMap()
+
+	e.EncodeString("hints")
+	e.EncodeInterface(g.hints)
+
+	e.EncodeString("items")
+	e.EncodeInterface(g.items)
+
+	e.EncodeString("variables")
+	e.EncodeInterface(g.variables)
+
+	e.EncodeString("screen")
+	e.EncodeInterface(g.screen)
+
+	e.EncodeString("windows")
+	e.EncodeInterface(g.windows)
+
+	e.EncodeString("currentMap")
+	e.EncodeInterface(g.currentMap)
+
+	e.EncodeString("lastInterpreterId")
+	e.EncodeInt(g.lastInterpreterID)
+
+	e.EncodeString("autoSaveEnabled")
+	e.EncodeBool(g.autoSaveEnabled)
+
+	e.EncodeString("playerControlEnabled")
+	e.EncodeBool(g.playerControlEnabled)
+
+	e.EncodeString("cleared")
+	e.EncodeBool(g.cleared)
+
+	e.EndMap()
+	return e.Flush()
+}
+
 func (g *Game) UnmarshalJSON(data []uint8) error {
 	var tmp *tmpGame
 	if err := json.Unmarshal(data, &tmp); err != nil {
@@ -120,6 +160,65 @@ func (g *Game) UnmarshalJSON(data []uint8) error {
 	g.playerControlEnabled = tmp.PlayerControlEnabled
 	g.cleared = tmp.Cleared
 	g.rand = generateDefaultRand()
+	return nil
+}
+
+func (g *Game) DecodeMsgpack(dec *msgpack.Decoder) error {
+	d := easymsgpack.NewDecoder(dec)
+	n := d.DecodeMapLen()
+	for i := 0; i < n; i++ {
+		k := d.DecodeString()
+		switch k {
+		case "hints":
+			if !d.SkipCodeIfNil() {
+				g.hints = &Hints{}
+				d.DecodeInterface(g.hints)
+			}
+		case "items":
+			if !d.SkipCodeIfNil() {
+				g.items = &items.Items{}
+				d.DecodeInterface(g.items)
+			}
+		case "variables":
+			if !d.SkipCodeIfNil() {
+				g.variables = &variables.Variables{}
+				d.DecodeInterface(g.variables)
+			}
+		case "screen":
+			if !d.SkipCodeIfNil() {
+				g.screen = &Screen{}
+				d.DecodeInterface(g.screen)
+			}
+		case "windows":
+			if !d.SkipCodeIfNil() {
+				g.windows = &window.Windows{}
+				d.DecodeInterface(g.windows)
+			}
+		case "currentMap":
+			if !d.SkipCodeIfNil() {
+				g.currentMap = &Map{}
+				d.DecodeInterface(g.currentMap)
+				g.currentMap.setGame(g)
+			}
+		case "lastInterpreterId":
+			g.lastInterpreterID = d.DecodeInt()
+		case "autoSaveEnabled":
+			g.autoSaveEnabled = d.DecodeBool()
+		case "playerControlEnabled":
+			g.playerControlEnabled = d.DecodeBool()
+		case "cleared":
+			g.cleared = d.DecodeBool()
+		default:
+			if err := d.Error(); err != nil {
+				return err
+			}
+			return fmt.Errorf("gamestate: Game.DecodeMsgpack failed: unknown key: %s", k)
+		}
+	}
+	g.rand = generateDefaultRand()
+	if err := d.Error(); err != nil {
+		return fmt.Errorf("gamestate: Game.DecodeMsgpack failed: %v", err)
+	}
 	return nil
 }
 
@@ -174,12 +273,12 @@ func (g *Game) RequestSave(sceneManager *scene.Manager) bool {
 	}
 	id := sceneManager.GenerateRequestID()
 	g.waitingRequestID = id
-	j, err := json.Marshal(g)
+	m, err := msgpack.Marshal(g)
 	if err != nil {
 		panic(fmt.Sprintf("gamestate: JSON encoding error: %v", err))
 	}
-	sceneManager.Requester().RequestSaveProgress(id, j)
-	sceneManager.SetProgress(j)
+	sceneManager.Requester().RequestSaveProgress(id, m)
+	sceneManager.SetProgress(m)
 	return true
 }
 

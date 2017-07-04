@@ -17,12 +17,15 @@ package gamestate
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/hajimehoshi/ebiten"
+	"github.com/vmihailenco/msgpack"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
 	pathpkg "github.com/hajimehoshi/rpgsnack-runtime/internal/path"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/sort"
@@ -87,6 +90,52 @@ func (m *Map) MarshalJSON() ([]uint8, error) {
 	return json.Marshal(tmp)
 }
 
+func (m *Map) EncodeMsgpack(enc *msgpack.Encoder) error {
+	e := easymsgpack.NewEncoder(enc)
+	e.BeginMap()
+
+	e.EncodeString("player")
+	e.EncodeInterface(m.player)
+
+	e.EncodeString("mapId")
+	e.EncodeInt(m.mapID)
+
+	e.EncodeString("roomId")
+	e.EncodeInt(m.roomID)
+
+	e.EncodeString("events")
+	e.BeginArray()
+	for _, v := range m.events {
+		e.EncodeInterface(v)
+	}
+	e.EndArray()
+
+	e.EncodeString("eventPageIndices")
+	e.BeginMap()
+	for k, v := range m.eventPageIndices {
+		e.EncodeInt(k)
+		e.EncodeInt(v)
+	}
+	e.EndMap()
+
+	e.EncodeString("executingEventIdByUserInput")
+	e.EncodeInt(m.executingEventIDByUserInput)
+
+	e.EncodeString("interpreters")
+	e.BeginMap()
+	for k, v := range m.interpreters {
+		e.EncodeInt(k)
+		e.EncodeInterface(v)
+	}
+	e.EndMap()
+
+	e.EncodeString("playerInterpreterId")
+	e.EncodeInt(m.playerInterpreterID)
+
+	e.EndMap()
+	return e.Flush()
+}
+
 func (m *Map) UnmarshalJSON(jsonData []uint8) error {
 	var tmp *tmpMap
 	if err := json.Unmarshal(jsonData, &tmp); err != nil {
@@ -100,6 +149,72 @@ func (m *Map) UnmarshalJSON(jsonData []uint8) error {
 	m.executingEventIDByUserInput = tmp.ExecutingEventIDByUserInput
 	m.interpreters = tmp.Interpreters
 	m.playerInterpreterID = tmp.PlayerInterpreterID
+	return nil
+}
+
+func (m *Map) DecodeMsgpack(dec *msgpack.Decoder) error {
+	d := easymsgpack.NewDecoder(dec)
+	n := d.DecodeMapLen()
+	for i := 0; i < n; i++ {
+		k := d.DecodeString()
+		switch k {
+		case "player":
+			if !d.SkipCodeIfNil() {
+				m.player = &character.Character{}
+				d.DecodeInterface(m.player)
+			}
+		case "mapId":
+			m.mapID = d.DecodeInt()
+		case "roomId":
+			m.roomID = d.DecodeInt()
+		case "events":
+			if !d.SkipCodeIfNil() {
+				n := d.DecodeArrayLen()
+				m.events = make([]*character.Character, n)
+				for i := 0; i < n; i++ {
+					if !d.SkipCodeIfNil() {
+						m.events[i] = &character.Character{}
+						d.DecodeInterface(m.events[i])
+					}
+				}
+			}
+		case "eventPageIndices":
+			if !d.SkipCodeIfNil() {
+				n := d.DecodeMapLen()
+				m.eventPageIndices = map[int]int{}
+				for i := 0; i < n; i++ {
+					k := d.DecodeInt()
+					v := d.DecodeInt()
+					m.eventPageIndices[k] = v
+				}
+			}
+		case "executingEventIdByUserInput":
+			m.executingEventIDByUserInput = d.DecodeInt()
+		case "interpreters":
+			if !d.SkipCodeIfNil() {
+				n := d.DecodeMapLen()
+				m.interpreters = map[int]*Interpreter{}
+				for i := 0; i < n; i++ {
+					k := d.DecodeInt()
+					m.interpreters[k] = nil
+					if !d.SkipCodeIfNil() {
+						m.interpreters[k] = &Interpreter{}
+						d.DecodeInterface(m.interpreters[k])
+					}
+				}
+			}
+		case "playerInterpreterId":
+			m.playerInterpreterID = d.DecodeInt()
+		default:
+			if err := d.Error(); err != nil {
+				return err
+			}
+			return fmt.Errorf("gamestate: Map.DecodeMsgpack failed: unknown key: %s", k)
+		}
+	}
+	if err := d.Error(); err != nil {
+		return fmt.Errorf("gamestate: Map.DecodeMsgpack failed: %v", err)
+	}
 	return nil
 }
 

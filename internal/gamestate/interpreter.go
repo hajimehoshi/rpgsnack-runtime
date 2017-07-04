@@ -19,10 +19,13 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/vmihailenco/msgpack"
+
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/commanditerator"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
 
@@ -91,6 +94,53 @@ func (i *Interpreter) MarshalJSON() ([]uint8, error) {
 	return json.Marshal(tmp)
 }
 
+func (i *Interpreter) EncodeMsgpack(enc *msgpack.Encoder) error {
+	e := easymsgpack.NewEncoder(enc)
+	e.BeginMap()
+
+	e.EncodeString("id")
+	e.EncodeInt(i.id)
+
+	e.EncodeString("mapId")
+	e.EncodeInt(i.mapID)
+
+	e.EncodeString("roomId")
+	e.EncodeInt(i.roomID)
+
+	e.EncodeString("eventId")
+	e.EncodeInt(i.eventID)
+
+	e.EncodeString("commandIterator")
+	e.EncodeInterface(i.commandIterator)
+
+	e.EncodeString("waitingCount")
+	e.EncodeInt(i.waitingCount)
+
+	e.EncodeString("waitingCommand")
+	e.EncodeBool(i.waitingCommand)
+
+	e.EncodeString("moveCharacterState")
+	e.EncodeInterface(i.moveCharacterState)
+
+	e.EncodeString("repeat")
+	e.EncodeBool(i.repeat)
+
+	e.EncodeString("sub")
+	e.EncodeInterface(i.sub)
+
+	e.EncodeString("route")
+	e.EncodeBool(i.route)
+
+	e.EncodeString("routeSkip")
+	e.EncodeBool(i.routeSkip)
+
+	e.EncodeString("waitingRequestId")
+	e.EncodeInt(i.waitingRequestID)
+
+	e.EndMap()
+	return e.Flush()
+}
+
 func (i *Interpreter) UnmarshalJSON(data []uint8) error {
 	var tmp *tmpInterpreter
 	if err := json.Unmarshal(data, &tmp); err != nil {
@@ -109,6 +159,54 @@ func (i *Interpreter) UnmarshalJSON(data []uint8) error {
 	i.route = tmp.Route
 	i.routeSkip = tmp.RouteSkip
 	i.waitingRequestID = tmp.WaitingRequestID
+	return nil
+}
+
+func (i *Interpreter) DecodeMsgpack(dec *msgpack.Decoder) error {
+	d := easymsgpack.NewDecoder(dec)
+	n := d.DecodeMapLen()
+	for j := 0; j < n; j++ {
+		switch d.DecodeString() {
+		case "id":
+			i.id = d.DecodeInt()
+		case "mapId":
+			i.mapID = d.DecodeInt()
+		case "roomId":
+			i.roomID = d.DecodeInt()
+		case "eventId":
+			i.eventID = d.DecodeInt()
+		case "commandIterator":
+			if !d.SkipCodeIfNil() {
+				i.commandIterator = &commanditerator.CommandIterator{}
+				d.DecodeInterface(i.commandIterator)
+			}
+		case "waitingCount":
+			i.waitingCount = d.DecodeInt()
+		case "waitingCommand":
+			i.waitingCommand = d.DecodeBool()
+		case "moveCharacterState":
+			if !d.SkipCodeIfNil() {
+				i.moveCharacterState = &moveCharacterState{}
+				d.DecodeInterface(i.moveCharacterState)
+			}
+		case "repeat":
+			i.repeat = d.DecodeBool()
+		case "sub":
+			if !d.SkipCodeIfNil() {
+				i.sub = &Interpreter{}
+				d.DecodeInterface(i.sub)
+			}
+		case "route":
+			i.route = d.DecodeBool()
+		case "routeSkip":
+			i.routeSkip = d.DecodeBool()
+		case "waitingRequestId":
+			i.waitingRequestID = d.DecodeInt()
+		}
+	}
+	if err := d.Error(); err != nil {
+		return fmt.Errorf("gamestate: Interpreter.DecodeMsgpack failed: %v", err)
+	}
 	return nil
 }
 

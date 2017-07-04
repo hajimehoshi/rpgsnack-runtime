@@ -17,12 +17,43 @@ package data
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/vmihailenco/msgpack"
+
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
 )
 
 type Command struct {
 	Name     CommandName
-	Args     interface{}
+	Args     CommandArgs
 	Branches [][]*Command
+}
+
+type CommandArgs interface{}
+
+func (c *Command) EncodeMsgpack(enc *msgpack.Encoder) error {
+	e := easymsgpack.NewEncoder(enc)
+	e.BeginMap()
+
+	e.EncodeString("name")
+	e.EncodeString(string(c.Name))
+
+	e.EncodeString("args")
+	e.EncodeAny(c.Args)
+
+	e.EncodeString("branches")
+	e.BeginArray()
+	for _, b := range c.Branches {
+		e.BeginArray()
+		for _, command := range b {
+			e.EncodeInterface(command)
+		}
+		e.EndArray()
+	}
+	e.EndArray()
+
+	e.EndMap()
+	return e.Flush()
 }
 
 func (c *Command) UnmarshalJSON(data []uint8) error {
@@ -241,6 +272,161 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 	return nil
 }
 
+func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
+	d := easymsgpack.NewDecoder(dec)
+	n := d.DecodeMapLen()
+	for i := 0; i < n; i++ {
+		switch d.DecodeString() {
+		case "name":
+			c.Name = CommandName(d.DecodeString())
+		case "args":
+			if c.Name == "" {
+				return fmt.Errorf("data: 'name' should come before 'args'")
+			}
+			switch c.Name {
+			case CommandNameNop:
+				d.DecodeNil()
+			case CommandNameIf:
+				c.Args = &CommandArgsIf{}
+				d.DecodeAny(c.Args)
+			case CommandNameLabel:
+				c.Args = &CommandArgsLabel{}
+				d.DecodeAny(c.Args)
+			case CommandNameGoto:
+				c.Args = &CommandArgsGoto{}
+				d.DecodeAny(c.Args)
+			case CommandNameCallEvent:
+				c.Args = &CommandArgsCallEvent{}
+				d.DecodeAny(c.Args)
+			case CommandNameReturn:
+				d.DecodeNil()
+			case CommandNameEraseEvent:
+				d.DecodeNil()
+			case CommandNameWait:
+				c.Args = &CommandArgsWait{}
+				d.DecodeAny(c.Args)
+			case CommandNameShowMessage:
+				args := &CommandArgsShowMessage{}
+				d.DecodeAny(c.Args)
+				if args.TextAlign == "" {
+					args.TextAlign = TextAlignLeft
+				}
+				c.Args = args
+			case CommandNameShowHint:
+				c.Args = &CommandArgsShowHint{}
+				d.DecodeAny(c.Args)
+			case CommandNameShowChoices:
+				c.Args = &CommandArgsShowChoices{}
+				d.DecodeAny(c.Args)
+			case CommandNameSetSwitch:
+				c.Args = &CommandArgsSetSwitch{}
+				d.DecodeAny(c.Args)
+			case CommandNameSetSelfSwitch:
+				c.Args = &CommandArgsSetSelfSwitch{}
+				d.DecodeAny(c.Args)
+			case CommandNameSetVariable:
+				c.Args = &CommandArgsSetVariable{}
+				d.DecodeAny(c.Args)
+			case CommandNameTransfer:
+				c.Args = &CommandArgsTransfer{}
+				d.DecodeAny(c.Args)
+			case CommandNameSetRoute:
+				c.Args = &CommandArgsSetRoute{}
+				d.DecodeAny(c.Args)
+			case CommandNameTintScreen:
+				c.Args = &CommandArgsTintScreen{}
+				d.DecodeAny(c.Args)
+			case CommandNamePlaySE:
+				c.Args = &CommandArgsPlaySE{}
+				d.DecodeAny(c.Args)
+			case CommandNamePlayBGM:
+				c.Args = &CommandArgsPlayBGM{}
+				d.DecodeAny(c.Args)
+			case CommandNameStopBGM:
+				d.DecodeNil()
+			case CommandNameSave:
+				d.DecodeNil()
+			case CommandNameGotoTitle:
+				d.DecodeNil()
+			case CommandNameSyncIAP:
+				d.DecodeNil()
+			case CommandUnlockAchievement:
+				c.Args = &CommandArgsUnlockAchievement{}
+				d.DecodeAny(c.Args)
+			case CommandNameAutoSave:
+				c.Args = &CommandArgsAutoSave{}
+				d.DecodeAny(c.Args)
+			case CommandNamePlayerControl:
+				c.Args = &CommandArgsPlayerControl{}
+				d.DecodeAny(c.Args)
+			case CommandControlHint:
+				c.Args = &CommandArgsControlHint{}
+				d.DecodeAny(c.Args)
+			case CommandPurchase:
+				c.Args = &CommandArgsPurchase{}
+				d.DecodeAny(c.Args)
+			case CommandShowAds:
+				c.Args = &CommandArgsShowAds{}
+				d.DecodeAny(c.Args)
+			case CommandOpenLink:
+				c.Args = &CommandArgsOpenLink{}
+				d.DecodeAny(c.Args)
+			case CommandNameMoveCharacter:
+				c.Args = &CommandArgsMoveCharacter{}
+				d.DecodeAny(c.Args)
+			case CommandNameTurnCharacter:
+				c.Args = &CommandArgsTurnCharacter{}
+				d.DecodeAny(c.Args)
+			case CommandNameRotateCharacter:
+				c.Args = &CommandArgsRotateCharacter{}
+				d.DecodeAny(c.Args)
+			case CommandNameSetCharacterProperty:
+				c.Args = &CommandArgsSetCharacterProperty{}
+				d.DecodeAny(c.Args)
+			case CommandNameSetCharacterImage:
+				c.Args = &CommandArgsSetCharacterImage{}
+				d.DecodeAny(c.Args)
+			case CommandNameSetInnerVariable:
+				// This happens when loading a save data.
+				c.Args = &CommandArgsSetInnerVariable{}
+				d.DecodeAny(c.Args)
+			case CommandAddItem:
+				c.Args = &CommandArgsAddItem{}
+				d.DecodeAny(c.Args)
+			case CommandRemoveItem:
+				c.Args = &CommandArgsRemoveItem{}
+				d.DecodeAny(c.Args)
+			default:
+				return fmt.Errorf("data: Command.DecodeMsgpack: invalid command: %s", c.Name)
+			}
+		case "branches":
+			if d.SkipCodeIfNil() {
+				continue
+			}
+			n := d.DecodeArrayLen()
+			c.Branches = make([][]*Command, n)
+			for i := 0; i < n; i++ {
+				if d.SkipCodeIfNil() {
+					continue
+				}
+				n := d.DecodeArrayLen()
+				c.Branches[i] = make([]*Command, n)
+				for j := 0; j < n; j++ {
+					if d.SkipCodeIfNil() {
+						continue
+					}
+					c.Branches[i][j] = &Command{}
+					d.DecodeInterface(c.Branches[i][j])
+				}
+			}
+		}
+	}
+	if err := d.Error(); err != nil {
+		return fmt.Errorf("data: Command.DecodeMsgpack failed: %v", err)
+	}
+	return nil
+}
+
 type CommandName string
 
 const (
@@ -290,55 +476,55 @@ const (
 )
 
 type CommandArgsIf struct {
-	Conditions []*Condition `json:"conditions"`
+	Conditions []*Condition `json:"conditions" msgpack:"conditions"`
 }
 
 type CommandArgsLabel struct {
-	Name string `json:"name"`
+	Name string `json:"name" msgpack:"name"`
 }
 
 type CommandArgsGoto struct {
-	Label string `json:"label"`
+	Label string `json:"label" msgpack:"label"`
 }
 
 type CommandArgsCallEvent struct {
-	EventID   int `json:"eventId"`
-	PageIndex int `json:"pageIndex"`
+	EventID   int `json:"eventId" msgpack:"eventId"`
+	PageIndex int `json:"pageIndex" msgpack:"pageIndex"`
 }
 
 type CommandArgsWait struct {
-	Time int `json:"time"`
+	Time int `json:"time" msgpack:"time"`
 }
 
 type CommandArgsShowMessage struct {
-	Type         ShowMessageType     `json:"type"`
-	EventID      int                 `json:"eventId"`
-	ContentID    UUID                `json:"content"`
-	BalloonType  BalloonType         `json:"balloonType"`
-	PositionType MessagePositionType `json:"positionType"`
-	TextAlign    TextAlign           `json:"textAlign"`
+	Type         ShowMessageType     `json:"type" msgpack:"type"`
+	EventID      int                 `json:"eventId" msgpack:"eventId"`
+	ContentID    UUID                `json:"content" msgpack:"content"`
+	BalloonType  BalloonType         `json:"balloonType" msgpack:"balloonType"`
+	PositionType MessagePositionType `json:"positionType" msgpack:"positionType"`
+	TextAlign    TextAlign           `json:"textAlign" msgpack:"textAlign"`
 }
 
 type CommandArgsShowHint struct {
-	Type         ShowMessageType     `json:"type"`
-	EventID      int                 `json:"eventId"`
-	ContentID    UUID                `json:"content"`
-	BalloonType  BalloonType         `json:"balloonType"`
-	PositionType MessagePositionType `json:"positionType"`
+	Type         ShowMessageType     `json:"type" msgpack:"type"`
+	EventID      int                 `json:"eventId" msgpack:"eventId"`
+	ContentID    UUID                `json:"content" msgpack:"contentId"`
+	BalloonType  BalloonType         `json:"balloonType" msgpack:"balloonType"`
+	PositionType MessagePositionType `json:"positionType" msgpack:"positionType"`
 }
 
 type CommandArgsShowChoices struct {
-	ChoiceIDs []UUID `json:"choices"`
+	ChoiceIDs []UUID `json:"choices" msgpack:"choices"`
 }
 
 type CommandArgsSetSwitch struct {
-	ID    int  `json:"id"`
-	Value bool `json:"value"`
+	ID    int  `json:"id" msgpack:"id"`
+	Value bool `json:"value" msgpack:"value"`
 }
 
 type CommandArgsSetSelfSwitch struct {
-	ID    int  `json:"id"`
-	Value bool `json:"value"`
+	ID    int  `json:"id" msgpack:"id"`
+	Value bool `json:"value" msgpack:"value"`
 }
 
 type CommandArgsSetVariable struct {
@@ -346,6 +532,41 @@ type CommandArgsSetVariable struct {
 	Op        SetVariableOp        `json:"op"`
 	ValueType SetVariableValueType `json:"valueType"`
 	Value     interface{}          `json:"value"`
+}
+
+func (c *CommandArgsSetVariable) EncodeMsgpack(enc *msgpack.Encoder) error {
+	e := easymsgpack.NewEncoder(enc)
+	e.BeginMap()
+
+	e.EncodeString("id")
+	e.EncodeInt(c.ID)
+
+	e.EncodeString("op")
+	e.EncodeString(string(c.Op))
+
+	e.EncodeString("valueType")
+	e.EncodeString(string(c.ValueType))
+
+	e.EncodeString("value")
+	switch c.ValueType {
+	case SetVariableValueTypeConstant:
+		e.EncodeInt(c.Value.(int))
+	case SetVariableValueTypeVariable:
+		e.EncodeInt(c.Value.(int))
+	case SetVariableValueTypeRandom:
+		e.EncodeAny(c.Value)
+	case SetVariableValueTypeCharacter:
+		e.EncodeAny(c.Value)
+	case SetVariableValueTypeIAPProduct:
+		e.EncodeInt(c.Value.(int))
+	case SetVariableValueTypeSystem:
+		e.EncodeString(string(c.Value.(SystemVariableType)))
+	default:
+		return fmt.Errorf("data: CommandArgsSetVariable.EncodeMsgpack: invalid type: %s", c.ValueType)
+	}
+
+	e.EndMap()
+	return e.Flush()
 }
 
 func (c *CommandArgsSetVariable) UnmarshalJSON(data []uint8) error {
@@ -405,89 +626,209 @@ func (c *CommandArgsSetVariable) UnmarshalJSON(data []uint8) error {
 	return nil
 }
 
+func (c *CommandArgsSetVariable) DecodeMsgpack(dec *msgpack.Decoder) error {
+	d := easymsgpack.NewDecoder(dec)
+	n := d.DecodeMapLen()
+	for i := 0; i < n; i++ {
+		switch d.DecodeString() {
+		case "id":
+			c.ID = d.DecodeInt()
+		case "op":
+			c.Op = SetVariableOp(d.DecodeString())
+		case "valueType":
+			c.ValueType = SetVariableValueType(d.DecodeString())
+		case "value":
+			switch c.ValueType {
+			case SetVariableValueTypeConstant:
+				c.Value = d.DecodeInt()
+			case SetVariableValueTypeVariable:
+				c.Value = d.DecodeInt()
+			case SetVariableValueTypeRandom:
+				if !d.SkipCodeIfNil() {
+					v := &SetVariableValueRandom{}
+					d.DecodeAny(v)
+					c.Value = v
+				}
+			case SetVariableValueTypeCharacter:
+				if !d.SkipCodeIfNil() {
+					v := &SetVariableCharacterArgs{}
+					d.DecodeAny(v)
+					c.Value = v
+				}
+			case SetVariableValueTypeIAPProduct:
+				c.Value = d.DecodeInt()
+			case SetVariableValueTypeSystem:
+				c.Value = SystemVariableType(d.DecodeString())
+			default:
+				return fmt.Errorf("data: CommandArgsSetVariable.DecodeMsgpack: invalid type: %s", c.ValueType)
+			}
+		}
+	}
+	if err := d.Error(); err != nil {
+		return fmt.Errorf("data: CommandArgsSetVariable.DecodeMsgpack failed: %v", err)
+	}
+	return nil
+}
+
 type CommandArgsTransfer struct {
-	RoomID int `json:"roomId"`
-	X      int `json:"x"`
-	Y      int `json:"y"`
+	RoomID int `json:"roomId" msgpack:"roomId"`
+	X      int `json:"x" msgpack:"x"`
+	Y      int `json:"y" msgpack:"y"`
 }
 
 type CommandArgsSetRoute struct {
-	EventID  int        `json:"eventId"`
-	Repeat   bool       `json:"repeat"`
-	Skip     bool       `json:"skip"`
-	Wait     bool       `json:"wait"`
-	Commands []*Command `json:"commands"`
+	EventID  int        `json:"eventId" msgpack:"eventId"`
+	Repeat   bool       `json:"repeat" msgpack:"repeat"`
+	Skip     bool       `json:"skip" msgpack:"skip"`
+	Wait     bool       `json:"wait" msgpack:"wait"`
+	Commands []*Command `json:"commands" msgpack:"commands"`
 }
 
 type CommandArgsTintScreen struct {
-	Red   int  `json:"red"`
-	Green int  `json:"green"`
-	Blue  int  `json:"blue"`
-	Gray  int  `json:"gray"`
-	Time  int  `json:"time"`
-	Wait  bool `json:"wait"`
+	Red   int  `json:"red" msgpack:"red"`
+	Green int  `json:"green" msgpack:"green"`
+	Blue  int  `json:"blue" msgpack:"blue"`
+	Gray  int  `json:"gray" msgpack:"gray"`
+	Time  int  `json:"time" msgpack:"time"`
+	Wait  bool `json:"wait" msgpack:"wait"`
 }
 
 type CommandArgsPlaySE struct {
-	Name   string `json:"name"`
-	Volume int    `json:"volume"`
+	Name   string `json:"name" msgpack:"name"`
+	Volume int    `json:"volume" msgpack:"volume"`
 }
 
 type CommandArgsPlayBGM struct {
-	Name     string `json:"name"`
-	Volume   int    `json:"volume"`
-	FadeTime int    `json:"fadeTime"`
+	Name     string `json:"name" msgpack:"name"`
+	Volume   int    `json:"volume" msgpack:"volume"`
+	FadeTime int    `json:"fadeTime" msgpack:"fadeTime"`
 }
 
 type CommandArgsUnlockAchievement struct {
-	ID int `json:"id"`
+	ID int `json:"id" msgpack:"id"`
 }
 
 type CommandArgsControlHint struct {
-	ID   int             `json:"id"`
-	Type ControlHintType `json:"type"`
+	ID   int             `json:"id" msgpack:"id"`
+	Type ControlHintType `json:"type" msgpack:"type"`
 }
 
 type CommandArgsPurchase struct {
-	ID int `json:"id"`
+	ID int `json:"id" msgpack:"id"`
 }
 
 type CommandArgsShowAds struct {
-	Type ShowAdsType `json:"type"`
+	Type ShowAdsType `json:"type" msgpack:"type"`
 }
 
 type CommandArgsOpenLink struct {
-	Type string `json:"type"`
-	Data string `json:"data"`
+	Type string `json:"type" msgpack:"type"`
+	Data string `json:"data" msgpack:"data"`
 }
 
 type CommandArgsAutoSave struct {
-	Enabled bool `json:"enabled"`
+	Enabled bool `json:"enabled" msgpack:"enabled"`
 }
 
 type CommandArgsPlayerControl struct {
-	Enabled bool `json:"enabled"`
+	Enabled bool `json:"enabled" msgpack:"enabled"`
 }
 
 type CommandArgsMoveCharacter struct {
-	Type     MoveCharacterType `json:"type"`
-	Dir      Dir               `json:"dir"`
-	Distance int               `json:"distance"`
-	X        int               `json:"x"`
-	Y        int               `json:"y"`
+	Type     MoveCharacterType `json:"type" msgpack:"type"`
+	Dir      Dir               `json:"dir" msgpack:"dir"`
+	Distance int               `json:"distance" msgpack:"distance"`
+	X        int               `json:"x" msgpack:"x"`
+	Y        int               `json:"y" msgpack:"y"`
+}
+
+func (c *CommandArgsMoveCharacter) EncodeMsgpack(enc *msgpack.Encoder) error {
+	e := easymsgpack.NewEncoder(enc)
+	e.BeginMap()
+
+	e.EncodeString("type")
+	e.EncodeString(string(c.Type))
+
+	e.EncodeString("dir")
+	e.EncodeInt(int(c.Dir))
+
+	e.EncodeString("distance")
+	e.EncodeInt(c.Distance)
+
+	e.EncodeString("x")
+	e.EncodeInt(c.X)
+
+	e.EncodeString("y")
+	e.EncodeInt(c.Y)
+
+	e.EndMap()
+	return e.Flush()
+}
+
+func (c *CommandArgsMoveCharacter) DecodeMsgpack(dec *msgpack.Decoder) error {
+	d := easymsgpack.NewDecoder(dec)
+	n := d.DecodeMapLen()
+	for i := 0; i < n; i++ {
+		k := d.DecodeString()
+		switch k {
+		case "type":
+			c.Type = MoveCharacterType(d.DecodeString())
+		case "dir":
+			c.Dir = Dir(d.DecodeInt())
+		case "distance":
+			c.Distance = d.DecodeInt()
+		case "x":
+			c.X = d.DecodeInt()
+		case "y":
+			c.Y = d.DecodeInt()
+		default:
+			return fmt.Errorf("data: CommandArgsMoveCharacter.DecodeMsgpack: invalid key: %s", k)
+		}
+	}
+	if err := d.Error(); err != nil {
+		return fmt.Errorf("data: CommandArgsMoveCharacter.DecodeMsgpack failed: %v", err)
+	}
+	return nil
 }
 
 type CommandArgsTurnCharacter struct {
-	Dir Dir `json:dir`
+	Dir Dir `json:dir msgpack:"dir"`
 }
 
 type CommandArgsRotateCharacter struct {
-	Angle int `json:angle`
+	Angle int `json:angle msgpack:"angle"`
 }
 
 type CommandArgsSetCharacterProperty struct {
 	Type  SetCharacterPropertyType `json:"type"`
 	Value interface{}              `json:"value"`
+}
+
+func (c *CommandArgsSetCharacterProperty) EncodeMsgpack(enc *msgpack.Encoder) error {
+	e := easymsgpack.NewEncoder(enc)
+	e.BeginMap()
+
+	e.EncodeString("type")
+	e.EncodeString(string(c.Type))
+
+	e.EncodeString("value")
+	switch c.Type {
+	case SetCharacterPropertyTypeVisibility:
+		e.EncodeBool(c.Value.(bool))
+	case SetCharacterPropertyTypeDirFix:
+		e.EncodeBool(c.Value.(bool))
+	case SetCharacterPropertyTypeStepping:
+		e.EncodeBool(c.Value.(bool))
+	case SetCharacterPropertyTypeThrough:
+		e.EncodeBool(c.Value.(bool))
+	case SetCharacterPropertyTypeWalking:
+		e.EncodeBool(c.Value.(bool))
+	case SetCharacterPropertyTypeSpeed:
+		e.EncodeInt(int(c.Value.(Speed)))
+	}
+
+	e.EndMap()
+	return e.Flush()
 }
 
 func (c *CommandArgsSetCharacterProperty) UnmarshalJSON(data []uint8) error {
@@ -543,31 +884,63 @@ func (c *CommandArgsSetCharacterProperty) UnmarshalJSON(data []uint8) error {
 	return nil
 }
 
+func (c *CommandArgsSetCharacterProperty) DecodeMsgpack(dec *msgpack.Decoder) error {
+	d := easymsgpack.NewDecoder(dec)
+	n := d.DecodeMapLen()
+	for i := 0; i < n; i++ {
+		switch d.DecodeString() {
+		case "type":
+			c.Type = SetCharacterPropertyType(d.DecodeString())
+		case "value":
+			switch c.Type {
+			case SetCharacterPropertyTypeVisibility:
+				c.Value = d.DecodeBool()
+			case SetCharacterPropertyTypeDirFix:
+				c.Value = d.DecodeBool()
+			case SetCharacterPropertyTypeStepping:
+				c.Value = d.DecodeBool()
+			case SetCharacterPropertyTypeThrough:
+				c.Value = d.DecodeBool()
+			case SetCharacterPropertyTypeWalking:
+				c.Value = d.DecodeBool()
+			case SetCharacterPropertyTypeSpeed:
+				c.Value = Speed(d.DecodeInt())
+			default:
+				return fmt.Errorf("data: CommandArgsSetCharacterProperty.DecodeMsgpack: invalid type: %s", c.Type)
+			}
+		}
+	}
+	if err := d.Error(); err != nil {
+		return fmt.Errorf("data: CommandArgsSetCharacterProperty.DecodeMsgpack failed: %v", err)
+	}
+	return nil
+}
+
 type CommandArgsSetCharacterImage struct {
-	Image          string `json:"image"`
-	ImageIndex     int    `json:"imageIndex"`
-	Frame          int    `json:"frame"`
-	Dir            Dir    `json:"dir"`
-	UseFrameAndDir bool   `json:"useFrameAndDir"`
+	Image          string `json:"image" msgpack:"image"`
+	ImageIndex     int    `json:"imageIndex" msgpack:"imageIndex"`
+	Frame          int    `json:"frame" msgpack:"frame"`
+	Dir            Dir    `json:"dir" msgpack:"dir"`
+	UseFrameAndDir bool   `json:"useFrameAndDir" msgpack:"useFrameAndDir"`
 }
 
 type CommandArgsSetInnerVariable struct {
-	Name  string `json:name`
-	Value int    `json:value`
+	Name  string `json:name msgpack:"name"`
+	Value int    `json:value msgpack:"value"`
 }
 
 type CommandArgsAddItem struct {
-	ID int `json:"id"`
+	ID int `json:"id" msgpack:"id"`
 }
 
 type CommandArgsRemoveItem struct {
-	ID int `json:"id"`
+	ID int `json:"id" msgpack:"id"`
 }
 
 type SetVariableOp string
 
 const (
-	SetVariableOpAssign SetVariableOp = "="
+	SetVariableOpAssign SetVariableOp = "=" // TODO: Rename
 	SetVariableOpAdd    SetVariableOp = "+"
 	SetVariableOpSub    SetVariableOp = "-"
 	SetVariableOpMul    SetVariableOp = "*"
@@ -587,18 +960,19 @@ const (
 )
 
 type SetVariableValueRandom struct {
-	Begin int `json:"begin"`
-	End   int `json:"end"`
+	Begin int `json:"begin" msgpack:"begin"`
+	End   int `json:"end" msgpack:"end"`
 }
 
+// TODO: Rename?
 type SetVariableCharacterArgs struct {
-	Type    SetVariableCharacterType `json:"type"`
-	EventID int                      `json:"eventId"`
+	Type    SetVariableCharacterType `json:"type" msgpack:"type"`
+	EventID int                      `json:"eventId" msgpack:"eventId"`
 }
 
 type SetVariableSystem struct {
-	Type    SetVariableCharacterType `json:"type"`
-	EventID int                      `json:"eventId"`
+	Type    SetVariableCharacterType `json:"type" msgpack:"type"`
+	EventID int                      `json:"eventId" msgpack:"eventId"`
 }
 
 type SetVariableCharacterType string

@@ -16,8 +16,12 @@ package commanditerator
 
 import (
 	"encoding/json"
+	"fmt"
+
+	"github.com/vmihailenco/msgpack"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
 )
 
 type CommandIterator struct {
@@ -52,6 +56,28 @@ func (c *CommandIterator) MarshalJSON() ([]uint8, error) {
 	return json.Marshal(tmp)
 }
 
+func (c *CommandIterator) EncodeMsgpack(enc *msgpack.Encoder) error {
+	e := easymsgpack.NewEncoder(enc)
+	e.BeginMap()
+
+	e.EncodeString("indices")
+	e.BeginArray()
+	for _, i := range c.indices {
+		e.EncodeInt(i)
+	}
+	e.EndArray()
+
+	e.EncodeString("commands")
+	e.BeginArray()
+	for _, c := range c.commands {
+		e.EncodeInterface(c)
+	}
+	e.EndArray()
+
+	e.EndMap()
+	return e.Flush()
+}
+
 func (c *CommandIterator) UnmarshalJSON(data []uint8) error {
 	var tmp *tmpCommandIterator
 	if err := json.Unmarshal(data, &tmp); err != nil {
@@ -61,6 +87,40 @@ func (c *CommandIterator) UnmarshalJSON(data []uint8) error {
 	c.commands = tmp.Commands
 	c.labels = map[string][]int{}
 	c.recordLabel(c.commands, nil)
+	return nil
+}
+
+func (c *CommandIterator) DecodeMsgpack(dec *msgpack.Decoder) error {
+	d := easymsgpack.NewDecoder(dec)
+	n := d.DecodeMapLen()
+	for i := 0; i < n; i++ {
+		switch d.DecodeString() {
+		case "indices":
+			if !d.SkipCodeIfNil() {
+				n := d.DecodeArrayLen()
+				c.indices = make([]int, n)
+				for i := 0; i < n; i++ {
+					c.indices[i] = d.DecodeInt()
+				}
+			}
+		case "commands":
+			if !d.SkipCodeIfNil() {
+				n := d.DecodeArrayLen()
+				c.commands = make([]*data.Command, n)
+				for i := 0; i < n; i++ {
+					if !d.SkipCodeIfNil() {
+						c.commands[i] = &data.Command{}
+						d.DecodeInterface(c.commands[i])
+					}
+				}
+			}
+		}
+	}
+	c.labels = map[string][]int{}
+	c.recordLabel(c.commands, []int{})
+	if err := d.Error(); err != nil {
+		return fmt.Errorf("commanditerator: CommandIterator.DecodeMsgpack failed: %v", err)
+	}
 	return nil
 }
 

@@ -16,15 +16,18 @@ package window
 
 import (
 	"encoding/json"
+	"fmt"
 	"image"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten"
+	"github.com/vmihailenco/msgpack"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/font"
 )
 
@@ -89,6 +92,56 @@ func (b *balloon) MarshalJSON() ([]uint8, error) {
 	return json.Marshal(tmp)
 }
 
+func (b *balloon) EncodeMsgpack(enc *msgpack.Encoder) error {
+	e := easymsgpack.NewEncoder(enc)
+	e.BeginMap()
+
+	e.EncodeString("interpreterId")
+	e.EncodeInt(b.interpreterID)
+
+	e.EncodeString("x")
+	e.EncodeInt(b.x)
+
+	e.EncodeString("y")
+	e.EncodeInt(b.y)
+
+	e.EncodeString("width")
+	e.EncodeInt(b.width)
+
+	e.EncodeString("height")
+	e.EncodeInt(b.height)
+
+	e.EncodeString("hasArrow")
+	e.EncodeBool(b.hasArrow)
+
+	e.EncodeString("eventId")
+	e.EncodeInt(b.eventID)
+
+	e.EncodeString("content")
+	e.EncodeString(b.content)
+
+	e.EncodeString("contentOffsetX")
+	e.EncodeInt(b.contentOffsetX)
+
+	e.EncodeString("contentOffsetY")
+	e.EncodeInt(b.contentOffsetY)
+
+	e.EncodeString("openingCount")
+	e.EncodeInt(b.openingCount)
+
+	e.EncodeString("closingCount")
+	e.EncodeInt(b.closingCount)
+
+	e.EncodeString("opened")
+	e.EncodeBool(b.opened)
+
+	e.EncodeString("balloonType")
+	e.EncodeString(string(b.balloonType))
+
+	e.EndMap()
+	return e.Flush()
+}
+
 func (b *balloon) UnmarshalJSON(data []uint8) error {
 	var tmp *tmpBalloon
 	if err := json.Unmarshal(data, &tmp); err != nil {
@@ -108,6 +161,47 @@ func (b *balloon) UnmarshalJSON(data []uint8) error {
 	b.closingCount = tmp.ClosingCount
 	b.opened = tmp.Opened
 	b.balloonType = tmp.BalloonType
+	return nil
+}
+
+func (b *balloon) DecodeMsgpack(dec *msgpack.Decoder) error {
+	d := easymsgpack.NewDecoder(dec)
+	n := d.DecodeMapLen()
+	for i := 0; i < n; i++ {
+		switch d.DecodeString() {
+		case "interpreterId":
+			b.interpreterID = d.DecodeInt()
+		case "x":
+			b.x = d.DecodeInt()
+		case "y":
+			b.y = d.DecodeInt()
+		case "width":
+			b.width = d.DecodeInt()
+		case "height":
+			b.height = d.DecodeInt()
+		case "hasArrow":
+			b.hasArrow = d.DecodeBool()
+		case "eventId":
+			b.eventID = d.DecodeInt()
+		case "content":
+			b.content = d.DecodeString()
+		case "contentOffsetX":
+			b.contentOffsetX = d.DecodeInt()
+		case "contentOffsetY":
+			b.contentOffsetY = d.DecodeInt()
+		case "openingCount":
+			b.openingCount = d.DecodeInt()
+		case "closingCount":
+			b.closingCount = d.DecodeInt()
+		case "opened":
+			b.opened = d.DecodeBool()
+		case "balloonType":
+			b.balloonType = data.BalloonType(d.DecodeString())
+		}
+	}
+	if err := d.Error(); err != nil {
+		return fmt.Errorf("window: balloon.DecodeMsgpack failed: %v", err)
+	}
 	return nil
 }
 

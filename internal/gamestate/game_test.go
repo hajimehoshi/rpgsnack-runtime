@@ -17,6 +17,8 @@ package gamestate_test
 import (
 	"testing"
 
+	"github.com/vmihailenco/msgpack"
+
 	. "github.com/hajimehoshi/rpgsnack-runtime/internal/gamestate"
 )
 
@@ -40,5 +42,17 @@ func TestRandomValue(t *testing.T) {
 		if got <= 0 || got >= 4 {
 			t.Errorf("RandomValue(1, 4) out of range: got: %v", got)
 		}
+	}
+}
+
+func TestMarshalGame(t *testing.T) {
+	g := &Game{}
+	b, err := msgpack.Marshal(g)
+	if err != nil {
+		t.Error(err)
+	}
+	var g2 *Game
+	if err := msgpack.Unmarshal(b, &g2); err != nil {
+		t.Error(err)
 	}
 }

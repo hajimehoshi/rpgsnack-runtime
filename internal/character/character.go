@@ -16,13 +16,16 @@ package character
 
 import (
 	"encoding/json"
+	"fmt"
 	"image"
 
 	"github.com/hajimehoshi/ebiten"
+	"github.com/vmihailenco/msgpack"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
 )
 
 const (
@@ -130,6 +133,71 @@ func (c *Character) MarshalJSON() ([]uint8, error) {
 	return json.Marshal(tmp)
 }
 
+func (c *Character) EncodeMsgpack(enc *msgpack.Encoder) error {
+	e := easymsgpack.NewEncoder(enc)
+	e.BeginMap()
+
+	e.EncodeString("eventId")
+	e.EncodeInt(c.eventID)
+
+	e.EncodeString("speed")
+	e.EncodeInt(int(c.speed))
+
+	e.EncodeString("imageName")
+	e.EncodeString(c.imageName)
+
+	e.EncodeString("imageIndex")
+	e.EncodeInt(c.imageIndex)
+
+	e.EncodeString("dir")
+	e.EncodeInt(int(c.dir))
+
+	e.EncodeString("dirFix")
+	e.EncodeBool(c.dirFix)
+
+	e.EncodeString("stepping")
+	e.EncodeBool(c.stepping)
+
+	e.EncodeString("steppingCount")
+	e.EncodeInt(c.steppingCount)
+
+	e.EncodeString("walking")
+	e.EncodeBool(c.walking)
+
+	e.EncodeString("walkingCount")
+	e.EncodeInt(c.walkingCount)
+
+	e.EncodeString("frame")
+	e.EncodeInt(c.frame)
+
+	e.EncodeString("prevFrame")
+	e.EncodeInt(c.prevFrame)
+
+	e.EncodeString("x")
+	e.EncodeInt(c.x)
+
+	e.EncodeString("y")
+	e.EncodeInt(c.y)
+
+	e.EncodeString("moveCount")
+	e.EncodeInt(c.moveCount)
+
+	e.EncodeString("moveDir")
+	e.EncodeInt(int(c.moveDir))
+
+	e.EncodeString("visible")
+	e.EncodeBool(c.visible)
+
+	e.EncodeString("through")
+	e.EncodeBool(c.through)
+
+	e.EncodeString("erased")
+	e.EncodeBool(c.erased)
+
+	e.EndMap()
+	return e.Flush()
+}
+
 func (c *Character) UnmarshalJSON(data []uint8) error {
 	var tmp *tmpCharacter
 	if err := json.Unmarshal(data, &tmp); err != nil {
@@ -154,6 +222,57 @@ func (c *Character) UnmarshalJSON(data []uint8) error {
 	c.visible = tmp.Visible
 	c.through = tmp.Through
 	c.erased = tmp.Erased
+	return nil
+}
+
+func (c *Character) DecodeMsgpack(dec *msgpack.Decoder) error {
+	d := easymsgpack.NewDecoder(dec)
+	n := d.DecodeMapLen()
+	for i := 0; i < n; i++ {
+		switch d.DecodeString() {
+		case "eventId":
+			c.eventID = d.DecodeInt()
+		case "speed":
+			c.speed = data.Speed(d.DecodeInt())
+		case "imageName":
+			c.imageName = d.DecodeString()
+		case "imageIndex":
+			c.imageIndex = d.DecodeInt()
+		case "dir":
+			c.dir = data.Dir(d.DecodeInt())
+		case "dirFix":
+			c.dirFix = d.DecodeBool()
+		case "stepping":
+			c.stepping = d.DecodeBool()
+		case "steppingCount":
+			c.steppingCount = d.DecodeInt()
+		case "walking":
+			c.walking = d.DecodeBool()
+		case "walkingCount":
+			c.walkingCount = d.DecodeInt()
+		case "frame":
+			c.frame = d.DecodeInt()
+		case "prevFrame":
+			c.prevFrame = d.DecodeInt()
+		case "x":
+			c.x = d.DecodeInt()
+		case "y":
+			c.y = d.DecodeInt()
+		case "moveCount":
+			c.moveCount = d.DecodeInt()
+		case "moveDir":
+			c.moveDir = data.Dir(d.DecodeInt())
+		case "visible":
+			c.visible = d.DecodeBool()
+		case "through":
+			c.through = d.DecodeBool()
+		case "erased":
+			c.erased = d.DecodeBool()
+		}
+	}
+	if err := d.Error(); err != nil {
+		return fmt.Errorf("character: Character.DecodeMsgpack failed: %v", err)
+	}
 	return nil
 }
 

@@ -16,6 +16,11 @@ package items
 
 import (
 	"encoding/json"
+	"fmt"
+
+	"github.com/vmihailenco/msgpack"
+
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
 )
 
 type Items struct {
@@ -43,6 +48,21 @@ func (i *Items) MarshalJSON() ([]uint8, error) {
 	return json.Marshal(tmp)
 }
 
+func (i *Items) EncodeMsgpack(enc *msgpack.Encoder) error {
+	e := easymsgpack.NewEncoder(enc)
+	e.BeginMap()
+	e.EncodeString("items")
+	e.BeginArray()
+	for _, item := range i.items {
+		e.EncodeInt(item)
+	}
+	e.EndArray()
+	e.EncodeString("activeItem")
+	e.EncodeInt(i.activeItem)
+	e.EndMap()
+	return e.Flush()
+}
+
 func (i *Items) UnmarshalJSON(data []uint8) error {
 	var tmp *tmpItems
 	if err := json.Unmarshal(data, &tmp); err != nil {
@@ -50,6 +70,29 @@ func (i *Items) UnmarshalJSON(data []uint8) error {
 	}
 	i.items = tmp.Items
 	i.activeItem = tmp.ActiveItem
+	return nil
+}
+
+func (i *Items) DecodeMsgpack(dec *msgpack.Decoder) error {
+	d := easymsgpack.NewDecoder(dec)
+	n := d.DecodeMapLen()
+	for j := 0; j < n; j++ {
+		switch d.DecodeString() {
+		case "items":
+			if !d.SkipCodeIfNil() {
+				n := d.DecodeArrayLen()
+				i.items = make([]int, n)
+				for j := 0; j < n; j++ {
+					i.items[j] = d.DecodeInt()
+				}
+			}
+		case "activeItem":
+			i.activeItem = d.DecodeInt()
+		}
+	}
+	if err := d.Error(); err != nil {
+		return fmt.Errorf("items: Items.DecodeMsgpack failed: %v", err)
+	}
 	return nil
 }
 

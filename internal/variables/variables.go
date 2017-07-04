@@ -18,7 +18,10 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/vmihailenco/msgpack"
+
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
 )
 
 type Variables struct {
@@ -45,6 +48,48 @@ func (v *Variables) MarshalJSON() ([]uint8, error) {
 	return json.Marshal(tmp)
 }
 
+func (v *Variables) EncodeMsgpack(enc *msgpack.Encoder) error {
+	e := easymsgpack.NewEncoder(enc)
+	e.BeginMap()
+
+	e.EncodeString("switches")
+	e.BeginArray()
+	for _, val := range v.switches {
+		e.EncodeBool(val)
+	}
+	e.EndArray()
+
+	e.EncodeString("selfSwitches")
+	e.BeginMap()
+	for k, val := range v.selfSwitches {
+		e.EncodeString(k)
+		e.BeginArray()
+		for _, s := range val {
+			e.EncodeBool(s)
+		}
+		e.EndArray()
+	}
+	e.EndMap()
+
+	e.EncodeString("variables")
+	e.BeginArray()
+	for _, val := range v.variables {
+		e.EncodeInt(val)
+	}
+	e.EndArray()
+
+	e.EncodeString("innerVariables")
+	e.BeginMap()
+	for k, val := range v.innerVariables {
+		e.EncodeString(k)
+		e.EncodeInt(val)
+	}
+	e.EndMap()
+
+	e.EndMap()
+	return e.Flush()
+}
+
 func (v *Variables) UnmarshalJSON(data []uint8) error {
 	var tmp *tmpVariables
 	if err := json.Unmarshal(data, &tmp); err != nil {
@@ -54,6 +99,62 @@ func (v *Variables) UnmarshalJSON(data []uint8) error {
 	v.selfSwitches = tmp.SelfSwitches
 	v.variables = tmp.Variables
 	v.innerVariables = tmp.InnerVariables
+	return nil
+}
+
+func (v *Variables) DecodeMsgpack(dec *msgpack.Decoder) error {
+	d := easymsgpack.NewDecoder(dec)
+	n := d.DecodeMapLen()
+	for i := 0; i < n; i++ {
+		switch d.DecodeString() {
+		case "switches":
+			if !d.SkipCodeIfNil() {
+				n := d.DecodeArrayLen()
+				v.switches = make([]bool, n)
+				for i := 0; i < n; i++ {
+					v.switches[i] = d.DecodeBool()
+				}
+			}
+		case "selfSwitches":
+			if !d.SkipCodeIfNil() {
+				n := d.DecodeMapLen()
+				v.selfSwitches = map[string][]bool{}
+				for i := 0; i < n; i++ {
+					k := d.DecodeString()
+					v.selfSwitches[k] = nil
+					if !d.SkipCodeIfNil() {
+						n := d.DecodeArrayLen()
+						a := make([]bool, n)
+						for i := 0; i < n; i++ {
+							a[i] = d.DecodeBool()
+						}
+						v.selfSwitches[k] = a
+					}
+				}
+			}
+		case "variables":
+			if !d.SkipCodeIfNil() {
+				n := d.DecodeArrayLen()
+				v.variables = make([]int, n)
+				for i := 0; i < n; i++ {
+					v.variables[i] = d.DecodeInt()
+				}
+			}
+		case "innerVariables":
+			if !d.SkipCodeIfNil() {
+				n := d.DecodeMapLen()
+				v.innerVariables = map[string]int{}
+				for i := 0; i < n; i++ {
+					k := d.DecodeString()
+					val := d.DecodeInt()
+					v.innerVariables[k] = val
+				}
+			}
+		}
+	}
+	if err := d.Error(); err != nil {
+		return fmt.Errorf("variables: Variables.DecodeMsgpack failed: %v", err)
+	}
 	return nil
 }
 

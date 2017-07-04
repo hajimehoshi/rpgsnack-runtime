@@ -31,7 +31,7 @@ import (
 
 var (
 	purchasesPath = flag.String("purchases-json-path", "./purchases.json", "purchases path")
-	savePath      = flag.String("save-json-path", "./save.json", "save path")
+	savePath      = flag.String("save-msgpack-path", "./save.msgpack", "save path")
 	languagePath  = flag.String("language-json-path", "./language.json", "language path")
 )
 

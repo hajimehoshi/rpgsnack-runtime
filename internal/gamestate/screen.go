@@ -16,10 +16,13 @@ package gamestate
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/hajimehoshi/ebiten"
+	"github.com/vmihailenco/msgpack"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
 )
 
 var emptyImage *ebiten.Image
@@ -41,6 +44,42 @@ type tint struct {
 
 func (t *tint) isZero() bool {
 	return t.Red == 0 && t.Green == 0 && t.Blue == 0 && t.Gray == 0
+}
+
+func (t *tint) EncodeMsgpack(enc *msgpack.Encoder) error {
+	e := easymsgpack.NewEncoder(enc)
+	e.BeginMap()
+	e.EncodeString("red")
+	e.EncodeFloat64(t.Red)
+	e.EncodeString("green")
+	e.EncodeFloat64(t.Green)
+	e.EncodeString("blue")
+	e.EncodeFloat64(t.Blue)
+	e.EncodeString("gray")
+	e.EncodeFloat64(t.Gray)
+	e.EndMap()
+	return e.Flush()
+}
+
+func (t *tint) DecodeMsgpack(dec *msgpack.Decoder) error {
+	d := easymsgpack.NewDecoder(dec)
+	n := d.DecodeMapLen()
+	for i := 0; i < n; i++ {
+		switch d.DecodeString() {
+		case "red":
+			t.Red = d.DecodeFloat64()
+		case "green":
+			t.Green = d.DecodeFloat64()
+		case "blue":
+			t.Blue = d.DecodeFloat64()
+		case "gray":
+			t.Gray = d.DecodeFloat64()
+		}
+	}
+	if err := d.Error(); err != nil {
+		return fmt.Errorf("gamestate: tint.DecodeMsgpack failed: %v", err)
+	}
+	return nil
 }
 
 type Screen struct {
@@ -85,6 +124,37 @@ func (s *Screen) MarshalJSON() ([]uint8, error) {
 	return json.Marshal(tmp)
 }
 
+func (s *Screen) EncodeMsgpack(enc *msgpack.Encoder) error {
+	e := easymsgpack.NewEncoder(enc)
+	e.BeginMap()
+
+	e.EncodeString("currentTint")
+	e.EncodeInterface(&s.currentTint)
+	e.EncodeString("origTint")
+	e.EncodeInterface(&s.origTint)
+	e.EncodeString("targetTint")
+	e.EncodeInterface(&s.targetTint)
+
+	e.EncodeString("tintCount")
+	e.EncodeInt(s.tintCount)
+	e.EncodeString("tintMaxCount")
+	e.EncodeInt(s.tintMaxCount)
+	e.EncodeString("fadeInCount")
+	e.EncodeInt(s.fadeInCount)
+	e.EncodeString("fadeInMaxCount")
+	e.EncodeInt(s.fadeInMaxCount)
+	e.EncodeString("fadeOutCount")
+	e.EncodeInt(s.fadeOutCount)
+	e.EncodeString("fadeOutMaxCount")
+	e.EncodeInt(s.fadeOutMaxCount)
+
+	e.EncodeString("fadedOut")
+	e.EncodeBool(s.fadedOut)
+
+	e.EndMap()
+	return e.Flush()
+}
+
 func (s *Screen) UnmarshalJSON(data []uint8) error {
 	var tmp *tmpScreen
 	if err := json.Unmarshal(data, &tmp); err != nil {
@@ -100,6 +170,39 @@ func (s *Screen) UnmarshalJSON(data []uint8) error {
 	s.fadeOutCount = tmp.FadeOutCount
 	s.fadeOutMaxCount = tmp.FadeOutMaxCount
 	s.fadedOut = tmp.FadedOut
+	return nil
+}
+
+func (s *Screen) DecodeMsgpack(dec *msgpack.Decoder) error {
+	d := easymsgpack.NewDecoder(dec)
+	n := d.DecodeMapLen()
+	for i := 0; i < n; i++ {
+		switch d.DecodeString() {
+		case "currentTint":
+			d.DecodeInterface(&s.currentTint)
+		case "origTint":
+			d.DecodeInterface(&s.origTint)
+		case "targetTint":
+			d.DecodeInterface(&s.targetTint)
+		case "tintCount":
+			s.tintCount = d.DecodeInt()
+		case "tintMaxCount":
+			s.tintMaxCount = d.DecodeInt()
+		case "fadeInCount":
+			s.fadeInCount = d.DecodeInt()
+		case "fadeInMaxCount":
+			s.fadeInMaxCount = d.DecodeInt()
+		case "fadeOutCount":
+			s.fadeOutCount = d.DecodeInt()
+		case "fadeOutMaxCount":
+			s.fadeOutMaxCount = d.DecodeInt()
+		case "fadedOut":
+			s.fadedOut = d.DecodeBool()
+		}
+	}
+	if err := d.Error(); err != nil {
+		return fmt.Errorf("gamestate: Screen.DecodeMsgpack failed: %v", err)
+	}
 	return nil
 }
 

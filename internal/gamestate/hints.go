@@ -16,6 +16,11 @@ package gamestate
 
 import (
 	"encoding/json"
+	"fmt"
+
+	"github.com/vmihailenco/msgpack"
+
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
 )
 
 type hintState int
@@ -42,12 +47,49 @@ func (h *Hints) MarshalJSON() ([]uint8, error) {
 	return json.Marshal(tmp)
 }
 
+func (h *Hints) EncodeMsgpack(enc *msgpack.Encoder) error {
+	e := easymsgpack.NewEncoder(enc)
+	e.BeginMap()
+	e.EncodeString("states")
+	e.BeginMap()
+	for k, v := range h.states {
+		e.EncodeInt(k)
+		e.EncodeInt(int(v))
+	}
+	e.EndMap()
+	e.EndMap()
+	return e.Flush()
+}
+
 func (h *Hints) UnmarshalJSON(data []uint8) error {
 	var tmp *tmpHints
 	if err := json.Unmarshal(data, &tmp); err != nil {
 		return err
 	}
 	h.states = tmp.States
+	return nil
+}
+
+func (h *Hints) DecodeMsgpack(dec *msgpack.Decoder) error {
+	d := easymsgpack.NewDecoder(dec)
+	n := d.DecodeMapLen()
+	for i := 0; i < n; i++ {
+		switch d.DecodeString() {
+		case "states":
+			if !d.SkipCodeIfNil() {
+				n := d.DecodeMapLen()
+				h.states = map[int]hintState{}
+				for i := 0; i < n; i++ {
+					k := d.DecodeInt()
+					v := hintState(d.DecodeInt())
+					h.states[k] = v
+				}
+			}
+		}
+	}
+	if err := d.Error(); err != nil {
+		return fmt.Errorf("gamestate: Hints.DecodeMsgpack failed: %v", err)
+	}
 	return nil
 }
 

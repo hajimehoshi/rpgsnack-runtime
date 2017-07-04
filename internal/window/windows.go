@@ -19,10 +19,12 @@ import (
 	"fmt"
 
 	"github.com/hajimehoshi/ebiten"
+	"github.com/vmihailenco/msgpack"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
@@ -71,6 +73,49 @@ func (w *Windows) MarshalJSON() ([]uint8, error) {
 	return json.Marshal(tmp)
 }
 
+func (w *Windows) EncodeMsgpack(enc *msgpack.Encoder) error {
+	e := easymsgpack.NewEncoder(enc)
+	e.BeginMap()
+
+	e.EncodeString("nextBalloon")
+	e.EncodeInterface(w.nextBalloon)
+
+	e.EncodeString("balloons")
+	e.BeginArray()
+	for _, b := range w.balloons {
+		e.EncodeInterface(b)
+	}
+	e.EndArray()
+
+	e.EncodeString("choiceBalloons")
+	e.BeginArray()
+	for _, b := range w.choiceBalloons {
+		e.EncodeInterface(b)
+	}
+	e.EndArray()
+
+	e.EncodeString("banner")
+	e.EncodeInterface(w.banner)
+
+	e.EncodeString("chosenIndex")
+	e.EncodeInt(w.chosenIndex)
+
+	e.EncodeString("choosing")
+	e.EncodeBool(w.choosing)
+
+	e.EncodeString("choosingInterpreterId")
+	e.EncodeInt(w.choosingInterpreterID)
+
+	e.EncodeString("chosenBalloonWaitingCount")
+	e.EncodeInt(w.chosenBalloonWaitingCount)
+
+	e.EncodeString("hasChosenIndex")
+	e.EncodeBool(w.hasChosenIndex)
+
+	e.EndMap()
+	return e.Flush()
+}
+
 func (w *Windows) UnmarshalJSON(data []uint8) error {
 	var tmp *tmpWindows
 	if err := json.Unmarshal(data, &tmp); err != nil {
@@ -85,6 +130,67 @@ func (w *Windows) UnmarshalJSON(data []uint8) error {
 	w.choosingInterpreterID = tmp.ChoosingInterpreterID
 	w.chosenBalloonWaitingCount = tmp.ChosenBalloonWaitingCount
 	w.hasChosenIndex = tmp.HasChosenIndex
+	return nil
+}
+
+func (w *Windows) DecodeMsgpack(dec *msgpack.Decoder) error {
+	d := easymsgpack.NewDecoder(dec)
+	n := d.DecodeMapLen()
+	for i := 0; i < n; i++ {
+		k := d.DecodeString()
+		switch k {
+		case "nextBalloon":
+			if !d.SkipCodeIfNil() {
+				w.nextBalloon = &balloon{}
+				d.DecodeInterface(w.nextBalloon)
+			}
+		case "balloons":
+			if !d.SkipCodeIfNil() {
+				n := d.DecodeArrayLen()
+				w.balloons = make([]*balloon, n)
+				for i := 0; i < n; i++ {
+					if !d.SkipCodeIfNil() {
+						w.balloons[i] = &balloon{}
+						d.DecodeInterface(w.balloons[i])
+					}
+				}
+			}
+		case "choiceBalloons":
+			if !d.SkipCodeIfNil() {
+				n := d.DecodeArrayLen()
+				w.choiceBalloons = make([]*balloon, n)
+				for i := 0; i < n; i++ {
+					if !d.SkipCodeIfNil() {
+						w.choiceBalloons[i] = &balloon{}
+						d.DecodeInterface(w.choiceBalloons[i])
+					}
+				}
+			}
+		case "banner":
+			if !d.SkipCodeIfNil() {
+				w.banner = &banner{}
+				d.DecodeInterface(w.banner)
+			}
+		case "chosenIndex":
+			w.chosenIndex = d.DecodeInt()
+		case "choosing":
+			w.choosing = d.DecodeBool()
+		case "choosingInterpreterId":
+			w.choosingInterpreterID = d.DecodeInt()
+		case "chosenBalloonWaitingCount":
+			w.chosenBalloonWaitingCount = d.DecodeInt()
+		case "hasChosenIndex":
+			w.hasChosenIndex = d.DecodeBool()
+		default:
+			if err := d.Error(); err != nil {
+				return err
+			}
+			return fmt.Errorf("window: Windows.DecodeMsgpack failed: unknown key: %s", k)
+		}
+	}
+	if err := d.Error(); err != nil {
+		return fmt.Errorf("window: Windows.DecodeMsgpack failed: %v", err)
+	}
 	return nil
 }
 
