@@ -35,7 +35,7 @@ type Button struct {
 	Visible   bool
 	Text      string
 	Disabled  bool
-	image     *ebiten.Image
+	Image     *ebiten.Image
 	pressing  bool
 	pressed   bool
 	soundName string
@@ -60,7 +60,7 @@ func NewImageButton(x, y int, image *ebiten.Image, soundName string) *Button {
 		Width:     w,
 		Height:    h,
 		Visible:   true,
-		image:     image,
+		Image:     image,
 		soundName: soundName,
 	}
 }
@@ -122,7 +122,7 @@ func (b *Button) Draw(screen *ebiten.Image) {
 	if !b.Visible {
 		return
 	}
-	if b.image != nil {
+	if b.Image != nil {
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(b.X), float64(b.Y))
 		op.GeoM.Scale(consts.TileScale, consts.TileScale)
@@ -130,7 +130,7 @@ func (b *Button) Draw(screen *ebiten.Image) {
 			op.ColorM.ChangeHSV(0, 0, 1)
 			op.ColorM.Scale(0.5, 0.5, 0.5, 1)
 		}
-		screen.DrawImage(b.image, op)
+		screen.DrawImage(b.Image, op)
 		return
 	}
 	img := assets.GetImage("system/9patch_test_off.png")

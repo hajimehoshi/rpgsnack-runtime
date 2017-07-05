@@ -77,7 +77,7 @@ func (i *Inventory) Draw(screen *ebiten.Image) {
 		if i.activeItemId == item.ID {
 			op.ColorM.Translate(0.5, 0.5, 0.5, 0)
 		}
-		screen.DrawImage(assets.GetImage("items/"+item.Icon+".png"), op)
+		screen.DrawImage(assets.GetImage("items/icon/"+item.Icon+".png"), op)
 	}
 }
 

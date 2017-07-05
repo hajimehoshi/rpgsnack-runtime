@@ -59,9 +59,7 @@ type MapScene struct {
 	removeAdsYesButton *ui.Button
 	removeAdsNoButton  *ui.Button
 	inventory          *ui.Inventory
-	itemDetailsDialog  *ui.Dialog
-	itemNameLabel      *ui.Label
-	itemDescLabel      *ui.Label
+	itemPreviewPopup   *ui.ItemPreviewPopup
 	waitingRequestID   int
 	isAdsRemoved       bool
 }
@@ -127,11 +125,7 @@ func (m *MapScene) initUI() {
 	m.removeAdsDialog.AddChild(m.removeAdsYesButton)
 	m.removeAdsDialog.AddChild(m.removeAdsNoButton)
 	m.inventory = ui.NewInventory(0, consts.TileYNum*consts.TileSize-2)
-	m.itemDetailsDialog = ui.NewDialog(0, 64, 128, 96)
-	m.itemNameLabel = ui.NewLabel(16, 8)
-	m.itemDescLabel = ui.NewLabel(16, 32)
-	m.itemDetailsDialog.AddChild(m.itemNameLabel)
-	m.itemDetailsDialog.AddChild(m.itemDescLabel)
+	m.itemPreviewPopup = ui.NewItemPreviewPopup(32, 32, 256, 256)
 	m.quitDialog.AddChild(m.quitLabel)
 
 	m.removeAdsButton.Visible = false // TODO: Clock of Atonement does not need this feature, so turn it off for now
@@ -237,22 +231,13 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 		}
 		return nil
 	}
-	m.itemDetailsDialog.X = (w/consts.TileScale-160)/2 + 16
-	if m.itemDetailsDialog.Visible {
-		m.itemDetailsDialog.Update()
-		if input.Triggered() {
-			m.itemDetailsDialog.Visible = false
-			return nil
-		}
-		return nil
-	}
 
 	if m.inventory.Visible {
 		// TODO creating array for each loop does not seem to be the right thing
 		items := []*data.Item{}
-		for _, itemId := range m.gameState.Items().Items() {
+		for _, itemID := range m.gameState.Items().Items() {
 			for _, item := range sceneManager.Game().Items {
-				if itemId == item.ID {
+				if itemID == item.ID {
 					items = append(items, item)
 				}
 			}
@@ -263,23 +248,27 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 		if m.inventory.PressedSlotIndex >= 0 && m.inventory.PressedSlotIndex < len(m.gameState.Items().Items()) {
 			itemID := m.gameState.Items().Items()[m.inventory.PressedSlotIndex]
 			if itemID == m.gameState.Items().ActiveItem() {
-				m.itemDetailsDialog.Visible = true
-				itemDetailName := ""
-				itemDetailDesc := ""
-				for _, item := range sceneManager.Game().Items {
-					if m.gameState.Items().ActiveItem() == item.ID {
-						itemDetailName = sceneManager.Game().Texts.Get(sceneManager.Language(), item.Name)
-						itemDetailDesc = sceneManager.Game().Texts.Get(sceneManager.Language(), item.Desc)
-						break
+				if !m.itemPreviewPopup.Visible {
+					for _, item := range sceneManager.Game().Items {
+						if itemID == item.ID {
+							m.itemPreviewPopup.SetItem(item)
+							break
+						}
 					}
 				}
-				m.itemNameLabel.Text = itemDetailName
-				m.itemDescLabel.Text = itemDetailDesc
+
+				m.itemPreviewPopup.Visible = true
 				m.gameState.Items().Deactivate()
 			} else {
 				m.gameState.Items().Activate(itemID)
 			}
 		}
+	}
+
+	m.itemPreviewPopup.X = (w/consts.TileScale-160)/2 + 16
+	if m.itemPreviewPopup.Visible {
+		m.itemPreviewPopup.Update()
+		return nil
 	}
 
 	m.storeErrorOkButton.X = (m.storeErrorDialog.Width - m.storeErrorOkButton.Width) / 2
@@ -483,5 +472,5 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	m.quitDialog.Draw(screen)
 	m.storeErrorDialog.Draw(screen)
 	m.removeAdsDialog.Draw(screen)
-	m.itemDetailsDialog.Draw(screen)
+	m.itemPreviewPopup.Draw(screen)
 }
