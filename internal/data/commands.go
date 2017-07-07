@@ -342,10 +342,10 @@ type CommandArgsSetSelfSwitch struct {
 }
 
 type CommandArgsSetVariable struct {
-	ID        int
-	Op        SetVariableOp
-	ValueType SetVariableValueType
-	Value     interface{}
+	ID        int                  `json:"id"`
+	Op        SetVariableOp        `json:"op"`
+	ValueType SetVariableValueType `json:"valueType"`
+	Value     interface{}          `json:"value"`
 }
 
 func (c *CommandArgsSetVariable) UnmarshalJSON(data []uint8) error {
@@ -486,8 +486,8 @@ type CommandArgsRotateCharacter struct {
 }
 
 type CommandArgsSetCharacterProperty struct {
-	Type  SetCharacterPropertyType
-	Value interface{}
+	Type  SetCharacterPropertyType `json:"type"`
+	Value interface{}              `json:"value"`
 }
 
 func (c *CommandArgsSetCharacterProperty) UnmarshalJSON(data []uint8) error {
