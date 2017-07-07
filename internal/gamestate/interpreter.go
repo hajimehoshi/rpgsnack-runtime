@@ -199,6 +199,8 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 	}
 	c := i.commandIterator.Command()
 	switch c.Name {
+	case data.CommandNameNop:
+		i.commandIterator.Advance()
 	case data.CommandNameIf:
 		conditions := c.Args.(*data.CommandArgsIf).Conditions
 		matches := true

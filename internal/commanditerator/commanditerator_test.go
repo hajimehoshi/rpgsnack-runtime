@@ -15,6 +15,7 @@
 package commanditerator_test
 
 import (
+	"encoding/json"
 	"testing"
 
 	. "github.com/hajimehoshi/rpgsnack-runtime/internal/commanditerator"
@@ -32,7 +33,7 @@ func makeLabelCommand(name string) *data.Command {
 
 func makeBranches(commands ...[]*data.Command) *data.Command {
 	return &data.Command{
-		Name:     "pseudo_command",
+		Name:     data.CommandNameNop,
 		Args:     nil,
 		Branches: commands,
 	}
@@ -90,7 +91,10 @@ func TestGoto(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
-		it.Goto(c.In)
+		if !it.Goto(c.In) {
+			t.Errorf("goto failed")
+			continue
+		}
 		command := it.Command()
 		if command.Name != data.CommandNameLabel {
 			t.Errorf("command is not '%v' for %v", data.CommandNameLabel, c.In)
@@ -101,6 +105,25 @@ func TestGoto(t *testing.T) {
 		want := c.Out
 		if got != want {
 			t.Errorf("it.Command().Args.Name == %v want: %v", got, want)
+		}
+
+		// JSON marshaling
+		j, err := json.Marshal(it)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var it2 *CommandIterator
+		if err := json.Unmarshal(j, &it2); err != nil {
+			t.Fatal(err)
+		}
+		if !it2.Goto(c.In) {
+			t.Errorf("goto failed")
+			continue
+		}
+		command = it2.Command()
+		if command.Name != data.CommandNameLabel {
+			t.Errorf("command is not '%v' for %v", data.CommandNameLabel, c.In)
+			continue
 		}
 	}
 }

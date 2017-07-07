@@ -35,7 +35,7 @@ func New(commands []*data.Command) *CommandIterator {
 		labels:   map[string][]int{},
 	}
 	c.unindentIfNeeded()
-	c.recordLabel(c.commands, []int{})
+	c.recordLabel(c.commands, nil)
 	return c
 }
 
@@ -59,6 +59,8 @@ func (c *CommandIterator) UnmarshalJSON(data []uint8) error {
 	}
 	c.indices = tmp.Indices
 	c.commands = tmp.Commands
+	c.labels = map[string][]int{}
+	c.recordLabel(c.commands, nil)
 	return nil
 }
 

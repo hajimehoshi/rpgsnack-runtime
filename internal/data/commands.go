@@ -38,6 +38,7 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 	c.Name = tmp.Name
 	c.Branches = tmp.Branches
 	switch c.Name {
+	case CommandNameNop:
 	case CommandNameIf:
 		var args *CommandArgsIf
 		if err := unmarshalJSON(tmp.Args, &args); err != nil {
@@ -243,6 +244,7 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 type CommandName string
 
 const (
+	CommandNameNop           CommandName = "nop"
 	CommandNameIf            CommandName = "if"
 	CommandNameLabel         CommandName = "label"
 	CommandNameGoto          CommandName = "goto"
