@@ -38,6 +38,10 @@ func Update() error {
 	return theAudio.Update()
 }
 
+func Stop() error {
+	return theAudio.Stop()
+}
+
 func PlaySE(path string, volume float64) error {
 	return theAudio.PlaySE(path, volume)
 }
@@ -53,6 +57,7 @@ func StopBGM() error {
 type audio struct {
 	context     *eaudio.Context
 	players     map[string]*eaudio.Player
+	sePlayers   map[*eaudio.Player]struct{}
 	playing     *eaudio.Player
 	playingName string
 }
@@ -63,13 +68,39 @@ func newAudio() (*audio, error) {
 		return nil, err
 	}
 	return &audio{
-		context: context,
-		players: map[string]*eaudio.Player{},
+		context:   context,
+		players:   map[string]*eaudio.Player{},
+		sePlayers: map[*eaudio.Player]struct{}{},
 	}, nil
 }
 
 func (a *audio) Update() error {
-	return a.context.Update()
+	if err := a.context.Update(); err != nil {
+		return err
+	}
+	closed := []*eaudio.Player{}
+	for p := range a.sePlayers {
+		if !p.IsPlaying() {
+			closed = append(closed, p)
+		}
+	}
+	for _, p := range closed {
+		delete(a.sePlayers, p)
+	}
+	return nil
+}
+
+func (a *audio) Stop() error {
+	if err := StopBGM(); err != nil {
+		return err
+	}
+	for p := range a.sePlayers {
+		if err := p.Pause(); err != nil {
+			return err
+		}
+	}
+	a.sePlayers = map[*eaudio.Player]struct{}{}
+	return nil
 }
 
 func (a *audio) PlaySE(name string, volume float64) error {
@@ -84,6 +115,7 @@ func (a *audio) PlaySE(name string, volume float64) error {
 	}
 	p.SetVolume(volume)
 	p.Play()
+	a.sePlayers[p] = struct{}{}
 	return nil
 }
 

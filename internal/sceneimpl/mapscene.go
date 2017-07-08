@@ -222,6 +222,9 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 			if m.gameState.IsAutoSaveEnabled() {
 				m.gameState.RequestSave(sceneManager)
 			}
+			if err := audio.Stop(); err != nil {
+				return err
+			}
 			sceneManager.GoToWithFading(NewTitleScene(), 30)
 			return nil
 		}
@@ -330,6 +333,9 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 	m.gameState.Windows().Update(sceneManager)
 	if err := m.gameState.Map().Update(sceneManager); err != nil {
 		if err == gamestate.GoToTitle {
+			if err := audio.Stop(); err != nil {
+				return err
+			}
 			sceneManager.GoToWithFading(NewTitleScene(), 60)
 			return nil
 		}
