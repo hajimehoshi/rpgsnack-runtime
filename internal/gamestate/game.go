@@ -26,6 +26,7 @@ import (
 	"github.com/hajimehoshi/ebiten"
 	"github.com/vmihailenco/msgpack"
 
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
@@ -50,6 +51,9 @@ type Game struct {
 	autoSaveEnabled      bool
 	playerControlEnabled bool
 	cleared              bool
+
+	lastPlayingBGMName   string
+	lastPlayingBGMVolume float64
 
 	// Fields that are not dumped
 	rand             Rand
@@ -139,6 +143,12 @@ func (g *Game) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EncodeString("cleared")
 	e.EncodeBool(g.cleared)
 
+	e.EncodeString("lastPlayingBGMName")
+	e.EncodeString(audio.PlayingBGMName())
+
+	e.EncodeString("lastPlayingBGMVolume")
+	e.EncodeFloat64(audio.PlayingBGMVolume())
+
 	e.EndMap()
 	return e.Flush()
 }
@@ -208,6 +218,10 @@ func (g *Game) DecodeMsgpack(dec *msgpack.Decoder) error {
 			g.playerControlEnabled = d.DecodeBool()
 		case "cleared":
 			g.cleared = d.DecodeBool()
+		case "lastPlayingBGMName":
+			g.lastPlayingBGMName = d.DecodeString()
+		case "lastPlayingBGMVolume":
+			g.lastPlayingBGMVolume = d.DecodeFloat64()
 		default:
 			if err := d.Error(); err != nil {
 				return err
@@ -239,6 +253,11 @@ func (g *Game) Map() *Map {
 }
 
 func (g *Game) Update(sceneManager *scene.Manager) error {
+	if g.lastPlayingBGMName != "" {
+		audio.PlayBGM(g.lastPlayingBGMName, g.lastPlayingBGMVolume)
+		g.lastPlayingBGMName = ""
+		g.lastPlayingBGMVolume = 0
+	}
 	if g.waitingRequestID != 0 {
 		if sceneManager.ReceiveResultIfExists(g.waitingRequestID) != nil {
 			g.waitingRequestID = 0

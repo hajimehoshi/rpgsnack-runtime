@@ -50,16 +50,25 @@ func PlayBGM(path string, volume float64) error {
 	return theAudio.PlayBGM(path, volume)
 }
 
+func PlayingBGMName() string {
+	return theAudio.playingBGMName
+}
+
+func PlayingBGMVolume() float64 {
+	return theAudio.playingBGMVolume
+}
+
 func StopBGM() error {
 	return theAudio.StopBGM()
 }
 
 type audio struct {
-	context     *eaudio.Context
-	players     map[string]*eaudio.Player
-	sePlayers   map[*eaudio.Player]struct{}
-	playing     *eaudio.Player
-	playingName string
+	context          *eaudio.Context
+	players          map[string]*eaudio.Player
+	sePlayers        map[*eaudio.Player]struct{}
+	playing          *eaudio.Player
+	playingBGMName   string
+	playingBGMVolume float64
 }
 
 func newAudio() (*audio, error) {
@@ -149,7 +158,7 @@ func (a *audio) PlayBGM(name string, volume float64) error {
 		a.players[name] = player
 		p = player
 	}
-	if a.playingName == name {
+	if a.playingBGMName == name {
 		a.playing.SetVolume(volume)
 		return nil
 	}
@@ -159,7 +168,8 @@ func (a *audio) PlayBGM(name string, volume float64) error {
 	p.Play()
 	p.SetVolume(volume)
 	a.playing = p
-	a.playingName = name
+	a.playingBGMName = name
+	a.playingBGMVolume = volume
 	return nil
 }
 
@@ -171,6 +181,7 @@ func (a *audio) StopBGM() error {
 		return err
 	}
 	a.playing = nil
-	a.playingName = ""
+	a.playingBGMName = ""
+	a.playingBGMVolume = 0
 	return nil
 }
