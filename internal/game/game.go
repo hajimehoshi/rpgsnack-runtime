@@ -108,6 +108,7 @@ func (g *Game) update() error {
 	if err := audio.Update(); err != nil {
 		return err
 	}
+	takeCPUProfileIfAvailable()
 	return g.sceneManager.Update()
 }
 

@@ -1,4 +1,4 @@
-// Copyright 2016 Hajime Hoshi
+// Copyright 2017 Hajime Hoshi
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,39 +12,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+// +build !js
+
+package game
 
 import (
 	"flag"
 	"log"
-	"strconv"
-	"strings"
+	"os"
+	"runtime/pprof"
 
 	"github.com/hajimehoshi/ebiten"
-
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/game"
 )
 
 var (
-	screenSize = flag.String("screensize", "480x720", "screen size like 480x720")
+	cpuProfile     = flag.String("cpuprofile", "", "write cpu profile to file")
+	cpuProfileFile *os.File
 )
 
-func main() {
-	flag.Parse()
-	sp := strings.Split(*screenSize, "x")
-	sw, err := strconv.Atoi(sp[0])
-	if err != nil {
-		log.Fatal(err)
+func takeCPUProfileIfAvailable() {
+	if ebiten.IsKeyPressed(ebiten.KeyP) && *cpuProfile != "" && cpuProfileFile == nil {
+		f, err := os.Create(*cpuProfile)
+		if err != nil {
+			panic(err)
+		}
+		cpuProfileFile = f
+		pprof.StartCPUProfile(f)
+		log.Print("Start CPU Profiling")
 	}
-	sh, err := strconv.Atoi(sp[1])
-	if err != nil {
-		log.Fatal(err)
-	}
-	g, err := game.NewWithDefaultRequester(sw, sh)
-	if err != nil {
-		log.Fatal(err)
-	}
-	if err := ebiten.Run(g.Update, sw, sh, game.Scale(), game.Title()); err != nil {
-		log.Fatal(err)
+	if ebiten.IsKeyPressed(ebiten.KeyQ) && cpuProfileFile != nil {
+		pprof.StopCPUProfile()
+		cpuProfileFile.Close()
+		cpuProfileFile = nil
+		log.Print("Stop CPU Profiling")
 	}
 }
