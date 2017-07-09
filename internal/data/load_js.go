@@ -37,11 +37,25 @@ func fetch(path string) <-chan []uint8 {
 	return ch
 }
 
+func fetchProgress() <-chan []uint8 {
+	ch := make(chan []uint8)
+	go func() {
+		data := js.Global.Get("localStorage").Call("getItem", "progress")
+		if data == nil {
+			close(ch)
+			return
+		}
+		ch <- js.Global.Get("Uint8Array").New(data).Interface().([]uint8)
+		close(ch)
+	}()
+	return ch
+}
+
 func loadRawData(projectPath string) (*rawData, error) {
 	return &rawData{
 		Project:   <-fetch(path.Join(projectPath, "project.json")),
 		Assets:    <-fetch(path.Join(projectPath, "assets.msgpack")),
-		Progress:  nil, // TODO: Implement this
+		Progress:  <-fetchProgress(),
 		Purchases: nil, // TODO: Implement this
 		Language:  []uint8(`"en"`),
 	}, nil

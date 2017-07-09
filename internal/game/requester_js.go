@@ -18,6 +18,8 @@ package game
 
 import (
 	"log"
+
+	"github.com/gopherjs/gopherjs/js"
 )
 
 type Requester struct {
@@ -31,6 +33,7 @@ func (m *Requester) RequestUnlockAchievement(requestID int, achievementID int) {
 
 func (m *Requester) RequestSaveProgress(requestID int, data []uint8) {
 	log.Printf("request save progress: requestID: %d", requestID)
+	js.Global.Get("localStorage").Call("setItem", "progress", data)
 	m.game.FinishSaveProgress(requestID)
 }
 
