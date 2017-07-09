@@ -17,6 +17,8 @@
 package data
 
 import (
+	"encoding/base64"
+	"log"
 	"path"
 
 	"github.com/gopherjs/gopherjs/js"
@@ -45,7 +47,13 @@ func fetchProgress() <-chan []uint8 {
 			close(ch)
 			return
 		}
-		ch <- js.Global.Get("Uint8Array").New(data).Interface().([]uint8)
+		b, err := base64.StdEncoding.DecodeString(data.String())
+		if err != nil {
+			log.Printf("localStroge's progress is invalid: %v", err)
+			close(ch)
+			return
+		}
+		ch <- b
 		close(ch)
 	}()
 	return ch

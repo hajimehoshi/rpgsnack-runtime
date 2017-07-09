@@ -17,6 +17,7 @@
 package game
 
 import (
+	"encoding/base64"
 	"log"
 
 	"github.com/gopherjs/gopherjs/js"
@@ -33,7 +34,7 @@ func (m *Requester) RequestUnlockAchievement(requestID int, achievementID int) {
 
 func (m *Requester) RequestSaveProgress(requestID int, data []uint8) {
 	log.Printf("request save progress: requestID: %d", requestID)
-	js.Global.Get("localStorage").Call("setItem", "progress", data)
+	js.Global.Get("localStorage").Call("setItem", "progress", base64.StdEncoding.EncodeToString(data))
 	m.game.FinishSaveProgress(requestID)
 }
 
