@@ -920,7 +920,7 @@ type CommandArgsSetCharacterImage struct {
 	Image          string `json:"image" msgpack:"image"`
 	ImageIndex     int    `json:"imageIndex" msgpack:"imageIndex"`
 	Frame          int    `json:"frame" msgpack:"frame"`
-	Dir            Dir    `json:"dir" msgpack:"dir"`
+	Dir            Dir    `json:"imageDir" msgpack:"imageDir"`
 	UseFrameAndDir bool   `json:"useFrameAndDir" msgpack:"useFrameAndDir"`
 }
 
