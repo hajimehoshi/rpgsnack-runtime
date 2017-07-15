@@ -644,7 +644,7 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, x, y int) bo
 			Args: &data.CommandArgsSetRoute{
 				EventID: character.PlayerEventID,
 				Repeat:  false,
-				Skip:    false,
+				Skip:    true,
 				Wait:    true,
 				Commands: []*data.Command{
 					{
@@ -654,27 +654,15 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, x, y int) bo
 							Value: data.Speed5,
 						},
 					},
-				},
-			},
-		},
-		{
-			Name: data.CommandNameSetRoute,
-			Args: &data.CommandArgsSetRoute{
-				EventID:  character.PlayerEventID,
-				Repeat:   false,
-				Skip:     false,
-				Wait:     true,
-				Commands: pathpkg.RouteCommandsToEventCommands(path),
-			},
-		},
-		{
-			Name: data.CommandNameSetRoute,
-			Args: &data.CommandArgsSetRoute{
-				EventID: character.PlayerEventID,
-				Repeat:  false,
-				Skip:    false,
-				Wait:    true,
-				Commands: []*data.Command{
+					{
+						Name: data.CommandNameMoveCharacter,
+						Args: &data.CommandArgsMoveCharacter{
+							Type:               data.MoveCharacterTypeTarget,
+							X:                  x,
+							Y:                  y,
+							ConsiderCharacters: true,
+						},
+					},
 					{
 						Name: data.CommandNameSetCharacterProperty,
 						Args: &data.CommandArgsSetCharacterProperty{

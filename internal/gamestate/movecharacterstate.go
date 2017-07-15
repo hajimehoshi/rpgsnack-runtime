@@ -60,7 +60,7 @@ func newMoveCharacterState(gameState *Game, mapID, roomID, eventID int, args *da
 		path, lastX, lastY := path.Calc(&passableOnMap{
 			through:          m.character().Through(),
 			m:                m.gameState.Map(),
-			ignoreCharacters: true,
+			ignoreCharacters: !args.ConsiderCharacters,
 		}, cx, cy, x, y)
 		m.path = path
 		m.distanceCount = len(path)
