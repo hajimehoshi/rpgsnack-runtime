@@ -137,6 +137,15 @@ func (d *Decoder) SkipCodeIfNil() bool {
 	return false
 }
 
+func (d *Decoder) Skip() {
+	if d.err != nil {
+		return
+	}
+	if err := d.dec.Skip(); err != nil {
+		d.err = err
+	}
+}
+
 func (d *Decoder) DecodeInterface(v msgpack.CustomDecoder) {
 	if d.err != nil {
 		return
