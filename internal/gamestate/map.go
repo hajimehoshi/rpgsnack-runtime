@@ -369,9 +369,6 @@ func (m *Map) Update(sceneManager *scene.Manager) error {
 		return is[i].id < is[j].id
 	})
 	for _, i := range is {
-		if m.IsPlayerMovingByUserInput() && i.id != m.playerInterpreterID {
-			continue
-		}
 		if i.route && m.executingEventIDByUserInput == i.eventID {
 			continue
 		}
@@ -387,9 +384,6 @@ func (m *Map) Update(sceneManager *scene.Manager) error {
 	}
 	if err := m.player.Update(); err != nil {
 		return err
-	}
-	if m.IsPlayerMovingByUserInput() {
-		return nil
 	}
 	for _, e := range m.events {
 		index, err := m.calcPageIndex(e)
