@@ -369,6 +369,9 @@ func (m *Map) Update(sceneManager *scene.Manager) error {
 		return is[i].id < is[j].id
 	})
 	for _, i := range is {
+		if m.IsPlayerMovingByUserInput() && i.id != m.playerInterpreterID {
+			continue
+		}
 		if i.route && m.executingEventIDByUserInput == i.eventID {
 			continue
 		}
@@ -384,6 +387,9 @@ func (m *Map) Update(sceneManager *scene.Manager) error {
 	}
 	if err := m.player.Update(); err != nil {
 		return err
+	}
+	if m.IsPlayerMovingByUserInput() {
+		return nil
 	}
 	for _, e := range m.events {
 		index, err := m.calcPageIndex(e)
@@ -638,7 +644,7 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, x, y int) bo
 			Args: &data.CommandArgsSetRoute{
 				EventID: character.PlayerEventID,
 				Repeat:  false,
-				Skip:    true,
+				Skip:    false,
 				Wait:    true,
 				Commands: []*data.Command{
 					{
@@ -725,6 +731,7 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, x, y int) bo
 						PageIndex: m.eventPageIndices[event.EventID()],
 					},
 				})
+			// TODO: DirFix state can be different when executing the event.
 			if !event.DirFix() {
 				commands = append(commands,
 					&data.Command{
