@@ -925,7 +925,7 @@ func (c *CommandArgsSetCharacterProperty) DecodeMsgpack(dec *msgpack.Decoder) er
 type CommandArgsSetCharacterImage struct {
 	Image          string `json:"image" msgpack:"image"`
 	ImageIndex     int    `json:"imageIndex" msgpack:"imageIndex"`
-	Frame          int    `json:"frame" msgpack:"frame"`
+	Frame          int    `json:"imageFrame" msgpack:"imageFrame"`
 	Dir            Dir    `json:"imageDir" msgpack:"imageDir"`
 	UseFrameAndDir bool   `json:"useFrameAndDir" msgpack:"useFrameAndDir"`
 }
