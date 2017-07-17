@@ -29,6 +29,7 @@ const (
 	ConditionTypeSelfSwitch ConditionType = "self_switch"
 	ConditionTypeVariable   ConditionType = "variable"
 	ConditionTypeItem       ConditionType = "item"
+	ConditionTypeSpecial    ConditionType = "special" // This type is intended for inner only.
 )
 
 type ConditionComp string

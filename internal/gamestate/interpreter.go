@@ -762,6 +762,20 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		i.gameState.currentMap.FinishPlayerMovingByUserInput()
 		i.commandIterator.Advance()
 
+	case data.CommandNameExecEventHere:
+		p := i.gameState.currentMap.player
+		e := i.gameState.currentMap.executableEventAt(p.Position())
+		if e == nil {
+			i.commandIterator.Advance()
+			break
+		}
+		page := i.gameState.currentMap.currentPage(e)
+		if page == nil {
+			panic("not reached")
+		}
+		c := page.Commands
+		i.sub = i.createChild(e.EventID(), c)
+
 	default:
 		return false, fmt.Errorf("interpreter: invalid command: %s", c.Name)
 	}

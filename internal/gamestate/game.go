@@ -322,6 +322,10 @@ func (g *Game) parseMessageSyntax(str string) string {
 	})
 }
 
+const (
+	specialConditionEventExistsAtPlayer = "event_exists_at_player"
+)
+
 func (g *Game) meetsCondition(cond *data.Condition, eventID int) (bool, error) {
 	// TODO: Is it OK to allow null conditions?
 	if cond == nil {
@@ -391,6 +395,14 @@ func (g *Game) meetsCondition(cond *data.Condition, eventID int) (bool, error) {
 
 		default:
 			return false, fmt.Errorf("gamestate: invalid item value: %s", itemValue)
+		}
+	case data.ConditionTypeSpecial:
+		switch cond.Value.(string) {
+		case specialConditionEventExistsAtPlayer:
+			e := g.currentMap.executableEventAt(g.currentMap.player.Position())
+			return e != nil, nil
+		default:
+			return false, fmt.Errorf("gamestate: ConditionTypeSpecial: invalid value: %s", cond)
 		}
 	default:
 		return false, fmt.Errorf("gamestate: invalid condition: %s", cond)

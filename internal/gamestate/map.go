@@ -665,17 +665,53 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, x, y int) bo
 				},
 			},
 		},
-		{
-			Name: data.CommandNameSetRoute,
-			Args: &data.CommandArgsSetRoute{
-				EventID:  character.PlayerEventID,
-				Repeat:   false,
-				Skip:     false,
-				Wait:     true,
-				Commands: pathpkg.RouteCommandsToEventCommands(path),
+	}
+	cs := pathpkg.RouteCommandsToEventCommands(path)
+
+	const labelPlayerMoved = "playerMoved"
+	for _, c := range cs {
+		commands = append(commands,
+			&data.Command{
+				Name: data.CommandNameSetRoute,
+				Args: &data.CommandArgsSetRoute{
+					EventID:  character.PlayerEventID,
+					Repeat:   false,
+					Skip:     false,
+					Wait:     true,
+					Commands: []*data.Command{c},
+				},
+			},
+			&data.Command{
+				Name: data.CommandNameIf,
+				Args: &data.CommandArgsIf{
+					Conditions: []*data.Condition{
+						{
+							Type:  data.ConditionTypeSpecial,
+							Value: specialConditionEventExistsAtPlayer,
+						},
+					},
+				},
+				Branches: [][]*data.Command{
+					{
+						{
+							Name: data.CommandNameGoto,
+							Args: &data.CommandArgsGoto{
+								Label: labelPlayerMoved,
+							},
+						},
+					},
+				},
+			},
+		)
+	}
+	commands = append(commands,
+		&data.Command{
+			Name: data.CommandNameLabel,
+			Args: &data.CommandArgsLabel{
+				Name: labelPlayerMoved,
 			},
 		},
-		{
+		&data.Command{
 			Name: data.CommandNameSetRoute,
 			Args: &data.CommandArgsSetRoute{
 				EventID: character.PlayerEventID,
@@ -693,10 +729,38 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, x, y int) bo
 				},
 			},
 		},
-		{
+		&data.Command{
 			Name: data.CommandNameFinishPlayerMovingByUserInput,
 		},
-	}
+	)
+
+	// Execute an event if there is an event on the way of the route.
+	// After executing the event, this interpreter terminates without executing
+	// the targeted event.
+	commands = append(commands,
+		&data.Command{
+			Name: data.CommandNameIf,
+			Args: &data.CommandArgsIf{
+				Conditions: []*data.Condition{
+					{
+						Type:  data.ConditionTypeSpecial,
+						Value: specialConditionEventExistsAtPlayer,
+					},
+				},
+			},
+			Branches: [][]*data.Command{
+				{
+					{
+						Name: data.CommandNameExecEventHere,
+					},
+					{
+						Name: data.CommandNameReturn,
+					},
+				},
+			},
+		},
+	)
+
 	if event != nil {
 		page := m.currentPage(event)
 		if page != nil && page.Trigger == data.TriggerPlayer {

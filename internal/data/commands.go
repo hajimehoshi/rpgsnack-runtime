@@ -462,6 +462,7 @@ const (
 
 	// Special commands
 	CommandNameFinishPlayerMovingByUserInput CommandName = "finish_player_moving_by_user_input"
+	CommandNameExecEventHere                 CommandName = "exec_event_here"
 )
 
 type CommandArgsIf struct {
