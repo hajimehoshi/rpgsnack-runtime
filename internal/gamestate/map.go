@@ -52,8 +52,9 @@ type Map struct {
 	playerInterpreterID         int
 
 	// Fields that are not dumped
-	game     *Game
-	gameData *data.Game
+	game                      *Game
+	gameData                  *data.Game
+	isPlayerMovingByUserInput bool
 }
 
 func NewMap(game *Game) *Map {
@@ -490,7 +491,11 @@ func (m *Map) CurrentRoom() *data.Room {
 }
 
 func (m *Map) IsPlayerMovingByUserInput() bool {
-	return m.game.variables.InnerVariableValue("is_player_moving_by_user_input") != 0
+	return m.isPlayerMovingByUserInput
+}
+
+func (m *Map) FinishPlayerMovingByUserInput() {
+	m.isPlayerMovingByUserInput = false
 }
 
 func (m *Map) passableTile(x, y int) bool {
@@ -636,14 +641,12 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, x, y int) bo
 	// The player's speed is never changed by another events during the player walks
 	// by user input.
 	origSpeed := m.player.Speed()
+
+	// Set this true before executing other interpreters, or
+	// the calculated path can be invalidated.
+	m.isPlayerMovingByUserInput = true
+
 	commands := []*data.Command{
-		{
-			Name: data.CommandNameSetInnerVariable,
-			Args: &data.CommandArgsSetInnerVariable{
-				Name:  "is_player_moving_by_user_input",
-				Value: 1,
-			},
-		},
 		{
 			Name: data.CommandNameSetRoute,
 			Args: &data.CommandArgsSetRoute{
@@ -691,11 +694,7 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, x, y int) bo
 			},
 		},
 		{
-			Name: data.CommandNameSetInnerVariable,
-			Args: &data.CommandArgsSetInnerVariable{
-				Name:  "is_player_moving_by_user_input",
-				Value: 0,
-			},
+			Name: data.CommandNameFinishPlayerMovingByUserInput,
 		},
 	}
 	if event != nil {

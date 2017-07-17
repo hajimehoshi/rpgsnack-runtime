@@ -472,7 +472,8 @@ const (
 	CommandNameSetCharacterImage    CommandName = "set_character_image"
 
 	// Special commands
-	CommandNameSetInnerVariable CommandName = "set_inner_variable"
+	CommandNameFinishPlayerMovingByUserInput CommandName = "finish_player_moving_by_user_input"
+	CommandNameSetInnerVariable              CommandName = "set_inner_variable" // TODO: Remove this
 )
 
 type CommandArgsIf struct {

@@ -758,6 +758,10 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		i.gameState.items.Remove(args.ID)
 		i.commandIterator.Advance()
 
+	case data.CommandNameFinishPlayerMovingByUserInput:
+		i.gameState.currentMap.FinishPlayerMovingByUserInput()
+		i.commandIterator.Advance()
+
 	case data.CommandNameSetInnerVariable:
 		args := c.Args.(*data.CommandArgsSetInnerVariable)
 		i.gameState.SetInnerVariableValue(args.Name, args.Value)
