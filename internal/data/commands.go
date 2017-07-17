@@ -735,12 +735,11 @@ type CommandArgsPlayerControl struct {
 }
 
 type CommandArgsMoveCharacter struct {
-	Type               MoveCharacterType `json:"type" msgpack:"type"`
-	Dir                Dir               `json:"dir" msgpack:"dir"`
-	Distance           int               `json:"distance" msgpack:"distance"`
-	X                  int               `json:"x" msgpack:"x"`
-	Y                  int               `json:"y" msgpack:"y"`
-	ConsiderCharacters bool              `json:"considerCharacters" msgpack:"considerCharacters"`
+	Type     MoveCharacterType `json:"type" msgpack:"type"`
+	Dir      Dir               `json:"dir" msgpack:"dir"`
+	Distance int               `json:"distance" msgpack:"distance"`
+	X        int               `json:"x" msgpack:"x"`
+	Y        int               `json:"y" msgpack:"y"`
 }
 
 func (c *CommandArgsMoveCharacter) EncodeMsgpack(enc *msgpack.Encoder) error {
@@ -761,9 +760,6 @@ func (c *CommandArgsMoveCharacter) EncodeMsgpack(enc *msgpack.Encoder) error {
 
 	e.EncodeString("y")
 	e.EncodeInt(c.Y)
-
-	e.EncodeString("considerCharacters")
-	e.EncodeBool(c.ConsiderCharacters)
 
 	e.EndMap()
 	return e.Flush()
@@ -786,7 +782,7 @@ func (c *CommandArgsMoveCharacter) DecodeMsgpack(dec *msgpack.Decoder) error {
 		case "y":
 			c.Y = d.DecodeInt()
 		case "considerCharacters":
-			c.ConsiderCharacters = d.DecodeBool()
+			d.Skip()
 		default:
 			return fmt.Errorf("data: CommandArgsMoveCharacter.DecodeMsgpack: invalid key: %s", k)
 		}
