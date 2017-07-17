@@ -124,7 +124,7 @@ func (m *MapScene) initUI() {
 	m.removeAdsDialog.AddChild(m.removeAdsLabel)
 	m.removeAdsDialog.AddChild(m.removeAdsYesButton)
 	m.removeAdsDialog.AddChild(m.removeAdsNoButton)
-	m.inventory = ui.NewInventory(0, consts.TileYNum*consts.TileSize-2)
+	m.inventory = ui.NewInventory(0, consts.TileYNum*consts.TileSize)
 	m.itemPreviewPopup = ui.NewItemPreviewPopup(32, 32, 256, 256)
 	m.quitDialog.AddChild(m.quitLabel)
 
