@@ -161,6 +161,8 @@ func (a *audio) PlayBGM(name string, volume float64) error {
 	if a.playingBGMName == name {
 		a.playing.SetVolume(volume)
 		return nil
+	} else if a.playing != nil {
+		a.playing.Pause()
 	}
 	if err := p.Rewind(); err != nil {
 		return err
