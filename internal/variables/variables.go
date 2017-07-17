@@ -25,25 +25,22 @@ import (
 )
 
 type Variables struct {
-	switches       []bool
-	selfSwitches   map[string][]bool
-	variables      []int
-	innerVariables map[string]int
+	switches     []bool
+	selfSwitches map[string][]bool
+	variables    []int
 }
 
 type tmpVariables struct {
-	Switches       []bool            `json:"switches"`
-	SelfSwitches   map[string][]bool `json:"selfSwitches"`
-	Variables      []int             `json:"variables"`
-	InnerVariables map[string]int    `json:"innerVariables"`
+	Switches     []bool            `json:"switches"`
+	SelfSwitches map[string][]bool `json:"selfSwitches"`
+	Variables    []int             `json:"variables"`
 }
 
 func (v *Variables) MarshalJSON() ([]uint8, error) {
 	tmp := &tmpVariables{
-		Switches:       v.switches,
-		SelfSwitches:   v.selfSwitches,
-		Variables:      v.variables,
-		InnerVariables: v.innerVariables,
+		Switches:     v.switches,
+		SelfSwitches: v.selfSwitches,
+		Variables:    v.variables,
 	}
 	return json.Marshal(tmp)
 }
@@ -78,14 +75,6 @@ func (v *Variables) EncodeMsgpack(enc *msgpack.Encoder) error {
 	}
 	e.EndArray()
 
-	e.EncodeString("innerVariables")
-	e.BeginMap()
-	for k, val := range v.innerVariables {
-		e.EncodeString(k)
-		e.EncodeInt(val)
-	}
-	e.EndMap()
-
 	e.EndMap()
 	return e.Flush()
 }
@@ -98,7 +87,6 @@ func (v *Variables) UnmarshalJSON(data []uint8) error {
 	v.switches = tmp.Switches
 	v.selfSwitches = tmp.SelfSwitches
 	v.variables = tmp.Variables
-	v.innerVariables = tmp.InnerVariables
 	return nil
 }
 
@@ -141,15 +129,7 @@ func (v *Variables) DecodeMsgpack(dec *msgpack.Decoder) error {
 				}
 			}
 		case "innerVariables":
-			if !d.SkipCodeIfNil() {
-				n := d.DecodeMapLen()
-				v.innerVariables = map[string]int{}
-				for i := 0; i < n; i++ {
-					k := d.DecodeString()
-					val := d.DecodeInt()
-					v.innerVariables[k] = val
-				}
-			}
+			d.Skip()
 		}
 	}
 	if err := d.Error(); err != nil {
@@ -215,23 +195,4 @@ func (v *Variables) SetVariableValue(id int, value int) {
 		v.variables = append(v.variables, zeros...)
 	}
 	v.variables[id] = value
-}
-
-func (v *Variables) InnerVariableValue(key string) int {
-	if v.innerVariables == nil {
-		v.innerVariables = map[string]int{}
-	}
-	value, ok := v.innerVariables[key]
-	if !ok {
-		v.innerVariables[key] = 0
-		return 0
-	}
-	return value
-}
-
-func (v *Variables) SetInnerVariableValue(key string, value int) {
-	if v.innerVariables == nil {
-		v.innerVariables = map[string]int{}
-	}
-	v.innerVariables[key] = value
 }

@@ -247,13 +247,6 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 			return err
 		}
 		c.Args = args
-	case CommandNameSetInnerVariable:
-		// This happens when loading a save data.
-		var args *CommandArgsSetInnerVariable
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
 	case CommandAddItem:
 		var args *CommandArgsAddItem
 		if err := unmarshalJSON(tmp.Args, &args); err != nil {
@@ -386,10 +379,6 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 			case CommandNameSetCharacterImage:
 				c.Args = &CommandArgsSetCharacterImage{}
 				d.DecodeAny(c.Args)
-			case CommandNameSetInnerVariable:
-				// This happens when loading a save data.
-				c.Args = &CommandArgsSetInnerVariable{}
-				d.DecodeAny(c.Args)
 			case CommandAddItem:
 				c.Args = &CommandArgsAddItem{}
 				d.DecodeAny(c.Args)
@@ -473,7 +462,6 @@ const (
 
 	// Special commands
 	CommandNameFinishPlayerMovingByUserInput CommandName = "finish_player_moving_by_user_input"
-	CommandNameSetInnerVariable              CommandName = "set_inner_variable" // TODO: Remove this
 )
 
 type CommandArgsIf struct {
@@ -925,11 +913,6 @@ type CommandArgsSetCharacterImage struct {
 	Frame          int    `json:"frame" msgpack:"frame"`
 	Dir            Dir    `json:"dir" msgpack:"dir"`
 	UseFrameAndDir bool   `json:"useFrameAndDir" msgpack:"useFrameAndDir"`
-}
-
-type CommandArgsSetInnerVariable struct {
-	Name  string `json:name msgpack:"name"`
-	Value int    `json:value msgpack:"value"`
 }
 
 type CommandArgsAddItem struct {

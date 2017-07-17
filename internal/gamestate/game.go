@@ -463,7 +463,3 @@ func (g *Game) VariableValue(id int) int {
 func (g *Game) SetVariableValue(id int, value int) {
 	g.variables.SetVariableValue(id, value)
 }
-
-func (g *Game) SetInnerVariableValue(name string, value int) {
-	g.variables.SetInnerVariableValue(name, value)
-}
