@@ -592,6 +592,23 @@ func (m *Map) TryRunDirectEvent(x, y int) bool {
 	return false
 }
 
+func (m *Map) executableEventAt(x, y int) *character.Character {
+	for _, e := range m.eventsAt(x, y) {
+		page := m.currentPage(e)
+		if page == nil {
+			continue
+		}
+		if len(page.Commands) == 0 {
+			continue
+		}
+		if page.Trigger != data.TriggerPlayer {
+			continue
+		}
+		return e
+	}
+	return nil
+}
+
 func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, x, y int) bool {
 	if !m.game.IsPlayerControlEnabled() {
 		return false
@@ -599,19 +616,7 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, x, y int) bo
 	if m.IsEventExecuting() {
 		return false
 	}
-	var event *character.Character
-	for _, e := range m.eventsAt(x, y) {
-		if page := m.currentPage(e); page != nil {
-			if len(page.Commands) == 0 {
-				continue
-			}
-			if page.Trigger != data.TriggerPlayer {
-				continue
-			}
-		}
-		event = e
-		break
-	}
+	event := m.executableEventAt(x, y)
 	if !m.passable(m.player.Through(), x, y, false) && event == nil {
 		return false
 	}
