@@ -358,9 +358,13 @@ func (m *Map) removeRoutes(eventID int) {
 	}
 }
 
-func (m *Map) UpdateItemCommandsIfNeeded(sceneManager *scene.Manager) error {
+func (m *Map) ExecutingItemCommands() bool {
+	return m.itemInterpreter != nil && m.itemInterpreter.IsExecuting()
+}
+
+func (m *Map) UpdateItemCommands(sceneManager *scene.Manager) error {
 	if m.itemInterpreter == nil {
-		return nil
+		panic("not reach")
 	}
 	if err := m.itemInterpreter.Update(sceneManager); err != nil {
 		return nil

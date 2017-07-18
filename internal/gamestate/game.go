@@ -480,6 +480,10 @@ func (g *Game) StartItemCommands() {
 	g.currentMap.StartItemCommands(g.Items().ActiveItem())
 }
 
-func (g *Game) UpdateItemCommandsIfNeeded(sceneManager *scene.Manager) error {
-	return g.currentMap.UpdateItemCommandsIfNeeded(sceneManager)
+func (g *Game) ExecutingItemCommands() bool {
+	return g.currentMap.ExecutingItemCommands()
+}
+
+func (g *Game) UpdateItemCommands(sceneManager *scene.Manager) error {
+	return g.currentMap.UpdateItemCommands(sceneManager)
 }

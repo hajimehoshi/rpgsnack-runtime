@@ -270,19 +270,21 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 
 	m.itemPreviewPopup.X = (w/consts.TileScale-160)/2 + 16
 	if m.itemPreviewPopup.Visible {
-		m.itemPreviewPopup.Update()
-		if m.itemPreviewPopup.PreviewPressed() {
-			m.gameState.StartItemCommands()
+		if m.gameState.ExecutingItemCommands() {
+			if err := m.gameState.UpdateItemCommands(sceneManager); err != nil {
+				return err
+			}
+			// TODO: This is copied from above. Integrate this.
+			if err := m.gameState.Screen().Update(); err != nil {
+				return err
+			}
+			m.gameState.Windows().Update(sceneManager)
+		} else {
+			m.itemPreviewPopup.Update()
+			if m.itemPreviewPopup.PreviewPressed() {
+				m.gameState.StartItemCommands()
+			}
 		}
-		if err := m.gameState.UpdateItemCommandsIfNeeded(sceneManager); err != nil {
-			return err
-		}
-
-		// TODO: This is copied from above. Integrate this.
-		if err := m.gameState.Screen().Update(); err != nil {
-			return err
-		}
-		m.gameState.Windows().Update(sceneManager)
 		return nil
 	}
 
