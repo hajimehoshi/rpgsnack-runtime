@@ -32,6 +32,8 @@ type Inventory struct {
 	activeItemId     int
 }
 
+const itemYMargin = 2
+
 func NewInventory(x, y int) *Inventory {
 	return &Inventory{
 		X:                x,
@@ -50,7 +52,7 @@ func (i *Inventory) pressedSlotIndex() int {
 
 	x, y := input.Position()
 	x /= consts.TileScale
-	y = (y - consts.GameMarginTop) / consts.TileScale
+	y = (y - consts.GameMarginTop - itemYMargin) / consts.TileScale
 
 	if i.Y <= y && y < i.Y+20 {
 		return (x - 4) / 20
@@ -73,7 +75,7 @@ func (i *Inventory) Draw(screen *ebiten.Image) {
 
 	for index, item := range i.items {
 		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(float64(4+i.X+index*20), float64(i.Y))
+		op.GeoM.Translate(float64(4+i.X+index*20), float64(i.Y+itemYMargin))
 		if i.activeItemId == item.ID {
 			op.ColorM.Translate(0.5, 0.5, 0.5, 0)
 		}
