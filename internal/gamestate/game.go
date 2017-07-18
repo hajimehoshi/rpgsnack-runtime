@@ -475,3 +475,11 @@ func (g *Game) VariableValue(id int) int {
 func (g *Game) SetVariableValue(id int, value int) {
 	g.variables.SetVariableValue(id, value)
 }
+
+func (g *Game) StartItemCommands() {
+	g.currentMap.StartItemCommands(g.Items().ActiveItem())
+}
+
+func (g *Game) UpdateItemCommandsIfNeeded(sceneManager *scene.Manager) error {
+	return g.currentMap.UpdateItemCommandsIfNeeded(sceneManager)
+}

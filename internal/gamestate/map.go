@@ -50,6 +50,7 @@ type Map struct {
 	executingEventIDByUserInput int
 	interpreters                map[int]*Interpreter
 	playerInterpreterID         int
+	itemInterpreter             *Interpreter
 
 	// Fields that are not dumped
 	game                      *Game
@@ -133,6 +134,9 @@ func (m *Map) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EncodeString("playerInterpreterId")
 	e.EncodeInt(m.playerInterpreterID)
 
+	e.EncodeString("itemInterpreter")
+	e.EncodeInterface(m.itemInterpreter)
+
 	e.EndMap()
 	return e.Flush()
 }
@@ -206,6 +210,11 @@ func (m *Map) DecodeMsgpack(dec *msgpack.Decoder) error {
 			}
 		case "playerInterpreterId":
 			m.playerInterpreterID = d.DecodeInt()
+		case "itemInterpreter":
+			if !d.SkipCodeIfNil() {
+				m.itemInterpreter = &Interpreter{}
+				d.DecodeInterface(m.itemInterpreter)
+			}
 		default:
 			if err := d.Error(); err != nil {
 				return err
@@ -347,6 +356,19 @@ func (m *Map) removeRoutes(eventID int) {
 	for _, id := range ids {
 		delete(m.interpreters, id)
 	}
+}
+
+func (m *Map) UpdateItemCommandsIfNeeded(sceneManager *scene.Manager) error {
+	if m.itemInterpreter == nil {
+		return nil
+	}
+	if err := m.itemInterpreter.Update(sceneManager); err != nil {
+		return nil
+	}
+	if !m.itemInterpreter.IsExecuting() {
+		m.itemInterpreter = nil
+	}
+	return nil
 }
 
 func (m *Map) Update(sceneManager *scene.Manager) error {
@@ -856,4 +878,16 @@ func (m *Map) DrawCharacters(screen *ebiten.Image) {
 	for _, c := range chars {
 		c.Draw(screen)
 	}
+}
+
+func (m *Map) StartItemCommands(itemID int) {
+	if m.itemInterpreter != nil {
+		return
+	}
+
+	i := m.gameData.Items[itemID]
+	if i.Commands == nil {
+		return
+	}
+	m.itemInterpreter = NewInterpreter(m.game, m.mapID, m.roomID, 0, i.Commands)
 }

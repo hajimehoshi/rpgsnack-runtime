@@ -60,13 +60,13 @@ func (i *ItemPreviewPopup) Update() {
 	i.previewButton.Update()
 	i.closeButton.Update()
 
-	if i.previewButton.Pressed() {
-		i.Visible = false
-	}
-
 	if i.closeButton.Pressed() {
 		i.Visible = false
 	}
+}
+
+func (i *ItemPreviewPopup) PreviewPressed() bool {
+	return i.previewButton.Pressed()
 }
 
 func (i *ItemPreviewPopup) SetItem(item *data.Item) {

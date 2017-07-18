@@ -380,9 +380,13 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 			if id == 0 {
 				id = i.eventID
 			}
-			if ch := i.gameState.character(i.mapID, i.roomID, id); ch != nil {
+			if ch := i.gameState.character(i.mapID, i.roomID, id); ch != nil || args.Type == data.ShowMessageBanner {
 				content = i.gameState.parseMessageSyntax(content)
-				i.gameState.windows.ShowMessage(args.Type, content, args.BalloonType, args.PositionType, args.TextAlign, ch.EventID(), i.id)
+				eid := 0
+				if ch != nil {
+					eid = ch.EventID()
+				}
+				i.gameState.windows.ShowMessage(args.Type, content, args.BalloonType, args.PositionType, args.TextAlign, eid, i.id)
 				i.waitingCommand = true
 				return false, nil
 			}

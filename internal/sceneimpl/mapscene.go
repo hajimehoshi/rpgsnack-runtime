@@ -271,6 +271,18 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 	m.itemPreviewPopup.X = (w/consts.TileScale-160)/2 + 16
 	if m.itemPreviewPopup.Visible {
 		m.itemPreviewPopup.Update()
+		if m.itemPreviewPopup.PreviewPressed() {
+			m.gameState.StartItemCommands()
+		}
+		if err := m.gameState.UpdateItemCommandsIfNeeded(sceneManager); err != nil {
+			return err
+		}
+
+		// TODO: This is copied from above. Integrate this.
+		if err := m.gameState.Screen().Update(); err != nil {
+			return err
+		}
+		m.gameState.Windows().Update(sceneManager)
 		return nil
 	}
 
@@ -324,6 +336,7 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 		return nil
 	}
 	m.cameraButton.Update()
+
 	if err := m.gameState.Update(sceneManager); err != nil {
 		return err
 	}
@@ -461,9 +474,6 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		screen.DrawImage(assets.GetImage("system/marker.png"), op)
 	}
 
-	m.gameState.DrawWindows(screen)
-	msg := fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS())
-	font.DrawText(screen, msg, 160, 8, consts.TextScale, data.TextAlignLeft, color.White)
 	if m.cameraTaking {
 		m.cameraTaking = false
 		m.screenShotImage.Clear()
@@ -479,4 +489,9 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	m.storeErrorDialog.Draw(screen)
 	m.removeAdsDialog.Draw(screen)
 	m.itemPreviewPopup.Draw(screen)
+
+	m.gameState.DrawWindows(screen)
+
+	msg := fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS())
+	font.DrawText(screen, msg, 160, 8, consts.TextScale, data.TextAlignLeft, color.White)
 }
