@@ -29,7 +29,7 @@ type Inventory struct {
 	Visible          bool
 	PressedSlotIndex int
 	items            []*data.Item
-	activeItemId     int
+	activeItemID     int
 }
 
 const itemYMargin = 2
@@ -41,7 +41,7 @@ func NewInventory(x, y int) *Inventory {
 		Visible:          true,
 		PressedSlotIndex: -1,
 		items:            []*data.Item{},
-		activeItemId:     0,
+		activeItemID:     0,
 	}
 }
 
@@ -76,7 +76,7 @@ func (i *Inventory) Draw(screen *ebiten.Image) {
 	for index, item := range i.items {
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(4+i.X+index*20), float64(i.Y+itemYMargin))
-		if i.activeItemId == item.ID {
+		if i.activeItemID == item.ID {
 			op.ColorM.Translate(0.5, 0.5, 0.5, 0)
 		}
 		screen.DrawImage(assets.GetImage("items/icon/"+item.Icon+".png"), op)
@@ -87,6 +87,6 @@ func (i *Inventory) SetItems(items []*data.Item) {
 	i.items = items
 }
 
-func (i *Inventory) SetActiveItemID(activeItemId int) {
-	i.activeItemId = activeItemId
+func (i *Inventory) SetActiveItemID(activeItemID int) {
+	i.activeItemID = activeItemID
 }

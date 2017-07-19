@@ -261,7 +261,6 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 				}
 
 				m.itemPreviewPopup.Visible = true
-				m.gameState.Items().Deactivate()
 			} else {
 				m.gameState.Items().Activate(itemID)
 			}

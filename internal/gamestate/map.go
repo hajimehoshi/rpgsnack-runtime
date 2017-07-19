@@ -888,10 +888,18 @@ func (m *Map) StartItemCommands(itemID int) {
 	if m.itemInterpreter != nil {
 		return
 	}
-
-	i := m.gameData.Items[itemID]
-	if i.Commands == nil {
+	if itemID == 0 {
 		return
 	}
-	m.itemInterpreter = NewInterpreter(m.game, m.mapID, m.roomID, 0, i.Commands)
+	var item *data.Item
+	for _, i := range m.gameData.Items {
+		if i.ID == itemID {
+			item = i
+			break
+		}
+	}
+	if item.Commands == nil {
+		return
+	}
+	m.itemInterpreter = NewInterpreter(m.game, m.mapID, m.roomID, 0, item.Commands)
 }
