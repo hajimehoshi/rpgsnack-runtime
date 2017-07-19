@@ -270,14 +270,17 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 	m.itemPreviewPopup.X = (w/consts.TileScale-160)/2 + 16
 	if m.itemPreviewPopup.Visible {
 		if m.gameState.ExecutingItemCommands() {
-			if err := m.gameState.UpdateItemCommands(sceneManager); err != nil {
-				return err
-			}
 			// TODO: This is copied from above. Integrate this.
 			if err := m.gameState.Screen().Update(); err != nil {
 				return err
 			}
 			m.gameState.Windows().Update(sceneManager)
+			if err := m.gameState.UpdateItemCommands(sceneManager); err != nil {
+				if err == gamestate.GoToTitle {
+					return m.goToTitle(sceneManager)
+				}
+				return err
+			}
 		} else {
 			m.itemPreviewPopup.Update()
 			if m.itemPreviewPopup.PreviewPressed() {
@@ -347,11 +350,7 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 	m.gameState.Windows().Update(sceneManager)
 	if err := m.gameState.Map().Update(sceneManager); err != nil {
 		if err == gamestate.GoToTitle {
-			if err := audio.Stop(); err != nil {
-				return err
-			}
-			sceneManager.GoToWithFading(NewTitleScene(), 60)
-			return nil
+			return m.goToTitle(sceneManager)
 		}
 		return err
 	}
@@ -377,6 +376,14 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 		m.waitingRequestID = sceneManager.GenerateRequestID()
 		sceneManager.Requester().RequestGetIAPPrices(m.waitingRequestID)
 	}
+	return nil
+}
+
+func (m *MapScene) goToTitle(sceneManager *scene.Manager) error {
+	if err := audio.Stop(); err != nil {
+		return err
+	}
+	sceneManager.GoToWithFading(NewTitleScene(), 60)
 	return nil
 }
 
