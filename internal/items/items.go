@@ -60,6 +60,8 @@ func (i *Items) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EndArray()
 	e.EncodeString("activeItem")
 	e.EncodeInt(i.activeItem)
+	e.EncodeString("eventItem")
+	e.EncodeInt(i.eventItem)
 	e.EndMap()
 	return e.Flush()
 }
@@ -89,6 +91,8 @@ func (i *Items) DecodeMsgpack(dec *msgpack.Decoder) error {
 			}
 		case "activeItem":
 			i.activeItem = d.DecodeInt()
+		case "eventItem":
+			i.eventItem = d.DecodeInt()
 		}
 	}
 	if err := d.Error(); err != nil {
