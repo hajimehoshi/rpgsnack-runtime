@@ -362,19 +362,6 @@ func (m *Map) ExecutingItemCommands() bool {
 	return m.itemInterpreter != nil && m.itemInterpreter.IsExecuting()
 }
 
-func (m *Map) UpdateItemCommands(sceneManager *scene.Manager) error {
-	if m.itemInterpreter == nil {
-		panic("not reach")
-	}
-	if err := m.itemInterpreter.Update(sceneManager); err != nil {
-		return nil
-	}
-	if !m.itemInterpreter.IsExecuting() {
-		m.itemInterpreter = nil
-	}
-	return nil
-}
-
 func (m *Map) Update(sceneManager *scene.Manager) error {
 	// TODO: This is a temporary hack for TileSet and currentMap.
 	// Remove this if possible.
@@ -388,28 +375,37 @@ func (m *Map) Update(sceneManager *scene.Manager) error {
 		m.player = character.NewPlayer(x, y)
 		m.setRoomID(roomID, nil)
 	}
-	is := []*Interpreter{}
-	for _, i := range m.interpreters {
-		is = append(is, i)
-	}
-	sort.Slice(is, func(i, j int) bool {
-		return is[i].id < is[j].id
-	})
-	for _, i := range is {
-		if m.IsPlayerMovingByUserInput() && i.id != m.playerInterpreterID {
-			continue
+	if m.itemInterpreter == nil {
+		is := []*Interpreter{}
+		for _, i := range m.interpreters {
+			is = append(is, i)
 		}
-		if i.route && m.executingEventIDByUserInput == i.eventID {
-			continue
+		sort.Slice(is, func(i, j int) bool {
+			return is[i].id < is[j].id
+		})
+		for _, i := range is {
+			if m.IsPlayerMovingByUserInput() && i.id != m.playerInterpreterID {
+				continue
+			}
+			if i.route && m.executingEventIDByUserInput == i.eventID {
+				continue
+			}
+			if err := i.Update(sceneManager); err != nil {
+				return err
+			}
+			if !i.IsExecuting() {
+				if i.id == m.playerInterpreterID {
+					m.executingEventIDByUserInput = 0
+				}
+				delete(m.interpreters, i.id)
+			}
 		}
-		if err := i.Update(sceneManager); err != nil {
+	} else {
+		if err := m.itemInterpreter.Update(sceneManager); err != nil {
 			return err
 		}
-		if !i.IsExecuting() {
-			if i.id == m.playerInterpreterID {
-				m.executingEventIDByUserInput = 0
-			}
-			delete(m.interpreters, i.id)
+		if !m.itemInterpreter.IsExecuting() {
+			m.itemInterpreter = nil
 		}
 	}
 	if err := m.player.Update(); err != nil {

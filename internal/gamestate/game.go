@@ -483,7 +483,3 @@ func (g *Game) StartItemCommands() {
 func (g *Game) ExecutingItemCommands() bool {
 	return g.currentMap.ExecutingItemCommands()
 }
-
-func (g *Game) UpdateItemCommands(sceneManager *scene.Manager) error {
-	return g.currentMap.UpdateItemCommands(sceneManager)
-}

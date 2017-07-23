@@ -136,6 +136,10 @@ func (m *MapScene) UpdatePurchasesState(sceneManager *scene.Manager) {
 }
 
 func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) error {
+	if m.itemPreviewPopup.Visible {
+		m.triggeringFailed = false
+		return nil
+	}
 	if m.gameState.Map().IsEventExecuting() {
 		m.triggeringFailed = false
 		return nil
@@ -269,25 +273,12 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 
 	m.itemPreviewPopup.X = (w/consts.TileScale-160)/2 + 16
 	if m.itemPreviewPopup.Visible {
-		if m.gameState.ExecutingItemCommands() {
-			// TODO: This is copied from above. Integrate this.
-			if err := m.gameState.Screen().Update(); err != nil {
-				return err
-			}
-			m.gameState.Windows().Update(sceneManager)
-			if err := m.gameState.UpdateItemCommands(sceneManager); err != nil {
-				if err == gamestate.GoToTitle {
-					return m.goToTitle(sceneManager)
-				}
-				return err
-			}
-		} else {
+		if !m.gameState.ExecutingItemCommands() {
 			m.itemPreviewPopup.Update()
 			if m.itemPreviewPopup.PreviewPressed() {
 				m.gameState.StartItemCommands()
 			}
 		}
-		return nil
 	}
 
 	m.storeErrorOkButton.X = (m.storeErrorDialog.Width - m.storeErrorOkButton.Width) / 2
