@@ -263,7 +263,7 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 						}
 					}
 				}
-				m.gameState.Items().Deactivate()
+
 				m.itemPreviewPopup.Visible = true
 			} else {
 				m.gameState.Items().Activate(itemID)
