@@ -26,6 +26,7 @@ import (
 type Items struct {
 	items      []int
 	activeItem int
+	eventItem  int
 }
 
 type tmpItems struct {
@@ -117,6 +118,10 @@ func (i *Items) ActiveItem() int {
 	return i.activeItem
 }
 
+func (i *Items) EventItem() int {
+	return i.eventItem
+}
+
 func (i *Items) Items() []int {
 	return i.items
 }
@@ -148,6 +153,10 @@ func (i *Items) Remove(id int) {
 
 func (i *Items) Activate(id int) {
 	i.activeItem = id
+}
+
+func (i *Items) SetEventItem(id int) {
+	i.eventItem = id
 }
 
 func (i *Items) Deactivate() {

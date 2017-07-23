@@ -477,7 +477,7 @@ func (g *Game) SetVariableValue(id int, value int) {
 }
 
 func (g *Game) StartItemCommands() {
-	g.currentMap.StartItemCommands(g.Items().ActiveItem())
+	g.currentMap.StartItemCommands(g.Items().EventItem())
 }
 
 func (g *Game) ExecutingItemCommands() bool {
