@@ -25,6 +25,12 @@ type Event struct {
 	Pages []*Page `json:"pages"`
 }
 
+type CommonEvent struct {
+	ID       int        `json:"id"`
+	Name     string     `json:"name"`
+	Commands []*Command `json:"commands"`
+}
+
 type Page struct {
 	Conditions []*Condition         `json:"conditions"`
 	Image      string               `json:"image"`

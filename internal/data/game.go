@@ -22,6 +22,7 @@ type Game struct {
 	Hints        []*Hint        `json:"hints"`
 	IAPProducts  []*IAPProduct  `json:"iapProducts"`
 	Items        []*Item        `json:"items"`
+	CommonEvents []*CommonEvent `json:"commonEvents"`
 	System       *System        `json:"system"`
 }
 

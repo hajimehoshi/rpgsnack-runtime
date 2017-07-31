@@ -94,6 +94,12 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 			return err
 		}
 		c.Args = args
+	case CommandNameCallCommonEvent:
+		var args *CommandArgsCallCommonEvent
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	case CommandNameReturn:
 	case CommandNameEraseEvent:
 	case CommandNameWait:
@@ -291,6 +297,9 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 			case CommandNameCallEvent:
 				c.Args = &CommandArgsCallEvent{}
 				d.DecodeAny(c.Args)
+			case CommandNameCallCommonEvent:
+				c.Args = &CommandArgsCallCommonEvent{}
+				d.DecodeAny(c.Args)
 			case CommandNameReturn:
 				d.DecodeNil()
 			case CommandNameEraseEvent:
@@ -419,39 +428,40 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 type CommandName string
 
 const (
-	CommandNameNop           CommandName = "nop"
-	CommandNameIf            CommandName = "if"
-	CommandNameLabel         CommandName = "label"
-	CommandNameGoto          CommandName = "goto"
-	CommandNameCallEvent     CommandName = "call_event"
-	CommandNameReturn        CommandName = "return"
-	CommandNameEraseEvent    CommandName = "erase_event"
-	CommandNameWait          CommandName = "wait"
-	CommandNameShowMessage   CommandName = "show_message"
-	CommandNameShowHint      CommandName = "show_hint"
-	CommandNameShowChoices   CommandName = "show_choices"
-	CommandNameSetSwitch     CommandName = "set_switch"
-	CommandNameSetSelfSwitch CommandName = "set_self_switch"
-	CommandNameSetVariable   CommandName = "set_variable"
-	CommandNameTransfer      CommandName = "transfer"
-	CommandNameSetRoute      CommandName = "set_route"
-	CommandNameTintScreen    CommandName = "tint_screen"
-	CommandNamePlaySE        CommandName = "play_se"
-	CommandNamePlayBGM       CommandName = "play_bgm"
-	CommandNameStopBGM       CommandName = "stop_bgm"
-	CommandNameSave          CommandName = "save"
-	CommandNameGotoTitle     CommandName = "goto_title"
-	CommandNameAutoSave      CommandName = "autosave"
-	CommandNameGameClear     CommandName = "game_clear"
-	CommandNamePlayerControl CommandName = "player_control"
-	CommandUnlockAchievement CommandName = "unlock_achievement"
-	CommandControlHint       CommandName = "control_hint"
-	CommandPurchase          CommandName = "start_iap"
-	CommandNameSyncIAP       CommandName = "sync_iap" // TODO: We might be able to remove this later
-	CommandShowAds           CommandName = "show_ads"
-	CommandOpenLink          CommandName = "open_link"
-	CommandAddItem           CommandName = "add_item"
-	CommandRemoveItem        CommandName = "remove_item"
+	CommandNameNop             CommandName = "nop"
+	CommandNameIf              CommandName = "if"
+	CommandNameLabel           CommandName = "label"
+	CommandNameGoto            CommandName = "goto"
+	CommandNameCallEvent       CommandName = "call_event"
+	CommandNameCallCommonEvent CommandName = "call_common_event"
+	CommandNameReturn          CommandName = "return"
+	CommandNameEraseEvent      CommandName = "erase_event"
+	CommandNameWait            CommandName = "wait"
+	CommandNameShowMessage     CommandName = "show_message"
+	CommandNameShowHint        CommandName = "show_hint"
+	CommandNameShowChoices     CommandName = "show_choices"
+	CommandNameSetSwitch       CommandName = "set_switch"
+	CommandNameSetSelfSwitch   CommandName = "set_self_switch"
+	CommandNameSetVariable     CommandName = "set_variable"
+	CommandNameTransfer        CommandName = "transfer"
+	CommandNameSetRoute        CommandName = "set_route"
+	CommandNameTintScreen      CommandName = "tint_screen"
+	CommandNamePlaySE          CommandName = "play_se"
+	CommandNamePlayBGM         CommandName = "play_bgm"
+	CommandNameStopBGM         CommandName = "stop_bgm"
+	CommandNameSave            CommandName = "save"
+	CommandNameGotoTitle       CommandName = "goto_title"
+	CommandNameAutoSave        CommandName = "autosave"
+	CommandNameGameClear       CommandName = "game_clear"
+	CommandNamePlayerControl   CommandName = "player_control"
+	CommandUnlockAchievement   CommandName = "unlock_achievement"
+	CommandControlHint         CommandName = "control_hint"
+	CommandPurchase            CommandName = "start_iap"
+	CommandNameSyncIAP         CommandName = "sync_iap" // TODO: We might be able to remove this later
+	CommandShowAds             CommandName = "show_ads"
+	CommandOpenLink            CommandName = "open_link"
+	CommandAddItem             CommandName = "add_item"
+	CommandRemoveItem          CommandName = "remove_item"
 
 	// Route commands
 	CommandNameMoveCharacter        CommandName = "move_character"
@@ -480,6 +490,10 @@ type CommandArgsGoto struct {
 type CommandArgsCallEvent struct {
 	EventID   int `json:"eventId" msgpack:"eventId"`
 	PageIndex int `json:"pageIndex" msgpack:"pageIndex"`
+}
+
+type CommandArgsCallCommonEvent struct {
+	EventID int `json:"eventId" msgpack:"eventId"`
 }
 
 type CommandArgsWait struct {

@@ -349,6 +349,22 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		page := event.Pages[args.PageIndex]
 		commands := page.Commands
 		i.sub = i.createChild(eventID, commands)
+
+	case data.CommandNameCallCommonEvent:
+		args := c.Args.(*data.CommandArgsCallCommonEvent)
+		eventID := args.EventID
+		var c *data.CommonEvent
+		for _, e := range sceneManager.Game().CommonEvents {
+			if e.ID == eventID {
+				c = e
+				break
+			}
+		}
+		if c == nil {
+			return false, fmt.Errorf("invalid common event ID: %d", eventID)
+		}
+		i.sub = i.createChild(i.eventID, c.Commands)
+
 	case data.CommandNameReturn:
 		i.commandIterator.Terminate()
 	case data.CommandNameEraseEvent:
