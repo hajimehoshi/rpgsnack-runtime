@@ -636,15 +636,24 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 			return true, nil
 		}
 		if i.moveCharacterState == nil {
-			m, err := newMoveCharacterState(
+			args := c.Args.(*data.CommandArgsMoveCharacter)
+			skip := i.routeSkip
+			if args.Type == data.MoveCharacterTypeTarget {
+				skip = false
+			}
+			m := newMoveCharacterState(
 				i.gameState,
 				i.mapID,
 				i.roomID,
 				i.eventID,
-				c.Args.(*data.CommandArgsMoveCharacter),
-				i.routeSkip)
-			if err != nil {
-				return false, err
+				args,
+				skip)
+			if m == nil {
+				if i.routeSkip {
+					i.commandIterator.Advance()
+					return true, nil
+				}
+				return false, nil
 			}
 			i.moveCharacterState = m
 		}

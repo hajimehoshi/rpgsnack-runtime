@@ -42,7 +42,7 @@ type moveCharacterState struct {
 	gameState *Game
 }
 
-func newMoveCharacterState(gameState *Game, mapID, roomID, eventID int, args *data.CommandArgsMoveCharacter, routeSkip bool) (*moveCharacterState, error) {
+func newMoveCharacterState(gameState *Game, mapID, roomID, eventID int, args *data.CommandArgsMoveCharacter, routeSkip bool) *moveCharacterState {
 	m := &moveCharacterState{
 		gameState: gameState,
 		mapID:     mapID,
@@ -66,7 +66,7 @@ func newMoveCharacterState(gameState *Game, mapID, roomID, eventID int, args *da
 		m.distanceCount = len(path)
 		if x != lastX || y != lastY {
 			if !m.routeSkip {
-				return nil, fmt.Errorf("gamestate: route is not found")
+				return nil
 			}
 			m.terminated = true
 		}
@@ -76,7 +76,7 @@ func newMoveCharacterState(gameState *Game, mapID, roomID, eventID int, args *da
 	default:
 		panic("not reach")
 	}
-	return m, nil
+	return m
 }
 
 type tmpMoveCharacterState struct {
