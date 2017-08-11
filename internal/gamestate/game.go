@@ -266,6 +266,14 @@ func (g *Game) Update(sceneManager *scene.Manager) error {
 	return nil
 }
 
+func (g *Game) SetBGM(bgm data.BGM) {
+	if bgm.Name == "" {
+		audio.StopBGM()
+	} else {
+		audio.PlayBGM(bgm.Name, float64(bgm.Volume)/100)
+	}
+}
+
 func (g *Game) setAutoSaveEnabled(enabled bool) {
 	g.autoSaveEnabled = enabled
 }

@@ -264,6 +264,11 @@ func (m *Map) setRoomID(id int, interpreter *Interpreter) error {
 	m.roomID = id
 	m.events = nil
 	m.eventPageIndices = map[int]int{}
+
+	if m.CurrentRoom().AutoBGM {
+		m.game.SetBGM(m.CurrentRoom().BGM)
+	}
+
 	for _, e := range m.CurrentRoom().Events {
 		event := character.NewEvent(e.ID, e.X, e.Y)
 		m.events = append(m.events, event)

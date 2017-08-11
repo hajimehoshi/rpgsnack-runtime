@@ -28,6 +28,11 @@ type Map struct {
 	Rooms []*Room `json:"rooms"`
 }
 
+type BGM struct {
+	Name   string `json:"name"`
+	Volume int    `json:"volume"`
+}
+
 type Room struct {
 	ID                   int                   `json:"id"`
 	X                    int                   `json:"x"`
@@ -38,6 +43,8 @@ type Room struct {
 	Background           MapSprite             `json:"background"`
 	Foreground           MapSprite             `json:"foreground"`
 	PassageTypeOverrides []PassageOverrideType `json:"passageTypeOverrides"`
+	AutoBGM              bool                  `json:"autoBGM"`
+	BGM                  BGM                   `json:"bgm"`
 }
 
 type MapSprite struct {
