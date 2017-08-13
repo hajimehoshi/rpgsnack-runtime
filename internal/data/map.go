@@ -28,11 +28,6 @@ type Map struct {
 	Rooms []*Room `json:"rooms"`
 }
 
-type BGM struct {
-	Name   string `json:"name"`
-	Volume int    `json:"volume"`
-}
-
 type Room struct {
 	ID                   int                   `json:"id"`
 	X                    int                   `json:"x"`

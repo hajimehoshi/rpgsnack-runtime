@@ -83,8 +83,15 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 	}
 
 	if !t.init {
-		if err := audio.PlayBGM("tick", 1); err != nil {
-			return err
+		var titleBGM = sceneManager.Game().System.TitleBGM
+		if titleBGM.Name == "" {
+			if err := audio.StopBGM(); err != nil {
+				return err
+			}
+		} else {
+			if err := audio.PlayBGM(titleBGM.Name, float64(titleBGM.Volume)/100); err != nil {
+				return err
+			}
 		}
 		t.init = true
 	}

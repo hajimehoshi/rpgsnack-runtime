@@ -26,6 +26,11 @@ type Game struct {
 	System       *System        `json:"system"`
 }
 
+type BGM struct {
+	Name   string `json:"name"`
+	Volume int    `json:"volume"`
+}
+
 type Achievement struct {
 	ID    int    `json:"id"`
 	Name  UUID   `json:"name"`

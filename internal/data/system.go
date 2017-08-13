@@ -21,18 +21,21 @@ import (
 type System struct {
 	InitialPosition *Position
 	DefaultLanguage language.Tag
+	TitleBGM        BGM
 }
 
 func (s *System) UnmarshalJSON(data []uint8) error {
 	type tmpSystem struct {
 		InitialPosition *Position `json:"player"`
 		DefualtLanguage string    `json:"defaultLanguage"`
+		TitleBGM        BGM       `json:"titleBgm"`
 	}
 	var tmp *tmpSystem
 	if err := unmarshalJSON(data, &tmp); err != nil {
 		return err
 	}
 	s.InitialPosition = tmp.InitialPosition
+	s.TitleBGM = tmp.TitleBGM
 	l, err := language.Parse(tmp.DefualtLanguage)
 	if err != nil {
 		return err
