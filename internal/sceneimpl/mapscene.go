@@ -93,7 +93,7 @@ func (m *MapScene) initUI() {
 	screenShotImage, _ := ebiten.NewImage(480, 720, ebiten.FilterLinear)
 	camera, _ := ebiten.NewImage(12, 12, ebiten.FilterNearest)
 	camera.Fill(color.RGBA{0xff, 0, 0, 0xff})
-	m.cameraButton = ui.NewImageButton(0, 0, camera, "click")
+	m.cameraButton = ui.NewImageButton(0, 0, camera, camera, "click")
 	m.screenShotImage = screenShotImage
 	m.screenShotDialog = ui.NewDialog(0, 4, 152, 232)
 	m.screenShotDialog.AddChild(ui.NewImage(8, 8, 1.0/consts.TileScale/2, m.screenShotImage))
@@ -124,7 +124,7 @@ func (m *MapScene) initUI() {
 	m.removeAdsDialog.AddChild(m.removeAdsLabel)
 	m.removeAdsDialog.AddChild(m.removeAdsYesButton)
 	m.removeAdsDialog.AddChild(m.removeAdsNoButton)
-	m.inventory = ui.NewInventory(0, consts.TileYNum*consts.TileSize)
+	m.inventory = ui.NewInventory(0, consts.TileYNum*consts.TileSize*consts.TileScale+consts.GameMarginTop)
 	m.itemPreviewPopup = ui.NewItemPreviewPopup(32, 32, 256, 256)
 	m.quitDialog.AddChild(m.quitLabel)
 
@@ -249,26 +249,33 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 				}
 			}
 		}
+
+		activeItemID := m.gameState.Items().ActiveItem()
 		m.inventory.SetItems(items)
-		m.inventory.SetActiveItemID(m.gameState.Items().ActiveItem())
+		m.inventory.SetActiveItemID(activeItemID)
 		m.inventory.Update()
 		if m.inventory.PressedSlotIndex >= 0 && m.inventory.PressedSlotIndex < len(m.gameState.Items().Items()) {
 			itemID := m.gameState.Items().Items()[m.inventory.PressedSlotIndex]
-			if itemID == m.gameState.Items().ActiveItem() {
-				if !m.itemPreviewPopup.Visible {
-					for _, item := range sceneManager.Game().Items {
-						if itemID == item.ID {
-							m.itemPreviewPopup.SetItem(item)
-							break
-						}
-					}
-				}
+			if itemID == activeItemID {
 				m.gameState.Items().Deactivate()
-				m.itemPreviewPopup.Visible = true
 			} else {
 				m.gameState.Items().Activate(itemID)
-				m.gameState.Items().SetEventItem(itemID)
 			}
+		}
+
+		if m.inventory.ActiveItemPressed() {
+			if !m.itemPreviewPopup.Visible {
+				var activeItem *data.Item
+				for _, item := range sceneManager.Game().Items {
+					if item.ID == activeItemID {
+						activeItem = item
+						break
+					}
+				}
+				m.itemPreviewPopup.SetItem(activeItem)
+			}
+			m.itemPreviewPopup.Visible = true
+			m.gameState.Items().SetEventItem(activeItemID)
 		}
 	}
 
@@ -457,13 +464,12 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		m.tilesImage.DrawImage(assets.GetImage("foregrounds/"+room.Foreground.Name+".png"), op)
 	}
 
-	m.inventory.Draw(m.tilesImage)
-
 	sw, _ := screen.Size()
 	op = &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(consts.TileScale, consts.TileScale)
 	op.GeoM.Translate(m.offsetX(sw), consts.GameMarginTop)
 	m.gameState.Screen().Draw(screen, m.tilesImage, op)
+	m.inventory.Draw(screen)
 
 	if m.gameState.IsPlayerControlEnabled() && (m.gameState.Map().IsPlayerMovingByUserInput() || m.triggeringFailed) {
 		x, y := m.moveDstX, m.moveDstY

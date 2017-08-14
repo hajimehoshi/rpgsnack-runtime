@@ -24,24 +24,35 @@ import (
 )
 
 type Inventory struct {
-	X                int
-	Y                int
-	Visible          bool
-	PressedSlotIndex int
-	items            []*data.Item
-	activeItemID     int
+	X                   int
+	Y                   int
+	Visible             bool
+	PressedSlotIndex    int
+	items               []*data.Item
+	activeItemID        int
+	activeItemBoxButton *Button
 }
 
-const itemYMargin = 2
+const (
+	frameXMargin = 54
+	frameYMargin = 12
+	itemXMargin  = 24
+	itemYMargin  = 20
+	itemSize     = 20
+)
 
 func NewInventory(x, y int) *Inventory {
+	button := NewImageButton(0, y/consts.TileScale, assets.GetImage("system/active_item_box.png"), assets.GetImage("system/active_item_box_pressed.png"), "click")
+	button.DisabledImage = assets.GetImage("system/active_item_box_pressed.png")
+
 	return &Inventory{
-		X:                x,
-		Y:                y,
-		Visible:          true,
-		PressedSlotIndex: -1,
-		items:            []*data.Item{},
-		activeItemID:     0,
+		X:                   x,
+		Y:                   y,
+		Visible:             true,
+		PressedSlotIndex:    -1,
+		items:               []*data.Item{},
+		activeItemID:        0,
+		activeItemBoxButton: button,
 	}
 }
 
@@ -51,18 +62,24 @@ func (i *Inventory) pressedSlotIndex() int {
 	}
 
 	x, y := input.Position()
-	x /= consts.TileScale
-	y = (y - consts.GameMarginTop - itemYMargin) / consts.TileScale
+	x -= frameXMargin
+	y = (y - itemYMargin)
 
-	if i.Y <= y && y < i.Y+20 {
-		return (x - 4) / 20
+	if x >= frameXMargin/consts.TileScale && i.Y <= y && y < i.Y+itemSize*consts.TileScale {
+		return (x - 4) / (itemSize * consts.TileScale)
 	}
 
 	return -1
 }
 
+func (i *Inventory) ActiveItemPressed() bool {
+	return i.activeItemBoxButton.Pressed()
+}
+
 func (i *Inventory) Update() {
 	i.PressedSlotIndex = i.pressedSlotIndex()
+	i.activeItemBoxButton.Update()
+	i.activeItemBoxButton.Disabled = i.activeItemID == 0
 }
 
 func (i *Inventory) Draw(screen *ebiten.Image) {
@@ -70,16 +87,39 @@ func (i *Inventory) Draw(screen *ebiten.Image) {
 		return
 	}
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(float64(i.X), float64(i.Y))
+	op.GeoM.Scale(consts.TileScale, consts.TileScale)
+	op.GeoM.Translate(float64(i.X+frameXMargin), float64(i.Y+frameYMargin))
 	screen.DrawImage(assets.GetImage("system/frame_inventory.png"), op)
 
+	var activeItem *data.Item
 	for index, item := range i.items {
 		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(float64(4+i.X+index*20), float64(i.Y+itemYMargin))
+		op.GeoM.Scale(consts.TileScale, consts.TileScale)
+		op.GeoM.Translate(float64(frameXMargin+itemXMargin+i.X+index*itemSize*consts.TileScale), float64(i.Y+itemYMargin))
 		if i.activeItemID == item.ID {
 			op.ColorM.Translate(0.5, 0.5, 0.5, 0)
+			activeItem = item
 		}
 		screen.DrawImage(assets.GetImage("items/icon/"+item.Icon+".png"), op)
+	}
+
+	i.activeItemBoxButton.Draw(screen)
+
+	if activeItem != nil {
+		dy := 0
+		if i.activeItemBoxButton.Pressing() {
+			dy = 3
+		}
+		op = &ebiten.DrawImageOptions{}
+		op.GeoM.Scale(consts.TileScale, consts.TileScale)
+		op.GeoM.Translate(float64(i.X+14), float64(i.Y+14+dy))
+		screen.DrawImage(assets.GetImage("items/icon/"+activeItem.Icon+".png"), op)
+		if len(activeItem.Commands) > 0 {
+			op = &ebiten.DrawImageOptions{}
+			op.GeoM.Scale(consts.TileScale, consts.TileScale)
+			op.GeoM.Translate(float64(i.X), float64(i.Y+dy))
+			screen.DrawImage(assets.GetImage("system/item_box_info.png"), op)
+		}
 	}
 }
 

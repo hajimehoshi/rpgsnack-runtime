@@ -28,17 +28,19 @@ import (
 )
 
 type Button struct {
-	X         int
-	Y         int
-	Width     int
-	Height    int
-	Visible   bool
-	Text      string
-	Disabled  bool
-	Image     *ebiten.Image
-	pressing  bool
-	pressed   bool
-	soundName string
+	X             int
+	Y             int
+	Width         int
+	Height        int
+	Visible       bool
+	Text          string
+	Disabled      bool
+	Image         *ebiten.Image
+	PressedImage  *ebiten.Image
+	DisabledImage *ebiten.Image
+	pressing      bool
+	pressed       bool
+	soundName     string
 }
 
 func NewButton(x, y, width, height int, soundName string) *Button {
@@ -52,17 +54,23 @@ func NewButton(x, y, width, height int, soundName string) *Button {
 	}
 }
 
-func NewImageButton(x, y int, image *ebiten.Image, soundName string) *Button {
+func NewImageButton(x, y int, image *ebiten.Image, pressedImage *ebiten.Image, soundName string) *Button {
 	w, h := image.Size()
 	return &Button{
-		X:         x,
-		Y:         y,
-		Width:     w,
-		Height:    h,
-		Visible:   true,
-		Image:     image,
-		soundName: soundName,
+		X:             x,
+		Y:             y,
+		Width:         w,
+		Height:        h,
+		Visible:       true,
+		Image:         image,
+		PressedImage:  pressedImage,
+		DisabledImage: nil,
+		soundName:     soundName,
 	}
+}
+
+func (b *Button) Pressing() bool {
+	return b.pressing
 }
 
 func (b *Button) Pressed() bool {
@@ -126,11 +134,26 @@ func (b *Button) Draw(screen *ebiten.Image) {
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(b.X), float64(b.Y))
 		op.GeoM.Scale(consts.TileScale, consts.TileScale)
+
+		image := b.Image
 		if b.Disabled {
-			op.ColorM.ChangeHSV(0, 0, 1)
-			op.ColorM.Scale(0.5, 0.5, 0.5, 1)
+			if b.DisabledImage == nil {
+				op.ColorM.ChangeHSV(0, 0, 1)
+				op.ColorM.Scale(0.5, 0.5, 0.5, 1)
+			} else {
+				image = b.DisabledImage
+			}
+		} else {
+			if b.pressing {
+				if b.PressedImage == nil {
+					op.ColorM.ChangeHSV(0, 0, 1)
+					op.ColorM.Scale(0.5, 0.5, 0.5, 1)
+				} else {
+					image = b.PressedImage
+				}
+			}
 		}
-		screen.DrawImage(b.Image, op)
+		screen.DrawImage(image, op)
 		return
 	}
 	img := assets.GetImage("system/9patch_test_off.png")

@@ -49,11 +49,13 @@ type TitleScene struct {
 }
 
 func NewTitleScene() *TitleScene {
+	settingsIcon := assets.GetImage("system/icon_settings.png")
+	moreGamesIcon := assets.GetImage("system/icon_moregames.png")
 	t := &TitleScene{
 		resumeGameButton: ui.NewButton(0, 184, 120, 20, "click"),
 		newGameButton:    ui.NewButton(0, 208, 120, 20, "click"),
-		settingsButton:   ui.NewImageButton(0, 0, assets.GetImage("system/icon_settings.png"), "click"),
-		moregamesButton:  ui.NewImageButton(0, 0, assets.GetImage("system/icon_moregames.png"), "click"),
+		settingsButton:   ui.NewImageButton(0, 0, settingsIcon, settingsIcon, "click"),
+		moregamesButton:  ui.NewImageButton(0, 0, moreGamesIcon, moreGamesIcon, "click"),
 		warningDialog:    ui.NewDialog(0, 64, 152, 124),
 		warningLabel:     ui.NewLabel(16, 8),
 		warningYesButton: ui.NewButton(0, 72, 120, 20, "click"),
