@@ -25,6 +25,7 @@ type input struct {
 	x              int
 	y              int
 	backPressCount int
+	prevPressCount int
 }
 
 func Update() {
@@ -47,6 +48,10 @@ func Triggered() bool {
 	return theInput.Triggered()
 }
 
+func Released() bool {
+	return theInput.Released()
+}
+
 func Position() (int, int) {
 	return theInput.Position()
 }
@@ -64,11 +69,10 @@ func (i *input) updatePointerDevices() {
 		return
 	}
 	i.pressCount = 0
-	i.x = 0
-	i.y = 0
 }
 
 func (i *input) Update() {
+	i.prevPressCount = i.pressCount
 	i.updatePointerDevices()
 	if i.backPressCount > 0 {
 		i.backPressCount--
@@ -77,6 +81,10 @@ func (i *input) Update() {
 
 func (i *input) Pressed() bool {
 	return i.pressCount > 0
+}
+
+func (i *input) Released() bool {
+	return i.pressCount == 0 && i.prevPressCount > 0
 }
 
 func (i *input) Triggered() bool {

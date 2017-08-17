@@ -15,6 +15,8 @@
 package ui
 
 import (
+	"math"
+
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
@@ -31,14 +33,21 @@ type Inventory struct {
 	items               []*data.Item
 	activeItemID        int
 	activeItemBoxButton *Button
+	pressStartIndex     int
+	pressStartX         int
+	pressStartY         int
+	scrollX             int
+	dragX               int
+	scrolling           bool
 }
 
 const (
-	frameXMargin = 54
-	frameYMargin = 12
-	itemXMargin  = 24
-	itemYMargin  = 20
-	itemSize     = 20
+	frameXMargin        = 24
+	frameYMargin        = 4
+	itemXMargin         = 2
+	itemYMargin         = 7
+	itemSize            = 20
+	scrollDragThreshold = 5
 )
 
 func NewInventory(x, y int) *Inventory {
@@ -56,17 +65,12 @@ func NewInventory(x, y int) *Inventory {
 	}
 }
 
-func (i *Inventory) pressedSlotIndex() int {
-	if !input.Triggered() {
-		return -1
-	}
+func (i *Inventory) slotIndexAt(x, y int) int {
+	x -= (frameXMargin + itemXMargin) * consts.TileScale
+	y = (y - (itemYMargin * consts.TileScale))
 
-	x, y := input.Position()
-	x -= frameXMargin
-	y = (y - itemYMargin)
-
-	if x >= frameXMargin/consts.TileScale && i.Y <= y && y < i.Y+itemSize*consts.TileScale {
-		return (x - 4) / (itemSize * consts.TileScale)
+	if x >= 0 && i.Y <= y && y < i.Y+itemSize*consts.TileScale {
+		return x / (itemSize * consts.TileScale)
 	}
 
 	return -1
@@ -77,7 +81,42 @@ func (i *Inventory) ActiveItemPressed() bool {
 }
 
 func (i *Inventory) Update() {
-	i.PressedSlotIndex = i.pressedSlotIndex()
+	touchX, touchY := input.Position()
+	i.PressedSlotIndex = -1
+	if input.Triggered() {
+		i.pressStartX = touchX
+		i.pressStartY = touchY
+		i.pressStartIndex = i.slotIndexAt(touchX-(i.scrollX+i.dragX), touchY)
+	}
+	if input.Pressed() {
+		dx := touchX - i.pressStartX
+		if math.Abs(float64(dx)) > scrollDragThreshold {
+			i.scrolling = true
+			i.dragX = dx
+			if i.scrollX+i.dragX > 0 {
+				i.dragX = -i.scrollX
+			}
+
+			scrollBarWidth := 160 - frameXMargin
+			maxX := (itemXMargin + len(i.items)*itemSize - scrollBarWidth) * consts.TileScale
+			if (i.scrollX + i.dragX) < -maxX {
+				i.dragX = -maxX - i.scrollX
+			}
+		}
+	}
+	if input.Released() {
+		if !i.scrolling && touchX > frameXMargin*consts.TileScale {
+			index := i.slotIndexAt(touchX-(i.scrollX+i.dragX), touchY)
+			if i.pressStartIndex == index {
+				i.PressedSlotIndex = index
+				i.pressStartIndex = -1
+			}
+		}
+		i.scrollX += i.dragX
+		i.dragX = 0
+		i.scrolling = false
+	}
+
 	i.activeItemBoxButton.Update()
 	i.activeItemBoxButton.Disabled = i.activeItemID == 0
 }
@@ -88,14 +127,14 @@ func (i *Inventory) Draw(screen *ebiten.Image) {
 	}
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(consts.TileScale, consts.TileScale)
-	op.GeoM.Translate(float64(i.X+frameXMargin), float64(i.Y+frameYMargin))
+	op.GeoM.Translate(float64(i.X+frameXMargin*consts.TileScale), float64(i.Y+frameYMargin*consts.TileScale))
 	screen.DrawImage(assets.GetImage("system/frame_inventory.png"), op)
 
 	var activeItem *data.Item
 	for index, item := range i.items {
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Scale(consts.TileScale, consts.TileScale)
-		op.GeoM.Translate(float64(frameXMargin+itemXMargin+i.X+index*itemSize*consts.TileScale), float64(i.Y+itemYMargin))
+		op.GeoM.Translate(float64((frameXMargin+itemXMargin+i.X+index*itemSize)*consts.TileScale+i.scrollX+i.dragX), float64(i.Y+itemYMargin*consts.TileScale))
 		if i.activeItemID == item.ID {
 			op.ColorM.Translate(0.5, 0.5, 0.5, 0)
 			activeItem = item
