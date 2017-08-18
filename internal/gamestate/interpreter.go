@@ -874,6 +874,14 @@ func (i *Interpreter) setVariable(sceneManager *scene.Manager, id int, op data.S
 			default:
 				panic("not reach")
 			}
+		case data.SetVariableCharacterTypeRoomX:
+			rhs, _ = ch.Position()
+		case data.SetVariableCharacterTypeRoomY:
+			_, rhs = ch.Position()
+		case data.SetVariableCharacterTypeScreenX:
+			rhs, _ = ch.DrawPosition()
+		case data.SetVariableCharacterTypeScreenY:
+			_, rhs = ch.DrawPosition()
 		default:
 			log.Printf("not implemented yet (set_variable): type %s", args.Type)
 		}
@@ -904,6 +912,8 @@ func (i *Interpreter) setVariable(sceneManager *scene.Manager, id int, op data.S
 			if sceneManager.RewardedAdsLoaded() {
 				rhs = 1
 			}
+		case data.SystemVariableRoomID:
+			rhs = i.roomID
 		default:
 			log.Printf("not implemented yet (set_variable): systemVariableType %s", systemVariableType)
 		}

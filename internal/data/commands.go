@@ -981,6 +981,10 @@ type SetVariableCharacterType string
 
 const (
 	SetVariableCharacterTypeDirection SetVariableCharacterType = "direction"
+	SetVariableCharacterTypeRoomX     SetVariableCharacterType = "room_x"
+	SetVariableCharacterTypeRoomY     SetVariableCharacterType = "room_y"
+	SetVariableCharacterTypeScreenX   SetVariableCharacterType = "screen_x"
+	SetVariableCharacterTypeScreenY   SetVariableCharacterType = "screen_y"
 )
 
 type ShowAdsType string
@@ -1049,6 +1053,7 @@ const (
 	SystemVariableInterstitialAdsLoaded SystemVariableType = "interstitial_ads_loaded"
 	SystemVariableRewardedAdsLoaded     SystemVariableType = "rewarded_ads_loaded"
 	SystemVariableHintCount             SystemVariableType = "active_hint_count"
+	SystemVariableRoomID                SystemVariableType = "room_id"
 )
 
 type MessagePositionType string
