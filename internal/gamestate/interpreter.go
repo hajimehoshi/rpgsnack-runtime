@@ -581,14 +581,14 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		i.waitingRequestID = sceneManager.GenerateRequestID()
 		sceneManager.Requester().RequestGetIAPPrices(i.waitingRequestID)
 		return false, nil
-	case data.CommandUnlockAchievement:
+	case data.CommandNameUnlockAchievement:
 		// TODO: Remove this command in the future.
 		// Implement passive achievements instead.
 		args := c.Args.(*data.CommandArgsUnlockAchievement)
 		i.waitingRequestID = sceneManager.GenerateRequestID()
 		sceneManager.Requester().RequestUnlockAchievement(i.waitingRequestID, args.ID)
 		return false, nil
-	case data.CommandControlHint:
+	case data.CommandNameControlHint:
 		args := c.Args.(*data.CommandArgsControlHint)
 		switch args.Type {
 		case data.ControlHintPause:
@@ -599,7 +599,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 			i.gameState.hints.Complete(args.ID)
 		}
 		i.commandIterator.Advance()
-	case data.CommandPurchase:
+	case data.CommandNamePurchase:
 		args := c.Args.(*data.CommandArgsPurchase)
 		i.waitingRequestID = sceneManager.GenerateRequestID()
 
@@ -613,7 +613,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 
 		sceneManager.Requester().RequestPurchase(i.waitingRequestID, key)
 		return false, nil
-	case data.CommandShowAds:
+	case data.CommandNameShowAds:
 		args := c.Args.(*data.CommandArgsShowAds)
 		i.waitingRequestID = sceneManager.GenerateRequestID()
 		switch args.Type {
@@ -623,7 +623,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 			sceneManager.Requester().RequestInterstitialAds(i.waitingRequestID)
 		}
 		return false, nil
-	case data.CommandOpenLink:
+	case data.CommandNameOpenLink:
 		args := c.Args.(*data.CommandArgsOpenLink)
 		i.waitingRequestID = sceneManager.GenerateRequestID()
 		// TODO: Define data.OpenLinkType
@@ -777,12 +777,12 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		}
 		i.commandIterator.Advance()
 
-	case data.CommandAddItem:
+	case data.CommandNameAddItem:
 		args := c.Args.(*data.CommandArgsAddItem)
 		i.gameState.items.Add(args.ID)
 		i.commandIterator.Advance()
 
-	case data.CommandRemoveItem:
+	case data.CommandNameRemoveItem:
 		args := c.Args.(*data.CommandArgsRemoveItem)
 		i.gameState.items.Remove(args.ID)
 		i.commandIterator.Advance()
