@@ -143,7 +143,7 @@ func TestItemMarshalAndUnmarshal(t *testing.T) {
 		t.Errorf("error %s", err)
 	}
 
-	newItems := NewItems([]int{1}, 1)
+	var newItems *Items
 	if err = msgpack.Unmarshal(out, &newItems); err != nil {
 		t.Errorf("error %s", err)
 	}

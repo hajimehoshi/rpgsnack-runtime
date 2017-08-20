@@ -15,8 +15,9 @@
 package commanditerator_test
 
 import (
-	"encoding/json"
 	"testing"
+
+	"github.com/vmihailenco/msgpack"
 
 	. "github.com/hajimehoshi/rpgsnack-runtime/internal/commanditerator"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
@@ -107,13 +108,12 @@ func TestGoto(t *testing.T) {
 			t.Errorf("it.Command().Args.Name == %v want: %v", got, want)
 		}
 
-		// JSON marshaling
-		j, err := json.Marshal(it)
+		bin, err := msgpack.Marshal(it)
 		if err != nil {
 			t.Fatal(err)
 		}
 		var it2 *CommandIterator
-		if err := json.Unmarshal(j, &it2); err != nil {
+		if err := msgpack.Unmarshal(bin, &it2); err != nil {
 			t.Fatal(err)
 		}
 		if !it2.Goto(c.In) {
