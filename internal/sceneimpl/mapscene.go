@@ -343,7 +343,7 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 	if err := m.gameState.Update(sceneManager); err != nil {
 		return err
 	}
-	if err := m.gameState.Screen().Update(); err != nil {
+	if err := m.gameState.UpdateScreen(); err != nil {
 		return err
 	}
 	m.gameState.UpdateWindows(sceneManager)
@@ -468,7 +468,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	op = &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(consts.TileScale, consts.TileScale)
 	op.GeoM.Translate(m.offsetX(sw), consts.GameMarginTop)
-	m.gameState.Screen().Draw(screen, m.tilesImage, op)
+	m.gameState.DrawScreen(screen, m.tilesImage, op)
 	m.inventory.Draw(screen)
 
 	if m.gameState.IsPlayerControlEnabled() && (m.gameState.Map().IsPlayerMovingByUserInput() || m.triggeringFailed) {

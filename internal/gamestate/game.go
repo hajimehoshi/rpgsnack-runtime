@@ -186,8 +186,8 @@ func (g *Game) DecodeMsgpack(dec *msgpack.Decoder) error {
 	return nil
 }
 
-func (g *Game) Screen() *Screen {
-	return g.screen
+func (g *Game) UpdateScreen() error {
+	return g.screen.Update()
 }
 
 func (g *Game) Items() *items.Items {
@@ -379,6 +379,10 @@ func (g *Game) SetRandomForTesting(r Rand) {
 
 func (g *Game) RandomValue(min, max int) int {
 	return min + g.rand.Intn(max-min)
+}
+
+func (g *Game) DrawScreen(screen *ebiten.Image, tilesImage *ebiten.Image, op *ebiten.DrawImageOptions) {
+	g.screen.Draw(screen, tilesImage, op)
 }
 
 func (g *Game) DrawWindows(screen *ebiten.Image) {
