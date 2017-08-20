@@ -202,7 +202,7 @@ func (g *Game) Map() *Map {
 	return g.currentMap
 }
 
-func (g *Game) Update(sceneManager *scene.Manager) error {
+func (g *Game) Update(sceneManager *scene.Manager) {
 	if g.lastPlayingBGMName != "" {
 		audio.PlayBGM(g.lastPlayingBGMName, g.lastPlayingBGMVolume)
 		g.lastPlayingBGMName = ""
@@ -213,7 +213,6 @@ func (g *Game) Update(sceneManager *scene.Manager) error {
 			g.waitingRequestID = 0
 		}
 	}
-	return nil
 }
 
 func (g *Game) SetBGM(bgm data.BGM) {

@@ -340,9 +340,7 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 	}
 	m.cameraButton.Update()
 
-	if err := m.gameState.Update(sceneManager); err != nil {
-		return err
-	}
+	m.gameState.Update(sceneManager)
 	m.gameState.UpdateScreen()
 	m.gameState.UpdateWindows(sceneManager)
 	if err := m.gameState.Map().Update(sceneManager); err != nil {
