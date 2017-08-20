@@ -186,8 +186,8 @@ func (g *Game) DecodeMsgpack(dec *msgpack.Decoder) error {
 	return nil
 }
 
-func (g *Game) UpdateScreen() error {
-	return g.screen.Update()
+func (g *Game) UpdateScreen() {
+	g.screen.Update()
 }
 
 func (g *Game) Items() *items.Items {

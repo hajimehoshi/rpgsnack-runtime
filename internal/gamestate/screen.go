@@ -256,7 +256,7 @@ func (s *Screen) Draw(screen *ebiten.Image, img *ebiten.Image, op *ebiten.DrawIm
 	return nil
 }
 
-func (s *Screen) Update() error {
+func (s *Screen) Update() {
 	if s.tintCount > 0 {
 		s.tintCount--
 		rate := 1 - float64(s.tintCount)/float64(s.tintMaxCount)
@@ -279,5 +279,4 @@ func (s *Screen) Update() error {
 			s.fadedOut = true
 		}
 	}
-	return nil
 }
