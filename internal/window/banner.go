@@ -15,7 +15,6 @@
 package window
 
 import (
-	"encoding/json"
 	"fmt"
 	"image/color"
 
@@ -48,29 +47,6 @@ type banner struct {
 	textAlign     data.TextAlign
 }
 
-type tmpBanner struct {
-	InterpreterID int                      `json:"interpreterId"`
-	Content       string                   `json:"content"`
-	OpeningCount  int                      `json:"openingCount"`
-	ClosingCount  int                      `json:"closingCount"`
-	Opened        bool                     `json:"opened"`
-	PositionType  data.MessagePositionType `json:"positionType"`
-	TextAlign     data.TextAlign           `json:"textAlign"`
-}
-
-func (b *banner) MarshalJSON() ([]uint8, error) {
-	tmp := &tmpBanner{
-		InterpreterID: b.interpreterID,
-		Content:       b.content,
-		Opened:        b.opened,
-		OpeningCount:  b.openingCount,
-		ClosingCount:  b.closingCount,
-		PositionType:  b.positionType,
-		TextAlign:     b.textAlign,
-	}
-	return json.Marshal(tmp)
-}
-
 func (b *banner) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e := easymsgpack.NewEncoder(enc)
 	e.BeginMap()
@@ -98,21 +74,6 @@ func (b *banner) EncodeMsgpack(enc *msgpack.Encoder) error {
 
 	e.EndMap()
 	return e.Flush()
-}
-
-func (b *banner) UnmarshalJSON(data []uint8) error {
-	var tmp *tmpBanner
-	if err := json.Unmarshal(data, &tmp); err != nil {
-		return err
-	}
-	b.interpreterID = tmp.InterpreterID
-	b.content = tmp.Content
-	b.opened = tmp.Opened
-	b.openingCount = tmp.OpeningCount
-	b.closingCount = tmp.ClosingCount
-	b.positionType = tmp.PositionType
-	b.textAlign = tmp.TextAlign
-	return nil
 }
 
 func (b *banner) DecodeMsgpack(dec *msgpack.Decoder) error {

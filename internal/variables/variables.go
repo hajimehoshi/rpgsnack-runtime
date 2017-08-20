@@ -15,7 +15,6 @@
 package variables
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/vmihailenco/msgpack"
@@ -28,21 +27,6 @@ type Variables struct {
 	switches     []bool
 	selfSwitches map[string][]bool
 	variables    []int
-}
-
-type tmpVariables struct {
-	Switches     []bool            `json:"switches"`
-	SelfSwitches map[string][]bool `json:"selfSwitches"`
-	Variables    []int             `json:"variables"`
-}
-
-func (v *Variables) MarshalJSON() ([]uint8, error) {
-	tmp := &tmpVariables{
-		Switches:     v.switches,
-		SelfSwitches: v.selfSwitches,
-		Variables:    v.variables,
-	}
-	return json.Marshal(tmp)
 }
 
 func (v *Variables) EncodeMsgpack(enc *msgpack.Encoder) error {
@@ -77,17 +61,6 @@ func (v *Variables) EncodeMsgpack(enc *msgpack.Encoder) error {
 
 	e.EndMap()
 	return e.Flush()
-}
-
-func (v *Variables) UnmarshalJSON(data []uint8) error {
-	var tmp *tmpVariables
-	if err := json.Unmarshal(data, &tmp); err != nil {
-		return err
-	}
-	v.switches = tmp.Switches
-	v.selfSwitches = tmp.SelfSwitches
-	v.variables = tmp.Variables
-	return nil
 }
 
 func (v *Variables) DecodeMsgpack(dec *msgpack.Decoder) error {

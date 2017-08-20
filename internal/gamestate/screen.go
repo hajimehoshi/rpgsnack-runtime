@@ -15,7 +15,6 @@
 package gamestate
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/hajimehoshi/ebiten"
@@ -36,10 +35,10 @@ func init() {
 }
 
 type tint struct {
-	Red   float64 `json:"red"`
-	Green float64 `json:"green"`
-	Blue  float64 `json:"blue"`
-	Gray  float64 `json:"gray"`
+	Red   float64
+	Green float64
+	Blue  float64
+	Gray  float64
 }
 
 func (t *tint) isZero() bool {
@@ -95,35 +94,6 @@ type Screen struct {
 	fadedOut        bool
 }
 
-type tmpScreen struct {
-	CurrentTint     tint `json:"currentTint"`
-	OrigTint        tint `json:"origTint"`
-	TargetTint      tint `json:"targetTint"`
-	TintCount       int  `json:"tintCount"`
-	TintMaxCount    int  `json:"tintMaxCount"`
-	FadeInCount     int  `json:"fadeInCount"`
-	FadeInMaxCount  int  `json:"fadeInMaxCount"`
-	FadeOutCount    int  `json:"fadeOutCount"`
-	FadeOutMaxCount int  `json:"fadeOutMaxCount"`
-	FadedOut        bool `json:"fadedOut"`
-}
-
-func (s *Screen) MarshalJSON() ([]uint8, error) {
-	tmp := &tmpScreen{
-		CurrentTint:     s.currentTint,
-		OrigTint:        s.origTint,
-		TargetTint:      s.targetTint,
-		TintCount:       s.tintCount,
-		TintMaxCount:    s.tintMaxCount,
-		FadeInCount:     s.fadeInCount,
-		FadeInMaxCount:  s.fadeInMaxCount,
-		FadeOutCount:    s.fadeOutCount,
-		FadeOutMaxCount: s.fadeOutMaxCount,
-		FadedOut:        s.fadedOut,
-	}
-	return json.Marshal(tmp)
-}
-
 func (s *Screen) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e := easymsgpack.NewEncoder(enc)
 	e.BeginMap()
@@ -153,24 +123,6 @@ func (s *Screen) EncodeMsgpack(enc *msgpack.Encoder) error {
 
 	e.EndMap()
 	return e.Flush()
-}
-
-func (s *Screen) UnmarshalJSON(data []uint8) error {
-	var tmp *tmpScreen
-	if err := json.Unmarshal(data, &tmp); err != nil {
-		return err
-	}
-	s.currentTint = tmp.CurrentTint
-	s.origTint = tmp.OrigTint
-	s.targetTint = tmp.TargetTint
-	s.tintCount = tmp.TintCount
-	s.tintMaxCount = tmp.TintMaxCount
-	s.fadeInCount = tmp.FadeInCount
-	s.fadeInMaxCount = tmp.FadeInMaxCount
-	s.fadeOutCount = tmp.FadeOutCount
-	s.fadeOutMaxCount = tmp.FadeOutMaxCount
-	s.fadedOut = tmp.FadedOut
-	return nil
 }
 
 func (s *Screen) DecodeMsgpack(dec *msgpack.Decoder) error {

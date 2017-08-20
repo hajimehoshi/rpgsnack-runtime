@@ -15,7 +15,6 @@
 package commanditerator
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/vmihailenco/msgpack"
@@ -43,19 +42,6 @@ func New(commands []*data.Command) *CommandIterator {
 	return c
 }
 
-type tmpCommandIterator struct {
-	Indices  []int           `json:"indices"`
-	Commands []*data.Command `json:"commands"`
-}
-
-func (c *CommandIterator) MarshalJSON() ([]uint8, error) {
-	tmp := &tmpCommandIterator{
-		Indices:  c.indices,
-		Commands: c.commands,
-	}
-	return json.Marshal(tmp)
-}
-
 func (c *CommandIterator) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e := easymsgpack.NewEncoder(enc)
 	e.BeginMap()
@@ -76,18 +62,6 @@ func (c *CommandIterator) EncodeMsgpack(enc *msgpack.Encoder) error {
 
 	e.EndMap()
 	return e.Flush()
-}
-
-func (c *CommandIterator) UnmarshalJSON(data []uint8) error {
-	var tmp *tmpCommandIterator
-	if err := json.Unmarshal(data, &tmp); err != nil {
-		return err
-	}
-	c.indices = tmp.Indices
-	c.commands = tmp.Commands
-	c.labels = map[string][]int{}
-	c.recordLabel(c.commands, nil)
-	return nil
 }
 
 func (c *CommandIterator) DecodeMsgpack(dec *msgpack.Decoder) error {

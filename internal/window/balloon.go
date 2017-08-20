@@ -15,7 +15,6 @@
 package window
 
 import (
-	"encoding/json"
 	"fmt"
 	"image"
 	"image/color"
@@ -53,43 +52,6 @@ type balloon struct {
 	closingCount   int
 	opened         bool
 	balloonType    data.BalloonType
-}
-
-type tmpBalloon struct {
-	InterpreterID  int              `json:"interpreterId"`
-	X              int              `json:"x"`
-	Y              int              `json:"y"`
-	Width          int              `json:"width"`
-	Height         int              `json:"height"`
-	HasArrow       bool             `json:"hasArrow"`
-	EventID        int              `json:"eventId"`
-	Content        string           `json:"content"`
-	ContentOffsetX int              `json:"contentOffsetX"`
-	ContentOffsetY int              `json:"contentOffsetY"`
-	OpeningCount   int              `json:"openingCount"`
-	ClosingCount   int              `json:"closingCount"`
-	Opened         bool             `json:"opened"`
-	BalloonType    data.BalloonType `json:"balloonType"`
-}
-
-func (b *balloon) MarshalJSON() ([]uint8, error) {
-	tmp := &tmpBalloon{
-		InterpreterID:  b.interpreterID,
-		X:              b.x,
-		Y:              b.y,
-		Width:          b.width,
-		Height:         b.height,
-		HasArrow:       b.hasArrow,
-		EventID:        b.eventID,
-		Content:        b.content,
-		ContentOffsetX: b.contentOffsetX,
-		ContentOffsetY: b.contentOffsetY,
-		OpeningCount:   b.openingCount,
-		ClosingCount:   b.closingCount,
-		Opened:         b.opened,
-		BalloonType:    b.balloonType,
-	}
-	return json.Marshal(tmp)
 }
 
 func (b *balloon) EncodeMsgpack(enc *msgpack.Encoder) error {
@@ -140,28 +102,6 @@ func (b *balloon) EncodeMsgpack(enc *msgpack.Encoder) error {
 
 	e.EndMap()
 	return e.Flush()
-}
-
-func (b *balloon) UnmarshalJSON(data []uint8) error {
-	var tmp *tmpBalloon
-	if err := json.Unmarshal(data, &tmp); err != nil {
-		return err
-	}
-	b.interpreterID = tmp.InterpreterID
-	b.x = tmp.X
-	b.y = tmp.Y
-	b.width = tmp.Width
-	b.height = tmp.Height
-	b.hasArrow = tmp.HasArrow
-	b.eventID = tmp.EventID
-	b.content = tmp.Content
-	b.contentOffsetX = tmp.ContentOffsetX
-	b.contentOffsetY = tmp.ContentOffsetY
-	b.openingCount = tmp.OpeningCount
-	b.closingCount = tmp.ClosingCount
-	b.opened = tmp.Opened
-	b.balloonType = tmp.BalloonType
-	return nil
 }
 
 func (b *balloon) DecodeMsgpack(dec *msgpack.Decoder) error {

@@ -59,41 +59,6 @@ func NewInterpreter(gameState *Game, mapID, roomID, eventID int, commands []*dat
 	}
 }
 
-type tmpInterpreter struct {
-	ID                 int                              `json:"id"`
-	MapID              int                              `json:"mapId"`
-	RoomID             int                              `json:"roomId"`
-	EventID            int                              `json:"eventId"`
-	CommandIterator    *commanditerator.CommandIterator `json:"commandIterator"`
-	WaitingCount       int                              `json:"waitingCount"`
-	WaitingCommand     bool                             `json:"waitingCommand"`
-	MoveCharacterState *moveCharacterState              `json:"moveCharacterState"`
-	Repeat             bool                             `json:"repeat"`
-	Sub                *Interpreter                     `json:"sub"`
-	Route              bool                             `json:"route"`
-	RouteSkip          bool                             `json:"routeSkip"`
-	WaitingRequestID   int                              `json:"waitingRequestId"`
-}
-
-func (i *Interpreter) MarshalJSON() ([]uint8, error) {
-	tmp := &tmpInterpreter{
-		ID:                 i.id,
-		MapID:              i.mapID,
-		RoomID:             i.roomID,
-		EventID:            i.eventID,
-		CommandIterator:    i.commandIterator,
-		WaitingCount:       i.waitingCount,
-		WaitingCommand:     i.waitingCommand,
-		MoveCharacterState: i.moveCharacterState,
-		Repeat:             i.repeat,
-		Sub:                i.sub,
-		Route:              i.route,
-		RouteSkip:          i.routeSkip,
-		WaitingRequestID:   i.waitingRequestID,
-	}
-	return json.Marshal(tmp)
-}
-
 func (i *Interpreter) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e := easymsgpack.NewEncoder(enc)
 	e.BeginMap()
@@ -139,27 +104,6 @@ func (i *Interpreter) EncodeMsgpack(enc *msgpack.Encoder) error {
 
 	e.EndMap()
 	return e.Flush()
-}
-
-func (i *Interpreter) UnmarshalJSON(data []uint8) error {
-	var tmp *tmpInterpreter
-	if err := json.Unmarshal(data, &tmp); err != nil {
-		return err
-	}
-	i.id = tmp.ID
-	i.mapID = tmp.MapID
-	i.roomID = tmp.RoomID
-	i.eventID = tmp.EventID
-	i.commandIterator = tmp.CommandIterator
-	i.waitingCount = tmp.WaitingCount
-	i.waitingCommand = tmp.WaitingCommand
-	i.moveCharacterState = tmp.MoveCharacterState
-	i.repeat = tmp.Repeat
-	i.sub = tmp.Sub
-	i.route = tmp.Route
-	i.routeSkip = tmp.RouteSkip
-	i.waitingRequestID = tmp.WaitingRequestID
-	return nil
 }
 
 func (i *Interpreter) DecodeMsgpack(dec *msgpack.Decoder) error {

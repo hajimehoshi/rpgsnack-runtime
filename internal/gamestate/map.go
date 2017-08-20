@@ -15,7 +15,6 @@
 package gamestate
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -67,31 +66,6 @@ func NewMap(game *Game) *Map {
 	return m
 }
 
-type tmpMap struct {
-	Player                      *character.Character   `json:"player"`
-	MapID                       int                    `json:"mapId"`
-	RoomID                      int                    `json:"roomId"`
-	Events                      []*character.Character `json:"events"`
-	EventPageIndices            map[int]int            `json:"eventPageIndices"`
-	ExecutingEventIDByUserInput int                    `json:"executingEventIdByUserInput"`
-	Interpreters                map[int]*Interpreter   `json:"interpreters"`
-	PlayerInterpreterID         int                    `json:"playerInterpreterId"`
-}
-
-func (m *Map) MarshalJSON() ([]uint8, error) {
-	tmp := &tmpMap{
-		Player:                      m.player,
-		MapID:                       m.mapID,
-		RoomID:                      m.roomID,
-		Events:                      m.events,
-		EventPageIndices:            m.eventPageIndices,
-		ExecutingEventIDByUserInput: m.executingEventIDByUserInput,
-		Interpreters:                m.interpreters,
-		PlayerInterpreterID:         m.playerInterpreterID,
-	}
-	return json.Marshal(tmp)
-}
-
 func (m *Map) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e := easymsgpack.NewEncoder(enc)
 	e.BeginMap()
@@ -139,22 +113,6 @@ func (m *Map) EncodeMsgpack(enc *msgpack.Encoder) error {
 
 	e.EndMap()
 	return e.Flush()
-}
-
-func (m *Map) UnmarshalJSON(jsonData []uint8) error {
-	var tmp *tmpMap
-	if err := json.Unmarshal(jsonData, &tmp); err != nil {
-		return err
-	}
-	m.player = tmp.Player
-	m.mapID = tmp.MapID
-	m.roomID = tmp.RoomID
-	m.events = tmp.Events
-	m.eventPageIndices = tmp.EventPageIndices
-	m.executingEventIDByUserInput = tmp.ExecutingEventIDByUserInput
-	m.interpreters = tmp.Interpreters
-	m.playerInterpreterID = tmp.PlayerInterpreterID
-	return nil
 }
 
 func (m *Map) DecodeMsgpack(dec *msgpack.Decoder) error {

@@ -15,7 +15,6 @@
 package gamestate
 
 import (
-	"encoding/json"
 	"fmt"
 	"math/rand"
 	"regexp"
@@ -80,35 +79,6 @@ func NewGame() *Game {
 	return g
 }
 
-type tmpGame struct {
-	Hints                *Hints               `json:"hints"`
-	Items                *items.Items         `json:"items"`
-	Variables            *variables.Variables `json:"variables"`
-	Screen               *Screen              `json:"screen"`
-	Windows              *window.Windows      `json:"windows"`
-	Map                  *Map                 `json:"map"`
-	LastInterpreterID    int                  `json:"lastInterpreterId"`
-	AutoSaveEnabled      bool                 `json:"autoSaveEnabled"`
-	PlayerControlEnabled bool                 `json:"playerControlEnabled"`
-	Cleared              bool                 `json:"cleared"`
-}
-
-func (g *Game) MarshalJSON() ([]uint8, error) {
-	tmp := &tmpGame{
-		Hints:                g.hints,
-		Items:                g.items,
-		Variables:            g.variables,
-		Screen:               g.screen,
-		Windows:              g.windows,
-		Map:                  g.currentMap,
-		LastInterpreterID:    g.lastInterpreterID,
-		AutoSaveEnabled:      g.autoSaveEnabled,
-		PlayerControlEnabled: g.playerControlEnabled,
-		Cleared:              g.cleared,
-	}
-	return json.Marshal(tmp)
-}
-
 func (g *Game) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e := easymsgpack.NewEncoder(enc)
 	e.BeginMap()
@@ -151,26 +121,6 @@ func (g *Game) EncodeMsgpack(enc *msgpack.Encoder) error {
 
 	e.EndMap()
 	return e.Flush()
-}
-
-func (g *Game) UnmarshalJSON(data []uint8) error {
-	var tmp *tmpGame
-	if err := json.Unmarshal(data, &tmp); err != nil {
-		return err
-	}
-	g.hints = tmp.Hints
-	g.items = tmp.Items
-	g.variables = tmp.Variables
-	g.screen = tmp.Screen
-	g.windows = tmp.Windows
-	g.currentMap = tmp.Map
-	g.currentMap.setGame(g)
-	g.lastInterpreterID = tmp.LastInterpreterID
-	g.autoSaveEnabled = tmp.AutoSaveEnabled
-	g.playerControlEnabled = tmp.PlayerControlEnabled
-	g.cleared = tmp.Cleared
-	g.rand = generateDefaultRand()
-	return nil
 }
 
 func (g *Game) DecodeMsgpack(dec *msgpack.Decoder) error {

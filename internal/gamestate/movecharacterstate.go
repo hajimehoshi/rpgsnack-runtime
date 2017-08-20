@@ -15,7 +15,6 @@
 package gamestate
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 
@@ -79,33 +78,6 @@ func newMoveCharacterState(gameState *Game, mapID, roomID, eventID int, args *da
 	return m
 }
 
-type tmpMoveCharacterState struct {
-	MapID         int                            `json:"mapId"`
-	RoomID        int                            `json:"roomId"`
-	EventID       int                            `json:"eventId"`
-	Args          *data.CommandArgsMoveCharacter `json:"args"`
-	RouteSkip     bool                           `json:"routeSkip"`
-	DistanceCount int                            `json:"distanceCount"`
-	Path          []path.RouteCommand            `json:"path"`
-	Waiting       bool                           `json:"waiting"`
-	Terminated    bool                           `json:"terminated"`
-}
-
-func (m *moveCharacterState) MarshalJSON() ([]uint8, error) {
-	tmp := &tmpMoveCharacterState{
-		MapID:         m.mapID,
-		RoomID:        m.roomID,
-		EventID:       m.eventID,
-		Args:          m.args,
-		RouteSkip:     m.routeSkip,
-		DistanceCount: m.distanceCount,
-		Path:          m.path,
-		Waiting:       m.waiting,
-		Terminated:    m.terminated,
-	}
-	return json.Marshal(tmp)
-}
-
 func (m *moveCharacterState) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e := easymsgpack.NewEncoder(enc)
 	e.BeginMap()
@@ -143,23 +115,6 @@ func (m *moveCharacterState) EncodeMsgpack(enc *msgpack.Encoder) error {
 
 	e.EndMap()
 	return e.Flush()
-}
-
-func (m *moveCharacterState) UnmarshalJSON(jsonData []uint8) error {
-	var tmp *tmpMoveCharacterState
-	if err := json.Unmarshal(jsonData, &tmp); err != nil {
-		return err
-	}
-	m.mapID = tmp.MapID
-	m.roomID = tmp.RoomID
-	m.eventID = tmp.EventID
-	m.args = tmp.Args
-	m.routeSkip = tmp.RouteSkip
-	m.distanceCount = tmp.DistanceCount
-	m.path = tmp.Path
-	m.waiting = tmp.Waiting
-	m.terminated = tmp.Terminated
-	return nil
 }
 
 func (m *moveCharacterState) DecodeMsgpack(dec *msgpack.Decoder) error {

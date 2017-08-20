@@ -15,7 +15,6 @@
 package items
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/vmihailenco/msgpack"
@@ -29,24 +28,11 @@ type Items struct {
 	eventItem  int
 }
 
-type tmpItems struct {
-	Items      []int `json:"items"`
-	ActiveItem int   `json:"activeItem"`
-}
-
 func NewItems(items []int, activeItem int) *Items {
 	return &Items{
 		items:      items,
 		activeItem: activeItem,
 	}
-}
-
-func (i *Items) MarshalJSON() ([]uint8, error) {
-	tmp := &tmpItems{
-		Items:      i.items,
-		ActiveItem: i.activeItem,
-	}
-	return json.Marshal(tmp)
 }
 
 func (i *Items) EncodeMsgpack(enc *msgpack.Encoder) error {
@@ -64,16 +50,6 @@ func (i *Items) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EncodeInt(i.eventItem)
 	e.EndMap()
 	return e.Flush()
-}
-
-func (i *Items) UnmarshalJSON(data []uint8) error {
-	var tmp *tmpItems
-	if err := json.Unmarshal(data, &tmp); err != nil {
-		return err
-	}
-	i.items = tmp.Items
-	i.activeItem = tmp.ActiveItem
-	return nil
 }
 
 func (i *Items) DecodeMsgpack(dec *msgpack.Decoder) error {

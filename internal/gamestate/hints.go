@@ -15,7 +15,6 @@
 package gamestate
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/vmihailenco/msgpack"
@@ -36,17 +35,6 @@ type Hints struct {
 	states map[int]hintState
 }
 
-type tmpHints struct {
-	States map[int]hintState `json:"states"`
-}
-
-func (h *Hints) MarshalJSON() ([]uint8, error) {
-	tmp := &tmpHints{
-		States: h.states,
-	}
-	return json.Marshal(tmp)
-}
-
 func (h *Hints) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e := easymsgpack.NewEncoder(enc)
 	e.BeginMap()
@@ -59,15 +47,6 @@ func (h *Hints) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EndMap()
 	e.EndMap()
 	return e.Flush()
-}
-
-func (h *Hints) UnmarshalJSON(data []uint8) error {
-	var tmp *tmpHints
-	if err := json.Unmarshal(data, &tmp); err != nil {
-		return err
-	}
-	h.states = tmp.States
-	return nil
 }
 
 func (h *Hints) DecodeMsgpack(dec *msgpack.Decoder) error {

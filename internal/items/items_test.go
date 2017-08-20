@@ -17,6 +17,8 @@ package items_test
 import (
 	"testing"
 
+	"github.com/vmihailenco/msgpack"
+
 	. "github.com/hajimehoshi/rpgsnack-runtime/internal/items"
 )
 
@@ -136,14 +138,13 @@ func TestItemActivate(t *testing.T) {
 
 func TestItemMarshalAndUnmarshal(t *testing.T) {
 	items := NewItems([]int{1, 2, 3}, 2)
-	out, err := items.MarshalJSON()
+	out, err := msgpack.Marshal(items)
 	if err != nil {
 		t.Errorf("error %s", err)
 	}
 
 	newItems := NewItems([]int{1}, 1)
-	err = newItems.UnmarshalJSON(out)
-	if err != nil {
+	if err = msgpack.Unmarshal(out, &newItems); err != nil {
 		t.Errorf("error %s", err)
 	}
 
