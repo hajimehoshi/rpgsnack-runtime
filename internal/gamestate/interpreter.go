@@ -787,6 +787,11 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		i.gameState.items.Remove(args.ID)
 		i.commandIterator.Advance()
 
+	case data.CommandNameShowPicture:
+		// args := c.Args.(*data.ShowPicture)
+		i.commandIterator.Advance()
+		// TODO: Implement this
+
 	case data.CommandNameFinishPlayerMovingByUserInput:
 		i.gameState.currentMap.FinishPlayerMovingByUserInput()
 		i.commandIterator.Advance()

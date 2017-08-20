@@ -265,6 +265,12 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 			return err
 		}
 		c.Args = args
+	case CommandNameShowPicture:
+		var args *CommandArgsShowPicture
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	default:
 		return fmt.Errorf("data: invalid command: %s", c.Name)
 	}
@@ -394,6 +400,9 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 			case CommandNameRemoveItem:
 				c.Args = &CommandArgsRemoveItem{}
 				d.DecodeAny(c.Args)
+			case CommandNameShowPicture:
+				c.Args = &CommandArgsShowPicture{}
+				d.DecodeAny(c.Args)
 			default:
 				return fmt.Errorf("data: Command.DecodeMsgpack: invalid command: %s", c.Name)
 			}
@@ -460,8 +469,11 @@ const (
 	CommandNameSyncIAP           CommandName = "sync_iap" // TODO: We might be able to remove this later
 	CommandNameShowAds           CommandName = "show_ads"
 	CommandNameOpenLink          CommandName = "open_link"
-	CommandNameAddItem           CommandName = "add_item"
-	CommandNameRemoveItem        CommandName = "remove_item"
+
+	CommandNameAddItem    CommandName = "add_item"
+	CommandNameRemoveItem CommandName = "remove_item"
+
+	CommandNameShowPicture CommandName = "show_picture"
 
 	// Route commands
 	CommandNameMoveCharacter        CommandName = "move_character"
@@ -937,6 +949,43 @@ type CommandArgsAddItem struct {
 
 type CommandArgsRemoveItem struct {
 	ID int `json:"id" msgpack:"id"`
+}
+
+type ShowPicturePosValueType string
+
+const (
+	ShowPicturePosValueTypeConstant ShowPicturePosValueType = "constant"
+	ShowPicturePosValueTypeVariable ShowPicturePosValueType = "variable"
+)
+
+type ShowPictureOrigin string
+
+const (
+	ShowPictureOriginUpperLeft ShowPictureOrigin = "upper_left"
+	ShowPictureOriginCenter    ShowPictureOrigin = "center"
+)
+
+type ShowPictureBlendType string
+
+const (
+	ShowPictureBlendTypeNormal ShowPictureBlendType = "normal"
+	ShowPictureBlendTypeAdd    ShowPictureBlendType = "add"
+)
+
+type CommandArgsShowPicture struct {
+	ID           int                     `json:"id" msgpack:"id"`
+	X            int                     `json:"x" msgpack:"x"`
+	Y            int                     `json:"y" msgpack:"y"`
+	PosValueType ShowPicturePosValueType `json:"posValueType" msgpack:"posValueType"`
+	scaleX       int                     `json:"scaleX" msgpack:"scaleX"`
+	scaleY       int                     `json:"scaleY" msgpack:"scaleY"`
+	opacity      int                     `json:"opacity" msgpack:"opacity"`
+	angle        int                     `json:"angle" msgpack:"angle"`
+	origin       ShowPictureOrigin       `json:"origin" msgpack:"origin"`
+	blendType    ShowPictureBlendType    `json:"blendType" msgpack:"blendType"`
+	wait         bool                    `json:"wait" msgpack:"wait"`
+	time         int                     `json:"time" msgpack:"time"`
+	name         string                  `json:"name" msgpack:"name"`
 }
 
 type SetVariableOp string
