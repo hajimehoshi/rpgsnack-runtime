@@ -346,7 +346,7 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 	if err := m.gameState.Screen().Update(); err != nil {
 		return err
 	}
-	m.gameState.Windows().Update(sceneManager)
+	m.gameState.UpdateWindows(sceneManager)
 	if err := m.gameState.Map().Update(sceneManager); err != nil {
 		if err == gamestate.GoToTitle {
 			return m.goToTitle(sceneManager)

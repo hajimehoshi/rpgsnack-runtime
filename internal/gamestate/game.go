@@ -194,8 +194,8 @@ func (g *Game) Items() *items.Items {
 	return g.items
 }
 
-func (g *Game) Windows() *window.Windows {
-	return g.windows
+func (g *Game) UpdateWindows(sceneManager *scene.Manager) {
+	g.windows.Update(sceneManager)
 }
 
 func (g *Game) Map() *Map {
