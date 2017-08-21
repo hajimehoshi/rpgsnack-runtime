@@ -976,18 +976,18 @@ const (
 
 type CommandArgsShowPicture struct {
 	ID           int                     `json:"id" msgpack:"id"`
+	Image        string                  `json:"image" msgpack:"image"`
 	X            int                     `json:"x" msgpack:"x"`
 	Y            int                     `json:"y" msgpack:"y"`
 	PosValueType ShowPicturePosValueType `json:"posValueType" msgpack:"posValueType"`
-	scaleX       int                     `json:"scaleX" msgpack:"scaleX"`
-	scaleY       int                     `json:"scaleY" msgpack:"scaleY"`
-	opacity      int                     `json:"opacity" msgpack:"opacity"`
-	angle        int                     `json:"angle" msgpack:"angle"`
-	origin       ShowPictureOrigin       `json:"origin" msgpack:"origin"`
-	blendType    ShowPictureBlendType    `json:"blendType" msgpack:"blendType"`
-	wait         bool                    `json:"wait" msgpack:"wait"`
-	time         int                     `json:"time" msgpack:"time"`
-	name         string                  `json:"name" msgpack:"name"`
+	ScaleX       int                     `json:"scaleX" msgpack:"scaleX"`
+	ScaleY       int                     `json:"scaleY" msgpack:"scaleY"`
+	Angle        int                     `json:"angle" msgpack:"angle"`
+	Opacity      int                     `json:"opacity" msgpack:"opacity"`
+	Origin       ShowPictureOrigin       `json:"origin" msgpack:"origin"`
+	BlendType    ShowPictureBlendType    `json:"blendType" msgpack:"blendType"`
+	Wait         bool                    `json:"wait" msgpack:"wait"`
+	Time         int                     `json:"time" msgpack:"time"`
 }
 
 type SetVariableOp string

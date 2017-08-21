@@ -30,6 +30,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/items"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/picture"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/variables"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/window"
@@ -45,6 +46,7 @@ type Game struct {
 	variables            *variables.Variables
 	screen               *Screen
 	windows              *window.Windows
+	pictures             *picture.Pictures
 	currentMap           *Map
 	lastInterpreterID    int
 	autoSaveEnabled      bool
@@ -71,6 +73,7 @@ func NewGame() *Game {
 		variables:            &variables.Variables{},
 		screen:               &Screen{},
 		windows:              &window.Windows{},
+		pictures:             &picture.Pictures{},
 		rand:                 generateDefaultRand(),
 		autoSaveEnabled:      true,
 		playerControlEnabled: true,
@@ -196,6 +199,10 @@ func (g *Game) Items() *items.Items {
 
 func (g *Game) UpdateWindows(sceneManager *scene.Manager) {
 	g.windows.Update(sceneManager)
+}
+
+func (g *Game) UpdatePictures() {
+	g.pictures.Update()
 }
 
 func (g *Game) Map() *Map {
@@ -389,6 +396,10 @@ func (g *Game) DrawWindows(screen *ebiten.Image) {
 	cs = append(cs, g.currentMap.player)
 	cs = append(cs, g.currentMap.events...)
 	g.windows.Draw(screen, cs)
+}
+
+func (g *Game) DrawPictures(screen *ebiten.Image) {
+	g.pictures.Draw(screen)
 }
 
 func (g *Game) character(mapID, roomID, eventID int) *character.Character {

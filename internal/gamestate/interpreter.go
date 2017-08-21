@@ -19,9 +19,11 @@ import (
 	"fmt"
 	"image/color"
 	"log"
+	"math"
 
 	"github.com/vmihailenco/msgpack"
 
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/commanditerator"
@@ -761,9 +763,15 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		i.commandIterator.Advance()
 
 	case data.CommandNameShowPicture:
-		// args := c.Args.(*data.ShowPicture)
+		args := c.Args.(*data.CommandArgsShowPicture)
+		image := assets.GetImage("pictures/" + args.Image + ".png")
+		scaleX := float64(args.ScaleX) / 100
+		scaleY := float64(args.ScaleY) / 100
+		angle := float64(args.Angle) * math.Pi / 180
+		opacity := float64(args.Opacity) / 255
+		i.gameState.pictures.Add(args.ID, image, args.X, args.Y, scaleX, scaleY, angle, opacity, args.Origin, args.BlendType)
 		i.commandIterator.Advance()
-		// TODO: Implement this
+		// TODO: Implement wait/time
 
 	case data.CommandNameFinishPlayerMovingByUserInput:
 		i.gameState.currentMap.FinishPlayerMovingByUserInput()
