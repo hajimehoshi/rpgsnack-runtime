@@ -687,9 +687,11 @@ func (c *CommandArgsSetVariable) DecodeMsgpack(dec *msgpack.Decoder) error {
 }
 
 type CommandArgsTransfer struct {
-	RoomID int `json:"roomId" msgpack:"roomId"`
-	X      int `json:"x" msgpack:"x"`
-	Y      int `json:"y" msgpack:"y"`
+	ValueType  TransferValueType      `json:"valueType" msgpack:"valueType"`
+	RoomID     int                    `json:"roomId" msgpack:"roomId"`
+	X          int                    `json:"x" msgpack:"x"`
+	Y          int                    `json:"y" msgpack:"y"`
+	Transition TransferTransitionType `json:"transition" msgpack:"transition"`
 }
 
 type CommandArgsSetRoute struct {
@@ -1008,6 +1010,21 @@ const (
 	SetVariableValueTypeCharacter  SetVariableValueType = "character"
 	SetVariableValueTypeIAPProduct SetVariableValueType = "iap_product"
 	SetVariableValueTypeSystem     SetVariableValueType = "system"
+)
+
+type TransferValueType string
+
+const (
+	TransferValueTypeConstant TransferValueType = "constant"
+	TransferValueTypeVariable TransferValueType = "variable"
+)
+
+type TransferTransitionType string
+
+const (
+	TransferTransitionTypeNone  TransferTransitionType = "none"
+	TransferTransitionTypeBlack TransferTransitionType = "black"
+	TransferTransitionTypeWhite TransferTransitionType = "white"
 )
 
 type SetVariableValueRandom struct {

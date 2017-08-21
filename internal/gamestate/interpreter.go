@@ -17,6 +17,7 @@ package gamestate
 import (
 	"encoding/json"
 	"fmt"
+	"image/color"
 	"log"
 
 	"github.com/vmihailenco/msgpack"
@@ -433,13 +434,41 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		return false, nil
 	case data.CommandNameTransfer:
 		args := c.Args.(*data.CommandArgsTransfer)
+		if args.Transition == data.TransferTransitionTypeNone {
+			roomID := args.RoomID
+			x := args.X
+			y := args.Y
+			if args.ValueType == data.TransferValueTypeVariable {
+				roomID = i.gameState.VariableValue(roomID)
+				x = i.gameState.VariableValue(x)
+				y = i.gameState.VariableValue(y)
+			}
+			i.gameState.Map().transferPlayerImmediately(roomID, x, y, i)
+			i.waitingCommand = false
+			i.commandIterator.Advance()
+			return true, nil
+		}
+
 		if !i.waitingCommand {
+			if args.Transition == data.TransferTransitionTypeWhite {
+				i.gameState.screen.setFadeColor(color.White)
+			} else {
+				i.gameState.screen.setFadeColor(color.Black)
+			}
 			i.gameState.screen.fadeOut(30)
 			i.waitingCommand = true
 			return false, nil
 		}
 		if i.gameState.screen.isFadedOut() {
-			i.gameState.Map().transferPlayerImmediately(args.RoomID, args.X, args.Y, i)
+			roomID := args.RoomID
+			x := args.X
+			y := args.Y
+			if args.ValueType == data.TransferValueTypeVariable {
+				roomID = i.gameState.VariableValue(roomID)
+				x = i.gameState.VariableValue(x)
+				y = i.gameState.VariableValue(y)
+			}
+			i.gameState.Map().transferPlayerImmediately(roomID, x, y, i)
 			i.gameState.screen.fadeIn(30)
 			return false, nil
 		}

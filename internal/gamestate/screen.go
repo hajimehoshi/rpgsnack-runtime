@@ -16,6 +16,7 @@ package gamestate
 
 import (
 	"fmt"
+	"image/color"
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/vmihailenco/msgpack"
@@ -92,6 +93,7 @@ type Screen struct {
 	fadeOutCount    int
 	fadeOutMaxCount int
 	fadedOut        bool
+	fadeColor       color.RGBA
 }
 
 func (s *Screen) EncodeMsgpack(enc *msgpack.Encoder) error {
@@ -120,6 +122,14 @@ func (s *Screen) EncodeMsgpack(enc *msgpack.Encoder) error {
 
 	e.EncodeString("fadedOut")
 	e.EncodeBool(s.fadedOut)
+
+	e.EncodeString("fadeColor")
+	e.BeginArray()
+	e.EncodeInt(int(s.fadeColor.R))
+	e.EncodeInt(int(s.fadeColor.G))
+	e.EncodeInt(int(s.fadeColor.B))
+	e.EncodeInt(int(s.fadeColor.A))
+	e.EndArray()
 
 	e.EndMap()
 	return e.Flush()
@@ -150,6 +160,18 @@ func (s *Screen) DecodeMsgpack(dec *msgpack.Decoder) error {
 			s.fadeOutMaxCount = d.DecodeInt()
 		case "fadedOut":
 			s.fadedOut = d.DecodeBool()
+		case "fadeColor":
+			n = d.DecodeArrayLen()
+			if n != 4 {
+				for i := 0; i < n; i++ {
+					d.Skip()
+				}
+				break
+			}
+			s.fadeColor.R = uint8(d.DecodeInt())
+			s.fadeColor.G = uint8(d.DecodeInt())
+			s.fadeColor.B = uint8(d.DecodeInt())
+			s.fadeColor.A = uint8(d.DecodeInt())
 		}
 	}
 	if err := d.Error(); err != nil {
@@ -182,6 +204,14 @@ func (s *Screen) fadeOut(count int) {
 	s.fadeOutMaxCount = count
 }
 
+func (s *Screen) setFadeColor(fadeColor color.Color) {
+	r, g, b, a := fadeColor.RGBA()
+	s.fadeColor.R = uint8(r >> 8)
+	s.fadeColor.G = uint8(g >> 8)
+	s.fadeColor.B = uint8(b >> 8)
+	s.fadeColor.A = uint8(a >> 8)
+}
+
 func (s *Screen) isChangingTint() bool {
 	return s.tintCount > 0
 }
@@ -192,6 +222,17 @@ func (s *Screen) isFading() bool {
 
 func (s *Screen) isFadedOut() bool {
 	return s.fadedOut
+}
+
+func (s *Screen) fadeColorTranslate() (r, g, b, a float64) {
+	if s.fadeColor.A == 0 {
+		return 0, 0, 0, 0
+	}
+	r = float64(s.fadeColor.R) / float64(s.fadeColor.A)
+	g = float64(s.fadeColor.G) / float64(s.fadeColor.A)
+	b = float64(s.fadeColor.B) / float64(s.fadeColor.A)
+	a = float64(s.fadeColor.A) / 255
+	return
 }
 
 func (s *Screen) Draw(screen *ebiten.Image, img *ebiten.Image, op *ebiten.DrawImageOptions) error {
@@ -247,7 +288,7 @@ func (s *Screen) Draw(screen *ebiten.Image, img *ebiten.Image, op *ebiten.DrawIm
 		sw, _ := screen.Size()
 		tx := (float64(sw) - consts.TileXNum*consts.TileSize*consts.TileScale) / 2
 		op.GeoM.Translate(tx, consts.GameMarginTop)
-		op.ColorM.Translate(0, 0, 0, 1)
+		op.ColorM.Translate(s.fadeColorTranslate())
 		op.ColorM.Scale(1, 1, 1, fadeRate)
 		if err := screen.DrawImage(emptyImage, op); err != nil {
 			return err
