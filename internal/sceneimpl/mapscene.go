@@ -253,7 +253,9 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 		activeItemID := m.gameState.Items().ActiveItem()
 		m.inventory.SetItems(items)
 		m.inventory.SetActiveItemID(activeItemID)
-		m.inventory.Update()
+		if !m.gameState.Map().IsEventExecuting() {
+			m.inventory.Update()
+		}
 		if m.inventory.PressedSlotIndex >= 0 && m.inventory.PressedSlotIndex < len(m.gameState.Items().Items()) {
 			itemID := m.gameState.Items().Items()[m.inventory.PressedSlotIndex]
 			if itemID == activeItemID {
