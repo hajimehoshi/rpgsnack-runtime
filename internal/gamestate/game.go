@@ -30,6 +30,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/items"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/picture"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/variables"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/window"
@@ -45,6 +46,7 @@ type Game struct {
 	variables            *variables.Variables
 	screen               *Screen
 	windows              *window.Windows
+	pictures             *picture.Pictures
 	currentMap           *Map
 	lastInterpreterID    int
 	autoSaveEnabled      bool
@@ -71,6 +73,7 @@ func NewGame() *Game {
 		variables:            &variables.Variables{},
 		screen:               &Screen{},
 		windows:              &window.Windows{},
+		pictures:             &picture.Pictures{},
 		rand:                 generateDefaultRand(),
 		autoSaveEnabled:      true,
 		playerControlEnabled: true,
@@ -97,6 +100,9 @@ func (g *Game) EncodeMsgpack(enc *msgpack.Encoder) error {
 
 	e.EncodeString("windows")
 	e.EncodeInterface(g.windows)
+
+	e.EncodeString("pictures")
+	e.EncodeInterface(g.pictures)
 
 	e.EncodeString("currentMap")
 	e.EncodeInterface(g.currentMap)
@@ -154,6 +160,11 @@ func (g *Game) DecodeMsgpack(dec *msgpack.Decoder) error {
 				g.windows = &window.Windows{}
 				d.DecodeInterface(g.windows)
 			}
+		case "pictures":
+			if !d.SkipCodeIfNil() {
+				g.pictures = &picture.Pictures{}
+				d.DecodeInterface(g.pictures)
+			}
 		case "currentMap":
 			if !d.SkipCodeIfNil() {
 				g.currentMap = &Map{}
@@ -200,6 +211,10 @@ func (g *Game) UpdateWindows(sceneManager *scene.Manager) {
 		_, playerY = g.currentMap.player.Position()
 	}
 	g.windows.Update(playerY, sceneManager)
+}
+
+func (g *Game) UpdatePictures() {
+	g.pictures.Update()
 }
 
 func (g *Game) Map() *Map {
@@ -393,6 +408,10 @@ func (g *Game) DrawWindows(screen *ebiten.Image) {
 	cs = append(cs, g.currentMap.player)
 	cs = append(cs, g.currentMap.events...)
 	g.windows.Draw(screen, cs)
+}
+
+func (g *Game) DrawPictures(screen *ebiten.Image) {
+	g.pictures.Draw(screen)
 }
 
 func (g *Game) character(mapID, roomID, eventID int) *character.Character {
