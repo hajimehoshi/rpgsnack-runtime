@@ -333,21 +333,21 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 			return true, nil
 		}
 		return false, nil
-	case data.CommandNameShowMessage:
-		args := c.Args.(*data.CommandArgsShowMessage)
+	case data.CommandNameShowBalloon:
+		args := c.Args.(*data.CommandArgsShowBalloon)
 		if !i.waitingCommand {
 			content := sceneManager.Game().Texts.Get(sceneManager.Language(), args.ContentID)
 			id := args.EventID
 			if id == 0 {
 				id = i.eventID
 			}
-			if ch := i.gameState.character(i.mapID, i.roomID, id); ch != nil || args.Type == data.ShowMessageBanner {
+			if ch := i.gameState.character(i.mapID, i.roomID, id); ch != nil {
 				content = i.gameState.parseMessageSyntax(content)
 				eid := 0
 				if ch != nil {
 					eid = ch.EventID()
 				}
-				i.gameState.windows.ShowMessage(args.Type, content, args.BalloonType, args.PositionType, args.TextAlign, eid, i.id)
+				i.gameState.windows.ShowBalloon(content, args.BalloonType, eid, i.id)
 				i.waitingCommand = true
 				return false, nil
 			}
@@ -358,13 +358,28 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		// Advance command index first and check the next command.
 		i.commandIterator.Advance()
 		if !i.commandIterator.IsTerminated() {
-			if (i.commandIterator.Command().Name != data.CommandNameShowChoices) ||
-				(args.Type != data.ShowMessageBalloon) {
+			if i.commandIterator.Command().Name != data.CommandNameShowChoices {
 				i.gameState.windows.CloseAll()
 			}
 		} else {
 			i.gameState.windows.CloseAll()
 		}
+		i.waitingCommand = false
+	case data.CommandNameShowMessage:
+		args := c.Args.(*data.CommandArgsShowMessage)
+		if !i.waitingCommand {
+			content := sceneManager.Game().Texts.Get(sceneManager.Language(), args.ContentID)
+			content = i.gameState.parseMessageSyntax(content)
+			i.gameState.windows.ShowMessage(content, args.PositionType, args.TextAlign, i.id)
+			i.waitingCommand = true
+			return false, nil
+		}
+		if i.gameState.windows.IsAnimating(i.id) {
+			return false, nil
+		}
+		// Advance command index first and check the next command.
+		i.commandIterator.Advance()
+		i.gameState.windows.CloseAll()
 		i.waitingCommand = false
 	case data.CommandNameShowHint:
 		if !i.waitingCommand {
@@ -383,16 +398,13 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 			if hintText.String() != "" {
 				content = sceneManager.Game().Texts.Get(sceneManager.Language(), hintText)
 			}
-			id := args.EventID
-			if id == 0 {
-				id = i.eventID
-			}
-			if ch := i.gameState.character(i.mapID, i.roomID, id); ch != nil {
-				content = i.gameState.parseMessageSyntax(content)
-				i.gameState.windows.ShowMessage(args.Type, content, args.BalloonType, args.PositionType, data.TextAlignLeft, ch.EventID(), i.id)
-				i.waitingCommand = true
-				return false, nil
-			}
+			content = i.gameState.parseMessageSyntax(content)
+			i.gameState.windows.ShowMessage(content, args.PositionType, args.TextAlign, i.id)
+			i.waitingCommand = true
+			return false, nil
+		}
+		if i.gameState.windows.IsAnimating(i.id) {
+			return false, nil
 		}
 		i.commandIterator.Advance()
 		i.gameState.windows.CloseAll()

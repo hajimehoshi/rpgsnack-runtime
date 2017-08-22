@@ -108,6 +108,12 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 			return err
 		}
 		c.Args = args
+	case CommandNameShowBalloon:
+		var args *CommandArgsShowBalloon
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	case CommandNameShowMessage:
 		var args *CommandArgsShowMessage
 		if err := unmarshalJSON(tmp.Args, &args); err != nil {
@@ -313,6 +319,10 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 			case CommandNameWait:
 				c.Args = &CommandArgsWait{}
 				d.DecodeAny(c.Args)
+			case CommandNameShowBalloon:
+				args := &CommandArgsShowBalloon{}
+				d.DecodeAny(c.Args)
+				c.Args = args
 			case CommandNameShowMessage:
 				args := &CommandArgsShowMessage{}
 				d.DecodeAny(c.Args)
@@ -446,6 +456,7 @@ const (
 	CommandNameReturn            CommandName = "return"
 	CommandNameEraseEvent        CommandName = "erase_event"
 	CommandNameWait              CommandName = "wait"
+	CommandNameShowBalloon       CommandName = "show_balloon"
 	CommandNameShowMessage       CommandName = "show_message"
 	CommandNameShowHint          CommandName = "show_hint"
 	CommandNameShowChoices       CommandName = "show_choices"
@@ -512,21 +523,23 @@ type CommandArgsWait struct {
 	Time int `json:"time" msgpack:"time"`
 }
 
+type CommandArgsShowBalloon struct {
+	EventID     int         `json:"eventId" msgpack:"eventId"`
+	ContentID   UUID        `json:"content" msgpack:"content"`
+	BalloonType BalloonType `json:"balloonType" msgpack:"balloonType"`
+}
+
 type CommandArgsShowMessage struct {
-	Type         ShowMessageType     `json:"type" msgpack:"type"`
-	EventID      int                 `json:"eventId" msgpack:"eventId"`
 	ContentID    UUID                `json:"content" msgpack:"content"`
-	BalloonType  BalloonType         `json:"balloonType" msgpack:"balloonType"`
+	Background   MessageBackground   `json:"textAlign" msgpack:"background"`
 	PositionType MessagePositionType `json:"positionType" msgpack:"positionType"`
 	TextAlign    TextAlign           `json:"textAlign" msgpack:"textAlign"`
 }
 
 type CommandArgsShowHint struct {
-	Type         ShowMessageType     `json:"type" msgpack:"type"`
-	EventID      int                 `json:"eventId" msgpack:"eventId"`
-	ContentID    UUID                `json:"content" msgpack:"contentId"`
-	BalloonType  BalloonType         `json:"balloonType" msgpack:"balloonType"`
+	ContentID    UUID                `json:"content" msgpack:"content"`
 	PositionType MessagePositionType `json:"positionType" msgpack:"positionType"`
+	TextAlign    TextAlign           `json:"textAlign" msgpack:"textAlign"`
 }
 
 type CommandArgsShowChoices struct {
@@ -1090,13 +1103,6 @@ const (
 	ControlHintComplete ControlHintType = "complete"
 )
 
-type ShowMessageType string
-
-const (
-	ShowMessageBalloon ShowMessageType = "balloon"
-	ShowMessageBanner  ShowMessageType = "banner"
-)
-
 type TextAlign string
 
 const (
@@ -1128,4 +1134,12 @@ const (
 	MessagePositionBottom MessagePositionType = "bottom"
 	MessagePositionMiddle MessagePositionType = "middle"
 	MessagePositionTop    MessagePositionType = "top"
+)
+
+type MessageBackground string
+
+const (
+	MessageBackgroundDim         MessageBackground = "dim"
+	MessageBackgroundTransparent MessageBackground = "transparent"
+	MessageBackgroundBanner      MessageBackground = "banner"
 )

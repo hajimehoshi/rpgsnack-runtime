@@ -157,20 +157,17 @@ func (w *Windows) HasChosenIndex() bool {
 	return w.hasChosenIndex
 }
 
-func (w *Windows) ShowMessage(messageType data.ShowMessageType, content string, balloonType data.BalloonType, positionType data.MessagePositionType, textAlign data.TextAlign, eventID int, interpreterID int) {
-	switch messageType {
-	case data.ShowMessageBalloon:
-		if w.nextBalloon != nil {
-			panic("not reach")
-		}
-		// TODO: How to call newBalloonCenter?
-		w.nextBalloon = newBalloonWithArrow(content, balloonType, eventID, interpreterID)
-	case data.ShowMessageBanner:
-		w.banner = newBanner(content, positionType, textAlign, interpreterID)
-		w.banner.open()
-	default:
-		fmt.Errorf("data: invalid messageType: %s", messageType)
+func (w *Windows) ShowBalloon(content string, balloonType data.BalloonType, eventID int, interpreterID int) {
+	if w.nextBalloon != nil {
+		panic("not reach")
 	}
+	// TODO: How to call newBalloonCenter?
+	w.nextBalloon = newBalloonWithArrow(content, balloonType, eventID, interpreterID)
+}
+
+func (w *Windows) ShowMessage(content string, positionType data.MessagePositionType, textAlign data.TextAlign, interpreterID int) {
+	w.banner = newBanner(content, positionType, textAlign, interpreterID)
+	w.banner.open()
 }
 
 func (w *Windows) ShowChoices(sceneManager *scene.Manager, choices []string, interpreterID int) {
