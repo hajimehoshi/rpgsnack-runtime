@@ -50,11 +50,12 @@ const (
 	itemYMargin         = 6
 	itemSize            = 22
 	scrollDragThreshold = 5
+	inventoryWidth      = 160
 )
 
 func NewInventory(x, y int) *Inventory {
 	button := NewImageButton(buttonOffsetX/consts.TileScale, (y+buttonOffsetY)/consts.TileScale, assets.GetImage("system/active_item_box.png"), assets.GetImage("system/active_item_box_pressed.png"), "click")
-	button.DisabledImage = assets.GetImage("system/active_item_box_pressed.png")
+	button.DisabledImage = assets.GetImage("system/active_item_box_disabled.png")
 	return &Inventory{
 		X:                   x,
 		Y:                   y,
@@ -91,17 +92,20 @@ func (i *Inventory) Update() {
 	}
 	if input.Pressed() {
 		dx := touchX - i.pressStartX
-		if math.Abs(float64(dx)) > scrollDragThreshold {
-			i.scrolling = true
-			i.dragX = dx
-			if i.scrollX+i.dragX > 0 {
-				i.dragX = -i.scrollX
-			}
-
-			scrollBarWidth := 160 - frameXMargin
+		if math.Abs(float64(dx)) > scrollDragThreshold && touchY > i.Y {
+			scrollBarWidth := inventoryWidth - frameXMargin
 			maxX := (itemXMargin + len(i.items)*itemSize - scrollBarWidth) * consts.TileScale
-			if (i.scrollX + i.dragX) < -maxX {
-				i.dragX = -maxX - i.scrollX
+
+			if maxX > scrollBarWidth {
+				i.scrolling = true
+				i.dragX = dx
+				if i.scrollX+i.dragX > 0 {
+					i.dragX = -i.scrollX
+				}
+
+				if (i.scrollX + i.dragX) < -maxX {
+					i.dragX = -maxX - i.scrollX
+				}
 			}
 		}
 	}
@@ -133,12 +137,22 @@ func (i *Inventory) Draw(screen *ebiten.Image) {
 
 	var activeItem *data.Item
 	for index, item := range i.items {
+		if i.activeItemID == item.ID {
+			activeItem = item
+		}
+
+		tx := float64((frameXMargin+itemXMargin+i.X+index*itemSize)*consts.TileScale + i.scrollX + i.dragX)
+		ty := float64(i.Y + itemYMargin*consts.TileScale)
+
+		if tx < frameXMargin || tx > inventoryWidth*consts.TileScale {
+			continue
+		}
+
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Scale(consts.TileScale, consts.TileScale)
-		op.GeoM.Translate(float64((frameXMargin+itemXMargin+i.X+index*itemSize)*consts.TileScale+i.scrollX+i.dragX), float64(i.Y+itemYMargin*consts.TileScale))
+		op.GeoM.Translate(tx, ty)
 		if i.activeItemID == item.ID {
 			screen.DrawImage(assets.GetImage("system/card_frame_selected.png"), op)
-			activeItem = item
 		} else {
 			screen.DrawImage(assets.GetImage("system/card_frame.png"), op)
 		}
