@@ -467,7 +467,6 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	op.GeoM.Scale(consts.TileScale, consts.TileScale)
 	op.GeoM.Translate(m.offsetX(sw), consts.GameMarginTop)
 	m.gameState.DrawScreen(screen, m.tilesImage, op)
-	m.gameState.DrawPictures(screen)
 	m.inventory.Draw(screen)
 
 	if m.gameState.IsPlayerControlEnabled() && (m.gameState.Map().IsPlayerMovingByUserInput() || m.triggeringFailed) {

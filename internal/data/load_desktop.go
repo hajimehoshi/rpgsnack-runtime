@@ -58,7 +58,6 @@ func loadAssets(projectPath string) ([]uint8, error) {
 		filepath.Join("images", "foregrounds"),
 		filepath.Join("images", "items", "icon"),
 		filepath.Join("images", "items", "preview"),
-		filepath.Join("images", "pictures"),
 		filepath.Join("images", "system"),
 		filepath.Join("images", "tilesets"),
 		filepath.Join("images", "titles"),
