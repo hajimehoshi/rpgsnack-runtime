@@ -101,4 +101,20 @@ func (s Speed) Frames() int {
 	}
 }
 
+func (s Speed) SteppingIncrementFrames() int {
+	switch s {
+	case Speed1:
+		return 1
+	case Speed2:
+		return 2
+	case Speed3:
+		return 3
+	case Speed4:
+		return 4
+	case Speed5:
+		return 5
+	}
+	return 0
+}
+
 const MaxVolume = 100

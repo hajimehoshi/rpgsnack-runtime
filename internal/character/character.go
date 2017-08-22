@@ -29,28 +29,29 @@ import (
 
 const (
 	PlayerEventID = -1
+	maxFrames     = 120
 )
 
 type Character struct {
-	eventID       int
-	speed         data.Speed
-	imageName     string
-	imageIndex    int
-	dir           data.Dir
-	dirFix        bool
-	stepping      bool
-	steppingCount int
-	walking       bool
-	walkingCount  int
-	frame         int
-	prevFrame     int
-	x             int
-	y             int
-	moveCount     int
-	moveDir       data.Dir
-	visible       bool
-	through       bool
-	erased        bool
+	eventID        int
+	speed          data.Speed
+	imageName      string
+	imageIndex     int
+	dir            data.Dir
+	dirFix         bool
+	stepping       bool
+	steppingCount  int
+	walking        bool
+	walkingCount   int
+	frame          int
+	x              int
+	y              int
+	idleFrameCount int
+	moveCount      int
+	moveDir        data.Dir
+	visible        bool
+	through        bool
+	erased         bool
 
 	// Not dumped
 	sizeW int
@@ -69,7 +70,6 @@ func NewPlayer(x, y int) *Character {
 		dirFix:     false,
 		visible:    true,
 		frame:      1,
-		prevFrame:  1,
 		walking:    true,
 	}
 }
@@ -122,9 +122,6 @@ func (c *Character) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EncodeString("frame")
 	e.EncodeInt(c.frame)
 
-	e.EncodeString("prevFrame")
-	e.EncodeInt(c.prevFrame)
-
 	e.EncodeString("x")
 	e.EncodeInt(c.x)
 
@@ -133,6 +130,9 @@ func (c *Character) EncodeMsgpack(enc *msgpack.Encoder) error {
 
 	e.EncodeString("moveCount")
 	e.EncodeInt(c.moveCount)
+
+	e.EncodeString("idleFrameCount")
+	e.EncodeInt(c.idleFrameCount)
 
 	e.EncodeString("moveDir")
 	e.EncodeInt(int(c.moveDir))
@@ -177,14 +177,14 @@ func (c *Character) DecodeMsgpack(dec *msgpack.Decoder) error {
 			c.walkingCount = d.DecodeInt()
 		case "frame":
 			c.frame = d.DecodeInt()
-		case "prevFrame":
-			c.prevFrame = d.DecodeInt()
 		case "x":
 			c.x = d.DecodeInt()
 		case "y":
 			c.y = d.DecodeInt()
 		case "moveCount":
 			c.moveCount = d.DecodeInt()
+		case "idleFrameCount":
+			c.idleFrameCount = d.DecodeInt()
 		case "moveDir":
 			c.moveDir = data.Dir(d.DecodeInt())
 		case "visible":
@@ -326,7 +326,6 @@ func (c *Character) SetImage(imageName string, imageIndex int) {
 
 func (c *Character) SetFrame(frame int) {
 	c.frame = frame
-	c.prevFrame = frame
 }
 
 func (c *Character) SetDir(dir data.Dir) {
@@ -378,32 +377,42 @@ func (c *Character) Update() error {
 	}
 	if c.stepping {
 		switch {
-		case c.steppingCount < 15:
+		case c.steppingCount < maxFrames/4:
 			c.frame = 1
-		case c.steppingCount < 30:
+		case c.steppingCount < maxFrames*2/4:
 			c.frame = 0
-		case c.steppingCount < 45:
+		case c.steppingCount < maxFrames*3/4:
 			c.frame = 1
 		default:
 			c.frame = 2
 		}
-		c.steppingCount++
-		c.steppingCount %= 60
+		c.steppingCount += c.speed.SteppingIncrementFrames()
+		c.steppingCount %= maxFrames
 	}
 	if !c.IsMoving() {
+		// Reset the character state only if it is idle for one more frame
+		if c.idleFrameCount > 0 && !c.stepping && c.walking {
+			c.walkingCount = 0
+			c.frame = 1
+		}
+		c.idleFrameCount++
 		return nil
 	}
 	if !c.stepping && c.walking {
-		if c.walkingCount < 8 {
+		switch {
+		case c.walkingCount < maxFrames/4:
 			c.frame = 1
-		} else if c.prevFrame == 0 {
-			c.frame = 2
-		} else {
+		case c.walkingCount < maxFrames*2/4:
 			c.frame = 0
+		case c.walkingCount < maxFrames*3/4:
+			c.frame = 1
+		default:
+			c.frame = 2
 		}
-		c.walkingCount++
-		c.walkingCount %= 16
+		c.walkingCount += c.speed.SteppingIncrementFrames()
+		c.walkingCount %= maxFrames
 	}
+	c.idleFrameCount = 0
 	c.moveCount--
 	if c.moveCount == 0 {
 		nx, ny := c.x, c.y
@@ -421,10 +430,6 @@ func (c *Character) Update() error {
 		}
 		c.x = nx
 		c.y = ny
-		if !c.stepping && c.walking {
-			c.prevFrame = c.frame
-			c.frame = 1
-		}
 	}
 	return nil
 }
