@@ -42,18 +42,19 @@ type Inventory struct {
 }
 
 const (
+	buttonOffsetX       = 9
+	buttonOffsetY       = 6
 	frameXMargin        = 24
 	frameYMargin        = 4
-	itemXMargin         = 2
-	itemYMargin         = 7
-	itemSize            = 20
+	itemXMargin         = 6
+	itemYMargin         = 6
+	itemSize            = 22
 	scrollDragThreshold = 5
 )
 
 func NewInventory(x, y int) *Inventory {
-	button := NewImageButton(0, y/consts.TileScale, assets.GetImage("system/active_item_box.png"), assets.GetImage("system/active_item_box_pressed.png"), "click")
+	button := NewImageButton(buttonOffsetX/consts.TileScale, (y+buttonOffsetY)/consts.TileScale, assets.GetImage("system/active_item_box.png"), assets.GetImage("system/active_item_box_pressed.png"), "click")
 	button.DisabledImage = assets.GetImage("system/active_item_box_pressed.png")
-
 	return &Inventory{
 		X:                   x,
 		Y:                   y,
@@ -122,7 +123,7 @@ func (i *Inventory) Update() {
 }
 
 func (i *Inventory) Draw(screen *ebiten.Image) {
-	if !i.Visible {
+	if !i.Visible || len(i.items) == 0 {
 		return
 	}
 	op := &ebiten.DrawImageOptions{}
@@ -136,9 +137,12 @@ func (i *Inventory) Draw(screen *ebiten.Image) {
 		op.GeoM.Scale(consts.TileScale, consts.TileScale)
 		op.GeoM.Translate(float64((frameXMargin+itemXMargin+i.X+index*itemSize)*consts.TileScale+i.scrollX+i.dragX), float64(i.Y+itemYMargin*consts.TileScale))
 		if i.activeItemID == item.ID {
-			op.ColorM.Translate(0.5, 0.5, 0.5, 0)
+			screen.DrawImage(assets.GetImage("system/card_frame_selected.png"), op)
 			activeItem = item
+		} else {
+			screen.DrawImage(assets.GetImage("system/card_frame.png"), op)
 		}
+		op.GeoM.Translate(3, 3)
 		screen.DrawImage(assets.GetImage("items/icon/"+item.Icon+".png"), op)
 	}
 
@@ -151,12 +155,12 @@ func (i *Inventory) Draw(screen *ebiten.Image) {
 		}
 		op = &ebiten.DrawImageOptions{}
 		op.GeoM.Scale(consts.TileScale, consts.TileScale)
-		op.GeoM.Translate(float64(i.X+14), float64(i.Y+14+dy))
+		op.GeoM.Translate(float64(i.X+buttonOffsetX+14), float64(i.Y+buttonOffsetY+14+dy))
 		screen.DrawImage(assets.GetImage("items/icon/"+activeItem.Icon+".png"), op)
 		if len(activeItem.Commands) > 0 {
 			op = &ebiten.DrawImageOptions{}
 			op.GeoM.Scale(consts.TileScale, consts.TileScale)
-			op.GeoM.Translate(float64(i.X), float64(i.Y+dy))
+			op.GeoM.Translate(float64(i.X+buttonOffsetX), float64(i.Y+buttonOffsetY+dy))
 			screen.DrawImage(assets.GetImage("system/item_box_info.png"), op)
 		}
 	}
