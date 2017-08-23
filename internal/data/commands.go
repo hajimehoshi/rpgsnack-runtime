@@ -531,13 +531,14 @@ type CommandArgsShowBalloon struct {
 
 type CommandArgsShowMessage struct {
 	ContentID    UUID                `json:"content" msgpack:"content"`
-	Background   MessageBackground   `json:"textAlign" msgpack:"background"`
+	Background   MessageBackground   `json:"background" msgpack:"background"`
 	PositionType MessagePositionType `json:"positionType" msgpack:"positionType"`
 	TextAlign    TextAlign           `json:"textAlign" msgpack:"textAlign"`
 }
 
 type CommandArgsShowHint struct {
 	ContentID    UUID                `json:"content" msgpack:"content"`
+	Background   MessageBackground   `json:"textAlign" msgpack:"background"`
 	PositionType MessagePositionType `json:"positionType" msgpack:"positionType"`
 	TextAlign    TextAlign           `json:"textAlign" msgpack:"textAlign"`
 }

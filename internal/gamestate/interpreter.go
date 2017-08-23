@@ -370,7 +370,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		if !i.waitingCommand {
 			content := sceneManager.Game().Texts.Get(sceneManager.Language(), args.ContentID)
 			content = i.gameState.parseMessageSyntax(content)
-			i.gameState.windows.ShowMessage(content, args.PositionType, args.TextAlign, i.id)
+			i.gameState.windows.ShowMessage(content, args.Background, args.PositionType, args.TextAlign, i.id)
 			i.waitingCommand = true
 			return false, nil
 		}
@@ -399,7 +399,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 				content = sceneManager.Game().Texts.Get(sceneManager.Language(), hintText)
 			}
 			content = i.gameState.parseMessageSyntax(content)
-			i.gameState.windows.ShowMessage(content, args.PositionType, args.TextAlign, i.id)
+			i.gameState.windows.ShowMessage(content, args.Background, args.PositionType, args.TextAlign, i.id)
 			i.waitingCommand = true
 			return false, nil
 		}

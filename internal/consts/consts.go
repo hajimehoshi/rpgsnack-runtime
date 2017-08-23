@@ -23,4 +23,5 @@ const (
 	TileScale       = 3
 	GameMarginTop   = 1 * TileSize * TileScale
 	TextScale       = 2
+	BigTextScale    = 3
 )

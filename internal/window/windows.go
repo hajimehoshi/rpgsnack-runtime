@@ -165,8 +165,8 @@ func (w *Windows) ShowBalloon(content string, balloonType data.BalloonType, even
 	w.nextBalloon = newBalloonWithArrow(content, balloonType, eventID, interpreterID)
 }
 
-func (w *Windows) ShowMessage(content string, positionType data.MessagePositionType, textAlign data.TextAlign, interpreterID int) {
-	w.banner = newBanner(content, positionType, textAlign, interpreterID)
+func (w *Windows) ShowMessage(content string, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign, interpreterID int) {
+	w.banner = newBanner(content, background, positionType, textAlign, interpreterID)
 	w.banner.open()
 }
 

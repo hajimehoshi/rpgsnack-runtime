@@ -43,6 +43,7 @@ type banner struct {
 	openingCount  int
 	closingCount  int
 	opened        bool
+	background    data.MessageBackground
 	positionType  data.MessagePositionType
 	textAlign     data.TextAlign
 }
@@ -72,6 +73,9 @@ func (b *banner) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EncodeString("textAlign")
 	e.EncodeString(string(b.textAlign))
 
+	e.EncodeString("background")
+	e.EncodeString(string(b.background))
+
 	e.EndMap()
 	return e.Flush()
 }
@@ -95,6 +99,8 @@ func (b *banner) DecodeMsgpack(dec *msgpack.Decoder) error {
 			b.positionType = data.MessagePositionType(d.DecodeString())
 		case "textAlign":
 			b.textAlign = data.TextAlign(d.DecodeString())
+		case "background":
+			b.background = data.MessageBackground(d.DecodeString())
 		}
 	}
 	if err := d.Error(); err != nil {
@@ -103,10 +109,11 @@ func (b *banner) DecodeMsgpack(dec *msgpack.Decoder) error {
 	return nil
 }
 
-func newBanner(content string, positionType data.MessagePositionType, textAlign data.TextAlign, interpreterID int) *banner {
+func newBanner(content string, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign, interpreterID int) *banner {
 	b := &banner{
 		interpreterID: interpreterID,
 		content:       content,
+		background:    background,
 		positionType:  positionType,
 		textAlign:     textAlign,
 	}
@@ -162,6 +169,8 @@ func (b *banner) position(screenHeight int) (int, int) {
 }
 
 func (b *banner) draw(screen *ebiten.Image, character *character.Character) {
+	textScale := consts.TextScale
+	textEdge := false
 	rate := 0.0
 	switch {
 	case b.opened:
@@ -174,16 +183,26 @@ func (b *banner) draw(screen *ebiten.Image, character *character.Character) {
 	sw, sh := screen.Size()
 	dx := (sw - consts.TileXNum*consts.TileSize*consts.TileScale) / 2
 	dy := 0
-	if rate > 0 {
-		img := assets.GetImage("system/banner.png")
-		x, y := b.position(sh)
-		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(float64(x), float64(y))
-		op.GeoM.Scale(consts.TileScale, consts.TileScale)
-		op.GeoM.Translate(float64(dx), float64(dy))
-		op.ColorM.Scale(1, 1, 1, rate)
-		screen.DrawImage(img, op)
+
+	switch b.background {
+	case data.MessageBackgroundDim:
+		// TODO
+	case data.MessageBackgroundTransparent:
+		textEdge = true
+		textScale = consts.BigTextScale
+	case data.MessageBackgroundBanner:
+		if rate > 0 {
+			img := assets.GetImage("system/banner.png")
+			x, y := b.position(sh)
+			op := &ebiten.DrawImageOptions{}
+			op.GeoM.Translate(float64(x), float64(y))
+			op.GeoM.Scale(consts.TileScale, consts.TileScale)
+			op.GeoM.Translate(float64(dx), float64(dy))
+			op.ColorM.Scale(1, 1, 1, rate)
+			screen.DrawImage(img, op)
+		}
 	}
+
 	if b.opened {
 		x, y := b.position(sh)
 		x = (x + bannerMarginX) * consts.TileScale
@@ -197,6 +216,13 @@ func (b *banner) draw(screen *ebiten.Image, character *character.Character) {
 		}
 		x += dx
 		y += dy
-		font.DrawText(screen, b.content, x, y, consts.TextScale, b.textAlign, color.White)
+
+		if textEdge {
+			font.DrawText(screen, b.content, x+textScale, y, textScale, b.textAlign, color.Black)
+			font.DrawText(screen, b.content, x-textScale, y, textScale, b.textAlign, color.Black)
+			font.DrawText(screen, b.content, x, y+textScale, textScale, b.textAlign, color.Black)
+			font.DrawText(screen, b.content, x, y-textScale, textScale, b.textAlign, color.Black)
+		}
+		font.DrawText(screen, b.content, x, y, textScale, b.textAlign, color.White)
 	}
 }
