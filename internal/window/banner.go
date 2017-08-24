@@ -33,8 +33,9 @@ const (
 	bannerMaxCount = 8
 	bannerWidth    = 160
 	bannerHeight   = 60
-	bannerMarginX  = 4
-	bannerMarginY  = 12
+	bannerPaddingX = 4
+	bannerPaddingY = 12
+	bannerMarginY  = 4
 )
 
 type banner struct {
@@ -154,16 +155,16 @@ func (b *banner) update() error {
 	return nil
 }
 
-func (b *banner) position(screenHeight int) (int, int) {
+func (b *banner) position() (int, int) {
 	x := 0
 	y := 0
 	switch b.positionType {
 	case data.MessagePositionBottom:
-		y = screenHeight / consts.TileScale
+		y = consts.MapHeight/consts.TileScale - bannerHeight + bannerMarginY
 	case data.MessagePositionMiddle:
-		y = screenHeight / (consts.TileScale * 2)
+		y = (consts.MapHeight/consts.TileScale-bannerHeight)/2 + bannerMarginY
 	case data.MessagePositionTop:
-		y = 0
+		y = bannerMarginY
 	}
 	return x, y
 }
@@ -180,7 +181,7 @@ func (b *banner) draw(screen *ebiten.Image, character *character.Character) {
 	case b.closingCount > 0:
 		rate = float64(b.closingCount) / float64(bannerMaxCount)
 	}
-	sw, sh := screen.Size()
+	sw, _ := screen.Size()
 	dx := (sw - consts.TileXNum*consts.TileSize*consts.TileScale) / 2
 	dy := 0
 
@@ -193,7 +194,7 @@ func (b *banner) draw(screen *ebiten.Image, character *character.Character) {
 	case data.MessageBackgroundBanner:
 		if rate > 0 {
 			img := assets.GetImage("system/banner.png")
-			x, y := b.position(sh)
+			x, y := b.position()
 			op := &ebiten.DrawImageOptions{}
 			op.GeoM.Translate(float64(x), float64(y))
 			op.GeoM.Scale(consts.TileScale, consts.TileScale)
@@ -204,15 +205,15 @@ func (b *banner) draw(screen *ebiten.Image, character *character.Character) {
 	}
 
 	if b.opened {
-		x, y := b.position(sh)
-		x = (x + bannerMarginX) * consts.TileScale
-		y = (y + bannerMarginY) * consts.TileScale
+		x, y := b.position()
+		x = (x + bannerPaddingX) * consts.TileScale
+		y = (y + bannerPaddingY) * consts.TileScale
 		switch b.textAlign {
 		case data.TextAlignLeft:
 		case data.TextAlignCenter:
-			x += (consts.TileXNum*consts.TileSize - 2*bannerMarginX) * consts.TileScale / 2
+			x += (consts.TileXNum*consts.TileSize - 2*bannerPaddingX) * consts.TileScale / 2
 		case data.TextAlignRight:
-			x += (consts.TileXNum*consts.TileSize - 2*bannerMarginX) * consts.TileScale
+			x += (consts.TileXNum*consts.TileSize - 2*bannerPaddingX) * consts.TileScale
 		}
 		x += dx
 		y += dy
