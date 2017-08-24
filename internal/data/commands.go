@@ -767,12 +767,13 @@ type CommandArgsPlayerControl struct {
 }
 
 type CommandArgsMoveCharacter struct {
-	Type             MoveCharacterType `json:"type" msgpack:"type"`
-	Dir              Dir               `json:"dir" msgpack:"dir"`
-	Distance         int               `json:"distance" msgpack:"distance"`
-	X                int               `json:"x" msgpack:"x"`
-	Y                int               `json:"y" msgpack:"y"`
-	IgnoreCharacters bool              `json:"ignoreCharacters" msgpack:"ignoreCharacters"`
+	Type             MoveCharacterType   `json:"type" msgpack:"type"`
+	Dir              Dir                 `json:"dir" msgpack:"dir"`
+	Distance         int                 `json:"distance" msgpack:"distance"`
+	X                int                 `json:"x" msgpack:"x"`
+	Y                int                 `json:"y" msgpack:"y"`
+	ValueType        MoveTargetValueType `json:"valueType" msgpack:"valueType"`
+	IgnoreCharacters bool                `json:"ignoreCharacters" msgpack:"ignoreCharacters"`
 }
 
 func (c *CommandArgsMoveCharacter) EncodeMsgpack(enc *msgpack.Encoder) error {
@@ -1031,6 +1032,13 @@ type TransferValueType string
 const (
 	TransferValueTypeConstant TransferValueType = "constant"
 	TransferValueTypeVariable TransferValueType = "variable"
+)
+
+type MoveTargetValueType string
+
+const (
+	MoveTargetValueTypeConstant MoveTargetValueType = "constant"
+	MoveTargetValueTypeVariable MoveTargetValueType = "variable"
 )
 
 type TransferTransitionType string

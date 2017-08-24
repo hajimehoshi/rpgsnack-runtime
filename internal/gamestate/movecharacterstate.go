@@ -41,6 +41,25 @@ type moveCharacterState struct {
 	gameState *Game
 }
 
+func (m *moveCharacterState) setMoveTarget(x int, y int, ignoreCharacters bool) bool {
+	cx, cy := m.character().Position()
+	path, lastX, lastY := path.Calc(&passableOnMap{
+		through:          m.character().Through(),
+		m:                m.gameState.Map(),
+		ignoreCharacters: ignoreCharacters,
+	}, cx, cy, x, y)
+	m.path = path
+	m.distanceCount = len(path)
+	if x != lastX || y != lastY {
+		if !m.routeSkip {
+			return false
+		}
+		m.terminated = true
+	}
+
+	return true
+}
+
 func newMoveCharacterState(gameState *Game, mapID, roomID, eventID int, args *data.CommandArgsMoveCharacter, routeSkip bool) *moveCharacterState {
 	m := &moveCharacterState{
 		gameState: gameState,
@@ -54,20 +73,14 @@ func newMoveCharacterState(gameState *Game, mapID, roomID, eventID int, args *da
 	case data.MoveCharacterTypeDirection, data.MoveCharacterTypeForward, data.MoveCharacterTypeBackward:
 		m.distanceCount = m.args.Distance
 	case data.MoveCharacterTypeTarget:
-		cx, cy := m.character().Position()
-		x, y := args.X, args.Y
-		path, lastX, lastY := path.Calc(&passableOnMap{
-			through:          m.character().Through(),
-			m:                m.gameState.Map(),
-			ignoreCharacters: args.IgnoreCharacters,
-		}, cx, cy, x, y)
-		m.path = path
-		m.distanceCount = len(path)
-		if x != lastX || y != lastY {
-			if !m.routeSkip {
+		if args.ValueType == data.MoveTargetValueTypeVariable {
+			if !m.setMoveTarget(gameState.VariableValue(args.X), gameState.VariableValue(args.Y), args.IgnoreCharacters) {
 				return nil
 			}
-			m.terminated = true
+		} else {
+			if !m.setMoveTarget(args.X, args.Y, args.IgnoreCharacters) {
+				return nil
+			}
 		}
 	case data.MoveCharacterTypeRandom, data.MoveCharacterTypeToward:
 		m.distanceCount = 1
