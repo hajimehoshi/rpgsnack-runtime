@@ -36,7 +36,7 @@ type ItemPreviewPopup struct {
 }
 
 func NewItemPreviewPopup(x, y, width, height int) *ItemPreviewPopup {
-	previewButton := NewButton(20, 40, 120, 120, "ok")
+	previewButton := NewButton(80, 100, 120, 120, "ok")
 	closeButton := NewButton(30, 170, 100, 20, "cancel")
 	closeButton.Text = "Close"
 
@@ -71,12 +71,29 @@ func (i *ItemPreviewPopup) PreviewPressed() bool {
 
 func (i *ItemPreviewPopup) SetItem(item *data.Item) {
 	i.item = item
-	if i.item == nil || i.item.Preview == "" {
+	if i.item == nil || (i.item.Preview == "" && i.item.Icon == "") {
 		i.previewButton.Visible = false
 		return
 	}
 	i.previewButton.Visible = true
-	i.previewButton.Image = assets.GetImage("items/preview/" + i.item.Preview + ".png")
+	if i.item.Preview != "" {
+		i.previewButton.Image = assets.GetImage("items/preview/" + i.item.Preview + ".png")
+		i.previewButton.ScaleX = 1
+		i.previewButton.ScaleY = 1
+		i.previewButton.AnchorX = 0.5
+		i.previewButton.AnchorY = 0.5
+		i.previewButton.Width = 120
+		i.previewButton.Height = 120
+
+	} else {
+		i.previewButton.Image = assets.GetImage("items/icon/" + i.item.Icon + ".png")
+		i.previewButton.ScaleX = 6
+		i.previewButton.ScaleY = 6
+		i.previewButton.AnchorX = 0.5
+		i.previewButton.AnchorY = 0.5
+		i.previewButton.Width = 16
+		i.previewButton.Height = 16
+	}
 }
 
 func (i *ItemPreviewPopup) Draw(screen *ebiten.Image) {

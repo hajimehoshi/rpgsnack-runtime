@@ -30,6 +30,10 @@ import (
 type Button struct {
 	X             int
 	Y             int
+	AnchorX       float64
+	AnchorY       float64
+	ScaleX        int
+	ScaleY        int
 	Width         int
 	Height        int
 	Visible       bool
@@ -47,6 +51,8 @@ func NewButton(x, y, width, height int, soundName string) *Button {
 	return &Button{
 		X:         x,
 		Y:         y,
+		ScaleX:    1,
+		ScaleY:    1,
 		Width:     width,
 		Height:    height,
 		Visible:   true,
@@ -59,6 +65,8 @@ func NewImageButton(x, y int, image *ebiten.Image, pressedImage *ebiten.Image, s
 	return &Button{
 		X:             x,
 		Y:             y,
+		ScaleX:        1,
+		ScaleY:        1,
 		Width:         w,
 		Height:        h,
 		Visible:       true,
@@ -79,11 +87,17 @@ func (b *Button) Pressed() bool {
 
 func (b *Button) includesInput(offsetX, offsetY int) bool {
 	x, y := input.Position()
-	x /= consts.TileScale
-	y /= consts.TileScale
+	x = int(float64(x) / consts.TileScale)
+	y = int(float64(y) / consts.TileScale)
 	x -= offsetX
 	y -= offsetY
-	if b.X <= x && x < b.X+b.Width && b.Y <= y && y < b.Y+b.Height {
+
+	buttonWidth := b.ScaleX * b.Width
+	buttonHeight := b.ScaleY * b.Height
+	buttonX := b.X - int(float64(buttonWidth)*b.AnchorX)
+	buttonY := b.Y - int(float64(buttonHeight)*b.AnchorY)
+
+	if buttonX <= x && x < buttonX+buttonWidth && buttonY <= y && y < buttonY+buttonHeight {
 		return true
 	}
 	return false
@@ -132,8 +146,9 @@ func (b *Button) Draw(screen *ebiten.Image) {
 	}
 	if b.Image != nil {
 		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(float64(b.X), float64(b.Y))
-		op.GeoM.Scale(consts.TileScale, consts.TileScale)
+		op.GeoM.Translate(-float64(b.Width)*b.AnchorX, -float64(b.Height)*b.AnchorY)
+		op.GeoM.Scale(float64(b.ScaleX*consts.TileScale), float64(b.ScaleY*consts.TileScale))
+		op.GeoM.Translate(float64(b.X*consts.TileScale), float64(b.Y*consts.TileScale))
 
 		image := b.Image
 		if b.Disabled {
@@ -161,8 +176,8 @@ func (b *Button) Draw(screen *ebiten.Image) {
 		img = assets.GetImage("system/9patch_test_on.png")
 	}
 	geoM := &ebiten.GeoM{}
-	geoM.Translate(float64(b.X), float64(b.Y))
-	geoM.Scale(consts.TileScale, consts.TileScale)
+	geoM.Translate(float64(b.X)-float64(b.Width)*b.AnchorX, float64(b.Y)-float64(b.Height)*b.AnchorY)
+	geoM.Scale(float64(b.ScaleX*consts.TileScale), float64(b.ScaleY*consts.TileScale))
 	colorM := &ebiten.ColorM{}
 	if b.Disabled {
 		colorM.ChangeHSV(0, 0, 1)
@@ -171,8 +186,8 @@ func (b *Button) Draw(screen *ebiten.Image) {
 	drawNinePatches(screen, img, b.Width, b.Height, geoM, colorM)
 
 	_, th := font.MeasureSize(b.Text)
-	tx := b.X*consts.TileScale + b.Width*consts.TileScale/2
-	ty := b.Y*consts.TileScale + (b.Height*consts.TileScale-th*consts.TextScale)/2
+	tx := b.X*b.ScaleX*consts.TileScale + b.Width*consts.TileScale*b.ScaleX/2
+	ty := b.Y*b.ScaleY*consts.TileScale + (b.Height*b.ScaleY*consts.TileScale-th*consts.TextScale*b.ScaleY)/2
 	var c color.Color = color.White
 	if b.Disabled {
 		c = color.RGBA{0x80, 0x80, 0x80, 0xff}
