@@ -259,6 +259,12 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 			return err
 		}
 		c.Args = args
+	case CommandNameSetCharacterOpacity:
+		var args *CommandArgsSetCharacterOpacity
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	case CommandNameAddItem:
 		var args *CommandArgsAddItem
 		if err := unmarshalJSON(tmp.Args, &args); err != nil {
@@ -404,6 +410,9 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 			case CommandNameSetCharacterImage:
 				c.Args = &CommandArgsSetCharacterImage{}
 				d.DecodeAny(c.Args)
+			case CommandNameSetCharacterOpacity:
+				c.Args = &CommandArgsSetCharacterOpacity{}
+				d.DecodeAny(c.Args)
 			case CommandNameAddItem:
 				c.Args = &CommandArgsAddItem{}
 				d.DecodeAny(c.Args)
@@ -492,6 +501,7 @@ const (
 	CommandNameRotateCharacter      CommandName = "rotate_character"
 	CommandNameSetCharacterProperty CommandName = "set_character_property"
 	CommandNameSetCharacterImage    CommandName = "set_character_image"
+	CommandNameSetCharacterOpacity  CommandName = "set_character_opacity"
 
 	// Special commands
 	CommandNameFinishPlayerMovingByUserInput CommandName = "finish_player_moving_by_user_input"
@@ -838,6 +848,12 @@ type CommandArgsRotateCharacter struct {
 type CommandArgsSetCharacterProperty struct {
 	Type  SetCharacterPropertyType `json:"type"`
 	Value interface{}              `json:"value"`
+}
+
+type CommandArgsSetCharacterOpacity struct {
+	Opacity int  `json:"opacity"`
+	Time    int  `json:"time"`
+	Wait    bool `json:"wait"`
 }
 
 func (c *CommandArgsSetCharacterProperty) EncodeMsgpack(enc *msgpack.Encoder) error {

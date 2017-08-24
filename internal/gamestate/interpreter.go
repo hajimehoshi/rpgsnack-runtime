@@ -762,6 +762,27 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		}
 		i.commandIterator.Advance()
 
+	case data.CommandNameSetCharacterOpacity:
+		ch := i.gameState.character(i.mapID, i.roomID, i.eventID)
+		if ch == nil {
+			i.commandIterator.Advance()
+			return true, nil
+		}
+		if !i.waitingCommand {
+			args := c.Args.(*data.CommandArgsSetCharacterOpacity)
+			ch.ChangeOpacity(args.Opacity, args.Time*6)
+			if !args.Wait {
+				i.commandIterator.Advance()
+				return true, nil
+			}
+			i.waitingCommand = args.Wait
+		}
+		if ch.IsChangingOpacity() {
+			return false, nil
+		}
+		i.waitingCommand = false
+		i.commandIterator.Advance()
+
 	case data.CommandNameAddItem:
 		args := c.Args.(*data.CommandArgsAddItem)
 		i.gameState.items.Add(args.ID)

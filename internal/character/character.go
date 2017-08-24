@@ -33,25 +33,30 @@ const (
 )
 
 type Character struct {
-	eventID        int
-	speed          data.Speed
-	imageName      string
-	imageIndex     int
-	dir            data.Dir
-	dirFix         bool
-	stepping       bool
-	steppingCount  int
-	walking        bool
-	walkingCount   int
-	frame          int
-	x              int
-	y              int
-	idleFrameCount int
-	moveCount      int
-	moveDir        data.Dir
-	visible        bool
-	through        bool
-	erased         bool
+	eventID         int
+	speed           data.Speed
+	imageName       string
+	imageIndex      int
+	dir             data.Dir
+	dirFix          bool
+	stepping        bool
+	steppingCount   int
+	walking         bool
+	walkingCount    int
+	frame           int
+	x               int
+	y               int
+	idleFrameCount  int
+	moveCount       int
+	moveDir         data.Dir
+	visible         bool
+	through         bool
+	erased          bool
+	opacity         int
+	origOpacity     int
+	targetOpacity   int
+	opacityCount    int
+	opacityMaxCount int
 
 	// Not dumped
 	sizeW int
@@ -60,28 +65,32 @@ type Character struct {
 
 func NewPlayer(x, y int) *Character {
 	return &Character{
-		eventID:    PlayerEventID,
-		speed:      data.Speed3,
-		imageName:  "",
-		imageIndex: 0,
-		x:          x,
-		y:          y,
-		dir:        data.DirDown,
-		dirFix:     false,
-		visible:    true,
-		frame:      1,
-		walking:    true,
+		eventID:       PlayerEventID,
+		speed:         data.Speed3,
+		imageName:     "",
+		imageIndex:    0,
+		x:             x,
+		y:             y,
+		dir:           data.DirDown,
+		dirFix:        false,
+		visible:       true,
+		frame:         1,
+		walking:       true,
+		opacity:       255,
+		targetOpacity: 255,
 	}
 }
 
 func NewEvent(id int, x, y int) *Character {
 	return &Character{
-		eventID: id,
-		speed:   data.Speed3,
-		x:       x,
-		y:       y,
-		visible: true,
-		walking: true,
+		eventID:       id,
+		speed:         data.Speed3,
+		x:             x,
+		y:             y,
+		visible:       true,
+		walking:       true,
+		opacity:       255,
+		targetOpacity: 255,
 	}
 }
 
@@ -146,6 +155,17 @@ func (c *Character) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EncodeString("erased")
 	e.EncodeBool(c.erased)
 
+	e.EncodeString("opacity")
+	e.EncodeInt(c.opacity)
+	e.EncodeString("origOpacity")
+	e.EncodeInt(c.origOpacity)
+	e.EncodeString("targetOpacity")
+	e.EncodeInt(c.targetOpacity)
+	e.EncodeString("opacityCount")
+	e.EncodeInt(c.opacityCount)
+	e.EncodeString("opacityMaxCount")
+	e.EncodeInt(c.opacityMaxCount)
+
 	e.EndMap()
 	return e.Flush()
 }
@@ -193,6 +213,16 @@ func (c *Character) DecodeMsgpack(dec *msgpack.Decoder) error {
 			c.through = d.DecodeBool()
 		case "erased":
 			c.erased = d.DecodeBool()
+		case "opacity":
+			c.opacity = d.DecodeInt()
+		case "origOpacity":
+			c.origOpacity = d.DecodeInt()
+		case "targetOpacity":
+			c.targetOpacity = d.DecodeInt()
+		case "opacityCount":
+			c.opacityCount = d.DecodeInt()
+		case "opacityMaxCount":
+			c.opacityMaxCount = d.DecodeInt()
 		}
 	}
 	if err := d.Error(); err != nil {
@@ -332,6 +362,17 @@ func (c *Character) SetDir(dir data.Dir) {
 	c.dir = dir
 }
 
+func (c *Character) ChangeOpacity(opacity int, frames int) {
+	c.origOpacity = c.opacity
+	c.targetOpacity = opacity
+	c.opacityCount = frames
+	c.opacityMaxCount = frames
+}
+
+func (c *Character) IsChangingOpacity() bool {
+	return c.opacityCount > 0
+}
+
 func (c *Character) TransferImmediately(x, y int) {
 	c.x = x
 	c.y = y
@@ -374,6 +415,13 @@ func (c *Character) UpdateWithPage(page *data.Page) error {
 func (c *Character) Update() error {
 	if c.erased {
 		return nil
+	}
+	if c.opacityCount > 0 {
+		c.opacityCount--
+		rate := 1 - float64(c.opacityCount)/float64(c.opacityMaxCount)
+		c.opacity = int(float64(c.origOpacity)*(1-rate) + float64(c.targetOpacity)*rate)
+	} else {
+		c.opacity = c.targetOpacity
 	}
 	if c.stepping {
 		switch {
@@ -468,5 +516,6 @@ func (c *Character) Draw(screen *ebiten.Image) {
 	}
 	r := image.Rect(sx, sy, sx+charW, sy+charH)
 	op.SourceRect = &r
+	op.ColorM.Scale(1, 1, 1, float64(c.opacity)/255)
 	screen.DrawImage(assets.GetImage("characters/"+c.imageName+".png"), op)
 }
