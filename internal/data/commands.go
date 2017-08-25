@@ -1106,6 +1106,7 @@ const (
 	MoveCharacterTypeForward   MoveCharacterType = "forward"
 	MoveCharacterTypeBackward  MoveCharacterType = "backward"
 	MoveCharacterTypeToward    MoveCharacterType = "toward"
+	MoveCharacterTypeAgainst   MoveCharacterType = "against"
 	MoveCharacterTypeRandom    MoveCharacterType = "random"
 )
 
