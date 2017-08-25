@@ -35,7 +35,7 @@ const (
 	bannerHeight   = 60
 	bannerPaddingX = 4
 	bannerPaddingY = 12
-	bannerMarginY  = 4
+	bannerMarginY  = 9
 )
 
 type banner struct {
@@ -47,6 +47,7 @@ type banner struct {
 	background    data.MessageBackground
 	positionType  data.MessagePositionType
 	textAlign     data.TextAlign
+	playerY       int
 }
 
 func (b *banner) EncodeMsgpack(enc *msgpack.Encoder) error {
@@ -141,7 +142,7 @@ func (b *banner) close() {
 	b.closingCount = bannerMaxCount
 }
 
-func (b *banner) update() error {
+func (b *banner) update(playerY int) error {
 	if b.closingCount > 0 {
 		b.closingCount--
 		b.opened = false
@@ -152,13 +153,22 @@ func (b *banner) update() error {
 			b.opened = true
 		}
 	}
+	b.playerY = playerY
 	return nil
 }
 
 func (b *banner) position() (int, int) {
 	x := 0
 	y := 0
-	switch b.positionType {
+	positionType := b.positionType
+	if positionType == data.MessagePositionAuto {
+		if b.playerY < consts.TileYNum/2 {
+			positionType = data.MessagePositionBottom
+		} else {
+			positionType = data.MessagePositionTop
+		}
+	}
+	switch positionType {
 	case data.MessagePositionBottom:
 		y = consts.MapHeight/consts.TileScale - bannerHeight + bannerMarginY
 	case data.MessagePositionMiddle:

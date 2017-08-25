@@ -1160,6 +1160,7 @@ const (
 	MessagePositionBottom MessagePositionType = "bottom"
 	MessagePositionMiddle MessagePositionType = "middle"
 	MessagePositionTop    MessagePositionType = "top"
+	MessagePositionAuto   MessagePositionType = "auto"
 )
 
 type MessageBackground string

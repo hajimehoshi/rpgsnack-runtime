@@ -296,7 +296,7 @@ func (w *Windows) IsAnimating(interpreterID int) bool {
 	return false
 }
 
-func (w *Windows) Update(sceneManager *scene.Manager) {
+func (w *Windows) Update(playerY int, sceneManager *scene.Manager) {
 	if !w.choosing {
 		// 0 means to check all balloons.
 		// TODO: Don't use magic numbers.
@@ -359,7 +359,7 @@ func (w *Windows) Update(sceneManager *scene.Manager) {
 		}
 	}
 	if w.banner != nil {
-		w.banner.update()
+		w.banner.update(playerY)
 		if w.banner.isClosed() {
 			w.banner = nil
 		}

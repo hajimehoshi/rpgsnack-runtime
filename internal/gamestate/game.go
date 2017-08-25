@@ -195,7 +195,11 @@ func (g *Game) Items() *items.Items {
 }
 
 func (g *Game) UpdateWindows(sceneManager *scene.Manager) {
-	g.windows.Update(sceneManager)
+	playerY := 0
+	if g.currentMap.player != nil {
+		_, playerY = g.currentMap.player.Position()
+	}
+	g.windows.Update(playerY, sceneManager)
 }
 
 func (g *Game) Map() *Map {
