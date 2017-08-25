@@ -191,6 +191,12 @@ func (s *Screen) startTint(red, green, blue, gray float64, count int) {
 	s.targetTint.Gray = gray
 	s.tintCount = count
 	s.tintMaxCount = count
+	if count == 0 {
+		s.currentTint.Red = red
+		s.currentTint.Green = green
+		s.currentTint.Blue = blue
+		s.currentTint.Gray = gray
+	}
 }
 
 func (s *Screen) fadeIn(count int) {
