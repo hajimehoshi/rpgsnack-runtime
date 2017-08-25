@@ -362,11 +362,14 @@ func (c *Character) SetDir(dir data.Dir) {
 	c.dir = dir
 }
 
-func (c *Character) ChangeOpacity(opacity int, frames int) {
-	c.origOpacity = c.opacity
+func (c *Character) ChangeOpacity(opacity int, count int) {
+	c.opacityCount = count
+	c.opacityMaxCount = count
 	c.targetOpacity = opacity
-	c.opacityCount = frames
-	c.opacityMaxCount = frames
+	c.origOpacity = c.opacity
+	if count == 0 {
+		c.opacity = opacity
+	}
 }
 
 func (c *Character) IsChangingOpacity() bool {
@@ -413,15 +416,15 @@ func (c *Character) UpdateWithPage(page *data.Page) error {
 }
 
 func (c *Character) Update() error {
-	if c.erased {
-		return nil
-	}
 	if c.opacityCount > 0 {
 		c.opacityCount--
 		rate := 1 - float64(c.opacityCount)/float64(c.opacityMaxCount)
 		c.opacity = int(float64(c.origOpacity)*(1-rate) + float64(c.targetOpacity)*rate)
 	} else {
 		c.opacity = c.targetOpacity
+	}
+	if c.erased {
+		return nil
 	}
 	if c.stepping {
 		switch {
