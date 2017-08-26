@@ -231,7 +231,7 @@ func (m *moveCharacterState) Update() error {
 			log.Printf("not implemented yet (move_character): type %s", m.args.Type)
 			dir = c.Dir()
 		case data.MoveCharacterTypeRandom:
-			dir = data.Dir(m.gameState.RandomValue(0, 3))
+			dir = data.Dir(m.gameState.RandomValue(0, 4))
 		default:
 			panic("not reach")
 		}
