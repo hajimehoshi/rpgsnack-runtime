@@ -88,22 +88,14 @@ func (i *I) Current() float64 {
 }
 
 func (i *I) Set(value float64, count int) {
-	if i.count > 0 {
-		// Abort the current animation.
-		i.count = 0
-	}
-	i.src = i.dst
+	i.src = i.Current()
 	i.dst = value
 	i.count = count
 	i.maxCount = count
 }
 
 func (i *I) SetDiff(value float64, count int) {
-	if i.count > 0 {
-		// Abort the current animation.
-		i.count = 0
-	}
-	i.src = i.dst
+	i.src = i.Current()
 	i.dst += value
 	i.count = count
 	i.maxCount = count
