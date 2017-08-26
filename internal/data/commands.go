@@ -721,7 +721,7 @@ func (c *CommandArgsSetVariable) DecodeMsgpack(dec *msgpack.Decoder) error {
 }
 
 type CommandArgsTransfer struct {
-	ValueType  TransferValueType      `json:"valueType" msgpack:"valueType"`
+	ValueType  ValueType              `json:"valueType" msgpack:"valueType"`
 	RoomID     int                    `json:"roomId" msgpack:"roomId"`
 	X          int                    `json:"x" msgpack:"x"`
 	Y          int                    `json:"y" msgpack:"y"`
@@ -788,13 +788,13 @@ type CommandArgsPlayerControl struct {
 }
 
 type CommandArgsMoveCharacter struct {
-	Type             MoveCharacterType   `json:"type" msgpack:"type"`
-	Dir              Dir                 `json:"dir" msgpack:"dir"`
-	Distance         int                 `json:"distance" msgpack:"distance"`
-	X                int                 `json:"x" msgpack:"x"`
-	Y                int                 `json:"y" msgpack:"y"`
-	ValueType        MoveTargetValueType `json:"valueType" msgpack:"valueType"`
-	IgnoreCharacters bool                `json:"ignoreCharacters" msgpack:"ignoreCharacters"`
+	Type             MoveCharacterType `json:"type" msgpack:"type"`
+	Dir              Dir               `json:"dir" msgpack:"dir"`
+	Distance         int               `json:"distance" msgpack:"distance"`
+	X                int               `json:"x" msgpack:"x"`
+	Y                int               `json:"y" msgpack:"y"`
+	ValueType        ValueType         `json:"valueType" msgpack:"valueType"`
+	IgnoreCharacters bool              `json:"ignoreCharacters" msgpack:"ignoreCharacters"`
 }
 
 func (c *CommandArgsMoveCharacter) EncodeMsgpack(enc *msgpack.Encoder) error {
@@ -995,11 +995,11 @@ type CommandArgsRemoveItem struct {
 	ID int `json:"id" msgpack:"id"`
 }
 
-type ShowPicturePosValueType string
+type ValueType string
 
 const (
-	ShowPicturePosValueTypeConstant ShowPicturePosValueType = "constant"
-	ShowPicturePosValueTypeVariable ShowPicturePosValueType = "variable"
+	ValueTypeConstant ValueType = "constant"
+	ValueTypeVariable ValueType = "variable"
 )
 
 type ShowPictureOrigin string
@@ -1017,17 +1017,17 @@ const (
 )
 
 type CommandArgsShowPicture struct {
-	ID           int                     `json:"id" msgpack:"id"`
-	Image        string                  `json:"image" msgpack:"image"`
-	X            int                     `json:"x" msgpack:"x"`
-	Y            int                     `json:"y" msgpack:"y"`
-	PosValueType ShowPicturePosValueType `json:"posValueType" msgpack:"posValueType"`
-	ScaleX       int                     `json:"scaleX" msgpack:"scaleX"`
-	ScaleY       int                     `json:"scaleY" msgpack:"scaleY"`
-	Angle        int                     `json:"angle" msgpack:"angle"`
-	Opacity      int                     `json:"opacity" msgpack:"opacity"`
-	Origin       ShowPictureOrigin       `json:"origin" msgpack:"origin"`
-	BlendType    ShowPictureBlendType    `json:"blendType" msgpack:"blendType"`
+	ID        int                  `json:"id" msgpack:"id"`
+	Image     string               `json:"image" msgpack:"image"`
+	X         int                  `json:"x" msgpack:"x"`
+	Y         int                  `json:"y" msgpack:"y"`
+	ValueType ValueType            `json:"posValueType" msgpack:"posValueType"`
+	ScaleX    int                  `json:"scaleX" msgpack:"scaleX"`
+	ScaleY    int                  `json:"scaleY" msgpack:"scaleY"`
+	Angle     int                  `json:"angle" msgpack:"angle"`
+	Opacity   int                  `json:"opacity" msgpack:"opacity"`
+	Origin    ShowPictureOrigin    `json:"origin" msgpack:"origin"`
+	BlendType ShowPictureBlendType `json:"blendType" msgpack:"blendType"`
 }
 
 type CommandArgsHidePicture struct {
@@ -1054,20 +1054,6 @@ const (
 	SetVariableValueTypeCharacter  SetVariableValueType = "character"
 	SetVariableValueTypeIAPProduct SetVariableValueType = "iap_product"
 	SetVariableValueTypeSystem     SetVariableValueType = "system"
-)
-
-type TransferValueType string
-
-const (
-	TransferValueTypeConstant TransferValueType = "constant"
-	TransferValueTypeVariable TransferValueType = "variable"
-)
-
-type MoveTargetValueType string
-
-const (
-	MoveTargetValueTypeConstant MoveTargetValueType = "constant"
-	MoveTargetValueTypeVariable MoveTargetValueType = "variable"
 )
 
 type TransferTransitionType string

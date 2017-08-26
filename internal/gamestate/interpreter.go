@@ -451,7 +451,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 			roomID := args.RoomID
 			x := args.X
 			y := args.Y
-			if args.ValueType == data.TransferValueTypeVariable {
+			if args.ValueType == data.ValueTypeVariable {
 				roomID = i.gameState.VariableValue(roomID)
 				x = i.gameState.VariableValue(x)
 				y = i.gameState.VariableValue(y)
@@ -480,7 +480,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 			roomID := args.RoomID
 			x := args.X
 			y := args.Y
-			if args.ValueType == data.TransferValueTypeVariable {
+			if args.ValueType == data.ValueTypeVariable {
 				roomID = i.gameState.VariableValue(roomID)
 				x = i.gameState.VariableValue(x)
 				y = i.gameState.VariableValue(y)

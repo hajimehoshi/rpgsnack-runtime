@@ -73,7 +73,7 @@ func newMoveCharacterState(gameState *Game, mapID, roomID, eventID int, args *da
 	case data.MoveCharacterTypeDirection, data.MoveCharacterTypeForward, data.MoveCharacterTypeBackward:
 		m.distanceCount = m.args.Distance
 	case data.MoveCharacterTypeTarget:
-		if args.ValueType == data.MoveTargetValueTypeVariable {
+		if args.ValueType == data.ValueTypeVariable {
 			if !m.setMoveTarget(gameState.VariableValue(args.X), gameState.VariableValue(args.Y), args.IgnoreCharacters) {
 				return nil
 			}
