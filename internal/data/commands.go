@@ -1028,8 +1028,6 @@ type CommandArgsShowPicture struct {
 	Opacity      int                     `json:"opacity" msgpack:"opacity"`
 	Origin       ShowPictureOrigin       `json:"origin" msgpack:"origin"`
 	BlendType    ShowPictureBlendType    `json:"blendType" msgpack:"blendType"`
-	Wait         bool                    `json:"wait" msgpack:"wait"`
-	Time         int                     `json:"time" msgpack:"time"`
 }
 
 type CommandArgsHidePicture struct {
