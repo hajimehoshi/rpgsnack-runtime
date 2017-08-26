@@ -249,7 +249,7 @@ func (p *picture) draw(screen *ebiten.Image) {
 
 	op := &ebiten.DrawImageOptions{}
 	if p.originX != 0 || p.originY != 0 {
-		op.GeoM.Translate(-p.originX*float64(sx)/2, -p.originY*float64(sy)/2)
+		op.GeoM.Translate((-1-p.originX)*float64(sx)/2, (-1-p.originY)*float64(sy)/2)
 	}
 	op.GeoM.Scale(p.scaleX.Current(), p.scaleY.Current())
 	op.GeoM.Rotate(p.angle.Current())
