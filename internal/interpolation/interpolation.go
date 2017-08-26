@@ -29,10 +29,11 @@ type I struct {
 	maxCount int
 }
 
-func New(value float64) *I {
+func New(src, dst float64, count int) *I {
 	return &I{
-		src: value,
-		dst: value,
+		src:   src,
+		dst:   dst,
+		count: count,
 	}
 }
 
