@@ -830,11 +830,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 				x = i.gameState.VariableValue(x)
 				y = i.gameState.VariableValue(y)
 			}
-			if args.IsRelative {
-				i.gameState.pictures.MoveBy(args.ID, x, y, args.Time*6)
-			} else {
-				i.gameState.pictures.MoveTo(args.ID, x, y, args.Time*6)
-			}
+			i.gameState.pictures.MoveTo(args.ID, x, y, args.Time*6)
 			i.waitingCount = args.Time * 6
 		}
 		if i.waitingCount > 0 {

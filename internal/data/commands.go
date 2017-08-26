@@ -1049,7 +1049,6 @@ type CommandArgsMovePicture struct {
 	X            int       `json:"x" msgpack:"x"`
 	Y            int       `json:"y" msgpack:"y"`
 	PosValueType ValueType `json:"posValueType" msgpack:"posValueType"`
-	IsRelative   bool      `json:"isRelative" msgpack:"isRelative"`
 	Time         int       `json:"time" msgpack:"time"`
 	Wait         bool      `json:"wait" msgpack:"wait"`
 }

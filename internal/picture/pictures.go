@@ -73,10 +73,6 @@ func (p *Pictures) DecodeMsgpack(dec *msgpack.Decoder) error {
 	return nil
 }
 
-func (p *Pictures) MoveBy(id int, x, y int, count int) {
-	p.pictures[id].moveBy(x, y, count)
-}
-
 func (p *Pictures) MoveTo(id int, x, y int, count int) {
 	p.pictures[id].moveTo(x, y, count)
 }
@@ -216,11 +212,6 @@ func (p *picture) DecodeMsgpack(dec *msgpack.Decoder) error {
 		return fmt.Errorf("pictures: picture.DecodeMsgpack failed: %v", err)
 	}
 	return nil
-}
-
-func (p *picture) moveBy(x, y int, count int) {
-	p.x.SetDiff(float64(x), count)
-	p.y.SetDiff(float64(y), count)
 }
 
 func (p *picture) moveTo(x, y int, count int) {

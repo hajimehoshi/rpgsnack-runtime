@@ -94,13 +94,6 @@ func (i *I) Set(value float64, count int) {
 	i.maxCount = count
 }
 
-func (i *I) SetDiff(value float64, count int) {
-	i.src = i.Current()
-	i.dst += value
-	i.count = count
-	i.maxCount = count
-}
-
 func (i *I) Update() {
 	if i.count > 0 {
 		i.count--
