@@ -295,6 +295,12 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 			return err
 		}
 		c.Args = args
+	case CommandNameScalePicture:
+		var args *CommandArgsScalePicture
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	default:
 		return fmt.Errorf("data: invalid command: %s", c.Name)
 	}
@@ -440,6 +446,9 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 			case CommandNameMovePicture:
 				c.Args = &CommandArgsMovePicture{}
 				d.DecodeAny(c.Args)
+			case CommandNameScalePicture:
+				c.Args = &CommandArgsScalePicture{}
+				d.DecodeAny(c.Args)
 			default:
 				return fmt.Errorf("data: Command.DecodeMsgpack: invalid command: %s", c.Name)
 			}
@@ -514,6 +523,7 @@ const (
 	CommandNameShowPicture  CommandName = "show_picture"
 	CommandNameErasePicture CommandName = "erase_picture"
 	CommandNameMovePicture  CommandName = "move_picture"
+	CommandNameScalePicture CommandName = "scale_picture"
 
 	// Route commands
 	CommandNameMoveCharacter        CommandName = "move_character"
@@ -1051,6 +1061,14 @@ type CommandArgsMovePicture struct {
 	PosValueType ValueType `json:"posValueType" msgpack:"posValueType"`
 	Time         int       `json:"time" msgpack:"time"`
 	Wait         bool      `json:"wait" msgpack:"wait"`
+}
+
+type CommandArgsScalePicture struct {
+	ID     int  `json:"id" msgpack:"id"`
+	ScaleX int  `json:"scaleX" msgpack:"scaleX"`
+	ScaleY int  `json:"scaleY" msgpack:"scaleY"`
+	Time   int  `json:"time" msgpack:"time"`
+	Wait   bool `json:"wait" msgpack:"wait"`
 }
 
 type SetVariableOp string

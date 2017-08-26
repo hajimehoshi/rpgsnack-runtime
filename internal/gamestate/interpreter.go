@@ -841,6 +841,22 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		}
 		i.commandIterator.Advance()
 
+	case data.CommandNameScalePicture:
+		args := c.Args.(*data.CommandArgsScalePicture)
+		if i.waitingCount == 0 {
+			scaleX := float64(args.ScaleX) / 100
+			scaleY := float64(args.ScaleY) / 100
+			i.gameState.pictures.Scale(args.ID, scaleX, scaleY, args.Time*6)
+			i.waitingCount = args.Time * 6
+		}
+		if i.waitingCount > 0 {
+			i.waitingCount--
+		}
+		if i.waitingCount > 0 {
+			return false, nil
+		}
+		i.commandIterator.Advance()
+
 	case data.CommandNameFinishPlayerMovingByUserInput:
 		i.gameState.currentMap.FinishPlayerMovingByUserInput()
 		i.commandIterator.Advance()

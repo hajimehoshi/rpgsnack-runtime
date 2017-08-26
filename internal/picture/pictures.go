@@ -77,6 +77,10 @@ func (p *Pictures) MoveTo(id int, x, y int, count int) {
 	p.pictures[id].moveTo(x, y, count)
 }
 
+func (p *Pictures) Scale(id int, scaleX, scaleY float64, count int) {
+	p.pictures[id].scale(scaleX, scaleY, count)
+}
+
 func (p *Pictures) Update() {
 	for _, pic := range p.pictures {
 		if pic == nil {
@@ -217,6 +221,11 @@ func (p *picture) DecodeMsgpack(dec *msgpack.Decoder) error {
 func (p *picture) moveTo(x, y int, count int) {
 	p.x.Set(float64(x), count)
 	p.y.Set(float64(y), count)
+}
+
+func (p *picture) scale(scaleX, scaleY float64, count int) {
+	p.scaleX.Set(scaleX, count)
+	p.scaleY.Set(scaleY, count)
 }
 
 func (p *picture) update() {
