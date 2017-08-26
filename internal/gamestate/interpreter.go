@@ -803,11 +803,17 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 
 	case data.CommandNameShowPicture:
 		args := c.Args.(*data.CommandArgsShowPicture)
+		x := args.X
+		y := args.Y
+		if args.ValueType == data.ValueTypeVariable {
+			x = i.gameState.VariableValue(x)
+			y = i.gameState.VariableValue(y)
+		}
 		scaleX := float64(args.ScaleX) / 100
 		scaleY := float64(args.ScaleY) / 100
 		angle := float64(args.Angle) * math.Pi / 180
 		opacity := float64(args.Opacity) / 255
-		i.gameState.pictures.Add(args.ID, args.Image, args.X, args.Y, scaleX, scaleY, angle, opacity, args.Origin, args.BlendType)
+		i.gameState.pictures.Add(args.ID, args.Image, x, y, scaleX, scaleY, angle, opacity, args.Origin, args.BlendType)
 		/*if args.Wait && i.gameState.pictures.IsAnimating(args.ID) {
 			return false, nil
 		}
