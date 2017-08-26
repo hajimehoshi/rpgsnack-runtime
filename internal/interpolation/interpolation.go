@@ -87,10 +87,6 @@ func (i *I) Current() float64 {
 	return rate*i.src + (1-rate)*i.dst
 }
 
-func (i *I) IsAnimating() bool {
-	return i.count > 0
-}
-
 func (i *I) Set(value float64, count int) {
 	if i.count > 0 {
 		// Abort the current animation.
@@ -98,6 +94,17 @@ func (i *I) Set(value float64, count int) {
 	}
 	i.src = i.dst
 	i.dst = value
+	i.count = count
+	i.maxCount = count
+}
+
+func (i *I) SetDiff(value float64, count int) {
+	if i.count > 0 {
+		// Abort the current animation.
+		i.count = 0
+	}
+	i.src = i.dst
+	i.dst += value
 	i.count = count
 	i.maxCount = count
 }

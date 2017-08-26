@@ -73,20 +73,20 @@ func (p *Pictures) DecodeMsgpack(dec *msgpack.Decoder) error {
 	return nil
 }
 
-func (p *Pictures) IsAnimating(id int) bool {
-	pic := p.pictures[id]
-	if pic == nil {
-		return false
-	}
-	return pic.isAnimating()
+func (p *Pictures) MoveBy(id int, x, y int, count int) {
+	p.pictures[id].moveBy(x, y, count)
+}
+
+func (p *Pictures) MoveTo(id int, x, y int, count int) {
+	p.pictures[id].moveTo(x, y, count)
 }
 
 func (p *Pictures) Update() {
 	for _, pic := range p.pictures {
-		pic.update()
-		if pic.isAnimating() {
+		if pic == nil {
 			continue
 		}
+		pic.update()
 	}
 }
 
@@ -218,8 +218,14 @@ func (p *picture) DecodeMsgpack(dec *msgpack.Decoder) error {
 	return nil
 }
 
-func (p *picture) isAnimating() bool {
-	return p.x.IsAnimating()
+func (p *picture) moveBy(x, y int, count int) {
+	p.x.SetDiff(float64(x), count)
+	p.y.SetDiff(float64(y), count)
+}
+
+func (p *picture) moveTo(x, y int, count int) {
+	p.x.Set(float64(x), count)
+	p.y.Set(float64(y), count)
 }
 
 func (p *picture) update() {

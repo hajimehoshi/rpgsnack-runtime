@@ -289,6 +289,12 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 			return err
 		}
 		c.Args = args
+	case CommandNameMovePicture:
+		var args *CommandArgsMovePicture
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	default:
 		return fmt.Errorf("data: invalid command: %s", c.Name)
 	}
@@ -431,6 +437,9 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 			case CommandNameHidePicture:
 				c.Args = &CommandArgsHidePicture{}
 				d.DecodeAny(c.Args)
+			case CommandNameMovePicture:
+				c.Args = &CommandArgsMovePicture{}
+				d.DecodeAny(c.Args)
 			default:
 				return fmt.Errorf("data: Command.DecodeMsgpack: invalid command: %s", c.Name)
 			}
@@ -504,6 +513,7 @@ const (
 
 	CommandNameShowPicture CommandName = "show_picture"
 	CommandNameHidePicture CommandName = "hide_picture"
+	CommandNameMovePicture CommandName = "move_picture"
 
 	// Route commands
 	CommandNameMoveCharacter        CommandName = "move_character"
@@ -1017,21 +1027,31 @@ const (
 )
 
 type CommandArgsShowPicture struct {
-	ID        int                  `json:"id" msgpack:"id"`
-	Image     string               `json:"image" msgpack:"image"`
-	X         int                  `json:"x" msgpack:"x"`
-	Y         int                  `json:"y" msgpack:"y"`
-	ValueType ValueType            `json:"posValueType" msgpack:"posValueType"`
-	ScaleX    int                  `json:"scaleX" msgpack:"scaleX"`
-	ScaleY    int                  `json:"scaleY" msgpack:"scaleY"`
-	Angle     int                  `json:"angle" msgpack:"angle"`
-	Opacity   int                  `json:"opacity" msgpack:"opacity"`
-	Origin    ShowPictureOrigin    `json:"origin" msgpack:"origin"`
-	BlendType ShowPictureBlendType `json:"blendType" msgpack:"blendType"`
+	ID           int                  `json:"id" msgpack:"id"`
+	Image        string               `json:"image" msgpack:"image"`
+	X            int                  `json:"x" msgpack:"x"`
+	Y            int                  `json:"y" msgpack:"y"`
+	PosValueType ValueType            `json:"posValueType" msgpack:"posValueType"`
+	ScaleX       int                  `json:"scaleX" msgpack:"scaleX"`
+	ScaleY       int                  `json:"scaleY" msgpack:"scaleY"`
+	Angle        int                  `json:"angle" msgpack:"angle"`
+	Opacity      int                  `json:"opacity" msgpack:"opacity"`
+	Origin       ShowPictureOrigin    `json:"origin" msgpack:"origin"`
+	BlendType    ShowPictureBlendType `json:"blendType" msgpack:"blendType"`
 }
 
 type CommandArgsHidePicture struct {
 	ID int `json:"id" msgpack:"id"`
+}
+
+type CommandArgsMovePicture struct {
+	ID           int       `json:"id" msgpack:"id"`
+	X            int       `json:"x" msgpack:"x"`
+	Y            int       `json:"y" msgpack:"y"`
+	PosValueType ValueType `json:"posValueType" msgpack:"posValueType"`
+	IsRelative   bool      `json:"isRelative" msgpack:"isRelative"`
+	Time         int       `json:"time" msgpack:"time"`
+	Wait         bool      `json:"wait" msgpack:"wait"`
 }
 
 type SetVariableOp string

@@ -805,7 +805,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		args := c.Args.(*data.CommandArgsShowPicture)
 		x := args.X
 		y := args.Y
-		if args.ValueType == data.ValueTypeVariable {
+		if args.PosValueType == data.ValueTypeVariable {
 			x = i.gameState.VariableValue(x)
 			y = i.gameState.VariableValue(y)
 		}
@@ -814,19 +814,35 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		angle := float64(args.Angle) * math.Pi / 180
 		opacity := float64(args.Opacity) / 255
 		i.gameState.pictures.Add(args.ID, args.Image, x, y, scaleX, scaleY, angle, opacity, args.Origin, args.BlendType)
-		/*if args.Wait && i.gameState.pictures.IsAnimating(args.ID) {
-			return false, nil
-		}
-		i.waitingCommand = false*/
 		i.commandIterator.Advance()
 
 	case data.CommandNameHidePicture:
 		args := c.Args.(*data.CommandArgsHidePicture)
 		i.gameState.pictures.Remove(args.ID)
-		/*if args.Wait && i.gameState.pictures.IsAnimating(args.ID) {
+		i.commandIterator.Advance()
+
+	case data.CommandNameMovePicture:
+		args := c.Args.(*data.CommandArgsMovePicture)
+		if i.waitingCount == 0 {
+			x := args.X
+			y := args.Y
+			if args.PosValueType == data.ValueTypeVariable {
+				x = i.gameState.VariableValue(x)
+				y = i.gameState.VariableValue(y)
+			}
+			if args.IsRelative {
+				i.gameState.pictures.MoveBy(args.ID, x, y, args.Time*6)
+			} else {
+				i.gameState.pictures.MoveTo(args.ID, x, y, args.Time*6)
+			}
+			i.waitingCount = args.Time * 6
+		}
+		if i.waitingCount > 0 {
+			i.waitingCount--
+		}
+		if i.waitingCount > 0 {
 			return false, nil
 		}
-		i.waitingCommand = false*/
 		i.commandIterator.Advance()
 
 	case data.CommandNameFinishPlayerMovingByUserInput:
