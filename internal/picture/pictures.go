@@ -108,7 +108,7 @@ func (p *Pictures) Draw(screen *ebiten.Image) {
 	screen.DrawImage(p.screen, op)
 }
 
-func (p *Pictures) Add(id int, name string, x, y int, scaleX, scaleY, angle, opacity float64, origin data.ShowPictureOrigin, blendType data.ShowPictureBlendType) {
+func (p *Pictures) Add(id int, name string, x, y int, scaleX, scaleY, angle, opacity float64, originX, originY float64, blendType data.ShowPictureBlendType) {
 	if len(p.pictures) < id+1 {
 		p.pictures = append(p.pictures, make([]*picture, id+1-len(p.pictures))...)
 	}
@@ -121,7 +121,8 @@ func (p *Pictures) Add(id int, name string, x, y int, scaleX, scaleY, angle, opa
 		scaleY:    interpolation.New(scaleX),
 		angle:     interpolation.New(angle),
 		opacity:   interpolation.New(opacity),
-		origin:    origin,
+		originX:   originX,
+		originY:   originY,
 		blendType: blendType,
 	}
 }
@@ -139,7 +140,8 @@ type picture struct {
 	scaleY    *interpolation.I
 	angle     *interpolation.I
 	opacity   *interpolation.I
-	origin    data.ShowPictureOrigin
+	originX   float64
+	originY   float64
 	blendType data.ShowPictureBlendType
 }
 
@@ -168,8 +170,11 @@ func (p *picture) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EncodeString("opacity")
 	e.EncodeInterface(p.opacity)
 
-	e.EncodeString("origin")
-	e.EncodeString(string(p.origin))
+	e.EncodeString("originX")
+	e.EncodeFloat64(p.originX)
+
+	e.EncodeString("originY")
+	e.EncodeFloat64(p.originY)
 
 	e.EncodeString("blendType")
 	e.EncodeString(string(p.blendType))
@@ -205,8 +210,10 @@ func (p *picture) DecodeMsgpack(dec *msgpack.Decoder) error {
 		case "opacity":
 			p.opacity = &interpolation.I{}
 			d.DecodeInterface(p.opacity)
-		case "origin":
-			p.origin = data.ShowPictureOrigin(d.DecodeString())
+		case "originX":
+			p.originX = d.DecodeFloat64()
+		case "originY":
+			p.originY = d.DecodeFloat64()
 		case "blendType":
 			p.blendType = data.ShowPictureBlendType(d.DecodeString())
 		}
@@ -241,8 +248,8 @@ func (p *picture) draw(screen *ebiten.Image) {
 	sx, sy := p.image.Size()
 
 	op := &ebiten.DrawImageOptions{}
-	if p.origin == data.ShowPictureOriginCenter {
-		op.GeoM.Translate(-float64(sx)/2, -float64(sy)/2)
+	if p.originX != 0 || p.originY != 0 {
+		op.GeoM.Translate(-p.originX*float64(sx)/2, -p.originY*float64(sy)/2)
 	}
 	op.GeoM.Scale(p.scaleX.Current(), p.scaleY.Current())
 	op.GeoM.Rotate(p.angle.Current())

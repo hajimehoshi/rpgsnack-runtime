@@ -1022,13 +1022,6 @@ const (
 	ValueTypeVariable ValueType = "variable"
 )
 
-type ShowPictureOrigin string
-
-const (
-	ShowPictureOriginUpperLeft ShowPictureOrigin = "upper_left"
-	ShowPictureOriginCenter    ShowPictureOrigin = "center"
-)
-
 type ShowPictureBlendType string
 
 const (
@@ -1039,6 +1032,8 @@ const (
 type CommandArgsShowPicture struct {
 	ID           int                  `json:"id" msgpack:"id"`
 	Image        string               `json:"image" msgpack:"image"`
+	OriginX      float64              `json:"originX" msgpack:"originX"`
+	OriginY      float64              `json:"originY" msgpack:"originY"`
 	X            int                  `json:"x" msgpack:"x"`
 	Y            int                  `json:"y" msgpack:"y"`
 	PosValueType ValueType            `json:"posValueType" msgpack:"posValueType"`
@@ -1046,7 +1041,6 @@ type CommandArgsShowPicture struct {
 	ScaleY       int                  `json:"scaleY" msgpack:"scaleY"`
 	Angle        int                  `json:"angle" msgpack:"angle"`
 	Opacity      int                  `json:"opacity" msgpack:"opacity"`
-	Origin       ShowPictureOrigin    `json:"origin" msgpack:"origin"`
 	BlendType    ShowPictureBlendType `json:"blendType" msgpack:"blendType"`
 }
 
