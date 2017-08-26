@@ -51,10 +51,11 @@ type Page struct {
 type Dir int
 
 const (
-	DirUp Dir = iota
-	DirRight
-	DirDown
-	DirLeft
+	DirNone  Dir = -1
+	DirUp    Dir = 0
+	DirRight Dir = 1
+	DirDown  Dir = 2
+	DirLeft  Dir = 3
 )
 
 type Priority int

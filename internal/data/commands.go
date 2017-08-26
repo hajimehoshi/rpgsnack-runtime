@@ -715,6 +715,7 @@ type CommandArgsTransfer struct {
 	RoomID     int                    `json:"roomId" msgpack:"roomId"`
 	X          int                    `json:"x" msgpack:"x"`
 	Y          int                    `json:"y" msgpack:"y"`
+	Dir        Dir                    `json:"dir" msgpack:"dir"`
 	Transition TransferTransitionType `json:"transition" msgpack:"transition"`
 }
 

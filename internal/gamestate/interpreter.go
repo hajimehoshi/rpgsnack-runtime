@@ -455,6 +455,10 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 				x = i.gameState.VariableValue(x)
 				y = i.gameState.VariableValue(y)
 			}
+
+			if args.Dir != data.DirNone {
+				i.gameState.currentMap.player.SetDir(args.Dir)
+			}
 			i.gameState.Map().transferPlayerImmediately(roomID, x, y, i)
 			i.waitingCommand = false
 			i.commandIterator.Advance()
@@ -479,6 +483,9 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 				roomID = i.gameState.VariableValue(roomID)
 				x = i.gameState.VariableValue(x)
 				y = i.gameState.VariableValue(y)
+			}
+			if args.Dir != data.DirNone {
+				i.gameState.currentMap.player.SetDir(args.Dir)
 			}
 			i.gameState.Map().transferPlayerImmediately(roomID, x, y, i)
 			i.gameState.screen.fadeIn(30)
