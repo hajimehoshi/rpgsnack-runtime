@@ -816,8 +816,8 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		i.gameState.pictures.Add(args.ID, args.Image, x, y, scaleX, scaleY, angle, opacity, args.Origin, args.BlendType)
 		i.commandIterator.Advance()
 
-	case data.CommandNameHidePicture:
-		args := c.Args.(*data.CommandArgsHidePicture)
+	case data.CommandNameErasePicture:
+		args := c.Args.(*data.CommandArgsErasePicture)
 		i.gameState.pictures.Remove(args.ID)
 		i.commandIterator.Advance()
 

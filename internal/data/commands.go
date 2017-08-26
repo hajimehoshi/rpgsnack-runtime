@@ -283,8 +283,8 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 			return err
 		}
 		c.Args = args
-	case CommandNameHidePicture:
-		var args *CommandArgsHidePicture
+	case CommandNameErasePicture:
+		var args *CommandArgsErasePicture
 		if err := unmarshalJSON(tmp.Args, &args); err != nil {
 			return err
 		}
@@ -434,8 +434,8 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 			case CommandNameShowPicture:
 				c.Args = &CommandArgsShowPicture{}
 				d.DecodeAny(c.Args)
-			case CommandNameHidePicture:
-				c.Args = &CommandArgsHidePicture{}
+			case CommandNameErasePicture:
+				c.Args = &CommandArgsErasePicture{}
 				d.DecodeAny(c.Args)
 			case CommandNameMovePicture:
 				c.Args = &CommandArgsMovePicture{}
@@ -511,9 +511,9 @@ const (
 	CommandNameAddItem    CommandName = "add_item"
 	CommandNameRemoveItem CommandName = "remove_item"
 
-	CommandNameShowPicture CommandName = "show_picture"
-	CommandNameHidePicture CommandName = "hide_picture"
-	CommandNameMovePicture CommandName = "move_picture"
+	CommandNameShowPicture  CommandName = "show_picture"
+	CommandNameErasePicture CommandName = "erase_picture"
+	CommandNameMovePicture  CommandName = "move_picture"
 
 	// Route commands
 	CommandNameMoveCharacter        CommandName = "move_character"
@@ -1040,7 +1040,7 @@ type CommandArgsShowPicture struct {
 	BlendType    ShowPictureBlendType `json:"blendType" msgpack:"blendType"`
 }
 
-type CommandArgsHidePicture struct {
+type CommandArgsErasePicture struct {
 	ID int `json:"id" msgpack:"id"`
 }
 
