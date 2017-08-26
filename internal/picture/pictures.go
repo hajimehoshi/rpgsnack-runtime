@@ -74,10 +74,20 @@ func (p *Pictures) DecodeMsgpack(dec *msgpack.Decoder) error {
 }
 
 func (p *Pictures) IsAnimating(id int) bool {
-	return p.pictures[id].isAnimating()
+	pic := p.pictures[id]
+	if pic == nil {
+		return false
+	}
+	return pic.isAnimating()
 }
 
 func (p *Pictures) Update() {
+	for _, pic := range p.pictures {
+		pic.update()
+		if pic.isAnimating() {
+			continue
+		}
+	}
 }
 
 func (p *Pictures) Draw(screen *ebiten.Image) {
@@ -89,7 +99,7 @@ func (p *Pictures) Draw(screen *ebiten.Image) {
 		if pic == nil {
 			continue
 		}
-		pic.Draw(p.screen)
+		pic.draw(p.screen)
 	}
 
 	op := &ebiten.DrawImageOptions{}
@@ -98,19 +108,19 @@ func (p *Pictures) Draw(screen *ebiten.Image) {
 	screen.DrawImage(p.screen, op)
 }
 
-func (p *Pictures) Add(id int, name string, x, y int, scaleX, scaleY, angle, opacity float64, origin data.ShowPictureOrigin, blendType data.ShowPictureBlendType, count int) {
+func (p *Pictures) Add(id int, name string, x, y int, scaleX, scaleY, angle, opacity float64, origin data.ShowPictureOrigin, blendType data.ShowPictureBlendType) {
 	if len(p.pictures) < id+1 {
 		p.pictures = append(p.pictures, make([]*picture, id+1-len(p.pictures))...)
 	}
 	p.pictures[id] = &picture{
 		imageName: name,
 		image:     assets.GetImage("pictures/" + name + ".png"),
-		x:         interpolation.New(float64(x), float64(x), count),
-		y:         interpolation.New(float64(y), float64(y), count),
-		scaleX:    interpolation.New(0, scaleX, count),
-		scaleY:    interpolation.New(0, scaleX, count),
-		angle:     interpolation.New(angle, angle, count),
-		opacity:   interpolation.New(0, opacity, count),
+		x:         interpolation.New(float64(x)),
+		y:         interpolation.New(float64(y)),
+		scaleX:    interpolation.New(scaleX),
+		scaleY:    interpolation.New(scaleX),
+		angle:     interpolation.New(angle),
+		opacity:   interpolation.New(opacity),
 		origin:    origin,
 		blendType: blendType,
 	}
@@ -212,7 +222,16 @@ func (p *picture) isAnimating() bool {
 	return p.x.IsAnimating()
 }
 
-func (p *picture) Draw(screen *ebiten.Image) {
+func (p *picture) update() {
+	p.x.Update()
+	p.y.Update()
+	p.scaleX.Update()
+	p.scaleY.Update()
+	p.angle.Update()
+	p.opacity.Update()
+}
+
+func (p *picture) draw(screen *ebiten.Image) {
 	sx, sy := p.image.Size()
 
 	op := &ebiten.DrawImageOptions{}

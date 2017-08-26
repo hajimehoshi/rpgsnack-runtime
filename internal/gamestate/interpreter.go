@@ -803,18 +803,24 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 
 	case data.CommandNameShowPicture:
 		args := c.Args.(*data.CommandArgsShowPicture)
-		if !i.waitingCommand {
-			scaleX := float64(args.ScaleX) / 100
-			scaleY := float64(args.ScaleY) / 100
-			angle := float64(args.Angle) * math.Pi / 180
-			opacity := float64(args.Opacity) / 255
-			i.gameState.pictures.Add(args.ID, args.Image, args.X, args.Y, scaleX, scaleY, angle, opacity, args.Origin, args.BlendType, args.Time*6)
-			i.waitingCommand = args.Wait
-		}
-		if args.Wait && i.gameState.pictures.IsAnimating(args.ID) {
+		scaleX := float64(args.ScaleX) / 100
+		scaleY := float64(args.ScaleY) / 100
+		angle := float64(args.Angle) * math.Pi / 180
+		opacity := float64(args.Opacity) / 255
+		i.gameState.pictures.Add(args.ID, args.Image, args.X, args.Y, scaleX, scaleY, angle, opacity, args.Origin, args.BlendType)
+		/*if args.Wait && i.gameState.pictures.IsAnimating(args.ID) {
 			return false, nil
 		}
-		i.waitingCommand = false
+		i.waitingCommand = false*/
+		i.commandIterator.Advance()
+
+	case data.CommandNameHidePicture:
+		args := c.Args.(*data.CommandArgsHidePicture)
+		i.gameState.pictures.Remove(args.ID)
+		/*if args.Wait && i.gameState.pictures.IsAnimating(args.ID) {
+			return false, nil
+		}
+		i.waitingCommand = false*/
 		i.commandIterator.Advance()
 
 	case data.CommandNameFinishPlayerMovingByUserInput:

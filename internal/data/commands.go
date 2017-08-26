@@ -283,6 +283,12 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 			return err
 		}
 		c.Args = args
+	case CommandNameHidePicture:
+		var args *CommandArgsHidePicture
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	default:
 		return fmt.Errorf("data: invalid command: %s", c.Name)
 	}
@@ -422,6 +428,9 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 			case CommandNameShowPicture:
 				c.Args = &CommandArgsShowPicture{}
 				d.DecodeAny(c.Args)
+			case CommandNameHidePicture:
+				c.Args = &CommandArgsHidePicture{}
+				d.DecodeAny(c.Args)
 			default:
 				return fmt.Errorf("data: Command.DecodeMsgpack: invalid command: %s", c.Name)
 			}
@@ -494,6 +503,7 @@ const (
 	CommandNameRemoveItem CommandName = "remove_item"
 
 	CommandNameShowPicture CommandName = "show_picture"
+	CommandNameHidePicture CommandName = "hide_picture"
 
 	// Route commands
 	CommandNameMoveCharacter        CommandName = "move_character"
@@ -1020,6 +1030,10 @@ type CommandArgsShowPicture struct {
 	BlendType    ShowPictureBlendType    `json:"blendType" msgpack:"blendType"`
 	Wait         bool                    `json:"wait" msgpack:"wait"`
 	Time         int                     `json:"time" msgpack:"time"`
+}
+
+type CommandArgsHidePicture struct {
+	ID int `json:"id" msgpack:"id"`
 }
 
 type SetVariableOp string
