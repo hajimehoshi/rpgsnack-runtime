@@ -307,6 +307,12 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 			return err
 		}
 		c.Args = args
+	case CommandNameFadePicture:
+		var args *CommandArgsFadePicture
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	case CommandNameTintPicture:
 		var args *CommandArgsTintPicture
 		if err := unmarshalJSON(tmp.Args, &args); err != nil {
@@ -464,6 +470,9 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 			case CommandNameRotatePicture:
 				c.Args = &CommandArgsRotatePicture{}
 				d.DecodeAny(c.Args)
+			case CommandNameFadePicture:
+				c.Args = &CommandArgsFadePicture{}
+				d.DecodeAny(c.Args)
 			case CommandNameTintPicture:
 				c.Args = &CommandArgsTintPicture{}
 				d.DecodeAny(c.Args)
@@ -543,6 +552,7 @@ const (
 	CommandNameMovePicture   CommandName = "move_picture"
 	CommandNameScalePicture  CommandName = "scale_picture"
 	CommandNameRotatePicture CommandName = "rotate_picture"
+	CommandNameFadePicture   CommandName = "fade_picture"
 	CommandNameTintPicture   CommandName = "tint_picture"
 
 	// Route commands
@@ -1090,6 +1100,13 @@ type CommandArgsRotatePicture struct {
 	Angle int  `json:"angle" msgpack:"angle"`
 	Time  int  `json:"time" msgpack:"time"`
 	Wait  bool `json:"wait" msgpack:"wait"`
+}
+
+type CommandArgsFadePicture struct {
+	ID      int  `json:"id" msgpack:"id"`
+	Opacity int  `json:"opacity" msgpack:"opacity"`
+	Time    int  `json:"time" msgpack:"time"`
+	Wait    bool `json:"wait" msgpack:"wait"`
 }
 
 type CommandArgsTintPicture struct {

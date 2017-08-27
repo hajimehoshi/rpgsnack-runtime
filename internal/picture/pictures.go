@@ -86,6 +86,10 @@ func (p *Pictures) Rotate(id int, angle float64, count int) {
 	p.pictures[id].rotate(angle, count)
 }
 
+func (p *Pictures) Fade(id int, opacity float64, count int) {
+	p.pictures[id].fade(opacity, count)
+}
+
 func (p *Pictures) Tint(id int, red, green, blue, gray float64, count int) {
 	p.pictures[id].setTint(red, green, blue, gray, count)
 }
@@ -252,6 +256,10 @@ func (p *picture) scale(scaleX, scaleY float64, count int) {
 
 func (p *picture) rotate(angle float64, count int) {
 	p.angle.Set(angle, count)
+}
+
+func (p *picture) fade(opacity float64, count int) {
+	p.opacity.Set(opacity, count)
 }
 
 func (p *picture) setTint(red, green, blue, gray float64, count int) {

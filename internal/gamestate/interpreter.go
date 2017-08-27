@@ -884,6 +884,25 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		}
 		i.commandIterator.Advance()
 
+	case data.CommandNameFadePicture:
+		if i.waitingCount == 0 {
+			args := c.Args.(*data.CommandArgsFadePicture)
+			opacity := float64(args.Opacity) / 255
+			i.gameState.pictures.Fade(args.ID, opacity, args.Time*6)
+			if !args.Wait {
+				i.commandIterator.Advance()
+				return true, nil
+			}
+			i.waitingCount = args.Time * 6
+		}
+		if i.waitingCount > 0 {
+			i.waitingCount--
+		}
+		if i.waitingCount > 0 {
+			return false, nil
+		}
+		i.commandIterator.Advance()
+
 	case data.CommandNameTintPicture:
 		if i.waitingCount == 0 {
 			args := c.Args.(*data.CommandArgsTintPicture)
