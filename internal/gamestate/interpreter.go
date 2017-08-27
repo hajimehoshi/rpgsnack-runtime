@@ -831,6 +831,10 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 				y = i.gameState.VariableValue(y)
 			}
 			i.gameState.pictures.MoveTo(args.ID, x, y, args.Time*6)
+			if !args.Wait {
+				i.commandIterator.Advance()
+				return true, nil
+			}
 			i.waitingCount = args.Time * 6
 		}
 		if i.waitingCount > 0 {
@@ -847,6 +851,10 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 			scaleX := float64(args.ScaleX) / 100
 			scaleY := float64(args.ScaleY) / 100
 			i.gameState.pictures.Scale(args.ID, scaleX, scaleY, args.Time*6)
+			if !args.Wait {
+				i.commandIterator.Advance()
+				return true, nil
+			}
 			i.waitingCount = args.Time * 6
 		}
 		if i.waitingCount > 0 {
@@ -862,6 +870,10 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 			args := c.Args.(*data.CommandArgsRotatePicture)
 			angle := float64(args.Angle) * math.Pi / 180
 			i.gameState.pictures.Rotate(args.ID, angle, args.Time*6)
+			if !args.Wait {
+				i.commandIterator.Advance()
+				return true, nil
+			}
 			i.waitingCount = args.Time * 6
 		}
 		if i.waitingCount > 0 {
@@ -880,6 +892,10 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 			b := float64(args.Blue) / 255
 			gray := float64(args.Gray) / 255
 			i.gameState.pictures.Tint(args.ID, r, g, b, gray, args.Time*6)
+			if !args.Wait {
+				i.commandIterator.Advance()
+				return true, nil
+			}
 			i.waitingCount = args.Time * 6
 		}
 		if i.waitingCount > 0 {
