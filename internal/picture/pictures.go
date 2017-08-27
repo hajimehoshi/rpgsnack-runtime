@@ -94,6 +94,10 @@ func (p *Pictures) Tint(id int, red, green, blue, gray float64, count int) {
 	p.pictures[id].setTint(red, green, blue, gray, count)
 }
 
+func (p *Pictures) ChangeImage(id int, imageName string) {
+	p.pictures[id].changeImage(imageName)
+}
+
 func (p *Pictures) Update() {
 	for _, pic := range p.pictures {
 		if pic == nil {
@@ -264,6 +268,11 @@ func (p *picture) fade(opacity float64, count int) {
 
 func (p *picture) setTint(red, green, blue, gray float64, count int) {
 	p.tint.Set(red, green, blue, gray, count)
+}
+
+func (p *picture) changeImage(imageName string) {
+	p.imageName = imageName
+	p.image = assets.GetImage("pictures/" + p.imageName + ".png")
 }
 
 func (p *picture) update() {

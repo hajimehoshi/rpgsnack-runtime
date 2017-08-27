@@ -925,6 +925,11 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		}
 		i.commandIterator.Advance()
 
+	case data.CommandNameChangePictureImage:
+		args := c.Args.(*data.CommandArgsChangePictureImage)
+		i.gameState.pictures.ChangeImage(args.ID, args.Image)
+		i.commandIterator.Advance()
+
 	case data.CommandNameFinishPlayerMovingByUserInput:
 		i.gameState.currentMap.FinishPlayerMovingByUserInput()
 		i.commandIterator.Advance()

@@ -319,6 +319,12 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 			return err
 		}
 		c.Args = args
+	case CommandNameChangePictureImage:
+		var args *CommandArgsChangePictureImage
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	default:
 		return fmt.Errorf("data: invalid command: %s", c.Name)
 	}
@@ -476,6 +482,9 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 			case CommandNameTintPicture:
 				c.Args = &CommandArgsTintPicture{}
 				d.DecodeAny(c.Args)
+			case CommandNameChangePictureImage:
+				c.Args = &CommandArgsChangePictureImage{}
+				d.DecodeAny(c.Args)
 			default:
 				return fmt.Errorf("data: Command.DecodeMsgpack: invalid command: %s", c.Name)
 			}
@@ -547,13 +556,14 @@ const (
 	CommandNameAddItem    CommandName = "add_item"
 	CommandNameRemoveItem CommandName = "remove_item"
 
-	CommandNameShowPicture   CommandName = "show_picture"
-	CommandNameErasePicture  CommandName = "erase_picture"
-	CommandNameMovePicture   CommandName = "move_picture"
-	CommandNameScalePicture  CommandName = "scale_picture"
-	CommandNameRotatePicture CommandName = "rotate_picture"
-	CommandNameFadePicture   CommandName = "fade_picture"
-	CommandNameTintPicture   CommandName = "tint_picture"
+	CommandNameShowPicture        CommandName = "show_picture"
+	CommandNameErasePicture       CommandName = "erase_picture"
+	CommandNameMovePicture        CommandName = "move_picture"
+	CommandNameScalePicture       CommandName = "scale_picture"
+	CommandNameRotatePicture      CommandName = "rotate_picture"
+	CommandNameFadePicture        CommandName = "fade_picture"
+	CommandNameTintPicture        CommandName = "tint_picture"
+	CommandNameChangePictureImage CommandName = "change_picture_image"
 
 	// Route commands
 	CommandNameMoveCharacter        CommandName = "move_character"
@@ -1117,6 +1127,11 @@ type CommandArgsTintPicture struct {
 	Gray  int  `json:"gray" msgpack:"gray"`
 	Time  int  `json:"time" msgpack:"time"`
 	Wait  bool `json:"wait" msgpack:"wait"`
+}
+
+type CommandArgsChangePictureImage struct {
+	ID    int    `json:"id" msgpack:"id"`
+	Image string `json:"image" msgpack:"image"`
 }
 
 type SetVariableOp string
