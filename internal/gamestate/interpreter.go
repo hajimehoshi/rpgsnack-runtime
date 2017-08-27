@@ -857,6 +857,21 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		}
 		i.commandIterator.Advance()
 
+	case data.CommandNameRotatePicture:
+		args := c.Args.(*data.CommandArgsRotatePicture)
+		if i.waitingCount == 0 {
+			angle := float64(args.Angle) * math.Pi / 180
+			i.gameState.pictures.Rotate(args.ID, angle, args.Time*6)
+			i.waitingCount = args.Time * 6
+		}
+		if i.waitingCount > 0 {
+			i.waitingCount--
+		}
+		if i.waitingCount > 0 {
+			return false, nil
+		}
+		i.commandIterator.Advance()
+
 	case data.CommandNameFinishPlayerMovingByUserInput:
 		i.gameState.currentMap.FinishPlayerMovingByUserInput()
 		i.commandIterator.Advance()

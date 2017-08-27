@@ -81,6 +81,10 @@ func (p *Pictures) Scale(id int, scaleX, scaleY float64, count int) {
 	p.pictures[id].scale(scaleX, scaleY, count)
 }
 
+func (p *Pictures) Rotate(id int, angle float64, count int) {
+	p.pictures[id].rotate(angle, count)
+}
+
 func (p *Pictures) Update() {
 	for _, pic := range p.pictures {
 		if pic == nil {
@@ -235,6 +239,10 @@ func (p *picture) scale(scaleX, scaleY float64, count int) {
 	p.scaleY.Set(scaleY, count)
 }
 
+func (p *picture) rotate(angle float64, count int) {
+	p.angle.Set(angle, count)
+}
+
 func (p *picture) update() {
 	p.x.Update()
 	p.y.Update()
@@ -248,9 +256,7 @@ func (p *picture) draw(screen *ebiten.Image) {
 	sx, sy := p.image.Size()
 
 	op := &ebiten.DrawImageOptions{}
-	if p.originX != 0 || p.originY != 0 {
-		op.GeoM.Translate((-1-p.originX)*float64(sx)/2, (-1-p.originY)*float64(sy)/2)
-	}
+	op.GeoM.Translate((-1-p.originX)*float64(sx)/2, (-1-p.originY)*float64(sy)/2)
 	op.GeoM.Scale(p.scaleX.Current(), p.scaleY.Current())
 	op.GeoM.Rotate(p.angle.Current())
 	op.GeoM.Translate(p.x.Current(), p.y.Current())
