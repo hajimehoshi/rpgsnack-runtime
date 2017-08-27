@@ -28,11 +28,7 @@ import (
 var emptyImage *ebiten.Image
 
 func init() {
-	img, err := ebiten.NewImage(16, 16, ebiten.FilterNearest)
-	if err != nil {
-		panic(err)
-	}
-	emptyImage = img
+	emptyImage, _ = ebiten.NewImage(16, 16, ebiten.FilterNearest)
 }
 
 type tint struct {
@@ -241,7 +237,7 @@ func (s *Screen) fadeColorTranslate() (r, g, b, a float64) {
 	return
 }
 
-func (s *Screen) Draw(screen *ebiten.Image, img *ebiten.Image, op *ebiten.DrawImageOptions) error {
+func (s *Screen) Draw(screen *ebiten.Image, img *ebiten.Image, op *ebiten.DrawImageOptions) {
 	fadeRate := 0.0
 	if s.fadedOut {
 		fadeRate = 1
@@ -280,9 +276,7 @@ func (s *Screen) Draw(screen *ebiten.Image, img *ebiten.Image, op *ebiten.DrawIm
 			fadeRate = 1 - float64(s.fadeOutCount)/float64(s.fadeOutMaxCount)
 		}
 	}
-	if err := screen.DrawImage(img, op); err != nil {
-		return err
-	}
+	screen.DrawImage(img, op)
 	if fadeRate > 0 {
 		op := &ebiten.DrawImageOptions{}
 		w, h := emptyImage.Size()
@@ -296,11 +290,8 @@ func (s *Screen) Draw(screen *ebiten.Image, img *ebiten.Image, op *ebiten.DrawIm
 		op.GeoM.Translate(tx, consts.GameMarginTop)
 		op.ColorM.Translate(s.fadeColorTranslate())
 		op.ColorM.Scale(1, 1, 1, fadeRate)
-		if err := screen.DrawImage(emptyImage, op); err != nil {
-			return err
-		}
+		screen.DrawImage(emptyImage, op)
 	}
-	return nil
 }
 
 func (s *Screen) Update() {
