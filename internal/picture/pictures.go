@@ -25,6 +25,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/interpolation"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/tint"
 )
 
 type Pictures struct {
@@ -83,6 +84,10 @@ func (p *Pictures) Scale(id int, scaleX, scaleY float64, count int) {
 
 func (p *Pictures) Rotate(id int, angle float64, count int) {
 	p.pictures[id].rotate(angle, count)
+}
+
+func (p *Pictures) Tint(id int, red, green, blue, gray float64, count int) {
+	p.pictures[id].setTint(red, green, blue, gray, count)
 }
 
 func (p *Pictures) Update() {
@@ -144,6 +149,7 @@ type picture struct {
 	scaleY    *interpolation.I
 	angle     *interpolation.I
 	opacity   *interpolation.I
+	tint      tint.Tint
 	originX   float64
 	originY   float64
 	blendType data.ShowPictureBlendType
@@ -173,6 +179,9 @@ func (p *picture) EncodeMsgpack(enc *msgpack.Encoder) error {
 
 	e.EncodeString("opacity")
 	e.EncodeInterface(p.opacity)
+
+	e.EncodeString("tint")
+	e.EncodeInterface(&p.tint)
 
 	e.EncodeString("originX")
 	e.EncodeFloat64(p.originX)
@@ -214,6 +223,8 @@ func (p *picture) DecodeMsgpack(dec *msgpack.Decoder) error {
 		case "opacity":
 			p.opacity = &interpolation.I{}
 			d.DecodeInterface(p.opacity)
+		case "tint":
+			d.DecodeInterface(&p.tint)
 		case "originX":
 			p.originX = d.DecodeFloat64()
 		case "originY":
@@ -243,6 +254,10 @@ func (p *picture) rotate(angle float64, count int) {
 	p.angle.Set(angle, count)
 }
 
+func (p *picture) setTint(red, green, blue, gray float64, count int) {
+	p.tint.Set(red, green, blue, gray, count)
+}
+
 func (p *picture) update() {
 	p.x.Update()
 	p.y.Update()
@@ -250,6 +265,7 @@ func (p *picture) update() {
 	p.scaleY.Update()
 	p.angle.Update()
 	p.opacity.Update()
+	p.tint.Update()
 }
 
 func (p *picture) draw(screen *ebiten.Image) {
@@ -261,6 +277,7 @@ func (p *picture) draw(screen *ebiten.Image) {
 	op.GeoM.Rotate(p.angle.Current())
 	op.GeoM.Translate(p.x.Current(), p.y.Current())
 
+	p.tint.Apply(&op.ColorM)
 	if p.opacity.Current() < 1 {
 		op.ColorM.Scale(1, 1, 1, p.opacity.Current())
 	}
