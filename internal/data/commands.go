@@ -307,6 +307,12 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 			return err
 		}
 		c.Args = args
+	case CommandNameTintPicture:
+		var args *CommandArgsTintPicture
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	default:
 		return fmt.Errorf("data: invalid command: %s", c.Name)
 	}
@@ -458,6 +464,9 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 			case CommandNameRotatePicture:
 				c.Args = &CommandArgsRotatePicture{}
 				d.DecodeAny(c.Args)
+			case CommandNameTintPicture:
+				c.Args = &CommandArgsTintPicture{}
+				d.DecodeAny(c.Args)
 			default:
 				return fmt.Errorf("data: Command.DecodeMsgpack: invalid command: %s", c.Name)
 			}
@@ -534,6 +543,7 @@ const (
 	CommandNameMovePicture   CommandName = "move_picture"
 	CommandNameScalePicture  CommandName = "scale_picture"
 	CommandNameRotatePicture CommandName = "rotate_picture"
+	CommandNameTintPicture   CommandName = "tint_picture"
 
 	// Route commands
 	CommandNameMoveCharacter        CommandName = "move_character"
@@ -1078,6 +1088,16 @@ type CommandArgsScalePicture struct {
 type CommandArgsRotatePicture struct {
 	ID    int  `json:"id" msgpack:"id"`
 	Angle int  `json:"angle" msgpack:"angle"`
+	Time  int  `json:"time" msgpack:"time"`
+	Wait  bool `json:"wait" msgpack:"wait"`
+}
+
+type CommandArgsTintPicture struct {
+	ID    int  `json:"id" msgpack:"id"`
+	Red   int  `json:"red" msgpack:"red"`
+	Green int  `json:"green" msgpack:"green"`
+	Blue  int  `json:"blue" msgpack:"blue"`
+	Gray  int  `json:"gray" msgpack:"gray"`
 	Time  int  `json:"time" msgpack:"time"`
 	Wait  bool `json:"wait" msgpack:"wait"`
 }
