@@ -33,11 +33,7 @@ func init() {
 }
 
 type Screen struct {
-	currentTint     tint.Tint
-	origTint        tint.Tint
-	targetTint      tint.Tint
-	tintCount       int
-	tintMaxCount    int
+	tint            tint.Tint
 	fadeInCount     int
 	fadeInMaxCount  int
 	fadeOutCount    int
@@ -50,17 +46,8 @@ func (s *Screen) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e := easymsgpack.NewEncoder(enc)
 	e.BeginMap()
 
-	e.EncodeString("currentTint")
-	e.EncodeInterface(&s.currentTint)
-	e.EncodeString("origTint")
-	e.EncodeInterface(&s.origTint)
-	e.EncodeString("targetTint")
-	e.EncodeInterface(&s.targetTint)
-
-	e.EncodeString("tintCount")
-	e.EncodeInt(s.tintCount)
-	e.EncodeString("tintMaxCount")
-	e.EncodeInt(s.tintMaxCount)
+	e.EncodeString("tint")
+	e.EncodeInterface(&s.tint)
 	e.EncodeString("fadeInCount")
 	e.EncodeInt(s.fadeInCount)
 	e.EncodeString("fadeInMaxCount")
@@ -90,16 +77,8 @@ func (s *Screen) DecodeMsgpack(dec *msgpack.Decoder) error {
 	n := d.DecodeMapLen()
 	for i := 0; i < n; i++ {
 		switch d.DecodeString() {
-		case "currentTint":
-			d.DecodeInterface(&s.currentTint)
-		case "origTint":
-			d.DecodeInterface(&s.origTint)
-		case "targetTint":
-			d.DecodeInterface(&s.targetTint)
-		case "tintCount":
-			s.tintCount = d.DecodeInt()
-		case "tintMaxCount":
-			s.tintMaxCount = d.DecodeInt()
+		case "tint":
+			d.DecodeInterface(&s.tint)
 		case "fadeInCount":
 			s.fadeInCount = d.DecodeInt()
 		case "fadeInMaxCount":
@@ -131,22 +110,7 @@ func (s *Screen) DecodeMsgpack(dec *msgpack.Decoder) error {
 }
 
 func (s *Screen) startTint(red, green, blue, gray float64, count int) {
-	s.origTint.Red = s.currentTint.Red
-	s.origTint.Green = s.currentTint.Green
-	s.origTint.Blue = s.currentTint.Blue
-	s.origTint.Gray = s.currentTint.Gray
-	s.targetTint.Red = red
-	s.targetTint.Green = green
-	s.targetTint.Blue = blue
-	s.targetTint.Gray = gray
-	s.tintCount = count
-	s.tintMaxCount = count
-	if count == 0 {
-		s.currentTint.Red = red
-		s.currentTint.Green = green
-		s.currentTint.Blue = blue
-		s.currentTint.Gray = gray
-	}
+	s.tint.Set(red, green, blue, gray, count)
 }
 
 func (s *Screen) fadeIn(count int) {
@@ -169,7 +133,7 @@ func (s *Screen) setFadeColor(fadeColor color.Color) {
 }
 
 func (s *Screen) isChangingTint() bool {
-	return s.tintCount > 0
+	return s.tint.IsChanging()
 }
 
 func (s *Screen) isFading() bool {
@@ -196,7 +160,7 @@ func (s *Screen) Draw(screen *ebiten.Image, img *ebiten.Image, op *ebiten.DrawIm
 	if s.fadedOut {
 		fadeRate = 1
 	} else {
-		s.currentTint.Apply(&op.ColorM)
+		s.tint.Apply(&op.ColorM)
 		if s.fadeInCount > 0 {
 			fadeRate = float64(s.fadeInCount) / float64(s.fadeInMaxCount)
 		}
@@ -205,6 +169,7 @@ func (s *Screen) Draw(screen *ebiten.Image, img *ebiten.Image, op *ebiten.DrawIm
 		}
 	}
 	screen.DrawImage(img, op)
+
 	if fadeRate > 0 {
 		op := &ebiten.DrawImageOptions{}
 		w, h := emptyImage.Size()
@@ -223,19 +188,7 @@ func (s *Screen) Draw(screen *ebiten.Image, img *ebiten.Image, op *ebiten.DrawIm
 }
 
 func (s *Screen) Update() {
-	if s.tintCount > 0 {
-		s.tintCount--
-		rate := 1 - float64(s.tintCount)/float64(s.tintMaxCount)
-		s.currentTint.Red = s.origTint.Red*(1-rate) + s.targetTint.Red*rate
-		s.currentTint.Green = s.origTint.Green*(1-rate) + s.targetTint.Green*rate
-		s.currentTint.Blue = s.origTint.Blue*(1-rate) + s.targetTint.Blue*rate
-		s.currentTint.Gray = s.origTint.Gray*(1-rate) + s.targetTint.Gray*rate
-	} else {
-		s.currentTint.Red = s.targetTint.Red
-		s.currentTint.Green = s.targetTint.Green
-		s.currentTint.Blue = s.targetTint.Blue
-		s.currentTint.Gray = s.targetTint.Gray
-	}
+	s.tint.Update()
 	if s.fadeInCount > 0 {
 		s.fadeInCount--
 	}

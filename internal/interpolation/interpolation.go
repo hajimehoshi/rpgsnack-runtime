@@ -94,6 +94,10 @@ func (i *I) Set(value float64, count int) {
 	i.maxCount = count
 }
 
+func (i *I) IsChanging() bool {
+	return i.count > 0
+}
+
 func (i *I) Update() {
 	if i.count > 0 {
 		i.count--
