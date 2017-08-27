@@ -17,6 +17,7 @@ package tint
 import (
 	"fmt"
 
+	"github.com/hajimehoshi/ebiten"
 	"github.com/vmihailenco/msgpack"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
@@ -67,4 +68,35 @@ func (t *Tint) DecodeMsgpack(dec *msgpack.Decoder) error {
 		return fmt.Errorf("gamestate: Tint.DecodeMsgpack failed: %v", err)
 	}
 	return nil
+}
+
+func (t *Tint) Apply(clr *ebiten.ColorM) {
+	if t.IsZero() {
+		return
+	}
+	if t.Gray != 0 {
+		clr.ChangeHSV(0, 1-t.Gray, 1)
+	}
+	rs, gs, bs := 1.0, 1.0, 1.0
+	if t.Red < 0 {
+		rs = 1 - -t.Red
+	}
+	if t.Green < 0 {
+		gs = 1 - -t.Green
+	}
+	if t.Blue < 0 {
+		bs = 1 - -t.Blue
+	}
+	clr.Scale(rs, gs, bs, 1)
+	rt, gt, bt := 0.0, 0.0, 0.0
+	if t.Red > 0 {
+		rt = t.Red
+	}
+	if t.Green > 0 {
+		gt = t.Green
+	}
+	if t.Blue > 0 {
+		bt = t.Blue
+	}
+	clr.Translate(rt, gt, bt, 0)
 }

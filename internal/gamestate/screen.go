@@ -196,33 +196,7 @@ func (s *Screen) Draw(screen *ebiten.Image, img *ebiten.Image, op *ebiten.DrawIm
 	if s.fadedOut {
 		fadeRate = 1
 	} else {
-		if !s.currentTint.IsZero() {
-			if s.currentTint.Gray != 0 {
-				op.ColorM.ChangeHSV(0, 1-s.currentTint.Gray, 1)
-			}
-			rs, gs, bs := 1.0, 1.0, 1.0
-			if s.currentTint.Red < 0 {
-				rs = 1 - -s.currentTint.Red
-			}
-			if s.currentTint.Green < 0 {
-				gs = 1 - -s.currentTint.Green
-			}
-			if s.currentTint.Blue < 0 {
-				bs = 1 - -s.currentTint.Blue
-			}
-			op.ColorM.Scale(rs, gs, bs, 1)
-			rt, gt, bt := 0.0, 0.0, 0.0
-			if s.currentTint.Red > 0 {
-				rt = s.currentTint.Red
-			}
-			if s.currentTint.Green > 0 {
-				gt = s.currentTint.Green
-			}
-			if s.currentTint.Blue > 0 {
-				bt = s.currentTint.Blue
-			}
-			op.ColorM.Translate(rt, gt, bt, 0)
-		}
+		s.currentTint.Apply(&op.ColorM)
 		if s.fadeInCount > 0 {
 			fadeRate = float64(s.fadeInCount) / float64(s.fadeInMaxCount)
 		}
