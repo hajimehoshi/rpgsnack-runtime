@@ -23,6 +23,7 @@ import (
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/tint"
 )
 
 var emptyImage *ebiten.Image
@@ -31,57 +32,10 @@ func init() {
 	emptyImage, _ = ebiten.NewImage(16, 16, ebiten.FilterNearest)
 }
 
-type tint struct {
-	Red   float64
-	Green float64
-	Blue  float64
-	Gray  float64
-}
-
-func (t *tint) isZero() bool {
-	return t.Red == 0 && t.Green == 0 && t.Blue == 0 && t.Gray == 0
-}
-
-func (t *tint) EncodeMsgpack(enc *msgpack.Encoder) error {
-	e := easymsgpack.NewEncoder(enc)
-	e.BeginMap()
-	e.EncodeString("red")
-	e.EncodeFloat64(t.Red)
-	e.EncodeString("green")
-	e.EncodeFloat64(t.Green)
-	e.EncodeString("blue")
-	e.EncodeFloat64(t.Blue)
-	e.EncodeString("gray")
-	e.EncodeFloat64(t.Gray)
-	e.EndMap()
-	return e.Flush()
-}
-
-func (t *tint) DecodeMsgpack(dec *msgpack.Decoder) error {
-	d := easymsgpack.NewDecoder(dec)
-	n := d.DecodeMapLen()
-	for i := 0; i < n; i++ {
-		switch d.DecodeString() {
-		case "red":
-			t.Red = d.DecodeFloat64()
-		case "green":
-			t.Green = d.DecodeFloat64()
-		case "blue":
-			t.Blue = d.DecodeFloat64()
-		case "gray":
-			t.Gray = d.DecodeFloat64()
-		}
-	}
-	if err := d.Error(); err != nil {
-		return fmt.Errorf("gamestate: tint.DecodeMsgpack failed: %v", err)
-	}
-	return nil
-}
-
 type Screen struct {
-	currentTint     tint
-	origTint        tint
-	targetTint      tint
+	currentTint     tint.Tint
+	origTint        tint.Tint
+	targetTint      tint.Tint
 	tintCount       int
 	tintMaxCount    int
 	fadeInCount     int
@@ -242,7 +196,7 @@ func (s *Screen) Draw(screen *ebiten.Image, img *ebiten.Image, op *ebiten.DrawIm
 	if s.fadedOut {
 		fadeRate = 1
 	} else {
-		if !s.currentTint.isZero() {
+		if !s.currentTint.IsZero() {
 			if s.currentTint.Gray != 0 {
 				op.ColorM.ChangeHSV(0, 1-s.currentTint.Gray, 1)
 			}
