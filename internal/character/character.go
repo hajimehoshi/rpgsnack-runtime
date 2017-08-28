@@ -442,7 +442,7 @@ func (c *Character) Update() error {
 	}
 	if !c.IsMoving() {
 		// Reset the character state only if it is idle for one more frame
-		if c.idleFrameCount > 0 && !c.stepping && c.walking {
+		if c.idleFrameCount > 0 && !c.stepping && c.walking && c.walkingCount > 0 {
 			c.walkingCount = 0
 			c.frame = 1
 		}
