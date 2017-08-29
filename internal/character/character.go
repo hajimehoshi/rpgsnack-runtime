@@ -427,6 +427,8 @@ func (c *Character) Update() error {
 		return nil
 	}
 	if c.stepping {
+		c.steppingCount += c.speed.SteppingIncrementFrames()
+		c.steppingCount %= maxFrames
 		switch {
 		case c.steppingCount < maxFrames/4:
 			c.frame = 1
@@ -437,8 +439,6 @@ func (c *Character) Update() error {
 		default:
 			c.frame = 2
 		}
-		c.steppingCount += c.speed.SteppingIncrementFrames()
-		c.steppingCount %= maxFrames
 	}
 	if !c.IsMoving() {
 		// Reset the character state only if it is idle for one more frame
@@ -450,6 +450,8 @@ func (c *Character) Update() error {
 		return nil
 	}
 	if !c.stepping && c.walking {
+		c.walkingCount += c.speed.SteppingIncrementFrames()
+		c.walkingCount %= maxFrames
 		switch {
 		case c.walkingCount < maxFrames/4:
 			c.frame = 1
@@ -460,8 +462,6 @@ func (c *Character) Update() error {
 		default:
 			c.frame = 2
 		}
-		c.walkingCount += c.speed.SteppingIncrementFrames()
-		c.walkingCount %= maxFrames
 	}
 	c.idleFrameCount = 0
 	c.moveCount--
