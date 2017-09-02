@@ -279,7 +279,9 @@ func (m *Map) calcPageIndex(ch *character.Character) (int, error) {
 		}
 	}
 	if event == nil {
-		panic("not reach")
+		// This can happen when the player resumes the game and
+		// the event was deleted by the game editor.
+		return -1, nil
 	}
 	for i := len(event.Pages) - 1; i >= 0; i-- {
 		page := event.Pages[i]
