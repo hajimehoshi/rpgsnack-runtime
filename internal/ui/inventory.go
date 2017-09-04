@@ -48,7 +48,7 @@ const (
 	frameYMargin        = 4
 	itemXMargin         = 6
 	itemYMargin         = 6
-	itemSize            = 22
+	itemSize            = 21
 	scrollDragThreshold = 5
 	inventoryWidth      = 160
 )
@@ -96,7 +96,7 @@ func (i *Inventory) Update() {
 			scrollBarWidth := inventoryWidth - frameXMargin
 			maxX := (itemXMargin + len(i.items)*itemSize - scrollBarWidth) * consts.TileScale
 
-			if maxX > scrollBarWidth {
+			if maxX > 0 {
 				i.scrolling = true
 				i.dragX = dx
 				if i.scrollX+i.dragX > 0 {
