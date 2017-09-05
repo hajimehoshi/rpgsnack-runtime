@@ -15,9 +15,6 @@
 package sceneimpl
 
 import (
-	"encoding/json"
-	"log"
-
 	"github.com/hajimehoshi/ebiten"
 	"github.com/vmihailenco/msgpack"
 
@@ -183,10 +180,7 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 	if t.resumeGameButton.Pressed() {
 		var game *gamestate.Game
 		if err := msgpack.Unmarshal(sceneManager.Progress(), &game); err != nil {
-			log.Printf("msgpack.Unmarshal failed: %v. Use json.Unmarshal instead.", err)
-			if err := json.Unmarshal(sceneManager.Progress(), &game); err != nil {
-				return err
-			}
+			return err
 		}
 		if err := audio.StopBGM(); err != nil {
 			return err
