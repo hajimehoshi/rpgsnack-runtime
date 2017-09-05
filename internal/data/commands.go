@@ -341,7 +341,8 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 	d := easymsgpack.NewDecoder(dec)
 	n := d.DecodeMapLen()
 	for i := 0; i < n; i++ {
-		switch d.DecodeString() {
+		s := d.DecodeString()
+		switch s {
 		case "name":
 			c.Name = CommandName(d.DecodeString())
 		case "args":
@@ -517,6 +518,8 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 					d.DecodeInterface(c.Branches[i][j])
 				}
 			}
+		default:
+			return fmt.Errorf("data: Command.DecodeMsgpack: invalid command structure: %s", s)
 		}
 	}
 	if err := d.Error(); err != nil {
