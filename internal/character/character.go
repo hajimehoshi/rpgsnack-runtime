@@ -390,7 +390,7 @@ func (c *Character) Erased() bool {
 	return c.erased
 }
 
-func (c *Character) UpdateWithPage(page *data.Page) error {
+func (c *Character) UpdateWithPage(page *data.Page) {
 	c.sizeW = 0
 	c.sizeH = 0
 	if page == nil {
@@ -401,7 +401,7 @@ func (c *Character) UpdateWithPage(page *data.Page) error {
 		c.frame = 1
 		c.stepping = false
 		c.speed = data.Speed3
-		return nil
+		return
 	}
 	c.imageName = page.Image
 	c.imageIndex = page.ImageIndex
@@ -412,10 +412,9 @@ func (c *Character) UpdateWithPage(page *data.Page) error {
 	c.walking = page.Walking
 	c.through = page.Through
 	c.speed = page.Speed
-	return nil
 }
 
-func (c *Character) Update() error {
+func (c *Character) Update() {
 	if c.opacityCount > 0 {
 		c.opacityCount--
 		rate := 1 - float64(c.opacityCount)/float64(c.opacityMaxCount)
@@ -424,7 +423,7 @@ func (c *Character) Update() error {
 		c.opacity = c.targetOpacity
 	}
 	if c.erased {
-		return nil
+		return
 	}
 	if c.stepping {
 		c.steppingCount += c.speed.SteppingIncrementFrames()
@@ -447,7 +446,7 @@ func (c *Character) Update() error {
 			c.frame = 1
 		}
 		c.idleFrameCount++
-		return nil
+		return
 	}
 	if !c.stepping && c.walking {
 		c.walkingCount += c.speed.SteppingIncrementFrames()
@@ -482,7 +481,6 @@ func (c *Character) Update() error {
 		c.x = nx
 		c.y = ny
 	}
-	return nil
 }
 
 func (c *Character) Draw(screen *ebiten.Image) {

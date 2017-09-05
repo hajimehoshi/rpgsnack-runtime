@@ -373,9 +373,7 @@ func (m *Map) Update(sceneManager *scene.Manager) error {
 			m.itemInterpreter = nil
 		}
 	}
-	if err := m.player.Update(); err != nil {
-		return err
-	}
+	m.player.Update()
 	if m.IsPlayerMovingByUserInput() {
 		return nil
 	}
@@ -391,9 +389,7 @@ func (m *Map) Update(sceneManager *scene.Manager) error {
 		m.removeRoutes(e.EventID())
 		m.eventPageIndices[e.EventID()] = index
 		page := m.currentPage(e)
-		if err := e.UpdateWithPage(page); err != nil {
-			return err
-		}
+		e.UpdateWithPage(page)
 		if page == nil {
 			continue
 		}
@@ -418,9 +414,7 @@ func (m *Map) Update(sceneManager *scene.Manager) error {
 		m.addInterpreter(interpreter)
 	}
 	for _, e := range m.events {
-		if err := e.Update(); err != nil {
-			return err
-		}
+		e.Update()
 	}
 	m.tryRunAutoEvent()
 	return nil
