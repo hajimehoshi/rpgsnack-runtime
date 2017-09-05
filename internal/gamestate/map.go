@@ -798,7 +798,7 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, x, y int) bo
 						PageIndex: m.eventPageIndices[event.EventID()],
 					},
 				})
-			// TODO: DirFix state can be different when executing the event.
+			// TODO: DirFix state can be different when executing the event (#278).
 			if !event.DirFix() {
 				commands = append(commands,
 					&data.Command{
