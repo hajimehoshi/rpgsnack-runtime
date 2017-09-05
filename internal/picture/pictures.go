@@ -74,27 +74,57 @@ func (p *Pictures) DecodeMsgpack(dec *msgpack.Decoder) error {
 	return nil
 }
 
+func (p *Pictures) ensurePictures(id int) {
+	if len(p.pictures) < id+1 {
+		p.pictures = append(p.pictures, make([]*picture, id+1-len(p.pictures))...)
+	}
+}
+
 func (p *Pictures) MoveTo(id int, x, y int, count int) {
+	p.ensurePictures(id)
+	if p.pictures[id] == nil {
+		return
+	}
 	p.pictures[id].moveTo(x, y, count)
 }
 
 func (p *Pictures) Scale(id int, scaleX, scaleY float64, count int) {
+	p.ensurePictures(id)
+	if p.pictures[id] == nil {
+		return
+	}
 	p.pictures[id].scale(scaleX, scaleY, count)
 }
 
 func (p *Pictures) Rotate(id int, angle float64, count int) {
+	p.ensurePictures(id)
+	if p.pictures[id] == nil {
+		return
+	}
 	p.pictures[id].rotate(angle, count)
 }
 
 func (p *Pictures) Fade(id int, opacity float64, count int) {
+	p.ensurePictures(id)
+	if p.pictures[id] == nil {
+		return
+	}
 	p.pictures[id].fade(opacity, count)
 }
 
 func (p *Pictures) Tint(id int, red, green, blue, gray float64, count int) {
+	p.ensurePictures(id)
+	if p.pictures[id] == nil {
+		return
+	}
 	p.pictures[id].setTint(red, green, blue, gray, count)
 }
 
 func (p *Pictures) ChangeImage(id int, imageName string) {
+	p.ensurePictures(id)
+	if p.pictures[id] == nil {
+		return
+	}
 	p.pictures[id].changeImage(imageName)
 }
 
@@ -126,9 +156,7 @@ func (p *Pictures) Draw(screen *ebiten.Image) {
 }
 
 func (p *Pictures) Add(id int, name string, x, y int, scaleX, scaleY, angle, opacity float64, originX, originY float64, blendType data.ShowPictureBlendType) {
-	if len(p.pictures) < id+1 {
-		p.pictures = append(p.pictures, make([]*picture, id+1-len(p.pictures))...)
-	}
+	p.ensurePictures(id)
 	p.pictures[id] = &picture{
 		imageName: name,
 		image:     assets.GetImage("pictures/" + name + ".png"),
@@ -145,6 +173,7 @@ func (p *Pictures) Add(id int, name string, x, y int, scaleX, scaleY, angle, opa
 }
 
 func (p *Pictures) Remove(id int) {
+	p.ensurePictures(id)
 	p.pictures[id] = nil
 }
 
