@@ -341,8 +341,7 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 	d := easymsgpack.NewDecoder(dec)
 	n := d.DecodeMapLen()
 	for i := 0; i < n; i++ {
-		s := d.DecodeString()
-		switch s {
+		switch k := d.DecodeString(); k {
 		case "name":
 			c.Name = CommandName(d.DecodeString())
 		case "args":
@@ -353,68 +352,84 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 			case CommandNameNop:
 				d.DecodeNil()
 			case CommandNameIf:
-				c.Args = &CommandArgsIf{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsIf{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameLabel:
-				c.Args = &CommandArgsLabel{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsLabel{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameGoto:
-				c.Args = &CommandArgsGoto{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsGoto{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameCallEvent:
-				c.Args = &CommandArgsCallEvent{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsCallEvent{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameCallCommonEvent:
-				c.Args = &CommandArgsCallCommonEvent{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsCallCommonEvent{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameReturn:
 				d.DecodeNil()
 			case CommandNameEraseEvent:
 				d.DecodeNil()
 			case CommandNameWait:
-				c.Args = &CommandArgsWait{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsWait{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameShowBalloon:
-				args := &CommandArgsShowBalloon{}
-				d.DecodeAny(c.Args)
-				c.Args = args
+				a := &CommandArgsShowBalloon{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameShowMessage:
-				args := &CommandArgsShowMessage{}
+				a := &CommandArgsShowMessage{}
 				d.DecodeAny(c.Args)
-				if args.TextAlign == "" {
-					args.TextAlign = TextAlignLeft
+				if a.TextAlign == "" {
+					a.TextAlign = TextAlignLeft
 				}
-				c.Args = args
+				c.Args = a
 			case CommandNameShowHint:
-				c.Args = &CommandArgsShowHint{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsShowHint{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameShowChoices:
-				c.Args = &CommandArgsShowChoices{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsShowChoices{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameSetSwitch:
-				c.Args = &CommandArgsSetSwitch{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsSetSwitch{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameSetSelfSwitch:
-				c.Args = &CommandArgsSetSelfSwitch{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsSetSelfSwitch{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameSetVariable:
-				c.Args = &CommandArgsSetVariable{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsSetVariable{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameTransfer:
-				c.Args = &CommandArgsTransfer{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsTransfer{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameSetRoute:
-				c.Args = &CommandArgsSetRoute{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsSetRoute{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameTintScreen:
-				c.Args = &CommandArgsTintScreen{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsTintScreen{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNamePlaySE:
-				c.Args = &CommandArgsPlaySE{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsPlaySE{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNamePlayBGM:
-				c.Args = &CommandArgsPlayBGM{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsPlayBGM{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameStopBGM:
 				d.DecodeNil()
 			case CommandNameSave:
@@ -424,78 +439,105 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 			case CommandNameSyncIAP:
 				d.DecodeNil()
 			case CommandNameUnlockAchievement:
-				c.Args = &CommandArgsUnlockAchievement{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsUnlockAchievement{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameAutoSave:
-				c.Args = &CommandArgsAutoSave{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsAutoSave{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNamePlayerControl:
-				c.Args = &CommandArgsPlayerControl{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsPlayerControl{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameControlHint:
-				c.Args = &CommandArgsControlHint{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsControlHint{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNamePurchase:
-				c.Args = &CommandArgsPurchase{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsPurchase{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameShowAds:
-				c.Args = &CommandArgsShowAds{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsShowAds{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameOpenLink:
-				c.Args = &CommandArgsOpenLink{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsOpenLink{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameMoveCharacter:
-				c.Args = &CommandArgsMoveCharacter{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsMoveCharacter{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameTurnCharacter:
-				c.Args = &CommandArgsTurnCharacter{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsTurnCharacter{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameRotateCharacter:
-				c.Args = &CommandArgsRotateCharacter{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsRotateCharacter{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameSetCharacterProperty:
-				c.Args = &CommandArgsSetCharacterProperty{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsSetCharacterProperty{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameSetCharacterImage:
-				c.Args = &CommandArgsSetCharacterImage{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsSetCharacterImage{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameSetCharacterOpacity:
-				c.Args = &CommandArgsSetCharacterOpacity{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsSetCharacterOpacity{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameAddItem:
-				c.Args = &CommandArgsAddItem{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsAddItem{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameRemoveItem:
-				c.Args = &CommandArgsRemoveItem{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsRemoveItem{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameReplaceItem:
-				c.Args = &CommandArgsReplaceItem{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsReplaceItem{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameShowPicture:
-				c.Args = &CommandArgsShowPicture{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsShowPicture{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameErasePicture:
-				c.Args = &CommandArgsErasePicture{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsErasePicture{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameMovePicture:
-				c.Args = &CommandArgsMovePicture{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsMovePicture{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameScalePicture:
-				c.Args = &CommandArgsScalePicture{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsScalePicture{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameRotatePicture:
-				c.Args = &CommandArgsRotatePicture{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsRotatePicture{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameFadePicture:
-				c.Args = &CommandArgsFadePicture{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsFadePicture{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameTintPicture:
-				c.Args = &CommandArgsTintPicture{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsTintPicture{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameChangePictureImage:
-				c.Args = &CommandArgsChangePictureImage{}
-				d.DecodeAny(c.Args)
+				a := &CommandArgsChangePictureImage{}
+				d.DecodeAny(a)
+				c.Args = a
 			default:
+				if err := d.Error(); err != nil {
+					return fmt.Errorf("data: Command.DecodeMsgpack failed: %v", err)
+				}
 				return fmt.Errorf("data: Command.DecodeMsgpack: invalid command: %s", c.Name)
 			}
 		case "branches":
@@ -519,7 +561,10 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 				}
 			}
 		default:
-			return fmt.Errorf("data: Command.DecodeMsgpack: invalid command structure: %s", s)
+			if err := d.Error(); err != nil {
+				return fmt.Errorf("data: Command.DecodeMsgpack failed: %v", err)
+			}
+			return fmt.Errorf("data: Command.DecodeMsgpack: invalid command structure: %s", k)
 		}
 	}
 	if err := d.Error(); err != nil {
