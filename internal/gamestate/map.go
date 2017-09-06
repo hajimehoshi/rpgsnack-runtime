@@ -380,6 +380,17 @@ func (m *Map) Update(sceneManager *scene.Manager) error {
 	if m.IsPlayerMovingByUserInput() {
 		return nil
 	}
+	if err := m.refreshEvents(); err != nil {
+		return err
+	}
+	for _, e := range m.events {
+		e.Update()
+	}
+	m.tryRunAutoEvent()
+	return nil
+}
+
+func (m *Map) refreshEvents() error {
 	for _, e := range m.events {
 		index, err := m.calcPageIndex(e)
 		if err != nil {
@@ -416,10 +427,6 @@ func (m *Map) Update(sceneManager *scene.Manager) error {
 		interpreter.route = true
 		m.addInterpreter(interpreter)
 	}
-	for _, e := range m.events {
-		e.Update()
-	}
-	m.tryRunAutoEvent()
 	return nil
 }
 

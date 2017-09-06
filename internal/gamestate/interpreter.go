@@ -438,24 +438,22 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		}
 		i.commandIterator.Choose(i.gameState.windows.ChosenIndex())
 		i.waitingCommand = false
+
 	case data.CommandNameSetSwitch:
 		args := c.Args.(*data.CommandArgsSetSwitch)
 		i.gameState.SetSwitchValue(args.ID, args.Value)
 		i.commandIterator.Advance()
-		// Suspend executing to give other events chances to update their pages.
-		return false, nil
+
 	case data.CommandNameSetSelfSwitch:
 		args := c.Args.(*data.CommandArgsSetSelfSwitch)
 		i.gameState.SetSelfSwitchValue(i.eventID, args.ID, args.Value)
 		i.commandIterator.Advance()
-		// Suspend executing to give other events chances to update their pages.
-		return false, nil
+
 	case data.CommandNameSetVariable:
 		args := c.Args.(*data.CommandArgsSetVariable)
 		i.setVariable(sceneManager, args.ID, args.Op, args.ValueType, args.Value)
 		i.commandIterator.Advance()
-		// Suspend executing to give other events chances to update their pages.
-		return false, nil
+
 	case data.CommandNameTransfer:
 		args := c.Args.(*data.CommandArgsTransfer)
 		if args.Transition == data.TransferTransitionTypeNone {
@@ -509,6 +507,10 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		i.waitingCommand = false
 		i.commandIterator.Advance()
 	case data.CommandNameSetRoute:
+		// Refresh events so that new event graphics can be seen before setting a route (#59)
+		if err := i.gameState.Map().refreshEvents(); err != nil {
+			return false, err
+		}
 		args := c.Args.(*data.CommandArgsSetRoute)
 		id := args.EventID
 		if id == 0 {
