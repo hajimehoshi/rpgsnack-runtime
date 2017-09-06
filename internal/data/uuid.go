@@ -18,8 +18,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"regexp"
-
-	"github.com/vmihailenco/msgpack"
 )
 
 var (
@@ -88,18 +86,5 @@ func (u *UUID) UnmarshalText(text []uint8) error {
 	if x < 0x8 && 0xb < x {
 		return fmt.Errorf("data: the two most significant bits of the clock_seq_hi_and_reserved part must be 0 and 1 respectively: %s", text)
 	}
-	return nil
-}
-
-func (u *UUID) EncodeMsgpack(enc *msgpack.Encoder) error {
-	return enc.EncodeBytes(u[:])
-}
-
-func (u *UUID) DecodeMsgpack(dec *msgpack.Decoder) error {
-	b, err := dec.DecodeBytes()
-	if err != nil {
-		return err
-	}
-	copy(u[:], b)
 	return nil
 }
