@@ -277,6 +277,7 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 			return err
 		}
 		c.Args = args
+	case CommandNameHideItem:
 	case CommandNameReplaceItem:
 		var args *CommandArgsReplaceItem
 		if err := unmarshalJSON(tmp.Args, &args); err != nil {
@@ -498,6 +499,8 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 				a := &CommandArgsRemoveItem{}
 				d.DecodeAny(a)
 				c.Args = a
+			case CommandNameHideItem:
+				d.DecodeNil()
 			case CommandNameReplaceItem:
 				a := &CommandArgsReplaceItem{}
 				d.DecodeAny(a)
@@ -612,6 +615,7 @@ const (
 
 	CommandNameAddItem     CommandName = "add_item"
 	CommandNameRemoveItem  CommandName = "remove_item"
+	CommandNameHideItem    CommandName = "hide_item"
 	CommandNameReplaceItem CommandName = "replace_item"
 
 	CommandNameShowPicture        CommandName = "show_picture"

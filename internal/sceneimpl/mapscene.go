@@ -266,19 +266,31 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 		}
 
 		if m.inventory.ActiveItemPressed() {
-			if !m.itemPreviewPopup.Visible {
-				var activeItem *data.Item
-				for _, item := range sceneManager.Game().Items {
-					if item.ID == activeItemID {
-						activeItem = item
-						break
-					}
-				}
-				m.itemPreviewPopup.SetItem(activeItem)
-			}
-			m.itemPreviewPopup.Visible = true
 			m.gameState.Items().SetEventItem(activeItemID)
 		}
+	}
+
+	// If close button is pressed, the item content should be nil
+	// TODO: add callback to onClose instead
+	if m.itemPreviewPopup.Visible && m.itemPreviewPopup.Item() == nil {
+		m.gameState.Items().SetEventItem(0)
+	}
+
+	if eventItemID := m.gameState.Items().EventItem(); eventItemID > 0 {
+		// Update the previewPopup if the content has changed
+		if !(m.itemPreviewPopup.Visible && m.itemPreviewPopup.Item().ID == eventItemID) {
+			var eventItem *data.Item
+			for _, item := range sceneManager.Game().Items {
+				if item.ID == eventItemID {
+					eventItem = item
+					break
+				}
+			}
+			m.itemPreviewPopup.SetItem(eventItem)
+			m.itemPreviewPopup.Visible = true
+		}
+	} else {
+		m.itemPreviewPopup.Visible = false
 	}
 
 	m.itemPreviewPopup.X = (w/consts.TileScale-160)/2 + 16
