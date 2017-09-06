@@ -135,41 +135,40 @@ func (m *MapScene) updatePurchasesState(sceneManager *scene.Manager) {
 	m.isAdsRemoved = sceneManager.IsPurchased("ads_removal")
 }
 
-func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) error {
+func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) {
 	if m.itemPreviewPopup.Visible {
 		m.triggeringFailed = false
-		return nil
+		return
 	}
 	if m.gameState.Map().IsEventExecuting() {
 		m.triggeringFailed = false
-		return nil
+		return
 	}
 	if !input.Triggered() {
-		return nil
+		return
 	}
 	x, y := input.Position()
 	x -= sceneManager.MapOffsetX()
 	y -= consts.GameMarginTop
 	if x < 0 || y < 0 {
-		return nil
+		return
 	}
 	tx := x / consts.TileSize / consts.TileScale
 	ty := y / consts.TileSize / consts.TileScale
 	if tx < 0 || consts.TileXNum <= tx || ty < 0 || consts.TileYNum <= ty {
-		return nil
+		return
 	}
 	m.moveDstX = tx
 	m.moveDstY = ty
 	if m.gameState.Map().TryRunDirectEvent(tx, ty) {
 		m.triggeringFailed = false
-		return nil
+		return
 	}
 	if !m.gameState.Map().TryMovePlayerByUserInput(sceneManager, tx, ty) {
 		m.triggeringFailed = true
-		return nil
+		return
 	}
 	m.triggeringFailed = false
-	return nil
 }
 
 func (m *MapScene) Update(sceneManager *scene.Manager) error {
@@ -364,9 +363,7 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 		}
 		return err
 	}
-	if err := m.runEventIfNeeded(sceneManager); err != nil {
-		return err
-	}
+	m.runEventIfNeeded(sceneManager)
 	if m.cameraButton.Pressed() {
 		m.cameraTaking = true
 		m.screenShotDialog.Visible = true
