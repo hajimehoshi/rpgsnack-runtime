@@ -197,31 +197,15 @@ func (g *Game) DecodeMsgpack(dec *msgpack.Decoder) error {
 	return nil
 }
 
-func (g *Game) UpdateScreen() {
-	g.screen.Update()
-}
-
 func (g *Game) Items() *items.Items {
 	return g.items
-}
-
-func (g *Game) UpdateWindows(sceneManager *scene.Manager) {
-	playerY := 0
-	if g.currentMap.player != nil {
-		_, playerY = g.currentMap.player.Position()
-	}
-	g.windows.Update(playerY, sceneManager)
-}
-
-func (g *Game) UpdatePictures() {
-	g.pictures.Update()
 }
 
 func (g *Game) Map() *Map {
 	return g.currentMap
 }
 
-func (g *Game) Update(sceneManager *scene.Manager) {
+func (g *Game) Update(sceneManager *scene.Manager) error {
 	if g.lastPlayingBGMName != "" {
 		audio.PlayBGM(g.lastPlayingBGMName, g.lastPlayingBGMVolume)
 		g.lastPlayingBGMName = ""
@@ -232,6 +216,17 @@ func (g *Game) Update(sceneManager *scene.Manager) {
 			g.waitingRequestID = 0
 		}
 	}
+	g.screen.Update()
+	playerY := 0
+	if g.currentMap.player != nil {
+		_, playerY = g.currentMap.player.Position()
+	}
+	g.windows.Update(playerY, sceneManager)
+	g.pictures.Update()
+	if err := g.Map().Update(sceneManager); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (g *Game) SetBGM(bgm data.BGM) {
