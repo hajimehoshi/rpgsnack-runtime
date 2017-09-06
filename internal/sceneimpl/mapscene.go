@@ -131,7 +131,7 @@ func (m *MapScene) initUI() {
 	m.removeAdsButton.Visible = false // TODO: Clock of Atonement does not need this feature, so turn it off for now
 }
 
-func (m *MapScene) UpdatePurchasesState(sceneManager *scene.Manager) {
+func (m *MapScene) updatePurchasesState(sceneManager *scene.Manager) {
 	m.isAdsRemoved = sceneManager.IsPurchased("ads_removal")
 }
 
@@ -173,7 +173,7 @@ func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) error {
 }
 
 func (m *MapScene) Update(sceneManager *scene.Manager) error {
-	m.UpdatePurchasesState(sceneManager)
+	m.updatePurchasesState(sceneManager)
 	if m.waitingRequestID != 0 {
 		r := sceneManager.ReceiveResultIfExists(m.waitingRequestID)
 		if r == nil {
@@ -201,7 +201,7 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 			// Note: Ideally we should show a notification toast to notify users about the result
 			// For now, the notifications are handled on the native platform side
 			if r.Succeeded {
-				m.UpdatePurchasesState(sceneManager)
+				m.updatePurchasesState(sceneManager)
 			}
 			m.removeAdsDialog.Visible = false
 		}
