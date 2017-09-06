@@ -116,6 +116,21 @@ func (i *Items) Add(id int) {
 	}
 }
 
+func (i *Items) InsertBefore(targetItemID int, insertItemID int) {
+	index := i.index(targetItemID)
+	// if the targetItem does not exist, fail this ops
+	if index < 0 {
+		return
+	}
+
+	// Only insert the item if it does not exist
+	if i.index(insertItemID) < 0 {
+		i.items = append(i.items, 0)
+		copy(i.items[index+1:], i.items[index:])
+		i.items[index] = insertItemID
+	}
+}
+
 func (i *Items) Remove(id int) {
 	if i.items == nil {
 		i.items = []int{}

@@ -277,6 +277,12 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 			return err
 		}
 		c.Args = args
+	case CommandNameReplaceItem:
+		var args *CommandArgsReplaceItem
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	case CommandNameShowPicture:
 		var args *CommandArgsShowPicture
 		if err := unmarshalJSON(tmp.Args, &args); err != nil {
@@ -461,6 +467,9 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 			case CommandNameRemoveItem:
 				c.Args = &CommandArgsRemoveItem{}
 				d.DecodeAny(c.Args)
+			case CommandNameReplaceItem:
+				c.Args = &CommandArgsReplaceItem{}
+				d.DecodeAny(c.Args)
 			case CommandNameShowPicture:
 				c.Args = &CommandArgsShowPicture{}
 				d.DecodeAny(c.Args)
@@ -553,8 +562,9 @@ const (
 	CommandNameShowAds           CommandName = "show_ads"
 	CommandNameOpenLink          CommandName = "open_link"
 
-	CommandNameAddItem    CommandName = "add_item"
-	CommandNameRemoveItem CommandName = "remove_item"
+	CommandNameAddItem     CommandName = "add_item"
+	CommandNameRemoveItem  CommandName = "remove_item"
+	CommandNameReplaceItem CommandName = "replace_item"
 
 	CommandNameShowPicture        CommandName = "show_picture"
 	CommandNameErasePicture       CommandName = "erase_picture"
@@ -1053,6 +1063,11 @@ type CommandArgsAddItem struct {
 
 type CommandArgsRemoveItem struct {
 	ID int `json:"id" msgpack:"id"`
+}
+
+type CommandArgsReplaceItem struct {
+	ID         int   `json:"id" msgpack:"id"`
+	ReplaceIDs []int `json:"replaceIds" msgpack:"replaceIds"`
 }
 
 type ValueType string
