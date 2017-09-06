@@ -247,6 +247,9 @@ func (m *Map) IsEventExecuting() bool {
 		if i.route {
 			continue
 		}
+		if i.parallel {
+			continue
+		}
 		if i.IsExecuting() {
 			return true
 		}
@@ -435,16 +438,29 @@ func (m *Map) tryRunAutoEvent() {
 	if m.IsEventExecuting() {
 		return
 	}
+events:
 	for _, e := range m.events {
 		page := m.currentPage(e)
 		if page == nil {
 			continue
 		}
-		if page.Trigger != data.TriggerAuto {
-			continue
+		var i *Interpreter
+		switch page.Trigger {
+		case data.TriggerAuto:
+			i = NewInterpreter(m.game, m.mapID, m.roomID, e.EventID(), page.Commands)
+		case data.TriggerParallel:
+			for _, i := range m.interpreters {
+				if i.mapID == m.mapID && i.roomID == m.roomID && i.eventID == e.EventID() {
+					continue events
+				}
+			}
+			i = NewInterpreter(m.game, m.mapID, m.roomID, e.EventID(), page.Commands)
+			i.parallel = true
 		}
-		m.addInterpreter(NewInterpreter(m.game, m.mapID, m.roomID, e.EventID(), page.Commands))
-		break
+		if i != nil {
+			m.addInterpreter(i)
+			return
+		}
 	}
 }
 

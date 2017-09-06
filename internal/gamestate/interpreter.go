@@ -44,6 +44,7 @@ type Interpreter struct {
 	sub                *Interpreter
 	route              bool // True when used for event routing property.
 	routeSkip          bool
+	parallel           bool
 	waitingRequestID   int // Note: When this is not 0, the game state can't be saved.
 
 	// Fields that are not dumped
@@ -101,6 +102,9 @@ func (i *Interpreter) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EncodeString("routeSkip")
 	e.EncodeBool(i.routeSkip)
 
+	e.EncodeString("parallel")
+	e.EncodeBool(i.parallel)
+
 	e.EncodeString("waitingRequestId")
 	e.EncodeInt(i.waitingRequestID)
 
@@ -112,7 +116,7 @@ func (i *Interpreter) DecodeMsgpack(dec *msgpack.Decoder) error {
 	d := easymsgpack.NewDecoder(dec)
 	n := d.DecodeMapLen()
 	for j := 0; j < n; j++ {
-		switch d.DecodeString() {
+		switch k := d.DecodeString(); k {
 		case "id":
 			i.id = d.DecodeInt()
 		case "mapId":
@@ -146,8 +150,15 @@ func (i *Interpreter) DecodeMsgpack(dec *msgpack.Decoder) error {
 			i.route = d.DecodeBool()
 		case "routeSkip":
 			i.routeSkip = d.DecodeBool()
+		case "parallel":
+			i.parallel = d.DecodeBool()
 		case "waitingRequestId":
 			i.waitingRequestID = d.DecodeInt()
+		default:
+			if err := d.Error(); err != nil {
+				return err
+			}
+			return fmt.Errorf("gamestate: Interpreter.DecodeMsgpack failed: invalid key: %s", k)
 		}
 	}
 	if err := d.Error(); err != nil {

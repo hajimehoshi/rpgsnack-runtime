@@ -68,7 +68,7 @@ func (c *CommandIterator) DecodeMsgpack(dec *msgpack.Decoder) error {
 	d := easymsgpack.NewDecoder(dec)
 	n := d.DecodeMapLen()
 	for i := 0; i < n; i++ {
-		switch d.DecodeString() {
+		switch k := d.DecodeString(); k {
 		case "indices":
 			if !d.SkipCodeIfNil() {
 				n := d.DecodeArrayLen()
@@ -88,6 +88,11 @@ func (c *CommandIterator) DecodeMsgpack(dec *msgpack.Decoder) error {
 					}
 				}
 			}
+		default:
+			if err := d.Error(); err != nil {
+				return fmt.Errorf("commanditerator: CommandIterator.DecodeMsgpack failed: %v", err)
+			}
+			return fmt.Errorf("commanditerator: CommandIterator.DecodeMsgpack failed: invalid key: %s", k)
 		}
 	}
 	c.labels = map[string][]int{}

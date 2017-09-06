@@ -69,10 +69,11 @@ const (
 type Trigger string
 
 const (
-	TriggerPlayer Trigger = "player"
-	TriggerAuto   Trigger = "auto"
-	TriggerDirect Trigger = "direct"
-	TriggerNever  Trigger = "never"
+	TriggerPlayer   Trigger = "player"
+	TriggerAuto     Trigger = "auto"
+	TriggerParallel Trigger = "parallel"
+	TriggerDirect   Trigger = "direct"
+	TriggerNever    Trigger = "never"
 )
 
 type Speed int
