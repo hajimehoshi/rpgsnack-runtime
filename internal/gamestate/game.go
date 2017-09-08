@@ -70,6 +70,7 @@ func generateDefaultRand() Rand {
 
 func NewGame() *Game {
 	g := &Game{
+		currentMap:           NewMap(),
 		hints:                &Hints{},
 		items:                &items.Items{},
 		variables:            &variables.Variables{},
@@ -81,7 +82,6 @@ func NewGame() *Game {
 		playerControlEnabled: true,
 		inventoryVisible:     true,
 	}
-	g.currentMap = NewMap(g)
 	return g
 }
 
@@ -175,7 +175,6 @@ func (g *Game) DecodeMsgpack(dec *msgpack.Decoder) error {
 			if !d.SkipCodeIfNil() {
 				g.currentMap = &Map{}
 				d.DecodeInterface(g.currentMap)
-				g.currentMap.setGame(g)
 			}
 		case "lastInterpreterId":
 			g.lastInterpreterID = d.DecodeInt()
@@ -507,7 +506,7 @@ func (g *Game) SetVariableValue(id int, value int) {
 }
 
 func (g *Game) StartItemCommands() {
-	g.currentMap.StartItemCommands(g.Items().EventItem())
+	g.currentMap.StartItemCommands(g, g.Items().EventItem())
 }
 
 func (g *Game) ExecutingItemCommands() bool {
@@ -544,5 +543,5 @@ func (g *Game) FadeIn(time int) {
 }
 
 func (g *Game) RefreshEvents() error {
-	return g.currentMap.refreshEvents()
+	return g.currentMap.refreshEvents(g)
 }

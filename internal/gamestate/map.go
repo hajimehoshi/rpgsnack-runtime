@@ -52,14 +52,12 @@ type Map struct {
 	itemInterpreter             *Interpreter
 
 	// Fields that are not dumped
-	game                      *Game
 	gameData                  *data.Game
 	isPlayerMovingByUserInput bool
 }
 
-func NewMap(game *Game) *Map {
+func NewMap() *Map {
 	m := &Map{
-		game:         game,
 		mapID:        1,
 		interpreters: map[int]*Interpreter{},
 	}
@@ -186,11 +184,6 @@ func (m *Map) DecodeMsgpack(dec *msgpack.Decoder) error {
 	return nil
 }
 
-// setGame sets the current game. This is called only when unmarshalzing.
-func (m *Map) setGame(game *Game) {
-	m.game = game
-}
-
 func (m *Map) addInterpreter(interpreter *Interpreter) {
 	m.interpreters[interpreter.id] = interpreter
 }
@@ -215,13 +208,13 @@ func (m *Map) TileSet(layer int) *data.TileSet {
 	return nil
 }
 
-func (m *Map) setRoomID(id int, interpreter *Interpreter) error {
+func (m *Map) setRoomID(gameState *Game, id int, interpreter *Interpreter) error {
 	m.roomID = id
 	m.events = nil
 	m.eventPageIndices = map[int]int{}
 
 	if m.CurrentRoom().AutoBGM {
-		m.game.SetBGM(m.CurrentRoom().BGM)
+		gameState.SetBGM(m.CurrentRoom().BGM)
 	}
 
 	for _, e := range m.CurrentRoom().Events {
@@ -254,9 +247,9 @@ func (m *Map) IsEventExecuting() bool {
 	return false
 }
 
-func (m *Map) meetsPageCondition(page *data.Page, eventID int) (bool, error) {
+func (m *Map) meetsPageCondition(gameState *Game, page *data.Page, eventID int) (bool, error) {
 	for _, cond := range page.Conditions {
-		m, err := m.game.MeetsCondition(cond, eventID)
+		m, err := gameState.MeetsCondition(cond, eventID)
 		if err != nil {
 			return false, err
 		}
@@ -267,7 +260,7 @@ func (m *Map) meetsPageCondition(page *data.Page, eventID int) (bool, error) {
 	return true, nil
 }
 
-func (m *Map) calcPageIndex(ch *character.Character) (int, error) {
+func (m *Map) calcPageIndex(gameState *Game, ch *character.Character) (int, error) {
 	if ch.Erased() {
 		return -1, nil
 	}
@@ -285,7 +278,7 @@ func (m *Map) calcPageIndex(ch *character.Character) (int, error) {
 	}
 	for i := len(event.Pages) - 1; i >= 0; i-- {
 		page := event.Pages[i]
-		m, err := m.meetsPageCondition(page, event.ID)
+		m, err := m.meetsPageCondition(gameState, page, event.ID)
 		if err != nil {
 			return 0, err
 		}
@@ -338,7 +331,7 @@ func (m *Map) Update(sceneManager *scene.Manager, gameState *Game) error {
 			x, y, roomID = pos.X, pos.Y, pos.RoomID
 		}
 		m.player = character.NewPlayer(x, y)
-		m.setRoomID(roomID, nil)
+		m.setRoomID(gameState, roomID, nil)
 	}
 	if m.itemInterpreter == nil {
 		is := []*Interpreter{}
@@ -377,19 +370,19 @@ func (m *Map) Update(sceneManager *scene.Manager, gameState *Game) error {
 	if m.IsPlayerMovingByUserInput() {
 		return nil
 	}
-	if err := m.refreshEvents(); err != nil {
+	if err := m.refreshEvents(gameState); err != nil {
 		return err
 	}
 	for _, e := range m.events {
 		e.Update()
 	}
-	m.tryRunAutoEvent()
+	m.tryRunAutoEvent(gameState)
 	return nil
 }
 
-func (m *Map) refreshEvents() error {
+func (m *Map) refreshEvents(gameState *Game) error {
 	for _, e := range m.events {
-		index, err := m.calcPageIndex(e)
+		index, err := m.calcPageIndex(gameState, e)
 		if err != nil {
 			return err
 		}
@@ -420,7 +413,7 @@ func (m *Map) refreshEvents() error {
 				},
 			},
 		}
-		interpreter := NewInterpreter(m.game, m.mapID, m.roomID, e.EventID(), commands)
+		interpreter := NewInterpreter(gameState, m.mapID, m.roomID, e.EventID(), commands)
 		interpreter.route = true
 		m.addInterpreter(interpreter)
 	}
@@ -438,7 +431,7 @@ func (m *Map) eventsAt(x, y int) []*character.Character {
 	return es
 }
 
-func (m *Map) tryRunAutoEvent() {
+func (m *Map) tryRunAutoEvent(gameState *Game) {
 	if m.IsEventExecuting() {
 		return
 	}
@@ -451,14 +444,14 @@ events:
 		var i *Interpreter
 		switch page.Trigger {
 		case data.TriggerAuto:
-			i = NewInterpreter(m.game, m.mapID, m.roomID, e.EventID(), page.Commands)
+			i = NewInterpreter(gameState, m.mapID, m.roomID, e.EventID(), page.Commands)
 		case data.TriggerParallel:
 			for _, i := range m.interpreters {
 				if i.mapID == m.mapID && i.roomID == m.roomID && i.eventID == e.EventID() {
 					continue events
 				}
 			}
-			i = NewInterpreter(m.game, m.mapID, m.roomID, e.EventID(), page.Commands)
+			i = NewInterpreter(gameState, m.mapID, m.roomID, e.EventID(), page.Commands)
 			i.parallel = true
 		}
 		if i != nil {
@@ -468,9 +461,9 @@ events:
 	}
 }
 
-func (m *Map) transferPlayerImmediately(roomID, x, y int, interpreter *Interpreter) {
+func (m *Map) transferPlayerImmediately(gameState *Game, roomID, x, y int, interpreter *Interpreter) {
 	m.player.TransferImmediately(x, y)
-	m.setRoomID(roomID, interpreter)
+	m.setRoomID(gameState, roomID, interpreter)
 }
 
 func (m *Map) currentMap() *data.Map {
@@ -575,7 +568,7 @@ func (m *Map) passable(through bool, x, y int, ignoreCharacters bool) bool {
 	return true
 }
 
-func (m *Map) TryRunDirectEvent(x, y int) bool {
+func (m *Map) TryRunDirectEvent(gameState *Game, x, y int) bool {
 	if m.IsEventExecuting() {
 		return false
 	}
@@ -591,7 +584,7 @@ func (m *Map) TryRunDirectEvent(x, y int) bool {
 		if page.Trigger != data.TriggerDirect {
 			continue
 		}
-		i := NewInterpreter(m.game, m.mapID, m.roomID, e.EventID(), page.Commands)
+		i := NewInterpreter(gameState, m.mapID, m.roomID, e.EventID(), page.Commands)
 		m.addInterpreter(i)
 		return true
 	}
@@ -615,8 +608,8 @@ func (m *Map) executableEventAt(x, y int) *character.Character {
 	return nil
 }
 
-func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, x, y int) bool {
-	if !m.game.IsPlayerControlEnabled() {
+func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, gameState *Game, x, y int) bool {
+	if !gameState.IsPlayerControlEnabled() {
 		return false
 	}
 	if m.IsEventExecuting() {
@@ -635,8 +628,8 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, x, y int) bo
 		return false
 	}
 	// The player can move. Let's save the state here just before starting moving.
-	if m.game.IsAutoSaveEnabled() {
-		m.game.RequestSave(sceneManager)
+	if gameState.IsAutoSaveEnabled() {
+		gameState.RequestSave(sceneManager)
 	}
 
 	// The player's speed is never changed by another events during the player walks
@@ -835,7 +828,7 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, x, y int) bo
 			}
 		}
 	}
-	i := NewInterpreter(m.game, m.mapID, m.roomID, character.PlayerEventID, commands)
+	i := NewInterpreter(gameState, m.mapID, m.roomID, character.PlayerEventID, commands)
 	m.addInterpreter(i)
 	m.playerInterpreterID = i.id
 	if event != nil {
@@ -859,7 +852,7 @@ func (m *Map) DrawCharacters(screen *ebiten.Image) {
 	}
 }
 
-func (m *Map) StartItemCommands(itemID int) {
+func (m *Map) StartItemCommands(gameState *Game, itemID int) {
 	if m.itemInterpreter != nil {
 		return
 	}
@@ -876,5 +869,5 @@ func (m *Map) StartItemCommands(itemID int) {
 	if item.Commands == nil {
 		return
 	}
-	m.itemInterpreter = NewInterpreter(m.game, m.mapID, m.roomID, 0, item.Commands)
+	m.itemInterpreter = NewInterpreter(gameState, m.mapID, m.roomID, 0, item.Commands)
 }

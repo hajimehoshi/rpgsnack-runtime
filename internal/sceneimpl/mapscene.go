@@ -160,11 +160,11 @@ func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) {
 	}
 	m.moveDstX = tx
 	m.moveDstY = ty
-	if m.gameState.Map().TryRunDirectEvent(tx, ty) {
+	if m.gameState.Map().TryRunDirectEvent(m.gameState, tx, ty) {
 		m.triggeringFailed = false
 		return
 	}
-	if !m.gameState.Map().TryMovePlayerByUserInput(sceneManager, tx, ty) {
+	if !m.gameState.Map().TryMovePlayerByUserInput(sceneManager, m.gameState, tx, ty) {
 		m.triggeringFailed = true
 		return
 	}

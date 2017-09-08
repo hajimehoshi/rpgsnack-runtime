@@ -427,7 +427,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			if args.Dir != data.DirNone {
 				gameState.SetPlayerDir(args.Dir)
 			}
-			gameState.Map().transferPlayerImmediately(roomID, x, y, i)
+			gameState.Map().transferPlayerImmediately(gameState, roomID, x, y, i)
 			i.waitingCommand = false
 			i.commandIterator.Advance()
 			return true, nil
@@ -455,7 +455,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			if args.Dir != data.DirNone {
 				gameState.SetPlayerDir(args.Dir)
 			}
-			gameState.Map().transferPlayerImmediately(roomID, x, y, i)
+			gameState.Map().transferPlayerImmediately(gameState, roomID, x, y, i)
 			gameState.FadeIn(30)
 			return false, nil
 		}
