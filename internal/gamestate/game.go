@@ -16,6 +16,7 @@ package gamestate
 
 import (
 	"fmt"
+	"image/color"
 	"math/rand"
 	"regexp"
 	"strconv"
@@ -231,7 +232,7 @@ func (g *Game) Update(sceneManager *scene.Manager) error {
 	}
 	g.windows.Update(playerY, sceneManager)
 	g.pictures.Update()
-	if err := g.Map().Update(sceneManager); err != nil {
+	if err := g.currentMap.Update(sceneManager, g); err != nil {
 		return err
 	}
 	return nil
@@ -523,5 +524,25 @@ func (g *Game) ExecutableEventAtPlayer() *character.Character {
 }
 
 func (g *Game) CurrentEvents() []*data.Event {
-	return g.Map().CurrentRoom().Events
+	return g.currentMap.CurrentRoom().Events
+}
+
+func (g *Game) SetFadeColor(clr color.Color) {
+	g.screen.setFadeColor(color.White)
+}
+
+func (g *Game) IsScreenFadedOut() bool {
+	return g.screen.isFadedOut()
+}
+
+func (g *Game) IsScreenFading() bool {
+	return g.screen.isFading()
+}
+
+func (g *Game) FadeIn(time int) {
+	g.screen.fadeIn(time)
+}
+
+func (g *Game) RefreshEvents() error {
+	return g.currentMap.refreshEvents()
 }

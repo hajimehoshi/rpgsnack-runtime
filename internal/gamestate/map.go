@@ -189,9 +189,6 @@ func (m *Map) DecodeMsgpack(dec *msgpack.Decoder) error {
 // setGame sets the current game. This is called only when unmarshalzing.
 func (m *Map) setGame(game *Game) {
 	m.game = game
-	for _, i := range m.interpreters {
-		i.setGame(game)
-	}
 }
 
 func (m *Map) addInterpreter(interpreter *Interpreter) {
@@ -330,7 +327,7 @@ func (m *Map) ExecutingItemCommands() bool {
 	return m.itemInterpreter != nil && m.itemInterpreter.IsExecuting()
 }
 
-func (m *Map) Update(sceneManager *scene.Manager) error {
+func (m *Map) Update(sceneManager *scene.Manager, gameState *Game) error {
 	// TODO: This is a temporary hack for TileSet and currentMap.
 	// Remove this if possible.
 	m.gameData = sceneManager.Game()
@@ -358,7 +355,7 @@ func (m *Map) Update(sceneManager *scene.Manager) error {
 			if i.route && m.executingEventIDByUserInput == i.eventID {
 				continue
 			}
-			if err := i.Update(sceneManager); err != nil {
+			if err := i.Update(sceneManager, gameState); err != nil {
 				return err
 			}
 			if !i.IsExecuting() {
@@ -369,7 +366,7 @@ func (m *Map) Update(sceneManager *scene.Manager) error {
 			}
 		}
 	} else {
-		if err := m.itemInterpreter.Update(sceneManager); err != nil {
+		if err := m.itemInterpreter.Update(sceneManager, gameState); err != nil {
 			return err
 		}
 		if !m.itemInterpreter.IsExecuting() {

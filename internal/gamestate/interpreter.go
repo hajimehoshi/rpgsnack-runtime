@@ -24,7 +24,6 @@ import (
 	"github.com/vmihailenco/msgpack"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/commanditerator"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
@@ -46,15 +45,11 @@ type Interpreter struct {
 	routeSkip          bool
 	parallel           bool
 	waitingRequestID   int // Note: When this is not 0, the game state can't be saved.
-
-	// Fields that are not dumped
-	gameState *Game
 }
 
 func NewInterpreter(gameState *Game, mapID, roomID, eventID int, commands []*data.Command) *Interpreter {
 	return &Interpreter{
 		id:              gameState.generateInterpreterID(),
-		gameState:       gameState,
 		mapID:           mapID,
 		roomID:          roomID,
 		eventID:         eventID,
@@ -167,54 +162,26 @@ func (i *Interpreter) DecodeMsgpack(dec *msgpack.Decoder) error {
 	return nil
 }
 
-func (i *Interpreter) setGame(game *Game) {
-	i.gameState = game
-	if i.sub != nil {
-		i.sub.setGame(game)
-	}
-	if i.moveCharacterState != nil {
-		i.moveCharacterState.setGame(game)
-	}
-}
-
 func (i *Interpreter) waitingRequestResponse() bool {
 	return i.waitingRequestID != 0
-}
-
-func (i *Interpreter) event() *character.Character {
-	if i.eventID == character.PlayerEventID {
-		return nil
-	}
-	if i.gameState.Map().mapID != i.mapID {
-		return nil
-	}
-	if i.gameState.Map().roomID != i.roomID {
-		return nil
-	}
-	for _, e := range i.gameState.Map().events {
-		if i.eventID == e.EventID() {
-			return e
-		}
-	}
-	return nil
 }
 
 func (i *Interpreter) IsExecuting() bool {
 	return i.commandIterator != nil
 }
 
-func (i *Interpreter) createChild(eventID int, commands []*data.Command) *Interpreter {
-	child := NewInterpreter(i.gameState, i.mapID, i.roomID, eventID, commands)
+func (i *Interpreter) createChild(gameState *Game, eventID int, commands []*data.Command) *Interpreter {
+	child := NewInterpreter(gameState, i.mapID, i.roomID, eventID, commands)
 	child.route = i.route
 	return child
 }
 
-func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
-	if !i.gameState.CanWindowProceed(i.id) {
+func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game) (bool, error) {
+	if !gameState.CanWindowProceed(i.id) {
 		return false, nil
 	}
 	if i.sub != nil {
-		if err := i.sub.Update(sceneManager); err != nil {
+		if err := i.sub.Update(sceneManager, gameState); err != nil {
 			return false, err
 		}
 		if !i.sub.IsExecuting() {
@@ -242,7 +209,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 				if err := json.Unmarshal(r.Data, &prices); err != nil {
 					panic(err)
 				}
-				i.gameState.SetPrices(prices)
+				gameState.SetPrices(prices)
 				i.commandIterator.Choose(0)
 			} else {
 				i.commandIterator.Choose(1)
@@ -260,7 +227,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		conditions := c.Args.(*data.CommandArgsIf).Conditions
 		matches := true
 		for _, c := range conditions {
-			m, err := i.gameState.MeetsCondition(c, i.eventID)
+			m, err := gameState.MeetsCondition(c, i.eventID)
 			if err != nil {
 				return false, err
 			}
@@ -291,7 +258,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		}
 		// TODO: Should i.mapID and i.roomID be considered here?
 		var event *data.Event
-		for _, e := range i.gameState.CurrentEvents() {
+		for _, e := range gameState.CurrentEvents() {
 			if e.ID == eventID {
 				event = e
 				break
@@ -304,7 +271,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		}
 		page := event.Pages[args.PageIndex]
 		commands := page.Commands
-		i.sub = i.createChild(eventID, commands)
+		i.sub = i.createChild(gameState, eventID, commands)
 
 	case data.CommandNameCallCommonEvent:
 		args := c.Args.(*data.CommandArgsCallCommonEvent)
@@ -319,14 +286,14 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		if c == nil {
 			return false, fmt.Errorf("invalid common event ID: %d", eventID)
 		}
-		i.sub = i.createChild(i.eventID, c.Commands)
+		i.sub = i.createChild(gameState, i.eventID, c.Commands)
 
 	case data.CommandNameReturn:
 		i.commandIterator.Terminate()
 
 	case data.CommandNameEraseEvent:
 		i.commandIterator.Terminate()
-		i.gameState.EraseCharacter(i.mapID, i.roomID, i.eventID)
+		gameState.EraseCharacter(i.mapID, i.roomID, i.eventID)
 
 	case data.CommandNameWait:
 		if i.waitingCount == 0 {
@@ -352,45 +319,45 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 			if id == 0 {
 				id = i.eventID
 			}
-			if i.gameState.ShowBalloon(i.id, i.mapID, i.roomID, id, content, args.BalloonType) {
+			if gameState.ShowBalloon(i.id, i.mapID, i.roomID, id, content, args.BalloonType) {
 				i.waitingCommand = true
 				return false, nil
 			}
 		}
-		if i.gameState.IsWindowAnimating(i.id) {
+		if gameState.IsWindowAnimating(i.id) {
 			return false, nil
 		}
 		// Advance command index first and check the next command.
 		i.commandIterator.Advance()
 		if !i.commandIterator.IsTerminated() {
 			if i.commandIterator.Command().Name != data.CommandNameShowChoices {
-				i.gameState.CloseAllWindows()
+				gameState.CloseAllWindows()
 			}
 		} else {
-			i.gameState.CloseAllWindows()
+			gameState.CloseAllWindows()
 		}
 		i.waitingCommand = false
 	case data.CommandNameShowMessage:
 		args := c.Args.(*data.CommandArgsShowMessage)
 		if !i.waitingCommand {
 			content := sceneManager.Game().Texts.Get(sceneManager.Language(), args.ContentID)
-			i.gameState.ShowMessage(i.id, content, args.Background, args.PositionType, args.TextAlign)
+			gameState.ShowMessage(i.id, content, args.Background, args.PositionType, args.TextAlign)
 			i.waitingCommand = true
 			return false, nil
 		}
-		if i.gameState.IsWindowAnimating(i.id) {
+		if gameState.IsWindowAnimating(i.id) {
 			return false, nil
 		}
 		// Advance command index first and check the next command.
 		i.commandIterator.Advance()
-		i.gameState.CloseAllWindows()
+		gameState.CloseAllWindows()
 		i.waitingCommand = false
 	case data.CommandNameShowHint:
 		if !i.waitingCommand {
 			args := c.Args.(*data.CommandArgsShowHint)
-			hintId := i.gameState.hints.ActiveHintId()
+			hintId := gameState.hints.ActiveHintId()
 			// next time it shows next available hint
-			i.gameState.hints.ReadHint(hintId)
+			gameState.hints.ReadHint(hintId)
 			var hintText data.UUID
 			for _, h := range sceneManager.Game().Hints {
 				if h.ID == hintId {
@@ -402,47 +369,47 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 			if hintText.String() != "" {
 				content = sceneManager.Game().Texts.Get(sceneManager.Language(), hintText)
 			}
-			i.gameState.ShowMessage(i.id, content, args.Background, args.PositionType, args.TextAlign)
+			gameState.ShowMessage(i.id, content, args.Background, args.PositionType, args.TextAlign)
 			i.waitingCommand = true
 			return false, nil
 		}
-		if i.gameState.IsWindowAnimating(i.id) {
+		if gameState.IsWindowAnimating(i.id) {
 			return false, nil
 		}
 		i.commandIterator.Advance()
-		i.gameState.windows.CloseAll()
+		gameState.windows.CloseAll()
 		i.waitingCommand = false
 	case data.CommandNameShowChoices:
 		if !i.waitingCommand {
 			choices := []string{}
 			for _, id := range c.Args.(*data.CommandArgsShowChoices).ChoiceIDs {
 				choice := sceneManager.Game().Texts.Get(sceneManager.Language(), id)
-				choice = i.gameState.parseMessageSyntax(choice)
+				choice = gameState.parseMessageSyntax(choice)
 				choices = append(choices, choice)
 			}
-			i.gameState.windows.ShowChoices(sceneManager, choices, i.id)
+			gameState.windows.ShowChoices(sceneManager, choices, i.id)
 			i.waitingCommand = true
 			return false, nil
 		}
-		if !i.gameState.windows.HasChosenIndex() {
+		if !gameState.windows.HasChosenIndex() {
 			return false, nil
 		}
-		i.commandIterator.Choose(i.gameState.windows.ChosenIndex())
+		i.commandIterator.Choose(gameState.windows.ChosenIndex())
 		i.waitingCommand = false
 
 	case data.CommandNameSetSwitch:
 		args := c.Args.(*data.CommandArgsSetSwitch)
-		i.gameState.SetSwitchValue(args.ID, args.Value)
+		gameState.SetSwitchValue(args.ID, args.Value)
 		i.commandIterator.Advance()
 
 	case data.CommandNameSetSelfSwitch:
 		args := c.Args.(*data.CommandArgsSetSelfSwitch)
-		i.gameState.SetSelfSwitchValue(i.eventID, args.ID, args.Value)
+		gameState.SetSelfSwitchValue(i.eventID, args.ID, args.Value)
 		i.commandIterator.Advance()
 
 	case data.CommandNameSetVariable:
 		args := c.Args.(*data.CommandArgsSetVariable)
-		i.setVariable(sceneManager, args.ID, args.Op, args.ValueType, args.Value)
+		i.setVariable(sceneManager, gameState, args.ID, args.Op, args.ValueType, args.Value)
 		i.commandIterator.Advance()
 
 	case data.CommandNameTransfer:
@@ -452,15 +419,15 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 			x := args.X
 			y := args.Y
 			if args.ValueType == data.ValueTypeVariable {
-				roomID = i.gameState.VariableValue(roomID)
-				x = i.gameState.VariableValue(x)
-				y = i.gameState.VariableValue(y)
+				roomID = gameState.VariableValue(roomID)
+				x = gameState.VariableValue(x)
+				y = gameState.VariableValue(y)
 			}
 
 			if args.Dir != data.DirNone {
-				i.gameState.SetPlayerDir(args.Dir)
+				gameState.SetPlayerDir(args.Dir)
 			}
-			i.gameState.Map().transferPlayerImmediately(roomID, x, y, i)
+			gameState.Map().transferPlayerImmediately(roomID, x, y, i)
 			i.waitingCommand = false
 			i.commandIterator.Advance()
 			return true, nil
@@ -468,38 +435,38 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 
 		if !i.waitingCommand {
 			if args.Transition == data.TransferTransitionTypeWhite {
-				i.gameState.screen.setFadeColor(color.White)
+				gameState.SetFadeColor(color.White)
 			} else {
-				i.gameState.screen.setFadeColor(color.Black)
+				gameState.SetFadeColor(color.Black)
 			}
-			i.gameState.screen.fadeOut(30)
+			gameState.screen.fadeOut(30)
 			i.waitingCommand = true
 			return false, nil
 		}
-		if i.gameState.screen.isFadedOut() {
+		if gameState.IsScreenFadedOut() {
 			roomID := args.RoomID
 			x := args.X
 			y := args.Y
 			if args.ValueType == data.ValueTypeVariable {
-				roomID = i.gameState.VariableValue(roomID)
-				x = i.gameState.VariableValue(x)
-				y = i.gameState.VariableValue(y)
+				roomID = gameState.VariableValue(roomID)
+				x = gameState.VariableValue(x)
+				y = gameState.VariableValue(y)
 			}
 			if args.Dir != data.DirNone {
-				i.gameState.SetPlayerDir(args.Dir)
+				gameState.SetPlayerDir(args.Dir)
 			}
-			i.gameState.Map().transferPlayerImmediately(roomID, x, y, i)
-			i.gameState.screen.fadeIn(30)
+			gameState.Map().transferPlayerImmediately(roomID, x, y, i)
+			gameState.FadeIn(30)
 			return false, nil
 		}
-		if i.gameState.screen.isFading() {
+		if gameState.IsScreenFading() {
 			return false, nil
 		}
 		i.waitingCommand = false
 		i.commandIterator.Advance()
 	case data.CommandNameSetRoute:
 		// Refresh events so that new event graphics can be seen before setting a route (#59)
-		if err := i.gameState.Map().refreshEvents(); err != nil {
+		if err := gameState.RefreshEvents(); err != nil {
 			return false, err
 		}
 		args := c.Args.(*data.CommandArgsSetRoute)
@@ -507,12 +474,12 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		if id == 0 {
 			id = i.eventID
 		}
-		sub := i.createChild(id, args.Commands)
+		sub := i.createChild(gameState, id, args.Commands)
 		sub.repeat = args.Repeat
 		sub.routeSkip = args.Skip
 		if !args.Wait {
 			// TODO: What if set_route w/o waiting already exists for this event?
-			i.gameState.Map().addInterpreter(sub)
+			gameState.Map().addInterpreter(sub)
 			i.commandIterator.Advance()
 			return true, nil
 		}
@@ -524,14 +491,14 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 			g := float64(args.Green) / 255
 			b := float64(args.Blue) / 255
 			gray := float64(args.Gray) / 255
-			i.gameState.screen.startTint(r, g, b, gray, args.Time*6)
+			gameState.screen.startTint(r, g, b, gray, args.Time*6)
 			if !args.Wait {
 				i.commandIterator.Advance()
 				return true, nil
 			}
 			i.waitingCommand = args.Wait
 		}
-		if i.gameState.screen.isChangingTint() {
+		if gameState.screen.isChangingTint() {
 			return false, nil
 		}
 		i.waitingCommand = false
@@ -559,18 +526,18 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		}
 		i.commandIterator.Advance()
 	case data.CommandNameSave:
-		i.gameState.RequestSave(sceneManager)
+		gameState.RequestSave(sceneManager)
 		i.commandIterator.Advance()
 	case data.CommandNameAutoSave:
 		args := c.Args.(*data.CommandArgsAutoSave)
-		i.gameState.setAutoSaveEnabled(args.Enabled)
+		gameState.setAutoSaveEnabled(args.Enabled)
 		i.commandIterator.Advance()
 	case data.CommandNameGameClear:
-		i.gameState.cleared = true
+		gameState.cleared = true
 		i.commandIterator.Advance()
 	case data.CommandNamePlayerControl:
 		args := c.Args.(*data.CommandArgsPlayerControl)
-		i.gameState.setPlayerControlEnabled(args.Enabled)
+		gameState.setPlayerControlEnabled(args.Enabled)
 		i.commandIterator.Advance()
 	case data.CommandNameGotoTitle:
 		return false, GoToTitle
@@ -589,11 +556,11 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		args := c.Args.(*data.CommandArgsControlHint)
 		switch args.Type {
 		case data.ControlHintPause:
-			i.gameState.hints.Pause(args.ID)
+			gameState.hints.Pause(args.ID)
 		case data.ControlHintStart:
-			i.gameState.hints.Activate(args.ID)
+			gameState.hints.Activate(args.ID)
 		case data.ControlHintComplete:
-			i.gameState.hints.Complete(args.ID)
+			gameState.hints.Complete(args.ID)
 		}
 		i.commandIterator.Advance()
 	case data.CommandNamePurchase:
@@ -627,8 +594,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		sceneManager.Requester().RequestOpenLink(i.waitingRequestID, args.Type, args.Data)
 		return false, nil
 	case data.CommandNameMoveCharacter:
-		ch := i.gameState.character(i.mapID, i.roomID, i.eventID)
-		if ch == nil {
+		if ch := gameState.character(i.mapID, i.roomID, i.eventID); ch == nil {
 			i.commandIterator.Advance()
 			return true, nil
 		}
@@ -639,7 +605,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 				skip = false
 			}
 			m := newMoveCharacterState(
-				i.gameState,
+				gameState,
 				i.mapID,
 				i.roomID,
 				i.eventID,
@@ -662,8 +628,9 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		}
 		i.moveCharacterState = nil
 		i.commandIterator.Advance()
+
 	case data.CommandNameTurnCharacter:
-		ch := i.gameState.character(i.mapID, i.roomID, i.eventID)
+		ch := gameState.character(i.mapID, i.roomID, i.eventID)
 		if ch == nil {
 			i.commandIterator.Advance()
 			return true, nil
@@ -680,8 +647,9 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		}
 		i.waitingCommand = false
 		i.commandIterator.Advance()
+
 	case data.CommandNameRotateCharacter:
-		ch := i.gameState.character(i.mapID, i.roomID, i.eventID)
+		ch := gameState.character(i.mapID, i.roomID, i.eventID)
 		if ch == nil {
 			i.commandIterator.Advance()
 			return true, nil
@@ -738,7 +706,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		i.commandIterator.Advance()
 	case data.CommandNameSetCharacterProperty:
 		args := c.Args.(*data.CommandArgsSetCharacterProperty)
-		ch := i.gameState.character(i.mapID, i.roomID, i.eventID)
+		ch := gameState.character(i.mapID, i.roomID, i.eventID)
 		if ch == nil {
 			i.commandIterator.Advance()
 			return true, nil
@@ -762,7 +730,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		i.commandIterator.Advance()
 	case data.CommandNameSetCharacterImage:
 		args := c.Args.(*data.CommandArgsSetCharacterImage)
-		ch := i.gameState.character(i.mapID, i.roomID, i.eventID)
+		ch := gameState.character(i.mapID, i.roomID, i.eventID)
 		if ch == nil {
 			i.commandIterator.Advance()
 			return true, nil
@@ -775,7 +743,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		i.commandIterator.Advance()
 
 	case data.CommandNameSetCharacterOpacity:
-		ch := i.gameState.character(i.mapID, i.roomID, i.eventID)
+		ch := gameState.character(i.mapID, i.roomID, i.eventID)
 		if ch == nil {
 			i.commandIterator.Advance()
 			return true, nil
@@ -797,37 +765,37 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 
 	case data.CommandNameAddItem:
 		args := c.Args.(*data.CommandArgsAddItem)
-		i.gameState.items.Add(args.ID)
+		gameState.items.Add(args.ID)
 		i.commandIterator.Advance()
 
 	case data.CommandNameRemoveItem:
 		args := c.Args.(*data.CommandArgsRemoveItem)
-		i.gameState.items.Remove(args.ID)
+		gameState.items.Remove(args.ID)
 		i.commandIterator.Advance()
 
 	case data.CommandNameShowInventory:
-		i.gameState.SetInventoryVisible(true)
+		gameState.SetInventoryVisible(true)
 		i.commandIterator.Advance()
 
 	case data.CommandNameHideInventory:
-		i.gameState.SetInventoryVisible(false)
+		gameState.SetInventoryVisible(false)
 		i.commandIterator.Advance()
 
 	case data.CommandNameShowItem:
 		args := c.Args.(*data.CommandArgsShowItem)
-		i.gameState.Items().SetEventItem(args.ID)
+		gameState.Items().SetEventItem(args.ID)
 		i.commandIterator.Advance()
 
 	case data.CommandNameHideItem:
-		i.gameState.Items().SetEventItem(0)
+		gameState.Items().SetEventItem(0)
 		i.commandIterator.Advance()
 
 	case data.CommandNameReplaceItem:
 		args := c.Args.(*data.CommandArgsReplaceItem)
 		for _, id := range args.ReplaceIDs {
-			i.gameState.items.InsertBefore(args.ID, id)
+			gameState.items.InsertBefore(args.ID, id)
 		}
-		i.gameState.items.Remove(args.ID)
+		gameState.items.Remove(args.ID)
 		i.commandIterator.Advance()
 
 	case data.CommandNameShowPicture:
@@ -835,19 +803,19 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		x := args.X
 		y := args.Y
 		if args.PosValueType == data.ValueTypeVariable {
-			x = i.gameState.VariableValue(x)
-			y = i.gameState.VariableValue(y)
+			x = gameState.VariableValue(x)
+			y = gameState.VariableValue(y)
 		}
 		scaleX := float64(args.ScaleX) / 100
 		scaleY := float64(args.ScaleY) / 100
 		angle := float64(args.Angle) * math.Pi / 180
 		opacity := float64(args.Opacity) / 255
-		i.gameState.pictures.Add(args.ID, args.Image, x, y, scaleX, scaleY, angle, opacity, args.OriginX, args.OriginY, args.BlendType)
+		gameState.pictures.Add(args.ID, args.Image, x, y, scaleX, scaleY, angle, opacity, args.OriginX, args.OriginY, args.BlendType)
 		i.commandIterator.Advance()
 
 	case data.CommandNameErasePicture:
 		args := c.Args.(*data.CommandArgsErasePicture)
-		i.gameState.pictures.Remove(args.ID)
+		gameState.pictures.Remove(args.ID)
 		i.commandIterator.Advance()
 
 	case data.CommandNameMovePicture:
@@ -856,10 +824,10 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 			x := args.X
 			y := args.Y
 			if args.PosValueType == data.ValueTypeVariable {
-				x = i.gameState.VariableValue(x)
-				y = i.gameState.VariableValue(y)
+				x = gameState.VariableValue(x)
+				y = gameState.VariableValue(y)
 			}
-			i.gameState.pictures.MoveTo(args.ID, x, y, args.Time*6)
+			gameState.pictures.MoveTo(args.ID, x, y, args.Time*6)
 			if !args.Wait {
 				i.commandIterator.Advance()
 				return true, nil
@@ -879,7 +847,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 			args := c.Args.(*data.CommandArgsScalePicture)
 			scaleX := float64(args.ScaleX) / 100
 			scaleY := float64(args.ScaleY) / 100
-			i.gameState.pictures.Scale(args.ID, scaleX, scaleY, args.Time*6)
+			gameState.pictures.Scale(args.ID, scaleX, scaleY, args.Time*6)
 			if !args.Wait {
 				i.commandIterator.Advance()
 				return true, nil
@@ -898,7 +866,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		if i.waitingCount == 0 {
 			args := c.Args.(*data.CommandArgsRotatePicture)
 			angle := float64(args.Angle) * math.Pi / 180
-			i.gameState.pictures.Rotate(args.ID, angle, args.Time*6)
+			gameState.pictures.Rotate(args.ID, angle, args.Time*6)
 			if !args.Wait {
 				i.commandIterator.Advance()
 				return true, nil
@@ -917,7 +885,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		if i.waitingCount == 0 {
 			args := c.Args.(*data.CommandArgsFadePicture)
 			opacity := float64(args.Opacity) / 255
-			i.gameState.pictures.Fade(args.ID, opacity, args.Time*6)
+			gameState.pictures.Fade(args.ID, opacity, args.Time*6)
 			if !args.Wait {
 				i.commandIterator.Advance()
 				return true, nil
@@ -939,7 +907,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 			g := float64(args.Green) / 255
 			b := float64(args.Blue) / 255
 			gray := float64(args.Gray) / 255
-			i.gameState.pictures.Tint(args.ID, r, g, b, gray, args.Time*6)
+			gameState.pictures.Tint(args.ID, r, g, b, gray, args.Time*6)
 			if !args.Wait {
 				i.commandIterator.Advance()
 				return true, nil
@@ -956,25 +924,25 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 
 	case data.CommandNameChangePictureImage:
 		args := c.Args.(*data.CommandArgsChangePictureImage)
-		i.gameState.pictures.ChangeImage(args.ID, args.Image)
+		gameState.pictures.ChangeImage(args.ID, args.Image)
 		i.commandIterator.Advance()
 
 	case data.CommandNameFinishPlayerMovingByUserInput:
-		i.gameState.currentMap.FinishPlayerMovingByUserInput()
+		gameState.currentMap.FinishPlayerMovingByUserInput()
 		i.commandIterator.Advance()
 
 	case data.CommandNameExecEventHere:
-		e := i.gameState.ExecutableEventAtPlayer()
+		e := gameState.ExecutableEventAtPlayer()
 		if e == nil {
 			i.commandIterator.Advance()
 			break
 		}
-		page := i.gameState.currentMap.currentPage(e)
+		page := gameState.currentMap.currentPage(e)
 		if page == nil {
 			panic("not reached")
 		}
 		c := page.Commands
-		i.sub = i.createChild(e.EventID(), c)
+		i.sub = i.createChild(gameState, e.EventID(), c)
 
 	default:
 		return false, fmt.Errorf("interpreter: invalid command: %s", c.Name)
@@ -982,12 +950,12 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 	return true, nil
 }
 
-func (i *Interpreter) Update(sceneManager *scene.Manager) error {
+func (i *Interpreter) Update(sceneManager *scene.Manager, gameState *Game) error {
 	if i.commandIterator == nil {
 		return nil
 	}
 	for !i.commandIterator.IsTerminated() {
-		cont, err := i.doOneCommand(sceneManager)
+		cont, err := i.doOneCommand(sceneManager, gameState)
 		if err != nil {
 			return err
 		}
@@ -1000,7 +968,7 @@ func (i *Interpreter) Update(sceneManager *scene.Manager) error {
 			i.commandIterator.Rewind()
 			return nil
 		}
-		if i.gameState.windows.IsBusy(i.id) {
+		if gameState.windows.IsBusy(i.id) {
 			return nil
 		}
 		i.commandIterator = nil
@@ -1009,23 +977,23 @@ func (i *Interpreter) Update(sceneManager *scene.Manager) error {
 	return nil
 }
 
-func (i *Interpreter) setVariable(sceneManager *scene.Manager, id int, op data.SetVariableOp, valueType data.SetVariableValueType, value interface{}) {
+func (i *Interpreter) setVariable(sceneManager *scene.Manager, gameState *Game, id int, op data.SetVariableOp, valueType data.SetVariableValueType, value interface{}) {
 	rhs := 0
 	switch valueType {
 	case data.SetVariableValueTypeConstant:
 		rhs = value.(int)
 	case data.SetVariableValueTypeVariable:
-		rhs = i.gameState.VariableValue(value.(int))
+		rhs = gameState.VariableValue(value.(int))
 	case data.SetVariableValueTypeRandom:
 		v := value.(*data.SetVariableValueRandom)
-		rhs = i.gameState.RandomValue(v.Begin, v.End+1)
+		rhs = gameState.RandomValue(v.Begin, v.End+1)
 	case data.SetVariableValueTypeCharacter:
 		args := value.(*data.SetVariableCharacterArgs)
 		id := args.EventID
 		if id == 0 {
 			id = i.eventID
 		}
-		ch := i.gameState.character(i.mapID, i.roomID, id)
+		ch := gameState.character(i.mapID, i.roomID, id)
 		if ch == nil {
 			// TODO: return error?
 			return
@@ -1074,7 +1042,7 @@ func (i *Interpreter) setVariable(sceneManager *scene.Manager, id int, op data.S
 		systemVariableType := value.(data.SystemVariableType)
 		switch systemVariableType {
 		case data.SystemVariableHintCount:
-			rhs = i.gameState.hints.ActiveHintCount()
+			rhs = gameState.hints.ActiveHintCount()
 		case data.SystemVariableInterstitialAdsLoaded:
 			if sceneManager.InterstitialAdsLoaded() {
 				rhs = 1
@@ -1092,15 +1060,15 @@ func (i *Interpreter) setVariable(sceneManager *scene.Manager, id int, op data.S
 	switch op {
 	case data.SetVariableOpAssign:
 	case data.SetVariableOpAdd:
-		rhs = i.gameState.VariableValue(id) + rhs
+		rhs = gameState.VariableValue(id) + rhs
 	case data.SetVariableOpSub:
-		rhs = i.gameState.VariableValue(id) - rhs
+		rhs = gameState.VariableValue(id) - rhs
 	case data.SetVariableOpMul:
-		rhs = i.gameState.VariableValue(id) * rhs
+		rhs = gameState.VariableValue(id) * rhs
 	case data.SetVariableOpDiv:
-		rhs = i.gameState.VariableValue(id) / rhs
+		rhs = gameState.VariableValue(id) / rhs
 	case data.SetVariableOpMod:
-		rhs = i.gameState.VariableValue(id) % rhs
+		rhs = gameState.VariableValue(id) % rhs
 	}
-	i.gameState.SetVariableValue(id, rhs)
+	gameState.SetVariableValue(id, rhs)
 }
