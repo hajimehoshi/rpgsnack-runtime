@@ -47,9 +47,13 @@ type Interpreter struct {
 	waitingRequestID   int // Note: When this is not 0, the game state can't be saved.
 }
 
-func NewInterpreter(gameState *Game, mapID, roomID, eventID int, commands []*data.Command) *Interpreter {
+type InterpreterIDGenerator interface {
+	GenerateInterpreterID() int
+}
+
+func NewInterpreter(idGen InterpreterIDGenerator, mapID, roomID, eventID int, commands []*data.Command) *Interpreter {
 	return &Interpreter{
-		id:              gameState.generateInterpreterID(),
+		id:              idGen.GenerateInterpreterID(),
 		mapID:           mapID,
 		roomID:          roomID,
 		eventID:         eventID,

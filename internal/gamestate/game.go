@@ -397,7 +397,7 @@ func (g *Game) MeetsCondition(cond *data.Condition, eventID int) (bool, error) {
 	return false, nil
 }
 
-func (g *Game) generateInterpreterID() int {
+func (g *Game) GenerateInterpreterID() int {
 	g.lastInterpreterID++
 	return g.lastInterpreterID
 }
