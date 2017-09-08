@@ -210,7 +210,7 @@ func (i *Interpreter) createChild(eventID int, commands []*data.Command) *Interp
 }
 
 func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
-	if !i.gameState.windows.CanProceed(i.id) {
+	if !i.gameState.CanWindowProceed(i.id) {
 		return false, nil
 	}
 	if i.sub != nil {
@@ -242,7 +242,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 				if err := json.Unmarshal(r.Data, &prices); err != nil {
 					panic(err)
 				}
-				i.gameState.updatePrices(prices)
+				i.gameState.SetPrices(prices)
 				i.commandIterator.Choose(0)
 			} else {
 				i.commandIterator.Choose(1)
@@ -260,7 +260,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		conditions := c.Args.(*data.CommandArgsIf).Conditions
 		matches := true
 		for _, c := range conditions {
-			m, err := i.gameState.meetsCondition(c, i.eventID)
+			m, err := i.gameState.MeetsCondition(c, i.eventID)
 			if err != nil {
 				return false, err
 			}
@@ -290,9 +290,8 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 			eventID = i.eventID
 		}
 		// TODO: Should i.mapID and i.roomID be considered here?
-		room := i.gameState.Map().CurrentRoom()
 		var event *data.Event
-		for _, e := range room.Events {
+		for _, e := range i.gameState.CurrentEvents() {
 			if e.ID == eventID {
 				event = e
 				break
@@ -324,11 +323,11 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 
 	case data.CommandNameReturn:
 		i.commandIterator.Terminate()
+
 	case data.CommandNameEraseEvent:
 		i.commandIterator.Terminate()
-		if ch := i.gameState.character(i.mapID, i.roomID, i.eventID); ch != nil {
-			ch.Erase()
-		}
+		i.gameState.EraseCharacter(i.mapID, i.roomID, i.eventID)
+
 	case data.CommandNameWait:
 		if i.waitingCount == 0 {
 			time := c.Args.(*data.CommandArgsWait).Time
@@ -353,45 +352,38 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 			if id == 0 {
 				id = i.eventID
 			}
-			if ch := i.gameState.character(i.mapID, i.roomID, id); ch != nil {
-				content = i.gameState.parseMessageSyntax(content)
-				eid := 0
-				if ch != nil {
-					eid = ch.EventID()
-				}
-				i.gameState.windows.ShowBalloon(content, args.BalloonType, eid, i.id)
+			if i.gameState.ShowBalloon(i.id, i.mapID, i.roomID, id, content, args.BalloonType) {
 				i.waitingCommand = true
 				return false, nil
 			}
 		}
-		if i.gameState.windows.IsAnimating(i.id) {
+		if i.gameState.IsWindowAnimating(i.id) {
 			return false, nil
 		}
 		// Advance command index first and check the next command.
 		i.commandIterator.Advance()
 		if !i.commandIterator.IsTerminated() {
 			if i.commandIterator.Command().Name != data.CommandNameShowChoices {
-				i.gameState.windows.CloseAll()
+				i.gameState.CloseAllWindows()
 			}
 		} else {
-			i.gameState.windows.CloseAll()
+			i.gameState.CloseAllWindows()
 		}
 		i.waitingCommand = false
 	case data.CommandNameShowMessage:
 		args := c.Args.(*data.CommandArgsShowMessage)
 		if !i.waitingCommand {
 			content := sceneManager.Game().Texts.Get(sceneManager.Language(), args.ContentID)
-			content = i.gameState.parseMessageSyntax(content)
-			i.gameState.windows.ShowMessage(content, args.Background, args.PositionType, args.TextAlign, i.id)
+			i.gameState.ShowMessage(i.id, content, args.Background, args.PositionType, args.TextAlign)
 			i.waitingCommand = true
 			return false, nil
 		}
-		if i.gameState.windows.IsAnimating(i.id) {
+		if i.gameState.IsWindowAnimating(i.id) {
 			return false, nil
 		}
 		// Advance command index first and check the next command.
 		i.commandIterator.Advance()
-		i.gameState.windows.CloseAll()
+		i.gameState.CloseAllWindows()
 		i.waitingCommand = false
 	case data.CommandNameShowHint:
 		if !i.waitingCommand {
@@ -410,12 +402,11 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 			if hintText.String() != "" {
 				content = sceneManager.Game().Texts.Get(sceneManager.Language(), hintText)
 			}
-			content = i.gameState.parseMessageSyntax(content)
-			i.gameState.windows.ShowMessage(content, args.Background, args.PositionType, args.TextAlign, i.id)
+			i.gameState.ShowMessage(i.id, content, args.Background, args.PositionType, args.TextAlign)
 			i.waitingCommand = true
 			return false, nil
 		}
-		if i.gameState.windows.IsAnimating(i.id) {
+		if i.gameState.IsWindowAnimating(i.id) {
 			return false, nil
 		}
 		i.commandIterator.Advance()
@@ -467,7 +458,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 			}
 
 			if args.Dir != data.DirNone {
-				i.gameState.currentMap.player.SetDir(args.Dir)
+				i.gameState.SetPlayerDir(args.Dir)
 			}
 			i.gameState.Map().transferPlayerImmediately(roomID, x, y, i)
 			i.waitingCommand = false
@@ -495,7 +486,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 				y = i.gameState.VariableValue(y)
 			}
 			if args.Dir != data.DirNone {
-				i.gameState.currentMap.player.SetDir(args.Dir)
+				i.gameState.SetPlayerDir(args.Dir)
 			}
 			i.gameState.Map().transferPlayerImmediately(roomID, x, y, i)
 			i.gameState.screen.fadeIn(30)
@@ -973,8 +964,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		i.commandIterator.Advance()
 
 	case data.CommandNameExecEventHere:
-		p := i.gameState.currentMap.player
-		e := i.gameState.currentMap.executableEventAt(p.Position())
+		e := i.gameState.ExecutableEventAtPlayer()
 		if e == nil {
 			i.commandIterator.Advance()
 			break

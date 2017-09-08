@@ -208,6 +208,7 @@ func (g *Game) Items() *items.Items {
 	return g.items
 }
 
+// TODO: Remove this
 func (g *Game) Map() *Map {
 	return g.currentMap
 }
@@ -312,7 +313,7 @@ const (
 	specialConditionEventExistsAtPlayer = "event_exists_at_player"
 )
 
-func (g *Game) meetsCondition(cond *data.Condition, eventID int) (bool, error) {
+func (g *Game) MeetsCondition(cond *data.Condition, eventID int) (bool, error) {
 	// TODO: Is it OK to allow null conditions?
 	if cond == nil {
 		return true, nil
@@ -442,6 +443,12 @@ func (g *Game) character(mapID, roomID, eventID int) *character.Character {
 	return nil
 }
 
+func (g *Game) EraseCharacter(mapID, roomID, eventID int) {
+	if ch := g.character(mapID, roomID, eventID); ch != nil {
+		ch.Erase()
+	}
+}
+
 func (g *Game) price(productID string) string {
 	if _, ok := g.prices[productID]; ok {
 		return g.prices[productID]
@@ -449,8 +456,36 @@ func (g *Game) price(productID string) string {
 	return ""
 }
 
-func (g *Game) updatePrices(p map[string]string) {
+func (g *Game) SetPrices(p map[string]string) {
 	g.prices = p
+}
+
+func (g *Game) CanWindowProceed(interpreterID int) bool {
+	return g.windows.CanProceed(interpreterID)
+}
+
+func (g *Game) IsWindowAnimating(interpreterID int) bool {
+	return g.windows.IsAnimating(interpreterID)
+}
+
+func (g *Game) CloseAllWindows() {
+	g.windows.CloseAll()
+}
+
+func (g *Game) ShowBalloon(interpreterID, mapID, roomID, eventID int, content string, balloonType data.BalloonType) bool {
+	ch := g.character(mapID, roomID, eventID)
+	if ch == nil {
+		return false
+	}
+
+	content = g.parseMessageSyntax(content)
+	g.windows.ShowBalloon(content, balloonType, eventID, interpreterID)
+	return true
+}
+
+func (g *Game) ShowMessage(interpreterID int, content string, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign) {
+	content = g.parseMessageSyntax(content)
+	g.windows.ShowMessage(content, background, positionType, textAlign, interpreterID)
 }
 
 func (g *Game) SetSwitchValue(id int, value bool) {
@@ -476,4 +511,17 @@ func (g *Game) StartItemCommands() {
 
 func (g *Game) ExecutingItemCommands() bool {
 	return g.currentMap.ExecutingItemCommands()
+}
+
+func (g *Game) SetPlayerDir(dir data.Dir) {
+	g.currentMap.player.SetDir(dir)
+}
+
+func (g *Game) ExecutableEventAtPlayer() *character.Character {
+	p := g.currentMap.player
+	return g.currentMap.executableEventAt(p.Position())
+}
+
+func (g *Game) CurrentEvents() []*data.Event {
+	return g.Map().CurrentRoom().Events
 }

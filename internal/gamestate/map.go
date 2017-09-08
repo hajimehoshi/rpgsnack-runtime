@@ -259,7 +259,7 @@ func (m *Map) IsEventExecuting() bool {
 
 func (m *Map) meetsPageCondition(page *data.Page, eventID int) (bool, error) {
 	for _, cond := range page.Conditions {
-		m, err := m.game.meetsCondition(cond, eventID)
+		m, err := m.game.MeetsCondition(cond, eventID)
 		if err != nil {
 			return false, err
 		}
