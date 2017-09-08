@@ -814,6 +814,14 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager) (bool, error) {
 		i.gameState.items.Remove(args.ID)
 		i.commandIterator.Advance()
 
+	case data.CommandNameShowInventory:
+		i.gameState.SetInventoryVisible(true)
+		i.commandIterator.Advance()
+
+	case data.CommandNameHideInventory:
+		i.gameState.SetInventoryVisible(false)
+		i.commandIterator.Advance()
+
 	case data.CommandNameShowItem:
 		args := c.Args.(*data.CommandArgsShowItem)
 		i.gameState.Items().SetEventItem(args.ID)

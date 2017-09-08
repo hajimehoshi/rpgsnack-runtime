@@ -238,6 +238,7 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 		return nil
 	}
 
+	m.inventory.Visible = m.gameState.InventoryVisible()
 	if m.inventory.Visible {
 		// TODO creating array for each loop does not seem to be the right thing
 		items := []*data.Item{}

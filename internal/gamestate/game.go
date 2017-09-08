@@ -51,6 +51,7 @@ type Game struct {
 	lastInterpreterID    int
 	autoSaveEnabled      bool
 	playerControlEnabled bool
+	inventoryVisible     bool
 	cleared              bool
 
 	lastPlayingBGMName   string
@@ -77,6 +78,7 @@ func NewGame() *Game {
 		rand:                 generateDefaultRand(),
 		autoSaveEnabled:      true,
 		playerControlEnabled: true,
+		inventoryVisible:     true,
 	}
 	g.currentMap = NewMap(g)
 	return g
@@ -115,6 +117,9 @@ func (g *Game) EncodeMsgpack(enc *msgpack.Encoder) error {
 
 	e.EncodeString("playerControlEnabled")
 	e.EncodeBool(g.playerControlEnabled)
+
+	e.EncodeString("inventoryVisible")
+	e.EncodeBool(g.inventoryVisible)
 
 	e.EncodeString("cleared")
 	e.EncodeBool(g.cleared)
@@ -177,6 +182,8 @@ func (g *Game) DecodeMsgpack(dec *msgpack.Decoder) error {
 			g.autoSaveEnabled = d.DecodeBool()
 		case "playerControlEnabled":
 			g.playerControlEnabled = d.DecodeBool()
+		case "inventoryVisible":
+			g.inventoryVisible = d.DecodeBool()
 		case "cleared":
 			g.cleared = d.DecodeBool()
 		case "lastPlayingBGMName":
@@ -235,6 +242,14 @@ func (g *Game) SetBGM(bgm data.BGM) {
 	} else {
 		audio.PlayBGM(bgm.Name, float64(bgm.Volume)/100)
 	}
+}
+
+func (g *Game) SetInventoryVisible(visible bool) {
+	g.inventoryVisible = visible
+}
+
+func (g *Game) InventoryVisible() bool {
+	return g.inventoryVisible
 }
 
 func (g *Game) setAutoSaveEnabled(enabled bool) {
