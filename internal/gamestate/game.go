@@ -501,10 +501,6 @@ func (g *Game) VariableValue(id int) int {
 	return g.variables.VariableValue(id)
 }
 
-func (g *Game) SetVariableValue(id int, value int) {
-	g.variables.SetVariableValue(id, value)
-}
-
 func (g *Game) StartItemCommands() {
 	g.currentMap.StartItemCommands(g, g.Items().EventItem())
 }
@@ -544,4 +540,103 @@ func (g *Game) FadeIn(time int) {
 
 func (g *Game) RefreshEvents() error {
 	return g.currentMap.refreshEvents(g)
+}
+
+func (g *Game) SetVariable(sceneManager *scene.Manager, variableID int, op data.SetVariableOp, valueType data.SetVariableValueType, value interface{}, mapID, roomID, eventID int) error {
+	rhs := 0
+	switch valueType {
+	case data.SetVariableValueTypeConstant:
+		rhs = value.(int)
+	case data.SetVariableValueTypeVariable:
+		rhs = g.VariableValue(value.(int))
+	case data.SetVariableValueTypeRandom:
+		v := value.(*data.SetVariableValueRandom)
+		rhs = g.RandomValue(v.Begin, v.End+1)
+	case data.SetVariableValueTypeCharacter:
+		args := value.(*data.SetVariableCharacterArgs)
+		id := args.EventID
+		if id == 0 {
+			id = eventID
+		}
+		ch := g.character(mapID, roomID, id)
+		if ch == nil {
+			// TODO: return error?
+			return nil
+		}
+		dir := ch.Dir()
+		switch args.Type {
+		case data.SetVariableCharacterTypeDirection:
+			switch dir {
+			case data.DirUp:
+				rhs = 0
+			case data.DirRight:
+				rhs = 1
+			case data.DirDown:
+				rhs = 2
+			case data.DirLeft:
+				rhs = 3
+			default:
+				panic("not reach")
+			}
+		case data.SetVariableCharacterTypeRoomX:
+			rhs, _ = ch.Position()
+		case data.SetVariableCharacterTypeRoomY:
+			_, rhs = ch.Position()
+		case data.SetVariableCharacterTypeScreenX:
+			rhs, _ = ch.DrawPosition()
+		case data.SetVariableCharacterTypeScreenY:
+			_, rhs = ch.DrawPosition()
+		default:
+			return fmt.Errorf("gamestate: not implemented yet (set_variable): type %s", args.Type)
+		}
+	case data.SetVariableValueTypeIAPProduct:
+		rhs = 0
+		id := value.(int)
+		var key string
+		for _, i := range sceneManager.Game().IAPProducts {
+			if i.ID == id {
+				key = i.Key
+				break
+			}
+		}
+		rhs = 0
+		if sceneManager.IsPurchased(key) {
+			rhs = 1
+		}
+	case data.SetVariableValueTypeSystem:
+		systemVariableType := value.(data.SystemVariableType)
+		switch systemVariableType {
+		case data.SystemVariableHintCount:
+			rhs = g.hints.ActiveHintCount()
+		case data.SystemVariableInterstitialAdsLoaded:
+			if sceneManager.InterstitialAdsLoaded() {
+				rhs = 1
+			}
+		case data.SystemVariableRewardedAdsLoaded:
+			if sceneManager.RewardedAdsLoaded() {
+				rhs = 1
+			}
+		case data.SystemVariableRoomID:
+			rhs = roomID
+		default:
+			return fmt.Errorf("gamestate: not implemented yet (set_variable): systemVariableType %s", systemVariableType)
+		}
+	}
+	switch op {
+	case data.SetVariableOpAssign:
+	case data.SetVariableOpAdd:
+		rhs = g.VariableValue(variableID) + rhs
+	case data.SetVariableOpSub:
+		rhs = g.VariableValue(variableID) - rhs
+	case data.SetVariableOpMul:
+		rhs = g.VariableValue(variableID) * rhs
+	case data.SetVariableOpDiv:
+		rhs = g.VariableValue(variableID) / rhs
+	case data.SetVariableOpMod:
+		rhs = g.VariableValue(variableID) % rhs
+	default:
+		return fmt.Errorf("gamestate: not implemented yet (set_variable): SetVariableOp %s", op)
+	}
+	g.variables.SetVariableValue(variableID, rhs)
+	return nil
 }

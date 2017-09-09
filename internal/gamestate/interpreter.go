@@ -174,7 +174,7 @@ func (i *Interpreter) IsExecuting() bool {
 	return i.commandIterator != nil
 }
 
-func (i *Interpreter) createChild(gameState *Game, eventID int, commands []*data.Command) *Interpreter {
+func (i *Interpreter) createChild(gameState InterpreterIDGenerator, eventID int, commands []*data.Command) *Interpreter {
 	child := NewInterpreter(gameState, i.mapID, i.roomID, eventID, commands)
 	child.route = i.route
 	return child
@@ -413,7 +413,9 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 
 	case data.CommandNameSetVariable:
 		args := c.Args.(*data.CommandArgsSetVariable)
-		i.setVariable(sceneManager, gameState, args.ID, args.Op, args.ValueType, args.Value)
+		if err := gameState.SetVariable(sceneManager, args.ID, args.Op, args.ValueType, args.Value, i.mapID, i.roomID, i.eventID); err != nil {
+			return false, err
+		}
 		i.commandIterator.Advance()
 
 	case data.CommandNameTransfer:
@@ -979,100 +981,4 @@ func (i *Interpreter) Update(sceneManager *scene.Manager, gameState *Game) error
 		return nil
 	}
 	return nil
-}
-
-func (i *Interpreter) setVariable(sceneManager *scene.Manager, gameState *Game, id int, op data.SetVariableOp, valueType data.SetVariableValueType, value interface{}) {
-	rhs := 0
-	switch valueType {
-	case data.SetVariableValueTypeConstant:
-		rhs = value.(int)
-	case data.SetVariableValueTypeVariable:
-		rhs = gameState.VariableValue(value.(int))
-	case data.SetVariableValueTypeRandom:
-		v := value.(*data.SetVariableValueRandom)
-		rhs = gameState.RandomValue(v.Begin, v.End+1)
-	case data.SetVariableValueTypeCharacter:
-		args := value.(*data.SetVariableCharacterArgs)
-		id := args.EventID
-		if id == 0 {
-			id = i.eventID
-		}
-		ch := gameState.character(i.mapID, i.roomID, id)
-		if ch == nil {
-			// TODO: return error?
-			return
-		}
-		dir := ch.Dir()
-		switch args.Type {
-		case data.SetVariableCharacterTypeDirection:
-			switch dir {
-			case data.DirUp:
-				rhs = 0
-			case data.DirRight:
-				rhs = 1
-			case data.DirDown:
-				rhs = 2
-			case data.DirLeft:
-				rhs = 3
-			default:
-				panic("not reach")
-			}
-		case data.SetVariableCharacterTypeRoomX:
-			rhs, _ = ch.Position()
-		case data.SetVariableCharacterTypeRoomY:
-			_, rhs = ch.Position()
-		case data.SetVariableCharacterTypeScreenX:
-			rhs, _ = ch.DrawPosition()
-		case data.SetVariableCharacterTypeScreenY:
-			_, rhs = ch.DrawPosition()
-		default:
-			log.Printf("not implemented yet (set_variable): type %s", args.Type)
-		}
-	case data.SetVariableValueTypeIAPProduct:
-		rhs = 0
-		id := value.(int)
-		var key string
-		for _, i := range sceneManager.Game().IAPProducts {
-			if i.ID == id {
-				key = i.Key
-				break
-			}
-		}
-		rhs = 0
-		if sceneManager.IsPurchased(key) {
-			rhs = 1
-		}
-	case data.SetVariableValueTypeSystem:
-		systemVariableType := value.(data.SystemVariableType)
-		switch systemVariableType {
-		case data.SystemVariableHintCount:
-			rhs = gameState.hints.ActiveHintCount()
-		case data.SystemVariableInterstitialAdsLoaded:
-			if sceneManager.InterstitialAdsLoaded() {
-				rhs = 1
-			}
-		case data.SystemVariableRewardedAdsLoaded:
-			if sceneManager.RewardedAdsLoaded() {
-				rhs = 1
-			}
-		case data.SystemVariableRoomID:
-			rhs = i.roomID
-		default:
-			log.Printf("not implemented yet (set_variable): systemVariableType %s", systemVariableType)
-		}
-	}
-	switch op {
-	case data.SetVariableOpAssign:
-	case data.SetVariableOpAdd:
-		rhs = gameState.VariableValue(id) + rhs
-	case data.SetVariableOpSub:
-		rhs = gameState.VariableValue(id) - rhs
-	case data.SetVariableOpMul:
-		rhs = gameState.VariableValue(id) * rhs
-	case data.SetVariableOpDiv:
-		rhs = gameState.VariableValue(id) / rhs
-	case data.SetVariableOpMod:
-		rhs = gameState.VariableValue(id) % rhs
-	}
-	gameState.SetVariableValue(id, rhs)
 }
