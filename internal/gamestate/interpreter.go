@@ -477,14 +477,14 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			g := float64(args.Green) / 255
 			b := float64(args.Blue) / 255
 			gray := float64(args.Gray) / 255
-			gameState.screen.startTint(r, g, b, gray, args.Time*6)
+			gameState.StartTint(r, g, b, gray, args.Time*6)
 			if !args.Wait {
 				i.commandIterator.Advance()
 				return true, nil
 			}
 			i.waitingCommand = args.Wait
 		}
-		if gameState.screen.isChangingTint() {
+		if gameState.IsChangingTint() {
 			return false, nil
 		}
 		i.waitingCommand = false
@@ -516,14 +516,14 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		i.commandIterator.Advance()
 	case data.CommandNameAutoSave:
 		args := c.Args.(*data.CommandArgsAutoSave)
-		gameState.setAutoSaveEnabled(args.Enabled)
+		gameState.SetAutoSaveEnabled(args.Enabled)
 		i.commandIterator.Advance()
 	case data.CommandNameGameClear:
-		gameState.cleared = true
+		gameState.Clear()
 		i.commandIterator.Advance()
 	case data.CommandNamePlayerControl:
 		args := c.Args.(*data.CommandArgsPlayerControl)
-		gameState.setPlayerControlEnabled(args.Enabled)
+		gameState.SetPlayerControlEnabled(args.Enabled)
 		i.commandIterator.Advance()
 	case data.CommandNameGotoTitle:
 		return false, GoToTitle
@@ -542,11 +542,11 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		args := c.Args.(*data.CommandArgsControlHint)
 		switch args.Type {
 		case data.ControlHintPause:
-			gameState.hints.Pause(args.ID)
+			gameState.PauseHint(args.ID)
 		case data.ControlHintStart:
-			gameState.hints.Activate(args.ID)
+			gameState.ActivateHint(args.ID)
 		case data.ControlHintComplete:
-			gameState.hints.Complete(args.ID)
+			gameState.CompleteHint(args.ID)
 		}
 		i.commandIterator.Advance()
 	case data.CommandNamePurchase:
@@ -580,7 +580,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		sceneManager.Requester().RequestOpenLink(i.waitingRequestID, args.Type, args.Data)
 		return false, nil
 	case data.CommandNameMoveCharacter:
-		if ch := gameState.character(i.mapID, i.roomID, i.eventID); ch == nil {
+		if ch := gameState.Character(i.mapID, i.roomID, i.eventID); ch == nil {
 			i.commandIterator.Advance()
 			return true, nil
 		}
@@ -616,7 +616,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		i.commandIterator.Advance()
 
 	case data.CommandNameTurnCharacter:
-		ch := gameState.character(i.mapID, i.roomID, i.eventID)
+		ch := gameState.Character(i.mapID, i.roomID, i.eventID)
 		if ch == nil {
 			i.commandIterator.Advance()
 			return true, nil
@@ -635,7 +635,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		i.commandIterator.Advance()
 
 	case data.CommandNameRotateCharacter:
-		ch := gameState.character(i.mapID, i.roomID, i.eventID)
+		ch := gameState.Character(i.mapID, i.roomID, i.eventID)
 		if ch == nil {
 			i.commandIterator.Advance()
 			return true, nil
@@ -692,7 +692,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		i.commandIterator.Advance()
 	case data.CommandNameSetCharacterProperty:
 		args := c.Args.(*data.CommandArgsSetCharacterProperty)
-		ch := gameState.character(i.mapID, i.roomID, i.eventID)
+		ch := gameState.Character(i.mapID, i.roomID, i.eventID)
 		if ch == nil {
 			i.commandIterator.Advance()
 			return true, nil
@@ -716,7 +716,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		i.commandIterator.Advance()
 	case data.CommandNameSetCharacterImage:
 		args := c.Args.(*data.CommandArgsSetCharacterImage)
-		ch := gameState.character(i.mapID, i.roomID, i.eventID)
+		ch := gameState.Character(i.mapID, i.roomID, i.eventID)
 		if ch == nil {
 			i.commandIterator.Advance()
 			return true, nil
@@ -729,7 +729,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		i.commandIterator.Advance()
 
 	case data.CommandNameSetCharacterOpacity:
-		ch := gameState.character(i.mapID, i.roomID, i.eventID)
+		ch := gameState.Character(i.mapID, i.roomID, i.eventID)
 		if ch == nil {
 			i.commandIterator.Advance()
 			return true, nil
@@ -751,12 +751,12 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 
 	case data.CommandNameAddItem:
 		args := c.Args.(*data.CommandArgsAddItem)
-		gameState.items.Add(args.ID)
+		gameState.AddItem(args.ID)
 		i.commandIterator.Advance()
 
 	case data.CommandNameRemoveItem:
 		args := c.Args.(*data.CommandArgsRemoveItem)
-		gameState.items.Remove(args.ID)
+		gameState.RemoveItem(args.ID)
 		i.commandIterator.Advance()
 
 	case data.CommandNameShowInventory:
@@ -769,19 +769,19 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 
 	case data.CommandNameShowItem:
 		args := c.Args.(*data.CommandArgsShowItem)
-		gameState.Items().SetEventItem(args.ID)
+		gameState.SetEventItem(args.ID)
 		i.commandIterator.Advance()
 
 	case data.CommandNameHideItem:
-		gameState.Items().SetEventItem(0)
+		gameState.SetEventItem(0)
 		i.commandIterator.Advance()
 
 	case data.CommandNameReplaceItem:
 		args := c.Args.(*data.CommandArgsReplaceItem)
 		for _, id := range args.ReplaceIDs {
-			gameState.items.InsertBefore(args.ID, id)
+			gameState.InsertItemBefore(args.ID, id)
 		}
-		gameState.items.Remove(args.ID)
+		gameState.RemoveItem(args.ID)
 		i.commandIterator.Advance()
 
 	case data.CommandNameShowPicture:

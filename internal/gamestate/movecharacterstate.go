@@ -175,7 +175,7 @@ func (m *moveCharacterState) setGame(game *Game) {
 }
 
 func (m *moveCharacterState) character() *character.Character {
-	return m.gameState.character(m.mapID, m.roomID, m.eventID)
+	return m.gameState.Character(m.mapID, m.roomID, m.eventID)
 }
 
 func (m *moveCharacterState) IsTerminated() bool {

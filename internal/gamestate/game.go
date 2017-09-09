@@ -237,6 +237,10 @@ func (g *Game) Update(sceneManager *scene.Manager) error {
 	return nil
 }
 
+func (g *Game) Clear() {
+	g.cleared = true
+}
+
 func (g *Game) SetBGM(bgm data.BGM) {
 	if bgm.Name == "" {
 		audio.StopBGM()
@@ -253,7 +257,7 @@ func (g *Game) InventoryVisible() bool {
 	return g.inventoryVisible
 }
 
-func (g *Game) setAutoSaveEnabled(enabled bool) {
+func (g *Game) SetAutoSaveEnabled(enabled bool) {
 	g.autoSaveEnabled = enabled
 }
 
@@ -261,7 +265,7 @@ func (g *Game) IsAutoSaveEnabled() bool {
 	return g.autoSaveEnabled
 }
 
-func (g *Game) setPlayerControlEnabled(enabled bool) {
+func (g *Game) SetPlayerControlEnabled(enabled bool) {
 	g.playerControlEnabled = enabled
 }
 
@@ -425,7 +429,7 @@ func (g *Game) DrawPictures(screen *ebiten.Image) {
 	g.pictures.Draw(screen)
 }
 
-func (g *Game) character(mapID, roomID, eventID int) *character.Character {
+func (g *Game) Character(mapID, roomID, eventID int) *character.Character {
 	if eventID == character.PlayerEventID {
 		return g.currentMap.player
 	}
@@ -444,7 +448,7 @@ func (g *Game) character(mapID, roomID, eventID int) *character.Character {
 }
 
 func (g *Game) EraseCharacter(mapID, roomID, eventID int) {
-	if ch := g.character(mapID, roomID, eventID); ch != nil {
+	if ch := g.Character(mapID, roomID, eventID); ch != nil {
 		ch.Erase()
 	}
 }
@@ -481,7 +485,7 @@ func (g *Game) ChosenWindowIndex() int {
 }
 
 func (g *Game) ShowBalloon(interpreterID, mapID, roomID, eventID int, content string, balloonType data.BalloonType) bool {
-	ch := g.character(mapID, roomID, eventID)
+	ch := g.Character(mapID, roomID, eventID)
 	if ch == nil {
 		return false
 	}
@@ -538,7 +542,7 @@ func (g *Game) VariableValue(id int) int {
 }
 
 func (g *Game) StartItemCommands() {
-	g.currentMap.StartItemCommands(g, g.Items().EventItem())
+	g.currentMap.StartItemCommands(g, g.items.EventItem())
 }
 
 func (g *Game) ExecutingItemCommands() bool {
@@ -582,6 +586,14 @@ func (g *Game) FadeOut(time int) {
 	g.screen.fadeOut(time)
 }
 
+func (g *Game) StartTint(red, green, blue, gray float64, time int) {
+	g.screen.startTint(red, green, blue, gray, time)
+}
+
+func (g *Game) IsChangingTint() bool {
+	return g.screen.isChangingTint()
+}
+
 func (g *Game) RefreshEvents() error {
 	return g.currentMap.refreshEvents(g)
 }
@@ -602,7 +614,7 @@ func (g *Game) SetVariable(sceneManager *scene.Manager, variableID int, op data.
 		if id == 0 {
 			id = eventID
 		}
-		ch := g.character(mapID, roomID, id)
+		ch := g.Character(mapID, roomID, id)
 		if ch == nil {
 			// TODO: return error?
 			return nil
@@ -683,4 +695,32 @@ func (g *Game) SetVariable(sceneManager *scene.Manager, variableID int, op data.
 	}
 	g.variables.SetVariableValue(variableID, rhs)
 	return nil
+}
+
+func (g *Game) PauseHint(id int) {
+	g.hints.Pause(id)
+}
+
+func (g *Game) ActivateHint(id int) {
+	g.hints.Activate(id)
+}
+
+func (g *Game) CompleteHint(id int) {
+	g.hints.Complete(id)
+}
+
+func (g *Game) AddItem(id int) {
+	g.items.Add(id)
+}
+
+func (g *Game) RemoveItem(id int) {
+	g.items.Remove(id)
+}
+
+func (g *Game) SetEventItem(id int) {
+	g.items.SetEventItem(id)
+}
+
+func (g *Game) InsertItemBefore(targetItemID int, insertItemID int) {
+	g.items.InsertBefore(targetItemID, insertItemID)
 }
