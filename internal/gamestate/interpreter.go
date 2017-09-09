@@ -27,6 +27,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/commanditerator"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/movecharacterstate"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
 
@@ -38,7 +39,7 @@ type Interpreter struct {
 	commandIterator    *commanditerator.CommandIterator
 	waitingCount       int
 	waitingCommand     bool
-	moveCharacterState *moveCharacterState
+	moveCharacterState *movecharacterstate.State
 	repeat             bool
 	sub                *Interpreter
 	route              bool // True when used for event routing property.
@@ -135,7 +136,7 @@ func (i *Interpreter) DecodeMsgpack(dec *msgpack.Decoder) error {
 			i.waitingCommand = d.DecodeBool()
 		case "moveCharacterState":
 			if !d.SkipCodeIfNil() {
-				i.moveCharacterState = &moveCharacterState{}
+				i.moveCharacterState = &movecharacterstate.State{}
 				d.DecodeInterface(i.moveCharacterState)
 			}
 		case "repeat":
@@ -590,7 +591,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			if args.Type == data.MoveCharacterTypeTarget {
 				skip = false
 			}
-			m := newMoveCharacterState(
+			m := movecharacterstate.New(
 				gameState,
 				i.mapID,
 				i.roomID,

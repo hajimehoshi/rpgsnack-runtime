@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package gamestate
+package movecharacterstate
 
 import (
 	"fmt"
@@ -26,7 +26,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/path"
 )
 
-type moveCharacterState struct {
+type State struct {
 	mapID         int
 	roomID        int
 	eventID       int
@@ -46,152 +46,159 @@ func (a *atFunc) At(x, y int) bool {
 	return a.f(x, y)
 }
 
-func (m *moveCharacterState) setMoveTarget(gameState *Game, x int, y int, ignoreCharacters bool) bool {
-	ch := m.character(gameState)
+type GameState interface {
+	MapPassableAt(through bool, x, y int, ignoreCharacters bool) bool
+	VariableValue(id int) int
+	RandomValue(min, max int) int
+	Character(mapID, roomID, eventID int) *character.Character
+}
+
+func (s *State) setMoveTarget(gameState GameState, x int, y int, ignoreCharacters bool) bool {
+	ch := s.character(gameState)
 	cx, cy := ch.Position()
 	path, lastX, lastY := path.Calc(&atFunc{
 		f: func(x, y int) bool {
 			return gameState.MapPassableAt(ch.Through(), x, y, ignoreCharacters)
 		},
 	}, cx, cy, x, y)
-	m.path = path
-	m.distanceCount = len(path)
+	s.path = path
+	s.distanceCount = len(path)
 	if x != lastX || y != lastY {
-		if !m.routeSkip {
+		if !s.routeSkip {
 			return false
 		}
-		m.terminated = true
+		s.terminated = true
 	}
 
 	return true
 }
 
-func newMoveCharacterState(gameState *Game, mapID, roomID, eventID int, args *data.CommandArgsMoveCharacter, routeSkip bool) *moveCharacterState {
-	m := &moveCharacterState{
+func New(gameState GameState, mapID, roomID, eventID int, args *data.CommandArgsMoveCharacter, routeSkip bool) *State {
+	s := &State{
 		mapID:     mapID,
 		roomID:    roomID,
 		eventID:   eventID,
 		args:      args,
 		routeSkip: routeSkip,
 	}
-	switch m.args.Type {
+	switch s.args.Type {
 	case data.MoveCharacterTypeDirection, data.MoveCharacterTypeForward, data.MoveCharacterTypeBackward:
-		m.distanceCount = m.args.Distance
+		s.distanceCount = s.args.Distance
 	case data.MoveCharacterTypeTarget:
 		if args.ValueType == data.ValueTypeVariable {
-			if !m.setMoveTarget(gameState, gameState.VariableValue(args.X), gameState.VariableValue(args.Y), args.IgnoreCharacters) {
+			if !s.setMoveTarget(gameState, gameState.VariableValue(args.X), gameState.VariableValue(args.Y), args.IgnoreCharacters) {
 				return nil
 			}
 		} else {
-			if !m.setMoveTarget(gameState, args.X, args.Y, args.IgnoreCharacters) {
+			if !s.setMoveTarget(gameState, args.X, args.Y, args.IgnoreCharacters) {
 				return nil
 			}
 		}
 	case data.MoveCharacterTypeRandom, data.MoveCharacterTypeToward:
-		m.distanceCount = 1
+		s.distanceCount = 1
 
 	default:
 		panic("not reach")
 	}
-	return m
+	return s
 }
 
-func (m *moveCharacterState) EncodeMsgpack(enc *msgpack.Encoder) error {
+func (s *State) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e := easymsgpack.NewEncoder(enc)
 	e.BeginMap()
 
 	e.EncodeString("mapId")
-	e.EncodeInt(m.mapID)
+	e.EncodeInt(s.mapID)
 
 	e.EncodeString("roomId")
-	e.EncodeInt(m.roomID)
+	e.EncodeInt(s.roomID)
 
 	e.EncodeString("eventId")
-	e.EncodeInt(m.eventID)
+	e.EncodeInt(s.eventID)
 
 	e.EncodeString("args")
-	e.EncodeInterface(m.args)
+	e.EncodeInterface(s.args)
 
 	e.EncodeString("routeSkip")
-	e.EncodeBool(m.routeSkip)
+	e.EncodeBool(s.routeSkip)
 
 	e.EncodeString("distanceCount")
-	e.EncodeInt(m.distanceCount)
+	e.EncodeInt(s.distanceCount)
 
 	e.EncodeString("path")
 	e.BeginArray()
-	for _, r := range m.path {
+	for _, r := range s.path {
 		e.EncodeInt(int(r))
 	}
 	e.EndArray()
 
 	e.EncodeString("waiting")
-	e.EncodeBool(m.waiting)
+	e.EncodeBool(s.waiting)
 
 	e.EncodeString("terminated")
-	e.EncodeBool(m.terminated)
+	e.EncodeBool(s.terminated)
 
 	e.EndMap()
 	return e.Flush()
 }
 
-func (m *moveCharacterState) DecodeMsgpack(dec *msgpack.Decoder) error {
+func (s *State) DecodeMsgpack(dec *msgpack.Decoder) error {
 	d := easymsgpack.NewDecoder(dec)
 	n := d.DecodeMapLen()
 	for i := 0; i < n; i++ {
 		switch d.DecodeString() {
 		case "mapId":
-			m.mapID = d.DecodeInt()
+			s.mapID = d.DecodeInt()
 		case "roomId":
-			m.roomID = d.DecodeInt()
+			s.roomID = d.DecodeInt()
 		case "eventId":
-			m.eventID = d.DecodeInt()
+			s.eventID = d.DecodeInt()
 		case "args":
 			if !d.SkipCodeIfNil() {
-				m.args = &data.CommandArgsMoveCharacter{}
-				d.DecodeInterface(m.args)
+				s.args = &data.CommandArgsMoveCharacter{}
+				d.DecodeInterface(s.args)
 			}
 		case "routeSkip":
-			m.routeSkip = d.DecodeBool()
+			s.routeSkip = d.DecodeBool()
 		case "distanceCount":
-			m.distanceCount = d.DecodeInt()
+			s.distanceCount = d.DecodeInt()
 		case "path":
 			if !d.SkipCodeIfNil() {
 				n := d.DecodeArrayLen()
-				m.path = make([]path.RouteCommand, n)
+				s.path = make([]path.RouteCommand, n)
 				for i := 0; i < n; i++ {
-					m.path[i] = path.RouteCommand(d.DecodeInt())
+					s.path[i] = path.RouteCommand(d.DecodeInt())
 				}
 			}
 		case "waiting":
-			m.waiting = d.DecodeBool()
+			s.waiting = d.DecodeBool()
 		case "terminated":
-			m.terminated = d.DecodeBool()
+			s.terminated = d.DecodeBool()
 		}
 	}
 	if err := d.Error(); err != nil {
-		return fmt.Errorf("gamestate: moveCharacterState.DecodeMsgpack failed: %v", err)
+		return fmt.Errorf("movecharacterstate: State.DecodeMsgpack failed: %v", err)
 	}
 	return nil
 }
 
-func (m *moveCharacterState) character(gameState *Game) *character.Character {
-	return gameState.Character(m.mapID, m.roomID, m.eventID)
+func (s *State) character(gameState GameState) *character.Character {
+	return gameState.Character(s.mapID, s.roomID, s.eventID)
 }
 
-func (m *moveCharacterState) IsTerminated(gameState *Game) bool {
-	c := m.character(gameState)
+func (s *State) IsTerminated(gameState GameState) bool {
+	c := s.character(gameState)
 	if c == nil {
 		return true
 	}
 	if c.IsMoving() {
 		return false
 	}
-	return m.terminated
+	return s.terminated
 }
 
-func (m *moveCharacterState) Update(gameState *Game) error {
-	c := m.character(gameState)
+func (s *State) Update(gameState GameState) error {
+	c := s.character(gameState)
 	if c == nil {
 		return nil
 	}
@@ -199,17 +206,17 @@ func (m *moveCharacterState) Update(gameState *Game) error {
 	if c.IsMoving() {
 		return nil
 	}
-	if m.terminated {
+	if s.terminated {
 		return nil
 	}
-	if m.distanceCount > 0 && !m.waiting {
+	if s.distanceCount > 0 && !s.waiting {
 		dx, dy := c.Position()
 		var dir data.Dir
-		switch m.args.Type {
+		switch s.args.Type {
 		case data.MoveCharacterTypeDirection:
-			dir = m.args.Dir
+			dir = s.args.Dir
 		case data.MoveCharacterTypeTarget:
-			switch m.path[len(m.path)-m.distanceCount] {
+			switch s.path[len(s.path)-s.distanceCount] {
 			case path.RouteCommandMoveUp:
 				dir = data.DirUp
 			case path.RouteCommandMoveRight:
@@ -226,10 +233,10 @@ func (m *moveCharacterState) Update(gameState *Game) error {
 		case data.MoveCharacterTypeBackward:
 			dir = (c.Dir() + 2) % 4
 		case data.MoveCharacterTypeToward:
-			log.Printf("not implemented yet (move_character): type %s", m.args.Type)
+			log.Printf("not implemented yet (move_character): type %s", s.args.Type)
 			dir = c.Dir()
 		case data.MoveCharacterTypeAgainst:
-			log.Printf("not implemented yet (move_character): type %s", m.args.Type)
+			log.Printf("not implemented yet (move_character): type %s", s.args.Type)
 			dir = c.Dir()
 		case data.MoveCharacterTypeRandom:
 			dir = data.Dir(gameState.RandomValue(0, 4))
@@ -250,24 +257,24 @@ func (m *moveCharacterState) Update(gameState *Game) error {
 		}
 		if !gameState.MapPassableAt(c.Through(), dx, dy, false) {
 			c.Turn(dir)
-			if !m.routeSkip {
+			if !s.routeSkip {
 				return nil
 			}
 			// Skip
-			m.terminated = true
-			m.distanceCount = 0
+			s.terminated = true
+			s.distanceCount = 0
 			// TODO: Can continue Update.
 			return nil
 		}
 		c.Move(dir)
-		m.waiting = true
+		s.waiting = true
 		return nil
 	}
-	m.distanceCount--
-	m.waiting = false
-	if m.distanceCount > 0 {
+	s.distanceCount--
+	s.waiting = false
+	if s.distanceCount > 0 {
 		return nil
 	}
-	m.terminated = true
+	s.terminated = true
 	return nil
 }
