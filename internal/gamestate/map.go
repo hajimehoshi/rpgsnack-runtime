@@ -37,7 +37,7 @@ type passableOnMap struct {
 }
 
 func (p *passableOnMap) At(x, y int) bool {
-	return p.m.passable(p.through, x, y, p.ignoreCharacters)
+	return p.m.Passable(p.through, x, y, p.ignoreCharacters)
 }
 
 type Map struct {
@@ -530,7 +530,7 @@ func (m *Map) passableTile(x, y int) bool {
 	return true
 }
 
-func (m *Map) passable(through bool, x, y int, ignoreCharacters bool) bool {
+func (m *Map) Passable(through bool, x, y int, ignoreCharacters bool) bool {
 	if x < 0 {
 		return false
 	}
@@ -616,7 +616,7 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, gameState *G
 		return false
 	}
 	event := m.executableEventAt(x, y)
-	if !m.passable(m.player.Through(), x, y, false) && event == nil {
+	if !m.Passable(m.player.Through(), x, y, false) && event == nil {
 		return false
 	}
 	px, py := m.player.Position()

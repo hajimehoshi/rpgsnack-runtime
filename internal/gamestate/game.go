@@ -213,6 +213,10 @@ func (g *Game) Map() *Map {
 	return g.currentMap
 }
 
+func (g *Game) MapPassableAt(through bool, x, y int, ignoreCharacters bool) bool {
+	return g.currentMap.Passable(through, x, y, ignoreCharacters)
+}
+
 func (g *Game) Update(sceneManager *scene.Manager) error {
 	if g.lastPlayingBGMName != "" {
 		audio.PlayBGM(g.lastPlayingBGMName, g.lastPlayingBGMVolume)

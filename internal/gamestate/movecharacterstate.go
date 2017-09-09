@@ -38,12 +38,21 @@ type moveCharacterState struct {
 	terminated    bool
 }
 
+type atFunc struct {
+	f func(x, y int) bool
+}
+
+func (a *atFunc) At(x, y int) bool {
+	return a.f(x, y)
+}
+
 func (m *moveCharacterState) setMoveTarget(gameState *Game, x int, y int, ignoreCharacters bool) bool {
-	cx, cy := m.character(gameState).Position()
-	path, lastX, lastY := path.Calc(&passableOnMap{
-		through:          m.character(gameState).Through(),
-		m:                gameState.Map(),
-		ignoreCharacters: ignoreCharacters,
+	ch := m.character(gameState)
+	cx, cy := ch.Position()
+	path, lastX, lastY := path.Calc(&atFunc{
+		f: func(x, y int) bool {
+			return gameState.MapPassableAt(ch.Through(), x, y, ignoreCharacters)
+		},
 	}, cx, cy, x, y)
 	m.path = path
 	m.distanceCount = len(path)
@@ -239,7 +248,7 @@ func (m *moveCharacterState) Update(gameState *Game) error {
 		default:
 			panic("not reach")
 		}
-		if !gameState.Map().passable(c.Through(), dx, dy, false) {
+		if !gameState.MapPassableAt(c.Through(), dx, dy, false) {
 			c.Turn(dir)
 			if !m.routeSkip {
 				return nil
