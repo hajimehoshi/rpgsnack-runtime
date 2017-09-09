@@ -25,10 +25,10 @@ import (
 type hintState int
 
 const (
-	HintStateInactive hintState = iota
-	HintStateActiveUnread
-	HintStateActiveRead
-	HintStateCompleted
+	hintStateInactive hintState = iota
+	hintStateActiveUnread
+	hintStateActiveRead
+	hintStateCompleted
 )
 
 type Hints struct {
@@ -67,7 +67,7 @@ func (h *Hints) DecodeMsgpack(dec *msgpack.Decoder) error {
 		}
 	}
 	if err := d.Error(); err != nil {
-		return fmt.Errorf("gamestate: Hints.DecodeMsgpack failed: %v", err)
+		return fmt.Errorf("hints: Hints.DecodeMsgpack failed: %v", err)
 	}
 	return nil
 }
@@ -76,8 +76,8 @@ func (h *Hints) Activate(id int) {
 	if h.states == nil {
 		h.states = map[int]hintState{}
 	}
-	if h.states[id] == HintStateInactive {
-		h.states[id] = HintStateActiveUnread
+	if h.states[id] == hintStateInactive {
+		h.states[id] = hintStateActiveUnread
 	}
 }
 
@@ -85,50 +85,50 @@ func (h *Hints) Pause(id int) {
 	if h.states == nil {
 		return
 	}
-	h.states[id] = HintStateInactive
-	h.RefreshActiveHints()
+	h.states[id] = hintStateInactive
+	h.refreshActiveHints()
 }
 
 func (h *Hints) Complete(id int) {
 	if h.states == nil {
 		return
 	}
-	h.states[id] = HintStateCompleted
-	h.RefreshActiveHints()
+	h.states[id] = hintStateCompleted
+	h.refreshActiveHints()
 }
 
 func (h *Hints) ReadHint(id int) {
 	if h.states == nil {
 		return
 	}
-	h.states[id] = HintStateActiveRead
-	h.RefreshActiveHints()
+	h.states[id] = hintStateActiveRead
+	h.refreshActiveHints()
 }
 
-func (h *Hints) RefreshActiveHints() {
+func (h *Hints) refreshActiveHints() {
 	// If all hints are marked as read, reset all to unread
-	if h.ActiveUnreadHintCount() == 0 {
+	if h.activeUnreadHintCount() == 0 {
 		for k := range h.states {
-			if h.states[k] == HintStateActiveRead {
-				h.states[k] = HintStateActiveUnread
+			if h.states[k] == hintStateActiveRead {
+				h.states[k] = hintStateActiveUnread
 			}
 		}
 	}
 }
 
-func (h *Hints) ActiveHintId() int {
+func (h *Hints) ActiveHintID() int {
 	for k, v := range h.states {
-		if v == HintStateActiveUnread {
+		if v == hintStateActiveUnread {
 			return k
 		}
 	}
 	return -1
 }
 
-func (h *Hints) ActiveUnreadHintCount() int {
+func (h *Hints) activeUnreadHintCount() int {
 	count := 0
 	for _, v := range h.states {
-		if v == HintStateActiveUnread {
+		if v == hintStateActiveUnread {
 			count++
 		}
 	}
@@ -138,7 +138,7 @@ func (h *Hints) ActiveUnreadHintCount() int {
 func (h *Hints) ActiveHintCount() int {
 	count := 0
 	for _, v := range h.states {
-		if v == HintStateActiveUnread || v == HintStateActiveRead {
+		if v == hintStateActiveUnread || v == hintStateActiveRead {
 			count++
 		}
 	}

@@ -500,7 +500,7 @@ func (g *Game) ShowMessage(interpreterID int, content string, background data.Me
 }
 
 func (g *Game) ShowHint(sceneManager *scene.Manager, interpreterID int, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign) {
-	hintId := g.hints.ActiveHintId()
+	hintId := g.hints.ActiveHintID()
 	// next time it shows next available hint
 	g.hints.ReadHint(hintId)
 	var hintText data.UUID
