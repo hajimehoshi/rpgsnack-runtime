@@ -298,7 +298,9 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 
 	case data.CommandNameEraseEvent:
 		i.commandIterator.Terminate()
-		gameState.EraseCharacter(i.mapID, i.roomID, i.eventID)
+		if ch := gameState.Character(i.mapID, i.roomID, i.eventID); ch != nil {
+			ch.Erase()
+		}
 
 	case data.CommandNameWait:
 		if i.waitingCount == 0 {

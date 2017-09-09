@@ -451,12 +451,6 @@ func (g *Game) Character(mapID, roomID, eventID int) *character.Character {
 	return nil
 }
 
-func (g *Game) EraseCharacter(mapID, roomID, eventID int) {
-	if ch := g.Character(mapID, roomID, eventID); ch != nil {
-		ch.Erase()
-	}
-}
-
 func (g *Game) price(productID string) string {
 	if _, ok := g.prices[productID]; ok {
 		return g.prices[productID]
