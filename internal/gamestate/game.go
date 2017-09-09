@@ -30,6 +30,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/hints"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/items"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/picture"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
@@ -42,7 +43,7 @@ type Rand interface {
 }
 
 type Game struct {
-	hints                *Hints
+	hints                *hints.Hints
 	items                *items.Items
 	variables            *variables.Variables
 	screen               *Screen
@@ -71,7 +72,7 @@ func generateDefaultRand() Rand {
 func NewGame() *Game {
 	g := &Game{
 		currentMap:           NewMap(),
-		hints:                &Hints{},
+		hints:                &hints.Hints{},
 		items:                &items.Items{},
 		variables:            &variables.Variables{},
 		screen:               &Screen{},
@@ -143,7 +144,7 @@ func (g *Game) DecodeMsgpack(dec *msgpack.Decoder) error {
 		switch k {
 		case "hints":
 			if !d.SkipCodeIfNil() {
-				g.hints = &Hints{}
+				g.hints = &hints.Hints{}
 				d.DecodeInterface(g.hints)
 			}
 		case "items":
