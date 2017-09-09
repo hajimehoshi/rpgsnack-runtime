@@ -472,6 +472,14 @@ func (g *Game) CloseAllWindows() {
 	g.windows.CloseAll()
 }
 
+func (g *Game) HasChosenWindowIndex() bool {
+	return g.windows.HasChosenIndex()
+}
+
+func (g *Game) ChosenWindowIndex() int {
+	return g.windows.ChosenIndex()
+}
+
 func (g *Game) ShowBalloon(interpreterID, mapID, roomID, eventID int, content string, balloonType data.BalloonType) bool {
 	ch := g.character(mapID, roomID, eventID)
 	if ch == nil {
@@ -541,6 +549,10 @@ func (g *Game) SetPlayerDir(dir data.Dir) {
 	g.currentMap.player.SetDir(dir)
 }
 
+func (g *Game) TransferPlayerImmediately(roomID, x, y int, interpreter *Interpreter) {
+	g.currentMap.transferPlayerImmediately(g, roomID, x, y, interpreter)
+}
+
 func (g *Game) ExecutableEventAtPlayer() *character.Character {
 	p := g.currentMap.player
 	return g.currentMap.executableEventAt(p.Position())
@@ -564,6 +576,10 @@ func (g *Game) IsScreenFading() bool {
 
 func (g *Game) FadeIn(time int) {
 	g.screen.fadeIn(time)
+}
+
+func (g *Game) FadeOut(time int) {
+	g.screen.fadeOut(time)
 }
 
 func (g *Game) RefreshEvents() error {

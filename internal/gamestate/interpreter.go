@@ -375,10 +375,10 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			i.waitingCommand = true
 			return false, nil
 		}
-		if !gameState.windows.HasChosenIndex() {
+		if !gameState.HasChosenWindowIndex() {
 			return false, nil
 		}
-		i.commandIterator.Choose(gameState.windows.ChosenIndex())
+		i.commandIterator.Choose(gameState.ChosenWindowIndex())
 		i.waitingCommand = false
 
 	case data.CommandNameSetSwitch:
@@ -413,7 +413,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			if args.Dir != data.DirNone {
 				gameState.SetPlayerDir(args.Dir)
 			}
-			gameState.Map().transferPlayerImmediately(gameState, roomID, x, y, i)
+			gameState.TransferPlayerImmediately(roomID, x, y, i)
 			i.waitingCommand = false
 			i.commandIterator.Advance()
 			return true, nil
@@ -425,7 +425,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			} else {
 				gameState.SetFadeColor(color.Black)
 			}
-			gameState.screen.fadeOut(30)
+			gameState.FadeOut(30)
 			i.waitingCommand = true
 			return false, nil
 		}
@@ -441,7 +441,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			if args.Dir != data.DirNone {
 				gameState.SetPlayerDir(args.Dir)
 			}
-			gameState.Map().transferPlayerImmediately(gameState, roomID, x, y, i)
+			gameState.TransferPlayerImmediately(roomID, x, y, i)
 			gameState.FadeIn(30)
 			return false, nil
 		}
