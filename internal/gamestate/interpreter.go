@@ -359,21 +359,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 	case data.CommandNameShowHint:
 		if !i.waitingCommand {
 			args := c.Args.(*data.CommandArgsShowHint)
-			hintId := gameState.hints.ActiveHintId()
-			// next time it shows next available hint
-			gameState.hints.ReadHint(hintId)
-			var hintText data.UUID
-			for _, h := range sceneManager.Game().Hints {
-				if h.ID == hintId {
-					hintText = h.Text
-					break
-				}
-			}
-			content := "Undefined"
-			if hintText.String() != "" {
-				content = sceneManager.Game().Texts.Get(sceneManager.Language(), hintText)
-			}
-			gameState.ShowMessage(i.id, content, args.Background, args.PositionType, args.TextAlign)
+			gameState.ShowHint(sceneManager, i.id, args.Background, args.PositionType, args.TextAlign)
 			i.waitingCommand = true
 			return false, nil
 		}
@@ -381,17 +367,11 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			return false, nil
 		}
 		i.commandIterator.Advance()
-		gameState.windows.CloseAll()
+		gameState.CloseAllWindows()
 		i.waitingCommand = false
 	case data.CommandNameShowChoices:
 		if !i.waitingCommand {
-			choices := []string{}
-			for _, id := range c.Args.(*data.CommandArgsShowChoices).ChoiceIDs {
-				choice := sceneManager.Game().Texts.Get(sceneManager.Language(), id)
-				choice = gameState.parseMessageSyntax(choice)
-				choices = append(choices, choice)
-			}
-			gameState.windows.ShowChoices(sceneManager, choices, i.id)
+			gameState.ShowChoices(sceneManager, i.id, c.Args.(*data.CommandArgsShowChoices).ChoiceIDs)
 			i.waitingCommand = true
 			return false, nil
 		}
