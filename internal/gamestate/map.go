@@ -837,9 +837,19 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, gameState *G
 	return true
 }
 
-func (m *Map) DrawCharacters(screen *ebiten.Image) {
-	chars := []*character.Character{m.player}
+func (m *Map) DrawCharacters(screen *ebiten.Image, priority data.Priority) {
+	chars := []*character.Character{}
+	if priority == data.PriorityMiddle {
+		chars = append(chars, m.player)
+	}
 	for _, e := range m.events {
+		page := m.currentPage(e)
+		if page == nil {
+			continue
+		}
+		if page.Priority != priority {
+			continue
+		}
 		chars = append(chars, e)
 	}
 	sort.Slice(chars, func(i, j int) bool {

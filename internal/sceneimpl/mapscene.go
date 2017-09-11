@@ -461,9 +461,18 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 				}
 			}
 		}
-		if k == 1 {
-			m.gameState.Map().DrawCharacters(m.tilesImage)
+		var p data.Priority
+		switch k {
+		case 0:
+			p = data.PriorityBottom
+		case 1:
+			p = data.PriorityMiddle
+		case 2:
+			p = data.PriorityTop
+		default:
+			panic("not reached")
 		}
+		m.gameState.Map().DrawCharacters(m.tilesImage, p)
 	}
 	if room.Foreground.Name != "" {
 		op := &ebiten.DrawImageOptions{}
