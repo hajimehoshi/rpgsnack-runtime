@@ -58,12 +58,12 @@ const (
 	DirLeft  Dir = 3
 )
 
-type Priority int
+type Priority string
 
 const (
-	PriorityBelowCharacters Priority = iota
-	PrioritySameAsCharacters
-	PriorityAboveCharacters
+	PriorityBottom Priority = "bottom"
+	PriorityMiddle Priority = "middle"
+	PriorityTop    Priority = "top"
 )
 
 type Trigger string

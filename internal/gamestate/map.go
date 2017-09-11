@@ -557,7 +557,7 @@ func (m *Map) Passable(through bool, x, y int, ignoreCharacters bool) bool {
 		if e.Through() {
 			continue
 		}
-		if page := m.currentPage(e); page != nil && page.Priority == data.PrioritySameAsCharacters {
+		if page := m.currentPage(e); page != nil && page.Priority == data.PriorityMiddle {
 			return false
 		}
 	}
