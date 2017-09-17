@@ -342,9 +342,6 @@ func (m *Map) Update(sceneManager *scene.Manager, gameState *Game) error {
 			return is[i].id < is[j].id
 		})
 		for _, i := range is {
-			if m.IsPlayerMovingByUserInput() && i.id != m.playerInterpreterID {
-				continue
-			}
 			if i.route && m.executingEventIDByUserInput == i.eventID {
 				continue
 			}
@@ -367,14 +364,14 @@ func (m *Map) Update(sceneManager *scene.Manager, gameState *Game) error {
 		}
 	}
 	m.player.Update()
-	if m.IsPlayerMovingByUserInput() {
-		return nil
-	}
 	if err := m.refreshEvents(gameState); err != nil {
 		return err
 	}
 	for _, e := range m.events {
 		e.Update()
+	}
+	if m.IsPlayerMovingByUserInput() {
+		return nil
 	}
 	m.tryRunAutoEvent(gameState)
 	return nil
