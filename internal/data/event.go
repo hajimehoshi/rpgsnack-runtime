@@ -34,7 +34,6 @@ type CommonEvent struct {
 type Page struct {
 	Conditions []*Condition         `json:"conditions"`
 	Image      string               `json:"image"`
-	ImageIndex int                  `json:"imageIndex"`
 	Frame      int                  `json:"frame"`
 	Dir        Dir                  `json:"dir"`
 	DirFix     bool                 `json:"dirFix"`

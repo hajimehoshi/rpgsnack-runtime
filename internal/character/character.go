@@ -17,6 +17,9 @@ package character
 import (
 	"fmt"
 	"image"
+	"log"
+	"regexp"
+	"strconv"
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/vmihailenco/msgpack"
@@ -29,21 +32,22 @@ import (
 
 const (
 	PlayerEventID = -1
-	maxFrames     = 120
+	frameInerval  = 60
 )
+
+var characterFileRegexp = regexp.MustCompile(".*_([0-9]+)_([0-9]+)")
 
 type Character struct {
 	eventID         int
 	speed           data.Speed
 	imageName       string
-	imageIndex      int
 	dir             data.Dir
 	dirFix          bool
 	stepping        bool
-	steppingCount   int
 	walking         bool
-	walkingCount    int
 	frame           int
+	steppingDir     int
+	steppingCount   int
 	x               int
 	y               int
 	idleFrameCount  int
@@ -59,8 +63,12 @@ type Character struct {
 	opacityMaxCount int
 
 	// Not dumped
-	sizeW int
-	sizeH int
+	sizeW      int
+	sizeH      int
+	dirCount   int
+	frameCount int
+	ImageW     int // TODO: Exported only for testing purpose
+	ImageH     int // TODO: Exported only for testing purpose
 }
 
 func NewPlayer(x, y int) *Character {
@@ -68,13 +76,13 @@ func NewPlayer(x, y int) *Character {
 		eventID:       PlayerEventID,
 		speed:         data.Speed3,
 		imageName:     "",
-		imageIndex:    0,
 		x:             x,
 		y:             y,
 		dir:           data.DirDown,
 		dirFix:        false,
 		visible:       true,
 		frame:         1,
+		steppingDir:   1,
 		walking:       true,
 		opacity:       255,
 		targetOpacity: 255,
@@ -91,6 +99,7 @@ func NewEvent(id int, x, y int) *Character {
 		walking:       true,
 		opacity:       255,
 		targetOpacity: 255,
+		steppingDir:   1,
 	}
 }
 
@@ -107,9 +116,6 @@ func (c *Character) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EncodeString("imageName")
 	e.EncodeString(c.imageName)
 
-	e.EncodeString("imageIndex")
-	e.EncodeInt(c.imageIndex)
-
 	e.EncodeString("dir")
 	e.EncodeInt(int(c.dir))
 
@@ -119,14 +125,14 @@ func (c *Character) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EncodeString("stepping")
 	e.EncodeBool(c.stepping)
 
-	e.EncodeString("steppingCount")
-	e.EncodeInt(c.steppingCount)
-
 	e.EncodeString("walking")
 	e.EncodeBool(c.walking)
 
-	e.EncodeString("walkingCount")
-	e.EncodeInt(c.walkingCount)
+	e.EncodeString("steppingCount")
+	e.EncodeInt(c.steppingCount)
+
+	e.EncodeString("steppingDir")
+	e.EncodeInt(c.steppingDir)
 
 	e.EncodeString("frame")
 	e.EncodeInt(c.frame)
@@ -181,20 +187,18 @@ func (c *Character) DecodeMsgpack(dec *msgpack.Decoder) error {
 			c.speed = data.Speed(d.DecodeInt())
 		case "imageName":
 			c.imageName = d.DecodeString()
-		case "imageIndex":
-			c.imageIndex = d.DecodeInt()
 		case "dir":
 			c.dir = data.Dir(d.DecodeInt())
 		case "dirFix":
 			c.dirFix = d.DecodeBool()
 		case "stepping":
 			c.stepping = d.DecodeBool()
-		case "steppingCount":
-			c.steppingCount = d.DecodeInt()
 		case "walking":
 			c.walking = d.DecodeBool()
-		case "walkingCount":
-			c.walkingCount = d.DecodeInt()
+		case "steppingCount":
+			c.steppingCount = d.DecodeInt()
+		case "steppingDir":
+			c.steppingDir = d.DecodeInt()
 		case "frame":
 			c.frame = d.DecodeInt()
 		case "x":
@@ -235,16 +239,71 @@ func (c *Character) EventID() int {
 	return c.eventID
 }
 
+func (c *Character) ImageSize() (int, int) {
+	if c.imageName == "" {
+		return 0, 0
+	}
+	if c.ImageW == 0 || c.ImageH == 0 {
+		c.ImageW, c.ImageH = assets.GetImage("characters/" + c.imageName + ".png").Size()
+	}
+	return c.ImageW, c.ImageH
+}
+
 func (c *Character) Size() (int, int) {
 	if c.imageName == "" {
 		return 0, 0
 	}
 	if c.sizeW == 0 || c.sizeH == 0 {
-		imageW, imageH := assets.GetImage("characters/" + c.imageName + ".png").Size()
-		c.sizeW = imageW / 4 / 3
-		c.sizeH = imageH / 2 / 4
+		arr := characterFileRegexp.FindStringSubmatch(c.imageName)
+
+		if len(arr) != 3 {
+			log.Printf("Invalid image is loaded: %s", c.imageName)
+			return 0, 0
+		}
+		c.sizeW, _ = strconv.Atoi(arr[1])
+		c.sizeH, _ = strconv.Atoi(arr[2])
+
+		// Validate to see if the character size is valid
+		if c.sizeW == 0 || c.sizeH == 0 || c.ImageW%c.sizeW != 0 || c.ImageH%c.sizeH != 0 {
+			panic(fmt.Sprintf("Invalid format ImageW:%d ImageH:%d sizeW:%d sizeH:%d", c.ImageW, c.ImageH, c.sizeW, c.sizeH))
+		}
 	}
 	return c.sizeW, c.sizeH
+}
+
+func (c *Character) DirCount() int {
+	if c.imageName == "" {
+		return 1
+	}
+	if c.dirCount == 0 {
+		_, ImageH := c.ImageSize()
+		_, h := c.Size()
+		if h > 0 {
+			c.dirCount = ImageH / h
+		}
+	}
+
+	return c.dirCount
+}
+
+func (c *Character) FrameCount() int {
+	if c.imageName == "" {
+		return 1
+	}
+	if c.frameCount == 0 {
+		ImageW, _ := c.ImageSize()
+		w, _ := c.Size()
+		if w > 0 {
+			c.frameCount = ImageW / w
+		}
+		return ImageW / w
+	}
+
+	return c.frameCount
+}
+
+func (c *Character) BaseFrame() int {
+	return c.FrameCount() / 2
 }
 
 func (c *Character) Position() (int, int) {
@@ -347,11 +406,14 @@ func (c *Character) SetThrough(through bool) {
 	c.through = through
 }
 
-func (c *Character) SetImage(imageName string, imageIndex int) {
+func (c *Character) SetImage(imageName string) {
 	c.imageName = imageName
-	c.imageIndex = imageIndex
+	c.ImageW = 0
+	c.ImageH = 0
 	c.sizeW = 0
 	c.sizeH = 0
+	c.dirCount = 0
+	c.frameCount = 0
 }
 
 func (c *Character) SetFrame(frame int) {
@@ -395,16 +457,14 @@ func (c *Character) UpdateWithPage(page *data.Page) {
 	c.sizeH = 0
 	if page == nil {
 		c.imageName = ""
-		c.imageIndex = 0
 		c.dirFix = false
 		c.dir = data.Dir(0)
-		c.frame = 1
+		c.frame = 0
 		c.stepping = false
 		c.speed = data.Speed3
 		return
 	}
 	c.imageName = page.Image
-	c.imageIndex = page.ImageIndex
 	c.dirFix = page.DirFix
 	c.dir = page.Dir
 	c.frame = page.Frame
@@ -412,6 +472,21 @@ func (c *Character) UpdateWithPage(page *data.Page) {
 	c.walking = page.Walking
 	c.through = page.Through
 	c.speed = page.Speed
+}
+
+func (c *Character) progressFrame(speedMultiplier int) {
+	c.steppingCount += c.speed.SteppingIncrementFrames() * speedMultiplier
+	if c.steppingCount > frameInerval {
+		c.steppingCount %= frameInerval
+		c.frame += c.steppingDir
+	}
+
+	if c.frame >= c.FrameCount()-1 {
+		c.steppingDir = -1
+	}
+	if c.frame <= 0 {
+		c.steppingDir = 1
+	}
 }
 
 func (c *Character) Update() {
@@ -426,42 +501,21 @@ func (c *Character) Update() {
 		return
 	}
 	if c.stepping {
-		c.steppingCount += c.speed.SteppingIncrementFrames()
-		c.steppingCount %= maxFrames
-		switch {
-		case c.steppingCount < maxFrames/4:
-			c.frame = 1
-		case c.steppingCount < maxFrames*2/4:
-			c.frame = 0
-		case c.steppingCount < maxFrames*3/4:
-			c.frame = 1
-		default:
-			c.frame = 2
-		}
+		c.progressFrame(1)
 	}
 	if !c.IsMoving() {
 		// Reset the character state only if it is idle for one more frame
-		if c.idleFrameCount > 0 && !c.stepping && c.walking && c.walkingCount > 0 {
-			c.walkingCount = 0
-			c.frame = 1
+		if c.idleFrameCount > 0 && !c.stepping && c.walking && c.steppingCount > 0 {
+			c.steppingCount = 0
+			c.frame = c.BaseFrame()
 		}
 		c.idleFrameCount++
 		return
 	}
 	if !c.stepping && c.walking {
-		c.walkingCount += c.speed.SteppingIncrementFrames()
-		c.walkingCount %= maxFrames
-		switch {
-		case c.walkingCount < maxFrames/4:
-			c.frame = 1
-		case c.walkingCount < maxFrames*2/4:
-			c.frame = 0
-		case c.walkingCount < maxFrames*3/4:
-			c.frame = 1
-		default:
-			c.frame = 2
-		}
+		c.progressFrame(2)
 	}
+
 	c.idleFrameCount = 0
 	c.moveCount--
 	if c.moveCount == 0 {
@@ -483,6 +537,21 @@ func (c *Character) Update() {
 	}
 }
 
+func (c *Character) dirToIndex(dir data.Dir) int {
+	switch c.dir {
+	case data.DirUp:
+		return 0
+	case data.DirRight:
+		return 1
+	case data.DirDown:
+		return 2
+	case data.DirLeft:
+		return 3
+	}
+
+	return 0
+}
+
 func (c *Character) Draw(screen *ebiten.Image) {
 	if c.imageName == "" || !c.visible || c.erased {
 		return
@@ -491,32 +560,33 @@ func (c *Character) Draw(screen *ebiten.Image) {
 	x, y := c.DrawPosition()
 	op.GeoM.Translate(float64(x), float64(y))
 	charW, charH := c.Size()
-	const characterXNum = 3
-	const characterYNum = 4
-	sx := (c.imageIndex % 4) * characterXNum * charW
-	sy := (c.imageIndex / 4) * characterYNum * charH
-	switch c.frame {
-	case 0:
+	dirIndex := c.dirToIndex(c.dir)
+
+	sx := c.frame * charW
+	sy := 0
+	scaleX := 1.0
+	scaleY := 1.0
+	switch c.DirCount() {
 	case 1:
-		sx += charW
 	case 2:
-		sx += 2 * charW
+		sy = dirIndex / 2 * charH
+	case 3:
+		if dirIndex == 4 {
+			// Reuse the second frame and mirror it
+			sy = 2 * charH
+			scaleX = -1.0
+		} else {
+			sy = dirIndex * charH
+		}
+	case 4:
+		sy = dirIndex * charH
 	default:
-		panic("not reached")
+		panic(fmt.Sprintf("not supported DirCount %d", c.DirCount()))
 	}
-	switch c.dir {
-	case data.DirUp:
-	case data.DirRight:
-		sy += charH
-	case data.DirDown:
-		sy += 2 * charH
-	case data.DirLeft:
-		sy += 3 * charH
-	default:
-		panic("not reached")
-	}
+
 	r := image.Rect(sx, sy, sx+charW, sy+charH)
 	op.SourceRect = &r
 	op.ColorM.Scale(1, 1, 1, float64(c.opacity)/255)
+	op.GeoM.Scale(scaleX, scaleY)
 	screen.DrawImage(assets.GetImage("characters/"+c.imageName+".png"), op)
 }
