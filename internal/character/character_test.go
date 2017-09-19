@@ -41,8 +41,7 @@ func TestCharacterSizeInvalid(t *testing.T) {
 func TestCharacterFrameCount(t *testing.T) {
 	character := Character{}
 	character.SetImage("test_24_32")
-	character.ImageW = 48
-	character.ImageH = 128
+	character.SetSizeForTesting(48, 128)
 
 	frameCount := character.FrameCount()
 	if frameCount != 2 {
@@ -58,8 +57,7 @@ func TestCharacterFrameCount(t *testing.T) {
 func TestCharacterDirCount(t *testing.T) {
 	character := Character{}
 	character.SetImage("test_24_32")
-	character.ImageW = 48
-	character.ImageH = 128
+	character.SetSizeForTesting(48, 128)
 
 	frameCount := character.DirCount()
 	if frameCount != 4 {

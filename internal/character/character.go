@@ -67,8 +67,8 @@ type Character struct {
 	sizeH      int
 	dirCount   int
 	frameCount int
-	ImageW     int // TODO: Exported only for testing purpose
-	ImageH     int // TODO: Exported only for testing purpose
+	imageW     int
+	imageH     int
 }
 
 func NewPlayer(x, y int) *Character {
@@ -101,6 +101,11 @@ func NewEvent(id int, x, y int) *Character {
 		targetOpacity: 255,
 		steppingDir:   1,
 	}
+}
+
+func (c *Character) SetSizeForTesting(w, h int) {
+	c.imageW = w
+	c.imageH = h
 }
 
 func (c *Character) EncodeMsgpack(enc *msgpack.Encoder) error {
@@ -243,10 +248,10 @@ func (c *Character) ImageSize() (int, int) {
 	if c.imageName == "" {
 		return 0, 0
 	}
-	if c.ImageW == 0 || c.ImageH == 0 {
-		c.ImageW, c.ImageH = assets.GetImage("characters/" + c.imageName + ".png").Size()
+	if c.imageW == 0 || c.imageH == 0 {
+		c.imageW, c.imageH = assets.GetImage("characters/" + c.imageName + ".png").Size()
 	}
-	return c.ImageW, c.ImageH
+	return c.imageW, c.imageH
 }
 
 func (c *Character) Size() (int, int) {
@@ -264,8 +269,8 @@ func (c *Character) Size() (int, int) {
 		c.sizeH, _ = strconv.Atoi(arr[2])
 
 		// Validate to see if the character size is valid
-		if c.sizeW == 0 || c.sizeH == 0 || c.ImageW%c.sizeW != 0 || c.ImageH%c.sizeH != 0 {
-			panic(fmt.Sprintf("Invalid format ImageW:%d ImageH:%d sizeW:%d sizeH:%d", c.ImageW, c.ImageH, c.sizeW, c.sizeH))
+		if c.sizeW == 0 || c.sizeH == 0 || c.imageW%c.sizeW != 0 || c.imageH%c.sizeH != 0 {
+			panic(fmt.Sprintf("Invalid format imageW:%d imageH:%d sizeW:%d sizeH:%d", c.imageW, c.imageH, c.sizeW, c.sizeH))
 		}
 	}
 	return c.sizeW, c.sizeH
@@ -276,10 +281,10 @@ func (c *Character) DirCount() int {
 		return 1
 	}
 	if c.dirCount == 0 {
-		_, ImageH := c.ImageSize()
+		_, imageH := c.ImageSize()
 		_, h := c.Size()
 		if h > 0 {
-			c.dirCount = ImageH / h
+			c.dirCount = imageH / h
 		}
 	}
 
@@ -291,12 +296,12 @@ func (c *Character) FrameCount() int {
 		return 1
 	}
 	if c.frameCount == 0 {
-		ImageW, _ := c.ImageSize()
+		imageW, _ := c.ImageSize()
 		w, _ := c.Size()
 		if w > 0 {
-			c.frameCount = ImageW / w
+			c.frameCount = imageW / w
 		}
-		return ImageW / w
+		return imageW / w
 	}
 
 	return c.frameCount
@@ -408,8 +413,8 @@ func (c *Character) SetThrough(through bool) {
 
 func (c *Character) SetImage(imageName string) {
 	c.imageName = imageName
-	c.ImageW = 0
-	c.ImageH = 0
+	c.imageW = 0
+	c.imageH = 0
 	c.sizeW = 0
 	c.sizeH = 0
 	c.dirCount = 0
