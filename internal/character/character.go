@@ -270,7 +270,7 @@ func (c *Character) Size() (int, int) {
 
 		// Validate to see if the character size is valid
 		if c.sizeW == 0 || c.sizeH == 0 || c.imageW%c.sizeW != 0 || c.imageH%c.sizeH != 0 {
-			panic(fmt.Sprintf("Invalid format imageW:%d imageH:%d sizeW:%d sizeH:%d", c.imageW, c.imageH, c.sizeW, c.sizeH))
+			panic(fmt.Sprintf("Invalid format imageName:%s imageW:%d imageH:%d sizeW:%d sizeH:%d", c.imageName, c.imageW, c.imageH, c.sizeW, c.sizeH))
 		}
 	}
 	return c.sizeW, c.sizeH
@@ -458,6 +458,8 @@ func (c *Character) Erased() bool {
 }
 
 func (c *Character) UpdateWithPage(page *data.Page) {
+	c.imageW = 0
+	c.imageH = 0
 	c.sizeW = 0
 	c.sizeH = 0
 	if page == nil {
