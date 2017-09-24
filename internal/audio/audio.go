@@ -138,14 +138,14 @@ func (a *audio) PlayBGM(name string, volume float64) error {
 			bin := assets.GetResource(mp3Path)
 			s, err := mp3.Decode(a.context, eaudio.BytesReadSeekCloser(bin))
 			if err != nil {
-				return err
+				return fmt.Errorf("audio: decode error: %s, %v", mp3Path, err)
 			}
 			ss = eaudio.NewInfiniteLoop(s, s.Size())
 		} else if assets.Exists(wavPath) {
 			bin := assets.GetResource(wavPath)
 			s, err := wav.Decode(a.context, eaudio.BytesReadSeekCloser(bin))
 			if err != nil {
-				return err
+				return fmt.Errorf("audio: decode error: %s, %v", wavPath, err)
 			}
 			ss = eaudio.NewInfiniteLoop(s, s.Size())
 		} else {
