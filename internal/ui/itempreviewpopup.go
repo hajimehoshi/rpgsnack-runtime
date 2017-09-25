@@ -90,7 +90,7 @@ func (i *ItemPreviewPopup) SetItem(item *data.Item) {
 		i.previewButton.Height = 120
 
 	} else {
-		i.previewButton.Image = assets.GetImage("items/icon/" + i.item.Icon + ".png")
+		i.previewButton.Image = assets.GetIconImage(i.item.Icon + ".png")
 		i.previewButton.ScaleX = 6
 		i.previewButton.ScaleY = 6
 		i.previewButton.AnchorX = 0.5

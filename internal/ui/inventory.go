@@ -157,7 +157,7 @@ func (i *Inventory) Draw(screen *ebiten.Image) {
 			screen.DrawImage(assets.GetImage("system/card_frame.png"), op)
 		}
 		op.GeoM.Translate(3, 3)
-		screen.DrawImage(assets.GetImage("items/icon/"+item.Icon+".png"), op)
+		screen.DrawImage(assets.GetIconImage(item.Icon+".png"), op)
 	}
 
 	i.activeItemBoxButton.Draw(screen)
@@ -170,7 +170,7 @@ func (i *Inventory) Draw(screen *ebiten.Image) {
 		op = &ebiten.DrawImageOptions{}
 		op.GeoM.Scale(consts.TileScale, consts.TileScale)
 		op.GeoM.Translate(float64(i.X+buttonOffsetX+14), float64(i.Y+buttonOffsetY+14+dy))
-		screen.DrawImage(assets.GetImage("items/icon/"+activeItem.Icon+".png"), op)
+		screen.DrawImage(assets.GetIconImage(activeItem.Icon+".png"), op)
 		if len(activeItem.Commands) > 0 {
 			op = &ebiten.DrawImageOptions{}
 			op.GeoM.Scale(consts.TileScale, consts.TileScale)

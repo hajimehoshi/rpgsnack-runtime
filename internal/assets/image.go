@@ -42,3 +42,8 @@ func GetImage(key string) *ebiten.Image {
 	}
 	return img
 }
+
+func GetIconImage(key string) *ebiten.Image {
+	iconPath := path.Join("icons", key)
+	return GetImage(iconPath)
+}
