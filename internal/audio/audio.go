@@ -72,7 +72,7 @@ type audio struct {
 }
 
 func newAudio() (*audio, error) {
-	context, err := eaudio.NewContext(22050)
+	context, err := eaudio.NewContext(44100)
 	if err != nil {
 		return nil, err
 	}
