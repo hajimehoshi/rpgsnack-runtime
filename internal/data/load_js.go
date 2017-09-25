@@ -19,7 +19,7 @@ package data
 import (
 	"encoding/base64"
 	"log"
-	"path"
+	"strings"
 
 	"github.com/gopherjs/gopherjs/js"
 )
@@ -60,9 +60,13 @@ func fetchProgress() <-chan []uint8 {
 }
 
 func loadRawData(projectPath string) (*rawData, error) {
+	// projectPath might be an absolute path, and in this case path.Join doesn't work.
+	for strings.HasSuffix(projectPath, "/") {
+		projectPath = projectPath[:len(projectPath)-1]
+	}
 	return &rawData{
-		Project:   <-fetch(path.Join(projectPath, "project.json")),
-		Assets:    <-fetch(path.Join(projectPath, "assets.msgpack")),
+		Project:   <-fetch(projectPath + "/project.json"),
+		Assets:    <-fetch(projectPath + "/assets.msgpack"),
 		Progress:  <-fetchProgress(),
 		Purchases: nil, // TODO: Implement this
 		Language:  []uint8(`"en"`),
