@@ -89,13 +89,11 @@ func (g *Game) Update(screen *ebiten.Image) error {
 func (g *Game) update() error {
 	if g.loadingCh != nil {
 		select {
-		case err, ok := <-g.loadingCh:
+		case err := <-g.loadingCh:
 			if err != nil {
 				return err
 			}
-			if !ok {
-				g.loadingCh = nil
-			}
+			g.loadingCh = nil
 			d := g.loadedData
 			assets.Set(d.Assets)
 			g.sceneManager = scene.NewManager(g.width, g.height, g.requester, d.Game, d.Progress, d.Purchases, d.Language)
