@@ -68,7 +68,7 @@ func loadRawData(projectPath string) (*rawData, error) {
 		Project:   <-fetch(projectPath + "/project.json"),
 		Assets:    <-fetch(projectPath + "/assets.msgpack"),
 		Progress:  <-fetchProgress(),
-		Purchases: nil, // TODO: Implement this
-		Language:  []uint8(`"en"`),
+		Purchases: nil,             // TODO: Implement this
+		Language:  []uint8(`"en"`), // TODO: Use OS's default language
 	}, nil
 }
