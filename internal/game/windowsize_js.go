@@ -17,32 +17,13 @@
 package game
 
 import (
-	"github.com/gopherjs/gopherjs/js"
 	"github.com/hajimehoshi/ebiten"
 )
 
-func min(a, b float64) float64 {
-	if a < b {
-		return a
-	}
-	return b
-}
-
 func Scale() float64 {
-	window := js.Global.Get("window")
-	windowWidth := window.Get("innerWidth").Float()
-	windowHeight := window.Get("innerHeight").Float()
-	// Now window size is fixed. Adjust these values when necessary.
-	width, height := 480, 720
-	return min(windowWidth/float64(width), windowHeight/float64(height))
-}
-
-func adjustWindowSize() {
-	ebiten.SetScreenScale(Scale())
+	return 1
 }
 
 func init() {
-	js.Global.Get("window").Call("addEventListener", "resize", func() {
-		adjustWindowSize()
-	})
+	ebiten.SetFullscreen(true)
 }
