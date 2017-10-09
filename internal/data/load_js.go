@@ -32,6 +32,7 @@ import (
 // TODO: We should remove this hardcoded value in the future
 const storageUrl = "https://storage.googleapis.com/rpgsnack-e85d3.appspot.com"
 
+// TODO: Change the API from `web`.
 var gameVersionUrlRegexp = regexp.MustCompile("(.*)/web/(.+)")
 
 type manifestBody struct {
@@ -119,7 +120,7 @@ func loadRawData(projectPath string) (*rawData, error) {
 	arr := gameVersionUrlRegexp.FindStringSubmatch(href)
 
 	if len(arr) != 3 {
-		panic(fmt.Sprintf("Invalid URL: %s", arr))
+		panic(fmt.Sprintf("data: invalid URL: %s", arr))
 	}
 
 	host := arr[1]
