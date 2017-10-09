@@ -76,8 +76,15 @@ func fetchProgress() <-chan []uint8 {
 	return ch
 }
 
-func loadAssets(gameVersion string) ([]uint8, []uint8, error) {
-	mBinary := <-fetch(fmt.Sprintf("/games/%s", gameVersion))
+func loadAssets(gameVersion string, useDefaultURL bool) ([]uint8, []uint8, error) {
+	// TODO: Stop hard-coding URLs.
+	const defaultURL = "https://rpgsnack-e85d3.appspot.com"
+
+	path := fmt.Sprintf("/games/%s", gameVersion)
+	if useDefaultURL {
+		path = defaultURL + path
+	}
+	mBinary := <-fetch(path)
 
 	mr := manifestResponse{}
 	if err := unmarshalJSON(mBinary, &mr); err != nil {
@@ -142,7 +149,11 @@ func loadRawData(projectPath string) (*rawData, error) {
 		return nil, err
 	}
 
-	project, assets, err := loadAssets(gameVersion)
+	useDefaultURL := false
+	if u.Hostname() == "localhost" || u.Hostname() == "127.0.0.1" {
+		useDefaultURL = true
+	}
+	project, assets, err := loadAssets(gameVersion, useDefaultURL)
 	if err != nil {
 		return nil, err
 	}
