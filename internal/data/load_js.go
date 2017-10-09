@@ -18,11 +18,29 @@ package data
 
 import (
 	"encoding/base64"
+	"fmt"
 	"log"
+	"regexp"
 	"strings"
+	"sync"
+
+	"github.com/vmihailenco/msgpack"
 
 	"github.com/gopherjs/gopherjs/js"
 )
+
+// TODO: We should remove this hardcoded value in the future
+const storageUrl = "https://storage.googleapis.com/rpgsnack-e85d3.appspot.com"
+
+var gameVersionUrlRegexp = regexp.MustCompile("(.*)/web/(.+)")
+
+type manifestBody struct {
+	Manifest map[string][]string `json:"manifest"`
+}
+
+type manifestResponse struct {
+	Body *manifestBody `json:"body"`
+}
 
 func fetch(path string) <-chan []uint8 {
 	// TODO: Use fetch API in the future.
@@ -59,14 +77,62 @@ func fetchProgress() <-chan []uint8 {
 	return ch
 }
 
-func loadRawData(projectPath string) (*rawData, error) {
-	// projectPath might be an absolute path, and in this case path.Join doesn't work.
-	for strings.HasSuffix(projectPath, "/") {
-		projectPath = projectPath[:len(projectPath)-1]
+func loadAssets(host string, gameVersion string) ([]uint8, []uint8, error) {
+	mBinary := <-fetch(fmt.Sprintf("%s/games/%s", host, gameVersion))
+
+	mr := manifestResponse{}
+	if err := unmarshalJSON(mBinary, &mr); err != nil {
+		return nil, nil, fmt.Errorf("unmarshalJSON Error %s", err)
 	}
+
+	var projectData []uint8
+	assetData := make(map[string][]uint8, len(mr.Body.Manifest))
+
+	var wg sync.WaitGroup
+	for key, paths := range mr.Body.Manifest {
+		for _, value := range paths {
+			wg.Add(1)
+			go func(key, value string) {
+				defer wg.Done()
+				if value == "project.json" {
+					projectData = <-fetch(fmt.Sprintf("%s/%s", storageUrl, key))
+				} else {
+					localPath := strings.Replace(value, "assets/", "", -1)
+					assetData[localPath] = <-fetch(fmt.Sprintf("%s/%s", storageUrl, key))
+				}
+			}(key, value)
+		}
+	}
+
+	wg.Wait()
+
+	b, err := msgpack.Marshal(assetData)
+	if err != nil {
+		return nil, nil, fmt.Errorf("MsgPack Error %s", err)
+	}
+
+	return projectData, b, nil
+}
+
+func loadRawData(projectPath string) (*rawData, error) {
+	href := js.Global.Get("window").Get("location").Get("href").String()
+	arr := gameVersionUrlRegexp.FindStringSubmatch(href)
+
+	if len(arr) != 3 {
+		panic(fmt.Sprintf("Invalid URL: %s", arr))
+	}
+
+	host := arr[1]
+	gameVersion := arr[2]
+
+	project, assets, err := loadAssets(host, gameVersion)
+	if err != nil {
+		return nil, err
+	}
+
 	return &rawData{
-		Project:   <-fetch(projectPath + "/project.json"),
-		Assets:    <-fetch(projectPath + "/assets.msgpack"),
+		Project:   project,
+		Assets:    assets,
 		Progress:  <-fetchProgress(),
 		Purchases: nil,             // TODO: Implement this
 		Language:  []uint8(`"en"`), // TODO: Use OS's default language
