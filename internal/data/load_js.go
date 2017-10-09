@@ -116,6 +116,18 @@ func loadAssets(host string, gameVersion string) ([]uint8, []uint8, error) {
 // TODO: Change the API from `web`.
 var gameVersionUrlRegexp = regexp.MustCompile(`\A/web/([0-9]+)\z`)
 
+func versionFromURL(url *url.URL) (string, error) {
+	v := url.Query().Get("version")
+	if v != "" {
+		return v, nil
+	}
+	arr := gameVersionUrlRegexp.FindStringSubmatch(url.Path)
+	if len(arr) == 2 {
+		return arr[1], nil
+	}
+	return "", fmt.Errorf("data: invalid URL: version is not specified?: %s", url)
+}
+
 func loadRawData(projectPath string) (*rawData, error) {
 	// projectPath is ignored so far.
 
@@ -125,15 +137,9 @@ func loadRawData(projectPath string) (*rawData, error) {
 		return nil, err
 	}
 
-	arr := gameVersionUrlRegexp.FindStringSubmatch(u.Path)
-	gameVersion := ""
-	if len(arr) == 2 {
-		gameVersion = arr[1]
-	} else {
-		gameVersion = u.Query().Get("version")
-		if gameVersion == "" {
-			panic(fmt.Sprintf("data: invalid URL: version is not specified?: %s", u.String()))
-		}
+	gameVersion, err := versionFromURL(u)
+	if err != nil {
+		return nil, err
 	}
 
 	project, assets, err := loadAssets(u.Host, gameVersion)
