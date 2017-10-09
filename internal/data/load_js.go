@@ -76,8 +76,8 @@ func fetchProgress() <-chan []uint8 {
 	return ch
 }
 
-func loadAssets(host string, gameVersion string) ([]uint8, []uint8, error) {
-	mBinary := <-fetch(fmt.Sprintf("%s/games/%s", host, gameVersion))
+func loadAssets(gameVersion string) ([]uint8, []uint8, error) {
+	mBinary := <-fetch(fmt.Sprintf("/games/%s", gameVersion))
 
 	mr := manifestResponse{}
 	if err := unmarshalJSON(mBinary, &mr); err != nil {
@@ -142,7 +142,7 @@ func loadRawData(projectPath string) (*rawData, error) {
 		return nil, err
 	}
 
-	project, assets, err := loadAssets(u.Host, gameVersion)
+	project, assets, err := loadAssets(gameVersion)
 	if err != nil {
 		return nil, err
 	}
