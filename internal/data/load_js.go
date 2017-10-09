@@ -114,7 +114,7 @@ func loadAssets(host string, gameVersion string) ([]uint8, []uint8, error) {
 }
 
 // TODO: Change the API from `web`.
-var gameVersionUrlRegexp = regexp.MustCompile(`/web/([0-9]+)`)
+var gameVersionUrlRegexp = regexp.MustCompile(`\A/web/([0-9]+)\z`)
 
 func loadRawData(projectPath string) (*rawData, error) {
 	// projectPath is ignored so far.
@@ -125,7 +125,7 @@ func loadRawData(projectPath string) (*rawData, error) {
 		return nil, err
 	}
 
-	arr := gameVersionUrlRegexp.FindStringSubmatch(href)
+	arr := gameVersionUrlRegexp.FindStringSubmatch(u.Path)
 	gameVersion := ""
 	if len(arr) == 2 {
 		gameVersion = arr[1]
