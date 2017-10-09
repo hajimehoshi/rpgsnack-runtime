@@ -20,6 +20,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"log"
+	"net/url"
 	"regexp"
 	"strings"
 	"sync"
@@ -31,9 +32,6 @@ import (
 
 // TODO: We should remove this hardcoded value in the future
 const storageUrl = "https://storage.googleapis.com/rpgsnack-e85d3.appspot.com"
-
-// TODO: Change the API from `web`.
-var gameVersionUrlRegexp = regexp.MustCompile("(.*)/web/(.+)")
 
 type manifestBody struct {
 	Manifest map[string][]string `json:"manifest"`
@@ -115,18 +113,30 @@ func loadAssets(host string, gameVersion string) ([]uint8, []uint8, error) {
 	return projectData, b, nil
 }
 
-func loadRawData(projectPath string) (*rawData, error) {
-	href := js.Global.Get("window").Get("location").Get("href").String()
-	arr := gameVersionUrlRegexp.FindStringSubmatch(href)
+// TODO: Change the API from `web`.
+var gameVersionUrlRegexp = regexp.MustCompile(`/web/([0-9]+)`)
 
-	if len(arr) != 3 {
-		panic(fmt.Sprintf("data: invalid URL: %s", arr))
+func loadRawData(projectPath string) (*rawData, error) {
+	// projectPath is ignored so far.
+
+	href := js.Global.Get("window").Get("location").Get("href").String()
+	u, err := url.Parse(href)
+	if err != nil {
+		return nil, err
 	}
 
-	host := arr[1]
-	gameVersion := arr[2]
+	arr := gameVersionUrlRegexp.FindStringSubmatch(href)
+	gameVersion := ""
+	if len(arr) == 2 {
+		gameVersion = arr[1]
+	} else {
+		gameVersion = u.Query().Get("version")
+		if gameVersion == "" {
+			panic(fmt.Sprintf("data: invalid URL: version is not specified?: %s", u.String()))
+		}
+	}
 
-	project, assets, err := loadAssets(host, gameVersion)
+	project, assets, err := loadAssets(u.Host, gameVersion)
 	if err != nil {
 		return nil, err
 	}
