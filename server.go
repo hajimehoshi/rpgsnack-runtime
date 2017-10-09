@@ -86,18 +86,14 @@ window.addEventListener('load', () => {
 	defer f.Close()
 
 	w.Header().Set("Content-Type", "text/javascript")
-	if _, err := io.Copy(w, f); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	w.WriteHeader(http.StatusOK)
+	io.Copy(w, f)
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	const indexHtml = `<!DOCTYPE html>
 <script src="main.js"></script>
 `
-
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	if strings.HasSuffix(r.URL.Path, "/main.js") {
 		serveMainJS(w, r)
@@ -116,10 +112,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	if strings.HasPrefix(r.URL.Path, "/web/") {
 		w.Header().Set("Content-Type", "text/html")
-		if _, err := io.WriteString(w, indexHtml); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+		w.WriteHeader(http.StatusOK)
+		io.WriteString(w, indexHtml)
+		return
 	}
 
 	http.NotFound(w, r)
