@@ -17,14 +17,7 @@
 
 package game
 
-import (
-	"fmt"
-)
-
 func NewWithDefaultRequester(width, height int) (*Game, error) {
-	if projectPath() == "" {
-		return nil, fmt.Errorf("game: no project directory is specified")
-	}
 	g := &Game{
 		projectPath: projectPath(),
 		width:       width,
