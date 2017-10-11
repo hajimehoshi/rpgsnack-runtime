@@ -96,7 +96,7 @@ func (m *MapScene) initUI() {
 	m.cameraButton = ui.NewImageButton(0, 0, camera, camera, "click")
 	m.screenShotImage = screenShotImage
 	m.screenShotDialog = ui.NewDialog(0, 4, 152, 232)
-	m.screenShotDialog.AddChild(ui.NewImage(8, 8, 1.0/consts.TileScale/2, m.screenShotImage))
+	m.screenShotDialog.AddChild(ui.NewImageView(8, 8, 1.0/consts.TileScale/2, m.screenShotImage))
 	m.titleButton = ui.NewButton(0, 2, 40, 12, "click")
 
 	// TODO: Implement the camera functionality later

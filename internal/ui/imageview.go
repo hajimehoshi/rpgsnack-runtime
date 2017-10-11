@@ -20,15 +20,15 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 )
 
-type Image struct {
+type ImageView struct {
 	X     int
 	Y     int
 	Scale float64
 	image *ebiten.Image
 }
 
-func NewImage(x, y int, scale float64, image *ebiten.Image) *Image {
-	return &Image{
+func NewImageView(x, y int, scale float64, image *ebiten.Image) *ImageView {
+	return &ImageView{
 		X:     x,
 		Y:     y,
 		Scale: scale,
@@ -36,13 +36,13 @@ func NewImage(x, y int, scale float64, image *ebiten.Image) *Image {
 	}
 }
 
-func (i *Image) Update() {
+func (i *ImageView) Update() {
 }
 
-func (i *Image) UpdateAsChild(visible bool, offsetX, offsetY int) {
+func (i *ImageView) UpdateAsChild(visible bool, offsetX, offsetY int) {
 }
 
-func (i *Image) Draw(screen *ebiten.Image) {
+func (i *ImageView) Draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(i.Scale*consts.TileScale, i.Scale*consts.TileScale)
 	op.GeoM.Translate(float64(i.X)*consts.TileScale, float64(i.Y)*consts.TileScale)
