@@ -39,9 +39,9 @@ type Button struct {
 	Visible       bool
 	Text          string
 	Disabled      bool
-	Image         *ebiten.Image
-	PressedImage  *ebiten.Image
-	DisabledImage *ebiten.Image
+	Image         *ImagePart
+	PressedImage  *ImagePart
+	DisabledImage *ImagePart
 	pressing      bool
 	pressed       bool
 	soundName     string
@@ -60,7 +60,7 @@ func NewButton(x, y, width, height int, soundName string) *Button {
 	}
 }
 
-func NewImageButton(x, y int, image *ebiten.Image, pressedImage *ebiten.Image, soundName string) *Button {
+func NewImageButton(x, y int, image *ImagePart, pressedImage *ImagePart, soundName string) *Button {
 	w, h := image.Size()
 	return &Button{
 		X:             x,
@@ -145,30 +145,31 @@ func (b *Button) Draw(screen *ebiten.Image) {
 		return
 	}
 	if b.Image != nil {
-		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(-float64(b.Width)*b.AnchorX, -float64(b.Height)*b.AnchorY)
-		op.GeoM.Scale(float64(b.ScaleX*consts.TileScale), float64(b.ScaleY*consts.TileScale))
-		op.GeoM.Translate(float64(b.X*consts.TileScale), float64(b.Y*consts.TileScale))
+		geoM := &ebiten.GeoM{}
+		geoM.Translate(-float64(b.Width)*b.AnchorX, -float64(b.Height)*b.AnchorY)
+		geoM.Scale(float64(b.ScaleX*consts.TileScale), float64(b.ScaleY*consts.TileScale))
+		geoM.Translate(float64(b.X*consts.TileScale), float64(b.Y*consts.TileScale))
 
+		colorM := &ebiten.ColorM{}
 		image := b.Image
 		if b.Disabled {
 			if b.DisabledImage == nil {
-				op.ColorM.ChangeHSV(0, 0, 1)
-				op.ColorM.Scale(0.5, 0.5, 0.5, 1)
+				colorM.ChangeHSV(0, 0, 1)
+				colorM.Scale(0.5, 0.5, 0.5, 1)
 			} else {
 				image = b.DisabledImage
 			}
 		} else {
 			if b.pressing {
 				if b.PressedImage == nil {
-					op.ColorM.ChangeHSV(0, 0, 1)
-					op.ColorM.Scale(0.5, 0.5, 0.5, 1)
+					colorM.ChangeHSV(0, 0, 1)
+					colorM.Scale(0.5, 0.5, 0.5, 1)
 				} else {
 					image = b.PressedImage
 				}
 			}
 		}
-		screen.DrawImage(image, op)
+		image.Draw(screen, geoM, colorM)
 		return
 	}
 	img := assets.GetImage("system/9patch_test_off.png")

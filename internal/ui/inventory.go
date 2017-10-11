@@ -54,8 +54,8 @@ const (
 )
 
 func NewInventory(x, y int) *Inventory {
-	button := NewImageButton(buttonOffsetX/consts.TileScale, (y+buttonOffsetY)/consts.TileScale, assets.GetImage("system/active_item_box.png"), assets.GetImage("system/active_item_box_pressed.png"), "click")
-	button.DisabledImage = assets.GetImage("system/active_item_box_disabled.png")
+	button := NewImageButton(buttonOffsetX/consts.TileScale, (y+buttonOffsetY)/consts.TileScale, NewImagePart(assets.GetImage("system/active_item_box.png")), NewImagePart(assets.GetImage("system/active_item_box_pressed.png")), "click")
+	button.DisabledImage = NewImagePart(assets.GetImage("system/active_item_box_disabled.png"))
 	return &Inventory{
 		X:                   x,
 		Y:                   y,

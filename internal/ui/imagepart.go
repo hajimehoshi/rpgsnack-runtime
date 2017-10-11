@@ -39,6 +39,13 @@ func NewImagePartWithRect(i *ebiten.Image, srcX, srcY, srcWidth, srcHeight int) 
 	}
 }
 
+func (i *ImagePart) Size() (int, int) {
+	if i.srcRect == nil {
+		return i.image.Size()
+	}
+	return i.srcRect.Max.X - i.srcRect.Min.X, i.srcRect.Max.Y - i.srcRect.Min.Y
+}
+
 func (i *ImagePart) Draw(screen *ebiten.Image, geoM *ebiten.GeoM, colorM *ebiten.ColorM) {
 	// TODO support NinePatch Drawing
 	op := &ebiten.DrawImageOptions{}

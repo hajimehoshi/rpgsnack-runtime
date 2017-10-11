@@ -93,7 +93,8 @@ func (m *MapScene) initUI() {
 	screenShotImage, _ := ebiten.NewImage(480, 720, ebiten.FilterLinear)
 	camera, _ := ebiten.NewImage(12, 12, ebiten.FilterNearest)
 	camera.Fill(color.RGBA{0xff, 0, 0, 0xff})
-	m.cameraButton = ui.NewImageButton(0, 0, camera, camera, "click")
+	cameraImagePart := ui.NewImagePart(camera)
+	m.cameraButton = ui.NewImageButton(0, 0, cameraImagePart, cameraImagePart, "click")
 	m.screenShotImage = screenShotImage
 	m.screenShotDialog = ui.NewDialog(0, 4, 152, 232)
 	m.screenShotDialog.AddChild(ui.NewImageView(8, 8, 1.0/consts.TileScale/2, m.screenShotImage))
