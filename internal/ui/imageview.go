@@ -24,10 +24,10 @@ type ImageView struct {
 	X     int
 	Y     int
 	Scale float64
-	image *ebiten.Image
+	image *ImagePart
 }
 
-func NewImageView(x, y int, scale float64, image *ebiten.Image) *ImageView {
+func NewImageView(x, y int, scale float64, image *ImagePart) *ImageView {
 	return &ImageView{
 		X:     x,
 		Y:     y,
@@ -43,8 +43,8 @@ func (i *ImageView) UpdateAsChild(visible bool, offsetX, offsetY int) {
 }
 
 func (i *ImageView) Draw(screen *ebiten.Image) {
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(i.Scale*consts.TileScale, i.Scale*consts.TileScale)
-	op.GeoM.Translate(float64(i.X)*consts.TileScale, float64(i.Y)*consts.TileScale)
-	screen.DrawImage(i.image, op)
+	geoM := &ebiten.GeoM{}
+	geoM.Scale(i.Scale*consts.TileScale, i.Scale*consts.TileScale)
+	geoM.Translate(float64(i.X)*consts.TileScale, float64(i.Y)*consts.TileScale)
+	i.image.Draw(screen, geoM, &ebiten.ColorM{})
 }
