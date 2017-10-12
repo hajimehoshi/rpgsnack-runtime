@@ -72,7 +72,7 @@ func serveMainJS(w http.ResponseWriter, r *http.Request) {
 		js := `
 window.addEventListener('load', () => {
   document.body.innerHTML="<pre style='white-space: pre-wrap;'><code>` + t + `</code></pre>";
-}`
+})`
 		w.Header().Set("Content-Type", "text/javascript")
 		io.WriteString(w, js)
 		return
