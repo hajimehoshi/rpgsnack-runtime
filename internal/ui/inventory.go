@@ -249,17 +249,21 @@ func (i *Inventory) Draw(screen *ebiten.Image) {
 
 	centerX := frameXMargin + scrollBarWidth/2
 	left := int(float64(centerX) - float64(i.pageCount())/2*dotSpace)
-	for index := 0; index < i.pageCount(); index++ {
-		var imagePart *ImagePart
-		if index == i.pageIndex {
-			imagePart = i.activeDot
-		} else {
-			imagePart = i.dot
+
+	// We only show dots UI if there are more than one page
+	if i.pageCount() > 1 {
+		for index := 0; index < i.pageCount(); index++ {
+			var imagePart *ImagePart
+			if index == i.pageIndex {
+				imagePart = i.activeDot
+			} else {
+				imagePart = i.dot
+			}
+			geoM := &ebiten.GeoM{}
+			geoM.Translate(float64(left+index*dotSpace), float64(i.Y/consts.TileScale+26))
+			geoM.Scale(consts.TileScale, consts.TileScale)
+			imagePart.Draw(screen, geoM, &ebiten.ColorM{})
 		}
-		geoM := &ebiten.GeoM{}
-		geoM.Translate(float64(left+index*dotSpace), float64(i.Y/consts.TileScale+26))
-		geoM.Scale(consts.TileScale, consts.TileScale)
-		imagePart.Draw(screen, geoM, &ebiten.ColorM{})
 	}
 }
 
