@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// +build !js
+
 package audio
 
 import (
@@ -42,12 +44,12 @@ func Stop() error {
 	return theAudio.Stop()
 }
 
-func PlaySE(path string, volume float64) error {
-	return theAudio.PlaySE(path, volume)
+func PlaySE(name string, volume float64) error {
+	return theAudio.PlaySE(name, volume)
 }
 
-func PlayBGM(path string, volume float64) error {
-	return theAudio.PlayBGM(path, volume)
+func PlayBGM(name string, volume float64) error {
+	return theAudio.PlayBGM(name, volume)
 }
 
 func PlayingBGMName() string {
