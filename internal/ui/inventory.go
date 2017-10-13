@@ -114,7 +114,7 @@ func (i *Inventory) slotIndexAt(x, y int) int {
 }
 
 func (i *Inventory) pageCount() int {
-	return int(math.Ceil(float64(len(i.items)) / float64(itemPerPageCount)))
+	return int(math.Max(1, math.Ceil(float64(len(i.items))/float64(itemPerPageCount))))
 }
 
 func (i *Inventory) slotCount() int {
@@ -187,7 +187,7 @@ func (i *Inventory) Update() {
 }
 
 func (i *Inventory) Draw(screen *ebiten.Image) {
-	if !i.Visible || len(i.items) == 0 {
+	if !i.Visible {
 		return
 	}
 
