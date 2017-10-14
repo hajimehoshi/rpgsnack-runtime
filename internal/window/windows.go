@@ -259,7 +259,7 @@ func (w *Windows) isOpened(interpreterID int) bool {
 			return true
 		}
 	}
-	if w.banner != nil {
+	if w.banner != nil && (interpreterID == 0 || w.banner.interpreterID == interpreterID) {
 		return true
 	}
 	return false
