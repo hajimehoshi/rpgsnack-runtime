@@ -62,34 +62,35 @@ type MapScene struct {
 	itemPreviewPopup   *ui.ItemPreviewPopup
 	waitingRequestID   int
 	isAdsRemoved       bool
+	initialized        bool
+	offsetX            float64
+	offsetY            float64
 }
 
 func NewMapScene() *MapScene {
-	tilesImage, _ := ebiten.NewImage(consts.TileXNum*consts.TileSize, (consts.TileYNum+consts.InventoryOffset)*consts.TileSize, ebiten.FilterNearest)
 	m := &MapScene{
-		tilesImage:   tilesImage,
 		gameState:    gamestate.NewGame(),
 		initialState: true,
 	}
-	m.initUI()
 	return m
 }
 
 func NewMapSceneWithGame(game *gamestate.Game) *MapScene {
-	tilesImage, _ := ebiten.NewImage(consts.TileXNum*consts.TileSize, (consts.TileYNum+consts.InventoryOffset)*consts.TileSize, ebiten.FilterNearest)
 	m := &MapScene{
-		tilesImage: tilesImage,
-		gameState:  game,
+		gameState: game,
 	}
-	m.initUI()
 	return m
 }
 
-func (m *MapScene) offsetX(screenWidth int) float64 {
-	return (float64(screenWidth) - consts.TileXNum*consts.TileSize*consts.TileScale) / 2
-}
+const footerHeight = 100
 
-func (m *MapScene) initUI() {
+func (m *MapScene) initUI(sceneManager *scene.Manager) {
+	screenW, screenH := sceneManager.Size()
+	tilesImage, _ := ebiten.NewImage(screenW/consts.TileScale, (screenH-footerHeight)/consts.TileScale, ebiten.FilterNearest)
+	m.tilesImage = tilesImage
+	m.offsetX = (float64(screenW) - consts.TileXNum*consts.TileSize*consts.TileScale) / 2
+	m.offsetY = 0 // TODO
+
 	screenShotImage, _ := ebiten.NewImage(480, 720, ebiten.FilterLinear)
 	camera, _ := ebiten.NewImage(12, 12, ebiten.FilterNearest)
 	camera.Fill(color.RGBA{0xff, 0, 0, 0xff})
@@ -125,11 +126,13 @@ func (m *MapScene) initUI() {
 	m.removeAdsDialog.AddChild(m.removeAdsLabel)
 	m.removeAdsDialog.AddChild(m.removeAdsYesButton)
 	m.removeAdsDialog.AddChild(m.removeAdsNoButton)
-	m.inventory = ui.NewInventory(0, consts.TileYNum*consts.TileSize*consts.TileScale+consts.GameMarginTop)
+
+	m.inventory = ui.NewInventory(0, screenH-footerHeight)
 	m.itemPreviewPopup = ui.NewItemPreviewPopup(32, 32, 256, 256)
 	m.quitDialog.AddChild(m.quitLabel)
 
 	m.removeAdsButton.Visible = false // TODO: Clock of Atonement does not need this feature, so turn it off for now
+	m.initialized = true
 }
 
 func (m *MapScene) updatePurchasesState(sceneManager *scene.Manager) {
@@ -149,7 +152,7 @@ func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) {
 		return
 	}
 	x, y := input.Position()
-	x -= sceneManager.MapOffsetX()
+	x -= int(m.offsetX)
 	y -= consts.GameMarginTop
 	if x < 0 || y < 0 {
 		return
@@ -173,6 +176,9 @@ func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) {
 }
 
 func (m *MapScene) Update(sceneManager *scene.Manager) error {
+	if !m.initialized {
+		m.initUI(sceneManager)
+	}
 	m.updatePurchasesState(sceneManager)
 	if m.waitingRequestID != 0 {
 		r := sceneManager.ReceiveResultIfExists(m.waitingRequestID)
@@ -341,8 +347,8 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 
 	// TODO: All UI parts' origin should be defined correctly
 	// so that we don't need to adjust X positions here.
-	m.titleButton.X = 4 + int(m.offsetX(w)/consts.TileScale)
-	m.removeAdsButton.X = 104 + int(m.offsetX(w)/consts.TileScale)
+	m.titleButton.X = 4 + int(m.offsetX/consts.TileScale)
+	m.removeAdsButton.X = 104 + int(m.offsetX/consts.TileScale)
 
 	m.screenShotDialog.X = (w/consts.TileScale-160)/2 + 4
 	if m.initialState && m.gameState.IsAutoSaveEnabled() {
@@ -480,10 +486,9 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		m.tilesImage.DrawImage(assets.GetImage("foregrounds/"+room.Foreground.Name+".png"), op)
 	}
 
-	sw, _ := screen.Size()
 	op = &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(consts.TileScale, consts.TileScale)
-	op.GeoM.Translate(m.offsetX(sw), consts.GameMarginTop)
+	op.GeoM.Translate(m.offsetX, consts.GameMarginTop)
 	m.gameState.DrawScreen(screen, m.tilesImage, op)
 	m.gameState.DrawPictures(screen)
 	m.inventory.Draw(screen)
@@ -493,7 +498,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(x*consts.TileSize), float64(y*consts.TileSize))
 		op.GeoM.Scale(consts.TileScale, consts.TileScale)
-		op.GeoM.Translate(m.offsetX(sw), consts.GameMarginTop)
+		op.GeoM.Translate(m.offsetX, consts.GameMarginTop)
 		screen.DrawImage(assets.GetImage("system/marker.png"), op)
 	}
 

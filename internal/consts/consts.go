@@ -15,15 +15,14 @@
 package consts
 
 const (
-	PaletteWidth    = 10
-	TileSize        = 16
-	TileXNum        = 10
-	TileYNum        = 12
-	MapWidth        = TileXNum * TileSize * TileScale
-	MapHeight       = TileYNum * TileSize * TileScale
-	InventoryOffset = 1
-	TileScale       = 3
-	GameMarginTop   = 1 * TileSize * TileScale
-	TextScale       = 2
-	BigTextScale    = 3
+	PaletteWidth  = 10
+	TileSize      = 16
+	TileXNum      = 10
+	TileYNum      = 12
+	MapWidth      = TileXNum * TileSize * TileScale
+	MapHeight     = TileYNum * TileSize * TileScale
+	TileScale     = 3
+	GameMarginTop = 1 * TileSize * TileScale
+	TextScale     = 2
+	BigTextScale  = 3
 )

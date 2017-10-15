@@ -23,7 +23,6 @@ import (
 
 	"github.com/hajimehoshi/ebiten"
 
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 )
@@ -134,10 +133,6 @@ func (m *Manager) Size() (int, int) {
 
 func (m *Manager) Requester() Requester {
 	return m.requester
-}
-
-func (m *Manager) MapOffsetX() int {
-	return (m.width - consts.TileXNum*consts.TileSize*consts.TileScale) / 2
 }
 
 func (m *Manager) Update() error {
