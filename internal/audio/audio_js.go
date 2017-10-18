@@ -27,7 +27,8 @@ import (
 
 type audio struct {
 	context   *js.Object
-	bgmNode   *js.Object
+	bgmSource *js.Object
+	bgmGain   *js.Object
 	bgmName   string
 	dataCache map[string][]byte
 }
@@ -141,8 +142,6 @@ func (a *audio) createSource(group string, name string, volume float64, loop boo
 	}
 
 	n.Set("buffer", buffer)
-	n.Call("connect", theCurrentAudio.context.Get("destination"))
-	n.Call("start", 0)
 	return n, nil
 }
 
@@ -156,20 +155,35 @@ func Stop() error {
 }
 
 func PlaySE(name string, volume float64) error {
-	if _, err := theCurrentAudio.createSource("se", name, volume, false); err != nil {
+	n, err := theCurrentAudio.createSource("se", name, volume, false)
+	if err != nil {
 		return err
 	}
+
+	g := theCurrentAudio.context.Call("createGain")
+	g.Get("gain").Set("value", volume)
+	n.Call("connect", g)
+	g.Call("connect", theCurrentAudio.context.Get("destination"))
+	n.Call("start", 0)
 	return nil
 }
 
 func PlayBGM(name string, volume float64) error {
 	StopBGM()
 
-	node, err := theCurrentAudio.createSource("bgm", name, volume, true)
+	n, err := theCurrentAudio.createSource("bgm", name, volume, true)
 	if err != nil {
 		return err
 	}
-	theCurrentAudio.bgmNode = node
+
+	g := theCurrentAudio.context.Call("createGain")
+	g.Get("gain").Set("value", volume)
+	n.Call("connect", g)
+	g.Call("connect", theCurrentAudio.context.Get("destination"))
+	n.Call("start", 0)
+
+	theCurrentAudio.bgmSource = n
+	theCurrentAudio.bgmGain = g
 	theCurrentAudio.bgmName = name
 	return nil
 }
@@ -179,19 +193,18 @@ func PlayingBGMName() string {
 }
 
 func PlayingBGMVolume() float64 {
-	if theCurrentAudio.bgmNode == nil {
+	if theCurrentAudio.bgmSource == nil {
 		return 0
 	}
-	// TODO: Implement this
-	return 1
+	return theCurrentAudio.bgmGain.Get("gain").Get("volume")
 }
 
 func StopBGM() error {
-	if theCurrentAudio.bgmNode == nil {
+	if theCurrentAudio.bgmSource == nil {
 		return nil
 	}
-	theCurrentAudio.bgmNode.Call("stop", 0)
-	theCurrentAudio.bgmNode = nil
+	theCurrentAudio.bgmSource.Call("stop", 0)
+	theCurrentAudio.bgmSource = nil
 	theCurrentAudio.bgmName = ""
 	return nil
 }
