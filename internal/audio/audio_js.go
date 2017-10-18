@@ -59,22 +59,6 @@ func init() {
 	js.Global.Get("document").Call("addEventListener", "touchend", f)
 }
 
-/*var offlineAudioContextClass *js.Object
-
-func init() {
-	if klass := js.Global.Get("OfflineAudioContext"); klass != js.Undefined {
-		offlineAudioContextClass = klass
-		return
-	}
-	if klass := js.Global.Get("webkitOfflineAudioContext"); klass != js.Undefined {
-		offlineAudioContextClass = klass
-		return
-	}
-	if offlineAudioContextClass == nil {
-		panic("audio: offlineAudioContext is not available")
-	}
-}*/
-
 func seekNextFrame(buf []byte) ([]byte, bool) {
 	// TODO: Need to skip tags explicitly? (hajimehoshi/go-mp3#9)
 
@@ -99,8 +83,6 @@ var errTryAgain = errors.New("try again")
 
 func (a *audio) decode(data []byte) (*js.Object, error) {
 	ch := make(chan error)
-	// Use offlineAudioContextClass to force to use 44100 hz.
-	//oc := offlineAudioContextClass.New(2, 1, 44100)
 	var buf *js.Object
 	a.context.Call("decodeAudioData", js.NewArrayBuffer(data), func(buffer *js.Object) {
 		buf = buffer
