@@ -196,7 +196,7 @@ func PlayingBGMVolume() float64 {
 	if theCurrentAudio.bgmSource == nil {
 		return 0
 	}
-	return theCurrentAudio.bgmGain.Get("gain").Get("volume")
+	return theCurrentAudio.bgmGain.Get("gain").Get("volume").Float()
 }
 
 func StopBGM() error {
