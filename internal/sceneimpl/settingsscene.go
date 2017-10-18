@@ -143,7 +143,7 @@ Powered By
 
 	s.languageDialog.Update()
 	s.creditDialog.Update()
-	if !s.languageDialog.Visible && !s.creditDialog.Visible {
+	if !s.languageDialog.Visible() && !s.creditDialog.Visible() {
 		s.languageButton.Update()
 		s.creditButton.Update()
 		s.reviewThisAppButton.Update()
@@ -154,7 +154,7 @@ Powered By
 
 	for i, b := range s.languageButtons {
 		if b.Pressed() {
-			s.languageDialog.Visible = false
+			s.languageDialog.Hide()
 			lang := sceneManager.Game().Texts.Languages()[i]
 			lang = sceneManager.SetLanguage(lang)
 
@@ -165,15 +165,15 @@ Powered By
 		}
 	}
 	if s.creditCloseButton.Pressed() {
-		s.creditDialog.Visible = false
+		s.creditDialog.Hide()
 		return nil
 	}
 	if s.languageButton.Pressed() {
-		s.languageDialog.Visible = true
+		s.languageDialog.Show()
 		return nil
 	}
 	if s.creditButton.Pressed() {
-		s.creditDialog.Visible = true
+		s.creditDialog.Show()
 		return nil
 	}
 	if s.reviewThisAppButton.Pressed() {
@@ -199,14 +199,14 @@ Powered By
 }
 
 func (s *SettingsScene) handleBackButton(sceneManager *scene.Manager) {
-	if s.languageDialog.Visible {
+	if s.languageDialog.Visible() {
 		audio.PlaySE("cancel", 1.0)
-		s.languageDialog.Visible = false
+		s.languageDialog.Hide()
 		return
 	}
-	if s.creditDialog.Visible {
+	if s.creditDialog.Visible() {
 		audio.PlaySE("cancel", 1.0)
-		s.creditDialog.Visible = false
+		s.creditDialog.Hide()
 		return
 	}
 

@@ -133,7 +133,7 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 	}
 
 	t.warningDialog.Update()
-	if !t.warningDialog.Visible && !t.quitDialog.Visible {
+	if !t.warningDialog.Visible() && !t.quitDialog.Visible() {
 		t.newGameButton.Update()
 		t.resumeGameButton.Update()
 		t.settingsButton.Update()
@@ -147,10 +147,10 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 		return nil
 	}
 	if t.warningNoButton.Pressed() {
-		t.warningDialog.Visible = false
+		t.warningDialog.Hide()
 		return nil
 	}
-	if t.warningDialog.Visible {
+	if t.warningDialog.Visible() {
 		return nil
 	}
 
@@ -160,16 +160,16 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 		return nil
 	}
 	if t.quitNoButton.Pressed() {
-		t.quitDialog.Visible = false
+		t.quitDialog.Hide()
 		return nil
 	}
-	if t.quitDialog.Visible {
+	if t.quitDialog.Visible() {
 		return nil
 	}
 
 	if t.newGameButton.Pressed() {
 		if sceneManager.HasProgress() {
-			t.warningDialog.Visible = true
+			t.warningDialog.Show()
 		} else {
 			if err := audio.StopBGM(); err != nil {
 				return err
@@ -205,19 +205,19 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 }
 
 func (t *TitleScene) handleBackButton() {
-	if t.warningDialog.Visible {
+	if t.warningDialog.Visible() {
 		audio.PlaySE("cancel", 1.0)
-		t.warningDialog.Visible = false
+		t.warningDialog.Hide()
 		return
 	}
-	if t.quitDialog.Visible {
+	if t.quitDialog.Visible() {
 		audio.PlaySE("cancel", 1.0)
-		t.quitDialog.Visible = false
+		t.quitDialog.Hide()
 		return
 	}
 
 	audio.PlaySE("click", 1.0)
-	t.quitDialog.Visible = true
+	t.quitDialog.Show()
 }
 
 func (t *TitleScene) Draw(screen *ebiten.Image) {
@@ -229,7 +229,7 @@ func (t *TitleScene) Draw(screen *ebiten.Image) {
 	screen.DrawImage(timg, op)
 
 	// TODO: hide buttons to avoid visual conflicts between the dialog and the buttons
-	if !t.warningDialog.Visible && !t.quitDialog.Visible {
+	if !t.warningDialog.Visible() && !t.quitDialog.Visible() {
 		t.newGameButton.Draw(screen)
 		t.resumeGameButton.Draw(screen)
 		t.settingsButton.Draw(screen)

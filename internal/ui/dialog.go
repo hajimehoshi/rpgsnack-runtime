@@ -31,7 +31,7 @@ type Dialog struct {
 	Y         int
 	Width     int
 	Height    int
-	Visible   bool
+	visible   bool
 	widgets   []Widget
 	offscreen *ebiten.Image
 }
@@ -45,18 +45,30 @@ func NewDialog(x, y, width, height int) *Dialog {
 	}
 }
 
+func (d *Dialog) Visible() bool {
+	return d.visible
+}
+
+func (d *Dialog) Show() {
+	d.visible = true
+}
+
+func (d *Dialog) Hide() {
+	d.visible = false
+}
+
 func (d *Dialog) AddChild(widget Widget) {
 	d.widgets = append(d.widgets, widget)
 }
 
 func (d *Dialog) Update() {
 	for _, w := range d.widgets {
-		w.UpdateAsChild(d.Visible, d.X, d.Y)
+		w.UpdateAsChild(d.visible, d.X, d.Y)
 	}
 }
 
 func (d *Dialog) Draw(screen *ebiten.Image) {
-	if !d.Visible {
+	if !d.visible {
 		return
 	}
 	if d.Width == 0 || d.Height == 0 {

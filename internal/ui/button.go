@@ -125,11 +125,7 @@ func (b *Button) update(visible bool, offsetX, offsetY int) {
 		audio.PlaySE(b.soundName, 1.0)
 		return
 	}
-	if b.includesInput(offsetX, offsetY) {
-		b.pressing = true
-	} else {
-		b.pressing = false
-	}
+	b.pressing = b.includesInput(offsetX, offsetY)
 }
 
 func (b *Button) Update() {

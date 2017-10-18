@@ -189,7 +189,7 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 		switch r.Type {
 		case scene.RequestTypeIAPPrices:
 			if !r.Succeeded {
-				m.storeErrorDialog.Visible = true
+				m.storeErrorDialog.Show()
 				break
 			}
 			priceText := "???"
@@ -202,14 +202,14 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 				priceText = prices["ads_removal"]
 			}
 			m.removeAdsLabel.Text = fmt.Sprintf(text, priceText)
-			m.removeAdsDialog.Visible = true
+			m.removeAdsDialog.Show()
 		case scene.RequestTypePurchase:
 			// Note: Ideally we should show a notification toast to notify users about the result
 			// For now, the notifications are handled on the native platform side
 			if r.Succeeded {
 				m.updatePurchasesState(sceneManager)
 			}
-			m.removeAdsDialog.Visible = false
+			m.removeAdsDialog.Hide()
 		}
 		return nil
 	}
@@ -226,7 +226,7 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 	m.quitDialog.X = (w/consts.TileScale-160)/2 + 4
 	m.quitYesButton.X = (m.quitDialog.Width - m.quitYesButton.Width) / 2
 	m.quitNoButton.X = (m.quitDialog.Width - m.quitNoButton.Width) / 2
-	if m.quitDialog.Visible {
+	if m.quitDialog.Visible() {
 		m.quitDialog.Update()
 		if m.quitYesButton.Pressed() {
 			if m.gameState.IsAutoSaveEnabled() {
@@ -239,7 +239,7 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 			return nil
 		}
 		if m.quitNoButton.Pressed() {
-			m.quitDialog.Visible = false
+			m.quitDialog.Hide()
 			return nil
 		}
 		return nil
@@ -315,10 +315,10 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 	m.storeErrorLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDStoreError)
 	m.storeErrorOkButton.Text = texts.Text(sceneManager.Language(), texts.TextIDOK)
 	m.storeErrorDialog.X = (w/consts.TileScale-160)/2 + 4
-	if m.storeErrorDialog.Visible {
+	if m.storeErrorDialog.Visible() {
 		m.storeErrorDialog.Update()
 		if m.storeErrorOkButton.Pressed() {
-			m.storeErrorDialog.Visible = false
+			m.storeErrorDialog.Hide()
 			return nil
 		}
 		return nil
@@ -329,7 +329,7 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 	m.removeAdsDialog.X = (w/consts.TileScale-160)/2 + 4
 	m.removeAdsYesButton.X = (m.removeAdsDialog.Width - m.removeAdsYesButton.Width) / 2
 	m.removeAdsNoButton.X = (m.removeAdsDialog.Width - m.removeAdsNoButton.Width) / 2
-	if m.removeAdsDialog.Visible {
+	if m.removeAdsDialog.Visible() {
 		m.removeAdsDialog.Update()
 		if m.removeAdsYesButton.Pressed() {
 			m.waitingRequestID = sceneManager.GenerateRequestID()
@@ -337,10 +337,10 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 			return nil
 		}
 		if m.removeAdsNoButton.Pressed() {
-			m.removeAdsDialog.Visible = false
+			m.removeAdsDialog.Hide()
 			return nil
 		}
-		if m.removeAdsDialog.Visible {
+		if m.removeAdsDialog.Visible() {
 			return nil
 		}
 	}
@@ -357,7 +357,7 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 	}
 	m.initialState = false
 	m.screenShotDialog.Update()
-	if m.screenShotDialog.Visible {
+	if m.screenShotDialog.Visible() {
 		return nil
 	}
 	m.cameraButton.Update()
@@ -372,14 +372,14 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 	m.runEventIfNeeded(sceneManager)
 	if m.cameraButton.Pressed() {
 		m.cameraTaking = true
-		m.screenShotDialog.Visible = true
+		m.screenShotDialog.Show()
 	}
 
 	m.titleButton.Text = texts.Text(sceneManager.Language(), texts.TextIDTitle)
 	m.titleButton.Disabled = m.gameState.Map().IsEventExecuting()
 	m.titleButton.Update()
 	if m.titleButton.Pressed() {
-		m.quitDialog.Visible = true
+		m.quitDialog.Show()
 	}
 
 	m.removeAdsButton.Text = texts.Text(sceneManager.Language(), texts.TextIDRemoveAds)
@@ -401,25 +401,25 @@ func (m *MapScene) goToTitle(sceneManager *scene.Manager) error {
 }
 
 func (m *MapScene) handleBackButton() {
-	if m.storeErrorDialog.Visible {
+	if m.storeErrorDialog.Visible() {
 		audio.PlaySE("cancel", 1.0)
-		m.storeErrorDialog.Visible = false
+		m.storeErrorDialog.Hide()
 		return
 	}
 
-	if m.quitDialog.Visible {
+	if m.quitDialog.Visible() {
 		audio.PlaySE("cancel", 1.0)
-		m.quitDialog.Visible = false
+		m.quitDialog.Hide()
 		return
 	}
-	if m.quitDialog.Visible {
+	if m.quitDialog.Visible() {
 		audio.PlaySE("cancel", 1.0)
-		m.quitDialog.Visible = false
+		m.quitDialog.Hide()
 		return
 	}
 
 	audio.PlaySE("click", 1.0)
-	m.quitDialog.Visible = true
+	m.quitDialog.Show()
 }
 
 func (m *MapScene) drawGround(bgImage *ebiten.Image, screen *ebiten.Image) {
