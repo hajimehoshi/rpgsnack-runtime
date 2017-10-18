@@ -180,7 +180,7 @@ func (s *Screen) Draw(screen *ebiten.Image, img *ebiten.Image, op *ebiten.DrawIm
 		op.GeoM.Scale(consts.TileScale, consts.TileScale)
 		sw, _ := screen.Size()
 		tx := (float64(sw) - consts.TileXNum*consts.TileSize*consts.TileScale) / 2
-		op.GeoM.Translate(tx, consts.GameMarginTop)
+		op.GeoM.Translate(tx, 0)
 		op.ColorM.Translate(s.fadeColorTranslate())
 		op.ColorM.Scale(1, 1, 1, fadeRate)
 		screen.DrawImage(emptyImage, op)

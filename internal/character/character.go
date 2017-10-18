@@ -559,13 +559,13 @@ func (c *Character) dirToIndex(dir data.Dir) int {
 	return 0
 }
 
-func (c *Character) Draw(screen *ebiten.Image) {
+func (c *Character) Draw(screen *ebiten.Image, offsetX, offsetY float64) {
 	if c.imageName == "" || !c.visible || c.erased {
 		return
 	}
 	op := &ebiten.DrawImageOptions{}
 	x, y := c.DrawPosition()
-	op.GeoM.Translate(float64(x), float64(y))
+	op.GeoM.Translate(float64(x)+offsetX, float64(y)+offsetY)
 	charW, charH := c.Size()
 	dirIndex := c.dirToIndex(c.dir)
 

@@ -86,10 +86,10 @@ const footerHeight = 100
 
 func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	screenW, screenH := sceneManager.Size()
-	tilesImage, _ := ebiten.NewImage(screenW/consts.TileScale, (screenH-footerHeight)/consts.TileScale, ebiten.FilterNearest)
+	tilesImage, _ := ebiten.NewImage(screenW/consts.TileScale, screenH/consts.TileScale, ebiten.FilterNearest)
 	m.tilesImage = tilesImage
 	m.offsetX = (float64(screenW) - consts.TileXNum*consts.TileSize*consts.TileScale) / 2
-	m.offsetY = 0 // TODO
+	m.offsetY = (float64(screenH) - (consts.TileYNum*consts.TileSize)*consts.TileScale - footerHeight)
 
 	screenShotImage, _ := ebiten.NewImage(480, 720, ebiten.FilterLinear)
 	camera, _ := ebiten.NewImage(12, 12, ebiten.FilterNearest)
@@ -127,8 +127,8 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	m.removeAdsDialog.AddChild(m.removeAdsYesButton)
 	m.removeAdsDialog.AddChild(m.removeAdsNoButton)
 
-	m.inventory = ui.NewInventory(0, screenH-footerHeight)
-	m.itemPreviewPopup = ui.NewItemPreviewPopup(32, 32, 256, 256)
+	m.inventory = ui.NewInventory(int(m.offsetX), screenH-footerHeight)
+	m.itemPreviewPopup = ui.NewItemPreviewPopup(32, 32, screenW/consts.TileScale, screenH/consts.TileScale)
 	m.quitDialog.AddChild(m.quitLabel)
 
 	m.removeAdsButton.Visible = false // TODO: Clock of Atonement does not need this feature, so turn it off for now
@@ -153,7 +153,7 @@ func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) {
 	}
 	x, y := input.Position()
 	x -= int(m.offsetX)
-	y -= consts.GameMarginTop
+	y -= int(m.offsetY)
 	if x < 0 || y < 0 {
 		return
 	}
@@ -303,7 +303,8 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 	m.itemPreviewPopup.X = (w/consts.TileScale-160)/2 + 16
 	if m.itemPreviewPopup.Visible {
 		if !m.gameState.ExecutingItemCommands() {
-			m.itemPreviewPopup.Update()
+			// TODO: ItemPreviewPopup is not standarized as the other Popups
+			m.itemPreviewPopup.Update(0, m.offsetY/consts.TileScale)
 			if m.itemPreviewPopup.PreviewPressed() {
 				m.gameState.StartItemCommands()
 			}
@@ -421,19 +422,23 @@ func (m *MapScene) handleBackButton() {
 	m.quitDialog.Visible = true
 }
 
+func (m *MapScene) drawGround(bgImage *ebiten.Image, screen *ebiten.Image) {
+	op := &ebiten.DrawImageOptions{}
+	_, bgH := bgImage.Size()
+	diff := bgH - consts.TileYNum*consts.TileSize
+
+	op.GeoM.Translate(0, float64(m.offsetY)/consts.TileScale-float64(diff))
+	screen.DrawImage(bgImage, op)
+}
+
 func (m *MapScene) Draw(screen *ebiten.Image) {
 	m.tilesImage.Fill(color.Black)
-
-	m.cameraButton.Draw(screen)
-	m.titleButton.Draw(screen)
-	m.removeAdsButton.Draw(screen)
 
 	// TODO: This accesses *data.Game, but is it OK?
 	room := m.gameState.Map().CurrentRoom()
 
 	if room.Background.Name != "" {
-		op := &ebiten.DrawImageOptions{}
-		m.tilesImage.DrawImage(assets.GetImage("backgrounds/"+room.Background.Name+".png"), op)
+		m.drawGround(assets.GetImage("backgrounds/"+room.Background.Name+".png"), m.tilesImage)
 	}
 	op := &ebiten.DrawImageOptions{}
 	for k := 0; k < 3; k++ {
@@ -461,7 +466,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 					r := image.Rect(sx, sy, sx+consts.TileSize, sy+consts.TileSize)
 					op.SourceRect = &r
 					dx := i * consts.TileSize
-					dy := j * consts.TileSize
+					dy := j*consts.TileSize + int(m.offsetY)
 					op.GeoM.Reset()
 					op.GeoM.Translate(float64(dx), float64(dy))
 					m.tilesImage.DrawImage(tileSetImg, op)
@@ -479,28 +484,30 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		default:
 			panic("not reached")
 		}
-		m.gameState.Map().DrawCharacters(m.tilesImage, p)
+		m.gameState.Map().DrawCharacters(m.tilesImage, p, 0, m.offsetY/consts.TileScale)
 	}
 	if room.Foreground.Name != "" {
-		op := &ebiten.DrawImageOptions{}
-		m.tilesImage.DrawImage(assets.GetImage("foregrounds/"+room.Foreground.Name+".png"), op)
+		m.drawGround(assets.GetImage("foregrounds/"+room.Foreground.Name+".png"), m.tilesImage)
 	}
 
 	op = &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(consts.TileScale, consts.TileScale)
-	op.GeoM.Translate(m.offsetX, consts.GameMarginTop)
+	op.GeoM.Translate(m.offsetX, 0)
 	m.gameState.DrawScreen(screen, m.tilesImage, op)
-	m.gameState.DrawPictures(screen)
-	m.inventory.Draw(screen)
+	m.gameState.DrawPictures(screen, 0, m.offsetY)
 
 	if m.gameState.IsPlayerControlEnabled() && (m.gameState.Map().IsPlayerMovingByUserInput() || m.triggeringFailed) {
 		x, y := m.moveDstX, m.moveDstY
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(x*consts.TileSize), float64(y*consts.TileSize))
 		op.GeoM.Scale(consts.TileScale, consts.TileScale)
-		op.GeoM.Translate(m.offsetX, consts.GameMarginTop)
+		op.GeoM.Translate(m.offsetX, m.offsetY)
 		screen.DrawImage(assets.GetImage("system/marker.png"), op)
 	}
+
+	m.itemPreviewPopup.Draw(screen)
+	m.inventory.Draw(screen)
+	m.gameState.DrawWindows(screen, 0, m.offsetY)
 
 	if m.cameraTaking {
 		m.cameraTaking = false
@@ -512,13 +519,14 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		m.screenShotImage.DrawImage(screen, nil)
 	}
 
+	m.cameraButton.Draw(screen)
+	m.titleButton.Draw(screen)
+	m.removeAdsButton.Draw(screen)
+
 	m.screenShotDialog.Draw(screen)
 	m.quitDialog.Draw(screen)
 	m.storeErrorDialog.Draw(screen)
 	m.removeAdsDialog.Draw(screen)
-	m.itemPreviewPopup.Draw(screen)
-
-	m.gameState.DrawWindows(screen)
 
 	msg := fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS())
 	font.DrawText(screen, msg, 160, 8, consts.TextScale, data.TextAlignLeft, color.White)

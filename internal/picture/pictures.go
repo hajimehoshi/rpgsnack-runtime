@@ -137,7 +137,7 @@ func (p *Pictures) Update() {
 	}
 }
 
-func (p *Pictures) Draw(screen *ebiten.Image) {
+func (p *Pictures) Draw(screen *ebiten.Image, offsetX, offsetY float64) {
 	if p.screen == nil {
 		p.screen, _ = ebiten.NewImage(consts.TileSize*consts.TileXNum, consts.TileSize*consts.TileYNum, ebiten.FilterNearest)
 	}
@@ -151,7 +151,7 @@ func (p *Pictures) Draw(screen *ebiten.Image) {
 
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(consts.TileScale, consts.TileScale)
-	op.GeoM.Translate(0, consts.GameMarginTop)
+	op.GeoM.Translate(offsetX, offsetY)
 	screen.DrawImage(p.screen, op)
 }
 

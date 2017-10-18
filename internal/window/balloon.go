@@ -323,10 +323,10 @@ func (b *balloon) openingRate() float64 {
 	}
 }
 
-func (b *balloon) draw(screen *ebiten.Image, character *character.Character) {
+func (b *balloon) draw(screen *ebiten.Image, character *character.Character, offsetX, offsetY float64) {
 	sw, _ := screen.Size()
-	dx := (sw - consts.TileXNum*consts.TileSize*consts.TileScale) / 2
-	dy := consts.GameMarginTop
+	dx := float64(sw-consts.TileXNum*consts.TileSize*consts.TileScale)/2 + offsetX
+	dy := offsetY
 	if b.openingRate() > 0 {
 		img := assets.GetImage("system/balloon.png")
 		if b.balloonType == data.BalloonTypeShout {
@@ -334,10 +334,10 @@ func (b *balloon) draw(screen *ebiten.Image, character *character.Character) {
 		}
 		op := &ebiten.DrawImageOptions{}
 		g := b.geoMForRate(screen, character)
-		g.Translate(float64(dx), float64(dy))
+		g.Translate(dx, dy)
 		pw, ph := b.width/b.partSize(), b.height/b.partSize()
 		s := b.partSize()
-		dx, dy := b.position(sw, character)
+		tx, ty := b.position(sw, character)
 		for j := 0; j < ph; j++ {
 			for i := 0; i < pw; i++ {
 				op.GeoM.Reset()
@@ -358,7 +358,7 @@ func (b *balloon) draw(screen *ebiten.Image, character *character.Character) {
 				}
 				r := image.Rect(sx, sy, sx+s, sy+s)
 				op.SourceRect = &r
-				op.GeoM.Translate(float64(dx+i*s), float64(dy+j*s))
+				op.GeoM.Translate(float64(tx+i*s), float64(ty+j*s))
 				op.GeoM.Concat(*g)
 				screen.DrawImage(img, op)
 			}
@@ -377,15 +377,15 @@ func (b *balloon) draw(screen *ebiten.Image, character *character.Character) {
 				panic("not reached")
 			}
 			ax, ay := b.arrowPosition(sw, character)
-			dx := ax
-			dy := ay - balloonArrowHeight
+			tx := ax
+			ty := ay - balloonArrowHeight
 			if b.arrowFlip(sw, character) {
 				// TODO: 4 is an arbitrary number. Define a const.
-				dx -= 4
+				tx -= 4
 			} else {
-				dx += b.partSize()
+				tx += b.partSize()
 			}
-			op.GeoM.Translate(float64(dx), float64(dy))
+			op.GeoM.Translate(float64(tx), float64(ty))
 			op.GeoM.Concat(*g)
 			screen.DrawImage(img, op)
 		}
@@ -395,8 +395,8 @@ func (b *balloon) draw(screen *ebiten.Image, character *character.Character) {
 		mx, my := b.margin()
 		x = (x + mx + b.contentOffsetX) * consts.TileScale
 		y = (y + my + b.contentOffsetY) * consts.TileScale
-		x += dx
-		y += dy
+		x += int(dx)
+		y += int(dy)
 		font.DrawText(screen, b.content, x, y, consts.TextScale, data.TextAlignLeft, color.Black)
 	}
 }

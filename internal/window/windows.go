@@ -172,7 +172,7 @@ func (w *Windows) ShowMessage(content string, background data.MessageBackground,
 
 func (w *Windows) ShowChoices(sceneManager *scene.Manager, choices []string, interpreterID int) {
 	_, h := sceneManager.Size()
-	ymin := h/consts.TileScale - consts.GameMarginTop/consts.TileScale - len(choices)*choiceBalloonHeight
+	ymin := h/consts.TileScale - len(choices)*choiceBalloonHeight
 	w.choiceBalloons = nil
 	for i, choice := range choices {
 		x := 0
@@ -366,7 +366,7 @@ func (w *Windows) Update(playerY int, sceneManager *scene.Manager) {
 	}
 }
 
-func (w *Windows) Draw(screen *ebiten.Image, characters []*character.Character) {
+func (w *Windows) Draw(screen *ebiten.Image, characters []*character.Character, offsetX, offsetY float64) {
 	for _, b := range w.balloons {
 		if b == nil {
 			continue
@@ -382,16 +382,16 @@ func (w *Windows) Draw(screen *ebiten.Image, characters []*character.Character) 
 			// TODO: Just log here?
 			panic(fmt.Sprintf("windows: character (EventID=%d) not found", b.eventID))
 		}
-		b.draw(screen, c)
+		b.draw(screen, c, offsetX, offsetY)
 	}
 	for _, b := range w.choiceBalloons {
 		if b == nil {
 			continue
 		}
-		b.draw(screen, nil)
+		b.draw(screen, nil, offsetX, 0)
 	}
 
 	if w.banner != nil {
-		w.banner.draw(screen, nil)
+		w.banner.draw(screen, nil, offsetX, offsetY)
 	}
 }

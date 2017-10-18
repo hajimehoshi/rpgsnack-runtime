@@ -69,7 +69,7 @@ const (
 
 func NewInventory(x, y int) *Inventory {
 	button := NewImageButton(
-		buttonOffsetX/consts.TileScale,
+		(x+buttonOffsetX)/consts.TileScale,
 		(y+buttonOffsetY)/consts.TileScale,
 		NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 40, 0, 36, 32),
 		NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 0, 0, 36, 32),
@@ -77,10 +77,11 @@ func NewInventory(x, y int) *Inventory {
 	)
 	button.DisabledImage = NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 80, 0, 36, 32)
 
+	tx := x / consts.TileScale
 	ty := y / consts.TileScale
-	bgPanel := NewImageView(0, ty, 1.0, NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 0, 32, 160, 40))
-	frameCover := NewImageView(34, ty+4, 1.0, NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 0, 144, 128, 24))
-	frameBase := NewImageView(34, ty+4, 1.0, NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 0, 168, 128, 24))
+	bgPanel := NewImageView(tx, ty, 1.0, NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 0, 32, 160, 40))
+	frameCover := NewImageView(tx+34, ty+4, 1.0, NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 0, 144, 128, 24))
+	frameBase := NewImageView(tx+34, ty+4, 1.0, NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 0, 168, 128, 24))
 
 	return &Inventory{
 		X:                   x,
@@ -135,7 +136,7 @@ func (i *Inventory) Update() {
 	if input.Triggered() {
 		i.pressStartX = touchX
 		i.pressStartY = touchY
-		i.pressStartIndex = i.slotIndexAt(touchX-(i.scrollX+i.dragX), touchY)
+		i.pressStartIndex = i.slotIndexAt(touchX-(i.X+i.scrollX+i.dragX), touchY)
 		i.autoScrolling = false
 	}
 	if input.Pressed() {
@@ -146,8 +147,8 @@ func (i *Inventory) Update() {
 		}
 	}
 	if input.Released() {
-		if !i.scrolling && touchX > (frameXMargin+frameXPadding)*consts.TileScale {
-			index := i.slotIndexAt(touchX-(i.scrollX+i.dragX), touchY)
+		if !i.scrolling && touchX > (i.X+(frameXMargin+frameXPadding)*consts.TileScale) {
+			index := i.slotIndexAt(touchX-(i.X+i.scrollX+i.dragX), touchY)
 			if i.pressStartIndex == index {
 				i.PressedSlotIndex = index
 				i.pressStartIndex = -1
@@ -210,10 +211,10 @@ func (i *Inventory) Draw(screen *ebiten.Image) {
 			}
 		}
 
-		tx := float64((frameXMargin+frameXPadding+i.X+index*itemSize)*consts.TileScale + i.scrollX + i.dragX)
+		tx := float64(i.X + (frameXMargin+frameXPadding+index*itemSize)*consts.TileScale + i.scrollX + i.dragX)
 		ty := float64(i.Y+frameYPadding*consts.TileScale) + 2
 
-		if tx < frameXMargin || tx > (frameXMargin+scrollBarWidth)*consts.TileScale {
+		if tx < float64(i.X+frameXMargin) || tx > float64(i.X+(frameXMargin+scrollBarWidth)*consts.TileScale) {
 			continue
 		}
 

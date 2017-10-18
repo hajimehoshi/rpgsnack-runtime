@@ -18,7 +18,6 @@ import (
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 )
 
@@ -37,7 +36,9 @@ type ItemPreviewPopup struct {
 
 func NewItemPreviewPopup(x, y, width, height int) *ItemPreviewPopup {
 	previewButton := NewButton(80, 100, 120, 120, "ok")
+	previewButton.AnchorX = 0.5
 	closeButton := NewButton(30, 170, 100, 20, "cancel")
+	closeButton.AnchorX = 0.5
 	closeButton.Text = "Close"
 
 	fadeImage, err := ebiten.NewImage(16, 16, ebiten.FilterNearest)
@@ -56,7 +57,11 @@ func NewItemPreviewPopup(x, y, width, height int) *ItemPreviewPopup {
 	}
 }
 
-func (i *ItemPreviewPopup) Update() {
+func (i *ItemPreviewPopup) Update(offsetX, offsetY float64) {
+	i.previewButton.X = i.Width/2 + int(offsetX)
+	i.previewButton.Y = 100 + int(offsetY)
+	i.closeButton.X = i.Width/2 + int(offsetX)
+	i.closeButton.Y = 170 + int(offsetY)
 	i.previewButton.Update()
 	i.closeButton.Update()
 
@@ -106,8 +111,7 @@ func (i *ItemPreviewPopup) Draw(screen *ebiten.Image) {
 	}
 
 	w, h := i.fadeImage.Size()
-	sw, _ := screen.Size()
-	sh := consts.TileYNum*consts.TileSize*consts.TileScale + consts.GameMarginTop
+	sw, sh := screen.Size()
 	sx := float64(sw) / float64(w)
 	sy := float64(sh) / float64(h)
 	op := &ebiten.DrawImageOptions{}
