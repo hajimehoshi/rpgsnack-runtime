@@ -33,9 +33,10 @@ func NewImagePart(i *ebiten.Image) *ImagePart {
 }
 
 func NewImagePartWithRect(i *ebiten.Image, srcX, srcY, srcWidth, srcHeight int) *ImagePart {
+	r := image.Rect(srcX, srcY, srcX+srcWidth, srcY+srcHeight)
 	return &ImagePart{
 		image:   i,
-		srcRect: &image.Rectangle{Min: image.Point{X: srcX, Y: srcY}, Max: image.Point{X: srcX + srcWidth, Y: srcY + srcHeight}},
+		srcRect: &r,
 	}
 }
 
