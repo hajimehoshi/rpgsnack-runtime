@@ -30,9 +30,9 @@ import (
 )
 
 var (
-	purchasesPath = flag.String("purchases-json-path", "./purchases.json", "purchases path")
-	savePath      = flag.String("save-msgpack-path", "./save.msgpack", "save path")
-	languagePath  = flag.String("language-json-path", "./language.json", "language path")
+	purchasesPath = flag.String("purchases-json-path", filepath.Join(".", "purchases.json"), "purchases path")
+	savePath      = flag.String("save-msgpack-path", filepath.Join(".", "save.msgpack"), "save path")
+	languagePath  = flag.String("language-json-path", filepath.Join(".", "language.json"), "language path")
 )
 
 func PurchasesPath() string {
