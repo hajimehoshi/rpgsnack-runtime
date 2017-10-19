@@ -466,7 +466,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 					r := image.Rect(sx, sy, sx+consts.TileSize, sy+consts.TileSize)
 					op.SourceRect = &r
 					dx := i * consts.TileSize
-					dy := j*consts.TileSize + int(m.offsetY)
+					dy := j*consts.TileSize + int(m.offsetY/consts.TileScale)
 					op.GeoM.Reset()
 					op.GeoM.Translate(float64(dx), float64(dy))
 					m.tilesImage.DrawImage(tileSetImg, op)
