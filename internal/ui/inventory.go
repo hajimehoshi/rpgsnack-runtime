@@ -69,23 +69,22 @@ const (
 
 func NewInventory(x, y int) *Inventory {
 	button := NewImageButton(
-		(x+buttonOffsetX)/consts.TileScale,
-		(y+buttonOffsetY)/consts.TileScale,
+		x+buttonOffsetX/consts.TileScale,
+		y+buttonOffsetY/consts.TileScale,
 		NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 40, 0, 36, 32),
 		NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 0, 0, 36, 32),
 		"click",
 	)
 	button.DisabledImage = NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 80, 0, 36, 32)
 
-	tx := x / consts.TileScale
-	ty := y / consts.TileScale
-	bgPanel := NewImageView(tx, ty, 1.0, NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 0, 32, 160, 40))
-	frameCover := NewImageView(tx+34, ty+4, 1.0, NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 0, 144, 128, 24))
-	frameBase := NewImageView(tx+34, ty+4, 1.0, NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 0, 168, 128, 24))
+	bgPanel := NewImageView(x, y, 1.0, NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 0, 32, 160, 40))
+	frameCover := NewImageView(x+34, y+4, 1.0, NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 0, 144, 128, 24))
+	frameBase := NewImageView(x+34, y+4, 1.0, NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 0, 168, 128, 24))
 
+	// TODO: Bug fix: x,y should be in the tile-scaled world
 	return &Inventory{
-		X:                   x,
-		Y:                   y,
+		X:                   x * consts.TileScale,
+		Y:                   y * consts.TileScale,
 		Visible:             true,
 		PressedSlotIndex:    -1,
 		items:               []*data.Item{},

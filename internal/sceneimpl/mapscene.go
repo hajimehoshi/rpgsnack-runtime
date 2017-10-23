@@ -127,7 +127,7 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	m.removeAdsDialog.AddChild(m.removeAdsYesButton)
 	m.removeAdsDialog.AddChild(m.removeAdsNoButton)
 
-	m.inventory = ui.NewInventory(int(m.offsetX), screenH-footerHeight)
+	m.inventory = ui.NewInventory(int(m.offsetX/consts.TileScale), (screenH-footerHeight)/consts.TileScale)
 	m.itemPreviewPopup = ui.NewItemPreviewPopup(32, 32, screenW/consts.TileScale, screenH/consts.TileScale)
 	m.quitDialog.AddChild(m.quitLabel)
 
