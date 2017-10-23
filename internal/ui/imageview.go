@@ -43,9 +43,13 @@ func (i *ImageView) UpdateAsChild(visible bool, offsetX, offsetY int) {
 }
 
 func (i *ImageView) Draw(screen *ebiten.Image) {
+	i.DrawAsChild(screen, 0, 0)
+}
+
+func (i *ImageView) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 	geoM := &ebiten.GeoM{}
 	geoM.Scale(i.Scale, i.Scale)
-	geoM.Translate(float64(i.X), float64(i.Y))
+	geoM.Translate(float64(i.X+offsetX), float64(i.Y+offsetY))
 	geoM.Scale(consts.TileScale, consts.TileScale)
 	i.image.Draw(screen, geoM, &ebiten.ColorM{})
 }

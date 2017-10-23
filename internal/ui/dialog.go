@@ -23,7 +23,7 @@ import (
 
 type Widget interface {
 	UpdateAsChild(visible bool, offsetX, offsetY int)
-	Draw(screen *ebiten.Image)
+	DrawAsChild(screen *ebiten.Image, offsetX, offsetY int)
 }
 
 type Dialog struct {
@@ -90,7 +90,7 @@ func (d *Dialog) Draw(screen *ebiten.Image) {
 	geoM.Scale(consts.TileScale, consts.TileScale)
 	drawNinePatches(d.offscreen, assets.GetImage("system/9patch_test_off.png"), d.Width, d.Height, geoM, nil)
 	for _, w := range d.widgets {
-		w.Draw(d.offscreen)
+		w.DrawAsChild(d.offscreen, 0, 0)
 	}
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(d.X)*consts.TileScale, float64(d.Y)*consts.TileScale)

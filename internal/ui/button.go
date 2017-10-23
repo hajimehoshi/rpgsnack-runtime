@@ -137,6 +137,10 @@ func (b *Button) UpdateAsChild(visible bool, offsetX, offsetY int) {
 }
 
 func (b *Button) Draw(screen *ebiten.Image) {
+	b.DrawAsChild(screen, 0, 0)
+}
+
+func (b *Button) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 	if !b.Visible {
 		return
 	}
@@ -144,7 +148,7 @@ func (b *Button) Draw(screen *ebiten.Image) {
 	geoM := &ebiten.GeoM{}
 	geoM.Translate(-float64(b.Width)*b.AnchorX, -float64(b.Height)*b.AnchorY)
 	geoM.Scale(float64(b.ScaleX), float64(b.ScaleY))
-	geoM.Translate(float64(b.X), float64(b.Y))
+	geoM.Translate(float64(b.X+offsetX), float64(b.Y+offsetY))
 	geoM.Scale(consts.TileScale, consts.TileScale)
 
 	colorM := &ebiten.ColorM{}
