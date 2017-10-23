@@ -52,12 +52,14 @@ type Inventory struct {
 }
 
 const (
-	buttonOffsetX       = 0
-	buttonOffsetY       = 0
-	frameXMargin        = 34
-	frameYMargin        = 2
-	frameXPadding       = 6
-	frameYPadding       = 6
+	buttonOffsetX = 0
+	buttonOffsetY = 0
+
+	frameXMargin  = 34
+	frameYMargin  = 2
+	frameXPadding = 6
+	frameYPadding = 6
+
 	itemSize            = 19
 	scrollDragThreshold = 5
 	scrollBarWidth      = 120
@@ -81,10 +83,9 @@ func NewInventory(x, y int) *Inventory {
 	frameCover := NewImageView(x+34, y+4, 1.0, NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 0, 144, 128, 24))
 	frameBase := NewImageView(x+34, y+4, 1.0, NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 0, 168, 128, 24))
 
-	// TODO: Bug fix: x,y should be in the tile-scaled world
 	return &Inventory{
-		X:                   x * consts.TileScale,
-		Y:                   y * consts.TileScale,
+		X:                   x,
+		Y:                   y,
 		Visible:             true,
 		PressedSlotIndex:    -1,
 		items:               []*data.Item{},
@@ -106,7 +107,7 @@ func (i *Inventory) slotIndexAt(x, y int) int {
 	x -= (frameXMargin + frameXPadding) * consts.TileScale
 	y = (y - (frameYPadding * consts.TileScale))
 
-	if x >= 0 && i.Y <= y && y < i.Y+itemSize*consts.TileScale {
+	if x >= 0 && i.Y*consts.TileScale <= y && y < (i.Y+itemSize)*consts.TileScale {
 		return x / (itemSize * consts.TileScale)
 	}
 
@@ -135,19 +136,19 @@ func (i *Inventory) Update() {
 	if input.Triggered() {
 		i.pressStartX = touchX
 		i.pressStartY = touchY
-		i.pressStartIndex = i.slotIndexAt(touchX-(i.X+i.scrollX+i.dragX), touchY)
+		i.pressStartIndex = i.slotIndexAt(touchX-(i.X*consts.TileScale+i.scrollX+i.dragX), touchY)
 		i.autoScrolling = false
 	}
 	if input.Pressed() {
 		dx := touchX - i.pressStartX
-		if math.Abs(float64(dx)) > scrollDragThreshold && touchY > i.Y {
+		if math.Abs(float64(dx)) > scrollDragThreshold && touchY > i.Y*consts.TileScale {
 			i.scrolling = true
 			i.dragX = dx
 		}
 	}
 	if input.Released() {
-		if !i.scrolling && touchX > (i.X+(frameXMargin+frameXPadding)*consts.TileScale) {
-			index := i.slotIndexAt(touchX-(i.X+i.scrollX+i.dragX), touchY)
+		if !i.scrolling && touchX > ((i.X+frameXMargin+frameXPadding)*consts.TileScale) {
+			index := i.slotIndexAt(touchX-(i.X*consts.TileScale+i.scrollX+i.dragX), touchY)
 			if i.pressStartIndex == index {
 				i.PressedSlotIndex = index
 				i.pressStartIndex = -1
@@ -196,7 +197,7 @@ func (i *Inventory) Draw(screen *ebiten.Image) {
 
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(consts.TileScale, consts.TileScale)
-	op.GeoM.Translate(float64(i.X+frameXMargin*consts.TileScale), float64(i.Y+frameYMargin*consts.TileScale))
+	op.GeoM.Translate(float64((i.X+frameXMargin)*consts.TileScale), float64((i.Y+frameYMargin)*consts.TileScale))
 
 	var activeItem *data.Item
 	for index := 0; index < i.slotCount(); index++ {
@@ -210,10 +211,10 @@ func (i *Inventory) Draw(screen *ebiten.Image) {
 			}
 		}
 
-		tx := float64(i.X + (frameXMargin+frameXPadding+index*itemSize)*consts.TileScale + i.scrollX + i.dragX)
-		ty := float64(i.Y+frameYPadding*consts.TileScale) + 2
+		tx := float64((i.X+frameXMargin+frameXPadding+index*itemSize)*consts.TileScale + i.scrollX + i.dragX)
+		ty := float64((i.Y+frameYPadding)*consts.TileScale) + 2
 
-		if tx < float64(i.X+frameXMargin) || tx > float64(i.X+(frameXMargin+scrollBarWidth)*consts.TileScale) {
+		if tx < float64((i.X+frameXMargin)*consts.TileScale) || tx > float64((i.X+frameXMargin+scrollBarWidth)*consts.TileScale) {
 			continue
 		}
 
@@ -243,7 +244,7 @@ func (i *Inventory) Draw(screen *ebiten.Image) {
 		}
 		op = &ebiten.DrawImageOptions{}
 		op.GeoM.Scale(consts.TileScale, consts.TileScale)
-		op.GeoM.Translate(float64(i.X+buttonOffsetX+30), float64(i.Y+buttonOffsetY+14+dy))
+		op.GeoM.Translate(float64(i.X*consts.TileScale+buttonOffsetX+30), float64(i.Y*consts.TileScale+buttonOffsetY+14+dy))
 		screen.DrawImage(assets.GetIconImage(activeItem.Icon+".png"), op)
 	}
 
@@ -260,7 +261,7 @@ func (i *Inventory) Draw(screen *ebiten.Image) {
 				imagePart = i.dot
 			}
 			geoM := &ebiten.GeoM{}
-			geoM.Translate(float64(left+index*dotSpace), float64(i.Y/consts.TileScale+26))
+			geoM.Translate(float64(left+index*dotSpace), float64(i.Y+26))
 			geoM.Scale(consts.TileScale, consts.TileScale)
 			imagePart.Draw(screen, geoM, &ebiten.ColorM{})
 		}
