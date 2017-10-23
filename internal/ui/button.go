@@ -181,11 +181,18 @@ func (b *Button) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 	if b.pressing {
 		img = assets.GetImage("system/9patch_test_on.png")
 	}
+	// x, y is 0: the position is specified at geoM.
 	drawNinePatches(screen, img, 0, 0, b.Width, b.Height, geoM, colorM)
 
 	_, th := font.MeasureSize(b.Text)
-	tx := b.X*b.ScaleX*consts.TileScale + b.Width*consts.TileScale*b.ScaleX/2 - int(float64(b.Width*consts.TileScale)*b.AnchorX)
-	ty := b.Y*b.ScaleY*consts.TileScale + (b.Height*b.ScaleY*consts.TileScale-th*consts.TextScale*b.ScaleY)/2 - int(float64(b.Height*consts.TileScale)*b.AnchorY)
+	tx := (b.X + offsetX) * b.ScaleX * consts.TileScale
+	tx += b.Width * consts.TileScale * b.ScaleX / 2
+	tx -= int(float64(b.Width*consts.TileScale) * b.AnchorX)
+
+	ty := (b.Y + offsetY) * b.ScaleY * consts.TileScale
+	ty += (b.Height*b.ScaleY*consts.TileScale - th*consts.TextScale*b.ScaleY) / 2
+	ty -= int(float64(b.Height*consts.TileScale) * b.AnchorY)
+
 	var c color.Color = color.White
 	if b.Disabled {
 		c = color.RGBA{0x80, 0x80, 0x80, 0xff}

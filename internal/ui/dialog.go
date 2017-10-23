@@ -27,13 +27,12 @@ type Widget interface {
 }
 
 type Dialog struct {
-	X         int
-	Y         int
-	Width     int
-	Height    int
-	visible   bool
-	widgets   []Widget
-	offscreen *ebiten.Image
+	X       int
+	Y       int
+	Width   int
+	Height  int
+	visible bool
+	widgets []Widget
 }
 
 func NewDialog(x, y, width, height int) *Dialog {
@@ -74,25 +73,12 @@ func (d *Dialog) Draw(screen *ebiten.Image) {
 	if d.Width == 0 || d.Height == 0 {
 		return
 	}
-	if d.offscreen == nil {
-		i, _ := ebiten.NewImage(d.Width*consts.TileScale, d.Height*consts.TileScale, ebiten.FilterNearest)
-		d.offscreen = i
-	} else {
-		w, h := d.offscreen.Size()
-		if d.Width != w || d.Height != h {
-			d.offscreen.Dispose()
-			i, _ := ebiten.NewImage(d.Width*consts.TileScale, d.Height*consts.TileScale, ebiten.FilterNearest)
-			d.offscreen = i
-		}
-	}
-	d.offscreen.Clear()
+
 	geoM := &ebiten.GeoM{}
 	geoM.Scale(consts.TileScale, consts.TileScale)
-	drawNinePatches(d.offscreen, assets.GetImage("system/9patch_test_off.png"), 0, 0, d.Width, d.Height, geoM, nil)
+	drawNinePatches(screen, assets.GetImage("system/9patch_test_off.png"), d.X, d.Y, d.Width, d.Height, geoM, nil)
+
 	for _, w := range d.widgets {
-		w.DrawAsChild(d.offscreen, 0, 0)
+		w.DrawAsChild(screen, d.X, d.Y)
 	}
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(float64(d.X)*consts.TileScale, float64(d.Y)*consts.TileScale)
-	screen.DrawImage(d.offscreen, op)
 }
