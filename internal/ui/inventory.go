@@ -195,10 +195,6 @@ func (i *Inventory) Draw(screen *ebiten.Image) {
 	i.bgPanel.Draw(screen)
 	i.frameBase.Draw(screen)
 
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(consts.TileScale, consts.TileScale)
-	op.GeoM.Translate(float64((i.X+frameXMargin)*consts.TileScale), float64((i.Y+frameYMargin)*consts.TileScale))
-
 	var activeItem *data.Item
 	for index := 0; index < i.slotCount(); index++ {
 		var item *data.Item
@@ -242,7 +238,7 @@ func (i *Inventory) Draw(screen *ebiten.Image) {
 		if i.activeItemBoxButton.Pressing() {
 			dy = 2
 		}
-		op = &ebiten.DrawImageOptions{}
+		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(i.X*consts.TileScale+buttonOffsetX+10), float64(i.Y+buttonOffsetY+5+dy))
 		op.GeoM.Scale(consts.TileScale, consts.TileScale)
 		screen.DrawImage(assets.GetIconImage(activeItem.Icon+".png"), op)
