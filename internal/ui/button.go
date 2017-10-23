@@ -143,8 +143,9 @@ func (b *Button) Draw(screen *ebiten.Image) {
 	if b.Image != nil {
 		geoM := &ebiten.GeoM{}
 		geoM.Translate(-float64(b.Width)*b.AnchorX, -float64(b.Height)*b.AnchorY)
-		geoM.Scale(float64(b.ScaleX*consts.TileScale), float64(b.ScaleY*consts.TileScale))
-		geoM.Translate(float64(b.X*consts.TileScale), float64(b.Y*consts.TileScale))
+		geoM.Scale(float64(b.ScaleX), float64(b.ScaleY))
+		geoM.Translate(float64(b.X), float64(b.Y))
+		geoM.Scale(consts.TileScale, consts.TileScale)
 
 		colorM := &ebiten.ColorM{}
 		image := b.Image
@@ -174,7 +175,8 @@ func (b *Button) Draw(screen *ebiten.Image) {
 	}
 	geoM := &ebiten.GeoM{}
 	geoM.Translate(float64(b.X)-float64(b.Width)*b.AnchorX, float64(b.Y)-float64(b.Height)*b.AnchorY)
-	geoM.Scale(float64(b.ScaleX*consts.TileScale), float64(b.ScaleY*consts.TileScale))
+	geoM.Scale(float64(b.ScaleX), float64(b.ScaleY))
+	geoM.Scale(consts.TileScale, consts.TileScale)
 	colorM := &ebiten.ColorM{}
 	if b.Disabled {
 		colorM.ChangeHSV(0, 0, 1)
