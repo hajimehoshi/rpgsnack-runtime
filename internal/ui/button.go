@@ -181,8 +181,7 @@ func (b *Button) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 	if b.pressing {
 		img = assets.GetImage("system/9patch_test_on.png")
 	}
-	// x, y is 0: the position is specified at geoM.
-	drawNinePatches(screen, img, 0, 0, b.Width, b.Height, geoM, colorM)
+	drawNinePatches(screen, img, b.Width, b.Height, geoM, colorM)
 
 	_, th := font.MeasureSize(b.Text)
 	tx := (b.X + offsetX) * b.ScaleX * consts.TileScale

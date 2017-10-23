@@ -75,8 +75,9 @@ func (d *Dialog) Draw(screen *ebiten.Image) {
 	}
 
 	geoM := &ebiten.GeoM{}
+	geoM.Translate(float64(d.X), float64(d.Y))
 	geoM.Scale(consts.TileScale, consts.TileScale)
-	drawNinePatches(screen, assets.GetImage("system/9patch_test_off.png"), d.X, d.Y, d.Width, d.Height, geoM, nil)
+	drawNinePatches(screen, assets.GetImage("system/9patch_test_off.png"), d.Width, d.Height, geoM, nil)
 
 	for _, w := range d.widgets {
 		w.DrawAsChild(screen, d.X, d.Y)
