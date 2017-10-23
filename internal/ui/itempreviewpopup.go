@@ -22,23 +22,25 @@ import (
 )
 
 type ItemPreviewPopup struct {
-	X             int
-	Y             int
-	Width         int
-	Height        int
-	item          *data.Item
+	X         int
+	Y         int
+	Width     int
+	Height    int
+	item      *data.Item
+	Visible   bool
+	fadeImage *ebiten.Image
+
+	nodes         []Node
 	closeButton   *Button
 	previewButton *Button
-	Visible       bool
-	fadeImage     *ebiten.Image
 }
 
 func NewItemPreviewPopup(x, y, width, height int) *ItemPreviewPopup {
-	previewButton := NewButton(80, 100, 120, 120, "ok")
-	previewButton.AnchorX = 0.5
-	closeButton := NewButton(30, 170, 100, 20, "cancel")
-	closeButton.AnchorX = 0.5
+	previewButton := NewButton(0, 40, 120, 120, "ok")
+	closeButton := NewButton(0, 160, 100, 20, "cancel")
 	closeButton.Text = "Close"
+
+	nodes := []Node{previewButton, closeButton}
 
 	fadeImage, err := ebiten.NewImage(16, 16, ebiten.FilterNearest)
 	if err != nil {
@@ -46,23 +48,25 @@ func NewItemPreviewPopup(x, y, width, height int) *ItemPreviewPopup {
 	}
 
 	return &ItemPreviewPopup{
-		X:             x,
-		Y:             y,
-		Width:         width,
-		Height:        height,
+		X:         x,
+		Y:         y,
+		Width:     width,
+		Height:    height,
+		fadeImage: fadeImage,
+
+		nodes:         nodes,
 		closeButton:   closeButton,
 		previewButton: previewButton,
-		fadeImage:     fadeImage,
 	}
 }
 
-func (i *ItemPreviewPopup) Update(offsetX, offsetY float64) {
-	i.previewButton.X = i.Width/2 + int(offsetX)
-	i.previewButton.Y = 100 + int(offsetY)
-	i.closeButton.X = i.Width/2 + int(offsetX)
-	i.closeButton.Y = 170 + int(offsetY)
-	i.previewButton.Update()
-	i.closeButton.Update()
+func (i *ItemPreviewPopup) Update() {
+	i.previewButton.X = (i.Width - i.previewButton.Width*i.previewButton.ScaleX) / 2
+	i.closeButton.X = (i.Width - i.closeButton.Width) / 2
+
+	for _, n := range i.nodes {
+		n.UpdateAsChild(i.Visible, i.X, i.Y)
+	}
 
 	if i.closeButton.Pressed() {
 		i.item = nil
@@ -88,8 +92,6 @@ func (i *ItemPreviewPopup) SetItem(item *data.Item) {
 		i.previewButton.Image = NewImagePart(assets.GetImage("items/preview/" + i.item.Preview + ".png"))
 		i.previewButton.ScaleX = 1
 		i.previewButton.ScaleY = 1
-		i.previewButton.AnchorX = 0.5
-		i.previewButton.AnchorY = 0.5
 		i.previewButton.Width = 120
 		i.previewButton.Height = 120
 
@@ -97,8 +99,6 @@ func (i *ItemPreviewPopup) SetItem(item *data.Item) {
 		i.previewButton.Image = NewImagePart(assets.GetIconImage(i.item.Icon + ".png"))
 		i.previewButton.ScaleX = 6
 		i.previewButton.ScaleY = 6
-		i.previewButton.AnchorX = 0.5
-		i.previewButton.AnchorY = 0.5
 		i.previewButton.Width = 16
 		i.previewButton.Height = 16
 	}
@@ -119,6 +119,7 @@ func (i *ItemPreviewPopup) Draw(screen *ebiten.Image) {
 	op.ColorM.Scale(1, 1, 1, 0.5)
 	screen.DrawImage(i.fadeImage, op)
 
-	i.previewButton.Draw(screen)
-	i.closeButton.Draw(screen)
+	for _, n := range i.nodes {
+		n.DrawAsChild(screen, i.X, i.Y)
+	}
 }

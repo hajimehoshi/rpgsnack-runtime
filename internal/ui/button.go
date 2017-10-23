@@ -30,8 +30,6 @@ import (
 type Button struct {
 	X             int
 	Y             int
-	AnchorX       float64
-	AnchorY       float64
 	ScaleX        int
 	ScaleY        int
 	Width         int
@@ -94,8 +92,8 @@ func (b *Button) includesInput(offsetX, offsetY int) bool {
 
 	buttonWidth := b.ScaleX * b.Width
 	buttonHeight := b.ScaleY * b.Height
-	buttonX := b.X - int(float64(buttonWidth)*b.AnchorX)
-	buttonY := b.Y - int(float64(buttonHeight)*b.AnchorY)
+	buttonX := b.X
+	buttonY := b.Y
 
 	if buttonX <= x && x < buttonX+buttonWidth && buttonY <= y && y < buttonY+buttonHeight {
 		return true
@@ -146,7 +144,6 @@ func (b *Button) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 	}
 
 	geoM := &ebiten.GeoM{}
-	geoM.Translate(-float64(b.Width)*b.AnchorX, -float64(b.Height)*b.AnchorY)
 	geoM.Scale(float64(b.ScaleX), float64(b.ScaleY))
 	geoM.Translate(float64(b.X+offsetX), float64(b.Y+offsetY))
 	geoM.Scale(consts.TileScale, consts.TileScale)
@@ -186,11 +183,9 @@ func (b *Button) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 	_, th := font.MeasureSize(b.Text)
 	tx := (b.X + offsetX) * b.ScaleX * consts.TileScale
 	tx += b.Width * consts.TileScale * b.ScaleX / 2
-	tx -= int(float64(b.Width*consts.TileScale) * b.AnchorX)
 
 	ty := (b.Y + offsetY) * b.ScaleY * consts.TileScale
 	ty += (b.Height*b.ScaleY*consts.TileScale - th*consts.TextScale*b.ScaleY) / 2
-	ty -= int(float64(b.Height*consts.TileScale) * b.AnchorY)
 
 	var c color.Color = color.White
 	if b.Disabled {

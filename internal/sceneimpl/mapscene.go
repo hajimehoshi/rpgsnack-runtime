@@ -128,7 +128,7 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	m.removeAdsDialog.AddChild(m.removeAdsNoButton)
 
 	m.inventory = ui.NewInventory(int(m.offsetX/consts.TileScale), (screenH-footerHeight)/consts.TileScale)
-	m.itemPreviewPopup = ui.NewItemPreviewPopup(32, 32, screenW/consts.TileScale, screenH/consts.TileScale)
+	m.itemPreviewPopup = ui.NewItemPreviewPopup(0, 0, screenW/consts.TileScale, screenH/consts.TileScale)
 	m.quitDialog.AddChild(m.quitLabel)
 
 	m.removeAdsButton.Visible = false // TODO: Clock of Atonement does not need this feature, so turn it off for now
@@ -301,10 +301,12 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 	}
 
 	m.itemPreviewPopup.X = (w/consts.TileScale-160)/2 + 16
+	m.itemPreviewPopup.Y = int(m.offsetY / consts.TileScale)
+	m.itemPreviewPopup.Width = 160 - 32
 	if m.itemPreviewPopup.Visible {
 		if !m.gameState.ExecutingItemCommands() {
 			// TODO: ItemPreviewPopup is not standarized as the other Popups
-			m.itemPreviewPopup.Update(0, m.offsetY/consts.TileScale)
+			m.itemPreviewPopup.Update()
 			if m.itemPreviewPopup.PreviewPressed() {
 				m.gameState.StartItemCommands()
 			}
