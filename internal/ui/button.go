@@ -140,20 +140,23 @@ func (b *Button) Draw(screen *ebiten.Image) {
 	if !b.Visible {
 		return
 	}
-	if b.Image != nil {
-		geoM := &ebiten.GeoM{}
-		geoM.Translate(-float64(b.Width)*b.AnchorX, -float64(b.Height)*b.AnchorY)
-		geoM.Scale(float64(b.ScaleX), float64(b.ScaleY))
-		geoM.Translate(float64(b.X), float64(b.Y))
-		geoM.Scale(consts.TileScale, consts.TileScale)
 
-		colorM := &ebiten.ColorM{}
+	geoM := &ebiten.GeoM{}
+	geoM.Translate(-float64(b.Width)*b.AnchorX, -float64(b.Height)*b.AnchorY)
+	geoM.Scale(float64(b.ScaleX), float64(b.ScaleY))
+	geoM.Translate(float64(b.X), float64(b.Y))
+	geoM.Scale(consts.TileScale, consts.TileScale)
+
+	colorM := &ebiten.ColorM{}
+	if b.Disabled {
+		colorM.ChangeHSV(0, 0, 1)
+		colorM.Scale(0.5, 0.5, 0.5, 1)
+	}
+
+	if b.Image != nil {
 		image := b.Image
 		if b.Disabled {
-			if b.DisabledImage == nil {
-				colorM.ChangeHSV(0, 0, 1)
-				colorM.Scale(0.5, 0.5, 0.5, 1)
-			} else {
+			if b.DisabledImage != nil {
 				image = b.DisabledImage
 			}
 		} else {
@@ -169,20 +172,10 @@ func (b *Button) Draw(screen *ebiten.Image) {
 		image.Draw(screen, geoM, colorM)
 		return
 	}
+
 	img := assets.GetImage("system/9patch_test_off.png")
 	if b.pressing {
 		img = assets.GetImage("system/9patch_test_on.png")
-	}
-
-	geoM := &ebiten.GeoM{}
-	geoM.Translate(-float64(b.Width)*b.AnchorX, -float64(b.Height)*b.AnchorY)
-	geoM.Scale(float64(b.ScaleX), float64(b.ScaleY))
-	geoM.Translate(float64(b.X), float64(b.Y))
-	geoM.Scale(consts.TileScale, consts.TileScale)
-	colorM := &ebiten.ColorM{}
-	if b.Disabled {
-		colorM.ChangeHSV(0, 0, 1)
-		colorM.Scale(0.5, 0.5, 0.5, 1)
 	}
 	drawNinePatches(screen, img, b.Width, b.Height, geoM, colorM)
 
