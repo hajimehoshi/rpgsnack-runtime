@@ -71,8 +71,8 @@ const (
 
 func NewInventory(x, y int) *Inventory {
 	button := NewImageButton(
-		x+buttonOffsetX/consts.TileScale,
-		y+buttonOffsetY/consts.TileScale,
+		x+buttonOffsetX,
+		y+buttonOffsetY,
 		NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 40, 0, 36, 32),
 		NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 0, 0, 36, 32),
 		"click",
@@ -240,11 +240,11 @@ func (i *Inventory) Draw(screen *ebiten.Image) {
 	if activeItem != nil {
 		dy := 0
 		if i.activeItemBoxButton.Pressing() {
-			dy = 6
+			dy = 2
 		}
 		op = &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(float64(i.X*consts.TileScale+buttonOffsetX+10), float64(i.Y+buttonOffsetY+5+dy))
 		op.GeoM.Scale(consts.TileScale, consts.TileScale)
-		op.GeoM.Translate(float64(i.X*consts.TileScale+buttonOffsetX+30), float64(i.Y*consts.TileScale+buttonOffsetY+14+dy))
 		screen.DrawImage(assets.GetIconImage(activeItem.Icon+".png"), op)
 	}
 
