@@ -207,16 +207,16 @@ func (i *Inventory) Draw(screen *ebiten.Image) {
 			}
 		}
 
-		tx := float64((i.X+frameXMargin+frameXPadding+index*itemSize)*consts.TileScale + i.scrollX + i.dragX)
-		ty := float64((i.Y+frameYPadding)*consts.TileScale) + 2
+		tx := float64((i.X + frameXMargin + frameXPadding + index*itemSize) + (i.scrollX+i.dragX)/consts.TileScale)
+		ty := float64(i.Y+frameYPadding) + 1
 
-		if tx < float64((i.X+frameXMargin)*consts.TileScale) || tx > float64((i.X+frameXMargin+scrollBarWidth)*consts.TileScale) {
+		if tx < float64(i.X+frameXMargin) || tx > float64(i.X+frameXMargin+scrollBarWidth) {
 			continue
 		}
 
 		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Scale(consts.TileScale, consts.TileScale)
 		op.GeoM.Translate(tx, ty)
+		op.GeoM.Scale(consts.TileScale, consts.TileScale)
 		if i.activeItemID == itemID {
 			i.activeCardSlot.Draw(screen, &op.GeoM, &ebiten.ColorM{})
 		} else {
