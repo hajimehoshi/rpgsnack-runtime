@@ -173,9 +173,11 @@ func (b *Button) Draw(screen *ebiten.Image) {
 	if b.pressing {
 		img = assets.GetImage("system/9patch_test_on.png")
 	}
+
 	geoM := &ebiten.GeoM{}
-	geoM.Translate(float64(b.X)-float64(b.Width)*b.AnchorX, float64(b.Y)-float64(b.Height)*b.AnchorY)
+	geoM.Translate(-float64(b.Width)*b.AnchorX, -float64(b.Height)*b.AnchorY)
 	geoM.Scale(float64(b.ScaleX), float64(b.ScaleY))
+	geoM.Translate(float64(b.X), float64(b.Y))
 	geoM.Scale(consts.TileScale, consts.TileScale)
 	colorM := &ebiten.ColorM{}
 	if b.Disabled {
