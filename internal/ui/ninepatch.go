@@ -24,7 +24,7 @@ const (
 	partSize = 4
 )
 
-func drawNinePatches(dst, src *ebiten.Image, width, height int, geoM *ebiten.GeoM, colorM *ebiten.ColorM) {
+func drawNinePatches(dst, src *ebiten.Image, x, y, width, height int, geoM *ebiten.GeoM, colorM *ebiten.ColorM) {
 	xn, yn := width/partSize, height/partSize
 	r := &image.Rectangle{}
 	op := &ebiten.DrawImageOptions{}
@@ -57,7 +57,7 @@ func drawNinePatches(dst, src *ebiten.Image, width, height int, geoM *ebiten.Geo
 			r.Max.Y = sy + partSize
 			op.SourceRect = r
 			op.GeoM.Reset()
-			op.GeoM.Translate(float64(i*partSize), float64(j*partSize))
+			op.GeoM.Translate(float64(x+i*partSize), float64(y+j*partSize))
 			op.GeoM.Concat(*geoM)
 			dst.DrawImage(src, op)
 		}
