@@ -128,18 +128,18 @@ Powered By
 	s.closeButton.Y = buttonOffsetX + buttonIndex*buttonDeltaY
 
 	w, _ := sceneManager.Size()
-	s.languageButton.X = (w/consts.TileScale - s.languageButton.Width) / 2
-	s.creditButton.X = (w/consts.TileScale - s.creditButton.Width) / 2
-	s.reviewThisAppButton.X = (w/consts.TileScale - s.reviewThisAppButton.Width) / 2
-	s.restorePurchasesButton.X = (w/consts.TileScale - s.restorePurchasesButton.Width) / 2
-	s.moreGamesButton.X = (w/consts.TileScale - s.moreGamesButton.Width) / 2
-	s.closeButton.X = (w/consts.TileScale - s.closeButton.Width) / 2
+	s.languageButton.X = (w/consts.TileScale - s.languageButton.Width()) / 2
+	s.creditButton.X = (w/consts.TileScale - s.creditButton.Width()) / 2
+	s.reviewThisAppButton.X = (w/consts.TileScale - s.reviewThisAppButton.Width()) / 2
+	s.restorePurchasesButton.X = (w/consts.TileScale - s.restorePurchasesButton.Width()) / 2
+	s.moreGamesButton.X = (w/consts.TileScale - s.moreGamesButton.Width()) / 2
+	s.closeButton.X = (w/consts.TileScale - s.closeButton.Width()) / 2
 	s.languageDialog.X = (w/consts.TileScale-160)/2 + 4
 	for _, b := range s.languageButtons {
-		b.X = (s.languageDialog.Width - b.Width) / 2
+		b.X = (s.languageDialog.Width - b.Width()) / 2
 	}
 	s.creditDialog.X = (w/consts.TileScale-160)/2 + 4
-	s.creditCloseButton.X = (s.creditDialog.Width - s.creditCloseButton.Width) / 2
+	s.creditCloseButton.X = (s.creditDialog.Width - s.creditCloseButton.Width()) / 2
 
 	s.languageDialog.Update()
 	s.creditDialog.Update()

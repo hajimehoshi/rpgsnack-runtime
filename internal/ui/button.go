@@ -32,8 +32,8 @@ type Button struct {
 	Y             int
 	ScaleX        int
 	ScaleY        int
-	Width         int
-	Height        int
+	width         int
+	height        int
 	Visible       bool
 	Text          string
 	Disabled      bool
@@ -51,8 +51,8 @@ func NewButton(x, y, width, height int, soundName string) *Button {
 		Y:         y,
 		ScaleX:    1,
 		ScaleY:    1,
-		Width:     width,
-		Height:    height,
+		width:     width,
+		height:    height,
 		Visible:   true,
 		soundName: soundName,
 	}
@@ -65,14 +65,28 @@ func NewImageButton(x, y int, image *ImagePart, pressedImage *ImagePart, soundNa
 		Y:             y,
 		ScaleX:        1,
 		ScaleY:        1,
-		Width:         w,
-		Height:        h,
+		width:         w,
+		height:        h,
 		Visible:       true,
 		Image:         image,
 		PressedImage:  pressedImage,
 		DisabledImage: nil,
 		soundName:     soundName,
 	}
+}
+
+func (b *Button) Width() int {
+	return b.width * b.ScaleX
+}
+
+func (b *Button) Height() int {
+	return b.height * b.ScaleY
+}
+
+func (b *Button) SetOriginalSize(width, height int) {
+	// TODO: Better name
+	b.width = width
+	b.height = height
 }
 
 func (b *Button) Pressing() bool {
@@ -90,8 +104,8 @@ func (b *Button) includesInput(offsetX, offsetY int) bool {
 	x -= offsetX
 	y -= offsetY
 
-	buttonWidth := b.ScaleX * b.Width
-	buttonHeight := b.ScaleY * b.Height
+	buttonWidth := b.ScaleX * b.width
+	buttonHeight := b.ScaleY * b.height
 	buttonX := b.X
 	buttonY := b.Y
 
@@ -178,14 +192,14 @@ func (b *Button) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 	if b.pressing {
 		img = assets.GetImage("system/9patch_test_on.png")
 	}
-	drawNinePatches(screen, img, b.Width, b.Height, geoM, colorM)
+	drawNinePatches(screen, img, b.width, b.height, geoM, colorM)
 
 	_, th := font.MeasureSize(b.Text)
 	tx := (b.X + offsetX) * b.ScaleX * consts.TileScale
-	tx += b.Width * consts.TileScale * b.ScaleX / 2
+	tx += b.width * consts.TileScale * b.ScaleX / 2
 
 	ty := (b.Y + offsetY) * b.ScaleY * consts.TileScale
-	ty += (b.Height*b.ScaleY*consts.TileScale - th*consts.TextScale*b.ScaleY) / 2
+	ty += (b.height*b.ScaleY*consts.TileScale - th*consts.TextScale*b.ScaleY) / 2
 
 	var c color.Color = color.White
 	if b.Disabled {

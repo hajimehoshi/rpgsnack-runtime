@@ -110,18 +110,18 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 	t.quitNoButton.Text = texts.Text(sceneManager.Language(), texts.TextIDNo)
 
 	w, h := sceneManager.Size()
-	t.newGameButton.X = (w/consts.TileScale - t.newGameButton.Width) / 2
-	t.resumeGameButton.X = (w/consts.TileScale - t.resumeGameButton.Width) / 2
+	t.newGameButton.X = (w/consts.TileScale - t.newGameButton.Width()) / 2
+	t.resumeGameButton.X = (w/consts.TileScale - t.resumeGameButton.Width()) / 2
 	t.settingsButton.X = w/consts.TileScale - 16
 	t.settingsButton.Y = h/consts.TileScale - 16
 	t.moregamesButton.X = 4
 	t.moregamesButton.Y = h/consts.TileScale - 16
 	t.warningDialog.X = (w/consts.TileScale-160)/2 + 4
-	t.warningYesButton.X = (t.warningDialog.Width - t.warningYesButton.Width) / 2
-	t.warningNoButton.X = (t.warningDialog.Width - t.warningNoButton.Width) / 2
+	t.warningYesButton.X = (t.warningDialog.Width - t.warningYesButton.Width()) / 2
+	t.warningNoButton.X = (t.warningDialog.Width - t.warningNoButton.Width()) / 2
 	t.quitDialog.X = (w/consts.TileScale-160)/2 + 4
-	t.quitYesButton.X = (t.quitDialog.Width - t.quitYesButton.Width) / 2
-	t.quitNoButton.X = (t.quitDialog.Width - t.quitNoButton.Width) / 2
+	t.quitYesButton.X = (t.quitDialog.Width - t.quitYesButton.Width()) / 2
+	t.quitNoButton.X = (t.quitDialog.Width - t.quitNoButton.Width()) / 2
 
 	if !sceneManager.HasProgress() {
 		t.resumeGameButton.Visible = false

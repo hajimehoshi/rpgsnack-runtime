@@ -61,8 +61,8 @@ func NewItemPreviewPopup(x, y, width, height int) *ItemPreviewPopup {
 }
 
 func (i *ItemPreviewPopup) Update() {
-	i.previewButton.X = (i.Width - i.previewButton.Width*i.previewButton.ScaleX) / 2
-	i.closeButton.X = (i.Width - i.closeButton.Width) / 2
+	i.previewButton.X = (i.Width - i.previewButton.Width()) / 2
+	i.closeButton.X = (i.Width - i.closeButton.Width()) / 2
 
 	for _, n := range i.nodes {
 		n.UpdateAsChild(i.Visible, i.X, i.Y)
@@ -92,15 +92,13 @@ func (i *ItemPreviewPopup) SetItem(item *data.Item) {
 		i.previewButton.Image = NewImagePart(assets.GetImage("items/preview/" + i.item.Preview + ".png"))
 		i.previewButton.ScaleX = 1
 		i.previewButton.ScaleY = 1
-		i.previewButton.Width = 120
-		i.previewButton.Height = 120
+		i.previewButton.SetOriginalSize(120, 120)
 
 	} else {
 		i.previewButton.Image = NewImagePart(assets.GetIconImage(i.item.Icon + ".png"))
 		i.previewButton.ScaleX = 6
 		i.previewButton.ScaleY = 6
-		i.previewButton.Width = 16
-		i.previewButton.Height = 16
+		i.previewButton.SetOriginalSize(16, 16)
 	}
 }
 
