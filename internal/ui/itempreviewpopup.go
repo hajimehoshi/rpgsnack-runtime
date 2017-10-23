@@ -30,7 +30,6 @@ type ItemPreviewPopup struct {
 	closeButton   *Button
 	previewButton *Button
 	Visible       bool
-	widgets       []Widget
 	fadeImage     *ebiten.Image
 }
 

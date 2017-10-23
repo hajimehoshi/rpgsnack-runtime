@@ -21,7 +21,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 )
 
-type Widget interface {
+type Node interface {
 	UpdateAsChild(visible bool, offsetX, offsetY int)
 	DrawAsChild(screen *ebiten.Image, offsetX, offsetY int)
 }
@@ -32,7 +32,7 @@ type Dialog struct {
 	Width   int
 	Height  int
 	visible bool
-	widgets []Widget
+	nodes   []Node
 }
 
 func NewDialog(x, y, width, height int) *Dialog {
@@ -56,13 +56,13 @@ func (d *Dialog) Hide() {
 	d.visible = false
 }
 
-func (d *Dialog) AddChild(widget Widget) {
-	d.widgets = append(d.widgets, widget)
+func (d *Dialog) AddChild(node Node) {
+	d.nodes = append(d.nodes, node)
 }
 
 func (d *Dialog) Update() {
-	for _, w := range d.widgets {
-		w.UpdateAsChild(d.visible, d.X, d.Y)
+	for _, n := range d.nodes {
+		n.UpdateAsChild(d.visible, d.X, d.Y)
 	}
 }
 
@@ -79,7 +79,7 @@ func (d *Dialog) Draw(screen *ebiten.Image) {
 	geoM.Scale(consts.TileScale, consts.TileScale)
 	drawNinePatches(screen, assets.GetImage("system/9patch_test_off.png"), d.Width, d.Height, geoM, nil)
 
-	for _, w := range d.widgets {
-		w.DrawAsChild(screen, d.X, d.Y)
+	for _, n := range d.nodes {
+		n.DrawAsChild(screen, d.X, d.Y)
 	}
 }
