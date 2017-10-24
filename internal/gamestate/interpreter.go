@@ -724,7 +724,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			i.commandIterator.Advance()
 			return true, nil
 		}
-		ch.SetImage(args.Image)
+		ch.SetImage(args.ImageType, args.Image)
 		if args.UseFrameAndDir {
 			ch.SetFrame(args.Frame)
 			ch.SetDir(args.Dir)

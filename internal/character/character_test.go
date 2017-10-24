@@ -18,11 +18,12 @@ import (
 	"testing"
 
 	. "github.com/hajimehoshi/rpgsnack-runtime/internal/character"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 )
 
 func TestCharacterSize(t *testing.T) {
 	character := Character{}
-	character.SetImage("test_24_32")
+	character.SetImage(data.ImageTypeCharacters, "test_24_32")
 	w, h := character.Size()
 	if w != 24 || h != 32 {
 		t.Errorf("output: %dx%d, want 24x32", w, h)
@@ -31,7 +32,7 @@ func TestCharacterSize(t *testing.T) {
 
 func TestCharacterSizeInvalid(t *testing.T) {
 	character := Character{}
-	character.SetImage("test")
+	character.SetImage(data.ImageTypeCharacters, "test")
 	w, h := character.Size()
 	if w != 0 || h != 0 {
 		t.Errorf("output: %dx%d, want 0x0", w, h)
@@ -40,7 +41,7 @@ func TestCharacterSizeInvalid(t *testing.T) {
 
 func TestCharacterFrameCount(t *testing.T) {
 	character := Character{}
-	character.SetImage("test_24_32")
+	character.SetImage(data.ImageTypeCharacters, "test_24_32")
 	character.SetSizeForTesting(48, 128)
 
 	frameCount := character.FrameCount()
@@ -56,7 +57,7 @@ func TestCharacterFrameCount(t *testing.T) {
 
 func TestCharacterDirCount(t *testing.T) {
 	character := Character{}
-	character.SetImage("test_24_32")
+	character.SetImage(data.ImageTypeCharacters, "test_24_32")
 	character.SetSizeForTesting(48, 128)
 
 	frameCount := character.DirCount()

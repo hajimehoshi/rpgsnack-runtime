@@ -34,6 +34,7 @@ type CommonEvent struct {
 type Page struct {
 	Conditions []*Condition         `json:"conditions"`
 	Image      string               `json:"image"`
+	ImageType  ImageType            `json:"imageType"`
 	Frame      int                  `json:"frame"`
 	Dir        Dir                  `json:"dir"`
 	DirFix     bool                 `json:"dirFix"`
@@ -63,6 +64,13 @@ const (
 	PriorityBottom Priority = "bottom"
 	PriorityMiddle Priority = "middle"
 	PriorityTop    Priority = "top"
+)
+
+type ImageType string
+
+const (
+	ImageTypeCharacters ImageType = "character"
+	ImageTypeIcons      ImageType = "icon"
 )
 
 type Trigger string

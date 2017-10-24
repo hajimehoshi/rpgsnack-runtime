@@ -33,6 +33,8 @@ import (
 const (
 	PlayerEventID = -1
 	frameInerval  = 60
+	iconWidth     = 16
+	iconHeight    = 16
 )
 
 var characterFileRegexp = regexp.MustCompile(".*_([0-9]+)_([0-9]+)")
@@ -41,6 +43,7 @@ type Character struct {
 	eventID         int
 	speed           data.Speed
 	imageName       string
+	imageType       data.ImageType
 	dir             data.Dir
 	dirFix          bool
 	stepping        bool
@@ -121,6 +124,9 @@ func (c *Character) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EncodeString("imageName")
 	e.EncodeString(c.imageName)
 
+	e.EncodeString("imageType")
+	e.EncodeString(string(c.imageType))
+
 	e.EncodeString("dir")
 	e.EncodeInt(int(c.dir))
 
@@ -192,6 +198,8 @@ func (c *Character) DecodeMsgpack(dec *msgpack.Decoder) error {
 			c.speed = data.Speed(d.DecodeInt())
 		case "imageName":
 			c.imageName = d.DecodeString()
+		case "imageType":
+			c.imageType = data.ImageType(d.DecodeString())
 		case "dir":
 			c.dir = data.Dir(d.DecodeInt())
 		case "dirFix":
@@ -244,12 +252,26 @@ func (c *Character) EventID() int {
 	return c.eventID
 }
 
+func (c *Character) getImage() *ebiten.Image {
+	switch c.imageType {
+	case data.ImageTypeCharacters:
+		return assets.GetImage("characters/" + c.imageName + ".png")
+	case data.ImageTypeIcons:
+		return assets.GetImage("icons/" + c.imageName + ".png")
+	}
+
+	panic("character: invalid image type:" + c.imageType)
+}
+
 func (c *Character) ImageSize() (int, int) {
 	if c.imageName == "" {
 		return 0, 0
 	}
+	if c.imageType == data.ImageTypeIcons {
+		return iconWidth, iconHeight
+	}
 	if c.imageW == 0 || c.imageH == 0 {
-		c.imageW, c.imageH = assets.GetImage("characters/" + c.imageName + ".png").Size()
+		c.imageW, c.imageH = c.getImage().Size()
 	}
 	return c.imageW, c.imageH
 }
@@ -257,6 +279,9 @@ func (c *Character) ImageSize() (int, int) {
 func (c *Character) Size() (int, int) {
 	if c.imageName == "" {
 		return 0, 0
+	}
+	if c.imageType == data.ImageTypeIcons {
+		return iconWidth, iconHeight
 	}
 	if c.sizeW == 0 || c.sizeH == 0 {
 		arr := characterFileRegexp.FindStringSubmatch(c.imageName)
@@ -277,7 +302,7 @@ func (c *Character) Size() (int, int) {
 }
 
 func (c *Character) DirCount() int {
-	if c.imageName == "" {
+	if c.imageName == "" || c.imageType == data.ImageTypeIcons {
 		return 1
 	}
 	if c.dirCount == 0 {
@@ -292,7 +317,7 @@ func (c *Character) DirCount() int {
 }
 
 func (c *Character) FrameCount() int {
-	if c.imageName == "" {
+	if c.imageName == "" || c.imageType == data.ImageTypeIcons {
 		return 1
 	}
 	if c.frameCount == 0 {
@@ -411,8 +436,9 @@ func (c *Character) SetThrough(through bool) {
 	c.through = through
 }
 
-func (c *Character) SetImage(imageName string) {
+func (c *Character) SetImage(imageType data.ImageType, imageName string) {
 	c.imageName = imageName
+	c.imageType = imageType
 	c.imageW = 0
 	c.imageH = 0
 	c.sizeW = 0
@@ -472,6 +498,7 @@ func (c *Character) UpdateWithPage(page *data.Page) {
 		return
 	}
 	c.imageName = page.Image
+	c.imageType = page.ImageType
 	c.dirFix = page.DirFix
 	c.dir = page.Dir
 	c.frame = page.Frame
@@ -595,5 +622,5 @@ func (c *Character) Draw(screen *ebiten.Image, offsetX, offsetY float64) {
 	op.SourceRect = &r
 	op.ColorM.Scale(1, 1, 1, float64(c.opacity)/255)
 	op.GeoM.Scale(scaleX, scaleY)
-	screen.DrawImage(assets.GetImage("characters/"+c.imageName+".png"), op)
+	screen.DrawImage(c.getImage(), op)
 }
