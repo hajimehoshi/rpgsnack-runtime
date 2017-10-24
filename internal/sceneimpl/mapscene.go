@@ -424,15 +424,6 @@ func (m *MapScene) handleBackButton() {
 	m.quitDialog.Show()
 }
 
-func (m *MapScene) drawGround(bgImage *ebiten.Image, screen *ebiten.Image) {
-	op := &ebiten.DrawImageOptions{}
-	_, bgH := bgImage.Size()
-	diff := bgH - consts.TileYNum*consts.TileSize
-
-	op.GeoM.Translate(0, float64(m.offsetY)/consts.TileScale-float64(diff))
-	screen.DrawImage(bgImage, op)
-}
-
 func (m *MapScene) Draw(screen *ebiten.Image) {
 	m.tilesImage.Fill(color.Black)
 
@@ -440,7 +431,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	room := m.gameState.Map().CurrentRoom()
 
 	if room.Background.Name != "" {
-		m.drawGround(assets.GetImage("backgrounds/"+room.Background.Name+".png"), m.tilesImage)
+		m.gameState.Map().DrawFullscreenImage(m.tilesImage, assets.GetImage("backgrounds/"+room.Background.Name+".png"), m.offsetX, m.offsetY)
 	}
 	op := &ebiten.DrawImageOptions{}
 	for k := 0; k < 3; k++ {
@@ -489,7 +480,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		m.gameState.Map().DrawCharacters(m.tilesImage, p, 0, m.offsetY/consts.TileScale)
 	}
 	if room.Foreground.Name != "" {
-		m.drawGround(assets.GetImage("foregrounds/"+room.Foreground.Name+".png"), m.tilesImage)
+		m.gameState.Map().DrawFullscreenImage(m.tilesImage, assets.GetImage("foregrounds/"+room.Foreground.Name+".png"), m.offsetX, m.offsetY)
 	}
 
 	op = &ebiten.DrawImageOptions{}
