@@ -237,7 +237,7 @@ func (m *Map) setRoomID(gameState *Game, id int, interpreter *Interpreter) error
 	return nil
 }
 
-func (m *Map) IsEventExecuting() bool {
+func (m *Map) IsBlockingEventExecuting() bool {
 	for _, i := range m.interpreters {
 		if i.route {
 			continue
@@ -378,6 +378,7 @@ func (m *Map) Update(sceneManager *scene.Manager, gameState *Game) error {
 	for _, e := range m.events {
 		e.Update()
 	}
+	m.tryRunParallelEvent(gameState)
 	if m.IsPlayerMovingByUserInput() {
 		return nil
 	}
@@ -437,33 +438,45 @@ func (m *Map) eventsAt(x, y int) []*character.Character {
 	return es
 }
 
-func (m *Map) tryRunAutoEvent(gameState *Game) {
-	if m.IsEventExecuting() {
-		return
-	}
+func (m *Map) tryRunParallelEvent(gameState *Game) {
 events:
 	for _, e := range m.events {
 		page := m.currentPage(e)
 		if page == nil {
 			continue
 		}
-		var i *Interpreter
-		switch page.Trigger {
-		case data.TriggerAuto:
-			i = NewInterpreter(gameState, m.mapID, m.roomID, e.EventID(), page.Commands)
-		case data.TriggerParallel:
-			for _, i := range m.interpreters {
-				if i.mapID == m.mapID && i.roomID == m.roomID && i.eventID == e.EventID() {
-					continue events
-				}
+		if page.Trigger != data.TriggerParallel {
+			continue
+		}
+		// Skip if the event is already executing
+		for _, i := range m.interpreters {
+			if i.mapID == m.mapID && i.roomID == m.roomID && i.eventID == e.EventID() {
+				continue events
 			}
-			i = NewInterpreter(gameState, m.mapID, m.roomID, e.EventID(), page.Commands)
-			i.parallel = true
 		}
-		if i != nil {
-			m.addInterpreter(i)
-			return
+		i := NewInterpreter(gameState, m.mapID, m.roomID, e.EventID(), page.Commands)
+		i.parallel = true
+		m.addInterpreter(i)
+		return
+	}
+}
+
+func (m *Map) tryRunAutoEvent(gameState *Game) {
+	if m.IsBlockingEventExecuting() {
+		return
+	}
+	for _, e := range m.events {
+		page := m.currentPage(e)
+		if page == nil {
+			continue
 		}
+		if page.Trigger != data.TriggerAuto {
+			continue
+		}
+		// The event is not executed here since IsBlockingEventExecuting returns false.
+		i := NewInterpreter(gameState, m.mapID, m.roomID, e.EventID(), page.Commands)
+		m.addInterpreter(i)
+		return
 	}
 }
 
@@ -575,7 +588,7 @@ func (m *Map) Passable(through bool, x, y int, ignoreCharacters bool) bool {
 }
 
 func (m *Map) TryRunDirectEvent(gameState *Game, x, y int) bool {
-	if m.IsEventExecuting() {
+	if m.IsBlockingEventExecuting() {
 		return false
 	}
 	es := m.eventsAt(x, y)
@@ -618,7 +631,7 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, gameState *G
 	if !gameState.IsPlayerControlEnabled() {
 		return false
 	}
-	if m.IsEventExecuting() {
+	if m.IsBlockingEventExecuting() {
 		return false
 	}
 	event := m.executableEventAt(x, y)

@@ -144,7 +144,7 @@ func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) {
 		m.triggeringFailed = false
 		return
 	}
-	if m.gameState.Map().IsEventExecuting() {
+	if m.gameState.Map().IsBlockingEventExecuting() {
 		m.triggeringFailed = false
 		return
 	}
@@ -260,7 +260,7 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 		activeItemID := m.gameState.Items().ActiveItem()
 		m.inventory.SetItems(items)
 		m.inventory.SetActiveItemID(activeItemID)
-		if !m.gameState.Map().IsEventExecuting() {
+		if !m.gameState.Map().IsBlockingEventExecuting() {
 			m.inventory.Update()
 		}
 		if m.inventory.PressedSlotIndex >= 0 && m.inventory.PressedSlotIndex < len(m.gameState.Items().Items()) {
@@ -378,14 +378,14 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 	}
 
 	m.titleButton.Text = texts.Text(sceneManager.Language(), texts.TextIDTitle)
-	m.titleButton.Disabled = m.gameState.Map().IsEventExecuting()
+	m.titleButton.Disabled = m.gameState.Map().IsBlockingEventExecuting()
 	m.titleButton.Update()
 	if m.titleButton.Pressed() {
 		m.quitDialog.Show()
 	}
 
 	m.removeAdsButton.Text = texts.Text(sceneManager.Language(), texts.TextIDRemoveAds)
-	m.removeAdsButton.Disabled = m.gameState.Map().IsEventExecuting()
+	m.removeAdsButton.Disabled = m.gameState.Map().IsBlockingEventExecuting()
 	m.removeAdsButton.Update()
 	if m.removeAdsButton.Pressed() {
 		m.waitingRequestID = sceneManager.GenerateRequestID()
