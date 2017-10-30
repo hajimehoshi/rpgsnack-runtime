@@ -158,11 +158,13 @@ func loadRawData(projectPath string) (*rawData, error) {
 		return nil, err
 	}
 
+	l := js.Global.Get("navigator").Get("language").String()
+
 	return &rawData{
 		Project:   project,
 		Assets:    assets,
 		Progress:  <-fetchProgress(),
-		Purchases: nil,             // TODO: Implement this
-		Language:  []uint8(`"en"`), // TODO: Use OS's default language
+		Purchases: nil, // TODO: Implement this
+		Language:  []uint8(fmt.Sprintf(`"%s"`, l)),
 	}, nil
 }

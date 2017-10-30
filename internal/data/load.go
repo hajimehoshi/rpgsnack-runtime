@@ -110,6 +110,11 @@ func Load(projectPath string) (*LoadedData, error) {
 	} else {
 		tag = gameData.System.DefaultLanguage
 	}
+
+	// Keep only the language base so far.
+	// TODO: If the language is Chinese, the region code might be needed to keep.
+	tag = tag.Parent()
+
 	return &LoadedData{
 		Game:      gameData,
 		Assets:    assets,
