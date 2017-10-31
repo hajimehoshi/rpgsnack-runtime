@@ -38,6 +38,7 @@ type Inventory struct {
 	pressStartY         int
 	scrollX             int
 	dragX               int
+	dragging            bool
 	scrolling           bool
 	autoScrolling       bool
 	pageIndex           int
@@ -138,8 +139,9 @@ func (i *Inventory) Update() {
 		i.pressStartY = touchY
 		i.pressStartIndex = i.slotIndexAt(touchX-(i.X*consts.TileScale+i.scrollX+i.dragX), touchY)
 		i.autoScrolling = false
+		i.dragging = true
 	}
-	if input.Pressed() {
+	if i.dragging {
 		dx := touchX - i.pressStartX
 		if math.Abs(float64(dx)) > scrollDragThreshold && touchY > i.Y*consts.TileScale {
 			i.scrolling = true
@@ -166,6 +168,7 @@ func (i *Inventory) Update() {
 		i.scrollX += i.dragX
 		i.dragX = 0
 		i.scrolling = false
+		i.dragging = false
 	}
 
 	i.activeItemBoxButton.Update()
