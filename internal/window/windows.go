@@ -171,6 +171,10 @@ func (w *Windows) ShowMessage(content string, background data.MessageBackground,
 }
 
 func (w *Windows) ShowChoices(sceneManager *scene.Manager, choices []string, interpreterID int) {
+	// TODO: w.chosenBalloonWaitingCount should be 0 here!
+	if w.chosenBalloonWaitingCount > 0 {
+		panic("not reach")
+	}
 	_, h := sceneManager.Size()
 	ymin := h/consts.TileScale - len(choices)*choiceBalloonHeight
 	w.choiceBalloons = nil
@@ -205,12 +209,16 @@ func (w *Windows) CloseAll() {
 	}
 }
 
+func (w *Windows) IsBusyWithChoosing() bool {
+	return w.choosing || w.chosenBalloonWaitingCount > 0
+}
+
 func (w *Windows) IsBusy(interpreterID int) bool {
 	if w.IsAnimating(interpreterID) {
 		return true
 	}
 	if w.choosingInterpreterID == interpreterID {
-		if w.choosing || w.chosenBalloonWaitingCount > 0 {
+		if w.IsBusyWithChoosing() {
 			return true
 		}
 	}

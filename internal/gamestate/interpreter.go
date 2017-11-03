@@ -378,6 +378,9 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 
 	case data.CommandNameShowChoices:
 		if !i.waitingCommand {
+			if gameState.windows.IsBusyWithChoosing() {
+				return false, nil
+			}
 			gameState.ShowChoices(sceneManager, i.id, c.Args.(*data.CommandArgsShowChoices).ChoiceIDs)
 			i.waitingCommand = true
 			return false, nil
