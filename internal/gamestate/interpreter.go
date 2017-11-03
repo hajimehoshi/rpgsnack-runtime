@@ -318,6 +318,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			return true, nil
 		}
 		return false, nil
+
 	case data.CommandNameShowBalloon:
 		args := c.Args.(*data.CommandArgsShowBalloon)
 		if !i.waitingCommand {
@@ -344,6 +345,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			gameState.CloseAllWindows()
 		}
 		i.waitingCommand = false
+
 	case data.CommandNameShowMessage:
 		args := c.Args.(*data.CommandArgsShowMessage)
 		if !i.waitingCommand {
@@ -359,6 +361,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		i.commandIterator.Advance()
 		gameState.CloseAllWindows()
 		i.waitingCommand = false
+
 	case data.CommandNameShowHint:
 		if !i.waitingCommand {
 			args := c.Args.(*data.CommandArgsShowHint)
@@ -372,6 +375,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		i.commandIterator.Advance()
 		gameState.CloseAllWindows()
 		i.waitingCommand = false
+
 	case data.CommandNameShowChoices:
 		if !i.waitingCommand {
 			gameState.ShowChoices(sceneManager, i.id, c.Args.(*data.CommandArgsShowChoices).ChoiceIDs)
