@@ -39,8 +39,8 @@ type Achievement struct {
 }
 
 type Hint struct {
-	ID   int  `json:"id"`
-	Text UUID `json:"text"`
+	ID       int        `json:"id"`
+	Commands []*Command `json:"commands"`
 }
 
 type IAPProduct struct {

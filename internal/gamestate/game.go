@@ -499,24 +499,6 @@ func (g *Game) ShowMessage(interpreterID int, content string, background data.Me
 	g.windows.ShowMessage(content, background, positionType, textAlign, interpreterID)
 }
 
-func (g *Game) ShowHint(sceneManager *scene.Manager, interpreterID int, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign) {
-	hintId := g.hints.ActiveHintID()
-	// next time it shows next available hint
-	g.hints.ReadHint(hintId)
-	var hintText data.UUID
-	for _, h := range sceneManager.Game().Hints {
-		if h.ID == hintId {
-			hintText = h.Text
-			break
-		}
-	}
-	content := "Undefined"
-	if hintText.String() != "" {
-		content = sceneManager.Game().Texts.Get(sceneManager.Language(), hintText)
-	}
-	g.ShowMessage(interpreterID, content, background, positionType, textAlign)
-}
-
 func (g *Game) ShowChoices(sceneManager *scene.Manager, interpreterID int, choiceIDs []data.UUID) {
 	choices := []string{}
 	for _, id := range choiceIDs {

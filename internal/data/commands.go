@@ -124,11 +124,6 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 		}
 		c.Args = args
 	case CommandNameShowHint:
-		var args *CommandArgsShowHint
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
 	case CommandNameShowChoices:
 		var args *CommandArgsShowChoices
 		if err := unmarshalJSON(tmp.Args, &args); err != nil {
@@ -400,9 +395,7 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 				}
 				c.Args = a
 			case CommandNameShowHint:
-				a := &CommandArgsShowHint{}
-				d.DecodeAny(a)
-				c.Args = a
+				d.DecodeNil()
 			case CommandNameShowChoices:
 				a := &CommandArgsShowChoices{}
 				d.DecodeAny(a)
@@ -693,13 +686,6 @@ type CommandArgsShowBalloon struct {
 type CommandArgsShowMessage struct {
 	ContentID    UUID                `json:"content" msgpack:"content"`
 	Background   MessageBackground   `json:"background" msgpack:"background"`
-	PositionType MessagePositionType `json:"positionType" msgpack:"positionType"`
-	TextAlign    TextAlign           `json:"textAlign" msgpack:"textAlign"`
-}
-
-type CommandArgsShowHint struct {
-	ContentID    UUID                `json:"content" msgpack:"content"`
-	Background   MessageBackground   `json:"textAlign" msgpack:"background"`
 	PositionType MessagePositionType `json:"positionType" msgpack:"positionType"`
 	TextAlign    TextAlign           `json:"textAlign" msgpack:"textAlign"`
 }

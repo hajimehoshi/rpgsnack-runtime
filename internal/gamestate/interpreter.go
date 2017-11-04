@@ -363,18 +363,22 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		i.waitingCommand = false
 
 	case data.CommandNameShowHint:
-		if !i.waitingCommand {
-			args := c.Args.(*data.CommandArgsShowHint)
-			gameState.ShowHint(sceneManager, i.id, args.Background, args.PositionType, args.TextAlign)
-			i.waitingCommand = true
-			return false, nil
+		hintId := gameState.hints.ActiveHintID()
+		// next time it shows next available hint
+		gameState.hints.ReadHint(hintId)
+		hasHint := false
+		for _, h := range sceneManager.Game().Hints {
+			if h.ID == hintId {
+				c := h.Commands
+				i.sub = i.createChild(gameState, i.eventID, c)
+				hasHint = true
+				break
+			}
 		}
-		if gameState.IsWindowAnimating(i.id) {
-			return false, nil
+		// Advance command index first and check the next command.
+		if !hasHint {
+			i.commandIterator.Advance()
 		}
-		i.commandIterator.Advance()
-		gameState.CloseAllWindows()
-		i.waitingCommand = false
 
 	case data.CommandNameShowChoices:
 		if !i.waitingCommand {
