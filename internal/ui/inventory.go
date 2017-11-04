@@ -64,6 +64,7 @@ const (
 	itemSize            = 19
 	scrollDragThreshold = 5
 	scrollBarWidth      = 120
+	scrollBarHeight     = 24
 	itemPerPageCount    = 6
 	autoScrollSpeed     = 20
 	snapDragX           = 60
@@ -131,10 +132,17 @@ func (i *Inventory) calcScrollX(pageIndex int) int {
 	return -(pageIndex * (scrollBarWidth - frameXPadding)) * consts.TileScale
 }
 
+func (i *Inventory) isTouchingScroll() bool {
+	touchX, touchY := input.Position()
+	sx := (i.X + frameXMargin + frameXPadding) * consts.TileScale
+	sy := i.Y * consts.TileScale
+	return sx <= touchX && touchX < sx+scrollBarWidth*consts.TileScale && sy <= touchY && touchY < sy+scrollBarHeight*consts.TileScale
+}
+
 func (i *Inventory) Update() {
 	touchX, touchY := input.Position()
 	i.PressedSlotIndex = -1
-	if input.Triggered() {
+	if input.Triggered() && i.isTouchingScroll() {
 		i.pressStartX = touchX
 		i.pressStartY = touchY
 		i.pressStartIndex = i.slotIndexAt(touchX-(i.X*consts.TileScale+i.scrollX+i.dragX), touchY)
@@ -143,13 +151,13 @@ func (i *Inventory) Update() {
 	}
 	if i.dragging {
 		dx := touchX - i.pressStartX
-		if math.Abs(float64(dx)) > scrollDragThreshold && touchY > i.Y*consts.TileScale {
+		if math.Abs(float64(dx)) > scrollDragThreshold && i.isTouchingScroll() {
 			i.scrolling = true
 			i.dragX = dx
 		}
 	}
 	if input.Released() {
-		if !i.scrolling && touchX > ((i.X+frameXMargin+frameXPadding)*consts.TileScale) {
+		if !i.scrolling && i.isTouchingScroll() {
 			index := i.slotIndexAt(touchX-(i.X*consts.TileScale+i.scrollX+i.dragX), touchY)
 			if i.pressStartIndex == index {
 				i.PressedSlotIndex = index
