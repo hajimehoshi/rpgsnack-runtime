@@ -245,8 +245,12 @@ func (m *MapScene) updateQuitDialog(sceneManager *scene.Manager) (bool, error) {
 
 func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
 	w, _ := sceneManager.Size()
-	m.inventory.Visible = m.gameState.InventoryVisible()
-	if m.inventory.Visible {
+	if m.gameState.InventoryVisible() {
+		m.inventory.Show()
+	} else {
+		m.inventory.Hide()
+	}
+	if m.inventory.Visible() {
 		// TODO creating array for each loop does not seem to be the right thing
 		items := []*data.Item{}
 		for _, itemID := range m.gameState.Items().Items() {
@@ -263,8 +267,8 @@ func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
 		if !m.gameState.Map().IsBlockingEventExecuting() {
 			m.inventory.Update()
 		}
-		if m.inventory.PressedSlotIndex >= 0 && m.inventory.PressedSlotIndex < len(m.gameState.Items().Items()) {
-			itemID := m.gameState.Items().Items()[m.inventory.PressedSlotIndex]
+		if m.inventory.PressedSlotIndex() >= 0 && m.inventory.PressedSlotIndex() < len(m.gameState.Items().Items()) {
+			itemID := m.gameState.Items().Items()[m.inventory.PressedSlotIndex()]
 			if itemID == activeItemID {
 				m.gameState.Items().Deactivate()
 			} else {

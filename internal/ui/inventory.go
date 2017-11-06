@@ -28,8 +28,8 @@ import (
 type Inventory struct {
 	X                   int
 	Y                   int
-	Visible             bool
-	PressedSlotIndex    int
+	visible             bool
+	pressedSlotIndex    int
 	items               []*data.Item
 	activeItemID        int
 	activeItemBoxButton *Button
@@ -88,8 +88,8 @@ func NewInventory(x, y int) *Inventory {
 	return &Inventory{
 		X:                   x,
 		Y:                   y,
-		Visible:             true,
-		PressedSlotIndex:    -1,
+		visible:             true,
+		pressedSlotIndex:    -1,
 		items:               []*data.Item{},
 		activeItemID:        0,
 		activeItemBoxButton: button,
@@ -103,6 +103,22 @@ func NewInventory(x, y int) *Inventory {
 		pageIndex:           0,
 		targetPageIndex:     0,
 	}
+}
+
+func (i *Inventory) PressedSlotIndex() int {
+	return i.pressedSlotIndex
+}
+
+func (i *Inventory) Show() {
+	i.visible = true
+}
+
+func (i *Inventory) Hide() {
+	i.visible = false
+}
+
+func (i *Inventory) Visible() bool {
+	return i.visible
 }
 
 func (i *Inventory) slotIndexAt(x, y int) int {
@@ -141,7 +157,7 @@ func (i *Inventory) isTouchingScroll() bool {
 
 func (i *Inventory) Update() {
 	touchX, touchY := input.Position()
-	i.PressedSlotIndex = -1
+	i.pressedSlotIndex = -1
 	if input.Triggered() && i.isTouchingScroll() {
 		i.pressStartX = touchX
 		i.pressStartY = touchY
@@ -160,7 +176,7 @@ func (i *Inventory) Update() {
 		if !i.scrolling && i.isTouchingScroll() {
 			index := i.slotIndexAt(touchX-(i.X*consts.TileScale+i.scrollX+i.dragX), touchY)
 			if i.pressStartIndex == index {
-				i.PressedSlotIndex = index
+				i.pressedSlotIndex = index
 				i.pressStartIndex = -1
 			}
 		}
@@ -199,7 +215,7 @@ func (i *Inventory) Update() {
 }
 
 func (i *Inventory) Draw(screen *ebiten.Image) {
-	if !i.Visible {
+	if !i.visible {
 		return
 	}
 
