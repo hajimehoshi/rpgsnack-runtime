@@ -24,10 +24,8 @@ import (
 type ItemPreviewPopup struct {
 	X         int
 	Y         int
-	Width     int
-	Height    int
 	item      *data.Item
-	Visible   bool
+	visible   bool
 	fadeImage *ebiten.Image
 
 	nodes         []Node
@@ -35,7 +33,7 @@ type ItemPreviewPopup struct {
 	previewButton *Button
 }
 
-func NewItemPreviewPopup(x, y, width, height int) *ItemPreviewPopup {
+func NewItemPreviewPopup() *ItemPreviewPopup {
 	previewButton := NewButton(0, 40, 120, 120, "ok")
 	closeButton := NewButton(0, 160, 100, 20, "cancel")
 	closeButton.Text = "Close"
@@ -48,10 +46,6 @@ func NewItemPreviewPopup(x, y, width, height int) *ItemPreviewPopup {
 	}
 
 	return &ItemPreviewPopup{
-		X:         x,
-		Y:         y,
-		Width:     width,
-		Height:    height,
 		fadeImage: fadeImage,
 
 		nodes:         nodes,
@@ -60,12 +54,25 @@ func NewItemPreviewPopup(x, y, width, height int) *ItemPreviewPopup {
 	}
 }
 
+func (i *ItemPreviewPopup) Show() {
+	i.visible = true
+}
+
+func (i *ItemPreviewPopup) Hide() {
+	i.visible = false
+}
+
+func (i *ItemPreviewPopup) Visible() bool {
+	return i.visible
+}
+
 func (i *ItemPreviewPopup) Update() {
-	i.previewButton.X = (i.Width - i.previewButton.Width()) / 2
-	i.closeButton.X = (i.Width - i.closeButton.Width()) / 2
+	const width = 160 - 32
+	i.previewButton.X = (width - i.previewButton.Width()) / 2
+	i.closeButton.X = (width - i.closeButton.Width()) / 2
 
 	for _, n := range i.nodes {
-		n.UpdateAsChild(i.Visible, i.X, i.Y)
+		n.UpdateAsChild(i.visible, i.X, i.Y)
 	}
 
 	if i.closeButton.Pressed() {
@@ -103,7 +110,7 @@ func (i *ItemPreviewPopup) SetItem(item *data.Item) {
 }
 
 func (i *ItemPreviewPopup) Draw(screen *ebiten.Image) {
-	if !i.Visible {
+	if !i.visible {
 		return
 	}
 

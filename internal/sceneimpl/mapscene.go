@@ -128,7 +128,7 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	m.removeAdsDialog.AddChild(m.removeAdsNoButton)
 
 	m.inventory = ui.NewInventory(int(m.offsetX/consts.TileScale), (screenH-footerHeight)/consts.TileScale)
-	m.itemPreviewPopup = ui.NewItemPreviewPopup(0, 0, screenW/consts.TileScale, screenH/consts.TileScale)
+	m.itemPreviewPopup = ui.NewItemPreviewPopup()
 	m.quitDialog.AddChild(m.quitLabel)
 
 	m.removeAdsButton.Visible = false // TODO: Clock of Atonement does not need this feature, so turn it off for now
@@ -140,7 +140,7 @@ func (m *MapScene) updatePurchasesState(sceneManager *scene.Manager) {
 }
 
 func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) {
-	if m.itemPreviewPopup.Visible {
+	if m.itemPreviewPopup.Visible() {
 		m.triggeringFailed = false
 		return
 	}
@@ -283,13 +283,13 @@ func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
 
 	// If close button is pressed, the item content should be nil
 	// TODO: add callback to onClose instead
-	if m.itemPreviewPopup.Visible && m.itemPreviewPopup.Item() == nil {
+	if m.itemPreviewPopup.Visible() && m.itemPreviewPopup.Item() == nil {
 		m.gameState.Items().SetEventItem(0)
 	}
 
 	if eventItemID := m.gameState.Items().EventItem(); eventItemID > 0 {
 		// Update the previewPopup if the content has changed
-		if !(m.itemPreviewPopup.Visible && m.itemPreviewPopup.Item().ID == eventItemID) {
+		if !(m.itemPreviewPopup.Visible() && m.itemPreviewPopup.Item().ID == eventItemID) {
 			var eventItem *data.Item
 			for _, item := range sceneManager.Game().Items {
 				if item.ID == eventItemID {
@@ -298,16 +298,15 @@ func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
 				}
 			}
 			m.itemPreviewPopup.SetItem(eventItem)
-			m.itemPreviewPopup.Visible = true
+			m.itemPreviewPopup.Show()
 		}
 	} else {
-		m.itemPreviewPopup.Visible = false
+		m.itemPreviewPopup.Hide()
 	}
 
 	m.itemPreviewPopup.X = (w/consts.TileScale-160)/2 + 16
 	m.itemPreviewPopup.Y = int(m.offsetY / consts.TileScale)
-	m.itemPreviewPopup.Width = 160 - 32
-	if m.itemPreviewPopup.Visible {
+	if m.itemPreviewPopup.Visible() {
 		if !m.gameState.ExecutingItemCommands() {
 			// TODO: ItemPreviewPopup is not standarized as the other Popups
 			m.itemPreviewPopup.Update()
