@@ -246,7 +246,7 @@ func (i *Inventory) Draw(screen *ebiten.Image) {
 
 	if activeItem != nil {
 		dy := 0
-		if i.activeItemBoxButton.Pressing() {
+		if i.activeItemBoxButton.pressing {
 			dy = 2
 		}
 		op := &ebiten.DrawImageOptions{}

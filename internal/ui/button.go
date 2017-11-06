@@ -89,10 +89,6 @@ func (b *Button) SetOriginalSize(width, height int) {
 	b.height = height
 }
 
-func (b *Button) Pressing() bool {
-	return b.pressing
-}
-
 func (b *Button) Pressed() bool {
 	return b.pressed
 }
