@@ -175,15 +175,11 @@ func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) {
 	m.triggeringFailed = false
 }
 
-func (m *MapScene) Update(sceneManager *scene.Manager) error {
-	if !m.initialized {
-		m.initUI(sceneManager)
-	}
-	m.updatePurchasesState(sceneManager)
+func (m *MapScene) receiveRequest(sceneManager *scene.Manager) bool {
 	if m.waitingRequestID != 0 {
 		r := sceneManager.ReceiveResultIfExists(m.waitingRequestID)
 		if r == nil {
-			return nil
+			return false
 		}
 		m.waitingRequestID = 0
 		switch r.Type {
@@ -211,15 +207,14 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 			}
 			m.removeAdsDialog.Hide()
 		}
-		return nil
+		return false
 	}
 
+	return true
+}
+
+func (m *MapScene) updateQuitDialog(sceneManager *scene.Manager) (bool, error) {
 	w, _ := sceneManager.Size()
-
-	if input.BackButtonPressed() {
-		m.handleBackButton()
-	}
-
 	m.quitLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDBackToTitle)
 	m.quitYesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDYes)
 	m.quitNoButton.Text = texts.Text(sceneManager.Language(), texts.TextIDNo)
@@ -233,18 +228,23 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 				m.gameState.RequestSave(sceneManager)
 			}
 			if err := audio.Stop(); err != nil {
-				return err
+				return false, err
 			}
 			sceneManager.GoToWithFading(NewTitleScene(), 30)
-			return nil
+			return false, nil
 		}
 		if m.quitNoButton.Pressed() {
 			m.quitDialog.Hide()
-			return nil
+			return false, nil
 		}
-		return nil
+		return false, nil
 	}
 
+	return true, nil
+}
+
+func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
+	w, _ := sceneManager.Size()
 	m.inventory.Visible = m.gameState.InventoryVisible()
 	if m.inventory.Visible {
 		// TODO creating array for each loop does not seem to be the right thing
@@ -312,6 +312,10 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 			}
 		}
 	}
+}
+
+func (m *MapScene) updateStoreDialog(sceneManager *scene.Manager) bool {
+	w, _ := sceneManager.Size()
 
 	m.storeErrorOkButton.X = (m.storeErrorDialog.Width - m.storeErrorOkButton.Width()) / 2
 	m.storeErrorLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDStoreError)
@@ -321,11 +325,16 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 		m.storeErrorDialog.Update()
 		if m.storeErrorOkButton.Pressed() {
 			m.storeErrorDialog.Hide()
-			return nil
+			return false
 		}
-		return nil
+		return false
 	}
 
+	return true
+}
+
+func (m *MapScene) updateRemoveAdsDialog(sceneManager *scene.Manager) bool {
+	w, _ := sceneManager.Size()
 	m.removeAdsYesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDYes)
 	m.removeAdsNoButton.Text = texts.Text(sceneManager.Language(), texts.TextIDNo)
 	m.removeAdsDialog.X = (w/consts.TileScale-160)/2 + 4
@@ -336,18 +345,49 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 		if m.removeAdsYesButton.Pressed() {
 			m.waitingRequestID = sceneManager.GenerateRequestID()
 			sceneManager.Requester().RequestPurchase(m.waitingRequestID, "ads_removal")
-			return nil
+			return false
 		}
 		if m.removeAdsNoButton.Pressed() {
 			m.removeAdsDialog.Hide()
-			return nil
+			return false
 		}
 		if m.removeAdsDialog.Visible() {
-			return nil
+			return false
 		}
 	}
-	// m.removeAdsButton.Visible = !m.isAdsRemoved
 
+	return true
+}
+
+func (m *MapScene) Update(sceneManager *scene.Manager) error {
+	if !m.initialized {
+		m.initUI(sceneManager)
+	}
+	m.updatePurchasesState(sceneManager)
+
+	if ok := m.receiveRequest(sceneManager); !ok {
+		return nil
+	}
+
+	if input.BackButtonPressed() {
+		m.handleBackButton()
+	}
+
+	if ok, err := m.updateQuitDialog(sceneManager); !ok {
+		return err
+	}
+
+	m.updateInventory(sceneManager)
+
+	if ok := m.updateStoreDialog(sceneManager); !ok {
+		return nil
+	}
+
+	if ok := m.updateRemoveAdsDialog(sceneManager); !ok {
+		return nil
+	}
+
+	w, _ := sceneManager.Size()
 	// TODO: All UI parts' origin should be defined correctly
 	// so that we don't need to adjust X positions here.
 	m.titleButton.X = 4 + int(m.offsetX/consts.TileScale)
