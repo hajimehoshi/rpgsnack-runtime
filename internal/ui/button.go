@@ -40,6 +40,7 @@ type Button struct {
 	Image         *ImagePart
 	PressedImage  *ImagePart
 	DisabledImage *ImagePart
+	dropShadow    bool
 	pressing      bool
 	pressed       bool
 	soundName     string
@@ -47,14 +48,15 @@ type Button struct {
 
 func NewButton(x, y, width, height int, soundName string) *Button {
 	return &Button{
-		X:         x,
-		Y:         y,
-		ScaleX:    1,
-		ScaleY:    1,
-		width:     width,
-		height:    height,
-		Visible:   true,
-		soundName: soundName,
+		X:          x,
+		Y:          y,
+		ScaleX:     1,
+		ScaleY:     1,
+		width:      width,
+		height:     height,
+		Visible:    true,
+		soundName:  soundName,
+		dropShadow: false,
 	}
 }
 
@@ -72,6 +74,7 @@ func NewImageButton(x, y int, image *ImagePart, pressedImage *ImagePart, soundNa
 		PressedImage:  pressedImage,
 		DisabledImage: nil,
 		soundName:     soundName,
+		dropShadow:    true,
 	}
 }
 
@@ -200,6 +203,9 @@ func (b *Button) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 	var c color.Color = color.White
 	if b.Disabled {
 		c = color.RGBA{0x80, 0x80, 0x80, 0xff}
+	}
+	if b.dropShadow {
+		font.DrawText(screen, b.Text, tx+consts.TextScale, ty+consts.TextScale, consts.TextScale, data.TextAlignCenter, color.Black)
 	}
 	font.DrawText(screen, b.Text, tx, ty, consts.TextScale, data.TextAlignCenter, c)
 }
