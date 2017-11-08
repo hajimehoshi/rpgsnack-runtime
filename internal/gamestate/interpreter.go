@@ -784,6 +784,9 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 	case data.CommandNameShowItem:
 		args := c.Args.(*data.CommandArgsShowItem)
 		gameState.SetEventItem(args.ID)
+		if gameState.Items().Includes(args.ID) {
+			gameState.Items().Activate(args.ID)
+		}
 		i.commandIterator.Advance()
 
 	case data.CommandNameHideItem:
