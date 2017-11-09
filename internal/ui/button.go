@@ -184,14 +184,13 @@ func (b *Button) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 			}
 		}
 		image.Draw(screen, geoM, colorM)
-		return
+	} else {
+		img := assets.GetImage("system/9patch_test_off.png")
+		if b.pressing {
+			img = assets.GetImage("system/9patch_test_on.png")
+		}
+		drawNinePatches(screen, img, b.width, b.height, geoM, colorM)
 	}
-
-	img := assets.GetImage("system/9patch_test_off.png")
-	if b.pressing {
-		img = assets.GetImage("system/9patch_test_on.png")
-	}
-	drawNinePatches(screen, img, b.width, b.height, geoM, colorM)
 
 	_, th := font.MeasureSize(b.Text)
 	tx := (b.X + offsetX) * b.ScaleX * consts.TileScale

@@ -25,6 +25,13 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 )
 
+type InventoryMode int
+
+const (
+	DefaultMode InventoryMode = iota
+	PreviewMode
+)
+
 type Inventory struct {
 	X                   int
 	Y                   int
@@ -32,7 +39,9 @@ type Inventory struct {
 	pressedSlotIndex    int
 	items               []*data.Item
 	activeItemID        int
-	activeItemBoxButton *Button
+	combineItemID       int
+	infoButton          *Button
+	backButton          *Button
 	pressStartIndex     int
 	pressStartX         int
 	pressStartY         int
@@ -43,13 +52,17 @@ type Inventory struct {
 	autoScrolling       bool
 	pageIndex           int
 	targetPageIndex     int
+	stashedActiveItemID int
+	stashedPageIndex    int
 	bgPanel             *ImageView
 	frameCover          *ImageView
 	frameBase           *ImageView
 	activeCardSlot      *ImagePart
+	combineCardSlot     *ImagePart
 	cardSlot            *ImagePart
 	activeDot           *ImagePart
 	dot                 *ImagePart
+	mode                InventoryMode
 }
 
 const (
@@ -72,36 +85,48 @@ const (
 )
 
 func NewInventory(x, y int) *Inventory {
-	button := NewImageButton(
+	backButton := NewImageButton(
+		x+8,
+		y+8,
+		NewImagePart(assets.GetImage("system/preview_back_button.png")),
+		NewImagePart(assets.GetImage("system/preview_back_button_on.png")),
+		"cancel",
+	)
+
+	infoButton := NewImageButton(
 		x+buttonOffsetX,
 		y+buttonOffsetY,
 		NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 40, 0, 36, 32),
 		NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 0, 0, 36, 32),
 		"click",
 	)
-	button.DisabledImage = NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 80, 0, 36, 32)
+	infoButton.DisabledImage = NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 80, 0, 36, 32)
 
 	bgPanel := NewImageView(x, y, 1.0, NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 0, 32, 160, 40))
-	frameCover := NewImageView(x+34, y+4, 1.0, NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 0, 144, 128, 24))
-	frameBase := NewImageView(x+34, y+4, 1.0, NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 0, 168, 128, 24))
+	frameCover := NewImageView(0, y+4, 1.0, NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 0, 144, 128, 24))
+	frameBase := NewImageView(0, y+4, 1.0, NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 0, 168, 128, 24))
 
 	return &Inventory{
-		X:                   x,
-		Y:                   y,
-		visible:             true,
-		pressedSlotIndex:    -1,
-		items:               []*data.Item{},
-		activeItemID:        0,
-		activeItemBoxButton: button,
-		bgPanel:             bgPanel,
-		frameCover:          frameCover,
-		frameBase:           frameBase,
-		cardSlot:            NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 120, 0, 18, 18),
-		activeCardSlot:      NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 138, 0, 18, 18),
-		dot:                 NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 120, 24, 8, 8),
-		activeDot:           NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 128, 24, 8, 8),
-		pageIndex:           0,
-		targetPageIndex:     0,
+		X:                x,
+		Y:                y,
+		visible:          true,
+		pressedSlotIndex: -1,
+		items:            []*data.Item{},
+		activeItemID:     0,
+		combineItemID:    0,
+		infoButton:       infoButton,
+		backButton:       backButton,
+		bgPanel:          bgPanel,
+		frameCover:       frameCover,
+		frameBase:        frameBase,
+		cardSlot:         NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 120, 0, 18, 18),
+		activeCardSlot:   NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 156, 0, 18, 18),
+		combineCardSlot:  NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 138, 0, 18, 18),
+		dot:              NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 120, 24, 8, 8),
+		activeDot:        NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 128, 24, 8, 8),
+		pageIndex:        0,
+		targetPageIndex:  0,
+		mode:             DefaultMode,
 	}
 }
 
@@ -141,7 +166,11 @@ func (i *Inventory) slotCount() int {
 }
 
 func (i *Inventory) ActiveItemPressed() bool {
-	return i.activeItemBoxButton.Pressed()
+	return i.infoButton.Pressed()
+}
+
+func (i *Inventory) BackPressed() bool {
+	return i.backButton.Pressed()
 }
 
 func (i *Inventory) calcScrollX(pageIndex int) int {
@@ -170,6 +199,7 @@ func (i *Inventory) Update() {
 		if math.Abs(float64(dx)) > scrollDragThreshold && i.isTouchingScroll() {
 			i.scrolling = true
 			i.dragX = dx
+			i.pressStartIndex = -1
 		}
 	}
 	if input.Released() {
@@ -177,10 +207,16 @@ func (i *Inventory) Update() {
 			index := i.slotIndexAt(touchX-(i.X*consts.TileScale+i.scrollX+i.dragX), touchY)
 			if i.pressStartIndex == index {
 				i.pressedSlotIndex = index
-				i.pressStartIndex = -1
+				if i.activeItemID > 0 {
+					if i.combineItemID == i.items[index].ID {
+						i.combineItemID = 0
+					} else {
+						i.combineItemID = i.items[index].ID
+					}
+				}
 			}
 		}
-
+		i.pressStartIndex = -1
 		i.targetPageIndex = i.pageIndex
 		if i.dragX > snapDragX && i.pageIndex > 0 {
 			i.targetPageIndex = i.pageIndex - 1
@@ -195,8 +231,12 @@ func (i *Inventory) Update() {
 		i.dragging = false
 	}
 
-	i.activeItemBoxButton.Update()
-	i.activeItemBoxButton.Disabled = i.activeItemID == 0
+	if i.mode == DefaultMode {
+		i.infoButton.Update()
+		i.infoButton.Disabled = i.activeItemID == 0
+	} else {
+		i.backButton.Update()
+	}
 
 	if i.autoScrolling {
 		targetX := i.calcScrollX(i.targetPageIndex)
@@ -212,6 +252,9 @@ func (i *Inventory) Update() {
 			i.autoScrolling = false
 		}
 	}
+
+	i.frameCover.X = i.X + frameXMargin
+	i.frameBase.X = i.X + frameXMargin
 }
 
 func (i *Inventory) Draw(screen *ebiten.Image) {
@@ -244,10 +287,15 @@ func (i *Inventory) Draw(screen *ebiten.Image) {
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(tx, ty)
 		op.GeoM.Scale(consts.TileScale, consts.TileScale)
+
 		if i.activeItemID == itemID {
 			i.activeCardSlot.Draw(screen, &op.GeoM, &ebiten.ColorM{})
 		} else {
-			i.cardSlot.Draw(screen, &op.GeoM, &ebiten.ColorM{})
+			if i.mode == PreviewMode && item != nil && i.combineItemID == item.ID {
+				i.combineCardSlot.Draw(screen, &op.GeoM, &ebiten.ColorM{})
+			} else {
+				i.cardSlot.Draw(screen, &op.GeoM, &ebiten.ColorM{})
+			}
 		}
 
 		if item != nil {
@@ -258,17 +306,20 @@ func (i *Inventory) Draw(screen *ebiten.Image) {
 
 	i.frameCover.Draw(screen)
 
-	i.activeItemBoxButton.Draw(screen)
-
-	if activeItem != nil {
-		dy := 0
-		if i.activeItemBoxButton.pressing {
-			dy = 2
+	if i.mode == DefaultMode {
+		i.infoButton.Draw(screen)
+		if activeItem != nil {
+			dy := 2
+			if i.infoButton.pressing {
+				dy = 3
+			}
+			op := &ebiten.DrawImageOptions{}
+			op.GeoM.Translate(float64(i.X*consts.TileScale+buttonOffsetX+10), float64(i.Y+buttonOffsetY+5+dy))
+			op.GeoM.Scale(consts.TileScale, consts.TileScale)
+			screen.DrawImage(assets.GetIconImage(activeItem.Icon+".png"), op)
 		}
-		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(float64(i.X*consts.TileScale+buttonOffsetX+10), float64(i.Y+buttonOffsetY+5+dy))
-		op.GeoM.Scale(consts.TileScale, consts.TileScale)
-		screen.DrawImage(assets.GetIconImage(activeItem.Icon+".png"), op)
+	} else {
+		i.backButton.Draw(screen)
 	}
 
 	centerX := frameXMargin + scrollBarWidth/2
@@ -291,10 +342,25 @@ func (i *Inventory) Draw(screen *ebiten.Image) {
 	}
 }
 
+func (i *Inventory) SetMode(mode InventoryMode) {
+	if i.mode != mode {
+		i.mode = mode
+		i.combineItemID = 0
+	}
+}
+
 func (i *Inventory) SetItems(items []*data.Item) {
 	i.items = items
 }
 
 func (i *Inventory) SetActiveItemID(activeItemID int) {
 	i.activeItemID = activeItemID
+}
+
+func (i *Inventory) CombineItemID() int {
+	return i.combineItemID
+}
+
+func (i *Inventory) Mode() InventoryMode {
+	return i.mode
 }

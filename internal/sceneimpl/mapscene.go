@@ -257,6 +257,7 @@ func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
 			for _, item := range sceneManager.Game().Items {
 				if itemID == item.ID {
 					items = append(items, item)
+					break
 				}
 			}
 		}
@@ -267,41 +268,55 @@ func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
 		if !m.gameState.Map().IsBlockingEventExecuting() {
 			m.inventory.Update()
 		}
+
 		if m.inventory.PressedSlotIndex() >= 0 && m.inventory.PressedSlotIndex() < len(m.gameState.Items().Items()) {
 			itemID := m.gameState.Items().Items()[m.inventory.PressedSlotIndex()]
-			if itemID == activeItemID {
-				m.gameState.Items().Deactivate()
+			if m.inventory.Mode() == ui.DefaultMode {
+				if itemID == activeItemID {
+					m.gameState.Items().Deactivate()
+				} else {
+					m.gameState.Items().Activate(itemID)
+				}
 			} else {
-				m.gameState.Items().Activate(itemID)
+				var combineItem *data.Item
+				for _, item := range sceneManager.Game().Items {
+					if m.inventory.CombineItemID() == item.ID {
+						combineItem = item
+						break
+					}
+				}
+
+				m.itemPreviewPopup.SetCombineItem(combineItem, sceneManager.Game().CreateCombine(activeItemID, m.inventory.CombineItemID()))
 			}
 		}
 
 		if m.inventory.ActiveItemPressed() {
-			m.gameState.Items().SetEventItem(activeItemID)
+			m.gameState.Items().SetEventItem(m.gameState.Items().ActiveItem())
+			m.inventory.SetMode(ui.PreviewMode)
 		}
 	}
 
-	// If close button is pressed, the item content should be nil
-	// TODO: add callback to onClose instead
-	if m.itemPreviewPopup.Visible() && m.itemPreviewPopup.Item() == nil {
+	// TODO: using Pressed() in if statement requires us to call extra Update()... this is ugly
+	if m.itemPreviewPopup.ClosePressed() || m.inventory.BackPressed() {
 		m.gameState.Items().SetEventItem(0)
+		m.itemPreviewPopup.SetActiveItem(nil, "")
+		m.itemPreviewPopup.Hide()
+		m.itemPreviewPopup.Update(sceneManager)
+		m.inventory.Update()
+		m.inventory.SetMode(ui.DefaultMode)
 	}
 
 	if eventItemID := m.gameState.Items().EventItem(); eventItemID > 0 {
-		// Update the previewPopup if the content has changed
-		if !(m.itemPreviewPopup.Visible() && m.itemPreviewPopup.Item().ID == eventItemID) {
-			var eventItem *data.Item
-			for _, item := range sceneManager.Game().Items {
-				if item.ID == eventItemID {
-					eventItem = item
-					break
-				}
+		var eventItem *data.Item
+		for _, item := range sceneManager.Game().Items {
+			if item.ID == eventItemID {
+				eventItem = item
+				break
 			}
-			m.itemPreviewPopup.SetItem(eventItem)
-			m.itemPreviewPopup.Show()
 		}
-	} else {
-		m.itemPreviewPopup.Hide()
+
+		m.itemPreviewPopup.SetActiveItem(eventItem, sceneManager.Game().Texts.Get(sceneManager.Language(), eventItem.Desc))
+		m.itemPreviewPopup.Show()
 	}
 
 	m.itemPreviewPopup.X = (w/consts.TileScale-160)/2 + 16
@@ -309,9 +324,14 @@ func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
 	if m.itemPreviewPopup.Visible() {
 		if !m.gameState.ExecutingItemCommands() {
 			// TODO: ItemPreviewPopup is not standarized as the other Popups
-			m.itemPreviewPopup.Update()
-			if m.itemPreviewPopup.PreviewPressed() {
-				m.gameState.StartItemCommands()
+			m.itemPreviewPopup.Update(sceneManager)
+			if m.itemPreviewPopup.ActionPressed() {
+				if m.inventory.CombineItemID() != 0 {
+					combine := sceneManager.Game().CreateCombine(m.gameState.Items().ActiveItem(), m.inventory.CombineItemID())
+					m.gameState.StartCombineCommands(combine)
+				} else {
+					m.gameState.StartItemCommands()
+				}
 			}
 		}
 	}

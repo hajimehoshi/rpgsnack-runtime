@@ -38,6 +38,7 @@ const (
 	TextIDBackToTitle
 	TextIDClose
 	TextIDTitle
+	TextIDItemCheck
 	TextIDQuitGame
 	TextIDStoreError
 )
@@ -67,6 +68,7 @@ to remove ads from the game?`,
 		TextIDMoreGames:        "More Games",
 		TextIDClose:            "Close",
 		TextIDTitle:            "Title",
+		TextIDItemCheck:        "Check",
 
 		TextIDNewGameWarning: `You have a on-going game data.
 Do you want to clear the progress
@@ -94,6 +96,7 @@ and connect to the network`,
 		TextIDMoreGames:        "ほかのゲーム",
 		TextIDClose:            "閉じる",
 		TextIDTitle:            "タイトル",
+		TextIDItemCheck:        "チェック",
 
 		TextIDNewGameWarning: `進行中のゲームデータがあります。
 進行中のゲームデータを消して、

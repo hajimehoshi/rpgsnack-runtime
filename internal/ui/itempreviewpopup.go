@@ -15,30 +15,57 @@
 package ui
 
 import (
+	"image/color"
+
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/font"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/texts"
 )
 
 type ItemPreviewPopup struct {
-	X         int
-	Y         int
-	item      *data.Item
-	visible   bool
-	fadeImage *ebiten.Image
-
-	nodes         []Node
-	closeButton   *Button
-	previewButton *Button
+	X               int
+	Y               int
+	item            *data.Item
+	combineItem     *data.Item
+	combine         *data.Combine
+	visible         bool
+	fadeImage       *ebiten.Image
+	frameImage      *ebiten.Image
+	bgBoxImage      *ebiten.Image
+	previewBoxImage *ebiten.Image
+	nodes           []Node
+	closeButton     *Button
+	previewButton   *Button
+	actionButton    *Button
+	desc            string
 }
 
 func NewItemPreviewPopup() *ItemPreviewPopup {
-	previewButton := NewButton(0, 40, 120, 120, "ok")
-	closeButton := NewButton(0, 160, 100, 20, "cancel")
-	closeButton.Text = "Close"
+	closeButton := NewImageButton(
+		120,
+		25,
+		NewImagePart(assets.GetImage("system/item_cancel_off.png")),
+		NewImagePart(assets.GetImage("system/item_cancel_on.png")),
+		"cancel",
+	)
 
-	nodes := []Node{previewButton, closeButton}
+	actionButton := NewImageButton(
+		40,
+		114,
+		NewImagePart(assets.GetImage("system/item_action_button_off.png")),
+		NewImagePart(assets.GetImage("system/item_action_button_on.png")),
+		"click",
+	)
+	frameImage := assets.GetImage("system/item_details.png")
+	bgBoxImage := assets.GetImage("system/item_bg_box.png")
+	previewBoxImage := assets.GetImage("system/item_preview_box.png")
+
+	nodes := []Node{closeButton, actionButton}
 
 	fadeImage, err := ebiten.NewImage(16, 16, ebiten.FilterNearest)
 	if err != nil {
@@ -46,12 +73,21 @@ func NewItemPreviewPopup() *ItemPreviewPopup {
 	}
 
 	return &ItemPreviewPopup{
-		fadeImage: fadeImage,
-
-		nodes:         nodes,
-		closeButton:   closeButton,
-		previewButton: previewButton,
+		fadeImage:       fadeImage,
+		frameImage:      frameImage,
+		bgBoxImage:      bgBoxImage,
+		previewBoxImage: previewBoxImage,
+		nodes:           nodes,
+		closeButton:     closeButton,
+		actionButton:    actionButton,
 	}
+}
+
+func (i *ItemPreviewPopup) Update(sceneManager *scene.Manager) {
+	for _, n := range i.nodes {
+		n.UpdateAsChild(i.visible, i.X, i.Y)
+	}
+	i.actionButton.Text = texts.Text(sceneManager.Language(), texts.TextIDItemCheck)
 }
 
 func (i *ItemPreviewPopup) Show() {
@@ -66,46 +102,39 @@ func (i *ItemPreviewPopup) Visible() bool {
 	return i.visible
 }
 
-func (i *ItemPreviewPopup) Update() {
-	const width = 160 - 32
-	i.previewButton.X = (width - i.previewButton.Width()) / 2
-	i.closeButton.X = (width - i.closeButton.Width()) / 2
+func (i *ItemPreviewPopup) ClosePressed() bool {
+	return i.closeButton.Pressed()
+}
 
-	for _, n := range i.nodes {
-		n.UpdateAsChild(i.visible, i.X, i.Y)
-	}
+func (i *ItemPreviewPopup) ActionPressed() bool {
+	return i.actionButton.Pressed()
+}
 
-	if i.closeButton.Pressed() {
-		i.item = nil
+func (i *ItemPreviewPopup) SetActiveItem(item *data.Item, desc string) {
+	if i.item != item {
+		i.item = item
+		i.desc = desc
+		i.combineItem = nil
+		i.combine = nil
 	}
 }
 
-func (i *ItemPreviewPopup) PreviewPressed() bool {
-	return i.previewButton.Pressed()
+func (i *ItemPreviewPopup) SetCombineItem(item *data.Item, combine *data.Combine) {
+	i.combineItem = item
+	i.combine = combine
 }
 
-func (i *ItemPreviewPopup) Item() *data.Item {
-	return i.item
-}
+func (i *ItemPreviewPopup) DrawItem(screen *ebiten.Image, x, y float64, icon string) {
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(x, y)
+	op.GeoM.Scale(consts.TileScale, consts.TileScale)
+	screen.DrawImage(i.previewBoxImage, op)
 
-func (i *ItemPreviewPopup) SetItem(item *data.Item) {
-	i.item = item
-	if i.item == nil || (i.item.Preview == "" && i.item.Icon == "") {
-		i.previewButton.Visible = false
-		return
-	}
-	i.previewButton.Visible = true
-	if i.item.Preview != "" {
-		i.previewButton.Image = NewImagePart(assets.GetImage("items/preview/" + i.item.Preview + ".png"))
-		i.previewButton.ScaleX = 1
-		i.previewButton.ScaleY = 1
-		i.previewButton.SetOriginalSize(120, 120)
-
-	} else {
-		i.previewButton.Image = NewImagePart(assets.GetIconImage(i.item.Icon + ".png"))
-		i.previewButton.ScaleX = 6
-		i.previewButton.ScaleY = 6
-		i.previewButton.SetOriginalSize(16, 16)
+	if i.item.Icon != "" {
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(x/consts.TileScale, y/consts.TileScale)
+		op.GeoM.Scale(consts.TileScale*3, consts.TileScale*3)
+		screen.DrawImage(assets.GetIconImage(icon+".png"), op)
 	}
 }
 
@@ -123,6 +152,24 @@ func (i *ItemPreviewPopup) Draw(screen *ebiten.Image) {
 	op.ColorM.Translate(0, 0, 0, 1)
 	op.ColorM.Scale(1, 1, 1, 0.5)
 	screen.DrawImage(i.fadeImage, op)
+
+	op = &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(6, 35)
+	op.GeoM.Scale(consts.TileScale, consts.TileScale)
+	screen.DrawImage(i.frameImage, op)
+
+	op = &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(12, 65)
+	op.GeoM.Scale(consts.TileScale, consts.TileScale)
+	screen.DrawImage(i.bgBoxImage, op)
+
+	i.DrawItem(screen, 16, 70, i.item.Icon)
+	if i.combineItem != nil && i.combineItem.ID != i.item.ID {
+		i.DrawItem(screen, 92, 70, i.combineItem.Icon)
+	} else {
+		font.DrawText(screen, i.desc, 68*consts.TileScale+consts.TextScale, 72*consts.TileScale+consts.TextScale, consts.TextScale, data.TextAlignLeft, color.Black)
+		font.DrawText(screen, i.desc, 68*consts.TileScale, 72*consts.TileScale, consts.TextScale, data.TextAlignLeft, color.White)
+	}
 
 	for _, n := range i.nodes {
 		n.DrawAsChild(screen, i.X, i.Y)

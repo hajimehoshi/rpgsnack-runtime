@@ -928,3 +928,13 @@ func (m *Map) StartItemCommands(gameState *Game, itemID int) {
 	}
 	m.itemInterpreter = NewInterpreter(gameState, m.mapID, m.roomID, 0, item.Commands)
 }
+
+func (m *Map) StartCombineCommands(gameState *Game, combine *data.Combine) {
+	if m.itemInterpreter != nil {
+		return
+	}
+	if combine == nil {
+		return
+	}
+	m.itemInterpreter = NewInterpreter(gameState, m.mapID, m.roomID, 0, combine.Commands)
+}

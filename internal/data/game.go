@@ -14,6 +14,13 @@
 
 package data
 
+type CombineType string
+
+const (
+	CombineTypeUse     CombineType = "use"
+	CombineTypeCombine CombineType = "combine"
+)
+
 type Game struct {
 	Maps         []*Map         `json:"maps"`
 	Texts        *Texts         `json:"texts"`
@@ -22,6 +29,7 @@ type Game struct {
 	Hints        []*Hint        `json:"hints"`
 	IAPProducts  []*IAPProduct  `json:"iapProducts"`
 	Items        []*Item        `json:"items"`
+	Combines     []*Combine     `json:"combines"`
 	CommonEvents []*CommonEvent `json:"commonEvents"`
 	System       *System        `json:"system"`
 }
@@ -52,6 +60,23 @@ type Item struct {
 	ID       int        `json:"id"`
 	Name     UUID       `json:"name"`
 	Icon     string     `json:"icon"`
-	Preview  string     `json:"preview"`
+	Desc     UUID       `json:"desc"`
 	Commands []*Command `json:"commands"`
+}
+
+type Combine struct {
+	ID       int         `json:"id"`
+	Item1    int         `json:"item1"`
+	Item2    int         `json:"item2"`
+	Type     CombineType `json:"type"`
+	Commands []*Command  `json:"commands"`
+}
+
+func (g *Game) CreateCombine(itemID1, itemID2 int) *Combine {
+	for _, combine := range g.Combines {
+		if (combine.Item1 == itemID1 && combine.Item2 == itemID2) || (combine.Type == CombineTypeCombine && combine.Item1 == itemID2 && combine.Item2 == itemID1) {
+			return combine
+		}
+	}
+	return nil
 }
