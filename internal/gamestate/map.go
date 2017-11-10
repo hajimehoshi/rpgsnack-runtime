@@ -886,9 +886,6 @@ func (m *Map) DrawFullscreenImage(screen *ebiten.Image, texture *ebiten.Image, o
 
 func (m *Map) DrawCharacters(screen *ebiten.Image, priority data.Priority, offsetX, offsetY float64) {
 	chars := []*character.Character{}
-	if priority == data.PriorityMiddle {
-		chars = append(chars, m.player)
-	}
 	for _, e := range m.events {
 		page := m.currentPage(e)
 		if page == nil {
@@ -904,6 +901,9 @@ func (m *Map) DrawCharacters(screen *ebiten.Image, priority data.Priority, offse
 		_, yj := chars[j].Position()
 		return yi < yj
 	})
+	if priority == data.PriorityMiddle {
+		chars = append(chars, m.player)
+	}
 	for _, c := range chars {
 		c.Draw(screen, offsetX, offsetY)
 	}
