@@ -250,6 +250,7 @@ func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
 	} else {
 		m.inventory.Hide()
 	}
+	activeItemID := m.gameState.Items().ActiveItem()
 	if m.inventory.Visible() {
 		// TODO creating array for each loop does not seem to be the right thing
 		items := []*data.Item{}
@@ -262,9 +263,10 @@ func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
 			}
 		}
 
-		activeItemID := m.gameState.Items().ActiveItem()
 		m.inventory.SetItems(items)
-		m.inventory.SetActiveItemID(activeItemID)
+		if m.inventory.Mode() == ui.DefaultMode {
+			m.inventory.SetActiveItemID(activeItemID)
+		}
 		if !m.gameState.Map().IsBlockingEventExecuting() {
 			m.inventory.Update()
 		}
@@ -291,8 +293,23 @@ func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
 		}
 
 		if m.inventory.ActiveItemPressed() {
-			m.gameState.Items().SetEventItem(m.gameState.Items().ActiveItem())
+			m.gameState.Items().SetEventItem(activeItemID)
+		}
+
+		if eventItemID := m.gameState.Items().EventItem(); eventItemID > 0 {
+			m.inventory.SetActiveItemID(eventItemID)
 			m.inventory.SetMode(ui.PreviewMode)
+
+			var eventItem *data.Item
+			for _, item := range sceneManager.Game().Items {
+				if item.ID == eventItemID {
+					eventItem = item
+					break
+				}
+			}
+
+			m.itemPreviewPopup.SetActiveItem(eventItem, sceneManager.Game().Texts.Get(sceneManager.Language(), eventItem.Desc))
+			m.itemPreviewPopup.Show()
 		}
 	}
 
@@ -306,19 +323,6 @@ func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
 		m.inventory.SetMode(ui.DefaultMode)
 	}
 
-	if eventItemID := m.gameState.Items().EventItem(); eventItemID > 0 {
-		var eventItem *data.Item
-		for _, item := range sceneManager.Game().Items {
-			if item.ID == eventItemID {
-				eventItem = item
-				break
-			}
-		}
-
-		m.itemPreviewPopup.SetActiveItem(eventItem, sceneManager.Game().Texts.Get(sceneManager.Language(), eventItem.Desc))
-		m.itemPreviewPopup.Show()
-	}
-
 	m.itemPreviewPopup.X = (w/consts.TileScale-160)/2 + 16
 	m.itemPreviewPopup.Y = int(m.offsetY / consts.TileScale)
 	if m.itemPreviewPopup.Visible() {
@@ -327,10 +331,10 @@ func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
 			m.itemPreviewPopup.Update(sceneManager)
 			if m.itemPreviewPopup.ActionPressed() {
 				if m.inventory.CombineItemID() != 0 {
-					combine := sceneManager.Game().CreateCombine(m.gameState.Items().ActiveItem(), m.inventory.CombineItemID())
+					combine := sceneManager.Game().CreateCombine(activeItemID, m.inventory.CombineItemID())
 					m.gameState.StartCombineCommands(combine)
 				} else {
-					m.gameState.StartItemCommands()
+					m.gameState.StartItemCommands(activeItemID)
 				}
 			}
 		}

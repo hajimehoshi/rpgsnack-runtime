@@ -353,6 +353,10 @@ func (i *Inventory) SetItems(items []*data.Item) {
 	i.items = items
 }
 
+func (i *Inventory) ActiveItemID() int {
+	return i.activeItemID
+}
+
 func (i *Inventory) SetActiveItemID(activeItemID int) {
 	i.activeItemID = activeItemID
 }

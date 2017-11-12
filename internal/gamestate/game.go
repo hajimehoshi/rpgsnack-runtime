@@ -526,8 +526,8 @@ func (g *Game) StartCombineCommands(combine *data.Combine) {
 	g.currentMap.StartCombineCommands(g, combine)
 }
 
-func (g *Game) StartItemCommands() {
-	g.currentMap.StartItemCommands(g, g.items.EventItem())
+func (g *Game) StartItemCommands(itemID int) {
+	g.currentMap.StartItemCommands(g, itemID)
 }
 
 func (g *Game) ExecutingItemCommands() bool {
