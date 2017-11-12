@@ -292,10 +292,6 @@ func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
 			}
 		}
 
-		if m.inventory.ActiveItemPressed() {
-			m.gameState.Items().SetEventItem(activeItemID)
-		}
-
 		if eventItemID := m.gameState.Items().EventItem(); eventItemID > 0 {
 			m.inventory.SetActiveItemID(eventItemID)
 			m.inventory.SetMode(ui.PreviewMode)
@@ -311,11 +307,18 @@ func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
 			m.itemPreviewPopup.SetActiveItem(eventItem, sceneManager.Game().Texts.Get(sceneManager.Language(), eventItem.Desc))
 			m.itemPreviewPopup.Show()
 		}
+
+		if m.inventory.ActiveItemPressed() {
+			m.gameState.Items().SetEventItem(activeItemID)
+		}
+	}
+
+	if m.itemPreviewPopup.ClosePressed() || m.inventory.BackPressed() {
+		m.gameState.Items().SetEventItem(0)
 	}
 
 	// TODO: using Pressed() in if statement requires us to call extra Update()... this is ugly
-	if m.itemPreviewPopup.ClosePressed() || m.inventory.BackPressed() {
-		m.gameState.Items().SetEventItem(0)
+	if m.itemPreviewPopup.Visible() && m.gameState.Items().EventItem() == 0 {
 		m.itemPreviewPopup.SetActiveItem(nil, "")
 		m.itemPreviewPopup.Hide()
 		m.itemPreviewPopup.Update(sceneManager)
