@@ -620,9 +620,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			}
 			i.moveCharacterState = m
 		}
-		if err := i.moveCharacterState.Update(gameState); err != nil {
-			return false, err
-		}
+		i.moveCharacterState.Update(gameState)
 		if !i.moveCharacterState.IsTerminated(gameState) {
 			return false, nil
 		}

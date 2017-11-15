@@ -95,7 +95,7 @@ func New(gameState GameState, mapID, roomID, eventID int, args *data.CommandArgs
 		s.distanceCount = 1
 
 	default:
-		panic("not reach")
+		panic("not reached")
 	}
 	return s
 }
@@ -194,17 +194,17 @@ func (s *State) IsTerminated(gameState GameState) bool {
 	return s.terminated
 }
 
-func (s *State) Update(gameState GameState) error {
+func (s *State) Update(gameState GameState) {
 	c := s.character(gameState)
 	if c == nil {
-		return nil
+		return
 	}
 	// Check IsMoving() first since the character might be moving at this time.
 	if c.IsMoving() {
-		return nil
+		return
 	}
 	if s.terminated {
-		return nil
+		return
 	}
 	if s.distanceCount > 0 && !s.waiting {
 		dx, dy := c.Position()
@@ -223,7 +223,7 @@ func (s *State) Update(gameState GameState) error {
 			case path.RouteCommandMoveLeft:
 				dir = data.DirLeft
 			default:
-				panic("not reach")
+				panic("not reached")
 			}
 		case data.MoveCharacterTypeForward:
 			dir = c.Dir()
@@ -238,7 +238,7 @@ func (s *State) Update(gameState GameState) error {
 		case data.MoveCharacterTypeRandom:
 			dir = data.Dir(gameState.RandomValue(0, 4))
 		default:
-			panic("not reach")
+			panic("not reached")
 		}
 		switch dir {
 		case data.DirUp:
@@ -250,28 +250,27 @@ func (s *State) Update(gameState GameState) error {
 		case data.DirLeft:
 			dx--
 		default:
-			panic("not reach")
+			panic("not reached")
 		}
 		if !gameState.MapPassableAt(c.Through(), dx, dy, false) {
 			c.Turn(dir)
 			if !s.routeSkip {
-				return nil
+				return
 			}
 			// Skip
 			s.terminated = true
 			s.distanceCount = 0
 			// TODO: Can continue Update.
-			return nil
+			return
 		}
 		c.Move(dir)
 		s.waiting = true
-		return nil
+		return
 	}
 	s.distanceCount--
 	s.waiting = false
 	if s.distanceCount > 0 {
-		return nil
+		return
 	}
 	s.terminated = true
-	return nil
 }
