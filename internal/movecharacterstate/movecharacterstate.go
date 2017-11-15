@@ -38,12 +38,10 @@ type State struct {
 	terminated    bool
 }
 
-type atFunc struct {
-	f func(x, y int) bool
-}
+type atFunc func(x, y int) bool
 
-func (a *atFunc) At(x, y int) bool {
-	return a.f(x, y)
+func (a atFunc) At(x, y int) bool {
+	return a(x, y)
 }
 
 type GameState interface {
@@ -56,11 +54,10 @@ type GameState interface {
 func (s *State) setMoveTarget(gameState GameState, x int, y int, ignoreCharacters bool) bool {
 	ch := s.character(gameState)
 	cx, cy := ch.Position()
-	path, lastX, lastY := path.Calc(&atFunc{
-		f: func(x, y int) bool {
-			return gameState.MapPassableAt(ch.Through(), x, y, ignoreCharacters)
-		},
-	}, cx, cy, x, y)
+	f := func(x, y int) bool {
+		return gameState.MapPassableAt(ch.Through(), x, y, ignoreCharacters)
+	}
+	path, lastX, lastY := path.Calc(atFunc(f), cx, cy, x, y)
 	s.path = path
 	s.distanceCount = len(path)
 	if x != lastX || y != lastY {
