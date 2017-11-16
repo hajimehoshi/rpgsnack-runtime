@@ -695,8 +695,9 @@ type CommandArgsShowChoices struct {
 }
 
 type CommandArgsSetSwitch struct {
-	ID    int  `json:"id" msgpack:"id"`
-	Value bool `json:"value" msgpack:"value"`
+	ID       int  `json:"id" msgpack:"id"`
+	Value    bool `json:"value" msgpack:"value"`
+	Internal bool `json:"internal" msgpack:"internal"`
 }
 
 type CommandArgsSetSelfSwitch struct {
@@ -709,6 +710,7 @@ type CommandArgsSetVariable struct {
 	Op        SetVariableOp        `json:"op"`
 	ValueType SetVariableValueType `json:"valueType"`
 	Value     interface{}          `json:"value"`
+	Internal  bool                 `json:"internal"`
 }
 
 func (c *CommandArgsSetVariable) EncodeMsgpack(enc *msgpack.Encoder) error {
@@ -742,6 +744,9 @@ func (c *CommandArgsSetVariable) EncodeMsgpack(enc *msgpack.Encoder) error {
 		return fmt.Errorf("data: CommandArgsSetVariable.EncodeMsgpack: invalid type: %s", c.ValueType)
 	}
 
+	e.EncodeString("internal")
+	e.EncodeBool(c.Internal)
+
 	e.EndMap()
 	return e.Flush()
 }
@@ -752,6 +757,7 @@ func (c *CommandArgsSetVariable) UnmarshalJSON(data []uint8) error {
 		Op        SetVariableOp        `json:"op"`
 		ValueType SetVariableValueType `json:"valueType"`
 		Value     json.RawMessage      `json:"value"`
+		Internal  bool                 `json:"internal"`
 	}
 	var tmp *tmpCommandArgsSetVariable
 	if err := unmarshalJSON(data, &tmp); err != nil {
@@ -760,6 +766,7 @@ func (c *CommandArgsSetVariable) UnmarshalJSON(data []uint8) error {
 	c.ID = tmp.ID
 	c.Op = tmp.Op
 	c.ValueType = tmp.ValueType
+	c.Internal = tmp.Internal
 	switch c.ValueType {
 	case SetVariableValueTypeConstant:
 		v := 0
@@ -839,6 +846,8 @@ func (c *CommandArgsSetVariable) DecodeMsgpack(dec *msgpack.Decoder) error {
 			default:
 				return fmt.Errorf("data: CommandArgsSetVariable.DecodeMsgpack: invalid type: %s", c.ValueType)
 			}
+		case "internal":
+			c.Internal = d.DecodeBool()
 		}
 	}
 	if err := d.Error(); err != nil {

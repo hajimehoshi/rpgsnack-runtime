@@ -29,6 +29,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/movecharacterstate"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/variables"
 )
 
 type Interpreter struct {
@@ -397,6 +398,9 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 
 	case data.CommandNameSetSwitch:
 		args := c.Args.(*data.CommandArgsSetSwitch)
+		if args.ID >= variables.ReservedID && !args.Internal {
+			return false, fmt.Errorf("gamestate: the switch ID (%d) must be < %d", args.ID, variables.ReservedID)
+		}
 		gameState.SetSwitchValue(args.ID, args.Value)
 		i.commandIterator.Advance()
 
@@ -407,6 +411,9 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 
 	case data.CommandNameSetVariable:
 		args := c.Args.(*data.CommandArgsSetVariable)
+		if args.ID >= variables.ReservedID && !args.Internal {
+			return false, fmt.Errorf("gamestate: the variable ID (%d) must be < %d", args.ID, variables.ReservedID)
+		}
 		if err := gameState.SetVariable(sceneManager, args.ID, args.Op, args.ValueType, args.Value, i.mapID, i.roomID, i.eventID); err != nil {
 			return false, err
 		}

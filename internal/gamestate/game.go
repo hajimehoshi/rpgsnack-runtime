@@ -347,7 +347,7 @@ func (g *Game) MeetsCondition(cond *data.Condition, eventID int) (bool, error) {
 		case data.ConditionValueTypeVariable:
 			rhs = g.variables.VariableValue(rhs)
 		default:
-			return false, fmt.Errorf("gamestate: invalid value type: %s eventId %d", cond, eventID)
+			return false, fmt.Errorf("gamestate: invalid value type: %s eventID %d", cond, eventID)
 		}
 		switch cond.Comp {
 		case data.ConditionCompEqualTo:
@@ -363,7 +363,7 @@ func (g *Game) MeetsCondition(cond *data.Condition, eventID int) (bool, error) {
 		case data.ConditionCompLessThan:
 			return v < rhs, nil
 		default:
-			return false, fmt.Errorf("gamestate: invalid comp: %s eventId %d", cond.Comp, eventID)
+			return false, fmt.Errorf("gamestate: invalid comp: %s eventID %d", cond.Comp, eventID)
 		}
 	case data.ConditionTypeItem:
 		id := cond.ID
@@ -390,7 +390,7 @@ func (g *Game) MeetsCondition(cond *data.Condition, eventID int) (bool, error) {
 			}
 
 		default:
-			return false, fmt.Errorf("gamestate: invalid item value: %s eventId %d", itemValue, eventID)
+			return false, fmt.Errorf("gamestate: invalid item value: %s eventID %d", itemValue, eventID)
 		}
 	case data.ConditionTypeSpecial:
 		switch cond.Value.(string) {
@@ -398,10 +398,10 @@ func (g *Game) MeetsCondition(cond *data.Condition, eventID int) (bool, error) {
 			e := g.currentMap.executableEventAt(g.currentMap.player.Position())
 			return e != nil, nil
 		default:
-			return false, fmt.Errorf("gamestate: ConditionTypeSpecial: invalid value: %s eventId %d", cond, eventID)
+			return false, fmt.Errorf("gamestate: ConditionTypeSpecial: invalid value: %s eventID %d", cond, eventID)
 		}
 	default:
-		return false, fmt.Errorf("gamestate: invalid condition: %s eventId %d", cond, eventID)
+		return false, fmt.Errorf("gamestate: invalid condition: %s eventID %d", cond, eventID)
 	}
 	return false, nil
 }

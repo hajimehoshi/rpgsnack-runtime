@@ -23,6 +23,9 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
 )
 
+// Note: Now this is used only at gamestate/map.go.
+const ReservedID = 4096
+
 type Variables struct {
 	switches     []bool
 	selfSwitches map[string][]bool

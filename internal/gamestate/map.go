@@ -29,6 +29,7 @@ import (
 	pathpkg "github.com/hajimehoshi/rpgsnack-runtime/internal/path"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/sort"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/variables"
 )
 
 const animationInterval = 30
@@ -683,15 +684,72 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, gameState *G
 
 	const labelPlayerMoved = "playerMoved"
 	for _, c := range cs {
+		const (
+			oldXID = iota + variables.ReservedID
+			oldYID
+			newXID
+			newYID
+		)
 		commands = append(commands,
+			// Get the original position.
+			&data.Command{
+				Name: data.CommandNameSetVariable,
+				Args: &data.CommandArgsSetVariable{
+					ID:        oldXID,
+					Op:        data.SetVariableOpAssign,
+					ValueType: data.SetVariableValueTypeCharacter,
+					Value: &data.SetVariableCharacterArgs{
+						Type: data.SetVariableCharacterTypeRoomX,
+					},
+					Internal: true,
+				},
+			},
+			&data.Command{
+				Name: data.CommandNameSetVariable,
+				Args: &data.CommandArgsSetVariable{
+					ID:        oldYID,
+					Op:        data.SetVariableOpAssign,
+					ValueType: data.SetVariableValueTypeCharacter,
+					Value: &data.SetVariableCharacterArgs{
+						Type: data.SetVariableCharacterTypeRoomY,
+					},
+					Internal: true,
+				},
+			},
+			// Try to move.
 			&data.Command{
 				Name: data.CommandNameSetRoute,
 				Args: &data.CommandArgsSetRoute{
 					EventID:  character.PlayerEventID,
 					Repeat:   false,
-					Skip:     false,
+					Skip:     true,
 					Wait:     true,
 					Commands: []*data.Command{c},
+				},
+			},
+			// Get the current position.
+			&data.Command{
+				Name: data.CommandNameSetVariable,
+				Args: &data.CommandArgsSetVariable{
+					ID:        newXID,
+					Op:        data.SetVariableOpAssign,
+					ValueType: data.SetVariableValueTypeCharacter,
+					Value: &data.SetVariableCharacterArgs{
+						Type: data.SetVariableCharacterTypeRoomX,
+					},
+					Internal: true,
+				},
+			},
+			&data.Command{
+				Name: data.CommandNameSetVariable,
+				Args: &data.CommandArgsSetVariable{
+					ID:        newYID,
+					Op:        data.SetVariableOpAssign,
+					ValueType: data.SetVariableValueTypeCharacter,
+					Value: &data.SetVariableCharacterArgs{
+						Type: data.SetVariableCharacterTypeRoomY,
+					},
+					Internal: true,
 				},
 			},
 			&data.Command{
@@ -716,6 +774,49 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, gameState *G
 				},
 			},
 		)
+		c1 := &data.Command{
+			Name: data.CommandNameIf,
+			Args: &data.CommandArgsIf{
+				Conditions: []*data.Condition{
+					{
+						Type:      data.ConditionTypeVariable,
+						ID:        oldXID,
+						Comp:      data.ConditionCompEqualTo,
+						ValueType: data.ConditionValueTypeVariable,
+						Value:     float64(newXID),
+					},
+				},
+			},
+			Branches: [][]*data.Command{
+				{},
+			},
+		}
+		c2 := &data.Command{
+			Name: data.CommandNameIf,
+			Args: &data.CommandArgsIf{
+				Conditions: []*data.Condition{
+					{
+						Type:      data.ConditionTypeVariable,
+						ID:        oldYID,
+						Comp:      data.ConditionCompEqualTo,
+						ValueType: data.ConditionValueTypeVariable,
+						Value:     float64(newYID),
+					},
+				},
+			},
+			Branches: [][]*data.Command{
+				{
+					{
+						Name: data.CommandNameGoto,
+						Args: &data.CommandArgsGoto{
+							Label: labelPlayerMoved,
+						},
+					},
+				},
+			},
+		}
+		c1.Branches[0] = append(c1.Branches[0], c2)
+		commands = append(commands, c1)
 	}
 	commands = append(commands,
 		&data.Command{
