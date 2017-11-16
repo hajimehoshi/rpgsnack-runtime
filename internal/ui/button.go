@@ -30,8 +30,6 @@ import (
 type Button struct {
 	X             int
 	Y             int
-	ScaleX        int
-	ScaleY        int
 	width         int
 	height        int
 	Visible       bool
@@ -50,8 +48,6 @@ func NewButton(x, y, width, height int, soundName string) *Button {
 	return &Button{
 		X:          x,
 		Y:          y,
-		ScaleX:     1,
-		ScaleY:     1,
 		width:      width,
 		height:     height,
 		Visible:    true,
@@ -65,8 +61,6 @@ func NewImageButton(x, y int, image *ImagePart, pressedImage *ImagePart, soundNa
 	return &Button{
 		X:             x,
 		Y:             y,
-		ScaleX:        1,
-		ScaleY:        1,
 		width:         w,
 		height:        h,
 		Visible:       true,
@@ -79,11 +73,11 @@ func NewImageButton(x, y int, image *ImagePart, pressedImage *ImagePart, soundNa
 }
 
 func (b *Button) Width() int {
-	return b.width * b.ScaleX
+	return b.width
 }
 
 func (b *Button) Height() int {
-	return b.height * b.ScaleY
+	return b.height
 }
 
 func (b *Button) SetOriginalSize(width, height int) {
@@ -103,8 +97,8 @@ func (b *Button) includesInput(offsetX, offsetY int) bool {
 	x -= offsetX
 	y -= offsetY
 
-	buttonWidth := b.ScaleX * b.width
-	buttonHeight := b.ScaleY * b.height
+	buttonWidth := b.width
+	buttonHeight := b.height
 	buttonX := b.X
 	buttonY := b.Y
 
@@ -157,7 +151,6 @@ func (b *Button) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 	}
 
 	geoM := &ebiten.GeoM{}
-	geoM.Scale(float64(b.ScaleX), float64(b.ScaleY))
 	geoM.Translate(float64(b.X+offsetX), float64(b.Y+offsetY))
 	geoM.Scale(consts.TileScale, consts.TileScale)
 
@@ -193,11 +186,11 @@ func (b *Button) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 	}
 
 	_, th := font.MeasureSize(b.Text)
-	tx := (b.X + offsetX) * b.ScaleX * consts.TileScale
-	tx += b.width * consts.TileScale * b.ScaleX / 2
+	tx := (b.X + offsetX) * consts.TileScale
+	tx += b.width * consts.TileScale / 2
 
-	ty := (b.Y + offsetY) * b.ScaleY * consts.TileScale
-	ty += (b.height*b.ScaleY*consts.TileScale - th*consts.TextScale*b.ScaleY) / 2
+	ty := (b.Y + offsetY) * consts.TileScale
+	ty += (b.height*consts.TileScale - th*consts.TextScale) / 2
 
 	var c color.Color = color.White
 	if b.Disabled {
