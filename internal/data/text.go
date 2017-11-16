@@ -17,11 +17,13 @@ package data
 import (
 	languagepkg "golang.org/x/text/language"
 
+	"github.com/google/uuid"
+
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/sort"
 )
 
 type Texts struct {
-	data      map[UUID]map[languagepkg.Tag]string
+	data      map[uuid.UUID]map[languagepkg.Tag]string
 	languages []languagepkg.Tag
 }
 
@@ -30,13 +32,13 @@ func (t *Texts) UnmarshalJSON(data []uint8) error {
 		Data map[string]string `json:data`
 		// ignore "meta" key.
 	}
-	orig := map[UUID]TextData{}
+	orig := map[uuid.UUID]TextData{}
 	if err := unmarshalJSON(data, &orig); err != nil {
 		return err
 	}
 	langs := map[languagepkg.Tag]struct{}{}
 	t.languages = []languagepkg.Tag{}
-	t.data = map[UUID]map[languagepkg.Tag]string{}
+	t.data = map[uuid.UUID]map[languagepkg.Tag]string{}
 	for id, textData := range orig {
 		t.data[id] = map[languagepkg.Tag]string{}
 		for langStr, text := range textData.Data {
@@ -69,6 +71,6 @@ func (t *Texts) Languages() []languagepkg.Tag {
 	return t.languages
 }
 
-func (t *Texts) Get(lang languagepkg.Tag, uuid UUID) string {
+func (t *Texts) Get(lang languagepkg.Tag, uuid uuid.UUID) string {
 	return t.data[uuid][lang]
 }

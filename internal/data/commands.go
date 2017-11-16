@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/vmihailenco/msgpack"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
@@ -679,19 +680,19 @@ type CommandArgsWait struct {
 
 type CommandArgsShowBalloon struct {
 	EventID     int         `json:"eventId" msgpack:"eventId"`
-	ContentID   UUID        `json:"content" msgpack:"content"`
+	ContentID   uuid.UUID   `json:"content" msgpack:"content"`
 	BalloonType BalloonType `json:"balloonType" msgpack:"balloonType"`
 }
 
 type CommandArgsShowMessage struct {
-	ContentID    UUID                `json:"content" msgpack:"content"`
+	ContentID    uuid.UUID           `json:"content" msgpack:"content"`
 	Background   MessageBackground   `json:"background" msgpack:"background"`
 	PositionType MessagePositionType `json:"positionType" msgpack:"positionType"`
 	TextAlign    TextAlign           `json:"textAlign" msgpack:"textAlign"`
 }
 
 type CommandArgsShowChoices struct {
-	ChoiceIDs []UUID `json:"choices" msgpack:"choices"`
+	ChoiceIDs []uuid.UUID `json:"choices" msgpack:"choices"`
 }
 
 type CommandArgsSetSwitch struct {

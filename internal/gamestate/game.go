@@ -23,6 +23,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/hajimehoshi/ebiten"
 	"github.com/vmihailenco/msgpack"
 
@@ -499,7 +500,7 @@ func (g *Game) ShowMessage(interpreterID int, content string, background data.Me
 	g.windows.ShowMessage(content, background, positionType, textAlign, interpreterID)
 }
 
-func (g *Game) ShowChoices(sceneManager *scene.Manager, interpreterID int, choiceIDs []data.UUID) {
+func (g *Game) ShowChoices(sceneManager *scene.Manager, interpreterID int, choiceIDs []uuid.UUID) {
 	choices := []string{}
 	for _, id := range choiceIDs {
 		choice := sceneManager.Game().Texts.Get(sceneManager.Language(), id)

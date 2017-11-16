@@ -14,6 +14,10 @@
 
 package data
 
+import (
+	"github.com/google/uuid"
+)
+
 type CombineType string
 
 const (
@@ -40,10 +44,10 @@ type BGM struct {
 }
 
 type Achievement struct {
-	ID    int    `json:"id"`
-	Name  UUID   `json:"name"`
-	Desc  UUID   `json:"desc"`
-	Image string `json:"image"`
+	ID    int       `json:"id"`
+	Name  uuid.UUID `json:"name"`
+	Desc  uuid.UUID `json:"desc"`
+	Image string    `json:"image"`
 }
 
 type Hint struct {
@@ -58,9 +62,9 @@ type IAPProduct struct {
 
 type Item struct {
 	ID       int        `json:"id"`
-	Name     UUID       `json:"name"`
+	Name     uuid.UUID  `json:"name"`
 	Icon     string     `json:"icon"`
-	Desc     UUID       `json:"desc"`
+	Desc     uuid.UUID  `json:"desc"`
 	Commands []*Command `json:"commands"`
 }
 
