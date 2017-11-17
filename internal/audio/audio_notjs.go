@@ -114,13 +114,38 @@ func (a *audio) Stop() error {
 	return nil
 }
 
-func (a *audio) PlaySE(name string, volume float64) error {
-	bin := assets.GetResource("audio/se/" + name + ".wav")
-	s, err := wav.Decode(a.context, eaudio.BytesReadSeekCloser(bin))
-	if err != nil {
-		return err
+func (a *audio) getPlayer(path string, loop bool) (*eaudio.Player, error) {
+	mp3Path := path + ".mp3"
+	wavPath := path + ".wav"
+	if assets.Exists(mp3Path) {
+		bin := assets.GetResource(mp3Path)
+		s, err := mp3.Decode(a.context, eaudio.BytesReadSeekCloser(bin))
+		if err != nil {
+			return nil, fmt.Errorf("audio: decode error: %s, %v", mp3Path, err)
+		}
+		if loop {
+			return eaudio.NewPlayer(a.context, eaudio.NewInfiniteLoop(s, s.Size()))
+		}
+		return eaudio.NewPlayer(a.context, s)
 	}
-	p, err := eaudio.NewPlayer(a.context, s)
+
+	if assets.Exists(wavPath) {
+		bin := assets.GetResource(wavPath)
+		s, err := wav.Decode(a.context, eaudio.BytesReadSeekCloser(bin))
+		if err != nil {
+			return nil, fmt.Errorf("audio: decode error: %s, %v", wavPath, err)
+		}
+		if loop {
+			return eaudio.NewPlayer(a.context, eaudio.NewInfiniteLoop(s, s.Size()))
+		}
+		return eaudio.NewPlayer(a.context, s)
+	}
+
+	return nil, fmt.Errorf("audio: %s not found", path)
+}
+
+func (a *audio) PlaySE(name string, volume float64) error {
+	p, err := a.getPlayer("audio/se/"+name, false)
 	if err != nil {
 		return err
 	}
@@ -131,32 +156,12 @@ func (a *audio) PlaySE(name string, volume float64) error {
 }
 
 func (a *audio) PlayBGM(name string, volume float64) error {
+	player, err := a.getPlayer("audio/bgm/"+name, true)
+	if err != nil {
+		return err
+	}
 	p, ok := a.players[name]
 	if !ok {
-		mp3Path := "audio/bgm/" + name + ".mp3"
-		wavPath := "audio/bgm/" + name + ".wav"
-		var ss eaudio.ReadSeekCloser
-		if assets.Exists(mp3Path) {
-			bin := assets.GetResource(mp3Path)
-			s, err := mp3.Decode(a.context, eaudio.BytesReadSeekCloser(bin))
-			if err != nil {
-				return fmt.Errorf("audio: decode error: %s, %v", mp3Path, err)
-			}
-			ss = eaudio.NewInfiniteLoop(s, s.Size())
-		} else if assets.Exists(wavPath) {
-			bin := assets.GetResource(wavPath)
-			s, err := wav.Decode(a.context, eaudio.BytesReadSeekCloser(bin))
-			if err != nil {
-				return fmt.Errorf("audio: decode error: %s, %v", wavPath, err)
-			}
-			ss = eaudio.NewInfiniteLoop(s, s.Size())
-		} else {
-			return fmt.Errorf("audio: %s not found", name)
-		}
-		player, err := eaudio.NewPlayer(a.context, ss)
-		if err != nil {
-			return err
-		}
 		a.players[name] = player
 		p = player
 	}
