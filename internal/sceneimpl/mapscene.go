@@ -329,7 +329,7 @@ func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
 	m.itemPreviewPopup.X = (w/consts.TileScale-160)/2 + 16
 	m.itemPreviewPopup.Y = int(m.offsetY / consts.TileScale)
 	if m.itemPreviewPopup.Visible() {
-		if !m.gameState.ExecutingItemCommands() {
+		if !m.gameState.ExecutingItemCommands() && !m.gameState.Map().IsBlockingEventExecuting() {
 			// TODO: ItemPreviewPopup is not standarized as the other Popups
 			m.itemPreviewPopup.Update(sceneManager)
 			if m.itemPreviewPopup.ActionPressed() {
