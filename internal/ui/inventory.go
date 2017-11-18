@@ -86,8 +86,8 @@ const (
 
 func NewInventory(x, y int) *Inventory {
 	backButton := NewImageButton(
-		x+8,
-		y+8,
+		x,
+		y,
 		NewImagePart(assets.GetImage("system/preview_back_button.png")),
 		NewImagePart(assets.GetImage("system/preview_back_button_on.png")),
 		"cancel",
