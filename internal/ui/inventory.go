@@ -205,7 +205,7 @@ func (i *Inventory) Update() {
 	if input.Released() {
 		if !i.scrolling && i.isTouchingScroll() {
 			index := i.slotIndexAt(touchX-(i.X*consts.TileScale+i.scrollX+i.dragX), touchY)
-			if i.pressStartIndex == index {
+			if i.pressStartIndex == index && index >= 0 && index < len(i.items) {
 				i.pressedSlotIndex = index
 				if i.activeItemID > 0 {
 					if i.combineItemID == i.items[index].ID {
