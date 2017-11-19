@@ -76,20 +76,6 @@ func (b *Button) SetY(y int) {
 	b.y = y
 }
 
-func (b *Button) Width() int {
-	return b.width
-}
-
-func (b *Button) Height() int {
-	return b.height
-}
-
-func (b *Button) SetOriginalSize(width, height int) {
-	// TODO: Better name
-	b.width = width
-	b.height = height
-}
-
 func (b *Button) Pressed() bool {
 	return b.pressed
 }
