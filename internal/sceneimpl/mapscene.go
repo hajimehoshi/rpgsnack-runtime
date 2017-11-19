@@ -98,37 +98,50 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	m.cameraButton = ui.NewImageButton(0, 0, cameraImagePart, cameraImagePart, "click")
 	m.screenShotImage = screenShotImage
 	m.screenShotDialog = ui.NewDialog(0, 4, 152, 232)
+	m.screenShotDialog.X = (screenW/consts.TileScale-160)/2 + 4
 	m.screenShotDialog.AddChild(ui.NewImageView(8, 8, 1.0/consts.TileScale/2, ui.NewImagePart(m.screenShotImage)))
 	m.titleButton = ui.NewButton(0, 2, 40, 12, "click")
+	m.titleButton.X = 4 + int(m.offsetX/consts.TileScale)
 
 	// TODO: Implement the camera functionality later
 	m.cameraButton.Visible = false
 
-	m.quitDialog = ui.NewDialog(0, 64, 152, 124)
+	m.quitDialog = ui.NewDialog((screenW/consts.TileScale-160)/2+4, 64, 152, 124)
 	m.quitLabel = ui.NewLabel(16, 8)
 	m.quitYesButton = ui.NewButton(0, 72, 120, 20, "click")
+	m.quitYesButton.X = (m.quitDialog.Width - m.quitYesButton.Width()) / 2
 	m.quitNoButton = ui.NewButton(0, 96, 120, 20, "cancel")
+	m.quitNoButton.X = (m.quitDialog.Width - m.quitNoButton.Width()) / 2
+
 	m.quitDialog.AddChild(m.quitLabel)
 	m.quitDialog.AddChild(m.quitYesButton)
 	m.quitDialog.AddChild(m.quitNoButton)
 
 	m.storeErrorDialog = ui.NewDialog(0, 64, 152, 124)
+	m.storeErrorDialog.X = (screenW/consts.TileScale-160)/2 + 4
 	m.storeErrorLabel = ui.NewLabel(16, 8)
 	m.storeErrorOkButton = ui.NewButton(0, 96, 120, 20, "click")
+	m.storeErrorOkButton.X = (m.storeErrorDialog.Width - m.storeErrorOkButton.Width()) / 2
 	m.storeErrorDialog.AddChild(m.storeErrorLabel)
 	m.storeErrorDialog.AddChild(m.storeErrorOkButton)
 
 	m.removeAdsButton = ui.NewButton(0, 8, 52, 12, "click")
+	m.removeAdsButton.X = 104 + int(m.offsetX/consts.TileScale)
 	m.removeAdsDialog = ui.NewDialog(0, 64, 152, 124)
+	m.removeAdsDialog.X = (screenW/consts.TileScale-160)/2 + 4
 	m.removeAdsLabel = ui.NewLabel(16, 8)
 	m.removeAdsYesButton = ui.NewButton(0, 72, 120, 20, "click")
+	m.removeAdsYesButton.X = (m.removeAdsDialog.Width - m.removeAdsYesButton.Width()) / 2
 	m.removeAdsNoButton = ui.NewButton(0, 96, 120, 20, "cancel")
+	m.removeAdsNoButton.X = (m.removeAdsDialog.Width - m.removeAdsNoButton.Width()) / 2
 	m.removeAdsDialog.AddChild(m.removeAdsLabel)
 	m.removeAdsDialog.AddChild(m.removeAdsYesButton)
 	m.removeAdsDialog.AddChild(m.removeAdsNoButton)
 
 	m.inventory = ui.NewInventory(int(m.offsetX/consts.TileScale), (screenH-footerHeight)/consts.TileScale)
 	m.itemPreviewPopup = ui.NewItemPreviewPopup()
+	m.itemPreviewPopup.X = (screenW/consts.TileScale-160)/2 + 16
+	m.itemPreviewPopup.Y = int(m.offsetY / consts.TileScale)
 	m.quitDialog.AddChild(m.quitLabel)
 
 	m.removeAdsButton.Visible = false // TODO: Clock of Atonement does not need this feature, so turn it off for now
@@ -214,13 +227,9 @@ func (m *MapScene) receiveRequest(sceneManager *scene.Manager) bool {
 }
 
 func (m *MapScene) updateQuitDialog(sceneManager *scene.Manager) (bool, error) {
-	w, _ := sceneManager.Size()
 	m.quitLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDBackToTitle)
 	m.quitYesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDYes)
 	m.quitNoButton.Text = texts.Text(sceneManager.Language(), texts.TextIDNo)
-	m.quitDialog.X = (w/consts.TileScale-160)/2 + 4
-	m.quitYesButton.X = (m.quitDialog.Width - m.quitYesButton.Width()) / 2
-	m.quitNoButton.X = (m.quitDialog.Width - m.quitNoButton.Width()) / 2
 	if m.quitDialog.Visible() {
 		m.quitDialog.Update()
 		if m.quitYesButton.Pressed() {
@@ -244,7 +253,6 @@ func (m *MapScene) updateQuitDialog(sceneManager *scene.Manager) (bool, error) {
 }
 
 func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
-	w, _ := sceneManager.Size()
 	if m.gameState.InventoryVisible() {
 		m.inventory.Show()
 	} else {
@@ -326,8 +334,6 @@ func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
 		m.inventory.SetMode(ui.DefaultMode)
 	}
 
-	m.itemPreviewPopup.X = (w/consts.TileScale-160)/2 + 16
-	m.itemPreviewPopup.Y = int(m.offsetY / consts.TileScale)
 	if m.itemPreviewPopup.Visible() {
 		if !m.gameState.ExecutingItemCommands() && !m.gameState.Map().IsBlockingEventExecuting() {
 			// TODO: ItemPreviewPopup is not standarized as the other Popups
@@ -345,12 +351,8 @@ func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
 }
 
 func (m *MapScene) updateStoreDialog(sceneManager *scene.Manager) bool {
-	w, _ := sceneManager.Size()
-
-	m.storeErrorOkButton.X = (m.storeErrorDialog.Width - m.storeErrorOkButton.Width()) / 2
 	m.storeErrorLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDStoreError)
 	m.storeErrorOkButton.Text = texts.Text(sceneManager.Language(), texts.TextIDOK)
-	m.storeErrorDialog.X = (w/consts.TileScale-160)/2 + 4
 	if m.storeErrorDialog.Visible() {
 		m.storeErrorDialog.Update()
 		if m.storeErrorOkButton.Pressed() {
@@ -364,12 +366,8 @@ func (m *MapScene) updateStoreDialog(sceneManager *scene.Manager) bool {
 }
 
 func (m *MapScene) updateRemoveAdsDialog(sceneManager *scene.Manager) bool {
-	w, _ := sceneManager.Size()
 	m.removeAdsYesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDYes)
 	m.removeAdsNoButton.Text = texts.Text(sceneManager.Language(), texts.TextIDNo)
-	m.removeAdsDialog.X = (w/consts.TileScale-160)/2 + 4
-	m.removeAdsYesButton.X = (m.removeAdsDialog.Width - m.removeAdsYesButton.Width()) / 2
-	m.removeAdsNoButton.X = (m.removeAdsDialog.Width - m.removeAdsNoButton.Width()) / 2
 	if m.removeAdsDialog.Visible() {
 		m.removeAdsDialog.Update()
 		if m.removeAdsYesButton.Pressed() {
@@ -417,13 +415,6 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 		return nil
 	}
 
-	w, _ := sceneManager.Size()
-	// TODO: All UI parts' origin should be defined correctly
-	// so that we don't need to adjust X positions here.
-	m.titleButton.X = 4 + int(m.offsetX/consts.TileScale)
-	m.removeAdsButton.X = 104 + int(m.offsetX/consts.TileScale)
-
-	m.screenShotDialog.X = (w/consts.TileScale-160)/2 + 4
 	if m.initialState && m.gameState.IsAutoSaveEnabled() {
 		m.gameState.RequestSave(sceneManager)
 	}
