@@ -592,7 +592,7 @@ func (c *Character) Draw(screen *ebiten.Image, offsetX, offsetY float64) {
 	}
 	op := &ebiten.DrawImageOptions{}
 	x, y := c.DrawPosition()
-	op.GeoM.Translate(float64(x)+offsetX, float64(y)+offsetY)
+	op.GeoM.Translate(float64(x), float64(y))
 	charW, charH := c.Size()
 	dirIndex := c.dirToIndex(c.dir)
 
@@ -622,5 +622,6 @@ func (c *Character) Draw(screen *ebiten.Image, offsetX, offsetY float64) {
 	op.SourceRect = &r
 	op.ColorM.Scale(1, 1, 1, float64(c.opacity)/255)
 	op.GeoM.Scale(scaleX, scaleY)
+	op.GeoM.Translate(offsetX, offsetY)
 	screen.DrawImage(c.getImage(), op)
 }

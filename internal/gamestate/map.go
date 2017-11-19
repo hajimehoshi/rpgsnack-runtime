@@ -981,7 +981,7 @@ func (m *Map) DrawFullscreenImage(screen *ebiten.Image, texture *ebiten.Image, o
 		op.SourceRect = &r
 	}
 
-	op.GeoM.Translate(offsetX, offsetY/consts.TileScale-float64(diff))
+	op.GeoM.Translate(offsetX, offsetY-float64(diff))
 	screen.DrawImage(texture, op)
 }
 

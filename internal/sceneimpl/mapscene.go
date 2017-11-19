@@ -89,7 +89,7 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	tilesImage, _ := ebiten.NewImage(screenW/consts.TileScale, screenH/consts.TileScale, ebiten.FilterNearest)
 	m.tilesImage = tilesImage
 	m.offsetX = (float64(screenW) - consts.TileXNum*consts.TileSize*consts.TileScale) / 2
-	m.offsetY = (float64(screenH) - (consts.TileYNum*consts.TileSize)*consts.TileScale - footerHeight)
+	m.offsetY = float64(screenH) - consts.TileYNum*consts.TileSize*consts.TileScale - footerHeight
 
 	screenShotImage, _ := ebiten.NewImage(480, 720, ebiten.FilterLinear)
 	camera, _ := ebiten.NewImage(12, 12, ebiten.FilterNearest)
@@ -483,7 +483,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	room := m.gameState.Map().CurrentRoom()
 
 	if room.Background.Name != "" {
-		m.gameState.Map().DrawFullscreenImage(m.tilesImage, assets.GetImage("backgrounds/"+room.Background.Name+".png"), m.offsetX, m.offsetY)
+		m.gameState.Map().DrawFullscreenImage(m.tilesImage, assets.GetImage("backgrounds/"+room.Background.Name+".png"), 0, m.offsetY/consts.TileScale)
 	}
 	op := &ebiten.DrawImageOptions{}
 	for k := 0; k < 3; k++ {
@@ -532,7 +532,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		m.gameState.Map().DrawCharacters(m.tilesImage, p, 0, m.offsetY/consts.TileScale)
 	}
 	if room.Foreground.Name != "" {
-		m.gameState.Map().DrawFullscreenImage(m.tilesImage, assets.GetImage("foregrounds/"+room.Foreground.Name+".png"), m.offsetX, m.offsetY)
+		m.gameState.Map().DrawFullscreenImage(m.tilesImage, assets.GetImage("foregrounds/"+room.Foreground.Name+".png"), 0, m.offsetY/consts.TileScale)
 	}
 
 	op = &ebiten.DrawImageOptions{}
