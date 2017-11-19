@@ -120,11 +120,11 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 
 	if !sceneManager.HasProgress() {
 		t.resumeGameButton.Visible = false
-		t.newGameButton.Y = 184
+		t.newGameButton.SetY(184)
 	} else {
 		t.resumeGameButton.Visible = true
-		t.resumeGameButton.Y = 184
-		t.newGameButton.Y = 208
+		t.resumeGameButton.SetY(184)
+		t.newGameButton.SetY(208)
 	}
 
 	t.warningDialog.Update()
