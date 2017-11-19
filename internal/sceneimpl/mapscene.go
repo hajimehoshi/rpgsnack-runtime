@@ -86,11 +86,11 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	const footerHeight = 33 * consts.TileScale
 
 	screenW, screenH := sceneManager.Size()
-	tilesImage, _ := ebiten.NewImage(screenW/consts.TileScale, screenH/consts.TileScale, ebiten.FilterNearest)
-	m.tilesImage = tilesImage
-
 	m.offsetX = (float64(screenW) - consts.TileXNum*consts.TileSize*consts.TileScale) / 2
 	m.offsetY = float64(screenH) - consts.TileYNum*consts.TileSize*consts.TileScale - footerHeight
+
+	tilesImage, _ := ebiten.NewImage(consts.TileXNum*consts.TileSize, screenH/consts.TileScale, ebiten.FilterNearest)
+	m.tilesImage = tilesImage
 
 	screenShotImage, _ := ebiten.NewImage(480, 720, ebiten.FilterLinear)
 	camera, _ := ebiten.NewImage(12, 12, ebiten.FilterNearest)
