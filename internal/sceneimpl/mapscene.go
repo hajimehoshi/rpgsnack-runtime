@@ -89,6 +89,7 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	m.offsetX = (float64(screenW) - consts.TileXNum*consts.TileSize*consts.TileScale) / 2
 	m.offsetY = float64(screenH) - consts.TileYNum*consts.TileSize*consts.TileScale - footerHeight
 
+	// TODO: Rename tilesImage to screenImage, and create another tilesImage that doesn't consider offsets
 	tilesImage, _ := ebiten.NewImage(consts.TileXNum*consts.TileSize, screenH/consts.TileScale, ebiten.FilterNearest)
 	m.tilesImage = tilesImage
 
@@ -575,5 +576,5 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	m.removeAdsDialog.Draw(screen)
 
 	msg := fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS())
-	font.DrawText(screen, msg, 160, 8, consts.TextScale, data.TextAlignLeft, color.White)
+	font.DrawText(screen, msg, 160+int(m.offsetX), 8, consts.TextScale, data.TextAlignLeft, color.White)
 }
