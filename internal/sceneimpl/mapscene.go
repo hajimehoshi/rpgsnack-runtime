@@ -83,11 +83,12 @@ func NewMapSceneWithGame(game *gamestate.Game) *MapScene {
 }
 
 func (m *MapScene) initUI(sceneManager *scene.Manager) {
-	const footerHeight = 100
+	const footerHeight = 33 * consts.TileScale
 
 	screenW, screenH := sceneManager.Size()
 	tilesImage, _ := ebiten.NewImage(screenW/consts.TileScale, screenH/consts.TileScale, ebiten.FilterNearest)
 	m.tilesImage = tilesImage
+
 	m.offsetX = (float64(screenW) - consts.TileXNum*consts.TileSize*consts.TileScale) / 2
 	m.offsetY = float64(screenH) - consts.TileYNum*consts.TileSize*consts.TileScale - footerHeight
 
@@ -539,7 +540,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	op.GeoM.Scale(consts.TileScale, consts.TileScale)
 	op.GeoM.Translate(m.offsetX, 0)
 	m.gameState.DrawScreen(screen, m.tilesImage, op)
-	m.gameState.DrawPictures(screen, 0, m.offsetY)
+	m.gameState.DrawPictures(screen, m.offsetX, m.offsetY)
 
 	if m.gameState.IsPlayerControlEnabled() && (m.gameState.Map().IsPlayerMovingByUserInput() || m.triggeringFailed) {
 		x, y := m.moveDstX, m.moveDstY
