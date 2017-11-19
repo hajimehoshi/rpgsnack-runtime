@@ -28,8 +28,8 @@ import (
 )
 
 type ItemPreviewPopup struct {
-	X               int
-	Y               int
+	x               int
+	y               int
 	item            *data.Item
 	combineItem     *data.Item
 	combine         *data.Combine
@@ -45,7 +45,7 @@ type ItemPreviewPopup struct {
 	desc            string
 }
 
-func NewItemPreviewPopup() *ItemPreviewPopup {
+func NewItemPreviewPopup(x, y int) *ItemPreviewPopup {
 	closeButton := NewImageButton(
 		120,
 		25,
@@ -73,6 +73,8 @@ func NewItemPreviewPopup() *ItemPreviewPopup {
 	}
 
 	return &ItemPreviewPopup{
+		x:               x,
+		y:               y,
 		fadeImage:       fadeImage,
 		frameImage:      frameImage,
 		bgBoxImage:      bgBoxImage,
@@ -85,7 +87,7 @@ func NewItemPreviewPopup() *ItemPreviewPopup {
 
 func (i *ItemPreviewPopup) Update(sceneManager *scene.Manager) {
 	for _, n := range i.nodes {
-		n.UpdateAsChild(i.visible, i.X, i.Y)
+		n.UpdateAsChild(i.visible, i.x, i.y)
 	}
 	i.actionButton.Text = texts.Text(sceneManager.Language(), texts.TextIDItemCheck)
 }
@@ -172,6 +174,6 @@ func (i *ItemPreviewPopup) Draw(screen *ebiten.Image) {
 	}
 
 	for _, n := range i.nodes {
-		n.DrawAsChild(screen, i.X, i.Y)
+		n.DrawAsChild(screen, i.x, i.y)
 	}
 }
