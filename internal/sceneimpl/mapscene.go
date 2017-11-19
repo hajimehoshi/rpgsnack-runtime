@@ -83,11 +83,11 @@ func NewMapSceneWithGame(game *gamestate.Game) *MapScene {
 }
 
 func (m *MapScene) initUI(sceneManager *scene.Manager) {
-	const footerHeight = 33 * consts.TileScale
+	const inventoryHeight = 33 * consts.TileScale
 
 	screenW, screenH := sceneManager.Size()
 	m.offsetX = (screenW - consts.TileXNum*consts.TileSize*consts.TileScale) / 2
-	m.offsetY = screenH - consts.TileYNum*consts.TileSize*consts.TileScale - footerHeight
+	m.offsetY = screenH - consts.TileYNum*consts.TileSize*consts.TileScale - inventoryHeight
 	// offset y should be multiplies of TileScale for pixel-pefect rendering
 	m.offsetY -= m.offsetY % consts.TileScale
 
@@ -103,7 +103,7 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	m.screenShotImage = screenShotImage
 	m.screenShotDialog = ui.NewDialog((screenW/consts.TileScale-160)/2+4, 4, 152, 232)
 	m.screenShotDialog.AddChild(ui.NewImageView(8, 8, 1.0/consts.TileScale/2, ui.NewImagePart(m.screenShotImage)))
-	m.titleButton = ui.NewButton(4+int(m.offsetX/consts.TileScale), 2, 40, 12, "click")
+	m.titleButton = ui.NewButton(4+m.offsetX/consts.TileScale, 2, 40, 12, "click")
 
 	// TODO: Implement the camera functionality later
 	m.cameraButton.Visible = false
@@ -123,7 +123,7 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	m.storeErrorDialog.AddChild(m.storeErrorLabel)
 	m.storeErrorDialog.AddChild(m.storeErrorOkButton)
 
-	m.removeAdsButton = ui.NewButton(104+int(m.offsetX/consts.TileScale), 8, 52, 12, "click")
+	m.removeAdsButton = ui.NewButton(104+m.offsetX/consts.TileScale, 8, 52, 12, "click")
 	m.removeAdsDialog = ui.NewDialog((screenW/consts.TileScale-160)/2+4, 64, 152, 124)
 	m.removeAdsLabel = ui.NewLabel(16, 8)
 	m.removeAdsYesButton = ui.NewButton((152-120)/2, 72, 120, 20, "click")
@@ -132,8 +132,8 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	m.removeAdsDialog.AddChild(m.removeAdsYesButton)
 	m.removeAdsDialog.AddChild(m.removeAdsNoButton)
 
-	m.inventory = ui.NewInventory(int(m.offsetX/consts.TileScale), (screenH-footerHeight)/consts.TileScale)
-	m.itemPreviewPopup = ui.NewItemPreviewPopup((screenW/consts.TileScale-160)/2+16, int(m.offsetY/consts.TileScale))
+	m.inventory = ui.NewInventory(m.offsetX/consts.TileScale, (screenH-inventoryHeight)/consts.TileScale)
+	m.itemPreviewPopup = ui.NewItemPreviewPopup((screenW/consts.TileScale-160)/2+16, m.offsetY/consts.TileScale)
 	m.quitDialog.AddChild(m.quitLabel)
 
 	m.removeAdsButton.Visible = false // TODO: Clock of Atonement does not need this feature, so turn it off for now
@@ -157,8 +157,8 @@ func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) {
 		return
 	}
 	x, y := input.Position()
-	x -= int(m.offsetX)
-	y -= int(m.offsetY)
+	x -= m.offsetX
+	y -= m.offsetY
 	if x < 0 || y < 0 {
 		return
 	}
@@ -515,7 +515,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 					r := image.Rect(sx, sy, sx+consts.TileSize, sy+consts.TileSize)
 					op.SourceRect = &r
 					dx := i * consts.TileSize
-					dy := j*consts.TileSize + int(m.offsetY/consts.TileScale)
+					dy := j*consts.TileSize + m.offsetY/consts.TileScale
 					op.GeoM.Reset()
 					op.GeoM.Translate(float64(dx), float64(dy))
 					m.tilesImage.DrawImage(tileSetImg, op)
@@ -578,5 +578,5 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	m.removeAdsDialog.Draw(screen)
 
 	msg := fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS())
-	font.DrawText(screen, msg, 160+int(m.offsetX), 8, consts.TextScale, data.TextAlignLeft, color.White)
+	font.DrawText(screen, msg, 160+m.offsetX, 8, consts.TextScale, data.TextAlignLeft, color.White)
 }
