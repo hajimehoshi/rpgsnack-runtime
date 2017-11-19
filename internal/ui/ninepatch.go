@@ -20,11 +20,9 @@ import (
 	"github.com/hajimehoshi/ebiten"
 )
 
-const (
-	partSize = 4
-)
-
 func drawNinePatches(dst, src *ebiten.Image, width, height int, geoM *ebiten.GeoM, colorM *ebiten.ColorM) {
+	const partSize = 4
+
 	xn, yn := width/partSize, height/partSize
 	r := &image.Rectangle{}
 	op := &ebiten.DrawImageOptions{}
