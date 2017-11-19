@@ -374,7 +374,7 @@ func (w *Windows) Update(playerY int, sceneManager *scene.Manager) {
 	}
 }
 
-func (w *Windows) Draw(screen *ebiten.Image, characters []*character.Character, offsetX, offsetY float64) {
+func (w *Windows) Draw(screen *ebiten.Image, characters []*character.Character, offsetX, offsetY int) {
 	for _, b := range w.balloons {
 		if b == nil {
 			continue

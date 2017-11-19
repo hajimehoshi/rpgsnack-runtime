@@ -179,7 +179,7 @@ func (b *banner) position() (int, int) {
 	return x, y
 }
 
-func (b *banner) draw(screen *ebiten.Image, character *character.Character, offsetX, offsetY float64) {
+func (b *banner) draw(screen *ebiten.Image, character *character.Character, offsetX, offsetY int) {
 	textScale := consts.TextScale
 	textEdge := false
 	rate := 0.0
@@ -192,8 +192,8 @@ func (b *banner) draw(screen *ebiten.Image, character *character.Character, offs
 		rate = float64(b.closingCount) / float64(bannerMaxCount)
 	}
 	sw, _ := screen.Size()
-	dx := float64(sw-consts.TileXNum*consts.TileSize*consts.TileScale)/2 + offsetX
-	dy := offsetY
+	dx := float64(sw-consts.TileXNum*consts.TileSize*consts.TileScale)/2 + float64(offsetX)
+	dy := float64(offsetY)
 
 	switch b.background {
 	case data.MessageBackgroundDim:

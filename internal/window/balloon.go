@@ -323,10 +323,10 @@ func (b *balloon) openingRate() float64 {
 	}
 }
 
-func (b *balloon) draw(screen *ebiten.Image, character *character.Character, offsetX, offsetY float64) {
+func (b *balloon) draw(screen *ebiten.Image, character *character.Character, offsetX, offsetY int) {
 	sw, _ := screen.Size()
-	dx := float64(sw-consts.TileXNum*consts.TileSize*consts.TileScale)/2 + offsetX
-	dy := offsetY
+	dx := float64(sw-consts.TileXNum*consts.TileSize*consts.TileScale)/2 + float64(offsetX)
+	dy := float64(offsetY)
 	if b.openingRate() > 0 {
 		img := assets.GetImage("system/balloon.png")
 		if b.balloonType == data.BalloonTypeShout {

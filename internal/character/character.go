@@ -586,7 +586,7 @@ func (c *Character) dirToIndex(dir data.Dir) int {
 	return 0
 }
 
-func (c *Character) Draw(screen *ebiten.Image, offsetX, offsetY float64) {
+func (c *Character) Draw(screen *ebiten.Image, offsetX, offsetY int) {
 	if c.imageName == "" || !c.visible || c.erased {
 		return
 	}
@@ -622,6 +622,6 @@ func (c *Character) Draw(screen *ebiten.Image, offsetX, offsetY float64) {
 	op.SourceRect = &r
 	op.ColorM.Scale(1, 1, 1, float64(c.opacity)/255)
 	op.GeoM.Scale(scaleX, scaleY)
-	op.GeoM.Translate(offsetX, offsetY)
+	op.GeoM.Translate(float64(offsetX), float64(offsetY))
 	screen.DrawImage(c.getImage(), op)
 }

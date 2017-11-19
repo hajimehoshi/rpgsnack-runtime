@@ -63,8 +63,8 @@ type MapScene struct {
 	waitingRequestID   int
 	isAdsRemoved       bool
 	initialized        bool
-	offsetX            float64
-	offsetY            float64
+	offsetX            int
+	offsetY            int
 }
 
 func NewMapScene() *MapScene {
@@ -86,8 +86,10 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	const footerHeight = 33 * consts.TileScale
 
 	screenW, screenH := sceneManager.Size()
-	m.offsetX = (float64(screenW) - consts.TileXNum*consts.TileSize*consts.TileScale) / 2
-	m.offsetY = float64(screenH) - consts.TileYNum*consts.TileSize*consts.TileScale - footerHeight
+	m.offsetX = (screenW - consts.TileXNum*consts.TileSize*consts.TileScale) / 2
+	m.offsetY = screenH - consts.TileYNum*consts.TileSize*consts.TileScale - footerHeight
+	// offset y should be multiplies of TileScale for pixel-pefect rendering
+	m.offsetY -= m.offsetY % consts.TileScale
 
 	// TODO: Rename tilesImage to screenImage, and create another tilesImage that doesn't consider offsets
 	tilesImage, _ := ebiten.NewImage(consts.TileXNum*consts.TileSize, screenH/consts.TileScale, ebiten.FilterNearest)
@@ -539,7 +541,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 
 	op = &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(consts.TileScale, consts.TileScale)
-	op.GeoM.Translate(m.offsetX, 0)
+	op.GeoM.Translate(float64(m.offsetX), 0)
 	m.gameState.DrawScreen(screen, m.tilesImage, op)
 	m.gameState.DrawPictures(screen, m.offsetX, m.offsetY)
 
@@ -548,7 +550,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(x*consts.TileSize), float64(y*consts.TileSize))
 		op.GeoM.Scale(consts.TileScale, consts.TileScale)
-		op.GeoM.Translate(m.offsetX, m.offsetY)
+		op.GeoM.Translate(float64(m.offsetX), float64(m.offsetY))
 		screen.DrawImage(assets.GetImage("system/marker.png"), op)
 	}
 

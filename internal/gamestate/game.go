@@ -424,14 +424,14 @@ func (g *Game) DrawScreen(screen *ebiten.Image, tilesImage *ebiten.Image, op *eb
 	g.screen.Draw(screen, tilesImage, op)
 }
 
-func (g *Game) DrawWindows(screen *ebiten.Image, offsetX, offsetY float64) {
+func (g *Game) DrawWindows(screen *ebiten.Image, offsetX, offsetY int) {
 	cs := []*character.Character{}
 	cs = append(cs, g.currentMap.player)
 	cs = append(cs, g.currentMap.events...)
 	g.windows.Draw(screen, cs, offsetX, offsetY)
 }
 
-func (g *Game) DrawPictures(screen *ebiten.Image, offsetX, offsetY float64) {
+func (g *Game) DrawPictures(screen *ebiten.Image, offsetX, offsetY int) {
 	g.pictures.Draw(screen, offsetX, offsetY)
 }
 
