@@ -82,9 +82,9 @@ func NewMapSceneWithGame(game *gamestate.Game) *MapScene {
 	return m
 }
 
-const footerHeight = 100
-
 func (m *MapScene) initUI(sceneManager *scene.Manager) {
+	const footerHeight = 100
+
 	screenW, screenH := sceneManager.Size()
 	tilesImage, _ := ebiten.NewImage(screenW/consts.TileScale, screenH/consts.TileScale, ebiten.FilterNearest)
 	m.tilesImage = tilesImage
@@ -97,43 +97,33 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	cameraImagePart := ui.NewImagePart(camera)
 	m.cameraButton = ui.NewImageButton(0, 0, cameraImagePart, cameraImagePart, "click")
 	m.screenShotImage = screenShotImage
-	m.screenShotDialog = ui.NewDialog(0, 4, 152, 232)
-	m.screenShotDialog.X = (screenW/consts.TileScale-160)/2 + 4
+	m.screenShotDialog = ui.NewDialog((screenW/consts.TileScale-160)/2+4, 4, 152, 232)
 	m.screenShotDialog.AddChild(ui.NewImageView(8, 8, 1.0/consts.TileScale/2, ui.NewImagePart(m.screenShotImage)))
-	m.titleButton = ui.NewButton(0, 2, 40, 12, "click")
-	m.titleButton.X = 4 + int(m.offsetX/consts.TileScale)
+	m.titleButton = ui.NewButton(4+int(m.offsetX/consts.TileScale), 2, 40, 12, "click")
 
 	// TODO: Implement the camera functionality later
 	m.cameraButton.Visible = false
 
 	m.quitDialog = ui.NewDialog((screenW/consts.TileScale-160)/2+4, 64, 152, 124)
 	m.quitLabel = ui.NewLabel(16, 8)
-	m.quitYesButton = ui.NewButton(0, 72, 120, 20, "click")
-	m.quitYesButton.X = (m.quitDialog.Width - m.quitYesButton.Width()) / 2
-	m.quitNoButton = ui.NewButton(0, 96, 120, 20, "cancel")
-	m.quitNoButton.X = (m.quitDialog.Width - m.quitNoButton.Width()) / 2
+	m.quitYesButton = ui.NewButton((m.quitDialog.Width-120)/2, 72, 120, 20, "click")
+	m.quitNoButton = ui.NewButton((m.quitDialog.Width-120)/2, 96, 120, 20, "cancel")
 
 	m.quitDialog.AddChild(m.quitLabel)
 	m.quitDialog.AddChild(m.quitYesButton)
 	m.quitDialog.AddChild(m.quitNoButton)
 
-	m.storeErrorDialog = ui.NewDialog(0, 64, 152, 124)
-	m.storeErrorDialog.X = (screenW/consts.TileScale-160)/2 + 4
+	m.storeErrorDialog = ui.NewDialog((screenW/consts.TileScale-160)/2+4, 64, 152, 124)
 	m.storeErrorLabel = ui.NewLabel(16, 8)
-	m.storeErrorOkButton = ui.NewButton(0, 96, 120, 20, "click")
-	m.storeErrorOkButton.X = (m.storeErrorDialog.Width - m.storeErrorOkButton.Width()) / 2
+	m.storeErrorOkButton = ui.NewButton((m.storeErrorDialog.Width-120)/2, 96, 120, 20, "click")
 	m.storeErrorDialog.AddChild(m.storeErrorLabel)
 	m.storeErrorDialog.AddChild(m.storeErrorOkButton)
 
-	m.removeAdsButton = ui.NewButton(0, 8, 52, 12, "click")
-	m.removeAdsButton.X = 104 + int(m.offsetX/consts.TileScale)
-	m.removeAdsDialog = ui.NewDialog(0, 64, 152, 124)
-	m.removeAdsDialog.X = (screenW/consts.TileScale-160)/2 + 4
+	m.removeAdsButton = ui.NewButton(104+int(m.offsetX/consts.TileScale), 8, 52, 12, "click")
+	m.removeAdsDialog = ui.NewDialog((screenW/consts.TileScale-160)/2+4, 64, 152, 124)
 	m.removeAdsLabel = ui.NewLabel(16, 8)
-	m.removeAdsYesButton = ui.NewButton(0, 72, 120, 20, "click")
-	m.removeAdsYesButton.X = (m.removeAdsDialog.Width - m.removeAdsYesButton.Width()) / 2
-	m.removeAdsNoButton = ui.NewButton(0, 96, 120, 20, "cancel")
-	m.removeAdsNoButton.X = (m.removeAdsDialog.Width - m.removeAdsNoButton.Width()) / 2
+	m.removeAdsYesButton = ui.NewButton((m.removeAdsDialog.Width-120)/2, 72, 120, 20, "click")
+	m.removeAdsNoButton = ui.NewButton((m.removeAdsDialog.Width-120)/2, 96, 120, 20, "cancel")
 	m.removeAdsDialog.AddChild(m.removeAdsLabel)
 	m.removeAdsDialog.AddChild(m.removeAdsYesButton)
 	m.removeAdsDialog.AddChild(m.removeAdsNoButton)
@@ -486,6 +476,9 @@ func (m *MapScene) handleBackButton() {
 }
 
 func (m *MapScene) Draw(screen *ebiten.Image) {
+	if !m.initialized {
+		return
+	}
 	m.tilesImage.Fill(color.Black)
 
 	// TODO: This accesses *data.Game, but is it OK?

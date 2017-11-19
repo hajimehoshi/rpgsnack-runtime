@@ -43,37 +43,46 @@ type TitleScene struct {
 	quitYesButton    *ui.Button
 	quitNoButton     *ui.Button
 	waitingRequestID int
+	initialized      bool
 }
 
 func NewTitleScene() *TitleScene {
+	t := &TitleScene{}
+	return t
+}
+
+func (t *TitleScene) initUI(sceneManager *scene.Manager) {
+	w, h := sceneManager.Size()
+
 	settingsIcon := ui.NewImagePart(assets.GetImage("system/icon_settings.png"))
 	moreGamesIcon := ui.NewImagePart(assets.GetImage("system/icon_moregames.png"))
 
-	t := &TitleScene{
-		resumeGameButton: ui.NewButton(0, 184, 120, 20, "click"),
-		newGameButton:    ui.NewButton(0, 208, 120, 20, "click"),
-		settingsButton:   ui.NewImageButton(0, 0, settingsIcon, settingsIcon, "click"),
-		moregamesButton:  ui.NewImageButton(0, 0, moreGamesIcon, moreGamesIcon, "click"),
-		warningDialog:    ui.NewDialog(0, 64, 152, 124),
-		warningLabel:     ui.NewLabel(16, 8),
-		warningYesButton: ui.NewButton(0, 72, 120, 20, "click"),
-		warningNoButton:  ui.NewButton(0, 96, 120, 20, "cancel"),
-		quitDialog:       ui.NewDialog(0, 64, 152, 124),
-		quitLabel:        ui.NewLabel(16, 8),
-		quitYesButton:    ui.NewButton(0, 72, 120, 20, "click"),
-		quitNoButton:     ui.NewButton(0, 96, 120, 20, "cancel"),
-	}
+	t.resumeGameButton = ui.NewButton((w/consts.TileScale-120)/2, 184, 120, 20, "click")
+	t.newGameButton = ui.NewButton((w/consts.TileScale-120)/2, 208, 120, 20, "click")
+	t.settingsButton = ui.NewImageButton(w/consts.TileScale-16, h/consts.TileScale-16, settingsIcon, settingsIcon, "click")
+	t.moregamesButton = ui.NewImageButton(4, h/consts.TileScale-16, moreGamesIcon, moreGamesIcon, "click")
+	t.warningDialog = ui.NewDialog((w/consts.TileScale-160)/2+4, 64, 152, 124)
+	t.warningLabel = ui.NewLabel(16, 8)
+	t.warningYesButton = ui.NewButton((t.warningDialog.Width-120)/2, 72, 120, 20, "click")
+	t.warningNoButton = ui.NewButton((t.warningDialog.Width-120)/2, 96, 120, 20, "cancel")
 	t.warningDialog.AddChild(t.warningLabel)
 	t.warningDialog.AddChild(t.warningYesButton)
 	t.warningDialog.AddChild(t.warningNoButton)
 
+	t.quitDialog = ui.NewDialog((w/consts.TileScale-160)/2+4, 64, 152, 124)
+	t.quitLabel = ui.NewLabel(16, 8)
+	t.quitYesButton = ui.NewButton((t.quitDialog.Width-120)/2, 72, 120, 20, "click")
+	t.quitNoButton = ui.NewButton((t.quitDialog.Width-120)/2, 96, 120, 20, "cancel")
 	t.quitDialog.AddChild(t.quitLabel)
 	t.quitDialog.AddChild(t.quitYesButton)
 	t.quitDialog.AddChild(t.quitNoButton)
-	return t
 }
 
 func (t *TitleScene) Update(sceneManager *scene.Manager) error {
+	if !t.initialized {
+		t.initUI(sceneManager)
+		t.initialized = true
+	}
 	if t.waitingRequestID != 0 {
 		r := sceneManager.ReceiveResultIfExists(t.waitingRequestID)
 		if r != nil {
@@ -108,20 +117,6 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 	t.quitLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDQuitGame)
 	t.quitYesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDYes)
 	t.quitNoButton.Text = texts.Text(sceneManager.Language(), texts.TextIDNo)
-
-	w, h := sceneManager.Size()
-	t.newGameButton.X = (w/consts.TileScale - t.newGameButton.Width()) / 2
-	t.resumeGameButton.X = (w/consts.TileScale - t.resumeGameButton.Width()) / 2
-	t.settingsButton.X = w/consts.TileScale - 16
-	t.settingsButton.Y = h/consts.TileScale - 16
-	t.moregamesButton.X = 4
-	t.moregamesButton.Y = h/consts.TileScale - 16
-	t.warningDialog.X = (w/consts.TileScale-160)/2 + 4
-	t.warningYesButton.X = (t.warningDialog.Width - t.warningYesButton.Width()) / 2
-	t.warningNoButton.X = (t.warningDialog.Width - t.warningNoButton.Width()) / 2
-	t.quitDialog.X = (w/consts.TileScale-160)/2 + 4
-	t.quitYesButton.X = (t.quitDialog.Width - t.quitYesButton.Width()) / 2
-	t.quitNoButton.X = (t.quitDialog.Width - t.quitNoButton.Width()) / 2
 
 	if !sceneManager.HasProgress() {
 		t.resumeGameButton.Visible = false
@@ -221,6 +216,9 @@ func (t *TitleScene) handleBackButton() {
 }
 
 func (t *TitleScene) Draw(screen *ebiten.Image) {
+	if !t.initialized {
+		return
+	}
 	timg := assets.GetImage("titles/title.png")
 	tw, _ := timg.Size()
 	sw, _ := screen.Size()

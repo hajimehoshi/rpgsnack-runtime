@@ -27,11 +27,6 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/ui"
 )
 
-const (
-	buttonOffsetX = 4
-	buttonDeltaY  = 24
-)
-
 type SettingsScene struct {
 	settingsLabel          *ui.Label
 	languageButton         *ui.Button
@@ -46,37 +41,53 @@ type SettingsScene struct {
 	creditLabel            *ui.Label
 	creditCloseButton      *ui.Button
 	waitingRequestID       int
+	initialized            bool
 }
 
 func NewSettingsScene() *SettingsScene {
-	s := &SettingsScene{
-		settingsLabel:          ui.NewLabel(16, 8),
-		languageButton:         ui.NewButton(0, 0, 120, 20, "click"),
-		creditButton:           ui.NewButton(0, 0, 120, 20, "click"),
-		reviewThisAppButton:    ui.NewButton(0, 0, 120, 20, "click"),
-		restorePurchasesButton: ui.NewButton(0, 0, 120, 20, "click"),
-		moreGamesButton:        ui.NewButton(0, 0, 120, 20, "click"),
-		closeButton:            ui.NewButton(0, 0, 120, 20, "cancel"),
-		languageDialog:         ui.NewDialog(0, 4, 152, 232),
-		creditDialog:           ui.NewDialog(0, 4, 152, 232),
-		creditLabel:            ui.NewLabel(16, 8),
-		creditCloseButton:      ui.NewButton(0, 204, 120, 20, "cancel"),
-	}
-	s.creditDialog.AddChild(s.creditLabel)
-	s.creditDialog.AddChild(s.creditCloseButton)
+	s := &SettingsScene{}
 	return s
 }
 
-func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
-	if s.languageButtons == nil {
-		for i, l := range sceneManager.Game().Texts.Languages() {
-			n := display.Self.Name(l)
-			b := ui.NewButton(0, 8+i*buttonDeltaY, 120, 20, "click")
-			b.Text = n
-			s.languageDialog.AddChild(b)
-			s.languageButtons = append(s.languageButtons, b)
-		}
+func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
+	const (
+		buttonOffsetX = 4
+		buttonDeltaY  = 24
+	)
+
+	w, _ := sceneManager.Size()
+
+	s.settingsLabel = ui.NewLabel(16, 8)
+	s.languageButton = ui.NewButton((w/consts.TileScale-120)/2, buttonOffsetX+1*buttonDeltaY, 120, 20, "click")
+	s.creditButton = ui.NewButton((w/consts.TileScale-120)/2, buttonOffsetX+2*buttonDeltaY, 120, 20, "click")
+	s.reviewThisAppButton = ui.NewButton((w/consts.TileScale-120)/2, buttonOffsetX+3*buttonDeltaY, 120, 20, "click")
+	s.restorePurchasesButton = ui.NewButton((w/consts.TileScale-120)/2, buttonOffsetX+4*buttonDeltaY, 120, 20, "click")
+	s.moreGamesButton = ui.NewButton((w/consts.TileScale-120)/2, buttonOffsetX+5*buttonDeltaY, 120, 20, "click")
+	s.closeButton = ui.NewButton((w/consts.TileScale-120)/2, buttonOffsetX+6*buttonDeltaY, 120, 20, "cancel")
+
+	s.languageDialog = ui.NewDialog((w/consts.TileScale-160)/2+4, 4, 152, 232)
+	s.creditDialog = ui.NewDialog((w/consts.TileScale-160)/2+4, 4, 152, 232)
+	s.creditLabel = ui.NewLabel(16, 8)
+	s.creditCloseButton = ui.NewButton((s.creditDialog.Width-120)/2, 204, 120, 20, "cancel")
+
+	for i, l := range sceneManager.Game().Texts.Languages() {
+		n := display.Self.Name(l)
+		b := ui.NewButton((s.languageDialog.Width-120)/2, 8+i*buttonDeltaY, 120, 20, "click")
+		b.Text = n
+		s.languageDialog.AddChild(b)
+		s.languageButtons = append(s.languageButtons, b)
 	}
+
+	s.creditDialog.AddChild(s.creditLabel)
+	s.creditDialog.AddChild(s.creditCloseButton)
+}
+
+func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
+	if !s.initialized {
+		s.initUI(sceneManager)
+		s.initialized = true
+	}
+
 	// TODO: This stirng should be given from outside.
 	const creditText = `Story
   Daigo Sato
@@ -112,34 +123,6 @@ Powered By
 		}
 		return nil
 	}
-
-	buttonIndex := 1
-	s.languageButton.Y = buttonOffsetX + buttonIndex*buttonDeltaY
-	buttonIndex++
-	s.creditButton.Y = buttonOffsetX + buttonIndex*buttonDeltaY
-	buttonIndex++
-
-	s.reviewThisAppButton.Y = buttonOffsetX + buttonIndex*buttonDeltaY
-	buttonIndex++
-	s.restorePurchasesButton.Y = buttonOffsetX + buttonIndex*buttonDeltaY
-	buttonIndex++
-	s.moreGamesButton.Y = buttonOffsetX + buttonIndex*buttonDeltaY
-	buttonIndex++
-	s.closeButton.Y = buttonOffsetX + buttonIndex*buttonDeltaY
-
-	w, _ := sceneManager.Size()
-	s.languageButton.X = (w/consts.TileScale - s.languageButton.Width()) / 2
-	s.creditButton.X = (w/consts.TileScale - s.creditButton.Width()) / 2
-	s.reviewThisAppButton.X = (w/consts.TileScale - s.reviewThisAppButton.Width()) / 2
-	s.restorePurchasesButton.X = (w/consts.TileScale - s.restorePurchasesButton.Width()) / 2
-	s.moreGamesButton.X = (w/consts.TileScale - s.moreGamesButton.Width()) / 2
-	s.closeButton.X = (w/consts.TileScale - s.closeButton.Width()) / 2
-	s.languageDialog.X = (w/consts.TileScale-160)/2 + 4
-	for _, b := range s.languageButtons {
-		b.X = (s.languageDialog.Width - b.Width()) / 2
-	}
-	s.creditDialog.X = (w/consts.TileScale-160)/2 + 4
-	s.creditCloseButton.X = (s.creditDialog.Width - s.creditCloseButton.Width()) / 2
 
 	s.languageDialog.Update()
 	s.creditDialog.Update()
@@ -215,6 +198,9 @@ func (s *SettingsScene) handleBackButton(sceneManager *scene.Manager) {
 }
 
 func (s *SettingsScene) Draw(screen *ebiten.Image) {
+	if !s.initialized {
+		return
+	}
 	s.settingsLabel.Draw(screen)
 	s.languageButton.Draw(screen)
 	s.creditButton.Draw(screen)
