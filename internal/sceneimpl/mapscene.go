@@ -106,8 +106,8 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 
 	m.quitDialog = ui.NewDialog((screenW/consts.TileScale-160)/2+4, 64, 152, 124)
 	m.quitLabel = ui.NewLabel(16, 8)
-	m.quitYesButton = ui.NewButton((m.quitDialog.Width-120)/2, 72, 120, 20, "click")
-	m.quitNoButton = ui.NewButton((m.quitDialog.Width-120)/2, 96, 120, 20, "cancel")
+	m.quitYesButton = ui.NewButton((152-120)/2, 72, 120, 20, "click")
+	m.quitNoButton = ui.NewButton((152-120)/2, 96, 120, 20, "cancel")
 
 	m.quitDialog.AddChild(m.quitLabel)
 	m.quitDialog.AddChild(m.quitYesButton)
@@ -115,15 +115,15 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 
 	m.storeErrorDialog = ui.NewDialog((screenW/consts.TileScale-160)/2+4, 64, 152, 124)
 	m.storeErrorLabel = ui.NewLabel(16, 8)
-	m.storeErrorOkButton = ui.NewButton((m.storeErrorDialog.Width-120)/2, 96, 120, 20, "click")
+	m.storeErrorOkButton = ui.NewButton((152-120)/2, 96, 120, 20, "click")
 	m.storeErrorDialog.AddChild(m.storeErrorLabel)
 	m.storeErrorDialog.AddChild(m.storeErrorOkButton)
 
 	m.removeAdsButton = ui.NewButton(104+int(m.offsetX/consts.TileScale), 8, 52, 12, "click")
 	m.removeAdsDialog = ui.NewDialog((screenW/consts.TileScale-160)/2+4, 64, 152, 124)
 	m.removeAdsLabel = ui.NewLabel(16, 8)
-	m.removeAdsYesButton = ui.NewButton((m.removeAdsDialog.Width-120)/2, 72, 120, 20, "click")
-	m.removeAdsNoButton = ui.NewButton((m.removeAdsDialog.Width-120)/2, 96, 120, 20, "cancel")
+	m.removeAdsYesButton = ui.NewButton((152-120)/2, 72, 120, 20, "click")
+	m.removeAdsNoButton = ui.NewButton((152-120)/2, 96, 120, 20, "cancel")
 	m.removeAdsDialog.AddChild(m.removeAdsLabel)
 	m.removeAdsDialog.AddChild(m.removeAdsYesButton)
 	m.removeAdsDialog.AddChild(m.removeAdsNoButton)

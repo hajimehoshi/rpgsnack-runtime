@@ -27,20 +27,20 @@ type Node interface {
 }
 
 type Dialog struct {
-	X       int
-	Y       int
-	Width   int
-	Height  int
+	x       int
+	y       int
+	width   int
+	height  int
 	visible bool
 	nodes   []Node
 }
 
 func NewDialog(x, y, width, height int) *Dialog {
 	return &Dialog{
-		X:      x,
-		Y:      y,
-		Width:  width,
-		Height: height,
+		x:      x,
+		y:      y,
+		width:  width,
+		height: height,
 	}
 }
 
@@ -62,7 +62,7 @@ func (d *Dialog) AddChild(node Node) {
 
 func (d *Dialog) Update() {
 	for _, n := range d.nodes {
-		n.UpdateAsChild(d.visible, d.X, d.Y)
+		n.UpdateAsChild(d.visible, d.x, d.y)
 	}
 }
 
@@ -70,16 +70,16 @@ func (d *Dialog) Draw(screen *ebiten.Image) {
 	if !d.visible {
 		return
 	}
-	if d.Width == 0 || d.Height == 0 {
+	if d.width == 0 || d.height == 0 {
 		return
 	}
 
 	geoM := &ebiten.GeoM{}
-	geoM.Translate(float64(d.X), float64(d.Y))
+	geoM.Translate(float64(d.x), float64(d.y))
 	geoM.Scale(consts.TileScale, consts.TileScale)
-	drawNinePatches(screen, assets.GetImage("system/9patch_test_off.png"), d.Width, d.Height, geoM, nil)
+	drawNinePatches(screen, assets.GetImage("system/9patch_test_off.png"), d.width, d.height, geoM, nil)
 
 	for _, n := range d.nodes {
-		n.DrawAsChild(screen, d.X, d.Y)
+		n.DrawAsChild(screen, d.x, d.y)
 	}
 }

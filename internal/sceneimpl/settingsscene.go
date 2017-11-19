@@ -68,11 +68,11 @@ func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
 	s.languageDialog = ui.NewDialog((w/consts.TileScale-160)/2+4, 4, 152, 232)
 	s.creditDialog = ui.NewDialog((w/consts.TileScale-160)/2+4, 4, 152, 232)
 	s.creditLabel = ui.NewLabel(16, 8)
-	s.creditCloseButton = ui.NewButton((s.creditDialog.Width-120)/2, 204, 120, 20, "cancel")
+	s.creditCloseButton = ui.NewButton((152-120)/2, 204, 120, 20, "cancel")
 
 	for i, l := range sceneManager.Game().Texts.Languages() {
 		n := display.Self.Name(l)
-		b := ui.NewButton((s.languageDialog.Width-120)/2, 8+i*buttonDeltaY, 120, 20, "click")
+		b := ui.NewButton((152-120)/2, 8+i*buttonDeltaY, 120, 20, "click")
 		b.Text = n
 		s.languageDialog.AddChild(b)
 		s.languageButtons = append(s.languageButtons, b)
