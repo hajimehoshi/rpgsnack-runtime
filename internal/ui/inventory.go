@@ -33,8 +33,8 @@ const (
 )
 
 type Inventory struct {
-	X                   int
-	Y                   int
+	x                   int
+	y                   int
 	visible             bool
 	pressedSlotIndex    int
 	items               []*data.Item
@@ -107,8 +107,8 @@ func NewInventory(x, y int) *Inventory {
 	frameBase := NewImageView(0, y+4, 1.0, NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 0, 168, 128, 24))
 
 	return &Inventory{
-		X:                x,
-		Y:                y,
+		x:                x,
+		y:                y,
 		visible:          true,
 		pressedSlotIndex: -1,
 		items:            []*data.Item{},
@@ -150,7 +150,7 @@ func (i *Inventory) slotIndexAt(x, y int) int {
 	x -= (frameXMargin + frameXPadding) * consts.TileScale
 	y = (y - (frameYPadding * consts.TileScale))
 
-	if x >= 0 && i.Y*consts.TileScale <= y && y < (i.Y+itemSize)*consts.TileScale {
+	if x >= 0 && i.y*consts.TileScale <= y && y < (i.y+itemSize)*consts.TileScale {
 		return x / (itemSize * consts.TileScale)
 	}
 
@@ -179,8 +179,8 @@ func (i *Inventory) calcScrollX(pageIndex int) int {
 
 func (i *Inventory) isTouchingScroll() bool {
 	touchX, touchY := input.Position()
-	sx := (i.X + frameXMargin + frameXPadding) * consts.TileScale
-	sy := i.Y * consts.TileScale
+	sx := (i.x + frameXMargin + frameXPadding) * consts.TileScale
+	sy := i.y * consts.TileScale
 	return sx <= touchX && touchX < sx+scrollBarWidth*consts.TileScale && sy <= touchY && touchY < sy+scrollBarHeight*consts.TileScale
 }
 
@@ -190,7 +190,7 @@ func (i *Inventory) Update() {
 	if input.Triggered() && i.isTouchingScroll() {
 		i.pressStartX = touchX
 		i.pressStartY = touchY
-		i.pressStartIndex = i.slotIndexAt(touchX-(i.X*consts.TileScale+i.scrollX+i.dragX), touchY)
+		i.pressStartIndex = i.slotIndexAt(touchX-(i.x*consts.TileScale+i.scrollX+i.dragX), touchY)
 		i.autoScrolling = false
 		i.dragging = true
 	}
@@ -204,7 +204,7 @@ func (i *Inventory) Update() {
 	}
 	if input.Released() {
 		if !i.scrolling && i.isTouchingScroll() {
-			index := i.slotIndexAt(touchX-(i.X*consts.TileScale+i.scrollX+i.dragX), touchY)
+			index := i.slotIndexAt(touchX-(i.x*consts.TileScale+i.scrollX+i.dragX), touchY)
 			if i.pressStartIndex == index && index >= 0 && index < len(i.items) {
 				i.pressedSlotIndex = index
 				if i.activeItemID > 0 {
@@ -253,8 +253,8 @@ func (i *Inventory) Update() {
 		}
 	}
 
-	i.frameCover.X = i.X + frameXMargin
-	i.frameBase.X = i.X + frameXMargin
+	i.frameCover.X = i.x + frameXMargin
+	i.frameBase.X = i.x + frameXMargin
 }
 
 func (i *Inventory) Draw(screen *ebiten.Image) {
@@ -277,10 +277,10 @@ func (i *Inventory) Draw(screen *ebiten.Image) {
 			}
 		}
 
-		tx := float64((i.X + frameXMargin + frameXPadding + index*itemSize) + (i.scrollX+i.dragX)/consts.TileScale)
-		ty := float64(i.Y+frameYPadding) + 1
+		tx := float64((i.x + frameXMargin + frameXPadding + index*itemSize) + (i.scrollX+i.dragX)/consts.TileScale)
+		ty := float64(i.y+frameYPadding) + 1
 
-		if tx < float64(i.X+frameXMargin) || tx > float64(i.X+frameXMargin+scrollBarWidth) {
+		if tx < float64(i.x+frameXMargin) || tx > float64(i.x+frameXMargin+scrollBarWidth) {
 			continue
 		}
 
@@ -314,7 +314,7 @@ func (i *Inventory) Draw(screen *ebiten.Image) {
 				dy = 3
 			}
 			op := &ebiten.DrawImageOptions{}
-			op.GeoM.Translate(float64(i.X*consts.TileScale+buttonOffsetX+10), float64(i.Y+buttonOffsetY+5+dy))
+			op.GeoM.Translate(float64(i.x*consts.TileScale+buttonOffsetX+10), float64(i.y+buttonOffsetY+5+dy))
 			op.GeoM.Scale(consts.TileScale, consts.TileScale)
 			screen.DrawImage(assets.GetIconImage(activeItem.Icon+".png"), op)
 		}
@@ -335,7 +335,7 @@ func (i *Inventory) Draw(screen *ebiten.Image) {
 				imagePart = i.dot
 			}
 			geoM := &ebiten.GeoM{}
-			geoM.Translate(float64(left+index*dotSpace), float64(i.Y+26))
+			geoM.Translate(float64(left+index*dotSpace), float64(i.y+26))
 			geoM.Scale(consts.TileScale, consts.TileScale)
 			imagePart.Draw(screen, geoM, &ebiten.ColorM{})
 		}
