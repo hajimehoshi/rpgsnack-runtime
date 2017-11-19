@@ -103,8 +103,8 @@ func NewInventory(x, y int) *Inventory {
 	infoButton.DisabledImage = NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 80, 0, 36, 32)
 
 	bgPanel := NewImageView(x, y, 1.0, NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 0, 32, 160, 40))
-	frameCover := NewImageView(0, y+4, 1.0, NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 0, 144, 128, 24))
-	frameBase := NewImageView(0, y+4, 1.0, NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 0, 168, 128, 24))
+	frameCover := NewImageView(x+frameXMargin, y+4, 1.0, NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 0, 144, 128, 24))
+	frameBase := NewImageView(x+frameXMargin, y+4, 1.0, NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 0, 168, 128, 24))
 
 	return &Inventory{
 		x:                x,
@@ -252,9 +252,6 @@ func (i *Inventory) Update() {
 			i.autoScrolling = false
 		}
 	}
-
-	i.frameCover.X = i.x + frameXMargin
-	i.frameBase.X = i.x + frameXMargin
 }
 
 func (i *Inventory) Draw(screen *ebiten.Image) {
