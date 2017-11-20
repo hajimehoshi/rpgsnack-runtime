@@ -141,7 +141,6 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	m.quitDialog.AddChild(m.quitLabel)
 
 	m.removeAdsButton.Visible = false // TODO: Clock of Atonement does not need this feature, so turn it off for now
-	m.initialized = true
 }
 
 func (m *MapScene) updatePurchasesState(sceneManager *scene.Manager) {
@@ -185,65 +184,64 @@ func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) {
 }
 
 func (m *MapScene) receiveRequest(sceneManager *scene.Manager) bool {
-	if m.waitingRequestID != 0 {
-		r := sceneManager.ReceiveResultIfExists(m.waitingRequestID)
-		if r == nil {
-			return false
-		}
-		m.waitingRequestID = 0
-		switch r.Type {
-		case scene.RequestTypeIAPPrices:
-			if !r.Succeeded {
-				m.storeErrorDialog.Show()
-				break
-			}
-			priceText := "???"
-			var prices map[string]string
-			if err := json.Unmarshal(r.Data, &prices); err != nil {
-				panic(err)
-			}
-			text := texts.Text(sceneManager.Language(), texts.TextIDRemoveAdsDesc)
-			if _, ok := prices["ads_removal"]; ok {
-				priceText = prices["ads_removal"]
-			}
-			m.removeAdsLabel.Text = fmt.Sprintf(text, priceText)
-			m.removeAdsDialog.Show()
-		case scene.RequestTypePurchase:
-			// Note: Ideally we should show a notification toast to notify users about the result
-			// For now, the notifications are handled on the native platform side
-			if r.Succeeded {
-				m.updatePurchasesState(sceneManager)
-			}
-			m.removeAdsDialog.Hide()
-		}
-		return false
+	if m.waitingRequestID == 0 {
+		return true
 	}
 
-	return true
+	r := sceneManager.ReceiveResultIfExists(m.waitingRequestID)
+	if r == nil {
+		return false
+	}
+	m.waitingRequestID = 0
+	switch r.Type {
+	case scene.RequestTypeIAPPrices:
+		if !r.Succeeded {
+			m.storeErrorDialog.Show()
+			break
+		}
+		priceText := "???"
+		var prices map[string]string
+		if err := json.Unmarshal(r.Data, &prices); err != nil {
+			panic(err)
+		}
+		text := texts.Text(sceneManager.Language(), texts.TextIDRemoveAdsDesc)
+		if _, ok := prices["ads_removal"]; ok {
+			priceText = prices["ads_removal"]
+		}
+		m.removeAdsLabel.Text = fmt.Sprintf(text, priceText)
+		m.removeAdsDialog.Show()
+	case scene.RequestTypePurchase:
+		// Note: Ideally we should show a notification toast to notify users about the result
+		// For now, the notifications are handled on the native platform side
+		if r.Succeeded {
+			m.updatePurchasesState(sceneManager)
+		}
+		m.removeAdsDialog.Hide()
+	}
+	return false
 }
 
 func (m *MapScene) updateQuitDialog(sceneManager *scene.Manager) bool {
 	m.quitLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDBackToTitle)
 	m.quitYesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDYes)
 	m.quitNoButton.Text = texts.Text(sceneManager.Language(), texts.TextIDNo)
-	if m.quitDialog.Visible() {
-		m.quitDialog.Update()
-		if m.quitYesButton.Pressed() {
-			if m.gameState.IsAutoSaveEnabled() {
-				m.gameState.RequestSave(sceneManager)
-			}
-			audio.Stop()
-			sceneManager.GoToWithFading(NewTitleScene(), 30)
-			return false
+	if !m.quitDialog.Visible() {
+		return true
+	}
+	m.quitDialog.Update()
+	if m.quitYesButton.Pressed() {
+		if m.gameState.IsAutoSaveEnabled() {
+			m.gameState.RequestSave(sceneManager)
 		}
-		if m.quitNoButton.Pressed() {
-			m.quitDialog.Hide()
-			return false
-		}
+		audio.Stop()
+		sceneManager.GoToWithFading(NewTitleScene(), 30)
 		return false
 	}
-
-	return true
+	if m.quitNoButton.Pressed() {
+		m.quitDialog.Hide()
+		return false
+	}
+	return false
 }
 
 func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
@@ -328,17 +326,18 @@ func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
 		m.inventory.SetMode(ui.DefaultMode)
 	}
 
-	if m.itemPreviewPopup.Visible() {
-		if !m.gameState.ExecutingItemCommands() && !m.gameState.Map().IsBlockingEventExecuting() {
-			// TODO: ItemPreviewPopup is not standarized as the other Popups
-			m.itemPreviewPopup.Update(sceneManager)
-			if m.itemPreviewPopup.ActionPressed() {
-				if m.inventory.CombineItemID() != 0 {
-					combine := sceneManager.Game().CreateCombine(activeItemID, m.inventory.CombineItemID())
-					m.gameState.StartCombineCommands(combine)
-				} else {
-					m.gameState.StartItemCommands(activeItemID)
-				}
+	if !m.itemPreviewPopup.Visible() {
+		return
+	}
+	if !m.gameState.ExecutingItemCommands() && !m.gameState.Map().IsBlockingEventExecuting() {
+		// TODO: ItemPreviewPopup is not standarized as the other Popups
+		m.itemPreviewPopup.Update(sceneManager)
+		if m.itemPreviewPopup.ActionPressed() {
+			if m.inventory.CombineItemID() != 0 {
+				combine := sceneManager.Game().CreateCombine(activeItemID, m.inventory.CombineItemID())
+				m.gameState.StartCombineCommands(combine)
+			} else {
+				m.gameState.StartItemCommands(activeItemID)
 			}
 		}
 	}
@@ -347,37 +346,33 @@ func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
 func (m *MapScene) updateStoreDialog(sceneManager *scene.Manager) bool {
 	m.storeErrorLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDStoreError)
 	m.storeErrorOkButton.Text = texts.Text(sceneManager.Language(), texts.TextIDOK)
-	if m.storeErrorDialog.Visible() {
-		m.storeErrorDialog.Update()
-		if m.storeErrorOkButton.Pressed() {
-			m.storeErrorDialog.Hide()
-			return false
-		}
+	if !m.storeErrorDialog.Visible() {
+		return true
+	}
+	m.storeErrorDialog.Update()
+	if m.storeErrorOkButton.Pressed() {
+		m.storeErrorDialog.Hide()
 		return false
 	}
-	return true
+	return false
 }
 
 func (m *MapScene) updateRemoveAdsDialog(sceneManager *scene.Manager) bool {
 	m.removeAdsYesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDYes)
 	m.removeAdsNoButton.Text = texts.Text(sceneManager.Language(), texts.TextIDNo)
-	if m.removeAdsDialog.Visible() {
-		m.removeAdsDialog.Update()
-		if m.removeAdsYesButton.Pressed() {
-			m.waitingRequestID = sceneManager.GenerateRequestID()
-			sceneManager.Requester().RequestPurchase(m.waitingRequestID, "ads_removal")
-			return false
-		}
-		if m.removeAdsNoButton.Pressed() {
-			m.removeAdsDialog.Hide()
-			return false
-		}
-		if m.removeAdsDialog.Visible() {
-			return false
-		}
+	if !m.removeAdsDialog.Visible() {
+		return true
 	}
-
-	return true
+	m.removeAdsDialog.Update()
+	if m.removeAdsYesButton.Pressed() {
+		m.waitingRequestID = sceneManager.GenerateRequestID()
+		sceneManager.Requester().RequestPurchase(m.waitingRequestID, "ads_removal")
+		return false
+	}
+	if m.removeAdsNoButton.Pressed() {
+		m.removeAdsDialog.Hide()
+	}
+	return false
 }
 
 func (m *MapScene) updateUI(sceneManager *scene.Manager) bool {
@@ -501,8 +496,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		if k >= 1 {
 			layer = 1
 		}
-		tileSet := m.gameState.Map().TileSet(layer)
-		if tileSet != nil {
+		if tileSet := m.gameState.Map().TileSet(layer); tileSet != nil {
 			tileSetImg := assets.GetImage("tilesets/" + tileSet.Name + ".png")
 			for j := 0; j < consts.TileYNum; j++ {
 				for i := 0; i < consts.TileXNum; i++ {
