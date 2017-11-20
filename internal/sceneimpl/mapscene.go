@@ -562,19 +562,10 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 
 	m.uiImage.Clear()
 
-	m.itemPreviewPopup.Draw(m.uiImage)
-	m.inventory.Draw(m.uiImage)
 	m.gameState.DrawWindows(m.uiImage, 0, m.offsetY)
 
-	if m.cameraTaking {
-		m.cameraTaking = false
-		m.screenShotImage.Clear()
-		op := &ebiten.DrawImageOptions{}
-		sw, _ := screen.Size()
-		w, _ := m.screenShotImage.Size()
-		op.GeoM.Translate((float64(w)-float64(sw))/2, 0)
-		m.screenShotImage.DrawImage(m.uiImage, nil)
-	}
+	m.itemPreviewPopup.Draw(m.uiImage)
+	m.inventory.Draw(m.uiImage)
 
 	m.cameraButton.Draw(m.uiImage)
 	m.titleButton.Draw(m.uiImage)
@@ -588,6 +579,16 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	op = &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(m.offsetX), 0)
 	screen.DrawImage(m.uiImage, op)
+
+	if m.cameraTaking {
+		m.cameraTaking = false
+		m.screenShotImage.Clear()
+		op := &ebiten.DrawImageOptions{}
+		sw, _ := screen.Size()
+		w, _ := m.screenShotImage.Size()
+		op.GeoM.Translate((float64(w)-float64(sw))/2, 0)
+		m.screenShotImage.DrawImage(m.uiImage, nil)
+	}
 
 	msg := fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS())
 	font.DrawText(screen, msg, 160+m.offsetX, 8, consts.TextScale, data.TextAlignLeft, color.White)
