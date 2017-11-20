@@ -222,7 +222,7 @@ func (m *MapScene) receiveRequest(sceneManager *scene.Manager) bool {
 	return true
 }
 
-func (m *MapScene) updateQuitDialog(sceneManager *scene.Manager) (bool, error) {
+func (m *MapScene) updateQuitDialog(sceneManager *scene.Manager) bool {
 	m.quitLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDBackToTitle)
 	m.quitYesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDYes)
 	m.quitNoButton.Text = texts.Text(sceneManager.Language(), texts.TextIDNo)
@@ -232,20 +232,18 @@ func (m *MapScene) updateQuitDialog(sceneManager *scene.Manager) (bool, error) {
 			if m.gameState.IsAutoSaveEnabled() {
 				m.gameState.RequestSave(sceneManager)
 			}
-			if err := audio.Stop(); err != nil {
-				return false, err
-			}
+			audio.Stop()
 			sceneManager.GoToWithFading(NewTitleScene(), 30)
-			return false, nil
+			return false
 		}
 		if m.quitNoButton.Pressed() {
 			m.quitDialog.Hide()
-			return false, nil
+			return false
 		}
-		return false, nil
+		return false
 	}
 
-	return true, nil
+	return true
 }
 
 func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
@@ -400,9 +398,9 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 
 	// Call SetOffset as temporary hack for UI input
 	input.SetOffset(m.offsetX, 0)
-	if ok, err := m.updateQuitDialog(sceneManager); !ok {
+	if ok := m.updateQuitDialog(sceneManager); !ok {
 		input.SetOffset(0, 0)
-		return err
+		return nil
 	}
 	m.updateInventory(sceneManager)
 	if ok := m.updateStoreDialog(sceneManager); !ok {
@@ -445,7 +443,8 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 	m.initialState = false
 	if err := m.gameState.Update(sceneManager); err != nil {
 		if err == gamestate.GoToTitle {
-			return m.goToTitle(sceneManager)
+			m.goToTitle(sceneManager)
+			return nil
 		}
 		return err
 	}
@@ -453,12 +452,9 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 	return nil
 }
 
-func (m *MapScene) goToTitle(sceneManager *scene.Manager) error {
-	if err := audio.Stop(); err != nil {
-		return err
-	}
+func (m *MapScene) goToTitle(sceneManager *scene.Manager) {
+	audio.Stop()
 	sceneManager.GoToWithFading(NewTitleScene(), 60)
-	return nil
 }
 
 func (m *MapScene) handleBackButton() {

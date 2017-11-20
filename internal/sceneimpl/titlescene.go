@@ -94,13 +94,9 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 	if !t.init {
 		var titleBGM = sceneManager.Game().System.TitleBGM
 		if titleBGM.Name == "" {
-			if err := audio.StopBGM(); err != nil {
-				return err
-			}
+			audio.StopBGM()
 		} else {
-			if err := audio.PlayBGM(titleBGM.Name, float64(titleBGM.Volume)/100); err != nil {
-				return err
-			}
+			audio.PlayBGM(titleBGM.Name, float64(titleBGM.Volume)/100)
 		}
 		t.init = true
 	}
@@ -135,9 +131,7 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 		t.moregamesButton.Update()
 	}
 	if t.warningYesButton.Pressed() {
-		if err := audio.StopBGM(); err != nil {
-			return err
-		}
+		audio.StopBGM()
 		sceneManager.GoToWithFading(NewMapScene(), 60)
 		return nil
 	}
@@ -166,9 +160,7 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 		if sceneManager.HasProgress() {
 			t.warningDialog.Show()
 		} else {
-			if err := audio.StopBGM(); err != nil {
-				return err
-			}
+			audio.StopBGM()
 			sceneManager.GoToWithFading(NewMapScene(), 60)
 		}
 		return nil
@@ -178,16 +170,12 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 		if err := msgpack.Unmarshal(sceneManager.Progress(), &game); err != nil {
 			return err
 		}
-		if err := audio.StopBGM(); err != nil {
-			return err
-		}
+		audio.StopBGM()
 		sceneManager.GoToWithFading(NewMapSceneWithGame(game), 60)
 		return nil
 	}
 	if t.settingsButton.Pressed() {
-		if err := audio.StopBGM(); err != nil {
-			return err
-		}
+		audio.StopBGM()
 		sceneManager.GoTo(NewSettingsScene())
 		return nil
 	}

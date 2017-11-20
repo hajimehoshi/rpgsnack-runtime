@@ -513,24 +513,18 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 	case data.CommandNamePlaySE:
 		args := c.Args.(*data.CommandArgsPlaySE)
 		v := float64(args.Volume) / data.MaxVolume
-		if err := audio.PlaySE(args.Name, v); err != nil {
-			return false, err
-		}
+		audio.PlaySE(args.Name, v)
 		i.commandIterator.Advance()
 	case data.CommandNamePlayBGM:
 		args := c.Args.(*data.CommandArgsPlayBGM)
 		v := float64(args.Volume) / data.MaxVolume
-		if err := audio.PlayBGM(args.Name, v); err != nil {
-			return false, err
-		}
+		audio.PlayBGM(args.Name, v)
 		if args.FadeTime > 0 {
 			log.Printf("fade time is not used so far: %d", args.FadeTime)
 		}
 		i.commandIterator.Advance()
 	case data.CommandNameStopBGM:
-		if err := audio.StopBGM(); err != nil {
-			return false, err
-		}
+		audio.StopBGM()
 		i.commandIterator.Advance()
 	case data.CommandNameSave:
 		gameState.RequestSave(sceneManager)

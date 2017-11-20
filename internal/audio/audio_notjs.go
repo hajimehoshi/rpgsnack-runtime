@@ -40,16 +40,16 @@ func Update() error {
 	return theAudio.Update()
 }
 
-func Stop() error {
-	return theAudio.Stop()
+func Stop() {
+	theAudio.Stop()
 }
 
-func PlaySE(name string, volume float64) error {
-	return theAudio.PlaySE(name, volume)
+func PlaySE(name string, volume float64) {
+	theAudio.PlaySE(name, volume)
 }
 
-func PlayBGM(name string, volume float64) error {
-	return theAudio.PlayBGM(name, volume)
+func PlayBGM(name string, volume float64) {
+	theAudio.PlayBGM(name, volume)
 }
 
 func PlayingBGMName() string {
@@ -60,8 +60,8 @@ func PlayingBGMVolume() float64 {
 	return theAudio.playingBGMVolume
 }
 
-func StopBGM() error {
-	return theAudio.StopBGM()
+func StopBGM() {
+	theAudio.StopBGM()
 }
 
 type audio struct {
@@ -71,6 +71,7 @@ type audio struct {
 	playing          *eaudio.Player
 	playingBGMName   string
 	playingBGMVolume float64
+	err              error
 }
 
 func newAudio() (*audio, error) {
@@ -86,6 +87,9 @@ func newAudio() (*audio, error) {
 }
 
 func (a *audio) Update() error {
+	if a.err != nil {
+		return a.err
+	}
 	if err := a.context.Update(); err != nil {
 		return err
 	}
@@ -101,17 +105,18 @@ func (a *audio) Update() error {
 	return nil
 }
 
-func (a *audio) Stop() error {
-	if err := StopBGM(); err != nil {
-		return err
+func (a *audio) Stop() {
+	if a.err != nil {
+		return
 	}
+	StopBGM()
 	for p := range a.sePlayers {
 		if err := p.Pause(); err != nil {
-			return err
+			a.err = err
+			return
 		}
 	}
 	a.sePlayers = map[*eaudio.Player]struct{}{}
-	return nil
 }
 
 func (a *audio) getPlayer(path string, loop bool) (*eaudio.Player, error) {
@@ -144,21 +149,28 @@ func (a *audio) getPlayer(path string, loop bool) (*eaudio.Player, error) {
 	return nil, fmt.Errorf("audio: %s not found", path)
 }
 
-func (a *audio) PlaySE(name string, volume float64) error {
+func (a *audio) PlaySE(name string, volume float64) {
+	if a.err != nil {
+		return
+	}
 	p, err := a.getPlayer("audio/se/"+name, false)
 	if err != nil {
-		return err
+		a.err = err
+		return
 	}
 	p.SetVolume(volume)
 	p.Play()
 	a.sePlayers[p] = struct{}{}
-	return nil
 }
 
-func (a *audio) PlayBGM(name string, volume float64) error {
+func (a *audio) PlayBGM(name string, volume float64) {
+	if a.err != nil {
+		return
+	}
 	player, err := a.getPlayer("audio/bgm/"+name, true)
 	if err != nil {
-		return err
+		a.err = err
+		return
 	}
 	p, ok := a.players[name]
 	if !ok {
@@ -167,30 +179,33 @@ func (a *audio) PlayBGM(name string, volume float64) error {
 	}
 	if a.playingBGMName == name {
 		a.playing.SetVolume(volume)
-		return nil
+		return
 	} else if a.playing != nil {
 		a.playing.Pause()
 	}
 	if err := p.Rewind(); err != nil {
-		return err
+		a.err = err
+		return
 	}
 	p.Play()
 	p.SetVolume(volume)
 	a.playing = p
 	a.playingBGMName = name
 	a.playingBGMVolume = volume
-	return nil
 }
 
-func (a *audio) StopBGM() error {
+func (a *audio) StopBGM() {
+	if a.err != nil {
+		return
+	}
 	if a.playing == nil {
-		return nil
+		return
 	}
 	if err := a.playing.Pause(); err != nil {
-		return err
+		a.err = err
+		return
 	}
 	a.playing = nil
 	a.playingBGMName = ""
 	a.playingBGMVolume = 0
-	return nil
 }
