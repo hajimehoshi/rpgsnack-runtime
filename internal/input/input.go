@@ -24,8 +24,15 @@ type input struct {
 	pressCount     int
 	x              int
 	y              int
+	offsetX        int
+	offsetY        int
 	backPressCount int
 	prevPressCount int
+}
+
+func SetOffset(offsetX, offsetY int) {
+	theInput.offsetX = offsetX
+	theInput.offsetY = offsetY
 }
 
 func Update() {
@@ -92,7 +99,7 @@ func (i *input) Triggered() bool {
 }
 
 func (i *input) Position() (int, int) {
-	return i.x, i.y
+	return i.x - i.offsetX, i.y - i.offsetY
 }
 
 func (i *input) BackButtonPressed() bool {

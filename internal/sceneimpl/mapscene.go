@@ -39,6 +39,7 @@ type MapScene struct {
 	moveDstX           int
 	moveDstY           int
 	tilesImage         *ebiten.Image
+	uiImage            *ebiten.Image
 	triggeringFailed   bool
 	initialState       bool
 	cameraButton       *ui.Button
@@ -83,7 +84,10 @@ func NewMapSceneWithGame(game *gamestate.Game) *MapScene {
 }
 
 func (m *MapScene) initUI(sceneManager *scene.Manager) {
-	const inventoryHeight = 33 * consts.TileScale
+	const (
+		inventoryHeight = 33 * consts.TileScale
+		uiWidth         = consts.TileXNum * consts.TileSize
+	)
 
 	screenW, screenH := sceneManager.Size()
 	m.offsetX = (screenW - consts.TileXNum*consts.TileSize*consts.TileScale) / 2
@@ -92,8 +96,8 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	m.offsetY -= m.offsetY % consts.TileScale
 
 	// TODO: Rename tilesImage to screenImage, and create another tilesImage that doesn't consider offsets
-	tilesImage, _ := ebiten.NewImage(consts.TileXNum*consts.TileSize, screenH/consts.TileScale, ebiten.FilterNearest)
-	m.tilesImage = tilesImage
+	m.tilesImage, _ = ebiten.NewImage(consts.TileXNum*consts.TileSize, screenH/consts.TileScale, ebiten.FilterNearest)
+	m.uiImage, _ = ebiten.NewImage(uiWidth*consts.TileScale, screenH, ebiten.FilterNearest)
 
 	screenShotImage, _ := ebiten.NewImage(480, 720, ebiten.FilterLinear)
 	camera, _ := ebiten.NewImage(12, 12, ebiten.FilterNearest)
@@ -101,14 +105,14 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	cameraImagePart := ui.NewImagePart(camera)
 	m.cameraButton = ui.NewImageButton(0, 0, cameraImagePart, cameraImagePart, "click")
 	m.screenShotImage = screenShotImage
-	m.screenShotDialog = ui.NewDialog((screenW/consts.TileScale-160)/2+4, 4, 152, 232)
+	m.screenShotDialog = ui.NewDialog((uiWidth-160)/2+4, 4, 152, 232)
 	m.screenShotDialog.AddChild(ui.NewImageView(8, 8, 1.0/consts.TileScale/2, ui.NewImagePart(m.screenShotImage)))
-	m.titleButton = ui.NewButton(4+m.offsetX/consts.TileScale, 2, 40, 12, "click")
+	m.titleButton = ui.NewButton(4, 2, 40, 12, "click")
 
 	// TODO: Implement the camera functionality later
 	m.cameraButton.Visible = false
 
-	m.quitDialog = ui.NewDialog((screenW/consts.TileScale-160)/2+4, 64, 152, 124)
+	m.quitDialog = ui.NewDialog((uiWidth-160)/2+4, 64, 152, 124)
 	m.quitLabel = ui.NewLabel(16, 8)
 	m.quitYesButton = ui.NewButton((152-120)/2, 72, 120, 20, "click")
 	m.quitNoButton = ui.NewButton((152-120)/2, 96, 120, 20, "cancel")
@@ -117,14 +121,14 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	m.quitDialog.AddChild(m.quitYesButton)
 	m.quitDialog.AddChild(m.quitNoButton)
 
-	m.storeErrorDialog = ui.NewDialog((screenW/consts.TileScale-160)/2+4, 64, 152, 124)
+	m.storeErrorDialog = ui.NewDialog((uiWidth-160)/2+4, 64, 152, 124)
 	m.storeErrorLabel = ui.NewLabel(16, 8)
 	m.storeErrorOkButton = ui.NewButton((152-120)/2, 96, 120, 20, "click")
 	m.storeErrorDialog.AddChild(m.storeErrorLabel)
 	m.storeErrorDialog.AddChild(m.storeErrorOkButton)
 
-	m.removeAdsButton = ui.NewButton(104+m.offsetX/consts.TileScale, 8, 52, 12, "click")
-	m.removeAdsDialog = ui.NewDialog((screenW/consts.TileScale-160)/2+4, 64, 152, 124)
+	m.removeAdsButton = ui.NewButton(104, 8, 52, 12, "click")
+	m.removeAdsDialog = ui.NewDialog((uiWidth-160)/2+4, 64, 152, 124)
 	m.removeAdsLabel = ui.NewLabel(16, 8)
 	m.removeAdsYesButton = ui.NewButton((152-120)/2, 72, 120, 20, "click")
 	m.removeAdsNoButton = ui.NewButton((152-120)/2, 96, 120, 20, "cancel")
@@ -132,8 +136,8 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	m.removeAdsDialog.AddChild(m.removeAdsYesButton)
 	m.removeAdsDialog.AddChild(m.removeAdsNoButton)
 
-	m.inventory = ui.NewInventory(m.offsetX/consts.TileScale, (screenH-inventoryHeight)/consts.TileScale)
-	m.itemPreviewPopup = ui.NewItemPreviewPopup((screenW/consts.TileScale-160)/2+16, m.offsetY/consts.TileScale)
+	m.inventory = ui.NewInventory(0, (screenH-inventoryHeight)/consts.TileScale)
+	m.itemPreviewPopup = ui.NewItemPreviewPopup((uiWidth-160)/2+16, m.offsetY/consts.TileScale)
 	m.quitDialog.AddChild(m.quitLabel)
 
 	m.removeAdsButton.Visible = false // TODO: Clock of Atonement does not need this feature, so turn it off for now
@@ -353,7 +357,6 @@ func (m *MapScene) updateStoreDialog(sceneManager *scene.Manager) bool {
 		}
 		return false
 	}
-
 	return true
 }
 
@@ -382,7 +385,9 @@ func (m *MapScene) updateRemoveAdsDialog(sceneManager *scene.Manager) bool {
 func (m *MapScene) Update(sceneManager *scene.Manager) error {
 	if !m.initialized {
 		m.initUI(sceneManager)
+		m.initialized = true
 	}
+
 	m.updatePurchasesState(sceneManager)
 
 	if ok := m.receiveRequest(sceneManager); !ok {
@@ -393,43 +398,31 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 		m.handleBackButton()
 	}
 
+	// Call SetOffset as temporary hack for UI input
+	input.SetOffset(m.offsetX, 0)
 	if ok, err := m.updateQuitDialog(sceneManager); !ok {
+		input.SetOffset(0, 0)
 		return err
 	}
-
 	m.updateInventory(sceneManager)
-
 	if ok := m.updateStoreDialog(sceneManager); !ok {
+		input.SetOffset(0, 0)
 		return nil
 	}
-
 	if ok := m.updateRemoveAdsDialog(sceneManager); !ok {
+		input.SetOffset(0, 0)
 		return nil
 	}
-
-	if m.initialState && m.gameState.IsAutoSaveEnabled() {
-		m.gameState.RequestSave(sceneManager)
-	}
-	m.initialState = false
 	m.screenShotDialog.Update()
 	if m.screenShotDialog.Visible() {
+		input.SetOffset(0, 0)
 		return nil
 	}
 	m.cameraButton.Update()
-
-	if err := m.gameState.Update(sceneManager); err != nil {
-		if err == gamestate.GoToTitle {
-			return m.goToTitle(sceneManager)
-		}
-		return err
-	}
-
-	m.runEventIfNeeded(sceneManager)
 	if m.cameraButton.Pressed() {
 		m.cameraTaking = true
 		m.screenShotDialog.Show()
 	}
-
 	m.titleButton.Text = texts.Text(sceneManager.Language(), texts.TextIDTitle)
 	m.titleButton.Disabled = m.gameState.Map().IsBlockingEventExecuting()
 	m.titleButton.Update()
@@ -444,6 +437,19 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 		m.waitingRequestID = sceneManager.GenerateRequestID()
 		sceneManager.Requester().RequestGetIAPPrices(m.waitingRequestID)
 	}
+	input.SetOffset(0, 0)
+
+	if m.initialState && m.gameState.IsAutoSaveEnabled() {
+		m.gameState.RequestSave(sceneManager)
+	}
+	m.initialState = false
+	if err := m.gameState.Update(sceneManager); err != nil {
+		if err == gamestate.GoToTitle {
+			return m.goToTitle(sceneManager)
+		}
+		return err
+	}
+	m.runEventIfNeeded(sceneManager)
 	return nil
 }
 
@@ -554,9 +560,11 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		screen.DrawImage(assets.GetImage("system/marker.png"), op)
 	}
 
-	m.itemPreviewPopup.Draw(screen)
-	m.inventory.Draw(screen)
-	m.gameState.DrawWindows(screen, 0, m.offsetY)
+	m.uiImage.Clear()
+
+	m.itemPreviewPopup.Draw(m.uiImage)
+	m.inventory.Draw(m.uiImage)
+	m.gameState.DrawWindows(m.uiImage, 0, m.offsetY)
 
 	if m.cameraTaking {
 		m.cameraTaking = false
@@ -565,17 +573,21 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		sw, _ := screen.Size()
 		w, _ := m.screenShotImage.Size()
 		op.GeoM.Translate((float64(w)-float64(sw))/2, 0)
-		m.screenShotImage.DrawImage(screen, nil)
+		m.screenShotImage.DrawImage(m.uiImage, nil)
 	}
 
-	m.cameraButton.Draw(screen)
-	m.titleButton.Draw(screen)
-	m.removeAdsButton.Draw(screen)
+	m.cameraButton.Draw(m.uiImage)
+	m.titleButton.Draw(m.uiImage)
+	m.removeAdsButton.Draw(m.uiImage)
 
-	m.screenShotDialog.Draw(screen)
-	m.quitDialog.Draw(screen)
-	m.storeErrorDialog.Draw(screen)
-	m.removeAdsDialog.Draw(screen)
+	m.screenShotDialog.Draw(m.uiImage)
+	m.quitDialog.Draw(m.uiImage)
+	m.storeErrorDialog.Draw(m.uiImage)
+	m.removeAdsDialog.Draw(m.uiImage)
+
+	op = &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(float64(m.offsetX), 0)
+	screen.DrawImage(m.uiImage, op)
 
 	msg := fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS())
 	font.DrawText(screen, msg, 160+m.offsetX, 8, consts.TextScale, data.TextAlignLeft, color.White)
