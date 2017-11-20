@@ -380,41 +380,24 @@ func (m *MapScene) updateRemoveAdsDialog(sceneManager *scene.Manager) bool {
 	return true
 }
 
-func (m *MapScene) Update(sceneManager *scene.Manager) error {
-	if !m.initialized {
-		m.initUI(sceneManager)
-		m.initialized = true
-	}
-
-	m.updatePurchasesState(sceneManager)
-
-	if ok := m.receiveRequest(sceneManager); !ok {
-		return nil
-	}
-
-	if input.BackButtonPressed() {
-		m.handleBackButton()
-	}
-
+func (m *MapScene) updateUI(sceneManager *scene.Manager) bool {
 	// Call SetOffset as temporary hack for UI input
 	input.SetOffset(m.offsetX, 0)
+	defer input.SetOffset(0, 0)
+
 	if ok := m.updateQuitDialog(sceneManager); !ok {
-		input.SetOffset(0, 0)
-		return nil
+		return false
 	}
 	m.updateInventory(sceneManager)
 	if ok := m.updateStoreDialog(sceneManager); !ok {
-		input.SetOffset(0, 0)
-		return nil
+		return false
 	}
 	if ok := m.updateRemoveAdsDialog(sceneManager); !ok {
-		input.SetOffset(0, 0)
-		return nil
+		return false
 	}
 	m.screenShotDialog.Update()
 	if m.screenShotDialog.Visible() {
-		input.SetOffset(0, 0)
-		return nil
+		return false
 	}
 	m.cameraButton.Update()
 	if m.cameraButton.Pressed() {
@@ -435,7 +418,28 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 		m.waitingRequestID = sceneManager.GenerateRequestID()
 		sceneManager.Requester().RequestGetIAPPrices(m.waitingRequestID)
 	}
-	input.SetOffset(0, 0)
+	return true
+}
+
+func (m *MapScene) Update(sceneManager *scene.Manager) error {
+	if !m.initialized {
+		m.initUI(sceneManager)
+		m.initialized = true
+	}
+
+	m.updatePurchasesState(sceneManager)
+
+	if ok := m.receiveRequest(sceneManager); !ok {
+		return nil
+	}
+
+	if input.BackButtonPressed() {
+		m.handleBackButton()
+	}
+
+	if ok := m.updateUI(sceneManager); !ok {
+		return nil
+	}
 
 	if m.initialState && m.gameState.IsAutoSaveEnabled() {
 		m.gameState.RequestSave(sceneManager)
