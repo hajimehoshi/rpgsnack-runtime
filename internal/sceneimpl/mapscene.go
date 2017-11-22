@@ -359,24 +359,12 @@ func (m *MapScene) updateStoreDialog(sceneManager *scene.Manager) {
 	m.storeErrorLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDStoreError)
 	m.storeErrorOkButton.Text = texts.Text(sceneManager.Language(), texts.TextIDOK)
 	m.storeErrorDialog.Update()
-	if m.storeErrorOkButton.Pressed() {
-		m.storeErrorDialog.Hide()
-		return
-	}
 }
 
 func (m *MapScene) updateRemoveAdsDialog(sceneManager *scene.Manager) {
 	m.removeAdsYesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDYes)
 	m.removeAdsNoButton.Text = texts.Text(sceneManager.Language(), texts.TextIDNo)
 	m.removeAdsDialog.Update()
-	if m.removeAdsYesButton.Pressed() {
-		m.waitingRequestID = sceneManager.GenerateRequestID()
-		sceneManager.Requester().RequestPurchase(m.waitingRequestID, "ads_removal")
-		return
-	}
-	if m.removeAdsNoButton.Pressed() {
-		m.removeAdsDialog.Hide()
-	}
 }
 
 func (m *MapScene) updateUI(sceneManager *scene.Manager) {
@@ -390,24 +378,38 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 	m.updateRemoveAdsDialog(sceneManager)
 	m.screenShotDialog.Update()
 	m.cameraButton.Update()
-	if m.cameraButton.Pressed() {
-		m.cameraTaking = true
-		m.screenShotDialog.Show()
-	}
 	m.titleButton.Text = texts.Text(sceneManager.Language(), texts.TextIDTitle)
 	m.titleButton.Disabled = m.gameState.Map().IsBlockingEventExecuting()
 	m.titleButton.Update()
-	if m.titleButton.Pressed() {
-		m.quitDialog.Show()
-	}
 
 	m.removeAdsButton.Text = texts.Text(sceneManager.Language(), texts.TextIDRemoveAds)
 	m.removeAdsButton.Disabled = m.gameState.Map().IsBlockingEventExecuting()
 	m.removeAdsButton.Update()
+
+	// Event handling
+	if m.titleButton.Pressed() {
+		m.quitDialog.Show()
+	}
+	if m.storeErrorOkButton.Pressed() {
+		m.storeErrorDialog.Hide()
+		return
+	}
 	if m.removeAdsButton.Pressed() {
 		m.waitingRequestID = sceneManager.GenerateRequestID()
 		sceneManager.Requester().RequestGetIAPPrices(m.waitingRequestID)
 	}
+	if m.removeAdsYesButton.Pressed() {
+		m.waitingRequestID = sceneManager.GenerateRequestID()
+		sceneManager.Requester().RequestPurchase(m.waitingRequestID, "ads_removal")
+	}
+	if m.removeAdsNoButton.Pressed() {
+		m.removeAdsDialog.Hide()
+	}
+	if m.cameraButton.Pressed() {
+		m.cameraTaking = true
+		m.screenShotDialog.Show()
+	}
+
 }
 
 func (m *MapScene) Update(sceneManager *scene.Manager) error {
