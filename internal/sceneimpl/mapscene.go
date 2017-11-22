@@ -257,13 +257,15 @@ func (m *MapScene) updateQuitDialog(sceneManager *scene.Manager) {
 }
 
 func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
+	// If any events are executing, stop interacting this UI.
+	if !m.gameState.Map().IsBlockingEventExecuting() {
+		m.inventory.Update(sceneManager)
+	}
 	if m.gameState.InventoryVisible() {
 		m.inventory.Show()
 	} else {
 		m.inventory.Hide()
 	}
-	activeItemID := m.gameState.Items().ActiveItem()
-	// TODO creating array for each loop does not seem to be the right thing
 	items := []*data.Item{}
 	for _, itemID := range m.gameState.Items().Items() {
 		for _, item := range sceneManager.Game().Items {
@@ -273,14 +275,12 @@ func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
 			}
 		}
 	}
-
 	m.inventory.SetItems(items)
 	if m.inventory.Mode() == ui.DefaultMode {
-		m.inventory.SetActiveItemID(activeItemID)
+		m.inventory.SetActiveItemID(m.gameState.Items().ActiveItem())
 	}
-	if !m.gameState.Map().IsBlockingEventExecuting() {
-		m.inventory.Update()
-	}
+
+	activeItemID := m.gameState.Items().ActiveItem()
 
 	if m.inventory.PressedSlotIndex() >= 0 && m.inventory.PressedSlotIndex() < len(m.gameState.Items().Items()) {
 		itemID := m.gameState.Items().Items()[m.inventory.PressedSlotIndex()]
@@ -328,27 +328,26 @@ func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
 	}
 
 	// TODO: using Pressed() in if statement requires us to call extra Update()... this is ugly
+	m.itemPreviewPopup.Update(sceneManager)
 	if m.itemPreviewPopup.Visible() && m.gameState.Items().EventItem() == 0 {
 		m.itemPreviewPopup.SetActiveItem(nil, "")
 		m.itemPreviewPopup.Hide()
-		m.itemPreviewPopup.Update(sceneManager)
-		m.inventory.Update()
+
+		// TODO: Why is this call needed?
+		m.inventory.Update(sceneManager)
 		m.inventory.SetMode(ui.DefaultMode)
 	}
 
-	if !m.itemPreviewPopup.Visible() {
+	if m.gameState.ExecutingItemCommands() || m.gameState.Map().IsBlockingEventExecuting() {
 		return
 	}
-	if !m.gameState.ExecutingItemCommands() && !m.gameState.Map().IsBlockingEventExecuting() {
-		// TODO: ItemPreviewPopup is not standarized as the other Popups
-		m.itemPreviewPopup.Update(sceneManager)
-		if m.itemPreviewPopup.ActionPressed() {
-			if m.inventory.CombineItemID() != 0 {
-				combine := sceneManager.Game().CreateCombine(activeItemID, m.inventory.CombineItemID())
-				m.gameState.StartCombineCommands(combine)
-			} else {
-				m.gameState.StartItemCommands(activeItemID)
-			}
+	// TODO: ItemPreviewPopup is not standarized as the other Popups
+	if m.itemPreviewPopup.ActionPressed() {
+		if m.inventory.CombineItemID() != 0 {
+			combine := sceneManager.Game().CreateCombine(activeItemID, m.inventory.CombineItemID())
+			m.gameState.StartCombineCommands(combine)
+		} else {
+			m.gameState.StartItemCommands(activeItemID)
 		}
 	}
 }
