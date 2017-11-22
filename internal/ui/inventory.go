@@ -166,10 +166,16 @@ func (i *Inventory) slotCount() int {
 }
 
 func (i *Inventory) ActiveItemPressed() bool {
+	if !i.visible {
+		return false
+	}
 	return i.infoButton.Pressed()
 }
 
 func (i *Inventory) BackPressed() bool {
+	if !i.visible {
+		return false
+	}
 	return i.backButton.Pressed()
 }
 
@@ -185,6 +191,9 @@ func (i *Inventory) isTouchingScroll() bool {
 }
 
 func (i *Inventory) Update() {
+	if !i.visible {
+		return
+	}
 	touchX, touchY := input.Position()
 	i.pressedSlotIndex = -1
 	if input.Triggered() && i.isTouchingScroll() {

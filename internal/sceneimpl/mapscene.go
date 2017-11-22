@@ -263,66 +263,64 @@ func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
 		m.inventory.Hide()
 	}
 	activeItemID := m.gameState.Items().ActiveItem()
-	if m.inventory.Visible() {
-		// TODO creating array for each loop does not seem to be the right thing
-		items := []*data.Item{}
-		for _, itemID := range m.gameState.Items().Items() {
-			for _, item := range sceneManager.Game().Items {
-				if itemID == item.ID {
-					items = append(items, item)
-					break
-				}
+	// TODO creating array for each loop does not seem to be the right thing
+	items := []*data.Item{}
+	for _, itemID := range m.gameState.Items().Items() {
+		for _, item := range sceneManager.Game().Items {
+			if itemID == item.ID {
+				items = append(items, item)
+				break
 			}
 		}
+	}
 
-		m.inventory.SetItems(items)
+	m.inventory.SetItems(items)
+	if m.inventory.Mode() == ui.DefaultMode {
+		m.inventory.SetActiveItemID(activeItemID)
+	}
+	if !m.gameState.Map().IsBlockingEventExecuting() {
+		m.inventory.Update()
+	}
+
+	if m.inventory.PressedSlotIndex() >= 0 && m.inventory.PressedSlotIndex() < len(m.gameState.Items().Items()) {
+		itemID := m.gameState.Items().Items()[m.inventory.PressedSlotIndex()]
 		if m.inventory.Mode() == ui.DefaultMode {
-			m.inventory.SetActiveItemID(activeItemID)
-		}
-		if !m.gameState.Map().IsBlockingEventExecuting() {
-			m.inventory.Update()
-		}
-
-		if m.inventory.PressedSlotIndex() >= 0 && m.inventory.PressedSlotIndex() < len(m.gameState.Items().Items()) {
-			itemID := m.gameState.Items().Items()[m.inventory.PressedSlotIndex()]
-			if m.inventory.Mode() == ui.DefaultMode {
-				if itemID == activeItemID {
-					m.gameState.Items().Deactivate()
-				} else {
-					m.gameState.Items().Activate(itemID)
-				}
+			if itemID == activeItemID {
+				m.gameState.Items().Deactivate()
 			} else {
-				var combineItem *data.Item
-				for _, item := range sceneManager.Game().Items {
-					if m.inventory.CombineItemID() == item.ID {
-						combineItem = item
-						break
-					}
-				}
-
-				m.itemPreviewPopup.SetCombineItem(combineItem, sceneManager.Game().CreateCombine(activeItemID, m.inventory.CombineItemID()))
+				m.gameState.Items().Activate(itemID)
 			}
-		}
-
-		if eventItemID := m.gameState.Items().EventItem(); eventItemID > 0 {
-			m.inventory.SetActiveItemID(eventItemID)
-			m.inventory.SetMode(ui.PreviewMode)
-
-			var eventItem *data.Item
+		} else {
+			var combineItem *data.Item
 			for _, item := range sceneManager.Game().Items {
-				if item.ID == eventItemID {
-					eventItem = item
+				if m.inventory.CombineItemID() == item.ID {
+					combineItem = item
 					break
 				}
 			}
 
-			m.itemPreviewPopup.SetActiveItem(eventItem, sceneManager.Game().Texts.Get(sceneManager.Language(), eventItem.Desc))
-			m.itemPreviewPopup.Show()
+			m.itemPreviewPopup.SetCombineItem(combineItem, sceneManager.Game().CreateCombine(activeItemID, m.inventory.CombineItemID()))
+		}
+	}
+
+	if eventItemID := m.gameState.Items().EventItem(); eventItemID > 0 {
+		m.inventory.SetActiveItemID(eventItemID)
+		m.inventory.SetMode(ui.PreviewMode)
+
+		var eventItem *data.Item
+		for _, item := range sceneManager.Game().Items {
+			if item.ID == eventItemID {
+				eventItem = item
+				break
+			}
 		}
 
-		if m.inventory.ActiveItemPressed() {
-			m.gameState.Items().SetEventItem(activeItemID)
-		}
+		m.itemPreviewPopup.SetActiveItem(eventItem, sceneManager.Game().Texts.Get(sceneManager.Language(), eventItem.Desc))
+		m.itemPreviewPopup.Show()
+	}
+
+	if m.inventory.ActiveItemPressed() {
+		m.gameState.Items().SetEventItem(activeItemID)
 	}
 
 	if m.itemPreviewPopup.ClosePressed() || m.inventory.BackPressed() {

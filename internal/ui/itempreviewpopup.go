@@ -86,6 +86,9 @@ func NewItemPreviewPopup(x, y int) *ItemPreviewPopup {
 }
 
 func (i *ItemPreviewPopup) Update(sceneManager *scene.Manager) {
+	if !i.visible {
+		return
+	}
 	for _, n := range i.nodes {
 		n.UpdateAsChild(i.visible, i.x, i.y)
 	}
@@ -105,10 +108,16 @@ func (i *ItemPreviewPopup) Visible() bool {
 }
 
 func (i *ItemPreviewPopup) ClosePressed() bool {
+	if !i.visible {
+		return false
+	}
 	return i.closeButton.Pressed()
 }
 
 func (i *ItemPreviewPopup) ActionPressed() bool {
+	if !i.visible {
+		return false
+	}
 	return i.actionButton.Pressed()
 }
 
