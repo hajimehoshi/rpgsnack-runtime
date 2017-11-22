@@ -221,7 +221,23 @@ func (m *MapScene) receiveRequest(sceneManager *scene.Manager) bool {
 	return false
 }
 
-func (m *MapScene) updateQuitDialog(sceneManager *scene.Manager) bool {
+func (m *MapScene) isUIBusy() bool {
+	if m.quitDialog.Visible() {
+		return true
+	}
+	if m.storeErrorDialog.Visible() {
+		return true
+	}
+	if m.removeAdsDialog.Visible() {
+		return true
+	}
+	if m.screenShotDialog.Visible() {
+		return true
+	}
+	return false
+}
+
+func (m *MapScene) updateQuitDialog(sceneManager *scene.Manager) {
 	m.quitLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDBackToTitle)
 	m.quitYesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDYes)
 	m.quitNoButton.Text = texts.Text(sceneManager.Language(), texts.TextIDNo)
@@ -232,13 +248,12 @@ func (m *MapScene) updateQuitDialog(sceneManager *scene.Manager) bool {
 		}
 		audio.Stop()
 		sceneManager.GoToWithFading(NewTitleScene(), 30)
-		return false
+		return
 	}
 	if m.quitNoButton.Pressed() {
 		m.quitDialog.Hide()
-		return false
+		return
 	}
-	return !m.quitDialog.Visible()
 }
 
 func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
@@ -340,51 +355,40 @@ func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
 	}
 }
 
-func (m *MapScene) updateStoreDialog(sceneManager *scene.Manager) bool {
+func (m *MapScene) updateStoreDialog(sceneManager *scene.Manager) {
 	m.storeErrorLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDStoreError)
 	m.storeErrorOkButton.Text = texts.Text(sceneManager.Language(), texts.TextIDOK)
 	m.storeErrorDialog.Update()
 	if m.storeErrorOkButton.Pressed() {
 		m.storeErrorDialog.Hide()
-		return false
+		return
 	}
-	return !m.storeErrorDialog.Visible()
 }
 
-func (m *MapScene) updateRemoveAdsDialog(sceneManager *scene.Manager) bool {
+func (m *MapScene) updateRemoveAdsDialog(sceneManager *scene.Manager) {
 	m.removeAdsYesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDYes)
 	m.removeAdsNoButton.Text = texts.Text(sceneManager.Language(), texts.TextIDNo)
 	m.removeAdsDialog.Update()
 	if m.removeAdsYesButton.Pressed() {
 		m.waitingRequestID = sceneManager.GenerateRequestID()
 		sceneManager.Requester().RequestPurchase(m.waitingRequestID, "ads_removal")
-		return false
+		return
 	}
 	if m.removeAdsNoButton.Pressed() {
 		m.removeAdsDialog.Hide()
 	}
-	return !m.removeAdsDialog.Visible()
 }
 
-func (m *MapScene) updateUI(sceneManager *scene.Manager) bool {
+func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 	// Call SetOffset as temporary hack for UI input
 	input.SetOffset(m.offsetX, 0)
 	defer input.SetOffset(0, 0)
 
-	if ok := m.updateQuitDialog(sceneManager); !ok {
-		return false
-	}
+	m.updateQuitDialog(sceneManager)
 	m.updateInventory(sceneManager)
-	if ok := m.updateStoreDialog(sceneManager); !ok {
-		return false
-	}
-	if ok := m.updateRemoveAdsDialog(sceneManager); !ok {
-		return false
-	}
+	m.updateStoreDialog(sceneManager)
+	m.updateRemoveAdsDialog(sceneManager)
 	m.screenShotDialog.Update()
-	if m.screenShotDialog.Visible() {
-		return false
-	}
 	m.cameraButton.Update()
 	if m.cameraButton.Pressed() {
 		m.cameraTaking = true
@@ -404,7 +408,6 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) bool {
 		m.waitingRequestID = sceneManager.GenerateRequestID()
 		sceneManager.Requester().RequestGetIAPPrices(m.waitingRequestID)
 	}
-	return true
 }
 
 func (m *MapScene) Update(sceneManager *scene.Manager) error {
@@ -423,7 +426,8 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 		m.handleBackButton()
 	}
 
-	if ok := m.updateUI(sceneManager); !ok {
+	m.updateUI(sceneManager)
+	if m.isUIBusy() {
 		return nil
 	}
 
