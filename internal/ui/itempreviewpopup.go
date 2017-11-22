@@ -126,7 +126,7 @@ func (i *ItemPreviewPopup) SetCombineItem(item *data.Item, combine *data.Combine
 	i.combine = combine
 }
 
-func (i *ItemPreviewPopup) DrawItem(screen *ebiten.Image, x, y float64, icon string) {
+func (i *ItemPreviewPopup) drawItem(screen *ebiten.Image, x, y float64, icon string) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(x, y)
 	op.GeoM.Scale(consts.TileScale, consts.TileScale)
@@ -165,9 +165,9 @@ func (i *ItemPreviewPopup) Draw(screen *ebiten.Image) {
 	op.GeoM.Scale(consts.TileScale, consts.TileScale)
 	screen.DrawImage(i.bgBoxImage, op)
 
-	i.DrawItem(screen, 16, 70, i.item.Icon)
+	i.drawItem(screen, 16, 70, i.item.Icon)
 	if i.combineItem != nil && i.combineItem.ID != i.item.ID {
-		i.DrawItem(screen, 92, 70, i.combineItem.Icon)
+		i.drawItem(screen, 92, 70, i.combineItem.Icon)
 	} else {
 		font.DrawText(screen, i.desc, 68*consts.TileScale+consts.TextScale, 72*consts.TileScale+consts.TextScale, consts.TextScale, data.TextAlignLeft, color.Black)
 		font.DrawText(screen, i.desc, 68*consts.TileScale, 72*consts.TileScale, consts.TextScale, data.TextAlignLeft, color.White)
