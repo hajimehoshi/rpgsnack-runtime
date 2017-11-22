@@ -237,12 +237,6 @@ func (m *MapScene) isUIBusy() bool {
 	return false
 }
 
-func (m *MapScene) updateQuitDialog(sceneManager *scene.Manager) {
-	m.quitLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDBackToTitle)
-	m.quitYesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDYes)
-	m.quitNoButton.Text = texts.Text(sceneManager.Language(), texts.TextIDNo)
-}
-
 func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
 	// If any events are executing, stop interacting this UI.
 	if !m.gameState.Map().IsBlockingEventExecuting() {
@@ -331,38 +325,35 @@ func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
 	}
 }
 
-func (m *MapScene) updateStoreDialog(sceneManager *scene.Manager) {
-	m.storeErrorLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDStoreError)
-	m.storeErrorOkButton.Text = texts.Text(sceneManager.Language(), texts.TextIDOK)
-	m.storeErrorDialog.Update()
-}
-
-func (m *MapScene) updateRemoveAdsDialog(sceneManager *scene.Manager) {
-	m.removeAdsYesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDYes)
-	m.removeAdsNoButton.Text = texts.Text(sceneManager.Language(), texts.TextIDNo)
-	m.removeAdsDialog.Update()
-}
-
 func (m *MapScene) updateUI(sceneManager *scene.Manager) {
+	l := sceneManager.Language()
+	m.quitLabel.Text = texts.Text(l, texts.TextIDBackToTitle)
+	m.quitYesButton.Text = texts.Text(l, texts.TextIDYes)
+	m.quitNoButton.Text = texts.Text(l, texts.TextIDNo)
+	m.storeErrorLabel.Text = texts.Text(l, texts.TextIDStoreError)
+	m.storeErrorOkButton.Text = texts.Text(l, texts.TextIDOK)
+	m.removeAdsYesButton.Text = texts.Text(l, texts.TextIDYes)
+	m.removeAdsNoButton.Text = texts.Text(l, texts.TextIDNo)
+	m.titleButton.Text = texts.Text(l, texts.TextIDTitle)
+	m.removeAdsButton.Text = texts.Text(l, texts.TextIDRemoveAds)
+
 	// Call SetOffset as temporary hack for UI input
 	input.SetOffset(m.offsetX, 0)
 	defer input.SetOffset(0, 0)
 
 	m.quitDialog.Update()
 	m.screenShotDialog.Update()
+	m.storeErrorDialog.Update()
+	m.removeAdsDialog.Update()
+
 	m.cameraButton.Update()
-	m.titleButton.Text = texts.Text(sceneManager.Language(), texts.TextIDTitle)
 	m.titleButton.Disabled = m.gameState.Map().IsBlockingEventExecuting()
 	m.titleButton.Update()
 
-	m.removeAdsButton.Text = texts.Text(sceneManager.Language(), texts.TextIDRemoveAds)
 	m.removeAdsButton.Disabled = m.gameState.Map().IsBlockingEventExecuting()
 	m.removeAdsButton.Update()
 
-	m.updateQuitDialog(sceneManager)
 	m.updateInventory(sceneManager)
-	m.updateStoreDialog(sceneManager)
-	m.updateRemoveAdsDialog(sceneManager)
 
 	// Event handling
 	if m.quitYesButton.Pressed() {
@@ -396,7 +387,6 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 		m.cameraTaking = true
 		m.screenShotDialog.Show()
 	}
-
 }
 
 func (m *MapScene) Update(sceneManager *scene.Manager) error {
