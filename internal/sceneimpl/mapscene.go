@@ -241,19 +241,6 @@ func (m *MapScene) updateQuitDialog(sceneManager *scene.Manager) {
 	m.quitLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDBackToTitle)
 	m.quitYesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDYes)
 	m.quitNoButton.Text = texts.Text(sceneManager.Language(), texts.TextIDNo)
-	m.quitDialog.Update()
-	if m.quitYesButton.Pressed() {
-		if m.gameState.IsAutoSaveEnabled() {
-			m.gameState.RequestSave(sceneManager)
-		}
-		audio.Stop()
-		sceneManager.GoToWithFading(NewTitleScene(), 30)
-		return
-	}
-	if m.quitNoButton.Pressed() {
-		m.quitDialog.Hide()
-		return
-	}
 }
 
 func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
@@ -361,10 +348,7 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 	input.SetOffset(m.offsetX, 0)
 	defer input.SetOffset(0, 0)
 
-	m.updateQuitDialog(sceneManager)
-	m.updateInventory(sceneManager)
-	m.updateStoreDialog(sceneManager)
-	m.updateRemoveAdsDialog(sceneManager)
+	m.quitDialog.Update()
 	m.screenShotDialog.Update()
 	m.cameraButton.Update()
 	m.titleButton.Text = texts.Text(sceneManager.Language(), texts.TextIDTitle)
@@ -375,13 +359,27 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 	m.removeAdsButton.Disabled = m.gameState.Map().IsBlockingEventExecuting()
 	m.removeAdsButton.Update()
 
+	m.updateQuitDialog(sceneManager)
+	m.updateInventory(sceneManager)
+	m.updateStoreDialog(sceneManager)
+	m.updateRemoveAdsDialog(sceneManager)
+
 	// Event handling
+	if m.quitYesButton.Pressed() {
+		if m.gameState.IsAutoSaveEnabled() {
+			m.gameState.RequestSave(sceneManager)
+		}
+		audio.Stop()
+		sceneManager.GoToWithFading(NewTitleScene(), 30)
+	}
+	if m.quitNoButton.Pressed() {
+		m.quitDialog.Hide()
+	}
 	if m.titleButton.Pressed() {
 		m.quitDialog.Show()
 	}
 	if m.storeErrorOkButton.Pressed() {
 		m.storeErrorDialog.Hide()
-		return
 	}
 	if m.removeAdsButton.Pressed() {
 		m.waitingRequestID = sceneManager.GenerateRequestID()
