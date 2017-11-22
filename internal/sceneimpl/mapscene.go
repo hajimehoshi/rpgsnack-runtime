@@ -261,6 +261,8 @@ func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
 	if !m.gameState.Map().IsBlockingEventExecuting() {
 		m.inventory.Update(sceneManager)
 	}
+	m.itemPreviewPopup.Update(sceneManager)
+
 	if m.gameState.InventoryVisible() {
 		m.inventory.Show()
 	} else {
@@ -276,9 +278,7 @@ func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
 		}
 	}
 	m.inventory.SetItems(items)
-	if m.inventory.Mode() == ui.DefaultMode {
-		m.inventory.SetActiveItemID(m.gameState.Items().ActiveItem())
-	}
+	m.inventory.SetActiveItemID(m.gameState.Items().ActiveItem())
 
 	activeItemID := m.gameState.Items().ActiveItem()
 
@@ -303,44 +303,36 @@ func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
 		}
 	}
 
-	if eventItemID := m.gameState.Items().EventItem(); eventItemID > 0 {
-		m.inventory.SetActiveItemID(eventItemID)
-		m.inventory.SetMode(ui.PreviewMode)
-
-		var eventItem *data.Item
-		for _, item := range sceneManager.Game().Items {
-			if item.ID == eventItemID {
-				eventItem = item
-				break
-			}
-		}
-
-		m.itemPreviewPopup.SetActiveItem(eventItem, sceneManager.Game().Texts.Get(sceneManager.Language(), eventItem.Desc))
-		m.itemPreviewPopup.Show()
-	}
-
 	if m.inventory.ActiveItemPressed() {
 		m.gameState.Items().SetEventItem(activeItemID)
-	}
+		eventItemID := m.gameState.Items().EventItem()
+		if eventItemID > 0 {
+			m.inventory.SetActiveItemID(eventItemID)
+			m.inventory.SetMode(ui.PreviewMode)
+			// TODO: SetMode changes the inventory state of the 'ClosedButton()'. That's confusing.
 
-	if m.itemPreviewPopup.ClosePressed() || m.inventory.BackPressed() {
+			var eventItem *data.Item
+			for _, item := range sceneManager.Game().Items {
+				if item.ID == eventItemID {
+					eventItem = item
+					break
+				}
+			}
+
+			m.itemPreviewPopup.SetActiveItem(eventItem, sceneManager.Game().Texts.Get(sceneManager.Language(), eventItem.Desc))
+			m.itemPreviewPopup.Show()
+		}
+	} else if m.itemPreviewPopup.ClosePressed() || m.inventory.BackPressed() {
 		m.gameState.Items().SetEventItem(0)
-	}
-
-	// TODO: using Pressed() in if statement requires us to call extra Update()... this is ugly
-	m.itemPreviewPopup.Update(sceneManager)
-	if m.itemPreviewPopup.Visible() && m.gameState.Items().EventItem() == 0 {
 		m.itemPreviewPopup.SetActiveItem(nil, "")
 		m.itemPreviewPopup.Hide()
-
-		// TODO: Why is this call needed?
-		m.inventory.Update(sceneManager)
 		m.inventory.SetMode(ui.DefaultMode)
 	}
 
 	if m.gameState.ExecutingItemCommands() || m.gameState.Map().IsBlockingEventExecuting() {
 		return
 	}
+
 	// TODO: ItemPreviewPopup is not standarized as the other Popups
 	if m.itemPreviewPopup.ActionPressed() {
 		if m.inventory.CombineItemID() != 0 {

@@ -170,11 +170,17 @@ func (i *Inventory) ActiveItemPressed() bool {
 	if !i.visible {
 		return false
 	}
+	if i.mode != DefaultMode {
+		return false
+	}
 	return i.infoButton.Pressed()
 }
 
 func (i *Inventory) BackPressed() bool {
 	if !i.visible {
+		return false
+	}
+	if i.mode != PreviewMode {
 		return false
 	}
 	return i.backButton.Pressed()
@@ -362,7 +368,10 @@ func (i *Inventory) SetItems(items []*data.Item) {
 }
 
 func (i *Inventory) ActiveItemID() int {
-	return i.activeItemID
+	if i.mode == DefaultMode {
+		return i.activeItemID
+	}
+	return 0
 }
 
 func (i *Inventory) SetActiveItemID(activeItemID int) {
