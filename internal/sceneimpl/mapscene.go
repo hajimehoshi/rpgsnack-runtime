@@ -225,9 +225,6 @@ func (m *MapScene) updateQuitDialog(sceneManager *scene.Manager) bool {
 	m.quitLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDBackToTitle)
 	m.quitYesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDYes)
 	m.quitNoButton.Text = texts.Text(sceneManager.Language(), texts.TextIDNo)
-	if !m.quitDialog.Visible() {
-		return true
-	}
 	m.quitDialog.Update()
 	if m.quitYesButton.Pressed() {
 		if m.gameState.IsAutoSaveEnabled() {
@@ -241,7 +238,7 @@ func (m *MapScene) updateQuitDialog(sceneManager *scene.Manager) bool {
 		m.quitDialog.Hide()
 		return false
 	}
-	return false
+	return !m.quitDialog.Visible()
 }
 
 func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
@@ -346,23 +343,17 @@ func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
 func (m *MapScene) updateStoreDialog(sceneManager *scene.Manager) bool {
 	m.storeErrorLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDStoreError)
 	m.storeErrorOkButton.Text = texts.Text(sceneManager.Language(), texts.TextIDOK)
-	if !m.storeErrorDialog.Visible() {
-		return true
-	}
 	m.storeErrorDialog.Update()
 	if m.storeErrorOkButton.Pressed() {
 		m.storeErrorDialog.Hide()
 		return false
 	}
-	return false
+	return !m.storeErrorDialog.Visible()
 }
 
 func (m *MapScene) updateRemoveAdsDialog(sceneManager *scene.Manager) bool {
 	m.removeAdsYesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDYes)
 	m.removeAdsNoButton.Text = texts.Text(sceneManager.Language(), texts.TextIDNo)
-	if !m.removeAdsDialog.Visible() {
-		return true
-	}
 	m.removeAdsDialog.Update()
 	if m.removeAdsYesButton.Pressed() {
 		m.waitingRequestID = sceneManager.GenerateRequestID()
@@ -372,7 +363,7 @@ func (m *MapScene) updateRemoveAdsDialog(sceneManager *scene.Manager) bool {
 	if m.removeAdsNoButton.Pressed() {
 		m.removeAdsDialog.Hide()
 	}
-	return false
+	return !m.removeAdsDialog.Visible()
 }
 
 func (m *MapScene) updateUI(sceneManager *scene.Manager) bool {

@@ -61,6 +61,9 @@ func (d *Dialog) AddChild(node Node) {
 }
 
 func (d *Dialog) Update() {
+	if !d.visible {
+		return
+	}
 	for _, n := range d.nodes {
 		n.UpdateAsChild(d.visible, d.x, d.y)
 	}

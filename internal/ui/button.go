@@ -77,6 +77,9 @@ func (b *Button) SetY(y int) {
 }
 
 func (b *Button) Pressed() bool {
+	if !b.Visible {
+		return false
+	}
 	return b.pressed
 }
 
