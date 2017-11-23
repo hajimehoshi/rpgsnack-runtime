@@ -237,30 +237,6 @@ func (m *MapScene) isUIBusy() bool {
 	return false
 }
 
-func (m *MapScene) items(sceneManager *scene.Manager) []*data.Item {
-	ids := map[int]struct{}{}
-	for _, id := range m.gameState.Items().ItemIDs() {
-		ids[id] = struct{}{}
-	}
-	items := []*data.Item{}
-	for _, item := range sceneManager.Game().Items {
-		if _, ok := ids[item.ID]; ok {
-			items = append(items, item)
-		}
-	}
-	return items
-}
-
-func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
-	if m.gameState.InventoryVisible() {
-		m.inventory.Show()
-	} else {
-		m.inventory.Hide()
-	}
-	m.inventory.SetItems(m.items(sceneManager))
-	m.inventory.SetActiveItemID(m.gameState.Items().ActiveItem())
-}
-
 func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 	l := sceneManager.Language()
 	m.quitLabel.Text = texts.Text(l, texts.TextIDBackToTitle)
@@ -289,10 +265,16 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 	m.removeAdsButton.Disabled = m.gameState.Map().IsBlockingEventExecuting()
 	m.removeAdsButton.Update()
 
+	if m.gameState.InventoryVisible() {
+		m.inventory.Show()
+	} else {
+		m.inventory.Hide()
+	}
 	m.inventory.SetDisabled(m.gameState.Map().IsBlockingEventExecuting())
-	m.inventory.Update(sceneManager)
-	m.itemPreviewPopup.Update(sceneManager)
-	m.updateInventory(sceneManager)
+	m.inventory.SetItems(m.gameState.Items().Items(sceneManager.Game().Items))
+	m.inventory.SetActiveItemID(m.gameState.Items().ActiveItem())
+	m.inventory.Update()
+	m.itemPreviewPopup.Update(l)
 
 	// Event handling
 	if m.quitYesButton.Pressed() {
@@ -329,7 +311,7 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 	if m.inventory.SlotPressed() {
 		if m.inventory.PressedSlotIndex() < m.gameState.Items().ItemNum() {
 			activeItemID := m.gameState.Items().ActiveItem()
-			itemID := m.gameState.Items().ItemIDs()[m.inventory.PressedSlotIndex()]
+			itemID := m.gameState.Items().ItemIDAt(m.inventory.PressedSlotIndex())
 			switch m.inventory.Mode() {
 			case ui.DefaultMode:
 				if itemID == m.gameState.Items().ActiveItem() {

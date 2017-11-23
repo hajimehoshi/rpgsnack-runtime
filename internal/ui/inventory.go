@@ -23,7 +23,6 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
 
 type InventoryMode int
@@ -218,7 +217,7 @@ func (i *Inventory) isTouchingScroll() bool {
 	return sx <= touchX && touchX < sx+scrollBarWidth*consts.TileScale && sy <= touchY && touchY < sy+scrollBarHeight*consts.TileScale
 }
 
-func (i *Inventory) Update(sceneManager *scene.Manager) {
+func (i *Inventory) Update() {
 	if !i.visible {
 		return
 	}

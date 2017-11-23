@@ -18,12 +18,12 @@ import (
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten"
+	"golang.org/x/text/language"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/font"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/texts"
 )
 
@@ -85,14 +85,14 @@ func NewItemPreviewPopup(x, y int) *ItemPreviewPopup {
 	}
 }
 
-func (i *ItemPreviewPopup) Update(sceneManager *scene.Manager) {
+func (i *ItemPreviewPopup) Update(lang language.Tag) {
 	if !i.visible {
 		return
 	}
 	for _, n := range i.nodes {
 		n.UpdateAsChild(i.visible, i.x, i.y)
 	}
-	i.actionButton.Text = texts.Text(sceneManager.Language(), texts.TextIDItemCheck)
+	i.actionButton.Text = texts.Text(lang, texts.TextIDItemCheck)
 }
 
 func (i *ItemPreviewPopup) Show() {

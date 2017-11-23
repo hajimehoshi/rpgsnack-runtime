@@ -19,6 +19,7 @@ import (
 
 	"github.com/vmihailenco/msgpack"
 
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
 )
 
@@ -106,8 +107,22 @@ func (i *Items) SetEventItem(id int) {
 	i.eventItem = id
 }
 
-func (i *Items) ItemIDs() []int {
-	return i.items
+func (i *Items) Items(dataItems []*data.Item) []*data.Item {
+	ids := map[int]struct{}{}
+	for _, id := range i.items {
+		ids[id] = struct{}{}
+	}
+	is := []*data.Item{}
+	for _, i := range dataItems {
+		if _, ok := ids[i.ID]; ok {
+			is = append(is, i)
+		}
+	}
+	return is
+}
+
+func (i *Items) ItemIDAt(index int) int {
+	return i.items[index]
 }
 
 func (i *Items) ItemNum() int {
