@@ -180,6 +180,11 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 		}
 		c.Args = args
 	case CommandNameStopBGM:
+		var args *CommandArgsStopBGM
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	case CommandNameSave:
 	case CommandNameGotoTitle:
 	case CommandNameSyncIAP:
@@ -434,7 +439,9 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 				d.DecodeAny(a)
 				c.Args = a
 			case CommandNameStopBGM:
-				d.DecodeNil()
+				a := &CommandArgsStopBGM{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameSave:
 				d.DecodeNil()
 			case CommandNameGotoTitle:
@@ -892,6 +899,10 @@ type CommandArgsPlayBGM struct {
 	Name     string `json:"name" msgpack:"name"`
 	Volume   int    `json:"volume" msgpack:"volume"`
 	FadeTime int    `json:"fadeTime" msgpack:"fadeTime"`
+}
+
+type CommandArgsStopBGM struct {
+	FadeTime int `json:"fadeTime" msgpack:"fadeTime"`
 }
 
 type CommandArgsUnlockAchievement struct {

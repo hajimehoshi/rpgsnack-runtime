@@ -524,6 +524,8 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		}
 		i.commandIterator.Advance()
 	case data.CommandNameStopBGM:
+		args := c.Args.(*data.CommandArgsStopBGM)
+		_ = args // TODO: Use FadeTime
 		audio.StopBGM()
 		i.commandIterator.Advance()
 	case data.CommandNameSave:
