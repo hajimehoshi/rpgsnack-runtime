@@ -286,13 +286,12 @@ func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
 
 	if m.inventory.ActiveItemPressed() {
 		m.gameState.Items().SetEventItem(activeItemID)
-		eventItemID := m.gameState.Items().EventItem()
-		if eventItemID > 0 {
-			m.inventory.SetActiveItemID(eventItemID)
+		if activeItemID > 0 {
+			m.inventory.SetActiveItemID(activeItemID)
 			m.inventory.SetMode(ui.PreviewMode)
 			var eventItem *data.Item
 			for _, item := range sceneManager.Game().Items {
-				if item.ID == eventItemID {
+				if item.ID == activeItemID {
 					eventItem = item
 					break
 				}
@@ -309,12 +308,11 @@ func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
 		m.inventory.SetMode(ui.DefaultMode)
 	}
 
-	if m.gameState.ExecutingItemCommands() || m.gameState.Map().IsBlockingEventExecuting() {
-		return
-	}
-
 	// TODO: ItemPreviewPopup is not standarized as the other Popups
 	if m.itemPreviewPopup.ActionPressed() {
+		if m.gameState.ExecutingItemCommands() || m.gameState.Map().IsBlockingEventExecuting() {
+			return
+		}
 		if m.inventory.CombineItemID() != 0 {
 			combine := sceneManager.Game().CreateCombine(activeItemID, m.inventory.CombineItemID())
 			m.gameState.StartCombineCommands(combine)
