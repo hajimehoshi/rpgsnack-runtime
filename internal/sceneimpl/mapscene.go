@@ -237,22 +237,27 @@ func (m *MapScene) isUIBusy() bool {
 	return false
 }
 
+func (m *MapScene) items(sceneManager *scene.Manager) []*data.Item {
+	ids := map[int]struct{}{}
+	for _, id := range m.gameState.Items().Items() {
+		ids[id] = struct{}{}
+	}
+	items := []*data.Item{}
+	for _, item := range sceneManager.Game().Items {
+		if _, ok := ids[item.ID]; ok {
+			items = append(items, item)
+		}
+	}
+	return items
+}
+
 func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
 	if m.gameState.InventoryVisible() {
 		m.inventory.Show()
 	} else {
 		m.inventory.Hide()
 	}
-	items := []*data.Item{}
-	for _, itemID := range m.gameState.Items().Items() {
-		for _, item := range sceneManager.Game().Items {
-			if itemID == item.ID {
-				items = append(items, item)
-				break
-			}
-		}
-	}
-	m.inventory.SetItems(items)
+	m.inventory.SetItems(m.items(sceneManager))
 	m.inventory.SetActiveItemID(m.gameState.Items().ActiveItem())
 }
 
@@ -325,13 +330,14 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 		if m.inventory.PressedSlotIndex() < len(m.gameState.Items().Items()) {
 			activeItemID := m.gameState.Items().ActiveItem()
 			itemID := m.gameState.Items().Items()[m.inventory.PressedSlotIndex()]
-			if m.inventory.Mode() == ui.DefaultMode {
+			switch m.inventory.Mode() {
+			case ui.DefaultMode:
 				if itemID == m.gameState.Items().ActiveItem() {
 					m.gameState.Items().Deactivate()
 				} else {
 					m.gameState.Items().Activate(itemID)
 				}
-			} else {
+			case ui.PreviewMode:
 				var combineItem *data.Item
 				for _, item := range sceneManager.Game().Items {
 					if m.inventory.CombineItemID() == item.ID {
@@ -341,6 +347,8 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 				}
 
 				m.itemPreviewPopup.SetCombineItem(combineItem, sceneManager.Game().CreateCombine(activeItemID, m.inventory.CombineItemID()))
+			default:
+				panic("not reached")
 			}
 		}
 	}
