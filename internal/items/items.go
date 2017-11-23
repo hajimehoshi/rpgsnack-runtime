@@ -106,8 +106,12 @@ func (i *Items) SetEventItem(id int) {
 	i.eventItem = id
 }
 
-func (i *Items) Items() []int {
+func (i *Items) ItemIDs() []int {
 	return i.items
+}
+
+func (i *Items) ItemNum() int {
+	return len(i.items)
 }
 
 func (i *Items) Add(id int) {

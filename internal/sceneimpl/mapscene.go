@@ -239,7 +239,7 @@ func (m *MapScene) isUIBusy() bool {
 
 func (m *MapScene) items(sceneManager *scene.Manager) []*data.Item {
 	ids := map[int]struct{}{}
-	for _, id := range m.gameState.Items().Items() {
+	for _, id := range m.gameState.Items().ItemIDs() {
 		ids[id] = struct{}{}
 	}
 	items := []*data.Item{}
@@ -327,9 +327,9 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 		m.screenShotDialog.Show()
 	}
 	if m.inventory.SlotPressed() {
-		if m.inventory.PressedSlotIndex() < len(m.gameState.Items().Items()) {
+		if m.inventory.PressedSlotIndex() < m.gameState.Items().ItemNum() {
 			activeItemID := m.gameState.Items().ActiveItem()
-			itemID := m.gameState.Items().Items()[m.inventory.PressedSlotIndex()]
+			itemID := m.gameState.Items().ItemIDs()[m.inventory.PressedSlotIndex()]
 			switch m.inventory.Mode() {
 			case ui.DefaultMode:
 				if itemID == m.gameState.Items().ActiveItem() {

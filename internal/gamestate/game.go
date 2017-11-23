@@ -373,13 +373,13 @@ func (g *Game) MeetsCondition(cond *data.Condition, eventID int) (bool, error) {
 		switch itemValue {
 		case data.ConditionItemOwn:
 			if id == 0 {
-				return len(g.items.Items()) > 0, nil
+				return g.items.ItemNum() > 0, nil
 			} else {
 				return g.items.Includes(id), nil
 			}
 		case data.ConditionItemNotOwn:
 			if id == 0 {
-				return len(g.items.Items()) == 0, nil
+				return g.items.ItemNum() == 0, nil
 			} else {
 				return !g.items.Includes(id), nil
 			}
