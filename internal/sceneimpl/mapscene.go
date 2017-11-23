@@ -290,8 +290,6 @@ func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
 		if eventItemID > 0 {
 			m.inventory.SetActiveItemID(eventItemID)
 			m.inventory.SetMode(ui.PreviewMode)
-			// TODO: SetMode changes the inventory state of the 'ClosedButton()'. That's confusing.
-
 			var eventItem *data.Item
 			for _, item := range sceneManager.Game().Items {
 				if item.ID == eventItemID {
@@ -303,7 +301,8 @@ func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
 			m.itemPreviewPopup.SetActiveItem(eventItem, sceneManager.Game().Texts.Get(sceneManager.Language(), eventItem.Desc))
 			m.itemPreviewPopup.Show()
 		}
-	} else if m.itemPreviewPopup.ClosePressed() || m.inventory.BackPressed() {
+	}
+	if m.itemPreviewPopup.ClosePressed() || m.inventory.BackPressed() {
 		m.gameState.Items().SetEventItem(0)
 		m.itemPreviewPopup.SetActiveItem(nil, "")
 		m.itemPreviewPopup.Hide()

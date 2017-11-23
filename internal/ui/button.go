@@ -80,6 +80,9 @@ func (b *Button) Pressed() bool {
 	if !b.Visible {
 		return false
 	}
+	if b.Disabled {
+		return false
+	}
 	return b.pressed
 }
 
