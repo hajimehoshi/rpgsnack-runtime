@@ -37,6 +37,7 @@ type Inventory struct {
 	x                   int
 	y                   int
 	visible             bool
+	disabled            bool
 	pressedSlotIndex    int
 	items               []*data.Item
 	activeItemID        int
@@ -139,6 +140,9 @@ func (i *Inventory) PressedSlotIndex() int {
 	if !i.visible {
 		return -1
 	}
+	if i.disabled {
+		return -1
+	}
 	return i.pressedSlotIndex
 }
 
@@ -152,6 +156,10 @@ func (i *Inventory) Hide() {
 
 func (i *Inventory) Visible() bool {
 	return i.visible
+}
+
+func (i *Inventory) SetDisabled(disabled bool) {
+	i.disabled = disabled
 }
 
 func (i *Inventory) slotIndexAt(x, y int) int {
@@ -177,6 +185,9 @@ func (i *Inventory) ActiveItemPressed() bool {
 	if !i.visible {
 		return false
 	}
+	if i.disabled {
+		return false
+	}
 	if i.mode != DefaultMode {
 		return false
 	}
@@ -185,6 +196,9 @@ func (i *Inventory) ActiveItemPressed() bool {
 
 func (i *Inventory) BackPressed() bool {
 	if !i.visible {
+		return false
+	}
+	if i.disabled {
 		return false
 	}
 	if i.mode != PreviewMode {
@@ -206,6 +220,9 @@ func (i *Inventory) isTouchingScroll() bool {
 
 func (i *Inventory) Update(sceneManager *scene.Manager) {
 	if !i.visible {
+		return
+	}
+	if i.disabled {
 		return
 	}
 
