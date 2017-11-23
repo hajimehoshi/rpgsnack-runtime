@@ -131,7 +131,14 @@ func NewInventory(x, y int) *Inventory {
 	}
 }
 
+func (i *Inventory) SlotPressed() bool {
+	return i.PressedSlotIndex() != -1
+}
+
 func (i *Inventory) PressedSlotIndex() int {
+	if !i.visible {
+		return -1
+	}
 	return i.pressedSlotIndex
 }
 

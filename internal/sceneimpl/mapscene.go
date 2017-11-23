@@ -261,30 +261,32 @@ func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
 	m.inventory.SetItems(items)
 	m.inventory.SetActiveItemID(m.gameState.Items().ActiveItem())
 
-	activeItemID := m.gameState.Items().ActiveItem()
-
-	if m.inventory.PressedSlotIndex() >= 0 && m.inventory.PressedSlotIndex() < len(m.gameState.Items().Items()) {
-		itemID := m.gameState.Items().Items()[m.inventory.PressedSlotIndex()]
-		if m.inventory.Mode() == ui.DefaultMode {
-			if itemID == activeItemID {
-				m.gameState.Items().Deactivate()
-			} else {
-				m.gameState.Items().Activate(itemID)
-			}
-		} else {
-			var combineItem *data.Item
-			for _, item := range sceneManager.Game().Items {
-				if m.inventory.CombineItemID() == item.ID {
-					combineItem = item
-					break
+	if m.inventory.SlotPressed() {
+		if m.inventory.PressedSlotIndex() < len(m.gameState.Items().Items()) {
+			activeItemID := m.gameState.Items().ActiveItem()
+			itemID := m.gameState.Items().Items()[m.inventory.PressedSlotIndex()]
+			if m.inventory.Mode() == ui.DefaultMode {
+				if itemID == m.gameState.Items().ActiveItem() {
+					m.gameState.Items().Deactivate()
+				} else {
+					m.gameState.Items().Activate(itemID)
 				}
-			}
+			} else {
+				var combineItem *data.Item
+				for _, item := range sceneManager.Game().Items {
+					if m.inventory.CombineItemID() == item.ID {
+						combineItem = item
+						break
+					}
+				}
 
-			m.itemPreviewPopup.SetCombineItem(combineItem, sceneManager.Game().CreateCombine(activeItemID, m.inventory.CombineItemID()))
+				m.itemPreviewPopup.SetCombineItem(combineItem, sceneManager.Game().CreateCombine(activeItemID, m.inventory.CombineItemID()))
+			}
 		}
 	}
 
 	if m.inventory.ActiveItemPressed() {
+		activeItemID := m.gameState.Items().ActiveItem()
 		m.gameState.Items().SetEventItem(activeItemID)
 		if activeItemID > 0 {
 			m.inventory.SetActiveItemID(activeItemID)
@@ -313,6 +315,7 @@ func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
 		if m.gameState.ExecutingItemCommands() || m.gameState.Map().IsBlockingEventExecuting() {
 			return
 		}
+		activeItemID := m.gameState.Items().ActiveItem()
 		if m.inventory.CombineItemID() != 0 {
 			combine := sceneManager.Game().CreateCombine(activeItemID, m.inventory.CombineItemID())
 			m.gameState.StartCombineCommands(combine)
