@@ -141,6 +141,107 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	m.quitDialog.AddChild(m.quitLabel)
 
 	m.removeAdsButton.Visible = false // TODO: Clock of Atonement does not need this feature, so turn it off for now
+
+	m.quitYesButton.SetOnPressed(func(_ *ui.Button) {
+		if m.gameState.IsAutoSaveEnabled() {
+			m.gameState.RequestSave(sceneManager)
+		}
+		audio.Stop()
+		sceneManager.GoToWithFading(NewTitleScene(), 30)
+	})
+	m.quitNoButton.SetOnPressed(func(_ *ui.Button) {
+		m.quitDialog.Hide()
+	})
+	m.titleButton.SetOnPressed(func(_ *ui.Button) {
+		m.quitDialog.Show()
+	})
+	m.storeErrorOkButton.SetOnPressed(func(_ *ui.Button) {
+		m.storeErrorDialog.Hide()
+	})
+	m.removeAdsButton.SetOnPressed(func(_ *ui.Button) {
+		m.waitingRequestID = sceneManager.GenerateRequestID()
+		sceneManager.Requester().RequestGetIAPPrices(m.waitingRequestID)
+	})
+	m.removeAdsYesButton.SetOnPressed(func(_ *ui.Button) {
+		m.waitingRequestID = sceneManager.GenerateRequestID()
+		sceneManager.Requester().RequestPurchase(m.waitingRequestID, "ads_removal")
+	})
+	m.removeAdsNoButton.SetOnPressed(func(_ *ui.Button) {
+		m.removeAdsDialog.Hide()
+	})
+	m.cameraButton.SetOnPressed(func(_ *ui.Button) {
+		m.cameraTaking = true
+		m.screenShotDialog.Show()
+	})
+
+	m.inventory.SetOnSlotPressed(func(_ *ui.Inventory, index int) {
+		if index < m.gameState.Items().ItemNum() {
+			activeItemID := m.gameState.Items().ActiveItem()
+			itemID := m.gameState.Items().ItemIDAt(index)
+			switch m.inventory.Mode() {
+			case ui.DefaultMode:
+				if itemID == m.gameState.Items().ActiveItem() {
+					m.gameState.Items().Deactivate()
+				} else {
+					m.gameState.Items().Activate(itemID)
+				}
+			case ui.PreviewMode:
+				var combineItem *data.Item
+				for _, item := range sceneManager.Game().Items {
+					if m.inventory.CombineItemID() == item.ID {
+						combineItem = item
+						break
+					}
+				}
+
+				m.itemPreviewPopup.SetCombineItem(combineItem, sceneManager.Game().CreateCombine(activeItemID, m.inventory.CombineItemID()))
+			default:
+				panic("not reached")
+			}
+		}
+	})
+	m.inventory.SetOnActiveItemPressed(func(_ *ui.Inventory) {
+		activeItemID := m.gameState.Items().ActiveItem()
+		m.gameState.Items().SetEventItem(activeItemID)
+		if activeItemID > 0 {
+			m.inventory.SetActiveItemID(activeItemID)
+			m.inventory.SetMode(ui.PreviewMode)
+			var eventItem *data.Item
+			for _, item := range sceneManager.Game().Items {
+				if item.ID == activeItemID {
+					eventItem = item
+					break
+				}
+			}
+
+			m.itemPreviewPopup.SetActiveItem(eventItem)
+			m.itemPreviewPopup.Show()
+		}
+	})
+	m.itemPreviewPopup.SetOnClosePressed(func(_ *ui.ItemPreviewPopup) {
+		m.gameState.Items().SetEventItem(0)
+		m.itemPreviewPopup.SetActiveItem(nil)
+		m.itemPreviewPopup.Hide()
+		m.inventory.SetMode(ui.DefaultMode)
+	})
+	m.inventory.SetOnBackPressed(func(_ *ui.Inventory) {
+		m.gameState.Items().SetEventItem(0)
+		m.itemPreviewPopup.SetActiveItem(nil)
+		m.itemPreviewPopup.Hide()
+		m.inventory.SetMode(ui.DefaultMode)
+	})
+	// TODO: ItemPreviewPopup is not standarized as the other Popups
+	m.itemPreviewPopup.SetOnActionPressed(func(_ *ui.ItemPreviewPopup) {
+		if !m.gameState.ExecutingItemCommands() && !m.gameState.Map().IsBlockingEventExecuting() {
+			activeItemID := m.gameState.Items().ActiveItem()
+			if m.inventory.CombineItemID() != 0 {
+				combine := sceneManager.Game().CreateCombine(activeItemID, m.inventory.CombineItemID())
+				m.gameState.StartCombineCommands(combine)
+			} else {
+				m.gameState.StartItemCommands(activeItemID)
+			}
+		}
+	})
 }
 
 func (m *MapScene) updatePurchasesState(sceneManager *scene.Manager) {
@@ -277,99 +378,6 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 	m.itemPreviewPopup.Update(l)
 
 	// Event handling
-	if m.quitYesButton.Pressed() {
-		if m.gameState.IsAutoSaveEnabled() {
-			m.gameState.RequestSave(sceneManager)
-		}
-		audio.Stop()
-		sceneManager.GoToWithFading(NewTitleScene(), 30)
-	}
-	if m.quitNoButton.Pressed() {
-		m.quitDialog.Hide()
-	}
-	if m.titleButton.Pressed() {
-		m.quitDialog.Show()
-	}
-	if m.storeErrorOkButton.Pressed() {
-		m.storeErrorDialog.Hide()
-	}
-	if m.removeAdsButton.Pressed() {
-		m.waitingRequestID = sceneManager.GenerateRequestID()
-		sceneManager.Requester().RequestGetIAPPrices(m.waitingRequestID)
-	}
-	if m.removeAdsYesButton.Pressed() {
-		m.waitingRequestID = sceneManager.GenerateRequestID()
-		sceneManager.Requester().RequestPurchase(m.waitingRequestID, "ads_removal")
-	}
-	if m.removeAdsNoButton.Pressed() {
-		m.removeAdsDialog.Hide()
-	}
-	if m.cameraButton.Pressed() {
-		m.cameraTaking = true
-		m.screenShotDialog.Show()
-	}
-	if m.inventory.SlotPressed() {
-		if m.inventory.PressedSlotIndex() < m.gameState.Items().ItemNum() {
-			activeItemID := m.gameState.Items().ActiveItem()
-			itemID := m.gameState.Items().ItemIDAt(m.inventory.PressedSlotIndex())
-			switch m.inventory.Mode() {
-			case ui.DefaultMode:
-				if itemID == m.gameState.Items().ActiveItem() {
-					m.gameState.Items().Deactivate()
-				} else {
-					m.gameState.Items().Activate(itemID)
-				}
-			case ui.PreviewMode:
-				var combineItem *data.Item
-				for _, item := range sceneManager.Game().Items {
-					if m.inventory.CombineItemID() == item.ID {
-						combineItem = item
-						break
-					}
-				}
-
-				m.itemPreviewPopup.SetCombineItem(combineItem, sceneManager.Game().CreateCombine(activeItemID, m.inventory.CombineItemID()))
-			default:
-				panic("not reached")
-			}
-		}
-	}
-	if m.inventory.ActiveItemPressed() {
-		activeItemID := m.gameState.Items().ActiveItem()
-		m.gameState.Items().SetEventItem(activeItemID)
-		if activeItemID > 0 {
-			m.inventory.SetActiveItemID(activeItemID)
-			m.inventory.SetMode(ui.PreviewMode)
-			var eventItem *data.Item
-			for _, item := range sceneManager.Game().Items {
-				if item.ID == activeItemID {
-					eventItem = item
-					break
-				}
-			}
-
-			m.itemPreviewPopup.SetActiveItem(eventItem)
-			m.itemPreviewPopup.Show()
-		}
-	}
-	if m.itemPreviewPopup.ClosePressed() || m.inventory.BackPressed() {
-		m.gameState.Items().SetEventItem(0)
-		m.itemPreviewPopup.SetActiveItem(nil)
-		m.itemPreviewPopup.Hide()
-		m.inventory.SetMode(ui.DefaultMode)
-	}
-	// TODO: ItemPreviewPopup is not standarized as the other Popups
-	if m.itemPreviewPopup.ActionPressed() {
-		if !m.gameState.ExecutingItemCommands() && !m.gameState.Map().IsBlockingEventExecuting() {
-			activeItemID := m.gameState.Items().ActiveItem()
-			if m.inventory.CombineItemID() != 0 {
-				combine := sceneManager.Game().CreateCombine(activeItemID, m.inventory.CombineItemID())
-				m.gameState.StartCombineCommands(combine)
-			} else {
-				m.gameState.StartItemCommands(activeItemID)
-			}
-		}
-	}
 }
 
 func (m *MapScene) Update(sceneManager *scene.Manager) error {

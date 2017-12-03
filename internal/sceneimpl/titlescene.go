@@ -44,6 +44,7 @@ type TitleScene struct {
 	quitNoButton     *ui.Button
 	waitingRequestID int
 	initialized      bool
+	err              error
 }
 
 func NewTitleScene() *TitleScene {
@@ -76,9 +77,51 @@ func (t *TitleScene) initUI(sceneManager *scene.Manager) {
 	t.quitDialog.AddChild(t.quitLabel)
 	t.quitDialog.AddChild(t.quitYesButton)
 	t.quitDialog.AddChild(t.quitNoButton)
+
+	t.warningYesButton.SetOnPressed(func(_ *ui.Button) {
+		audio.StopBGM()
+		sceneManager.GoToWithFading(NewMapScene(), 60)
+	})
+	t.warningNoButton.SetOnPressed(func(_ *ui.Button) {
+		t.warningDialog.Hide()
+	})
+	t.quitYesButton.SetOnPressed(func(_ *ui.Button) {
+		sceneManager.Requester().RequestTerminateGame()
+	})
+	t.quitNoButton.SetOnPressed(func(_ *ui.Button) {
+		t.quitDialog.Hide()
+	})
+	t.newGameButton.SetOnPressed(func(_ *ui.Button) {
+		if sceneManager.HasProgress() {
+			t.warningDialog.Show()
+		} else {
+			audio.StopBGM()
+			sceneManager.GoToWithFading(NewMapScene(), 60)
+		}
+	})
+	t.resumeGameButton.SetOnPressed(func(_ *ui.Button) {
+		var game *gamestate.Game
+		if err := msgpack.Unmarshal(sceneManager.Progress(), &game); err != nil {
+			t.err = err
+			return
+		}
+		audio.StopBGM()
+		sceneManager.GoToWithFading(NewMapSceneWithGame(game), 60)
+	})
+	t.settingsButton.SetOnPressed(func(_ *ui.Button) {
+		audio.StopBGM()
+		sceneManager.GoTo(NewSettingsScene())
+	})
+	t.moregamesButton.SetOnPressed(func(_ *ui.Button) {
+		t.waitingRequestID = sceneManager.GenerateRequestID()
+		sceneManager.Requester().RequestOpenLink(t.waitingRequestID, "more", "")
+	})
 }
 
 func (t *TitleScene) Update(sceneManager *scene.Manager) error {
+	if t.err != nil {
+		return t.err
+	}
 	if !t.initialized {
 		t.initUI(sceneManager)
 		t.initialized = true
@@ -124,65 +167,12 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 	}
 
 	t.warningDialog.Update()
+	t.quitDialog.Update()
 	if !t.warningDialog.Visible() && !t.quitDialog.Visible() {
 		t.newGameButton.Update()
 		t.resumeGameButton.Update()
 		t.settingsButton.Update()
 		t.moregamesButton.Update()
-	}
-	if t.warningYesButton.Pressed() {
-		audio.StopBGM()
-		sceneManager.GoToWithFading(NewMapScene(), 60)
-		return nil
-	}
-	if t.warningNoButton.Pressed() {
-		t.warningDialog.Hide()
-		return nil
-	}
-	if t.warningDialog.Visible() {
-		return nil
-	}
-
-	t.quitDialog.Update()
-	if t.quitYesButton.Pressed() {
-		sceneManager.Requester().RequestTerminateGame()
-		return nil
-	}
-	if t.quitNoButton.Pressed() {
-		t.quitDialog.Hide()
-		return nil
-	}
-	if t.quitDialog.Visible() {
-		return nil
-	}
-
-	if t.newGameButton.Pressed() {
-		if sceneManager.HasProgress() {
-			t.warningDialog.Show()
-		} else {
-			audio.StopBGM()
-			sceneManager.GoToWithFading(NewMapScene(), 60)
-		}
-		return nil
-	}
-	if t.resumeGameButton.Pressed() {
-		var game *gamestate.Game
-		if err := msgpack.Unmarshal(sceneManager.Progress(), &game); err != nil {
-			return err
-		}
-		audio.StopBGM()
-		sceneManager.GoToWithFading(NewMapSceneWithGame(game), 60)
-		return nil
-	}
-	if t.settingsButton.Pressed() {
-		audio.StopBGM()
-		sceneManager.GoTo(NewSettingsScene())
-		return nil
-	}
-	if t.moregamesButton.Pressed() {
-		t.waitingRequestID = sceneManager.GenerateRequestID()
-		sceneManager.Requester().RequestOpenLink(t.waitingRequestID, "more", "")
-		return nil
 	}
 	return nil
 }

@@ -40,8 +40,9 @@ type Button struct {
 	DisabledImage *ImagePart
 	dropShadow    bool
 	pressing      bool
-	pressed       bool
 	soundName     string
+
+	onPressed func(button *Button)
 }
 
 func NewButton(x, y, width, height int, soundName string) *Button {
@@ -76,14 +77,8 @@ func (b *Button) SetY(y int) {
 	b.y = y
 }
 
-func (b *Button) Pressed() bool {
-	if !b.Visible {
-		return false
-	}
-	if b.Disabled {
-		return false
-	}
-	return b.pressed
+func (b *Button) SetOnPressed(onPressed func(button *Button)) {
+	b.onPressed = onPressed
 }
 
 func (b *Button) includesInput(offsetX, offsetY int) bool {
@@ -105,7 +100,6 @@ func (b *Button) includesInput(offsetX, offsetY int) bool {
 }
 
 func (b *Button) update(visible bool, offsetX, offsetY int) {
-	b.pressed = false
 	if !visible {
 		return
 	}
@@ -122,8 +116,10 @@ func (b *Button) update(visible bool, offsetX, offsetY int) {
 	}
 	if !input.Pressed() {
 		b.pressing = false
-		b.pressed = true
 		audio.PlaySE(b.soundName, 1.0)
+		if b.onPressed != nil {
+			b.onPressed(b)
+		}
 		return
 	}
 	b.pressing = b.includesInput(offsetX, offsetY)

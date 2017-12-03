@@ -103,18 +103,16 @@ func (i *ItemPreviewPopup) Visible() bool {
 	return i.visible
 }
 
-func (i *ItemPreviewPopup) ClosePressed() bool {
-	if !i.visible {
-		return false
-	}
-	return i.closeButton.Pressed()
+func (i *ItemPreviewPopup) SetOnClosePressed(f func(itemPreviewPopup *ItemPreviewPopup)) {
+	i.closeButton.SetOnPressed(func(_ *Button) {
+		f(i)
+	})
 }
 
-func (i *ItemPreviewPopup) ActionPressed() bool {
-	if !i.visible {
-		return false
-	}
-	return i.actionButton.Pressed()
+func (i *ItemPreviewPopup) SetOnActionPressed(f func(itemPreviewPopup *ItemPreviewPopup)) {
+	i.actionButton.SetOnPressed(func(_ *Button) {
+		f(i)
+	})
 }
 
 func (i *ItemPreviewPopup) SetActiveItem(item *data.Item) {

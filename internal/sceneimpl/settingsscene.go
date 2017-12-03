@@ -45,8 +45,7 @@ type SettingsScene struct {
 }
 
 func NewSettingsScene() *SettingsScene {
-	s := &SettingsScene{}
-	return s
+	return &SettingsScene{}
 }
 
 func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
@@ -76,10 +75,44 @@ func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
 		b.Text = n
 		s.languageDialog.AddChild(b)
 		s.languageButtons = append(s.languageButtons, b)
+		b.SetOnPressed(func(_ *ui.Button) {
+			s.languageDialog.Hide()
+			lang := sceneManager.Game().Texts.Languages()[i]
+			lang = sceneManager.SetLanguage(lang)
+
+			base, _ := lang.Base()
+			s.waitingRequestID = sceneManager.GenerateRequestID()
+			sceneManager.Requester().RequestChangeLanguage(s.waitingRequestID, base.String())
+		})
 	}
 
 	s.creditDialog.AddChild(s.creditLabel)
 	s.creditDialog.AddChild(s.creditCloseButton)
+
+	s.creditCloseButton.SetOnPressed(func(_ *ui.Button) {
+		s.creditDialog.Hide()
+	})
+	s.languageButton.SetOnPressed(func(_ *ui.Button) {
+		s.languageDialog.Show()
+	})
+	s.creditButton.SetOnPressed(func(_ *ui.Button) {
+		s.creditDialog.Show()
+	})
+	s.reviewThisAppButton.SetOnPressed(func(_ *ui.Button) {
+		s.waitingRequestID = sceneManager.GenerateRequestID()
+		sceneManager.Requester().RequestOpenLink(s.waitingRequestID, "review", "")
+	})
+	s.restorePurchasesButton.SetOnPressed(func(_ *ui.Button) {
+		s.waitingRequestID = sceneManager.GenerateRequestID()
+		sceneManager.Requester().RequestRestorePurchases(s.waitingRequestID)
+	})
+	s.moreGamesButton.SetOnPressed(func(_ *ui.Button) {
+		s.waitingRequestID = sceneManager.GenerateRequestID()
+		sceneManager.Requester().RequestOpenLink(s.waitingRequestID, "more", "")
+	})
+	s.closeButton.SetOnPressed(func(_ *ui.Button) {
+		sceneManager.GoTo(NewTitleScene())
+	})
 }
 
 func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
@@ -133,50 +166,6 @@ Powered By
 	s.moreGamesButton.Update()
 	s.closeButton.Update()
 
-	for i, b := range s.languageButtons {
-		// TODO: Button.Pressed() should consider its parents' visibility
-		if s.languageDialog.Visible() && b.Pressed() {
-			s.languageDialog.Hide()
-			lang := sceneManager.Game().Texts.Languages()[i]
-			lang = sceneManager.SetLanguage(lang)
-
-			base, _ := lang.Base()
-			s.waitingRequestID = sceneManager.GenerateRequestID()
-			sceneManager.Requester().RequestChangeLanguage(s.waitingRequestID, base.String())
-			return nil
-		}
-	}
-	if s.creditDialog.Visible() && s.creditCloseButton.Pressed() {
-		s.creditDialog.Hide()
-		return nil
-	}
-	if s.languageButton.Pressed() {
-		s.languageDialog.Show()
-		return nil
-	}
-	if s.creditButton.Pressed() {
-		s.creditDialog.Show()
-		return nil
-	}
-	if s.reviewThisAppButton.Pressed() {
-		s.waitingRequestID = sceneManager.GenerateRequestID()
-		sceneManager.Requester().RequestOpenLink(s.waitingRequestID, "review", "")
-		return nil
-	}
-	if s.restorePurchasesButton.Pressed() {
-		s.waitingRequestID = sceneManager.GenerateRequestID()
-		sceneManager.Requester().RequestRestorePurchases(s.waitingRequestID)
-		return nil
-	}
-	if s.moreGamesButton.Pressed() {
-		s.waitingRequestID = sceneManager.GenerateRequestID()
-		sceneManager.Requester().RequestOpenLink(s.waitingRequestID, "more", "")
-		return nil
-	}
-	if s.closeButton.Pressed() {
-		sceneManager.GoTo(NewTitleScene())
-		return nil
-	}
 	return nil
 }
 

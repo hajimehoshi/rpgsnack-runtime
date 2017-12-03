@@ -37,7 +37,6 @@ type Inventory struct {
 	y                   int
 	visible             bool
 	disabled            bool
-	pressedSlotIndex    int
 	items               []*data.Item
 	activeItemID        int
 	combineItemID       int
@@ -64,6 +63,8 @@ type Inventory struct {
 	activeDot           *ImagePart
 	dot                 *ImagePart
 	mode                InventoryMode
+
+	onSlotPressed func(inventory *Inventory, index int)
 }
 
 const (
@@ -108,41 +109,30 @@ func NewInventory(x, y int) *Inventory {
 	frameBase := NewImageView(x+frameXMargin, y+4, 1.0, NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 0, 168, 128, 24))
 
 	return &Inventory{
-		x:                x,
-		y:                y,
-		visible:          true,
-		pressedSlotIndex: -1,
-		items:            []*data.Item{},
-		activeItemID:     0,
-		combineItemID:    0,
-		infoButton:       infoButton,
-		backButton:       backButton,
-		bgPanel:          bgPanel,
-		frameCover:       frameCover,
-		frameBase:        frameBase,
-		cardSlot:         NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 120, 0, 18, 18),
-		activeCardSlot:   NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 156, 0, 18, 18),
-		combineCardSlot:  NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 138, 0, 18, 18),
-		dot:              NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 120, 24, 8, 8),
-		activeDot:        NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 128, 24, 8, 8),
-		pageIndex:        0,
-		targetPageIndex:  0,
-		mode:             DefaultMode,
+		x:               x,
+		y:               y,
+		visible:         true,
+		items:           []*data.Item{},
+		activeItemID:    0,
+		combineItemID:   0,
+		infoButton:      infoButton,
+		backButton:      backButton,
+		bgPanel:         bgPanel,
+		frameCover:      frameCover,
+		frameBase:       frameBase,
+		cardSlot:        NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 120, 0, 18, 18),
+		activeCardSlot:  NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 156, 0, 18, 18),
+		combineCardSlot: NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 138, 0, 18, 18),
+		dot:             NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 120, 24, 8, 8),
+		activeDot:       NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 128, 24, 8, 8),
+		pageIndex:       0,
+		targetPageIndex: 0,
+		mode:            DefaultMode,
 	}
 }
 
-func (i *Inventory) SlotPressed() bool {
-	return i.PressedSlotIndex() != -1
-}
-
-func (i *Inventory) PressedSlotIndex() int {
-	if !i.visible {
-		return -1
-	}
-	if i.disabled {
-		return -1
-	}
-	return i.pressedSlotIndex
+func (i *Inventory) SetOnSlotPressed(f func(inventory *Inventory, index int)) {
+	i.onSlotPressed = f
 }
 
 func (i *Inventory) Show() {
@@ -180,30 +170,16 @@ func (i *Inventory) slotCount() int {
 	return i.pageCount() * itemPerPageCount
 }
 
-func (i *Inventory) ActiveItemPressed() bool {
-	if !i.visible {
-		return false
-	}
-	if i.disabled {
-		return false
-	}
-	if i.mode != DefaultMode {
-		return false
-	}
-	return i.infoButton.Pressed()
+func (i *Inventory) SetOnActiveItemPressed(f func(inventory *Inventory)) {
+	i.infoButton.SetOnPressed(func(_ *Button) {
+		f(i)
+	})
 }
 
-func (i *Inventory) BackPressed() bool {
-	if !i.visible {
-		return false
-	}
-	if i.disabled {
-		return false
-	}
-	if i.mode != PreviewMode {
-		return false
-	}
-	return i.backButton.Pressed()
+func (i *Inventory) SetOnBackPressed(f func(inventory *Inventory)) {
+	i.backButton.SetOnPressed(func(_ *Button) {
+		f(i)
+	})
 }
 
 func (i *Inventory) calcScrollX(pageIndex int) int {
@@ -226,7 +202,6 @@ func (i *Inventory) Update() {
 	}
 
 	touchX, touchY := input.Position()
-	i.pressedSlotIndex = -1
 	if input.Triggered() && i.isTouchingScroll() {
 		i.pressStartX = touchX
 		i.pressStartY = touchY
@@ -246,7 +221,9 @@ func (i *Inventory) Update() {
 		if !i.scrolling && i.isTouchingScroll() {
 			index := i.slotIndexAt(touchX-(i.x*consts.TileScale+i.scrollX+i.dragX), touchY)
 			if i.pressStartIndex == index && index >= 0 && index < len(i.items) {
-				i.pressedSlotIndex = index
+				if i.onSlotPressed != nil {
+					i.onSlotPressed(i, index)
+				}
 				if i.activeItemID > 0 {
 					if i.combineItemID == i.items[index].ID {
 						i.combineItemID = 0
