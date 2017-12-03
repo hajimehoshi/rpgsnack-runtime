@@ -201,22 +201,7 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 		}
 	})
 	m.inventory.SetOnActiveItemPressed(func(_ *ui.Inventory) {
-		activeItemID := m.gameState.Items().ActiveItem()
-		m.gameState.Items().SetEventItem(activeItemID)
-		if activeItemID > 0 {
-			m.inventory.SetActiveItemID(activeItemID)
-			m.inventory.SetMode(ui.PreviewMode)
-			var eventItem *data.Item
-			for _, item := range sceneManager.Game().Items {
-				if item.ID == activeItemID {
-					eventItem = item
-					break
-				}
-			}
-
-			m.itemPreviewPopup.SetActiveItem(eventItem)
-			m.itemPreviewPopup.Show()
-		}
+		m.showItemPreviewPopup(sceneManager, m.gameState.Items().ActiveItem())
 	})
 	m.itemPreviewPopup.SetOnClosePressed(func(_ *ui.ItemPreviewPopup) {
 		m.gameState.Items().SetEventItem(0)
@@ -242,6 +227,25 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 			}
 		}
 	})
+}
+
+func (m *MapScene) showItemPreviewPopup(sceneManager *scene.Manager, itemID int) {
+	m.gameState.Items().SetEventItem(itemID)
+	if itemID <= 0 {
+		return
+	}
+	m.inventory.SetActiveItemID(itemID)
+	m.inventory.SetMode(ui.PreviewMode)
+	var eventItem *data.Item
+	for _, item := range sceneManager.Game().Items {
+		if item.ID == itemID {
+			eventItem = item
+			break
+		}
+	}
+
+	m.itemPreviewPopup.SetActiveItem(eventItem)
+	m.itemPreviewPopup.Show()
 }
 
 func (m *MapScene) updatePurchasesState(sceneManager *scene.Manager) {
@@ -413,6 +417,10 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 		return err
 	}
 	m.runEventIfNeeded(sceneManager)
+
+	if m.gameState.Items().EventItem() != 0 {
+		m.showItemPreviewPopup(sceneManager, m.gameState.Items().EventItem())
+	}
 	return nil
 }
 
