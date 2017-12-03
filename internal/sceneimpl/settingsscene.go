@@ -126,17 +126,16 @@ Powered By
 
 	s.languageDialog.Update()
 	s.creditDialog.Update()
-	if !s.languageDialog.Visible() && !s.creditDialog.Visible() {
-		s.languageButton.Update()
-		s.creditButton.Update()
-		s.reviewThisAppButton.Update()
-		s.restorePurchasesButton.Update()
-		s.moreGamesButton.Update()
-		s.closeButton.Update()
-	}
+	s.languageButton.Update()
+	s.creditButton.Update()
+	s.reviewThisAppButton.Update()
+	s.restorePurchasesButton.Update()
+	s.moreGamesButton.Update()
+	s.closeButton.Update()
 
 	for i, b := range s.languageButtons {
-		if b.Pressed() {
+		// TODO: Button.Pressed() should consider its parents' visibility
+		if s.languageDialog.Visible() && b.Pressed() {
 			s.languageDialog.Hide()
 			lang := sceneManager.Game().Texts.Languages()[i]
 			lang = sceneManager.SetLanguage(lang)
@@ -147,7 +146,7 @@ Powered By
 			return nil
 		}
 	}
-	if s.creditCloseButton.Pressed() {
+	if s.creditDialog.Visible() && s.creditCloseButton.Pressed() {
 		s.creditDialog.Hide()
 		return nil
 	}
