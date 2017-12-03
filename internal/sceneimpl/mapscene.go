@@ -513,8 +513,6 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 
 	m.uiImage.Clear()
 
-	m.gameState.DrawWindows(m.uiImage, 0, m.offsetY)
-
 	m.itemPreviewPopup.Draw(m.uiImage)
 	m.inventory.Draw(m.uiImage)
 
@@ -526,6 +524,8 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	m.quitDialog.Draw(m.uiImage)
 	m.storeErrorDialog.Draw(m.uiImage)
 	m.removeAdsDialog.Draw(m.uiImage)
+
+	m.gameState.DrawWindows(m.uiImage, 0, m.offsetY)
 
 	op = &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(m.offsetX), 0)
