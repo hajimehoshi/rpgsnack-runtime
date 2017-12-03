@@ -108,15 +108,13 @@ func (i *Items) SetEventItem(id int) {
 }
 
 func (i *Items) Items(dataItems []*data.Item) []*data.Item {
-	ids := map[int]struct{}{}
-	for _, id := range i.items {
-		ids[id] = struct{}{}
+	idToItem := map[int]*data.Item{}
+	for _, i := range dataItems {
+		idToItem[i.ID] = i
 	}
 	is := []*data.Item{}
-	for _, i := range dataItems {
-		if _, ok := ids[i.ID]; ok {
-			is = append(is, i)
-		}
+	for _, id := range i.items {
+		is = append(is, idToItem[id])
 	}
 	return is
 }
