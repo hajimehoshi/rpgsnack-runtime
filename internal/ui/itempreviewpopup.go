@@ -15,15 +15,12 @@
 package ui
 
 import (
-	"image/color"
-
 	"github.com/hajimehoshi/ebiten"
 	"golang.org/x/text/language"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/font"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/texts"
 )
 
@@ -42,7 +39,6 @@ type ItemPreviewPopup struct {
 	closeButton     *Button
 	previewButton   *Button
 	actionButton    *Button
-	desc            string
 }
 
 func NewItemPreviewPopup(x, y int) *ItemPreviewPopup {
@@ -121,10 +117,9 @@ func (i *ItemPreviewPopup) ActionPressed() bool {
 	return i.actionButton.Pressed()
 }
 
-func (i *ItemPreviewPopup) SetActiveItem(item *data.Item, desc string) {
+func (i *ItemPreviewPopup) SetActiveItem(item *data.Item) {
 	if i.item != item {
 		i.item = item
-		i.desc = desc
 		i.combineItem = nil
 		i.combine = nil
 	}
@@ -143,7 +138,7 @@ func (i *ItemPreviewPopup) drawItem(screen *ebiten.Image, x, y float64, icon str
 
 	if i.item.Icon != "" {
 		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(x/consts.TileScale, y/consts.TileScale)
+		op.GeoM.Translate((x+3)/consts.TileScale, (y+3)/consts.TileScale)
 		op.GeoM.Scale(consts.TileScale*3, consts.TileScale*3)
 		screen.DrawImage(assets.GetIconImage(icon+".png"), op)
 	}
@@ -170,16 +165,12 @@ func (i *ItemPreviewPopup) Draw(screen *ebiten.Image) {
 	screen.DrawImage(i.frameImage, op)
 
 	op = &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(12, 65)
-	op.GeoM.Scale(consts.TileScale, consts.TileScale)
-	screen.DrawImage(i.bgBoxImage, op)
 
-	i.drawItem(screen, 16, 70, i.item.Icon)
 	if i.combineItem != nil && i.combineItem.ID != i.item.ID {
-		i.drawItem(screen, 92, 70, i.combineItem.Icon)
+		i.drawItem(screen, 16, 64, i.item.Icon)
+		i.drawItem(screen, 88, 64, i.combineItem.Icon)
 	} else {
-		font.DrawText(screen, i.desc, 68*consts.TileScale+consts.TextScale, 72*consts.TileScale+consts.TextScale, consts.TextScale, data.TextAlignLeft, color.Black)
-		font.DrawText(screen, i.desc, 68*consts.TileScale, 72*consts.TileScale, consts.TextScale, data.TextAlignLeft, color.White)
+		i.drawItem(screen, 54, 64, i.item.Icon)
 	}
 
 	for _, n := range i.nodes {

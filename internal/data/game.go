@@ -64,7 +64,6 @@ type Item struct {
 	ID       int        `json:"id"`
 	Name     uuid.UUID  `json:"name"`
 	Icon     string     `json:"icon"`
-	Desc     uuid.UUID  `json:"desc"`
 	Commands []*Command `json:"commands"`
 }
 

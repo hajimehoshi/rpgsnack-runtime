@@ -348,13 +348,13 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 				}
 			}
 
-			m.itemPreviewPopup.SetActiveItem(eventItem, sceneManager.Game().Texts.Get(sceneManager.Language(), eventItem.Desc))
+			m.itemPreviewPopup.SetActiveItem(eventItem)
 			m.itemPreviewPopup.Show()
 		}
 	}
 	if m.itemPreviewPopup.ClosePressed() || m.inventory.BackPressed() {
 		m.gameState.Items().SetEventItem(0)
-		m.itemPreviewPopup.SetActiveItem(nil, "")
+		m.itemPreviewPopup.SetActiveItem(nil)
 		m.itemPreviewPopup.Hide()
 		m.inventory.SetMode(ui.DefaultMode)
 	}
