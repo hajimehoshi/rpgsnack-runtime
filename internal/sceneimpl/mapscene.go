@@ -246,7 +246,6 @@ func (m *MapScene) updateItemPreviewPopupVisibility(sceneManager *scene.Manager)
 		m.itemPreviewPopup.SetActiveItem(eventItem)
 		m.itemPreviewPopup.Show()
 	} else {
-		m.gameState.Items().SetEventItem(0)
 		m.itemPreviewPopup.SetActiveItem(nil)
 		m.itemPreviewPopup.Hide()
 		m.inventory.SetMode(ui.DefaultMode)
