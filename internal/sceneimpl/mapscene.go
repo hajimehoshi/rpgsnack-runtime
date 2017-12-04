@@ -175,42 +175,39 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	})
 
 	m.inventory.SetOnSlotPressed(func(_ *ui.Inventory, index int) {
-		if index < m.gameState.Items().ItemNum() {
-			activeItemID := m.gameState.Items().ActiveItem()
-			itemID := m.gameState.Items().ItemIDAt(index)
-			switch m.inventory.Mode() {
-			case ui.DefaultMode:
-				if itemID == m.gameState.Items().ActiveItem() {
-					m.gameState.Items().Deactivate()
-				} else {
-					m.gameState.Items().Activate(itemID)
-				}
-			case ui.PreviewMode:
-				var combineItem *data.Item
-				for _, item := range sceneManager.Game().Items {
-					if m.inventory.CombineItemID() == item.ID {
-						combineItem = item
-						break
-					}
-				}
-
-				m.itemPreviewPopup.SetCombineItem(combineItem, sceneManager.Game().CreateCombine(activeItemID, m.inventory.CombineItemID()))
-			default:
-				panic("not reached")
+		if index >= m.gameState.Items().ItemNum() {
+			return
+		}
+		activeItemID := m.gameState.Items().ActiveItem()
+		itemID := m.gameState.Items().ItemIDAt(index)
+		switch m.inventory.Mode() {
+		case ui.DefaultMode:
+			if itemID == m.gameState.Items().ActiveItem() {
+				m.gameState.Items().Deactivate()
+			} else {
+				m.gameState.Items().Activate(itemID)
 			}
+		case ui.PreviewMode:
+			var combineItem *data.Item
+			for _, item := range sceneManager.Game().Items {
+				if m.inventory.CombineItemID() == item.ID {
+					combineItem = item
+					break
+				}
+			}
+			m.itemPreviewPopup.SetCombineItem(combineItem, sceneManager.Game().CreateCombine(activeItemID, m.inventory.CombineItemID()))
+		default:
+			panic("not reached")
 		}
 	})
 	m.inventory.SetOnActiveItemPressed(func(_ *ui.Inventory) {
 		m.gameState.Items().SetEventItem(m.gameState.Items().ActiveItem())
-		m.updateItemPreviewPopupVisibility(sceneManager)
 	})
 	m.itemPreviewPopup.SetOnClosePressed(func(_ *ui.ItemPreviewPopup) {
 		m.gameState.Items().SetEventItem(0)
-		m.updateItemPreviewPopupVisibility(sceneManager)
 	})
 	m.inventory.SetOnBackPressed(func(_ *ui.Inventory) {
 		m.gameState.Items().SetEventItem(0)
-		m.updateItemPreviewPopupVisibility(sceneManager)
 	})
 	// TODO: ItemPreviewPopup is not standarized as the other Popups
 	m.itemPreviewPopup.SetOnActionPressed(func(_ *ui.ItemPreviewPopup) {
