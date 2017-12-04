@@ -214,14 +214,18 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	})
 	// TODO: ItemPreviewPopup is not standarized as the other Popups
 	m.itemPreviewPopup.SetOnActionPressed(func(_ *ui.ItemPreviewPopup) {
-		if !m.gameState.ExecutingItemCommands() && !m.gameState.Map().IsBlockingEventExecuting() {
-			activeItemID := m.gameState.Items().ActiveItem()
-			if m.inventory.CombineItemID() != 0 {
-				combine := sceneManager.Game().CreateCombine(activeItemID, m.inventory.CombineItemID())
-				m.gameState.StartCombineCommands(combine)
-			} else {
-				m.gameState.StartItemCommands(activeItemID)
-			}
+		if m.gameState.ExecutingItemCommands() {
+			return
+		}
+		if m.gameState.Map().IsBlockingEventExecuting() {
+			return
+		}
+		activeItemID := m.gameState.Items().ActiveItem()
+		if m.inventory.CombineItemID() != 0 {
+			combine := sceneManager.Game().CreateCombine(activeItemID, m.inventory.CombineItemID())
+			m.gameState.StartCombineCommands(combine)
+		} else {
+			m.gameState.StartItemCommands(activeItemID)
 		}
 	})
 }
