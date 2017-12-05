@@ -997,14 +997,14 @@ func (m *Map) DrawCharacters(screen *ebiten.Image, priority data.Priority, offse
 		}
 		chars = append(chars, e)
 	}
+	if priority == data.PriorityMiddle {
+		chars = append(chars, m.player)
+	}
 	sort.Slice(chars, func(i, j int) bool {
 		_, yi := chars[i].Position()
 		_, yj := chars[j].Position()
 		return yi < yj
 	})
-	if priority == data.PriorityMiddle {
-		chars = append(chars, m.player)
-	}
 	for _, c := range chars {
 		c.Draw(screen, offsetX, offsetY)
 	}
