@@ -70,6 +70,7 @@ func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
 	s.creditCloseButton = ui.NewButton((152-120)/2, 204, 120, 20, "cancel")
 
 	for i, l := range sceneManager.Game().Texts.Languages() {
+		i := i // i is captured by the below closure and it is needed to copy here.
 		n := display.Self.Name(l)
 		b := ui.NewButton((152-120)/2, 8+i*buttonDeltaY, 120, 20, "click")
 		b.Text = n
@@ -159,12 +160,14 @@ Powered By
 
 	s.languageDialog.Update()
 	s.creditDialog.Update()
-	s.languageButton.Update()
-	s.creditButton.Update()
-	s.reviewThisAppButton.Update()
-	s.restorePurchasesButton.Update()
-	s.moreGamesButton.Update()
-	s.closeButton.Update()
+	if !s.languageDialog.Visible() && !s.creditDialog.Visible() {
+		s.languageButton.Update()
+		s.creditButton.Update()
+		s.reviewThisAppButton.Update()
+		s.restorePurchasesButton.Update()
+		s.moreGamesButton.Update()
+		s.closeButton.Update()
+	}
 
 	return nil
 }
