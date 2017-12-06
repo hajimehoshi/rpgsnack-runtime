@@ -449,6 +449,37 @@ func (m *MapScene) handleBackButton() {
 	m.quitDialog.Show()
 }
 
+func (m *MapScene) drawTileLayer(layer int, priority data.Priority) {
+	op := &ebiten.DrawImageOptions{}
+	room := m.gameState.Map().CurrentRoom()
+	if tileSet := m.gameState.Map().TileSet(layer); tileSet != nil {
+		tileSetImg := assets.GetImage("tilesets/" + tileSet.Name + ".png")
+		for j := 0; j < consts.TileYNum; j++ {
+			for i := 0; i < consts.TileXNum; i++ {
+				tile := room.Tiles[layer][j*consts.TileXNum+i]
+				if layer == 1 {
+					p := tileSet.PassageTypes[tile]
+					if priority != data.PriorityTop && p == data.PassageTypeOver {
+						continue
+					}
+					if priority == data.PriorityTop && p != data.PassageTypeOver {
+						continue
+					}
+				}
+				sx := tile % consts.PaletteWidth * consts.TileSize
+				sy := tile / consts.PaletteWidth * consts.TileSize
+				r := image.Rect(sx, sy, sx+consts.TileSize, sy+consts.TileSize)
+				op.SourceRect = &r
+				dx := i * consts.TileSize
+				dy := j*consts.TileSize + m.offsetY/consts.TileScale
+				op.GeoM.Reset()
+				op.GeoM.Translate(float64(dx), float64(dy))
+				m.tilesImage.DrawImage(tileSetImg, op)
+			}
+		}
+	}
+}
+
 func (m *MapScene) Draw(screen *ebiten.Image) {
 	if !m.initialized {
 		return
@@ -461,37 +492,10 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	if room.Background.Name != "" {
 		m.gameState.Map().DrawFullscreenImage(m.tilesImage, assets.GetImage("backgrounds/"+room.Background.Name+".png"), 0, m.offsetY/consts.TileScale)
 	}
-	op := &ebiten.DrawImageOptions{}
 	for k := 0; k < 3; k++ {
 		layer := 0
 		if k >= 1 {
 			layer = 1
-		}
-		if tileSet := m.gameState.Map().TileSet(layer); tileSet != nil {
-			tileSetImg := assets.GetImage("tilesets/" + tileSet.Name + ".png")
-			for j := 0; j < consts.TileYNum; j++ {
-				for i := 0; i < consts.TileXNum; i++ {
-					tile := room.Tiles[layer][j*consts.TileXNum+i]
-					if layer == 1 {
-						p := tileSet.PassageTypes[tile]
-						if k == 1 && p == data.PassageTypeOver {
-							continue
-						}
-						if k == 2 && p != data.PassageTypeOver {
-							continue
-						}
-					}
-					sx := tile % consts.PaletteWidth * consts.TileSize
-					sy := tile / consts.PaletteWidth * consts.TileSize
-					r := image.Rect(sx, sy, sx+consts.TileSize, sy+consts.TileSize)
-					op.SourceRect = &r
-					dx := i * consts.TileSize
-					dy := j*consts.TileSize + m.offsetY/consts.TileScale
-					op.GeoM.Reset()
-					op.GeoM.Translate(float64(dx), float64(dy))
-					m.tilesImage.DrawImage(tileSetImg, op)
-				}
-			}
 		}
 		var p data.Priority
 		switch k {
@@ -504,13 +508,14 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		default:
 			panic("not reached")
 		}
+		m.drawTileLayer(layer, p)
 		m.gameState.Map().DrawCharacters(m.tilesImage, p, 0, m.offsetY/consts.TileScale)
 	}
 	if room.Foreground.Name != "" {
 		m.gameState.Map().DrawFullscreenImage(m.tilesImage, assets.GetImage("foregrounds/"+room.Foreground.Name+".png"), 0, m.offsetY/consts.TileScale)
 	}
 
-	op = &ebiten.DrawImageOptions{}
+	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(consts.TileScale, consts.TileScale)
 	op.GeoM.Translate(float64(m.offsetX), 0)
 	m.gameState.DrawScreen(screen, m.tilesImage, op)
