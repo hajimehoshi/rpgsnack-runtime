@@ -250,6 +250,9 @@ func (m *Map) IsBlockingEventExecuting() bool {
 			return true
 		}
 	}
+	if m.ExecutingItemCommands() {
+		return true
+	}
 	return false
 }
 
