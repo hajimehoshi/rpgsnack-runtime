@@ -455,22 +455,31 @@ func (m *MapScene) handleBackButton() {
 func (m *MapScene) drawTileLayer(layer int, priority data.Priority) {
 	op := &ebiten.DrawImageOptions{}
 	room := m.gameState.Map().CurrentRoom()
-	if tileSet := m.gameState.Map().TileSet(layer); tileSet != nil {
-		tileSetImg := assets.GetImage("tilesets/" + tileSet.Name + ".png")
-		for j := 0; j < consts.TileYNum; j++ {
-			for i := 0; i < consts.TileXNum; i++ {
-				tile := room.Tiles[layer][j*consts.TileXNum+i]
-				if layer == 1 {
-					p := tileSet.PassageTypes[tile]
-					if priority != data.PriorityTop && p == data.PassageTypeOver {
-						continue
-					}
-					if priority == data.PriorityTop && p != data.PassageTypeOver {
-						continue
-					}
+	// tile ID is consist of three section
+	// [8bit - x][8bit - y][15bit - image id]
+	const yOffset = 15
+	const xOffset = 23
+	imgIdMask := (1 << yOffset) - 1
+	yMask := (1 << xOffset) - 1 - imgIdMask
+
+	for j := 0; j < consts.TileYNum; j++ {
+		for i := 0; i < consts.TileXNum; i++ {
+			tileIndex := j*consts.TileXNum + i
+			tile := room.Tiles[layer][tileIndex]
+			passageOverrideType := room.PassageTypeOverrides[tileIndex]
+			if layer == 2 || layer == 3 {
+				if passageOverrideType == data.PassageTypeOver && priority != data.PriorityTop {
+					continue
 				}
-				sx := tile % consts.PaletteWidth * consts.TileSize
-				sy := tile / consts.PaletteWidth * consts.TileSize
+				if passageOverrideType != data.PassageTypeOver && priority == data.PriorityTop {
+					continue
+				}
+			}
+			imageID := tile & imgIdMask
+			tileSetImg := m.gameState.Map().FindImage(imageID)
+			if tileSetImg != nil {
+				sx := (tile >> xOffset) * consts.TileSize
+				sy := ((tile & yMask) >> yOffset) * consts.TileSize
 				r := image.Rect(sx, sy, sx+consts.TileSize, sy+consts.TileSize)
 				op.SourceRect = &r
 				dx := i * consts.TileSize
@@ -480,6 +489,16 @@ func (m *MapScene) drawTileLayer(layer int, priority data.Priority) {
 				m.tilesImage.DrawImage(tileSetImg, op)
 			}
 		}
+	}
+}
+
+func (m *MapScene) drawTiles(priority data.Priority) {
+	if priority == data.PriorityBottom {
+		m.drawTileLayer(0, priority)
+		m.drawTileLayer(1, priority)
+	} else {
+		m.drawTileLayer(2, priority)
+		m.drawTileLayer(3, priority)
 	}
 }
 
@@ -496,10 +515,6 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		m.gameState.Map().DrawFullscreenImage(m.tilesImage, assets.GetImage("backgrounds/"+room.Background.Name+".png"), 0, m.offsetY/consts.TileScale)
 	}
 	for k := 0; k < 3; k++ {
-		layer := 0
-		if k >= 1 {
-			layer = 1
-		}
 		var p data.Priority
 		switch k {
 		case 0:
@@ -511,7 +526,8 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		default:
 			panic("not reached")
 		}
-		m.drawTileLayer(layer, p)
+
+		m.drawTiles(p)
 		m.gameState.Map().DrawCharacters(m.tilesImage, p, 0, m.offsetY/consts.TileScale)
 	}
 	if room.Foreground.Name != "" {

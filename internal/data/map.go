@@ -14,14 +14,6 @@
 
 package data
 
-type PassageOverrideType int
-
-const (
-	PassageOverrideTypeNone PassageOverrideType = iota
-	PassageOverrideTypePassable
-	PassageOverrideTypeBlock
-)
-
 type Map struct {
 	ID    int     `json:"id"`
 	Name  string  `json:"name"`
@@ -29,17 +21,16 @@ type Map struct {
 }
 
 type Room struct {
-	ID                   int                   `json:"id"`
-	X                    int                   `json:"x"`
-	Y                    int                   `json:"y"`
-	Tiles                [][]int               `json:"tiles"`
-	TileSets             []string              `json:"tileSets"`
-	Events               []*Event              `json:"events"`
-	Background           MapSprite             `json:"background"`
-	Foreground           MapSprite             `json:"foreground"`
-	PassageTypeOverrides []PassageOverrideType `json:"passageTypeOverrides"`
-	AutoBGM              bool                  `json:"autoBGM"`
-	BGM                  BGM                   `json:"bgm"`
+	ID                   int           `json:"id"`
+	X                    int           `json:"x"`
+	Y                    int           `json:"y"`
+	Tiles                [][]int       `json:"tiles"`
+	Events               []*Event      `json:"events"`
+	Background           MapSprite     `json:"background"`
+	Foreground           MapSprite     `json:"foreground"`
+	PassageTypeOverrides []PassageType `json:"passageTypeOverrides"`
+	AutoBGM              bool          `json:"autoBGM"`
+	BGM                  BGM           `json:"bgm"`
 }
 
 type MapSprite struct {

@@ -60,7 +60,9 @@ func loadAssets(projectPath string) ([]uint8, error) {
 		filepath.Join("images", "items", "preview"),
 		filepath.Join("images", "pictures"),
 		filepath.Join("images", "system"),
-		filepath.Join("images", "tilesets"),
+		filepath.Join("images", "tilesets", "backgrounds"),
+		filepath.Join("images", "tilesets", "decorations"),
+		filepath.Join("images", "tilesets", "objects"),
 		filepath.Join("images", "titles"),
 	}
 	for _, dir := range dirs {

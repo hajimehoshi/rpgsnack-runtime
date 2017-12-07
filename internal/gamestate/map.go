@@ -22,6 +22,7 @@ import (
 	"github.com/hajimehoshi/ebiten"
 	"github.com/vmihailenco/msgpack"
 
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
@@ -202,17 +203,6 @@ func (m *Map) waitingRequestResponse() bool {
 	return false
 }
 
-func (m *Map) TileSet(layer int) *data.TileSet {
-	tileSetName := m.CurrentRoom().TileSets[layer]
-	for _, t := range m.gameData.TileSets {
-		if t.Name == tileSetName {
-			return t
-		}
-	}
-
-	return nil
-}
-
 func (m *Map) setRoomID(gameState *Game, id int, interpreter *Interpreter) error {
 	m.roomID = id
 	m.events = nil
@@ -323,6 +313,15 @@ func (m *Map) removeRoutes(eventID int) {
 	for _, id := range ids {
 		delete(m.interpreters, id)
 	}
+}
+
+func (m *Map) FindImage(imageID int) *ebiten.Image {
+	for _, tileSetItem := range m.gameData.TileSets {
+		if tileSetItem.ID == imageID {
+			return assets.GetImage(tileSetItem.Name + ".png")
+		}
+	}
+	return nil
 }
 
 func (m *Map) Update(sceneManager *scene.Manager, gameState *Game) error {
@@ -516,36 +515,13 @@ func (m *Map) passableTile(x, y int) bool {
 	passageTypeOverrides := m.CurrentRoom().PassageTypeOverrides
 	if passageTypeOverrides != nil {
 		switch passageTypeOverrides[tileIndex] {
-		case data.PassageOverrideTypePassable:
+		case data.PassageTypeOver:
 			return true
-		case data.PassageOverrideTypeBlock:
-			return false
-		}
-	}
-
-	layer := 1
-	tileSetTop := m.TileSet(layer)
-	if tileSetTop != nil {
-		tile := m.CurrentRoom().Tiles[layer][tileIndex]
-		switch tileSetTop.PassageTypes[tile] {
 		case data.PassageTypeBlock:
 			return false
-		case data.PassageTypePassable:
-			return true
-		case data.PassageTypeOver:
-		default:
-			panic("not reach")
 		}
 	}
 
-	layer = 0
-	tileSetBottom := m.TileSet(layer)
-	if tileSetBottom != nil {
-		tile := m.CurrentRoom().Tiles[layer][tileIndex]
-		if tileSetBottom.PassageTypes[tile] == data.PassageTypeBlock {
-			return false
-		}
-	}
 	return true
 }
 

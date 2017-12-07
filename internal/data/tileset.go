@@ -18,11 +18,11 @@ type PassageType int
 
 const (
 	PassageTypePassable PassageType = iota
-	PassageTypeBlock
 	PassageTypeOver
+	PassageTypeBlock
 )
 
 type TileSet struct {
-	Name         string        `json:"name"`
-	PassageTypes []PassageType `json:"passageTypes"`
+	ID   int    `json:"id"`
+	Name string `json:"name"`
 }
