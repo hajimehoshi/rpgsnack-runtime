@@ -195,7 +195,8 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 					break
 				}
 			}
-			m.itemPreviewPopup.SetCombineItem(combineItem, sceneManager.Game().CreateCombine(activeItemID, m.inventory.CombineItemID()))
+			c := sceneManager.Game().CreateCombine(activeItemID, m.inventory.CombineItemID())
+			m.itemPreviewPopup.SetCombineItem(combineItem, c)
 		default:
 			panic("not reached")
 		}
@@ -378,10 +379,7 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 	m.inventory.SetActiveItemID(m.gameState.Items().ActiveItem())
 	m.inventory.Update()
 	m.itemPreviewPopup.Update(l)
-	m.itemPreviewPopup.SetActionEnabled(true)
-	if m.gameState.Map().IsBlockingEventExecuting() {
-		m.itemPreviewPopup.SetActionEnabled(false)
-	}
+	m.itemPreviewPopup.SetActionEnabled(!m.gameState.Map().IsBlockingEventExecuting())
 
 	// Event handling
 	m.updateItemPreviewPopupVisibility(sceneManager)
