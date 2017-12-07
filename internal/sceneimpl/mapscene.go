@@ -188,15 +188,19 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 				m.gameState.Items().Activate(itemID)
 			}
 		case ui.PreviewMode:
-			var combineItem *data.Item
-			for _, item := range sceneManager.Game().Items {
-				if m.inventory.CombineItemID() == item.ID {
-					combineItem = item
+			var item *data.Item
+			for _, i := range sceneManager.Game().Items {
+				if i.ID == itemID {
+					item = i
 					break
 				}
 			}
-			c := sceneManager.Game().CreateCombine(activeItemID, m.inventory.CombineItemID())
-			m.itemPreviewPopup.SetCombineItem(combineItem, c)
+			if m.inventory.CombineItemID() != item.ID {
+				c := sceneManager.Game().CreateCombine(activeItemID, item.ID)
+				m.itemPreviewPopup.SetCombineItem(item, c)
+			} else {
+				m.itemPreviewPopup.SetCombineItem(nil, nil)
+			}
 		default:
 			panic("not reached")
 		}
