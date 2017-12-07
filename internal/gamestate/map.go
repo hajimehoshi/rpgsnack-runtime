@@ -250,7 +250,7 @@ func (m *Map) IsBlockingEventExecuting() bool {
 			return true
 		}
 	}
-	if m.ExecutingItemCommands() {
+	if m.itemInterpreter != nil && m.itemInterpreter.IsExecuting() {
 		return true
 	}
 	return false
@@ -323,10 +323,6 @@ func (m *Map) removeRoutes(eventID int) {
 	for _, id := range ids {
 		delete(m.interpreters, id)
 	}
-}
-
-func (m *Map) ExecutingItemCommands() bool {
-	return m.itemInterpreter != nil && m.itemInterpreter.IsExecuting()
 }
 
 func (m *Map) Update(sceneManager *scene.Manager, gameState *Game) error {

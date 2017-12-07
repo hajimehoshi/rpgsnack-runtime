@@ -531,10 +531,6 @@ func (g *Game) StartItemCommands(itemID int) {
 	g.currentMap.StartItemCommands(g, itemID)
 }
 
-func (g *Game) ExecutingItemCommands() bool {
-	return g.currentMap.ExecutingItemCommands()
-}
-
 func (g *Game) SetPlayerDir(dir data.Dir) {
 	g.currentMap.player.SetDir(dir)
 }

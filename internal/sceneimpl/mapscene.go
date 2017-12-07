@@ -211,9 +211,6 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	})
 	// TODO: ItemPreviewPopup is not standarized as the other Popups
 	m.itemPreviewPopup.SetOnActionPressed(func(_ *ui.ItemPreviewPopup) {
-		if m.gameState.ExecutingItemCommands() {
-			return
-		}
 		if m.gameState.Map().IsBlockingEventExecuting() {
 			return
 		}
