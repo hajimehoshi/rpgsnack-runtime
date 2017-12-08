@@ -936,6 +936,9 @@ func (m *Map) DrawFullscreenImage(screen *ebiten.Image, texture *ebiten.Image, o
 	op := &ebiten.DrawImageOptions{}
 	w, h := texture.Size()
 	diff := h - consts.TileYNum*consts.TileSize
+	if h > consts.MaxFullscreenImageSize {
+		diff += consts.MaxFullscreenImageSize - h
+	}
 
 	mapWidth := consts.TileXNum * consts.TileSize
 
