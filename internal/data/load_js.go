@@ -20,6 +20,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"log"
+	"net"
 	"net/url"
 	"regexp"
 	"strings"
@@ -149,9 +150,19 @@ func loadRawData(projectPath string) (*rawData, error) {
 		return nil, err
 	}
 
+	// TODO: This is a dirty hack to do tests on local machines.
+	// useDefaultURL should be specificed in another way e.g. from clients.
 	useDefaultURL := false
-	if u.Hostname() == "localhost" || u.Hostname() == "127.0.0.1" {
+	if u.Hostname() == "localhost" {
 		useDefaultURL = true
+	}
+	if ip := net.ParseIP(u.Hostname()); ip != nil {
+		if ip.IsLoopback() {
+			useDefaultURL = true
+		}
+		if ip.IsGlobalUnicast() {
+			useDefaultURL = true
+		}
 	}
 	project, assets, err := loadAssets(gameVersion, useDefaultURL)
 	if err != nil {
