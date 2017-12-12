@@ -20,6 +20,8 @@ import (
 	"image/png"
 	"path"
 
+	"golang.org/x/text/language"
+
 	"github.com/hajimehoshi/ebiten"
 )
 
@@ -33,6 +35,15 @@ func loadImage(path string, bin []uint8, filter ebiten.Filter) (*ebiten.Image, e
 		return nil, err
 	}
 	return eimg, nil
+}
+
+func GetLocalizeImage(key string, lang language.Tag) *ebiten.Image {
+	base, _ := lang.Base()
+	img, ok := theAssets.images[path.Join("images", key+"_"+base.String()+".png")]
+	if ok {
+		return img
+	}
+	return GetImage(key + ".png")
 }
 
 func GetImage(key string) *ebiten.Image {

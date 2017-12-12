@@ -17,6 +17,7 @@ package sceneimpl
 import (
 	"github.com/hajimehoshi/ebiten"
 	"github.com/vmihailenco/msgpack"
+	"golang.org/x/text/language"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
@@ -44,6 +45,7 @@ type TitleScene struct {
 	quitNoButton     *ui.Button
 	waitingRequestID int
 	initialized      bool
+	lang             language.Tag
 	err              error
 }
 
@@ -119,6 +121,7 @@ func (t *TitleScene) initUI(sceneManager *scene.Manager) {
 }
 
 func (t *TitleScene) Update(sceneManager *scene.Manager) error {
+	t.lang = sceneManager.Language()
 	if t.err != nil {
 		return t.err
 	}
@@ -197,7 +200,7 @@ func (t *TitleScene) Draw(screen *ebiten.Image) {
 	if !t.initialized {
 		return
 	}
-	timg := assets.GetImage("titles/title.png")
+	timg := assets.GetLocalizeImage("titles/title", t.lang)
 	tw, _ := timg.Size()
 	sw, _ := screen.Size()
 	op := &ebiten.DrawImageOptions{}
