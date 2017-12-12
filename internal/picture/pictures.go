@@ -16,6 +16,7 @@ package picture
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/vmihailenco/msgpack"
@@ -318,7 +319,7 @@ func (p *picture) draw(screen *ebiten.Image) {
 	sx, sy := p.image.Size()
 
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate((-1-p.originX)*float64(sx)/2, (-1-p.originY)*float64(sy)/2)
+	op.GeoM.Translate(math.Floor((-1-p.originX)*float64(sx)/2), math.Floor((-1-p.originY)*float64(sy)/2))
 	op.GeoM.Scale(p.scaleX.Current(), p.scaleY.Current())
 	op.GeoM.Rotate(p.angle.Current())
 	op.GeoM.Translate(p.x.Current(), p.y.Current())
