@@ -356,10 +356,9 @@ func (c *Character) Position() (int, int) {
 	return c.x, c.y
 }
 
-func (c *Character) DrawPosition() (int, int) {
-	charW, charH := c.Size()
-	x := c.x*consts.TileSize + consts.TileSize/2 - charW/2
-	y := (c.y+1)*consts.TileSize - charH
+func (c *Character) DrawFootPosition() (int, int) {
+	x := c.x*consts.TileSize + consts.TileSize/2
+	y := (c.y + 1) * consts.TileSize
 	if c.moveCount > 0 {
 		d := (c.speed.Frames() - c.moveCount) * consts.TileSize / c.speed.Frames()
 		switch c.moveDir {
@@ -376,6 +375,12 @@ func (c *Character) DrawPosition() (int, int) {
 		}
 	}
 	return x, y
+}
+
+func (c *Character) DrawPosition() (int, int) {
+	x, y := c.DrawFootPosition()
+	charW, charH := c.Size()
+	return x - charW/2, y - charH
 }
 
 func (c *Character) Dir() data.Dir {
