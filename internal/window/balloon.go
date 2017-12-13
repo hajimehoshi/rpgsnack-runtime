@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"math"
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/vmihailenco/msgpack"
@@ -305,9 +304,6 @@ func (b *balloon) geoMForRate(screen *ebiten.Image, character *character.Charact
 	g := ebiten.GeoM{}
 	g.Translate(-cx, -cy)
 	rate := b.openingRate()
-	// rate can't be used as it is. On macOS Sierra, there are some glitches
-	// without the below adjustment (#367)
-	rate -= math.Mod(rate, 0.5)
 	g.Scale(rate, rate)
 	g.Translate(cx, cy)
 	g.Scale(consts.TileScale, consts.TileScale)
