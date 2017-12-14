@@ -32,9 +32,8 @@ import (
 const (
 	bannerMaxCount = 8
 	bannerWidth    = 160
-	bannerHeight   = 60
+	bannerHeight   = 75
 	bannerPaddingX = 4
-	bannerPaddingY = 12
 	bannerMarginY  = 9
 )
 
@@ -215,9 +214,10 @@ func (b *banner) draw(screen *ebiten.Image, character *character.Character, offs
 	}
 
 	if b.opened {
+		_, th := font.MeasureSize(b.content)
 		x, y := b.position()
 		x = (x + bannerPaddingX) * consts.TileScale
-		y = (y + bannerPaddingY) * consts.TileScale
+		y = y*consts.TileScale + (bannerHeight*consts.TileScale-th*textScale)/2
 		switch b.textAlign {
 		case data.TextAlignLeft:
 		case data.TextAlignCenter:
