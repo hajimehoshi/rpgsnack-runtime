@@ -57,8 +57,8 @@ func NewTitleScene() *TitleScene {
 func (t *TitleScene) initUI(sceneManager *scene.Manager) {
 	w, h := sceneManager.Size()
 
-	settingsIcon := ui.NewImagePart(assets.GetImage("system/icon_settings.png"))
-	moreGamesIcon := ui.NewImagePart(assets.GetImage("system/icon_moregames.png"))
+	settingsIcon := ui.NewImagePart(assets.GetImage("system/common/icon_settings.png"))
+	moreGamesIcon := ui.NewImagePart(assets.GetImage("system/common/icon_moregames.png"))
 
 	t.resumeGameButton = ui.NewButton((w/consts.TileScale-120)/2, 184, 120, 20, "click")
 	t.newGameButton = ui.NewButton((w/consts.TileScale-120)/2, 208, 120, 20, "click")

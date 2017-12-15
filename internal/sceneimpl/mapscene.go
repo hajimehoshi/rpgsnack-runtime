@@ -546,7 +546,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		op.GeoM.Translate(float64(x*consts.TileSize), float64(y*consts.TileSize))
 		op.GeoM.Scale(consts.TileScale, consts.TileScale)
 		op.GeoM.Translate(float64(m.offsetX), float64(m.offsetY))
-		screen.DrawImage(assets.GetImage("system/marker.png"), op)
+		screen.DrawImage(assets.GetImage("system/game/marker.png"), op)
 	}
 
 	m.uiImage.Clear()
@@ -580,5 +580,6 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	}
 
 	msg := fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS())
+	msg = ""
 	font.DrawText(screen, msg, 160+m.offsetX, 8, consts.TextScale, data.TextAlignLeft, color.White)
 }

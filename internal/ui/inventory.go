@@ -90,23 +90,23 @@ func NewInventory(x, y int) *Inventory {
 	backButton := NewImageButton(
 		x,
 		y,
-		NewImagePart(assets.GetImage("system/preview_back_button.png")),
-		NewImagePart(assets.GetImage("system/preview_back_button_on.png")),
+		NewImagePart(assets.GetImage("system/footer/back_button.png")),
+		NewImagePart(assets.GetImage("system/footer/back_button_on.png")),
 		"cancel",
 	)
 
 	infoButton := NewImageButton(
 		x+buttonOffsetX,
 		y+buttonOffsetY,
-		NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 40, 0, 36, 32),
-		NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 0, 0, 36, 32),
+		NewImagePart(assets.GetImage("system/footer/info_button_on.png")),
+		NewImagePart(assets.GetImage("system/footer/info_button_off.png")),
 		"click",
 	)
-	infoButton.DisabledImage = NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 80, 0, 36, 32)
+	infoButton.DisabledImage = NewImagePart(assets.GetImage("system/footer/info_button_disabled.png"))
 
-	bgPanel := NewImageView(x, y, 1.0, NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 0, 32, 160, 40))
-	frameCover := NewImageView(x+frameXMargin, y+4, 1.0, NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 0, 144, 128, 24))
-	frameBase := NewImageView(x+frameXMargin, y+4, 1.0, NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 0, 168, 128, 24))
+	bgPanel := NewImageView(x, y, 1.0, NewImagePart(assets.GetImage("system/footer/panel.png")))
+	frameCover := NewImageView(x+frameXMargin, y+4, 1.0, NewImagePart(assets.GetImage("system/footer/inventory_mask.png")))
+	frameBase := NewImageView(x+frameXMargin, y+4, 1.0, NewImagePart(assets.GetImage("system/footer/inventory_bg.png")))
 
 	return &Inventory{
 		x:               x,
@@ -120,11 +120,11 @@ func NewInventory(x, y int) *Inventory {
 		bgPanel:         bgPanel,
 		frameCover:      frameCover,
 		frameBase:       frameBase,
-		cardSlot:        NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 120, 0, 18, 18),
-		activeCardSlot:  NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 156, 0, 18, 18),
-		combineCardSlot: NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 138, 0, 18, 18),
-		dot:             NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 120, 24, 8, 8),
-		activeDot:       NewImagePartWithRect(assets.GetImage("system/ui_footer.png"), 128, 24, 8, 8),
+		cardSlot:        NewImagePart(assets.GetImage("system/footer/item_holder.png")),
+		activeCardSlot:  NewImagePart(assets.GetImage("system/footer/item_holder_active.png")),
+		combineCardSlot: NewImagePart(assets.GetImage("system/footer/item_holder_selected.png")),
+		dot:             NewImagePart(assets.GetImage("system/footer/dot_off.png")),
+		activeDot:       NewImagePart(assets.GetImage("system/footer/dot_on.png")),
 		pageIndex:       0,
 		targetPageIndex: 0,
 		mode:            DefaultMode,

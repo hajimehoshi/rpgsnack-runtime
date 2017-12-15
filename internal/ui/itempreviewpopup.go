@@ -33,7 +33,6 @@ type ItemPreviewPopup struct {
 	visible         bool
 	fadeImage       *ebiten.Image
 	frameImage      *ebiten.Image
-	bgBoxImage      *ebiten.Image
 	previewBoxImage *ebiten.Image
 	nodes           []Node
 	closeButton     *Button
@@ -45,21 +44,20 @@ func NewItemPreviewPopup(x, y int) *ItemPreviewPopup {
 	closeButton := NewImageButton(
 		120,
 		25,
-		NewImagePart(assets.GetImage("system/item_cancel_off.png")),
-		NewImagePart(assets.GetImage("system/item_cancel_on.png")),
+		NewImagePart(assets.GetImage("system/itempreview/cancel_off.png")),
+		NewImagePart(assets.GetImage("system/itempreview/cancel_on.png")),
 		"cancel",
 	)
 
 	actionButton := NewImageButton(
 		40,
 		114,
-		NewImagePart(assets.GetImage("system/item_action_button_off.png")),
-		NewImagePart(assets.GetImage("system/item_action_button_on.png")),
+		NewImagePart(assets.GetImage("system/itempreview/action_button_off.png")),
+		NewImagePart(assets.GetImage("system/itempreview/action_button_on.png")),
 		"click",
 	)
-	frameImage := assets.GetImage("system/item_details.png")
-	bgBoxImage := assets.GetImage("system/item_bg_box.png")
-	previewBoxImage := assets.GetImage("system/item_preview_box.png")
+	frameImage := assets.GetImage("system/itempreview/details.png")
+	previewBoxImage := assets.GetImage("system/itempreview/preview_box.png")
 
 	nodes := []Node{closeButton, actionButton}
 
@@ -73,7 +71,6 @@ func NewItemPreviewPopup(x, y int) *ItemPreviewPopup {
 		y:               y,
 		fadeImage:       fadeImage,
 		frameImage:      frameImage,
-		bgBoxImage:      bgBoxImage,
 		previewBoxImage: previewBoxImage,
 		nodes:           nodes,
 		closeButton:     closeButton,

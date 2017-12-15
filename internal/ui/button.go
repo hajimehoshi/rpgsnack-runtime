@@ -170,9 +170,9 @@ func (b *Button) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 		}
 		image.Draw(screen, geoM, colorM)
 	} else {
-		img := assets.GetImage("system/9patch_test_off.png")
+		img := assets.GetImage("system/common/9patch_frame_off.png")
 		if b.pressing {
-			img = assets.GetImage("system/9patch_test_on.png")
+			img = assets.GetImage("system/common/9patch_frame_on.png")
 		}
 		drawNinePatches(screen, img, b.width, b.height, geoM, colorM)
 	}

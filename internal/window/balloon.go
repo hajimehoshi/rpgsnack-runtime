@@ -328,9 +328,9 @@ func (b *balloon) draw(screen *ebiten.Image, character *character.Character, off
 	dx := float64(sw-consts.TileXNum*consts.TileSize*consts.TileScale)/2 + float64(offsetX)
 	dy := float64(offsetY)
 	if b.openingRate() > 0 {
-		img := assets.GetImage("system/balloon.png")
+		img := assets.GetImage("system/game/balloon.png")
 		if b.balloonType == data.BalloonTypeShout {
-			img = assets.GetImage("system/shout.png")
+			img = assets.GetImage("system/game/shout.png")
 		}
 		op := &ebiten.DrawImageOptions{}
 		g := b.geoMForRate(screen, character)

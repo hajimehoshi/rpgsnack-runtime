@@ -202,7 +202,7 @@ func (b *banner) draw(screen *ebiten.Image, character *character.Character, offs
 		textScale = consts.BigTextScale
 	case data.MessageBackgroundBanner:
 		if rate > 0 {
-			img := assets.GetImage("system/banner.png")
+			img := assets.GetImage("system/game/banner.png")
 			x, y := b.position()
 			op := &ebiten.DrawImageOptions{}
 			op.GeoM.Translate(float64(x), float64(y))
