@@ -112,8 +112,9 @@ func (i *ItemPreviewPopup) SetOnActionPressed(f func(itemPreviewPopup *ItemPrevi
 	})
 }
 
-func (i *ItemPreviewPopup) SetActionEnabled(enabled bool) {
+func (i *ItemPreviewPopup) SetEnabled(enabled bool) {
 	i.actionButton.Disabled = !enabled
+	i.closeButton.Disabled = !enabled
 }
 
 func (i *ItemPreviewPopup) SetActiveItem(item *data.Item) {

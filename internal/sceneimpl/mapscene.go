@@ -382,8 +382,9 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 	m.inventory.SetItems(m.gameState.Items().Items(sceneManager.Game().Items))
 	m.inventory.SetActiveItemID(m.gameState.Items().ActiveItem())
 	m.inventory.Update()
+
 	m.itemPreviewPopup.Update(l)
-	m.itemPreviewPopup.SetActionEnabled(!m.gameState.Map().IsBlockingEventExecuting())
+	m.itemPreviewPopup.SetEnabled(!m.gameState.Map().IsBlockingEventExecuting())
 
 	// Event handling
 	m.updateItemPreviewPopupVisibility(sceneManager)
