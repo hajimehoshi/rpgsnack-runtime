@@ -43,6 +43,7 @@ type TitleScene struct {
 	quitLabel        *ui.Label
 	quitYesButton    *ui.Button
 	quitNoButton     *ui.Button
+	titleLine        *ui.ImageView
 	waitingRequestID int
 	initialized      bool
 	lang             language.Tag
@@ -61,6 +62,7 @@ func (t *TitleScene) initUI(sceneManager *scene.Manager) {
 	moreGamesIcon := ui.NewImagePart(assets.GetImage("system/common/icon_moregames.png"))
 
 	t.resumeGameButton = ui.NewTextButton((w/consts.TileScale-120)/2, 184, 120, 20, "click")
+	t.titleLine = ui.NewImageView((w/consts.TileScale-120)/2+20, 206, 1.0, ui.NewImagePart(assets.GetImage("system/common/title_line.png")))
 	t.newGameButton = ui.NewTextButton((w/consts.TileScale-120)/2, 208, 120, 20, "click")
 	t.settingsButton = ui.NewImageButton(w/consts.TileScale-16, h/consts.TileScale-16, settingsIcon, settingsIcon, "click")
 	t.moregamesButton = ui.NewImageButton(4, h/consts.TileScale-16, moreGamesIcon, moreGamesIcon, "click")
@@ -210,6 +212,7 @@ func (t *TitleScene) Draw(screen *ebiten.Image) {
 	// TODO: hide buttons to avoid visual conflicts between the dialog and the buttons
 	if !t.warningDialog.Visible() && !t.quitDialog.Visible() {
 		t.newGameButton.Draw(screen)
+		t.titleLine.Draw(screen)
 		t.resumeGameButton.Draw(screen)
 		t.settingsButton.Draw(screen)
 		t.moregamesButton.Draw(screen)
