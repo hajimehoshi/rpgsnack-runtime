@@ -692,10 +692,11 @@ type CommandArgsShowBalloon struct {
 }
 
 type CommandArgsShowMessage struct {
-	ContentID    uuid.UUID           `json:"content" msgpack:"content"`
-	Background   MessageBackground   `json:"background" msgpack:"background"`
-	PositionType MessagePositionType `json:"positionType" msgpack:"positionType"`
-	TextAlign    TextAlign           `json:"textAlign" msgpack:"textAlign"`
+	ContentID      uuid.UUID           `json:"content" msgpack:"content"`
+	Background     MessageBackground   `json:"background" msgpack:"background"`
+	PositionType   MessagePositionType `json:"positionType" msgpack:"positionType"`
+	TextAlign      TextAlign           `json:"textAlign" msgpack:"textAlign"`
+	MessageStyleID int                 `json:"messageStyleId" msgpack:"messageStyleId"`
 }
 
 type CommandArgsShowChoices struct {

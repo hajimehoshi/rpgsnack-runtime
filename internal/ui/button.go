@@ -189,7 +189,7 @@ func (b *Button) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 		c = color.RGBA{0x80, 0x80, 0x80, 0xff}
 	}
 	if b.dropShadow {
-		font.DrawText(screen, b.Text, tx+consts.TextScale, ty+consts.TextScale, consts.TextScale, data.TextAlignCenter, color.Black)
+		font.DrawText(screen, b.Text, tx+consts.TextScale, ty+consts.TextScale, consts.TextScale, data.TextAlignCenter, color.Black, len(b.Text))
 	}
-	font.DrawText(screen, b.Text, tx, ty, consts.TextScale, data.TextAlignCenter, c)
+	font.DrawText(screen, b.Text, tx, ty, consts.TextScale, data.TextAlignCenter, c, len(b.Text))
 }

@@ -47,6 +47,8 @@ type banner struct {
 	positionType  data.MessagePositionType
 	textAlign     data.TextAlign
 	playerY       int
+	messageStyle  *data.MessageStyle
+	typingEffect  *typingEffect
 }
 
 func (b *banner) EncodeMsgpack(enc *msgpack.Encoder) error {
@@ -77,6 +79,9 @@ func (b *banner) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EncodeString("background")
 	e.EncodeString(string(b.background))
 
+	e.EncodeString("typingEffect")
+	e.EncodeInterface(b.typingEffect)
+
 	e.EndMap()
 	return e.Flush()
 }
@@ -102,6 +107,11 @@ func (b *banner) DecodeMsgpack(dec *msgpack.Decoder) error {
 			b.textAlign = data.TextAlign(d.DecodeString())
 		case "background":
 			b.background = data.MessageBackground(d.DecodeString())
+		case "typingEffect":
+			if !d.SkipCodeIfNil() {
+				b.typingEffect = &typingEffect{}
+				d.DecodeInterface(b.typingEffect)
+			}
 		}
 	}
 	if err := d.Error(); err != nil {
@@ -110,13 +120,14 @@ func (b *banner) DecodeMsgpack(dec *msgpack.Decoder) error {
 	return nil
 }
 
-func newBanner(content string, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign, interpreterID int) *banner {
+func newBanner(content string, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign, interpreterID int, messageStyle *data.MessageStyle) *banner {
 	b := &banner{
 		interpreterID: interpreterID,
 		content:       content,
 		background:    background,
 		positionType:  positionType,
 		textAlign:     textAlign,
+		messageStyle:  messageStyle,
 	}
 	return b
 }
@@ -130,11 +141,16 @@ func (b *banner) isOpened() bool {
 }
 
 func (b *banner) isAnimating() bool {
-	return b.openingCount > 0 || b.closingCount > 0
+	return b.openingCount > 0 || b.closingCount > 0 || b.typingEffect.isAnimating()
+}
+
+func (b *banner) skipTypingAnim() {
+	b.typingEffect.skipAnim()
 }
 
 func (b *banner) open() {
 	b.openingCount = bannerMaxCount
+	b.typingEffect = NewTypingEffect(b.content, b.messageStyle.TypingEffectDelay)
 }
 
 func (b *banner) close() {
@@ -151,6 +167,9 @@ func (b *banner) update(playerY int) error {
 		if b.openingCount == 0 {
 			b.opened = true
 		}
+	}
+	if b.opened {
+		b.typingEffect.update()
 	}
 	b.playerY = playerY
 	return nil
@@ -214,6 +233,7 @@ func (b *banner) draw(screen *ebiten.Image, character *character.Character, offs
 	}
 
 	if b.opened {
+		displayTextLength := b.typingEffect.getCurrentTextLength()
 		_, th := font.MeasureSize(b.content)
 		x, y := b.position()
 		x = (x + bannerPaddingX) * consts.TileScale
@@ -229,11 +249,11 @@ func (b *banner) draw(screen *ebiten.Image, character *character.Character, offs
 		y += int(dy)
 
 		if textEdge {
-			font.DrawText(screen, b.content, x+textScale, y, textScale, b.textAlign, color.Black)
-			font.DrawText(screen, b.content, x-textScale, y, textScale, b.textAlign, color.Black)
-			font.DrawText(screen, b.content, x, y+textScale, textScale, b.textAlign, color.Black)
-			font.DrawText(screen, b.content, x, y-textScale, textScale, b.textAlign, color.Black)
+			font.DrawText(screen, b.content, x+textScale, y, textScale, b.textAlign, color.Black, displayTextLength)
+			font.DrawText(screen, b.content, x-textScale, y, textScale, b.textAlign, color.Black, displayTextLength)
+			font.DrawText(screen, b.content, x, y+textScale, textScale, b.textAlign, color.Black, displayTextLength)
+			font.DrawText(screen, b.content, x, y-textScale, textScale, b.textAlign, color.Black, displayTextLength)
 		}
-		font.DrawText(screen, b.content, x, y, textScale, b.textAlign, color.White)
+		font.DrawText(screen, b.content, x, y, textScale, b.textAlign, color.White, displayTextLength)
 	}
 }

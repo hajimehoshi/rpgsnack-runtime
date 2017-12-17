@@ -582,5 +582,5 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 
 	msg := fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS())
 	msg = ""
-	font.DrawText(screen, msg, 160+m.offsetX, 8, consts.TextScale, data.TextAlignLeft, color.White)
+	font.DrawText(screen, msg, 160+m.offsetX, 8, consts.TextScale, data.TextAlignLeft, color.White, len(msg))
 }

@@ -26,16 +26,23 @@ const (
 )
 
 type Game struct {
-	Maps         []*Map         `json:"maps"`
-	Texts        *Texts         `json:"texts"`
-	TileSets     []*TileSet     `json:"tileSets"`
-	Achievements []*Achievement `json:"achievements"`
-	Hints        []*Hint        `json:"hints"`
-	IAPProducts  []*IAPProduct  `json:"iapProducts"`
-	Items        []*Item        `json:"items"`
-	Combines     []*Combine     `json:"combines"`
-	CommonEvents []*CommonEvent `json:"commonEvents"`
-	System       *System        `json:"system"`
+	Maps          []*Map          `json:"maps"`
+	Texts         *Texts          `json:"texts"`
+	TileSets      []*TileSet      `json:"tileSets"`
+	Achievements  []*Achievement  `json:"achievements"`
+	Hints         []*Hint         `json:"hints"`
+	IAPProducts   []*IAPProduct   `json:"iapProducts"`
+	Items         []*Item         `json:"items"`
+	Combines      []*Combine      `json:"combines"`
+	CommonEvents  []*CommonEvent  `json:"commonEvents"`
+	System        *System         `json:"system"`
+	MessageStyles []*MessageStyle `json:"messageStyles"`
+}
+
+type MessageStyle struct {
+	ID                int       `json:"id"`
+	Name              uuid.UUID `json:"name"`
+	TypingEffectDelay int       `json:"typingEffectDelay"`
 }
 
 type BGM struct {
@@ -82,4 +89,8 @@ func (g *Game) CreateCombine(itemID1, itemID2 int) *Combine {
 		}
 	}
 	return nil
+}
+
+func (g *Game) CreateDefaultMessageStyle() *MessageStyle {
+	return &MessageStyle{TypingEffectDelay: 1}
 }

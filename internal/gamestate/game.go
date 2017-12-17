@@ -495,9 +495,9 @@ func (g *Game) ShowBalloon(interpreterID, mapID, roomID, eventID int, content st
 	return true
 }
 
-func (g *Game) ShowMessage(interpreterID int, content string, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign) {
+func (g *Game) ShowMessage(interpreterID int, content string, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign, messageStyle *data.MessageStyle) {
 	content = g.parseMessageSyntax(content)
-	g.windows.ShowMessage(content, background, positionType, textAlign, interpreterID)
+	g.windows.ShowMessage(content, background, positionType, textAlign, interpreterID, messageStyle)
 }
 
 func (g *Game) ShowChoices(sceneManager *scene.Manager, interpreterID int, choiceIDs []uuid.UUID) {

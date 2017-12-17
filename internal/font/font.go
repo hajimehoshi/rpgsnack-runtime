@@ -62,7 +62,11 @@ func MeasureSize(text string) (int, int) {
 	return w, h
 }
 
-func DrawText(screen *ebiten.Image, text string, ox, oy int, scale int, textAlign data.TextAlign, color color.Color) {
+func DrawText(screen *ebiten.Image, text string, ox, oy int, scale int, textAlign data.TextAlign, color color.Color, displayTextLength int) {
+	if len(text) <= 0 {
+		return
+	}
+
 	if positions == nil {
 		positions = map[rune]int{}
 		b := assets.GetResource("images/fonts/mplus_positions")
@@ -92,7 +96,9 @@ func DrawText(screen *ebiten.Image, text string, ox, oy int, scale int, textAlig
 	dy := (renderingLineHeight - lineHeight) / 2
 	l := 0
 	img := assets.GetImage("fonts/mplus.compacted.png")
-	for _, r := range text {
+	displayText := text[0:displayTextLength]
+
+	for _, r := range displayText {
 		if r == '\n' {
 			dx = 0
 			dy += renderingLineHeight

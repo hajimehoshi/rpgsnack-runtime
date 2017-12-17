@@ -351,7 +351,18 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		args := c.Args.(*data.CommandArgsShowMessage)
 		if !i.waitingCommand {
 			content := sceneManager.Game().Texts.Get(sceneManager.Language(), args.ContentID)
-			gameState.ShowMessage(i.id, content, args.Background, args.PositionType, args.TextAlign)
+
+			messageStyle := sceneManager.Game().CreateDefaultMessageStyle()
+			if args.MessageStyleID > 0 {
+				messageStyles := sceneManager.Game().MessageStyles
+				for index := range messageStyles {
+					if messageStyles[index].ID == args.MessageStyleID {
+						messageStyle = messageStyles[index]
+						break
+					}
+				}
+			}
+			gameState.ShowMessage(i.id, content, args.Background, args.PositionType, args.TextAlign, messageStyle)
 			i.waitingCommand = true
 			return false, nil
 		}

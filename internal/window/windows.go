@@ -165,8 +165,8 @@ func (w *Windows) ShowBalloon(content string, balloonType data.BalloonType, even
 	w.nextBalloon = newBalloonWithArrow(content, balloonType, eventID, interpreterID)
 }
 
-func (w *Windows) ShowMessage(content string, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign, interpreterID int) {
-	w.banner = newBanner(content, background, positionType, textAlign, interpreterID)
+func (w *Windows) ShowMessage(content string, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign, interpreterID int, messageStyle *data.MessageStyle) {
+	w.banner = newBanner(content, background, positionType, textAlign, interpreterID, messageStyle)
 	w.banner.open()
 }
 
@@ -368,7 +368,9 @@ func (w *Windows) Update(playerY int, sceneManager *scene.Manager) {
 	}
 	if w.banner != nil {
 		w.banner.update(playerY)
-		if w.banner.isClosed() {
+		if w.banner.isAnimating() && input.Triggered() {
+			w.banner.skipTypingAnim()
+		} else if w.banner.isClosed() {
 			w.banner = nil
 		}
 	}
