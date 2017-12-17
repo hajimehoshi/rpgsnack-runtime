@@ -71,8 +71,8 @@ to remove ads from the game?`,
 		TextIDItemCheck:        "Check",
 
 		TextIDNewGameWarning: `You have a on-going game data.
-Do you want to clear the progress
-to start a new game?`,
+Do you want to clear the 
+progress to start a new game?`,
 		TextIDBackToTitle: "Do you want to go back to title?",
 		TextIDQuitGame:    "Do you want to quit the game?",
 		TextIDStoreError: `Failed to connect to the store.
