@@ -94,3 +94,7 @@ func (g *Game) CreateCombine(itemID1, itemID2 int) *Combine {
 func (g *Game) CreateDefaultMessageStyle() *MessageStyle {
 	return &MessageStyle{TypingEffectDelay: 1}
 }
+
+func (g *Game) CreateChoicesMessageStyle() *MessageStyle {
+	return &MessageStyle{TypingEffectDelay: 0}
+}

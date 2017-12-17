@@ -182,6 +182,18 @@ func (i *Interpreter) createChild(gameState InterpreterIDGenerator, eventID int,
 	return child
 }
 
+func (i *Interpreter) findMessageStyle(sceneManager *scene.Manager, messageStyleID int) *data.MessageStyle {
+	messageStyles := sceneManager.Game().MessageStyles
+	if messageStyleID > 0 {
+		for index := range messageStyles {
+			if messageStyles[index].ID == messageStyleID {
+				return messageStyles[index]
+			}
+		}
+	}
+	return sceneManager.Game().CreateDefaultMessageStyle()
+}
+
 func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game) (bool, error) {
 	if !gameState.CanWindowProceed(i.id) {
 		return false, nil
@@ -328,7 +340,8 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			if id == 0 {
 				id = i.eventID
 			}
-			if gameState.ShowBalloon(i.id, i.mapID, i.roomID, id, content, args.BalloonType) {
+			messageStyle := i.findMessageStyle(sceneManager, args.MessageStyleID)
+			if gameState.ShowBalloon(i.id, i.mapID, i.roomID, id, content, args.BalloonType, messageStyle) {
 				i.waitingCommand = true
 				return false, nil
 			}
@@ -352,16 +365,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		if !i.waitingCommand {
 			content := sceneManager.Game().Texts.Get(sceneManager.Language(), args.ContentID)
 
-			messageStyle := sceneManager.Game().CreateDefaultMessageStyle()
-			if args.MessageStyleID > 0 {
-				messageStyles := sceneManager.Game().MessageStyles
-				for index := range messageStyles {
-					if messageStyles[index].ID == args.MessageStyleID {
-						messageStyle = messageStyles[index]
-						break
-					}
-				}
-			}
+			messageStyle := i.findMessageStyle(sceneManager, args.MessageStyleID)
 			gameState.ShowMessage(i.id, content, args.Background, args.PositionType, args.TextAlign, messageStyle)
 			i.waitingCommand = true
 			return false, nil

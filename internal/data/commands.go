@@ -686,9 +686,10 @@ type CommandArgsWait struct {
 }
 
 type CommandArgsShowBalloon struct {
-	EventID     int         `json:"eventId" msgpack:"eventId"`
-	ContentID   uuid.UUID   `json:"content" msgpack:"content"`
-	BalloonType BalloonType `json:"balloonType" msgpack:"balloonType"`
+	EventID        int         `json:"eventId" msgpack:"eventId"`
+	ContentID      uuid.UUID   `json:"content" msgpack:"content"`
+	BalloonType    BalloonType `json:"balloonType" msgpack:"balloonType"`
+	MessageStyleID int         `json:"messageStyleId" msgpack:"messageStyleId"`
 }
 
 type CommandArgsShowMessage struct {

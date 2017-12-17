@@ -157,12 +157,12 @@ func (w *Windows) HasChosenIndex() bool {
 	return w.hasChosenIndex
 }
 
-func (w *Windows) ShowBalloon(content string, balloonType data.BalloonType, eventID int, interpreterID int) {
+func (w *Windows) ShowBalloon(content string, balloonType data.BalloonType, eventID int, interpreterID int, messageStyle *data.MessageStyle) {
 	if w.nextBalloon != nil {
 		panic("not reach")
 	}
 	// TODO: How to call newBalloonCenter?
-	w.nextBalloon = newBalloonWithArrow(content, balloonType, eventID, interpreterID)
+	w.nextBalloon = newBalloonWithArrow(content, balloonType, eventID, interpreterID, messageStyle)
 }
 
 func (w *Windows) ShowMessage(content string, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign, interpreterID int, messageStyle *data.MessageStyle) {
@@ -182,7 +182,7 @@ func (w *Windows) ShowChoices(sceneManager *scene.Manager, choices []string, int
 		x := 0
 		y := i*choiceBalloonHeight + ymin
 		width := consts.TileXNum * consts.TileSize
-		balloon := newBalloon(x, y, width, choiceBalloonHeight, choice, data.BalloonTypeNormal, interpreterID)
+		balloon := newBalloon(x, y, width, choiceBalloonHeight, choice, data.BalloonTypeNormal, interpreterID, sceneManager.Game().CreateChoicesMessageStyle())
 		w.choiceBalloons = append(w.choiceBalloons, balloon)
 		balloon.open()
 	}
@@ -353,7 +353,9 @@ func (w *Windows) Update(playerY int, sceneManager *scene.Manager) {
 			continue
 		}
 		b.update()
-		if b.isClosed() {
+		if b.isAnimating() && input.Triggered() {
+			b.skipTypingAnim()
+		} else if b.isClosed() {
 			w.balloons[i] = nil
 		}
 	}

@@ -484,14 +484,14 @@ func (g *Game) ChosenWindowIndex() int {
 	return g.windows.ChosenIndex()
 }
 
-func (g *Game) ShowBalloon(interpreterID, mapID, roomID, eventID int, content string, balloonType data.BalloonType) bool {
+func (g *Game) ShowBalloon(interpreterID, mapID, roomID, eventID int, content string, balloonType data.BalloonType, messageStyle *data.MessageStyle) bool {
 	ch := g.Character(mapID, roomID, eventID)
 	if ch == nil {
 		return false
 	}
 
 	content = g.parseMessageSyntax(content)
-	g.windows.ShowBalloon(content, balloonType, eventID, interpreterID)
+	g.windows.ShowBalloon(content, balloonType, eventID, interpreterID, messageStyle)
 	return true
 }
 

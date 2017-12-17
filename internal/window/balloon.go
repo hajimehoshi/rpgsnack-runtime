@@ -52,6 +52,8 @@ type balloon struct {
 	closingCount   int
 	opened         bool
 	balloonType    data.BalloonType
+	messageStyle   *data.MessageStyle
+	typingEffect   *typingEffect
 }
 
 func (b *balloon) EncodeMsgpack(enc *msgpack.Encoder) error {
@@ -100,6 +102,9 @@ func (b *balloon) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EncodeString("balloonType")
 	e.EncodeString(string(b.balloonType))
 
+	e.EncodeString("typingEffect")
+	e.EncodeInterface(b.typingEffect)
+
 	e.EndMap()
 	return e.Flush()
 }
@@ -137,6 +142,11 @@ func (b *balloon) DecodeMsgpack(dec *msgpack.Decoder) error {
 			b.opened = d.DecodeBool()
 		case "balloonType":
 			b.balloonType = data.BalloonType(d.DecodeString())
+		case "typingEffect":
+			if !d.SkipCodeIfNil() {
+				b.typingEffect = &typingEffect{}
+				d.DecodeInterface(b.typingEffect)
+			}
 		}
 	}
 	if err := d.Error(); err != nil {
@@ -145,13 +155,14 @@ func (b *balloon) DecodeMsgpack(dec *msgpack.Decoder) error {
 	return nil
 }
 
-func newBalloon(x, y, width, height int, content string, balloonType data.BalloonType, interpreterID int) *balloon {
+func newBalloon(x, y, width, height int, content string, balloonType data.BalloonType, interpreterID int, messageStyle *data.MessageStyle) *balloon {
 	b := &balloon{
 		interpreterID: interpreterID,
 		content:       content,
 		x:             x,
 		y:             y,
 		balloonType:   balloonType,
+		messageStyle:  messageStyle,
 	}
 	s := b.partSize()
 	b.width = ((width + (s - 1)) / s) * s
@@ -193,13 +204,14 @@ func balloonSizeFromContent(content string, balloonType data.BalloonType) (int, 
 	return w, h, contentOffsetX, contentOffsetY
 }
 
-func newBalloonWithArrow(content string, balloonType data.BalloonType, eventID int, interpreterID int) *balloon {
+func newBalloonWithArrow(content string, balloonType data.BalloonType, eventID int, interpreterID int, messageStyle *data.MessageStyle) *balloon {
 	b := &balloon{
 		interpreterID: interpreterID,
 		content:       content,
 		hasArrow:      true,
 		eventID:       eventID,
 		balloonType:   balloonType,
+		messageStyle:  messageStyle,
 	}
 	w, h, contentOffsetX, contentOffsetY := balloonSizeFromContent(content, balloonType)
 	b.width = w
@@ -207,6 +219,10 @@ func newBalloonWithArrow(content string, balloonType data.BalloonType, eventID i
 	b.contentOffsetX = contentOffsetX
 	b.contentOffsetY = contentOffsetY
 	return b
+}
+
+func (b *balloon) skipTypingAnim() {
+	b.typingEffect.skipAnim()
 }
 
 func (b *balloon) arrowPosition(screenWidth int, character *character.Character) (int, int) {
@@ -253,12 +269,13 @@ func (b *balloon) isOpened() bool {
 }
 
 func (b *balloon) isAnimating() bool {
-	return b.openingCount > 0 || b.closingCount > 0
+	return b.openingCount > 0 || b.closingCount > 0 || b.typingEffect.isAnimating()
 }
 
 func (b *balloon) open() {
 	// TODO: This should be called only in the constructor?
 	b.openingCount = balloonMaxCount
+	b.typingEffect = NewTypingEffect(b.content, b.messageStyle.TypingEffectDelay)
 }
 
 func (b *balloon) close() {
@@ -283,6 +300,9 @@ func (b *balloon) update() {
 		if b.openingCount == 0 {
 			b.opened = true
 		}
+	}
+	if b.opened {
+		b.typingEffect.update()
 	}
 }
 
@@ -397,6 +417,6 @@ func (b *balloon) draw(screen *ebiten.Image, character *character.Character, off
 		y = (y + my + b.contentOffsetY) * consts.TileScale
 		x += int(dx)
 		y += int(dy)
-		font.DrawText(screen, b.content, x, y, consts.TextScale, data.TextAlignLeft, color.Black, len(b.content))
+		font.DrawText(screen, b.content, x, y, consts.TextScale, data.TextAlignLeft, color.Black, b.typingEffect.getCurrentTextLength())
 	}
 }
