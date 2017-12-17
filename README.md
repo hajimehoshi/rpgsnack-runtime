@@ -26,3 +26,14 @@ Run `go run main.go /path/to/json/file`
 ```
 go generate ./...
 ```
+
+# How to downgrade NDK
+
+There is a known issue that Go doesn't work with NDK r16 (https://github.com/golang/go/issues/22766). Let's use r15 (or older) until the issue is fixed.
+
+1. Download r15c version of NDK from https://developer.android.com/ndk/downloads/older_releases.html
+2. Unzip `android-ndk-r15c-*-x86_64.zip`
+3. `cd $ANDROID_HOME`
+4. `mv ndk-bundle ndk-bundle.r16` for example.
+5. Move the unziped directory to `$ANDROID_HOME/nkd-bundle`
+6. `gomobile init`
