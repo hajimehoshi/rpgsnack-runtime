@@ -249,10 +249,21 @@ func (b *banner) draw(screen *ebiten.Image, character *character.Character, offs
 		y += int(dy)
 
 		if textEdge {
-			font.DrawText(screen, b.content, x+textScale, y, textScale, b.textAlign, color.Black, displayTextLength)
-			font.DrawText(screen, b.content, x-textScale, y, textScale, b.textAlign, color.Black, displayTextLength)
-			font.DrawText(screen, b.content, x, y+textScale, textScale, b.textAlign, color.Black, displayTextLength)
-			font.DrawText(screen, b.content, x, y-textScale, textScale, b.textAlign, color.Black, displayTextLength)
+			shadowColor := color.RGBA{0, 0, 0, 64}
+			font.DrawText(screen, b.content, x+textScale*2, y, textScale, b.textAlign, shadowColor, displayTextLength)
+			font.DrawText(screen, b.content, x-textScale*2, y, textScale, b.textAlign, shadowColor, displayTextLength)
+			font.DrawText(screen, b.content, x, y+textScale*2, textScale, b.textAlign, shadowColor, displayTextLength)
+			font.DrawText(screen, b.content, x, y-textScale*2, textScale, b.textAlign, shadowColor, displayTextLength)
+			font.DrawText(screen, b.content, x+textScale, y+textScale, textScale, b.textAlign, shadowColor, displayTextLength)
+			font.DrawText(screen, b.content, x-textScale, y+textScale, textScale, b.textAlign, shadowColor, displayTextLength)
+			font.DrawText(screen, b.content, x+textScale, y-textScale, textScale, b.textAlign, shadowColor, displayTextLength)
+			font.DrawText(screen, b.content, x-textScale, y-textScale, textScale, b.textAlign, shadowColor, displayTextLength)
+
+			edgeColor := color.Black
+			font.DrawText(screen, b.content, x+textScale, y, textScale, b.textAlign, edgeColor, displayTextLength)
+			font.DrawText(screen, b.content, x-textScale, y, textScale, b.textAlign, edgeColor, displayTextLength)
+			font.DrawText(screen, b.content, x, y+textScale, textScale, b.textAlign, edgeColor, displayTextLength)
+			font.DrawText(screen, b.content, x, y-textScale, textScale, b.textAlign, edgeColor, displayTextLength)
 		}
 		font.DrawText(screen, b.content, x, y, textScale, b.textAlign, color.White, displayTextLength)
 	}
