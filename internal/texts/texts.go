@@ -37,7 +37,6 @@ const (
 	TextIDMoreGames
 	TextIDBackToTitle
 	TextIDClose
-	TextIDTitle
 	TextIDItemCheck
 	TextIDQuitGame
 	TextIDStoreError
@@ -67,7 +66,6 @@ to remove ads from the game?`,
 		TextIDRestorePurchases: "Restore Purchases",
 		TextIDMoreGames:        "More Games",
 		TextIDClose:            "Close",
-		TextIDTitle:            "Title",
 		TextIDItemCheck:        "Check",
 
 		TextIDNewGameWarning: `You have a on-going game data.
@@ -95,7 +93,6 @@ and connect to the network`,
 		TextIDRestorePurchases: "購入情報のリストア",
 		TextIDMoreGames:        "ほかのゲーム",
 		TextIDClose:            "閉じる",
-		TextIDTitle:            "タイトル",
 		TextIDItemCheck:        "チェック",
 
 		TextIDNewGameWarning: `進行中のゲームデータがあります。

@@ -107,7 +107,7 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	m.screenShotImage = screenShotImage
 	m.screenShotDialog = ui.NewDialog((uiWidth-160)/2+4, 4, 152, 232)
 	m.screenShotDialog.AddChild(ui.NewImageView(8, 8, 1.0/consts.TileScale/2, ui.NewImagePart(m.screenShotImage)))
-	m.titleButton = ui.NewButton(4, 2, 40, 12, "click")
+	m.titleButton = ui.NewImageButton(4, 2, ui.NewImagePart(assets.GetImage("system/game/button_home_off.png")), ui.NewImagePart(assets.GetImage("system/game/button_home_on.png")), "click")
 
 	// TODO: Implement the camera functionality later
 	m.cameraButton.Visible = false
@@ -354,7 +354,6 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 	m.storeErrorOkButton.Text = texts.Text(l, texts.TextIDOK)
 	m.removeAdsYesButton.Text = texts.Text(l, texts.TextIDYes)
 	m.removeAdsNoButton.Text = texts.Text(l, texts.TextIDNo)
-	m.titleButton.Text = texts.Text(l, texts.TextIDTitle)
 	m.removeAdsButton.Text = texts.Text(l, texts.TextIDRemoveAds)
 
 	// Call SetOffset as temporary hack for UI input
@@ -367,7 +366,7 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 	m.removeAdsDialog.Update()
 
 	m.cameraButton.Update()
-	m.titleButton.Disabled = m.gameState.Map().IsBlockingEventExecuting()
+	m.titleButton.Disabled = m.gameState.Map().IsBlockingEventExecuting() || m.quitDialog.Visible()
 	m.titleButton.Update()
 
 	m.removeAdsButton.Disabled = m.gameState.Map().IsBlockingEventExecuting()
@@ -438,11 +437,6 @@ func (m *MapScene) handleBackButton() {
 		return
 	}
 
-	if m.quitDialog.Visible() {
-		audio.PlaySE("cancel", 1.0)
-		m.quitDialog.Hide()
-		return
-	}
 	if m.quitDialog.Visible() {
 		audio.PlaySE("cancel", 1.0)
 		m.quitDialog.Hide()
