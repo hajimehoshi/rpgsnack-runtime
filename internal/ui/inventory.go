@@ -98,8 +98,8 @@ func NewInventory(x, y int) *Inventory {
 	infoButton := NewImageButton(
 		x+buttonOffsetX,
 		y+buttonOffsetY,
-		NewImagePart(assets.GetImage("system/footer/info_button_on.png")),
 		NewImagePart(assets.GetImage("system/footer/info_button_off.png")),
+		NewImagePart(assets.GetImage("system/footer/info_button_on.png")),
 		"click",
 	)
 	infoButton.DisabledImage = NewImagePart(assets.GetImage("system/footer/info_button_disabled.png"))
