@@ -41,8 +41,8 @@ type Button struct {
 	dropShadow    bool
 	pressing      bool
 	soundName     string
-
-	onPressed func(button *Button)
+	showFrame     bool
+	onPressed     func(button *Button)
 }
 
 func NewButton(x, y, width, height int, soundName string) *Button {
@@ -54,6 +54,20 @@ func NewButton(x, y, width, height int, soundName string) *Button {
 		Visible:    true,
 		soundName:  soundName,
 		dropShadow: false,
+		showFrame:  true,
+	}
+}
+
+func NewTextButton(x, y, width, height int, soundName string) *Button {
+	return &Button{
+		x:          x,
+		y:          y,
+		width:      width,
+		height:     height,
+		Visible:    true,
+		soundName:  soundName,
+		dropShadow: false,
+		showFrame:  false,
 	}
 }
 
@@ -70,6 +84,7 @@ func NewImageButton(x, y int, image *ImagePart, pressedImage *ImagePart, soundNa
 		DisabledImage: nil,
 		soundName:     soundName,
 		dropShadow:    true,
+		showFrame:     true,
 	}
 }
 
@@ -152,29 +167,36 @@ func (b *Button) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 		colorM.Scale(0.5, 0.5, 0.5, 1)
 	}
 
-	if b.Image != nil {
-		image := b.Image
-		if b.Disabled {
-			if b.DisabledImage != nil {
-				image = b.DisabledImage
-			}
-		} else {
-			if b.pressing {
-				if b.PressedImage == nil {
-					colorM.ChangeHSV(0, 0, 1)
-					colorM.Scale(0.5, 0.5, 0.5, 1)
-				} else {
-					image = b.PressedImage
+	opacity := uint8(255)
+	if b.showFrame {
+		if b.Image != nil {
+			image := b.Image
+			if b.Disabled {
+				if b.DisabledImage != nil {
+					image = b.DisabledImage
+				}
+			} else {
+				if b.pressing {
+					if b.PressedImage == nil {
+						colorM.ChangeHSV(0, 0, 1)
+						colorM.Scale(0.5, 0.5, 0.5, 1)
+					} else {
+						image = b.PressedImage
+					}
 				}
 			}
+			image.Draw(screen, geoM, colorM)
+		} else {
+			img := assets.GetImage("system/common/9patch_frame_off.png")
+			if b.pressing {
+				img = assets.GetImage("system/common/9patch_frame_on.png")
+			}
+			drawNinePatches(screen, img, b.width, b.height, geoM, colorM)
 		}
-		image.Draw(screen, geoM, colorM)
 	} else {
-		img := assets.GetImage("system/common/9patch_frame_off.png")
 		if b.pressing {
-			img = assets.GetImage("system/common/9patch_frame_on.png")
+			opacity = uint8(127)
 		}
-		drawNinePatches(screen, img, b.width, b.height, geoM, colorM)
 	}
 
 	_, th := font.MeasureSize(b.Text)
@@ -184,9 +206,9 @@ func (b *Button) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 	ty := (b.y + offsetY) * consts.TileScale
 	ty += (b.height*consts.TileScale - th*consts.TextScale) / 2
 
-	var c color.Color = color.White
+	var c color.Color = color.RGBA{0xff, 0xff, 0xff, opacity}
 	if b.Disabled {
-		c = color.RGBA{0x80, 0x80, 0x80, 0xff}
+		c = color.RGBA{0x80, 0x80, 0x80, opacity}
 	}
 	if b.dropShadow {
 		font.DrawText(screen, b.Text, tx+consts.TextScale, ty+consts.TextScale, consts.TextScale, data.TextAlignCenter, color.Black, len(b.Text))
