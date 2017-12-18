@@ -56,11 +56,11 @@ func unmarshalJSON(data []uint8, v interface{}) error {
 }
 
 type rawData struct {
-	Project   []uint8
-	Assets    []uint8
-	Progress  []uint8
-	Purchases []uint8
-	Language  []uint8
+	Project   []byte
+	Assets    []byte
+	Progress  []byte
+	Purchases []byte
+	Language  []byte
 }
 
 type Project struct {
@@ -69,8 +69,8 @@ type Project struct {
 
 type LoadedData struct {
 	Game      *Game
-	Assets    map[string][]uint8
-	Progress  []uint8
+	Assets    map[string][]byte
+	Progress  []byte
 	Purchases []string
 	Language  language.Tag
 }
@@ -85,7 +85,7 @@ func Load(projectPath string) (*LoadedData, error) {
 		return nil, err
 	}
 	gameData := project.Data
-	var assets map[string][]uint8
+	var assets map[string][]byte
 	if err := msgpack.Unmarshal(data.Assets, &assets); err != nil {
 		return nil, fmt.Errorf("data: msgpack.Unmarshal error: %s", err.Error())
 	}

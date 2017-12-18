@@ -25,17 +25,17 @@ var (
 	dataCh = make(chan *rawData, 1)
 )
 
-func loadRawData() (*rawData, error) {
+func loadRawData(projectPath string) (*rawData, error) {
 	return <-dataCh, nil
 }
 
-func SetData(game []uint8, assets []uint8, progress []uint8, purchases []uint8, language string) {
+func SetData(project []byte, assets []byte, progress []byte, purchases []byte, language string) {
 	l, err := json.Marshal(language)
 	if err != nil {
 		panic(err)
 	}
 	dataCh <- &rawData{
-		Game:      game,
+		Project:   project,
 		Assets:    assets,
 		Progress:  progress,
 		Purchases: purchases,
