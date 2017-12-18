@@ -34,38 +34,44 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/ui"
 )
 
+const (
+	markerAnimationInterval = 2
+	markerSize              = 16
+)
+
 type MapScene struct {
-	gameState          *gamestate.Game
-	moveDstX           int
-	moveDstY           int
-	tilesImage         *ebiten.Image
-	uiImage            *ebiten.Image
-	triggeringFailed   bool
-	initialState       bool
-	cameraButton       *ui.Button
-	cameraTaking       bool
-	titleButton        *ui.Button
-	screenShotImage    *ebiten.Image
-	screenShotDialog   *ui.Dialog
-	quitDialog         *ui.Dialog
-	quitLabel          *ui.Label
-	quitYesButton      *ui.Button
-	quitNoButton       *ui.Button
-	storeErrorDialog   *ui.Dialog
-	storeErrorLabel    *ui.Label
-	storeErrorOkButton *ui.Button
-	removeAdsButton    *ui.Button
-	removeAdsDialog    *ui.Dialog
-	removeAdsLabel     *ui.Label
-	removeAdsYesButton *ui.Button
-	removeAdsNoButton  *ui.Button
-	inventory          *ui.Inventory
-	itemPreviewPopup   *ui.ItemPreviewPopup
-	waitingRequestID   int
-	isAdsRemoved       bool
-	initialized        bool
-	offsetX            int
-	offsetY            int
+	gameState            *gamestate.Game
+	moveDstX             int
+	moveDstY             int
+	tilesImage           *ebiten.Image
+	uiImage              *ebiten.Image
+	triggeringFailed     bool
+	initialState         bool
+	cameraButton         *ui.Button
+	cameraTaking         bool
+	titleButton          *ui.Button
+	screenShotImage      *ebiten.Image
+	screenShotDialog     *ui.Dialog
+	quitDialog           *ui.Dialog
+	quitLabel            *ui.Label
+	quitYesButton        *ui.Button
+	quitNoButton         *ui.Button
+	storeErrorDialog     *ui.Dialog
+	storeErrorLabel      *ui.Label
+	storeErrorOkButton   *ui.Button
+	removeAdsButton      *ui.Button
+	removeAdsDialog      *ui.Dialog
+	removeAdsLabel       *ui.Label
+	removeAdsYesButton   *ui.Button
+	removeAdsNoButton    *ui.Button
+	inventory            *ui.Inventory
+	itemPreviewPopup     *ui.ItemPreviewPopup
+	markerAnimationFrame int
+	waitingRequestID     int
+	isAdsRemoved         bool
+	initialized          bool
+	offsetX              int
+	offsetY              int
 }
 
 func NewMapScene() *MapScene {
@@ -267,6 +273,8 @@ func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) {
 	if !input.Triggered() {
 		return
 	}
+
+	m.markerAnimationFrame = 0
 	x, y := input.Position()
 	x -= m.offsetX
 	y -= m.offsetY
@@ -541,7 +549,20 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		op.GeoM.Translate(float64(x*consts.TileSize), float64(y*consts.TileSize))
 		op.GeoM.Scale(consts.TileScale, consts.TileScale)
 		op.GeoM.Translate(float64(m.offsetX), float64(m.offsetY))
-		screen.DrawImage(assets.GetImage("system/game/marker.png"), op)
+
+		numFrames := m.markerAnimationFrame / markerAnimationInterval
+		src := image.Rect(markerSize*numFrames, 0, markerSize*(1+numFrames), markerSize)
+		op.SourceRect = &src
+		markerImage := assets.GetImage("system/game/marker.png")
+		screen.DrawImage(markerImage, op)
+
+		w, _ := markerImage.Size()
+		frameCount := w / markerSize
+		if m.markerAnimationFrame < frameCount*markerAnimationInterval {
+			m.markerAnimationFrame++
+		} else {
+			m.triggeringFailed = false
+		}
 	}
 
 	m.uiImage.Clear()
