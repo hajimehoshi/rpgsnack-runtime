@@ -50,7 +50,7 @@ type Manager struct {
 	results               map[int]*RequestResult
 	setPlatformDataCh     chan setPlatformDataArgs
 	game                  *data.Game
-	progress              []uint8
+	progress              []byte
 	purchases             []string
 	language              language.Tag
 	interstitialAdsLoaded bool
@@ -60,7 +60,7 @@ type Manager struct {
 
 type Requester interface {
 	RequestUnlockAchievement(requestID int, achievementID int)
-	RequestSaveProgress(requestID int, data []uint8)
+	RequestSaveProgress(requestID int, data []byte)
 	RequestPurchase(requestID int, productID string)
 	RequestRestorePurchases(requestID int)
 	RequestInterstitialAds(requestID int)
@@ -91,7 +91,7 @@ type RequestResult struct {
 	ID        int
 	Type      RequestType
 	Succeeded bool
-	Data      []uint8
+	Data      []byte
 }
 
 type PlatformDataKey string
@@ -102,7 +102,7 @@ const (
 	PlatformDataKeyBackButton            PlatformDataKey = "backbutton"
 )
 
-func NewManager(width, height int, requester Requester, game *data.Game, progress []uint8, purchases []string, language language.Tag) *Manager {
+func NewManager(width, height int, requester Requester, game *data.Game, progress []byte, purchases []string, language language.Tag) *Manager {
 	m := &Manager{
 		width:             width,
 		height:            height,
@@ -212,11 +212,11 @@ func (m *Manager) HasProgress() bool {
 	return m.progress != nil
 }
 
-func (m *Manager) Progress() []uint8 {
+func (m *Manager) Progress() []byte {
 	return m.progress
 }
 
-func (m *Manager) SetProgress(progress []uint8) {
+func (m *Manager) SetProgress(progress []byte) {
 	m.progress = progress
 }
 
@@ -285,7 +285,7 @@ func (m *Manager) FinishSaveProgress(id int) {
 	}
 }
 
-func (m *Manager) FinishPurchase(id int, success bool, purchases []uint8) {
+func (m *Manager) FinishPurchase(id int, success bool, purchases []byte) {
 	m.resultCh <- RequestResult{
 		ID:        id,
 		Type:      RequestTypePurchase,
@@ -294,7 +294,7 @@ func (m *Manager) FinishPurchase(id int, success bool, purchases []uint8) {
 	}
 }
 
-func (m *Manager) FinishRestorePurchases(id int, success bool, purchases []uint8) {
+func (m *Manager) FinishRestorePurchases(id int, success bool, purchases []byte) {
 	m.resultCh <- RequestResult{
 		ID:        id,
 		Type:      RequestTypeRestorePurchases,
@@ -339,7 +339,7 @@ func (m *Manager) FinishChangeLanguage(id int) {
 	}
 }
 
-func (m *Manager) FinishGetIAPPrices(id int, success bool, prices []uint8) {
+func (m *Manager) FinishGetIAPPrices(id int, success bool, prices []byte) {
 	m.resultCh <- RequestResult{
 		ID:        id,
 		Type:      RequestTypeIAPPrices,
