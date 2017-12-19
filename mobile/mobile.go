@@ -28,14 +28,14 @@ var (
 	theGame *game.Game
 )
 
-func SetData(project []byte, resources []byte, progress []byte, purchases []byte, language string) {
+func SetData(project []byte, assets []byte, progress []byte, purchases []byte, language string) {
 	// Copy data here since the given data is just a reference and might be
 	// broken in the mobile side.
 	p := make([]byte, len(project))
 	copy(p, project)
 
-	r := make([]byte, len(resources))
-	copy(r, resources)
+	a := make([]byte, len(assets))
+	copy(a, assets)
 
 	var p1 []byte
 	if progress != nil {
@@ -49,7 +49,7 @@ func SetData(project []byte, resources []byte, progress []byte, purchases []byte
 		copy(p2, purchases)
 	}
 
-	data.SetData(p, r, p1, p2, language)
+	data.SetData(p, a, p1, p2, language)
 }
 
 func IsRunning() bool {
