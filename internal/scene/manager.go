@@ -58,42 +58,6 @@ type Manager struct {
 	blackImage            *ebiten.Image
 }
 
-type Requester interface {
-	RequestUnlockAchievement(requestID int, achievementID int)
-	RequestSaveProgress(requestID int, data []byte)
-	RequestPurchase(requestID int, productID string)
-	RequestRestorePurchases(requestID int)
-	RequestInterstitialAds(requestID int)
-	RequestRewardedAds(requestID int)
-	RequestOpenLink(requestID int, linkType string, data string)
-	RequestShareImage(requestID int, title string, message string, image string)
-	RequestTerminateGame()
-	RequestChangeLanguage(requestID int, lang string)
-	RequestGetIAPPrices(requestID int)
-}
-
-type RequestType int
-
-const (
-	RequestTypeUnlockAchievement RequestType = iota
-	RequestTypeSaveProgress
-	RequestTypePurchase
-	RequestTypeRestorePurchases
-	RequestTypeInterstitialAds
-	RequestTypeRewardedAds
-	RequestTypeOpenLink
-	RequestTypeShareImage
-	RequestTypeChangeLanguage
-	RequestTypeIAPPrices
-)
-
-type RequestResult struct {
-	ID        int
-	Type      RequestType
-	Succeeded bool
-	Data      []byte
-}
-
 type PlatformDataKey string
 
 const (
@@ -106,7 +70,7 @@ func NewManager(width, height int, requester Requester, game *data.Game, progres
 	m := &Manager{
 		width:             width,
 		height:            height,
-		requester:         requester,
+		requester:         &requesterImpl{Requester: requester},
 		resultCh:          make(chan RequestResult, 1),
 		results:           map[int]*RequestResult{},
 		setPlatformDataCh: make(chan setPlatformDataArgs, 1),
