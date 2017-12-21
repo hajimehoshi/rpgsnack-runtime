@@ -21,6 +21,7 @@ import (
 	"log"
 	"os"
 	"runtime/pprof"
+	"runtime/trace"
 
 	"github.com/hajimehoshi/ebiten"
 )
@@ -28,22 +29,44 @@ import (
 var (
 	cpuProfile     = flag.String("cpuprofile", "", "write cpu profile to file")
 	cpuProfileFile *os.File
+
+	traceOut     = flag.String("trace", "", "write trace output to file")
+	traceOutFile *os.File
 )
 
 func takeCPUProfileIfAvailable() {
-	if ebiten.IsKeyPressed(ebiten.KeyP) && *cpuProfile != "" && cpuProfileFile == nil {
-		f, err := os.Create(*cpuProfile)
-		if err != nil {
-			panic(err)
+	if ebiten.IsKeyPressed(ebiten.KeyP) {
+		if *cpuProfile != "" && cpuProfileFile == nil {
+			f, err := os.Create(*cpuProfile)
+			if err != nil {
+				panic(err)
+			}
+			cpuProfileFile = f
+			pprof.StartCPUProfile(f)
+			log.Print("Start CPU Profiling")
 		}
-		cpuProfileFile = f
-		pprof.StartCPUProfile(f)
-		log.Print("Start CPU Profiling")
+		if *traceOut != "" && traceOutFile == nil {
+			f, err := os.Create(*traceOut)
+			if err != nil {
+				panic(err)
+			}
+			traceOutFile = f
+			trace.Start(f)
+			log.Print("Start Tracing")
+		}
 	}
-	if ebiten.IsKeyPressed(ebiten.KeyQ) && cpuProfileFile != nil {
-		pprof.StopCPUProfile()
-		cpuProfileFile.Close()
-		cpuProfileFile = nil
-		log.Print("Stop CPU Profiling")
+	if ebiten.IsKeyPressed(ebiten.KeyQ) {
+		if cpuProfileFile != nil {
+			pprof.StopCPUProfile()
+			cpuProfileFile.Close()
+			cpuProfileFile = nil
+			log.Print("Stop CPU Profiling")
+		}
+		if traceOutFile != nil {
+			trace.Stop()
+			traceOutFile.Close()
+			traceOutFile = nil
+			log.Print("Stop Tracing")
+		}
 	}
 }
