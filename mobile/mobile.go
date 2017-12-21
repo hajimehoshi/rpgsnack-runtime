@@ -56,10 +56,27 @@ func IsRunning() bool {
 	return running
 }
 
-func Start(screenWidth int, screenHeight int, scale float64, requester Requester) error {
+func Start(widthInDP int, heightInDP int, requester Requester) error {
+	const (
+		minWidth  = 480
+		minHeight = 672
+	)
+
 	running = true
-	g := game.New(screenWidth, screenHeight, requester)
-	if err := mobile.Start(g.Update, screenWidth, screenHeight, scale, game.Title()); err != nil {
+
+	width := 0
+	height := 0
+	scale := 0.0
+	if float64(heightInDP)/float64(widthInDP) > float64(minHeight)/minWidth {
+		scale = float64(widthInDP) / minWidth
+	} else {
+		scale = float64(heightInDP) / minHeight
+	}
+	width = int(float64(widthInDP) / scale)
+	height = int(float64(heightInDP) / scale)
+
+	g := game.New(width, height, requester)
+	if err := mobile.Start(g.Update, width, height, scale, game.Title()); err != nil {
 		return err
 	}
 	theGame = g
