@@ -167,13 +167,13 @@ func (a *audio) PlayBGM(name string, volume float64) {
 	if a.err != nil {
 		return
 	}
-	player, err := a.getPlayer("audio/bgm/"+name, true)
-	if err != nil {
-		a.err = err
-		return
-	}
 	p, ok := a.players[name]
 	if !ok {
+		player, err := a.getPlayer("audio/bgm/"+name, true)
+		if err != nil {
+			a.err = err
+			return
+		}
 		a.players[name] = player
 		p = player
 	}
