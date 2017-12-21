@@ -233,7 +233,7 @@ func (b *banner) draw(screen *ebiten.Image, character *character.Character, offs
 	}
 
 	if b.opened {
-		displayTextLength := b.typingEffect.getCurrentTextLength()
+		displayTextLength := b.typingEffect.getCurrentTextRuneCount()
 		_, th := font.MeasureSize(b.content)
 		x, y := b.position()
 		x = (x + bannerPaddingX) * consts.TileScale

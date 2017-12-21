@@ -16,7 +16,6 @@ package window
 
 import (
 	"fmt"
-	"unicode/utf8"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
 	"github.com/vmihailenco/msgpack"
@@ -32,7 +31,7 @@ type typingEffect struct {
 func NewTypingEffect(content string, delay int) *typingEffect {
 	t := &typingEffect{
 		content:          content,
-		animMaxCount:     utf8.RuneCountInString(content) / 2 * delay,
+		animMaxCount:     len([]rune(content)) / 2 * delay,
 		allTextDisplayed: false,
 		animCount:        0,
 	}
@@ -97,9 +96,9 @@ func (t *typingEffect) update() {
 	}
 }
 
-func (t *typingEffect) getCurrentTextLength() int {
+func (t *typingEffect) getCurrentTextRuneCount() int {
 	if t.animMaxCount > 0 {
-		return len(t.content) * t.animCount / t.animMaxCount
+		return len([]rune(t.content)) * t.animCount / t.animMaxCount
 	}
-	return len(t.content)
+	return len([]rune(t.content))
 }
