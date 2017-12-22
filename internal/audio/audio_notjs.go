@@ -180,15 +180,16 @@ func (a *audio) PlayBGM(name string, volume float64) {
 	if a.playingBGMName == name {
 		a.playing.SetVolume(volume)
 		return
-	} else if a.playing != nil {
+	}
+	if a.playing != nil {
 		a.playing.Pause()
 	}
 	if err := p.Rewind(); err != nil {
 		a.err = err
 		return
 	}
-	p.Play()
 	p.SetVolume(volume)
+	p.Play()
 	a.playing = p
 	a.playingBGMName = name
 	a.playingBGMVolume = volume
