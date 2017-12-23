@@ -90,9 +90,6 @@ func (a *audio) Update() error {
 	if a.err != nil {
 		return a.err
 	}
-	if err := a.context.Update(); err != nil {
-		return err
-	}
 	closed := []*eaudio.Player{}
 	for p := range a.sePlayers {
 		if !p.IsPlaying() {

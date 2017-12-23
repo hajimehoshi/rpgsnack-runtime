@@ -107,7 +107,10 @@ func (g *Game) update() error {
 		return err
 	}
 	takeCPUProfileIfAvailable()
-	return g.sceneManager.Update()
+	if err := g.sceneManager.Update(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (g *Game) draw(screen *ebiten.Image) {
