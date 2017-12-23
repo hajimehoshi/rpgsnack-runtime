@@ -42,16 +42,16 @@ type ItemPreviewPopup struct {
 
 func NewItemPreviewPopup(x, y int) *ItemPreviewPopup {
 	closeButton := NewImageButton(
-		120,
-		25,
+		136,
+		39,
 		NewImagePart(assets.GetImage("system/itempreview/cancel_off.png")),
 		NewImagePart(assets.GetImage("system/itempreview/cancel_on.png")),
 		"cancel",
 	)
 
 	actionButton := NewImageButton(
-		40,
-		114,
+		56,
+		128,
 		NewImagePart(assets.GetImage("system/itempreview/action_button_off.png")),
 		NewImagePart(assets.GetImage("system/itempreview/action_button_on.png")),
 		"click",
@@ -83,7 +83,7 @@ func (i *ItemPreviewPopup) Update(lang language.Tag) {
 		return
 	}
 	for _, n := range i.nodes {
-		n.UpdateAsChild(i.visible, i.x, i.y)
+		n.UpdateAsChild(i.visible, 0, 0)
 	}
 	i.actionButton.Text = texts.Text(lang, texts.TextIDItemCheck)
 }
@@ -174,6 +174,6 @@ func (i *ItemPreviewPopup) Draw(screen *ebiten.Image) {
 	}
 
 	for _, n := range i.nodes {
-		n.DrawAsChild(screen, i.x, i.y)
+		n.DrawAsChild(screen, 0, 0)
 	}
 }
