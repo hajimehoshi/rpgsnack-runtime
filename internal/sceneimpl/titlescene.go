@@ -113,7 +113,6 @@ func (t *TitleScene) initUI(sceneManager *scene.Manager) {
 		sceneManager.GoToWithFading(NewMapSceneWithGame(game), 60)
 	})
 	t.settingsButton.SetOnPressed(func(_ *ui.Button) {
-		audio.StopBGM()
 		sceneManager.GoTo(NewSettingsScene())
 	})
 	t.moregamesButton.SetOnPressed(func(_ *ui.Button) {
