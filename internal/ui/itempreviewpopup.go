@@ -42,7 +42,7 @@ type ItemPreviewPopup struct {
 
 func NewItemPreviewPopup(x, y int) *ItemPreviewPopup {
 	closeButton := NewImageButton(
-		136,
+		137,
 		39,
 		NewImagePart(assets.GetImage("system/itempreview/cancel_off.png")),
 		NewImagePart(assets.GetImage("system/itempreview/cancel_on.png")),
@@ -50,7 +50,7 @@ func NewItemPreviewPopup(x, y int) *ItemPreviewPopup {
 	)
 
 	actionButton := NewImageButton(
-		56,
+		54,
 		128,
 		NewImagePart(assets.GetImage("system/itempreview/action_button_off.png")),
 		NewImagePart(assets.GetImage("system/itempreview/action_button_on.png")),
