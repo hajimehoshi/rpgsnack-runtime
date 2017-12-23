@@ -289,9 +289,10 @@ func (g *Game) RequestSave(sceneManager *scene.Manager) bool {
 	}
 	id := sceneManager.GenerateRequestID()
 	g.waitingRequestID = id
+
 	m, err := msgpack.Marshal(g)
 	if err != nil {
-		panic(fmt.Sprintf("gamestate: JSON encoding error: %v", err))
+		panic(fmt.Sprintf("gamestate: msgpack encoding error: %v", err))
 	}
 	sceneManager.Requester().RequestSaveProgress(id, m)
 	sceneManager.SetProgress(m)
