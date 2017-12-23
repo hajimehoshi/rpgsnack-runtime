@@ -30,6 +30,7 @@ type audio struct {
 	bgmSource *js.Object
 	bgmGain   *js.Object
 	bgmName   string
+	bgmVolume float64
 	dataCache map[string][]byte
 	err       error
 }
@@ -166,7 +167,7 @@ func PlaySE(name string, volume float64) {
 	}
 
 	g := theCurrentAudio.context.Call("createGain")
-	g.Get("gain").Set("value", volume)
+	g.Get("gain").Set("value", volume*volumeBias)
 	n.Call("connect", g)
 	g.Call("connect", theCurrentAudio.context.Get("destination"))
 	n.Call("start", 0)
@@ -185,7 +186,7 @@ func PlayBGM(name string, volume float64) {
 	}
 
 	g := theCurrentAudio.context.Call("createGain")
-	g.Get("gain").Set("value", volume)
+	g.Get("gain").Set("value", volume*volumeBias)
 	n.Call("connect", g)
 	g.Call("connect", theCurrentAudio.context.Get("destination"))
 	n.Call("start", 0)
@@ -193,6 +194,7 @@ func PlayBGM(name string, volume float64) {
 	theCurrentAudio.bgmSource = n
 	theCurrentAudio.bgmGain = g
 	theCurrentAudio.bgmName = name
+	theCurrentAudio.bgmVolume = volume
 }
 
 func PlayingBGMName() string {
@@ -203,7 +205,7 @@ func PlayingBGMVolume() float64 {
 	if theCurrentAudio.bgmSource == nil {
 		return 0
 	}
-	return theCurrentAudio.bgmGain.Get("gain").Get("volume").Float()
+	return theCurrentAudio.bgmVolume
 }
 
 func StopBGM() {
@@ -216,4 +218,5 @@ func StopBGM() {
 	theCurrentAudio.bgmSource.Call("stop", 0)
 	theCurrentAudio.bgmSource = nil
 	theCurrentAudio.bgmName = ""
+	theCurrentAudio.bgmVolume = 0
 }

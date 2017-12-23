@@ -155,7 +155,7 @@ func (a *audio) PlaySE(name string, volume float64) {
 		a.err = err
 		return
 	}
-	p.SetVolume(volume)
+	p.SetVolume(volume * volumeBias)
 	p.Play()
 	a.sePlayers[p] = struct{}{}
 }
@@ -175,7 +175,7 @@ func (a *audio) PlayBGM(name string, volume float64) {
 		p = player
 	}
 	if a.playingBGMName == name {
-		a.playing.SetVolume(volume)
+		a.playing.SetVolume(volume * volumeBias)
 		return
 	}
 	if a.playing != nil {
@@ -185,7 +185,7 @@ func (a *audio) PlayBGM(name string, volume float64) {
 		a.err = err
 		return
 	}
-	p.SetVolume(volume)
+	p.SetVolume(volume * volumeBias)
 	p.Play()
 	a.playing = p
 	a.playingBGMName = name
