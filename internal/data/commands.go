@@ -230,6 +230,12 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 			return err
 		}
 		c.Args = args
+	case CommandNameSendAnalytics:
+		var args *CommandArgsSendAnalytics
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	case CommandNameMoveCharacter:
 		var args *CommandArgsMoveCharacter
 		if err := unmarshalJSON(tmp.Args, &args); err != nil {
@@ -476,6 +482,10 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 				a := &CommandArgsOpenLink{}
 				d.DecodeAny(a)
 				c.Args = a
+			case CommandNameSendAnalytics:
+				a := &CommandArgsSendAnalytics{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameMoveCharacter:
 				a := &CommandArgsMoveCharacter{}
 				d.DecodeAny(a)
@@ -629,6 +639,7 @@ const (
 	CommandNameSyncIAP           CommandName = "sync_iap" // TODO: We might be able to remove this later
 	CommandNameShowAds           CommandName = "show_ads"
 	CommandNameOpenLink          CommandName = "open_link"
+	CommandNameSendAnalytics     CommandName = "send_analytics"
 
 	CommandNameAddItem       CommandName = "add_item"
 	CommandNameRemoveItem    CommandName = "remove_item"
@@ -927,6 +938,10 @@ type CommandArgsShowAds struct {
 type CommandArgsOpenLink struct {
 	Type string `json:"type" msgpack:"type"`
 	Data string `json:"data" msgpack:"data"`
+}
+
+type CommandArgsSendAnalytics struct {
+	EventName string `json:"eventName" msgpack:"eventName"`
 }
 
 type CommandArgsAutoSave struct {

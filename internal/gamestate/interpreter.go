@@ -611,6 +611,10 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		// TODO: Define data.OpenLinkType
 		sceneManager.Requester().RequestOpenLink(i.waitingRequestID, args.Type, args.Data)
 		return false, nil
+	case data.CommandNameSendAnalytics:
+		args := c.Args.(*data.CommandArgsSendAnalytics)
+		sceneManager.Requester().RequestSendAnalytics(args.EventName)
+		i.commandIterator.Advance()
 	case data.CommandNameMoveCharacter:
 		if ch := gameState.Character(i.mapID, i.roomID, i.eventID); ch == nil {
 			i.commandIterator.Advance()

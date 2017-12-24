@@ -26,6 +26,7 @@ type Requester interface {
 	RequestTerminateGame()
 	RequestChangeLanguage(requestID int, lang string)
 	RequestGetIAPPrices(requestID int)
+	RequestSendAnalytics(eventName string)
 }
 
 type RequestType int

@@ -144,3 +144,7 @@ func (m *Requester) RequestGetIAPPrices(requestID int) {
 func (m *Requester) RequestTerminateGame() {
 	log.Printf("request terminate game")
 }
+
+func (m *Requester) RequestSendAnalytics(eventName string) {
+	log.Printf("request to send an analytics event: %s", eventName)
+}
