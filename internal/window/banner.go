@@ -150,7 +150,7 @@ func (b *banner) skipTypingAnim() {
 
 func (b *banner) open() {
 	b.openingCount = bannerMaxCount
-	b.typingEffect = NewTypingEffect(b.content, b.messageStyle.TypingEffectDelay)
+	b.typingEffect = newTypingEffect(b.content, b.messageStyle.TypingEffectDelay, b.messageStyle.SoundEffect)
 }
 
 func (b *banner) close() {

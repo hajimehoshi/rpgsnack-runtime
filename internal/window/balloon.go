@@ -275,7 +275,7 @@ func (b *balloon) isAnimating() bool {
 func (b *balloon) open() {
 	// TODO: This should be called only in the constructor?
 	b.openingCount = balloonMaxCount
-	b.typingEffect = NewTypingEffect(b.content, b.messageStyle.TypingEffectDelay)
+	b.typingEffect = newTypingEffect(b.content, b.messageStyle.TypingEffectDelay, b.messageStyle.SoundEffect)
 }
 
 func (b *balloon) close() {

@@ -43,6 +43,7 @@ type MessageStyle struct {
 	ID                int       `json:"id"`
 	Name              uuid.UUID `json:"name"`
 	TypingEffectDelay int       `json:"typingEffectDelay"`
+	SoundEffect       string    `json:"soundEffect"`
 }
 
 type BGM struct {

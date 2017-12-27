@@ -17,23 +17,25 @@ package window
 import (
 	"fmt"
 
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
 	"github.com/vmihailenco/msgpack"
 )
 
 type typingEffect struct {
-	animCount        int
-	animMaxCount     int
-	allTextDisplayed bool
-	content          string
+	animCount                 int
+	animMaxCount              int
+	allTextDisplayed          bool
+	content                   string
+	soundEffect               string
+	isSEPlayedInPreviousFrame bool
 }
 
-func NewTypingEffect(content string, delay int) *typingEffect {
+func newTypingEffect(content string, delay int, soundEffect string) *typingEffect {
 	t := &typingEffect{
-		content:          content,
-		animMaxCount:     len([]rune(content)) / 2 * delay,
-		allTextDisplayed: false,
-		animCount:        0,
+		content:      content,
+		animMaxCount: len([]rune(content)) * delay,
+		soundEffect:  soundEffect,
 	}
 	return t
 }
@@ -54,6 +56,12 @@ func (t *typingEffect) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EncodeString("content")
 	e.EncodeString(t.content)
 
+	e.EncodeString("soundEffect")
+	e.EncodeString(t.soundEffect)
+
+	e.EncodeString("playedSE")
+	e.EncodeBool(t.isSEPlayedInPreviousFrame)
+
 	e.EndMap()
 	return e.Flush()
 }
@@ -71,6 +79,10 @@ func (t *typingEffect) DecodeMsgpack(dec *msgpack.Decoder) error {
 			t.allTextDisplayed = d.DecodeBool()
 		case "content":
 			t.content = d.DecodeString()
+		case "soundEffect":
+			t.soundEffect = d.DecodeString()
+		case "playedSE":
+			t.isSEPlayedInPreviousFrame = d.DecodeBool()
 		}
 	}
 	if err := d.Error(); err != nil {
@@ -88,11 +100,28 @@ func (t *typingEffect) skipAnim() {
 }
 
 func (t *typingEffect) update() {
+	prevTextRuneCount := t.getCurrentTextRuneCount()
 	if t.animCount < t.animMaxCount {
 		t.animCount++
 	}
 	if t.animCount == t.animMaxCount {
 		t.allTextDisplayed = true
+	}
+	currentTextRuneCount := t.getCurrentTextRuneCount()
+	if currentTextRuneCount > 0 && currentTextRuneCount != prevTextRuneCount {
+		t.playSE()
+	}
+}
+
+func (t *typingEffect) playSE() {
+	if t.soundEffect == "" {
+		return
+	}
+	if !t.isSEPlayedInPreviousFrame && t.content[t.getCurrentTextRuneCount()-1] != ' ' {
+		audio.PlaySE(t.soundEffect, 0.2)
+		t.isSEPlayedInPreviousFrame = true
+	} else {
+		t.isSEPlayedInPreviousFrame = false
 	}
 }
 
