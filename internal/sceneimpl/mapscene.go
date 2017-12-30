@@ -579,7 +579,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	m.storeErrorDialog.Draw(m.uiImage)
 	m.removeAdsDialog.Draw(m.uiImage)
 
-	m.gameState.DrawWindows(m.uiImage, 0, m.offsetY)
+	m.gameState.DrawWindows(m.uiImage, 0, m.offsetY/consts.TileScale)
 
 	op = &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(m.offsetX), 0)

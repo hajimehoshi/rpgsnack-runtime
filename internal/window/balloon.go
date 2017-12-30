@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"math"
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/vmihailenco/msgpack"
@@ -326,7 +327,6 @@ func (b *balloon) geoMForRate(screen *ebiten.Image, character *character.Charact
 	rate := b.openingRate()
 	g.Scale(rate, rate)
 	g.Translate(cx, cy)
-	g.Scale(consts.TileScale, consts.TileScale)
 	return &g
 }
 
@@ -345,8 +345,8 @@ func (b *balloon) openingRate() float64 {
 
 func (b *balloon) draw(screen *ebiten.Image, character *character.Character, offsetX, offsetY int) {
 	sw, _ := screen.Size()
-	dx := float64(sw-consts.TileXNum*consts.TileSize*consts.TileScale)/2 + float64(offsetX)
-	dy := float64(offsetY)
+	dx := math.Floor(float64(sw/consts.TileScale-consts.TileXNum*consts.TileSize)/2 + float64(offsetX))
+	dy := math.Floor(float64(offsetY))
 	if b.openingRate() > 0 {
 		img := assets.GetImage("system/game/balloon.png")
 		if b.balloonType == data.BalloonTypeShout {
@@ -380,6 +380,7 @@ func (b *balloon) draw(screen *ebiten.Image, character *character.Character, off
 				op.SourceRect = &r
 				op.GeoM.Translate(float64(tx+i*s), float64(ty+j*s))
 				op.GeoM.Concat(*g)
+				op.GeoM.Scale(consts.TileScale, consts.TileScale)
 				screen.DrawImage(img, op)
 			}
 		}
@@ -407,6 +408,7 @@ func (b *balloon) draw(screen *ebiten.Image, character *character.Character, off
 			}
 			op.GeoM.Translate(float64(tx), float64(ty))
 			op.GeoM.Concat(*g)
+			op.GeoM.Scale(consts.TileScale, consts.TileScale)
 			screen.DrawImage(img, op)
 		}
 	}
@@ -415,8 +417,8 @@ func (b *balloon) draw(screen *ebiten.Image, character *character.Character, off
 		mx, my := b.margin()
 		x = (x + mx + b.contentOffsetX) * consts.TileScale
 		y = (y + my + b.contentOffsetY) * consts.TileScale
-		x += int(dx)
-		y += int(dy)
+		x += int(dx * consts.TileScale)
+		y += int(dy * consts.TileScale)
 		font.DrawText(screen, b.content, x, y, consts.TextScale, data.TextAlignLeft, color.Black, b.typingEffect.getCurrentTextRuneCount())
 	}
 }

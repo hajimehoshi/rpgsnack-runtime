@@ -17,6 +17,7 @@ package window
 import (
 	"fmt"
 	"image/color"
+	"math"
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/vmihailenco/msgpack"
@@ -210,8 +211,8 @@ func (b *banner) draw(screen *ebiten.Image, character *character.Character, offs
 		rate = float64(b.closingCount) / float64(bannerMaxCount)
 	}
 	sw, _ := screen.Size()
-	dx := float64(sw-consts.TileXNum*consts.TileSize*consts.TileScale)/2 + float64(offsetX)
-	dy := float64(offsetY)
+	dx := math.Floor(float64(sw/consts.TileScale-consts.TileXNum*consts.TileSize)/2 + float64(offsetX))
+	dy := math.Floor(float64(offsetY))
 
 	switch b.background {
 	case data.MessageBackgroundDim:
@@ -225,8 +226,8 @@ func (b *banner) draw(screen *ebiten.Image, character *character.Character, offs
 			x, y := b.position()
 			op := &ebiten.DrawImageOptions{}
 			op.GeoM.Translate(float64(x), float64(y))
-			op.GeoM.Scale(consts.TileScale, consts.TileScale)
 			op.GeoM.Translate(float64(dx), float64(dy))
+			op.GeoM.Scale(consts.TileScale, consts.TileScale)
 			op.ColorM.Scale(1, 1, 1, rate)
 			screen.DrawImage(img, op)
 		}
@@ -245,8 +246,8 @@ func (b *banner) draw(screen *ebiten.Image, character *character.Character, offs
 		case data.TextAlignRight:
 			x += (consts.TileXNum*consts.TileSize - 2*bannerPaddingX) * consts.TileScale
 		}
-		x += int(dx)
-		y += int(dy)
+		x += int(dx * consts.TileScale)
+		y += int(dy * consts.TileScale)
 
 		if textEdge {
 			shadowColor := color.RGBA{0, 0, 0, 64}
