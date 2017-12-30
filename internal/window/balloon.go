@@ -55,6 +55,8 @@ type balloon struct {
 	balloonType    data.BalloonType
 	messageStyle   *data.MessageStyle
 	typingEffect   *typingEffect
+
+	offscreen *ebiten.Image
 }
 
 func (b *balloon) EncodeMsgpack(enc *msgpack.Encoder) error {
@@ -343,47 +345,68 @@ func (b *balloon) openingRate() float64 {
 	}
 }
 
+func (b *balloon) assetImage() *ebiten.Image {
+	if b.balloonType == data.BalloonTypeShout {
+		return assets.GetImage("system/game/shout.png")
+	} else {
+		return assets.GetImage("system/game/balloon.png")
+	}
+}
+
+func (b *balloon) ensureOffscreen() {
+	if b.offscreen != nil {
+		return
+	}
+
+	b.offscreen, _ = ebiten.NewImage(b.width, b.height, ebiten.FilterNearest)
+
+	img := b.assetImage()
+
+	op := &ebiten.DrawImageOptions{}
+	pw, ph := b.width/b.partSize(), b.height/b.partSize()
+	s := b.partSize()
+	for j := 0; j < ph; j++ {
+		for i := 0; i < pw; i++ {
+			op.GeoM.Reset()
+			sx, sy := 0, 0
+			switch i {
+			case 0:
+			default:
+				sx += s
+			case pw - 1:
+				sx += s * 2
+			}
+			switch j {
+			case 0:
+			default:
+				sy += s
+			case ph - 1:
+				sy += s * 2
+			}
+			r := image.Rect(sx, sy, sx+s, sy+s)
+			op.SourceRect = &r
+			op.GeoM.Translate(float64(i*s), float64(j*s))
+			b.offscreen.DrawImage(img, op)
+		}
+	}
+}
+
 func (b *balloon) draw(screen *ebiten.Image, character *character.Character, offsetX, offsetY int) {
 	sw, _ := screen.Size()
 	dx := math.Floor(float64(sw/consts.TileScale-consts.TileXNum*consts.TileSize)/2 + float64(offsetX))
 	dy := math.Floor(float64(offsetY))
 	if b.openingRate() > 0 {
-		img := assets.GetImage("system/game/balloon.png")
-		if b.balloonType == data.BalloonTypeShout {
-			img = assets.GetImage("system/game/shout.png")
-		}
+		b.ensureOffscreen()
+
+		img := b.assetImage()
 		op := &ebiten.DrawImageOptions{}
 		g := b.geoMForRate(screen, character)
 		g.Translate(dx, dy)
-		pw, ph := b.width/b.partSize(), b.height/b.partSize()
-		s := b.partSize()
 		tx, ty := b.position(sw, character)
-		for j := 0; j < ph; j++ {
-			for i := 0; i < pw; i++ {
-				op.GeoM.Reset()
-				sx, sy := 0, 0
-				switch i {
-				case 0:
-				default:
-					sx += s
-				case pw - 1:
-					sx += s * 2
-				}
-				switch j {
-				case 0:
-				default:
-					sy += s
-				case ph - 1:
-					sy += s * 2
-				}
-				r := image.Rect(sx, sy, sx+s, sy+s)
-				op.SourceRect = &r
-				op.GeoM.Translate(float64(tx+i*s), float64(ty+j*s))
-				op.GeoM.Concat(*g)
-				op.GeoM.Scale(consts.TileScale, consts.TileScale)
-				screen.DrawImage(img, op)
-			}
-		}
+		op.GeoM.Translate(float64(tx), float64(ty))
+		op.GeoM.Concat(*g)
+		op.GeoM.Scale(consts.TileScale, consts.TileScale)
+		screen.DrawImage(b.offscreen, op)
 		if b.hasArrow && (b.balloonType == data.BalloonTypeNormal ||
 			b.balloonType == data.BalloonTypeThink) {
 			op := &ebiten.DrawImageOptions{}
