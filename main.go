@@ -26,7 +26,7 @@ import (
 )
 
 var (
-	screenSize = flag.String("screensize", "480x720", "screen size like 480x720")
+	screenSize = flag.String("screensize", "480x853", "screen size like 480x720")
 )
 
 func main() {

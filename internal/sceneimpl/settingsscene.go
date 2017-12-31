@@ -85,6 +85,7 @@ func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
 		s.languageDialog.Show()
 	})
 	s.creditButton.SetOnPressed(func(_ *ui.Button) {
+		s.waitingRequestID = sceneManager.GenerateRequestID()
 		sceneManager.Requester().RequestOpenLink(s.waitingRequestID, "show_credit", "menu")
 	})
 	s.reviewThisAppButton.SetOnPressed(func(_ *ui.Button) {
