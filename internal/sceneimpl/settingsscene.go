@@ -37,9 +37,6 @@ type SettingsScene struct {
 	closeButton            *ui.Button
 	languageDialog         *ui.Dialog
 	languageButtons        []*ui.Button
-	creditDialog           *ui.Dialog
-	creditLabel            *ui.Label
-	creditCloseButton      *ui.Button
 	waitingRequestID       int
 	initialized            bool
 }
@@ -65,9 +62,6 @@ func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
 	s.closeButton = ui.NewButton((w/consts.TileScale-120)/2, buttonOffsetX+6*buttonDeltaY, 120, 20, "cancel")
 
 	s.languageDialog = ui.NewDialog((w/consts.TileScale-160)/2+4, 4, 152, 232)
-	s.creditDialog = ui.NewDialog((w/consts.TileScale-160)/2+4, 4, 152, 232)
-	s.creditLabel = ui.NewLabel(16, 8)
-	s.creditCloseButton = ui.NewButton((152-120)/2, 204, 120, 20, "cancel")
 
 	for i, l := range sceneManager.Game().Texts.Languages() {
 		i := i // i is captured by the below closure and it is needed to copy here.
@@ -87,17 +81,11 @@ func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
 		})
 	}
 
-	s.creditDialog.AddChild(s.creditLabel)
-	s.creditDialog.AddChild(s.creditCloseButton)
-
-	s.creditCloseButton.SetOnPressed(func(_ *ui.Button) {
-		s.creditDialog.Hide()
-	})
 	s.languageButton.SetOnPressed(func(_ *ui.Button) {
 		s.languageDialog.Show()
 	})
 	s.creditButton.SetOnPressed(func(_ *ui.Button) {
-		s.creditDialog.Show()
+		sceneManager.Requester().RequestOpenLink(s.waitingRequestID, "show_credit", "menu")
 	})
 	s.reviewThisAppButton.SetOnPressed(func(_ *ui.Button) {
 		s.waitingRequestID = sceneManager.GenerateRequestID()
@@ -122,20 +110,6 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 		s.initialized = true
 	}
 
-	// TODO: This stirng should be given from outside.
-	const creditText = `Story
-  Daigo Sato
-
-Engineering
-  Hajime Hoshi
-
-Title Logo
-  Akari Yamashita
-
-Powered By
-  Ebiten
-`
-
 	if input.BackButtonPressed() {
 		s.handleBackButton(sceneManager)
 	}
@@ -147,8 +121,6 @@ Powered By
 	s.restorePurchasesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDRestorePurchases)
 	s.moreGamesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDMoreGames)
 	s.closeButton.Text = texts.Text(sceneManager.Language(), texts.TextIDClose)
-	s.creditLabel.Text = creditText
-	s.creditCloseButton.Text = texts.Text(sceneManager.Language(), texts.TextIDClose)
 
 	if s.waitingRequestID != 0 {
 		r := sceneManager.ReceiveResultIfExists(s.waitingRequestID)
@@ -159,8 +131,7 @@ Powered By
 	}
 
 	s.languageDialog.Update()
-	s.creditDialog.Update()
-	if !s.languageDialog.Visible() && !s.creditDialog.Visible() {
+	if !s.languageDialog.Visible() {
 		s.languageButton.Update()
 		s.creditButton.Update()
 		s.reviewThisAppButton.Update()
@@ -176,11 +147,6 @@ func (s *SettingsScene) handleBackButton(sceneManager *scene.Manager) {
 	if s.languageDialog.Visible() {
 		audio.PlaySE("cancel", 1.0)
 		s.languageDialog.Hide()
-		return
-	}
-	if s.creditDialog.Visible() {
-		audio.PlaySE("cancel", 1.0)
-		s.creditDialog.Hide()
 		return
 	}
 
@@ -200,5 +166,4 @@ func (s *SettingsScene) Draw(screen *ebiten.Image) {
 	s.moreGamesButton.Draw(screen)
 	s.closeButton.Draw(screen)
 	s.languageDialog.Draw(screen)
-	s.creditDialog.Draw(screen)
 }
