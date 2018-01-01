@@ -157,12 +157,12 @@ func (w *Windows) HasChosenIndex() bool {
 	return w.hasChosenIndex
 }
 
-func (w *Windows) ShowBalloon(content string, balloonType data.BalloonType, eventID int, interpreterID int, messageStyle *data.MessageStyle) {
+func (w *Windows) ShowBalloon(content string, balloonType data.BalloonType, character *character.Character, interpreterID int, messageStyle *data.MessageStyle) {
 	if w.nextBalloon != nil {
 		panic("not reach")
 	}
 	// TODO: How to call newBalloonCenter?
-	w.nextBalloon = newBalloonWithArrow(content, balloonType, eventID, interpreterID, messageStyle)
+	w.nextBalloon = newBalloonWithArrow(content, balloonType, character, interpreterID, messageStyle)
 }
 
 func (w *Windows) ShowMessage(content string, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign, interpreterID int, messageStyle *data.MessageStyle) {
@@ -383,24 +383,13 @@ func (w *Windows) Draw(screen *ebiten.Image, characters []*character.Character, 
 		if b == nil {
 			continue
 		}
-		var c *character.Character
-		for _, cc := range characters {
-			if cc.EventID() == b.eventID {
-				c = cc
-				break
-			}
-		}
-		if c == nil {
-			// TODO: Just log here?
-			panic(fmt.Sprintf("windows: character (EventID=%d) not found", b.eventID))
-		}
-		b.draw(screen, c, offsetX, offsetY)
+		b.draw(screen, offsetX, offsetY)
 	}
 	for _, b := range w.choiceBalloons {
 		if b == nil {
 			continue
 		}
-		b.draw(screen, nil, offsetX, 0)
+		b.draw(screen, offsetX, 0)
 	}
 
 	if w.banner != nil {

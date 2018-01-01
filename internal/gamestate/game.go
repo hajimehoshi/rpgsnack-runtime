@@ -492,7 +492,7 @@ func (g *Game) ShowBalloon(interpreterID, mapID, roomID, eventID int, content st
 	}
 
 	content = g.parseMessageSyntax(content)
-	g.windows.ShowBalloon(content, balloonType, eventID, interpreterID, messageStyle)
+	g.windows.ShowBalloon(content, balloonType, ch, interpreterID, messageStyle)
 	return true
 }
 
