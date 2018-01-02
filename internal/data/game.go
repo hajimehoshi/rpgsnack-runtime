@@ -40,10 +40,26 @@ type Game struct {
 }
 
 type MessageStyle struct {
-	ID                int       `json:"id"`
-	Name              uuid.UUID `json:"name"`
-	TypingEffectDelay int       `json:"typingEffectDelay"`
-	SoundEffect       string    `json:"soundEffect"`
+	ID                int            `json:"id"`
+	Name              uuid.UUID      `json:"name"`
+	TypingEffectDelay int            `json:"typingEffectDelay"`
+	SoundEffect       string         `json:"soundEffect"`
+	CharacterAnim     *CharacterAnim `json:"characterAnim"`
+}
+
+type FinishTriggerType string
+
+const (
+	FinishTriggerTypeNone    FinishTriggerType = "none"
+	FinishTriggerTypeMessage FinishTriggerType = "message"
+	FinishTriggerTypeWindow  FinishTriggerType = "window"
+)
+
+type CharacterAnim struct {
+	Image         string            `json:"image"`
+	ImageType     ImageType         `json:"imageType"`
+	Speed         Speed             `json:"speed"`
+	FinishTrigger FinishTriggerType `json:"finishTrigger"`
 }
 
 type BGM struct {

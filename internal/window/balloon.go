@@ -296,20 +296,56 @@ func (b *balloon) margin() (int, int) {
 	return balloonMargin(b.balloonType)
 }
 
+func (b *balloon) characterAnimFinishTrigger() data.FinishTriggerType {
+	if b.messageStyle.CharacterAnim == nil {
+		return data.FinishTriggerTypeNone
+	}
+	return b.messageStyle.CharacterAnim.FinishTrigger
+}
+
 func (b *balloon) update() {
 	if b.closingCount > 0 {
 		b.closingCount--
 		b.opened = false
+		if b.characterAnimFinishTrigger() == data.FinishTriggerTypeWindow {
+			b.stopCharacterAnim()
+		}
 	}
 	if b.openingCount > 0 {
 		b.openingCount--
 		if b.openingCount == 0 {
 			b.opened = true
+			b.playCharacterAnim()
 		}
 	}
-	if b.opened {
+	if b.opened && b.typingEffect.isAnimating() {
 		b.typingEffect.update()
+		if !b.typingEffect.isAnimating() && b.characterAnimFinishTrigger() == data.FinishTriggerTypeMessage {
+			b.stopCharacterAnim()
+		}
 	}
+}
+
+func (b *balloon) playCharacterAnim() {
+	if b.character == nil {
+		return
+	}
+	CharacterAnim := b.messageStyle.CharacterAnim
+	if CharacterAnim == nil {
+		return
+	}
+
+	b.character.StoreState()
+	b.character.SetImage(CharacterAnim.ImageType, CharacterAnim.Image)
+	b.character.SetStepping(true)
+	b.character.SetSpeed(CharacterAnim.Speed)
+}
+
+func (b *balloon) stopCharacterAnim() {
+	if b.character == nil {
+		return
+	}
+	b.character.RestoreStoredState()
 }
 
 func (b *balloon) geoMForRate(screen *ebiten.Image, character *character.Character) *ebiten.GeoM {

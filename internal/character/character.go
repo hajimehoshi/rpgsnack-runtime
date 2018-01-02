@@ -39,6 +39,13 @@ const (
 
 var characterFileRegexp = regexp.MustCompile(".*_([0-9]+)_([0-9]+)")
 
+type StoredState struct {
+	speed     data.Speed
+	imageName string
+	imageType data.ImageType
+	stepping  bool
+}
+
 type Character struct {
 	eventID         int
 	speed           data.Speed
@@ -66,12 +73,13 @@ type Character struct {
 	opacityMaxCount int
 
 	// Not dumped
-	sizeW      int
-	sizeH      int
-	dirCount   int
-	frameCount int
-	imageW     int
-	imageH     int
+	sizeW       int
+	sizeH       int
+	dirCount    int
+	frameCount  int
+	imageW      int
+	imageH      int
+	storedState *StoredState
 }
 
 func NewPlayer(x, y int) *Character {
@@ -246,6 +254,29 @@ func (c *Character) DecodeMsgpack(dec *msgpack.Decoder) error {
 		return fmt.Errorf("character: Character.DecodeMsgpack failed: %v", err)
 	}
 	return nil
+}
+
+// StoreState stores a subset of character state. It can be restored by calling
+// RestoreStoredState.
+func (c *Character) StoreState() {
+	c.storedState = &StoredState{
+		speed:     c.speed,
+		imageType: c.imageType,
+		imageName: c.imageName,
+		stepping:  c.stepping,
+	}
+}
+
+// RestoreStoredState restores the last stored state. It is useful for reviving
+// the character state after a temporary change.
+func (c *Character) RestoreStoredState() {
+	if c.storedState == nil {
+		return
+	}
+
+	c.SetSpeed(c.storedState.speed)
+	c.SetImage(c.storedState.imageType, c.storedState.imageName)
+	c.SetStepping(c.storedState.stepping)
 }
 
 func (c *Character) EventID() int {
