@@ -50,6 +50,7 @@ type banner struct {
 	playerY       int
 	messageStyle  *data.MessageStyle
 	typingEffect  *typingEffect
+	eventID       int
 }
 
 func (b *banner) EncodeMsgpack(enc *msgpack.Encoder) error {
@@ -83,6 +84,9 @@ func (b *banner) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EncodeString("typingEffect")
 	e.EncodeInterface(b.typingEffect)
 
+	e.EncodeString("eventID")
+	e.EncodeInt(b.eventID)
+
 	e.EndMap()
 	return e.Flush()
 }
@@ -113,6 +117,8 @@ func (b *banner) DecodeMsgpack(dec *msgpack.Decoder) error {
 				b.typingEffect = &typingEffect{}
 				d.DecodeInterface(b.typingEffect)
 			}
+		case "eventID":
+			b.eventID = d.DecodeInt()
 		}
 	}
 	if err := d.Error(); err != nil {
@@ -121,7 +127,7 @@ func (b *banner) DecodeMsgpack(dec *msgpack.Decoder) error {
 	return nil
 }
 
-func newBanner(content string, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign, interpreterID int, messageStyle *data.MessageStyle) *banner {
+func newBanner(content string, eventID int, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign, interpreterID int, messageStyle *data.MessageStyle) *banner {
 	b := &banner{
 		interpreterID: interpreterID,
 		content:       content,
@@ -129,6 +135,7 @@ func newBanner(content string, background data.MessageBackground, positionType d
 		positionType:  positionType,
 		textAlign:     textAlign,
 		messageStyle:  messageStyle,
+		eventID:       eventID,
 	}
 	return b
 }
@@ -158,22 +165,58 @@ func (b *banner) close() {
 	b.closingCount = bannerMaxCount
 }
 
-func (b *banner) update(playerY int) error {
+func (b *banner) characterAnimFinishTrigger() data.FinishTriggerType {
+	if b.messageStyle.CharacterAnim == nil {
+		return data.FinishTriggerTypeNone
+	}
+	return b.messageStyle.CharacterAnim.FinishTrigger
+}
+
+func (b *banner) update(playerY int, character *character.Character) error {
 	if b.closingCount > 0 {
 		b.closingCount--
 		b.opened = false
+		if b.characterAnimFinishTrigger() == data.FinishTriggerTypeWindow {
+			b.stopCharacterAnim(character)
+		}
 	}
 	if b.openingCount > 0 {
 		b.openingCount--
 		if b.openingCount == 0 {
 			b.opened = true
+			b.playCharacterAnim(character)
 		}
 	}
-	if b.opened {
+	if b.opened && b.typingEffect.isAnimating() {
 		b.typingEffect.update()
+		if !b.typingEffect.isAnimating() && b.characterAnimFinishTrigger() == data.FinishTriggerTypeMessage {
+			b.stopCharacterAnim(character)
+		}
 	}
 	b.playerY = playerY
 	return nil
+}
+
+func (b *banner) playCharacterAnim(character *character.Character) {
+	if character == nil {
+		return
+	}
+	CharacterAnim := b.messageStyle.CharacterAnim
+	if CharacterAnim == nil {
+		return
+	}
+
+	character.StoreState()
+	character.SetImage(CharacterAnim.ImageType, CharacterAnim.Image)
+	character.SetStepping(true)
+	character.SetSpeed(CharacterAnim.Speed)
+}
+
+func (b *banner) stopCharacterAnim(character *character.Character) {
+	if character == nil {
+		return
+	}
+	character.RestoreStoredState()
 }
 
 func (b *banner) position() (int, int) {
@@ -198,7 +241,7 @@ func (b *banner) position() (int, int) {
 	return x, y
 }
 
-func (b *banner) draw(screen *ebiten.Image, character *character.Character, offsetX, offsetY int) {
+func (b *banner) draw(screen *ebiten.Image, offsetX, offsetY int) {
 	textScale := consts.TextScale
 	textEdge := false
 	rate := 0.0

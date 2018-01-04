@@ -235,7 +235,7 @@ func (g *Game) Update(sceneManager *scene.Manager) error {
 	if g.currentMap.player != nil {
 		_, playerY = g.currentMap.player.Position()
 	}
-	g.windows.Update(playerY, sceneManager)
+	g.windows.Update(playerY, sceneManager, g.createCharacterList())
 	g.pictures.Update()
 	if err := g.currentMap.Update(sceneManager, g); err != nil {
 		return err
@@ -426,10 +426,14 @@ func (g *Game) DrawScreen(screen *ebiten.Image, tilesImage *ebiten.Image, op *eb
 }
 
 func (g *Game) DrawWindows(screen *ebiten.Image, offsetX, offsetY int) {
+	g.windows.Draw(screen, g.createCharacterList(), offsetX, offsetY)
+}
+
+func (g *Game) createCharacterList() []*character.Character {
 	cs := []*character.Character{}
 	cs = append(cs, g.currentMap.player)
 	cs = append(cs, g.currentMap.events...)
-	g.windows.Draw(screen, cs, offsetX, offsetY)
+	return cs
 }
 
 func (g *Game) DrawPictures(screen *ebiten.Image, offsetX, offsetY int) {
@@ -492,13 +496,13 @@ func (g *Game) ShowBalloon(interpreterID, mapID, roomID, eventID int, content st
 	}
 
 	content = g.parseMessageSyntax(content)
-	g.windows.ShowBalloon(content, balloonType, ch, interpreterID, messageStyle)
+	g.windows.ShowBalloon(content, balloonType, eventID, interpreterID, messageStyle)
 	return true
 }
 
-func (g *Game) ShowMessage(interpreterID int, content string, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign, messageStyle *data.MessageStyle) {
+func (g *Game) ShowMessage(interpreterID, eventID int, content string, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign, messageStyle *data.MessageStyle) {
 	content = g.parseMessageSyntax(content)
-	g.windows.ShowMessage(content, background, positionType, textAlign, interpreterID, messageStyle)
+	g.windows.ShowMessage(content, eventID, background, positionType, textAlign, interpreterID, messageStyle)
 }
 
 func (g *Game) ShowChoices(sceneManager *scene.Manager, interpreterID int, choiceIDs []uuid.UUID) {

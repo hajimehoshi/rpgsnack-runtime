@@ -157,16 +157,16 @@ func (w *Windows) HasChosenIndex() bool {
 	return w.hasChosenIndex
 }
 
-func (w *Windows) ShowBalloon(content string, balloonType data.BalloonType, character *character.Character, interpreterID int, messageStyle *data.MessageStyle) {
+func (w *Windows) ShowBalloon(content string, balloonType data.BalloonType, eventID int, interpreterID int, messageStyle *data.MessageStyle) {
 	if w.nextBalloon != nil {
 		panic("not reach")
 	}
 	// TODO: How to call newBalloonCenter?
-	w.nextBalloon = newBalloonWithArrow(content, balloonType, character, interpreterID, messageStyle)
+	w.nextBalloon = newBalloonWithArrow(content, balloonType, eventID, interpreterID, messageStyle)
 }
 
-func (w *Windows) ShowMessage(content string, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign, interpreterID int, messageStyle *data.MessageStyle) {
-	w.banner = newBanner(content, background, positionType, textAlign, interpreterID, messageStyle)
+func (w *Windows) ShowMessage(content string, eventID int, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign, interpreterID int, messageStyle *data.MessageStyle) {
+	w.banner = newBanner(content, eventID, background, positionType, textAlign, interpreterID, messageStyle)
 	w.banner.open()
 }
 
@@ -304,7 +304,21 @@ func (w *Windows) IsAnimating(interpreterID int) bool {
 	return false
 }
 
-func (w *Windows) Update(playerY int, sceneManager *scene.Manager) {
+func (w *Windows) findCharacterByEventID(characters []*character.Character, eventID int) *character.Character {
+	var c *character.Character
+	for _, cc := range characters {
+		if cc.EventID() == eventID {
+			c = cc
+			break
+		}
+	}
+	if c == nil {
+		panic(fmt.Sprintf("windows: character (EventID=%d) not found", eventID))
+	}
+	return c
+}
+
+func (w *Windows) Update(playerY int, sceneManager *scene.Manager, characters []*character.Character) {
 	if !w.choosing {
 		// 0 means to check all balloons.
 		// TODO: Don't use magic numbers.
@@ -352,7 +366,7 @@ func (w *Windows) Update(playerY int, sceneManager *scene.Manager) {
 		if b == nil {
 			continue
 		}
-		b.update()
+		b.update(w.findCharacterByEventID(characters, b.eventID))
 		if b.isAnimating() && input.Triggered() {
 			b.skipTypingAnim()
 		} else if b.isClosed() {
@@ -363,13 +377,13 @@ func (w *Windows) Update(playerY int, sceneManager *scene.Manager) {
 		if b == nil {
 			continue
 		}
-		b.update()
+		b.update(nil)
 		if b.isClosed() {
 			w.choiceBalloons[i] = nil
 		}
 	}
 	if w.banner != nil {
-		w.banner.update(playerY)
+		w.banner.update(playerY, w.findCharacterByEventID(characters, w.banner.eventID))
 		if w.banner.isAnimating() && input.Triggered() {
 			w.banner.skipTypingAnim()
 		} else if w.banner.isClosed() {
@@ -383,16 +397,16 @@ func (w *Windows) Draw(screen *ebiten.Image, characters []*character.Character, 
 		if b == nil {
 			continue
 		}
-		b.draw(screen, offsetX, offsetY)
+		b.draw(screen, w.findCharacterByEventID(characters, b.eventID), offsetX, offsetY)
 	}
 	for _, b := range w.choiceBalloons {
 		if b == nil {
 			continue
 		}
-		b.draw(screen, offsetX, 0)
+		b.draw(screen, nil, offsetX, 0)
 	}
 
 	if w.banner != nil {
-		w.banner.draw(screen, nil, offsetX, offsetY)
+		w.banner.draw(screen, offsetX, offsetY)
 	}
 }

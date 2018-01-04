@@ -45,7 +45,7 @@ type balloon struct {
 	width          int
 	height         int
 	hasArrow       bool
-	character      *character.Character
+	eventID        int
 	content        string
 	contentOffsetX int
 	contentOffsetY int
@@ -81,8 +81,8 @@ func (b *balloon) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EncodeString("hasArrow")
 	e.EncodeBool(b.hasArrow)
 
-	e.EncodeString("character")
-	e.EncodeInterface(b.character)
+	e.EncodeString("eventID")
+	e.EncodeInt(b.eventID)
 
 	e.EncodeString("content")
 	e.EncodeString(b.content)
@@ -129,11 +129,8 @@ func (b *balloon) DecodeMsgpack(dec *msgpack.Decoder) error {
 			b.height = d.DecodeInt()
 		case "hasArrow":
 			b.hasArrow = d.DecodeBool()
-		case "character":
-			if !d.SkipCodeIfNil() {
-				b.character = &character.Character{}
-				d.DecodeInterface(b.character)
-			}
+		case "eventID":
+			b.eventID = d.DecodeInt()
 		case "content":
 			b.content = d.DecodeString()
 		case "contentOffsetX":
@@ -210,12 +207,12 @@ func balloonSizeFromContent(content string, balloonType data.BalloonType) (int, 
 	return w, h, contentOffsetX, contentOffsetY
 }
 
-func newBalloonWithArrow(content string, balloonType data.BalloonType, character *character.Character, interpreterID int, messageStyle *data.MessageStyle) *balloon {
+func newBalloonWithArrow(content string, balloonType data.BalloonType, eventID int, interpreterID int, messageStyle *data.MessageStyle) *balloon {
 	b := &balloon{
 		interpreterID: interpreterID,
 		content:       content,
 		hasArrow:      true,
-		character:     character,
+		eventID:       eventID,
 		balloonType:   balloonType,
 		messageStyle:  messageStyle,
 	}
@@ -303,31 +300,31 @@ func (b *balloon) characterAnimFinishTrigger() data.FinishTriggerType {
 	return b.messageStyle.CharacterAnim.FinishTrigger
 }
 
-func (b *balloon) update() {
+func (b *balloon) update(character *character.Character) {
 	if b.closingCount > 0 {
 		b.closingCount--
 		b.opened = false
 		if b.characterAnimFinishTrigger() == data.FinishTriggerTypeWindow {
-			b.stopCharacterAnim()
+			b.stopCharacterAnim(character)
 		}
 	}
 	if b.openingCount > 0 {
 		b.openingCount--
 		if b.openingCount == 0 {
 			b.opened = true
-			b.playCharacterAnim()
+			b.playCharacterAnim(character)
 		}
 	}
 	if b.opened && b.typingEffect.isAnimating() {
 		b.typingEffect.update()
 		if !b.typingEffect.isAnimating() && b.characterAnimFinishTrigger() == data.FinishTriggerTypeMessage {
-			b.stopCharacterAnim()
+			b.stopCharacterAnim(character)
 		}
 	}
 }
 
-func (b *balloon) playCharacterAnim() {
-	if b.character == nil {
+func (b *balloon) playCharacterAnim(character *character.Character) {
+	if character == nil {
 		return
 	}
 	CharacterAnim := b.messageStyle.CharacterAnim
@@ -335,17 +332,17 @@ func (b *balloon) playCharacterAnim() {
 		return
 	}
 
-	b.character.StoreState()
-	b.character.SetImage(CharacterAnim.ImageType, CharacterAnim.Image)
-	b.character.SetStepping(true)
-	b.character.SetSpeed(CharacterAnim.Speed)
+	character.StoreState()
+	character.SetImage(CharacterAnim.ImageType, CharacterAnim.Image)
+	character.SetStepping(true)
+	character.SetSpeed(CharacterAnim.Speed)
 }
 
-func (b *balloon) stopCharacterAnim() {
-	if b.character == nil {
+func (b *balloon) stopCharacterAnim(character *character.Character) {
+	if character == nil {
 		return
 	}
-	b.character.RestoreStoredState()
+	character.RestoreStoredState()
 }
 
 func (b *balloon) geoMForRate(screen *ebiten.Image, character *character.Character) *ebiten.GeoM {
@@ -430,7 +427,7 @@ func (b *balloon) ensureOffscreen() {
 	}
 }
 
-func (b *balloon) draw(screen *ebiten.Image, offsetX, offsetY int) {
+func (b *balloon) draw(screen *ebiten.Image, character *character.Character, offsetX, offsetY int) {
 	sw, _ := screen.Size()
 	dx := math.Floor(float64(sw/consts.TileScale-consts.TileXNum*consts.TileSize)/2 + float64(offsetX))
 	dy := math.Floor(float64(offsetY))
@@ -439,9 +436,9 @@ func (b *balloon) draw(screen *ebiten.Image, offsetX, offsetY int) {
 
 		img := b.assetImage()
 		op := &ebiten.DrawImageOptions{}
-		g := b.geoMForRate(screen, b.character)
+		g := b.geoMForRate(screen, character)
 		g.Translate(dx, dy)
-		tx, ty := b.position(sw, b.character)
+		tx, ty := b.position(sw, character)
 		op.GeoM.Translate(float64(tx), float64(ty))
 		op.GeoM.Concat(*g)
 		op.GeoM.Scale(consts.TileScale, consts.TileScale)
@@ -459,10 +456,10 @@ func (b *balloon) draw(screen *ebiten.Image, offsetX, offsetY int) {
 			default:
 				panic("not reached")
 			}
-			ax, ay := b.arrowPosition(sw, b.character)
+			ax, ay := b.arrowPosition(sw, character)
 			tx := ax
 			ty := ay - balloonArrowHeight
-			if b.arrowFlip(sw, b.character) {
+			if b.arrowFlip(sw, character) {
 				// TODO: 4 is an arbitrary number. Define a const.
 				tx -= 4
 			} else {
@@ -475,7 +472,7 @@ func (b *balloon) draw(screen *ebiten.Image, offsetX, offsetY int) {
 		}
 	}
 	if b.opened {
-		x, y := b.position(sw, b.character)
+		x, y := b.position(sw, character)
 		mx, my := b.margin()
 		x = (x + mx + b.contentOffsetX) * consts.TileScale
 		y = (y + my + b.contentOffsetY) * consts.TileScale

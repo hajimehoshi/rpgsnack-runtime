@@ -704,6 +704,7 @@ type CommandArgsShowBalloon struct {
 }
 
 type CommandArgsShowMessage struct {
+	EventID        int                 `json:"eventId" msgpack:"eventId"`
 	ContentID      uuid.UUID           `json:"content" msgpack:"content"`
 	Background     MessageBackground   `json:"background" msgpack:"background"`
 	PositionType   MessagePositionType `json:"positionType" msgpack:"positionType"`
