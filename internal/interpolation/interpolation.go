@@ -87,6 +87,10 @@ func (i *I) Current() float64 {
 	return rate*i.src + (1-rate)*i.dst
 }
 
+func (i *I) Dst() float64 {
+	return i.dst
+}
+
 func (i *I) Set(value float64, count int) {
 	i.src = i.Current()
 	i.dst = value

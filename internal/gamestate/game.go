@@ -221,7 +221,7 @@ func (g *Game) MapPassableAt(through bool, x, y int, ignoreCharacters bool) bool
 
 func (g *Game) Update(sceneManager *scene.Manager) error {
 	if g.lastPlayingBGMName != "" {
-		audio.PlayBGM(g.lastPlayingBGMName, g.lastPlayingBGMVolume)
+		audio.PlayBGM(g.lastPlayingBGMName, g.lastPlayingBGMVolume, 0)
 		g.lastPlayingBGMName = ""
 		g.lastPlayingBGMVolume = 0
 	}
@@ -249,9 +249,9 @@ func (g *Game) Clear() {
 
 func (g *Game) SetBGM(bgm data.BGM) {
 	if bgm.Name == "" {
-		audio.StopBGM()
+		audio.StopBGM(0)
 	} else {
-		audio.PlayBGM(bgm.Name, float64(bgm.Volume)/100)
+		audio.PlayBGM(bgm.Name, float64(bgm.Volume)/100, 0)
 	}
 }
 

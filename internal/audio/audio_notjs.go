@@ -18,12 +18,14 @@ package audio
 
 import (
 	"fmt"
+	"log"
 
 	eaudio "github.com/hajimehoshi/ebiten/audio"
 	"github.com/hajimehoshi/ebiten/audio/mp3"
 	"github.com/hajimehoshi/ebiten/audio/wav"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/interpolation"
 )
 
 var theAudio = &audio{}
@@ -48,8 +50,8 @@ func PlaySE(name string, volume float64) {
 	theAudio.PlaySE(name, volume)
 }
 
-func PlayBGM(name string, volume float64) {
-	theAudio.PlayBGM(name, volume)
+func PlayBGM(name string, volume float64, fadeTimeInFrames int) {
+	theAudio.PlayBGM(name, volume, fadeTimeInFrames)
 }
 
 func PlayingBGMName() string {
@@ -57,21 +59,23 @@ func PlayingBGMName() string {
 }
 
 func PlayingBGMVolume() float64 {
-	return theAudio.playingBGMVolume
+	return theAudio.bgmVolume.Dst()
 }
 
-func StopBGM() {
-	theAudio.StopBGM()
+func StopBGM(fadeTimeInFrames int) {
+	theAudio.StopBGM(fadeTimeInFrames)
 }
 
 type audio struct {
-	context          *eaudio.Context
-	players          map[string]*eaudio.Player
-	sePlayers        map[*eaudio.Player]struct{}
-	playing          *eaudio.Player
-	playingBGMName   string
-	playingBGMVolume float64
-	err              error
+	context        *eaudio.Context
+	players        map[string]*eaudio.Player
+	sePlayers      map[*eaudio.Player]struct{}
+	playing        *eaudio.Player
+	playingBGMName string
+
+	bgmVolume interpolation.I
+
+	err error
 }
 
 func newAudio() (*audio, error) {
@@ -90,6 +94,12 @@ func (a *audio) Update() error {
 	if a.err != nil {
 		return a.err
 	}
+
+	a.bgmVolume.Update()
+	if a.playing != nil {
+		a.playing.SetVolume(a.bgmVolume.Current() * volumeBias)
+	}
+
 	closed := []*eaudio.Player{}
 	for p := range a.sePlayers {
 		if !p.IsPlaying() {
@@ -106,7 +116,7 @@ func (a *audio) Stop() {
 	if a.err != nil {
 		return
 	}
-	StopBGM()
+	StopBGM(0)
 	for p := range a.sePlayers {
 		if err := p.Pause(); err != nil {
 			a.err = err
@@ -160,10 +170,13 @@ func (a *audio) PlaySE(name string, volume float64) {
 	a.sePlayers[p] = struct{}{}
 }
 
-func (a *audio) PlayBGM(name string, volume float64) {
+func (a *audio) PlayBGM(name string, volume float64, fadeTimeInFrames int) {
 	if a.err != nil {
 		return
 	}
+
+	a.bgmVolume.Set(volume, fadeTimeInFrames)
+
 	p, ok := a.players[name]
 	if !ok {
 		player, err := a.getPlayer("audio/bgm/"+name, true)
@@ -175,25 +188,27 @@ func (a *audio) PlayBGM(name string, volume float64) {
 		p = player
 	}
 	if a.playingBGMName == name {
-		a.playingBGMVolume = volume
-		a.playing.SetVolume(volume * volumeBias)
+		p.SetVolume(a.bgmVolume.Current() * volumeBias)
 		return
 	}
 	if a.playing != nil {
 		a.playing.Pause()
 	}
+
 	if err := p.Rewind(); err != nil {
 		a.err = err
 		return
 	}
-	p.SetVolume(volume * volumeBias)
 	p.Play()
+	p.SetVolume(a.bgmVolume.Current() * volumeBias)
 	a.playing = p
 	a.playingBGMName = name
-	a.playingBGMVolume = volume
 }
 
-func (a *audio) StopBGM() {
+func (a *audio) StopBGM(fadeTimeInFrames int) {
+	if fadeTimeInFrames > 0 {
+		log.Printf("fade time is not used so far in StopBGM")
+	}
 	if a.err != nil {
 		return
 	}
@@ -206,5 +221,4 @@ func (a *audio) StopBGM() {
 	}
 	a.playing = nil
 	a.playingBGMName = ""
-	a.playingBGMVolume = 0
 }

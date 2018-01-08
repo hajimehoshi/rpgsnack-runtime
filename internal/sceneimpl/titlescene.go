@@ -83,7 +83,7 @@ func (t *TitleScene) initUI(sceneManager *scene.Manager) {
 	t.quitDialog.AddChild(t.quitNoButton)
 
 	t.warningYesButton.SetOnPressed(func(_ *ui.Button) {
-		audio.StopBGM()
+		audio.StopBGM(0)
 		sceneManager.GoToWithFading(NewMapScene(), 60)
 	})
 	t.warningNoButton.SetOnPressed(func(_ *ui.Button) {
@@ -99,7 +99,7 @@ func (t *TitleScene) initUI(sceneManager *scene.Manager) {
 		if sceneManager.HasProgress() {
 			t.warningDialog.Show()
 		} else {
-			audio.StopBGM()
+			audio.StopBGM(0)
 			sceneManager.GoToWithFading(NewMapScene(), 60)
 		}
 	})
@@ -109,7 +109,7 @@ func (t *TitleScene) initUI(sceneManager *scene.Manager) {
 			t.err = err
 			return
 		}
-		audio.StopBGM()
+		audio.StopBGM(0)
 		sceneManager.GoToWithFading(NewMapSceneWithGame(game), 60)
 	})
 	t.settingsButton.SetOnPressed(func(_ *ui.Button) {
@@ -141,9 +141,9 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 	if !t.init {
 		var titleBGM = sceneManager.Game().System.TitleBGM
 		if titleBGM.Name == "" {
-			audio.StopBGM()
+			audio.StopBGM(0)
 		} else {
-			audio.PlayBGM(titleBGM.Name, float64(titleBGM.Volume)/100)
+			audio.PlayBGM(titleBGM.Name, float64(titleBGM.Volume)/100, 0)
 		}
 		t.init = true
 	}

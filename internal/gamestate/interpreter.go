@@ -18,7 +18,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"image/color"
-	"log"
 	"math"
 
 	"github.com/vmihailenco/msgpack"
@@ -537,15 +536,11 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 	case data.CommandNamePlayBGM:
 		args := c.Args.(*data.CommandArgsPlayBGM)
 		v := float64(args.Volume) / data.MaxVolume
-		audio.PlayBGM(args.Name, v)
-		if args.FadeTime > 0 {
-			log.Printf("fade time is not used so far: %d", args.FadeTime)
-		}
+		audio.PlayBGM(args.Name, v, args.FadeTime*6)
 		i.commandIterator.Advance()
 	case data.CommandNameStopBGM:
 		args := c.Args.(*data.CommandArgsStopBGM)
-		_ = args // TODO: Use FadeTime
-		audio.StopBGM()
+		audio.StopBGM(args.FadeTime * 6)
 		i.commandIterator.Advance()
 	case data.CommandNameSave:
 		gameState.RequestSave(sceneManager)
