@@ -18,7 +18,6 @@ package audio
 
 import (
 	"fmt"
-	"log"
 
 	eaudio "github.com/hajimehoshi/ebiten/audio"
 	"github.com/hajimehoshi/ebiten/audio/mp3"
@@ -75,6 +74,8 @@ type audio struct {
 
 	bgmVolume interpolation.I
 
+	toStopBGM bool
+
 	err error
 }
 
@@ -98,6 +99,14 @@ func (a *audio) Update() error {
 	a.bgmVolume.Update()
 	if a.playing != nil {
 		a.playing.SetVolume(a.bgmVolume.Current() * volumeBias)
+	}
+	if a.toStopBGM && !a.bgmVolume.IsChanging() {
+		if err := a.playing.Pause(); err != nil {
+			return err
+		}
+		a.playing = nil
+		a.playingBGMName = ""
+		a.toStopBGM = false
 	}
 
 	closed := []*eaudio.Player{}
@@ -175,6 +184,7 @@ func (a *audio) PlayBGM(name string, volume float64, fadeTimeInFrames int) {
 		return
 	}
 
+	a.toStopBGM = false
 	a.bgmVolume.Set(volume, fadeTimeInFrames)
 
 	p, ok := a.players[name]
@@ -206,19 +216,12 @@ func (a *audio) PlayBGM(name string, volume float64, fadeTimeInFrames int) {
 }
 
 func (a *audio) StopBGM(fadeTimeInFrames int) {
-	if fadeTimeInFrames > 0 {
-		log.Printf("fade time is not used so far in StopBGM")
-	}
 	if a.err != nil {
 		return
 	}
 	if a.playing == nil {
 		return
 	}
-	if err := a.playing.Pause(); err != nil {
-		a.err = err
-		return
-	}
-	a.playing = nil
-	a.playingBGMName = ""
+	a.bgmVolume.Set(0, fadeTimeInFrames)
+	a.toStopBGM = true
 }
