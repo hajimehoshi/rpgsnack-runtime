@@ -175,6 +175,7 @@ func (a *audio) PlayBGM(name string, volume float64) {
 		p = player
 	}
 	if a.playingBGMName == name {
+		a.playingBGMVolume = volume
 		a.playing.SetVolume(volume * volumeBias)
 		return
 	}
