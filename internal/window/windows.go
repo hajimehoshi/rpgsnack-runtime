@@ -312,9 +312,6 @@ func (w *Windows) findCharacterByEventID(characters []*character.Character, even
 			break
 		}
 	}
-	if c == nil {
-		panic(fmt.Sprintf("windows: character (EventID=%d) not found", eventID))
-	}
 	return c
 }
 
