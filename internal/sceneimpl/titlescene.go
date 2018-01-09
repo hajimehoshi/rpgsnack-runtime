@@ -61,9 +61,9 @@ func (t *TitleScene) initUI(sceneManager *scene.Manager) {
 	settingsIcon := ui.NewImagePart(assets.GetImage("system/common/icon_settings.png"))
 	moreGamesIcon := ui.NewImagePart(assets.GetImage("system/common/icon_moregames.png"))
 
-	t.resumeGameButton = ui.NewTextButton((w/consts.TileScale-120)/2, 184, 120, 20, "click")
+	t.resumeGameButton = ui.NewTextButton((w/consts.TileScale-120)/2, 208, 120, 20, "click")
 	t.titleLine = ui.NewImageView((w/consts.TileScale-120)/2+20, 206, 1.0, ui.NewImagePart(assets.GetImage("system/common/title_line.png")))
-	t.newGameButton = ui.NewTextButton((w/consts.TileScale-120)/2, 208, 120, 20, "click")
+	t.newGameButton = ui.NewTextButton((w/consts.TileScale-120)/2, 184, 120, 20, "click")
 	t.settingsButton = ui.NewImageButton(w/consts.TileScale-16, h/consts.TileScale-16, settingsIcon, settingsIcon, "click")
 	t.moregamesButton = ui.NewImageButton(4, h/consts.TileScale-16, moreGamesIcon, moreGamesIcon, "click")
 	t.warningDialog = ui.NewDialog((w/consts.TileScale-160)/2+4, 64, 152, 124)
@@ -162,12 +162,9 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 	t.quitNoButton.Text = texts.Text(sceneManager.Language(), texts.TextIDNo)
 
 	if !sceneManager.HasProgress() {
-		t.resumeGameButton.Visible = false
-		t.newGameButton.SetY(184)
+		t.resumeGameButton.Disabled = true
 	} else {
-		t.resumeGameButton.Visible = true
-		t.resumeGameButton.SetY(184)
-		t.newGameButton.SetY(208)
+		t.resumeGameButton.Disabled = false
 	}
 
 	t.warningDialog.Update()
