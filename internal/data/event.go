@@ -91,6 +91,7 @@ const (
 	Speed3 Speed = 3
 	Speed4 Speed = 4
 	Speed5 Speed = 5
+	Speed6 Speed = 6
 )
 
 func (s Speed) Frames() int {
@@ -105,6 +106,8 @@ func (s Speed) Frames() int {
 		return 8
 	case Speed5:
 		return 4
+	case Speed6:
+		return 2
 	default:
 		panic("not reach")
 	}
@@ -122,6 +125,8 @@ func (s Speed) SteppingIncrementFrames() int {
 		return 4
 	case Speed5:
 		return 5
+	case Speed6:
+		return 6
 	}
 	return 0
 }
