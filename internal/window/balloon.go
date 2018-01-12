@@ -327,15 +327,15 @@ func (b *balloon) playCharacterAnim(character *character.Character) {
 	if character == nil {
 		return
 	}
-	CharacterAnim := b.messageStyle.CharacterAnim
-	if CharacterAnim == nil {
+	a := b.messageStyle.CharacterAnim
+	if a == nil {
 		return
 	}
 
 	character.StoreState()
-	character.SetImage(CharacterAnim.ImageType, CharacterAnim.Image)
+	character.SetImage(a.ImageType, a.Image)
 	character.SetStepping(true)
-	character.SetSpeed(CharacterAnim.Speed)
+	character.SetSpeed(a.Speed)
 }
 
 func (b *balloon) stopCharacterAnim(character *character.Character) {
