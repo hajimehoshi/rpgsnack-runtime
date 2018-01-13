@@ -206,7 +206,9 @@ func (b *banner) playCharacterAnim(character *character.Character) {
 		return
 	}
 
-	character.StoreState()
+	if !character.HasStoredState() {
+		character.StoreState()
+	}
 	character.SetImage(CharacterAnim.ImageType, CharacterAnim.Image)
 	character.SetStepping(true)
 	character.SetSpeed(CharacterAnim.Speed)

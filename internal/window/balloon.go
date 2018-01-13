@@ -332,7 +332,9 @@ func (b *balloon) playCharacterAnim(character *character.Character) {
 		return
 	}
 
-	character.StoreState()
+	if !character.HasStoredState() {
+		character.StoreState()
+	}
 	character.SetImage(a.ImageType, a.Image)
 	character.SetStepping(true)
 	character.SetSpeed(a.Speed)

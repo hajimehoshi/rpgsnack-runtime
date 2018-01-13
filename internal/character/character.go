@@ -256,6 +256,10 @@ func (c *Character) DecodeMsgpack(dec *msgpack.Decoder) error {
 	return nil
 }
 
+func (c *Character) HasStoredState() bool {
+	return c.storedState != nil
+}
+
 // StoreState stores a subset of character state. It can be restored by calling
 // RestoreStoredState.
 func (c *Character) StoreState() {
@@ -277,6 +281,7 @@ func (c *Character) RestoreStoredState() {
 	c.SetSpeed(c.storedState.speed)
 	c.SetImage(c.storedState.imageType, c.storedState.imageName)
 	c.SetStepping(c.storedState.stepping)
+	c.storedState = nil
 }
 
 func (c *Character) EventID() int {
