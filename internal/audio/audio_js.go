@@ -152,7 +152,7 @@ func Update() error {
 }
 
 func Stop() error {
-	StopBGM()
+	StopBGM(0)
 	return nil
 }
 
@@ -173,11 +173,11 @@ func PlaySE(name string, volume float64) {
 	n.Call("start", 0)
 }
 
-func PlayBGM(name string, volume float64) {
+func PlayBGM(name string, volume float64, fadeTimeInFrames int) {
 	if theCurrentAudio.err != nil {
 		return
 	}
-	StopBGM()
+	StopBGM(0)
 
 	n, err := theCurrentAudio.createSource("bgm", name, volume, true)
 	if err != nil {
@@ -208,7 +208,7 @@ func PlayingBGMVolume() float64 {
 	return theCurrentAudio.bgmVolume
 }
 
-func StopBGM() {
+func StopBGM(fadeTimeInFrames int) {
 	if theCurrentAudio.err != nil {
 		return
 	}
