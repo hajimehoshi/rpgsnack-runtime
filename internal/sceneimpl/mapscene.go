@@ -72,7 +72,6 @@ type MapScene struct {
 	initialized          bool
 	offsetX              int
 	offsetY              int
-	combineItemID        int
 }
 
 func NewMapScene() *MapScene {
@@ -195,12 +194,12 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 				m.gameState.Items().Activate(itemID)
 			}
 		case ui.PreviewMode:
+			combineItemID := 0
 			if m.gameState.Items().ActiveItem() > 0 {
 				if activeItemID != itemID {
-					m.combineItemID = itemID
-				} else {
-					m.combineItemID = 0
+					combineItemID = itemID
 				}
+				m.gameState.Items().SetCombineItem(combineItemID)
 			}
 			var item *data.Item
 			for _, i := range sceneManager.Game().Items {
@@ -209,7 +208,7 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 					break
 				}
 			}
-			if m.combineItemID != 0 {
+			if combineItemID != 0 {
 				c := sceneManager.Game().CreateCombine(activeItemID, item.ID)
 				m.itemPreviewPopup.SetCombineItem(item, c)
 			} else {
@@ -234,8 +233,9 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 			return
 		}
 		activeItemID := m.gameState.Items().ActiveItem()
-		if m.combineItemID != 0 {
-			combine := sceneManager.Game().CreateCombine(activeItemID, m.combineItemID)
+		combineItemID := m.gameState.Items().CombineItem()
+		if combineItemID != 0 {
+			combine := sceneManager.Game().CreateCombine(activeItemID, combineItemID)
 			m.gameState.StartCombineCommands(combine)
 		} else {
 			m.gameState.StartItemCommands(activeItemID)
@@ -247,7 +247,7 @@ func (m *MapScene) updateItemPreviewPopupVisibility(sceneManager *scene.Manager)
 	itemID := m.gameState.Items().EventItem()
 	if itemID > 0 {
 		m.inventory.SetActiveItemID(itemID)
-		m.inventory.SetCombineItemID(m.combineItemID)
+		m.inventory.SetCombineItemID(m.gameState.Items().CombineItem())
 		m.inventory.SetMode(ui.PreviewMode)
 		var eventItem *data.Item
 		for _, item := range sceneManager.Game().Items {

@@ -805,6 +805,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		gameState.SetEventItem(args.ID)
 		if gameState.Items().Includes(args.ID) {
 			gameState.Items().Activate(args.ID)
+			gameState.Items().SetCombineItem(0)
 		}
 		i.commandIterator.Advance()
 

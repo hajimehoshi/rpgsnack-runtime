@@ -24,9 +24,10 @@ import (
 )
 
 type Items struct {
-	items      []int
-	activeItem int
-	eventItem  int
+	items       []int
+	activeItem  int
+	combineItem int
+	eventItem   int
 }
 
 func NewItems(items []int, activeItem int) *Items {
@@ -47,6 +48,8 @@ func (i *Items) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EndArray()
 	e.EncodeString("activeItem")
 	e.EncodeInt(i.activeItem)
+	e.EncodeString("combineItem")
+	e.EncodeInt(i.combineItem)
 	e.EncodeString("eventItem")
 	e.EncodeInt(i.eventItem)
 	e.EndMap()
@@ -68,6 +71,8 @@ func (i *Items) DecodeMsgpack(dec *msgpack.Decoder) error {
 			}
 		case "activeItem":
 			i.activeItem = d.DecodeInt()
+		case "combineItem":
+			i.combineItem = d.DecodeInt()
 		case "eventItem":
 			i.eventItem = d.DecodeInt()
 		}
@@ -169,6 +174,14 @@ func (i *Items) Remove(id int) {
 
 func (i *Items) Activate(id int) {
 	i.activeItem = id
+}
+
+func (i *Items) CombineItem() int {
+	return i.combineItem
+}
+
+func (i *Items) SetCombineItem(id int) {
+	i.combineItem = id
 }
 
 func (i *Items) Deactivate() {
