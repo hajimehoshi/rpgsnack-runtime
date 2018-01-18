@@ -224,13 +224,6 @@ func (i *Inventory) Update() {
 				if i.onSlotPressed != nil {
 					i.onSlotPressed(i, index)
 				}
-				if i.activeItemID > 0 {
-					if i.combineItemID == i.items[index].ID {
-						i.combineItemID = 0
-					} else {
-						i.combineItemID = i.items[index].ID
-					}
-				}
 			}
 		}
 		i.pressStartIndex = -1
@@ -361,10 +354,7 @@ func (i *Inventory) Draw(screen *ebiten.Image) {
 }
 
 func (i *Inventory) SetMode(mode InventoryMode) {
-	if i.mode != mode {
-		i.mode = mode
-		i.combineItemID = 0
-	}
+	i.mode = mode
 }
 
 func (i *Inventory) SetItems(items []*data.Item) {
@@ -382,8 +372,8 @@ func (i *Inventory) SetActiveItemID(activeItemID int) {
 	i.activeItemID = activeItemID
 }
 
-func (i *Inventory) CombineItemID() int {
-	return i.combineItemID
+func (i *Inventory) SetCombineItemID(combineItemID int) {
+	i.combineItemID = combineItemID
 }
 
 func (i *Inventory) Mode() InventoryMode {
