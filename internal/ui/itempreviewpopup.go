@@ -25,7 +25,6 @@ import (
 )
 
 type ItemPreviewPopup struct {
-	x               int
 	y               int
 	item            *data.Item
 	combineItem     *data.Item
@@ -40,10 +39,10 @@ type ItemPreviewPopup struct {
 	actionButton    *Button
 }
 
-func NewItemPreviewPopup(x, y int) *ItemPreviewPopup {
+func NewItemPreviewPopup(y int) *ItemPreviewPopup {
 	closeButton := NewImageButton(
-		137,
-		39,
+		135,
+		5,
 		NewImagePart(assets.GetImage("system/itempreview/cancel_off.png")),
 		NewImagePart(assets.GetImage("system/itempreview/cancel_on.png")),
 		"cancel",
@@ -51,7 +50,7 @@ func NewItemPreviewPopup(x, y int) *ItemPreviewPopup {
 
 	actionButton := NewImageButton(
 		54,
-		128,
+		93,
 		NewImagePart(assets.GetImage("system/itempreview/action_button_off.png")),
 		NewImagePart(assets.GetImage("system/itempreview/action_button_on.png")),
 		"click",
@@ -67,7 +66,6 @@ func NewItemPreviewPopup(x, y int) *ItemPreviewPopup {
 	}
 
 	return &ItemPreviewPopup{
-		x:               x,
 		y:               y,
 		fadeImage:       fadeImage,
 		frameImage:      frameImage,
@@ -83,7 +81,7 @@ func (i *ItemPreviewPopup) Update(lang language.Tag) {
 		return
 	}
 	for _, n := range i.nodes {
-		n.UpdateAsChild(i.visible, 0, 0)
+		n.UpdateAsChild(i.visible, 0, i.y)
 	}
 	i.actionButton.Text = texts.Text(lang, texts.TextIDItemCheck)
 }
@@ -160,20 +158,19 @@ func (i *ItemPreviewPopup) Draw(screen *ebiten.Image) {
 	screen.DrawImage(i.fadeImage, op)
 
 	op = &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(6, 35)
+	op.GeoM.Translate(6, float64(i.y))
 	op.GeoM.Scale(consts.TileScale, consts.TileScale)
 	screen.DrawImage(i.frameImage, op)
 
 	op = &ebiten.DrawImageOptions{}
-
 	if i.combineItem != nil && i.combineItem.ID != i.item.ID {
-		i.drawItem(screen, 16, 64, i.item.Icon)
-		i.drawItem(screen, 88, 64, i.combineItem.Icon)
+		i.drawItem(screen, 16, float64(i.y)+28, i.item.Icon)
+		i.drawItem(screen, 88, float64(i.y)+28, i.combineItem.Icon)
 	} else {
-		i.drawItem(screen, 54, 64, i.item.Icon)
+		i.drawItem(screen, 54, float64(i.y)+28, i.item.Icon)
 	}
 
 	for _, n := range i.nodes {
-		n.DrawAsChild(screen, 0, 0)
+		n.DrawAsChild(screen, 0, i.y)
 	}
 }

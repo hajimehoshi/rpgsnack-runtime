@@ -143,7 +143,7 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	m.removeAdsDialog.AddChild(m.removeAdsNoButton)
 
 	m.inventory = ui.NewInventory(0, (screenH-inventoryHeight)/consts.TileScale)
-	m.itemPreviewPopup = ui.NewItemPreviewPopup((uiWidth-160)/2+16, m.offsetY/consts.TileScale)
+	m.itemPreviewPopup = ui.NewItemPreviewPopup(int(screenH/consts.TileScale) - 160)
 	m.quitDialog.AddChild(m.quitLabel)
 
 	m.removeAdsButton.Visible = false // TODO: Clock of Atonement does not need this feature, so turn it off for now
