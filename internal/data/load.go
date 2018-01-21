@@ -78,11 +78,11 @@ type LoadedData struct {
 func Load(projectPath string) (*LoadedData, error) {
 	data, err := loadRawData(projectPath)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("data: loadRawData failed: %s", err.Error())
 	}
 	var project *Project
 	if err := unmarshalJSON(data.Project, &project); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("data: parsing project data failed: %s", err.Error())
 	}
 	gameData := project.Data
 	var assets map[string][]byte
@@ -92,7 +92,7 @@ func Load(projectPath string) (*LoadedData, error) {
 	var purchases []string
 	if data.Purchases != nil {
 		if err := unmarshalJSON(data.Purchases, &purchases); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("data: parsing purchases data failed: %s", err.Error())
 		}
 	} else {
 		purchases = []string{}
@@ -101,7 +101,7 @@ func Load(projectPath string) (*LoadedData, error) {
 	if data.Language != nil {
 		var langId string
 		if err := unmarshalJSON(data.Language, &langId); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("data: parsing language data failed: %s", err.Error())
 		}
 		tag, err = language.Parse(langId)
 		if err != nil {
