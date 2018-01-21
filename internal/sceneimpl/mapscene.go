@@ -223,9 +223,11 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	})
 	m.itemPreviewPopup.SetOnClosePressed(func(_ *ui.ItemPreviewPopup) {
 		m.gameState.Items().SetEventItem(0)
+		m.gameState.Items().SetCombineItem(0)
 	})
 	m.inventory.SetOnBackPressed(func(_ *ui.Inventory) {
 		m.gameState.Items().SetEventItem(0)
+		m.gameState.Items().SetCombineItem(0)
 	})
 	// TODO: ItemPreviewPopup is not standarized as the other Popups
 	m.itemPreviewPopup.SetOnActionPressed(func(_ *ui.ItemPreviewPopup) {
