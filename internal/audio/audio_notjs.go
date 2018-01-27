@@ -145,7 +145,7 @@ func (a *audio) getPlayer(path string, loop bool) (*eaudio.Player, error) {
 			return nil, fmt.Errorf("audio: decode error: %s, %v", mp3Path, err)
 		}
 		if loop {
-			return eaudio.NewPlayer(a.context, eaudio.NewInfiniteLoop(s, s.Size()))
+			return eaudio.NewPlayer(a.context, eaudio.NewInfiniteLoop(s, s.Length()))
 		}
 		return eaudio.NewPlayer(a.context, s)
 	}
@@ -157,7 +157,7 @@ func (a *audio) getPlayer(path string, loop bool) (*eaudio.Player, error) {
 			return nil, fmt.Errorf("audio: decode error: %s, %v", wavPath, err)
 		}
 		if loop {
-			return eaudio.NewPlayer(a.context, eaudio.NewInfiniteLoop(s, s.Size()))
+			return eaudio.NewPlayer(a.context, eaudio.NewInfiniteLoop(s, s.Length()))
 		}
 		return eaudio.NewPlayer(a.context, s)
 	}
