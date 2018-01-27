@@ -18,6 +18,7 @@ package audio
 
 import (
 	"fmt"
+	"io/ioutil"
 
 	eaudio "github.com/hajimehoshi/ebiten/audio"
 	"github.com/hajimehoshi/ebiten/audio/mp3"
@@ -72,6 +73,8 @@ type audio struct {
 	playing        *eaudio.Player
 	playingBGMName string
 
+	wavCache map[string][]byte
+
 	bgmVolume interpolation.I
 
 	toStopBGM bool
@@ -88,6 +91,7 @@ func newAudio() (*audio, error) {
 		context:   context,
 		players:   map[string]*eaudio.Player{},
 		sePlayers: map[*eaudio.Player]struct{}{},
+		wavCache:  map[string][]byte{},
 	}, nil
 }
 
@@ -151,13 +155,22 @@ func (a *audio) getPlayer(path string, loop bool) (*eaudio.Player, error) {
 	}
 
 	if assets.Exists(wavPath) {
-		bin := assets.GetResource(wavPath)
-		s, err := wav.Decode(a.context, eaudio.BytesReadSeekCloser(bin))
-		if err != nil {
-			return nil, fmt.Errorf("audio: decode error: %s, %v", wavPath, err)
+		if _, ok := a.wavCache[wavPath]; !ok {
+			bin := assets.GetResource(wavPath)
+			s, err := wav.Decode(a.context, eaudio.BytesReadSeekCloser(bin))
+			if err != nil {
+				return nil, fmt.Errorf("audio: decode error: %s, %v", wavPath, err)
+			}
+			bs, err := ioutil.ReadAll(s)
+			if err != nil {
+				return nil, err
+			}
+			a.wavCache[wavPath] = bs
 		}
+		bs := a.wavCache[wavPath]
+		s := eaudio.BytesReadSeekCloser(bs)
 		if loop {
-			return eaudio.NewPlayer(a.context, eaudio.NewInfiniteLoop(s, s.Length()))
+			return eaudio.NewPlayer(a.context, eaudio.NewInfiniteLoop(s, int64(len(bs))))
 		}
 		return eaudio.NewPlayer(a.context, s)
 	}
