@@ -66,6 +66,14 @@ func StopBGM(fadeTimeInFrames int) {
 	theAudio.StopBGM(fadeTimeInFrames)
 }
 
+func ResumeBGM() {
+	theAudio.ResumeBGM()
+}
+
+func PauseBGM() {
+	theAudio.PauseBGM()
+}
+
 type audio struct {
 	context        *eaudio.Context
 	players        map[string]*eaudio.Player
@@ -211,6 +219,7 @@ func (a *audio) PlayBGM(name string, volume float64, fadeTimeInFrames int) {
 	}
 	if a.playingBGMName == name {
 		p.SetVolume(a.bgmVolume.Current() * volumeBias)
+		p.Play()
 		return
 	}
 	if a.playing != nil {
@@ -225,6 +234,29 @@ func (a *audio) PlayBGM(name string, volume float64, fadeTimeInFrames int) {
 	p.SetVolume(a.bgmVolume.Current() * volumeBias)
 	a.playing = p
 	a.playingBGMName = name
+}
+
+func (a *audio) ResumeBGM() {
+	if a.err != nil {
+		return
+	}
+	if a.playing == nil {
+		return
+	}
+	a.PlayBGM(a.playingBGMName, a.bgmVolume.Current(), 0)
+}
+
+func (a *audio) PauseBGM() {
+	if a.err != nil {
+		return
+	}
+	if a.playing == nil {
+		return
+	}
+	// Cancel the current fading.
+	a.toStopBGM = false
+	a.bgmVolume.Set(a.bgmVolume.Current(), 0)
+	a.playing.Pause()
 }
 
 func (a *audio) StopBGM(fadeTimeInFrames int) {
