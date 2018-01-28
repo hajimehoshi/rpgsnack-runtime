@@ -16,7 +16,6 @@ package game
 
 import (
 	"github.com/hajimehoshi/ebiten"
-	"github.com/hajimehoshi/ebiten/ebitenutil"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
@@ -100,7 +99,6 @@ func (g *Game) update() error {
 
 func (g *Game) draw(screen *ebiten.Image) {
 	if g.loadingCh != nil {
-		ebitenutil.DebugPrint(screen, "Now Loading...")
 		return
 	}
 	g.sceneManager.Draw(screen)
