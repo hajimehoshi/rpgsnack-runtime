@@ -86,6 +86,7 @@ type audio struct {
 	bgmVolume interpolation.I
 
 	toStopBGM bool
+	paused    bool
 
 	err error
 }
@@ -108,7 +109,9 @@ func (a *audio) Update() error {
 		return a.err
 	}
 
-	a.bgmVolume.Update()
+	if !a.paused {
+		a.bgmVolume.Update()
+	}
 	if a.playing != nil {
 		a.playing.SetVolume(a.bgmVolume.Current() * volumeBias)
 	}
@@ -205,6 +208,7 @@ func (a *audio) PlayBGM(name string, volume float64, fadeTimeInFrames int) {
 	}
 
 	a.toStopBGM = false
+	a.paused = false
 	a.bgmVolume.Set(volume, fadeTimeInFrames)
 
 	p, ok := a.players[name]
@@ -253,10 +257,8 @@ func (a *audio) PauseBGM() {
 	if a.playing == nil {
 		return
 	}
-	// Cancel the current fading.
-	a.toStopBGM = false
-	a.bgmVolume.Set(a.bgmVolume.Current(), 0)
 	a.playing.Pause()
+	a.paused = true
 }
 
 func (a *audio) StopBGM(fadeTimeInFrames int) {
@@ -266,6 +268,10 @@ func (a *audio) StopBGM(fadeTimeInFrames int) {
 	if a.playing == nil {
 		return
 	}
-	a.bgmVolume.Set(0, fadeTimeInFrames)
 	a.toStopBGM = true
+	if a.paused {
+		fadeTimeInFrames = 0
+		a.paused = false
+	}
+	a.bgmVolume.Set(0, fadeTimeInFrames)
 }
