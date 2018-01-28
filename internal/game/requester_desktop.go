@@ -23,6 +23,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"time"
 
 	datapkg "github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 )
@@ -96,12 +97,18 @@ func (m *Requester) RequestRestorePurchases(requestID int) {
 
 func (m *Requester) RequestInterstitialAds(requestID int) {
 	log.Printf("request interstitial ads: requestID: %d", requestID)
-	m.game.FinishInterstitialAds(requestID)
+	go func() {
+		time.Sleep(time.Second)
+		m.game.FinishInterstitialAds(requestID)
+	}()
 }
 
 func (m *Requester) RequestRewardedAds(requestID int) {
 	log.Printf("request rewarded ads: requestID: %d", requestID)
-	m.game.FinishRewardedAds(requestID, true)
+	go func() {
+		time.Sleep(time.Second)
+		m.game.FinishRewardedAds(requestID, true)
+	}()
 }
 
 func (m *Requester) RequestOpenLink(requestID int, linkType string, data string) {
