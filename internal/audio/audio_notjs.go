@@ -105,9 +105,7 @@ func (a *audio) Update() error {
 		a.playing.SetVolume(a.bgmVolume.Current() * volumeBias)
 	}
 	if a.toStopBGM && !a.bgmVolume.IsChanging() {
-		if err := a.playing.Pause(); err != nil {
-			return err
-		}
+		a.playing.Pause()
 		a.playing = nil
 		a.playingBGMName = ""
 		a.toStopBGM = false
@@ -131,10 +129,7 @@ func (a *audio) Stop() {
 	}
 	StopBGM(0)
 	for p := range a.sePlayers {
-		if err := p.Pause(); err != nil {
-			a.err = err
-			return
-		}
+		p.Pause()
 	}
 	a.sePlayers = map[*eaudio.Player]struct{}{}
 }
