@@ -106,6 +106,9 @@ func (a *audio) Update() error {
 	}
 	if a.toStopBGM && !a.bgmVolume.IsChanging() {
 		a.playing.Pause()
+		if err := a.playing.Rewind(); err != nil {
+			return err
+		}
 		a.playing = nil
 		a.playingBGMName = ""
 		a.toStopBGM = false
@@ -130,6 +133,7 @@ func (a *audio) Stop() {
 	StopBGM(0)
 	for p := range a.sePlayers {
 		p.Pause()
+		// These SEs are no longer used, so positions should not be cared.
 	}
 	a.sePlayers = map[*eaudio.Player]struct{}{}
 }
@@ -211,12 +215,12 @@ func (a *audio) PlayBGM(name string, volume float64, fadeTimeInFrames int) {
 	}
 	if a.playing != nil {
 		a.playing.Pause()
+		if err := a.playing.Rewind(); err != nil {
+			a.err = err
+			return
+		}
 	}
 
-	if err := p.Rewind(); err != nil {
-		a.err = err
-		return
-	}
 	p.Play()
 	p.SetVolume(a.bgmVolume.Current() * volumeBias)
 	a.playing = p
