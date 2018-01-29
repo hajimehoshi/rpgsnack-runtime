@@ -152,6 +152,6 @@ func (m *Requester) RequestTerminateGame() {
 	log.Printf("request terminate game")
 }
 
-func (m *Requester) RequestSendAnalytics(eventName string) {
-	log.Printf("request to send an analytics event: %s", eventName)
+func (m *Requester) RequestSendAnalytics(eventName string, value string) {
+	log.Printf("request to send an analytics event: %s value: %s", eventName, value)
 }

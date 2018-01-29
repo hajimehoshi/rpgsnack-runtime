@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"image/color"
 	"math"
+	"strconv"
 
 	"github.com/vmihailenco/msgpack"
 
@@ -389,6 +390,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		hintId := gameState.hints.ActiveHintID()
 		// next time it shows next available hint
 		gameState.hints.ReadHint(hintId)
+		sceneManager.Requester().RequestSendAnalytics("show_hint", strconv.Itoa(hintId))
 		hasHint := false
 		for _, h := range sceneManager.Game().Hints {
 			if h.ID == hintId {
@@ -617,7 +619,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		return false, nil
 	case data.CommandNameSendAnalytics:
 		args := c.Args.(*data.CommandArgsSendAnalytics)
-		sceneManager.Requester().RequestSendAnalytics(args.EventName)
+		sceneManager.Requester().RequestSendAnalytics(args.EventName, "")
 		i.commandIterator.Advance()
 	case data.CommandNameMoveCharacter:
 		if ch := gameState.Character(i.mapID, i.roomID, i.eventID); ch == nil {
