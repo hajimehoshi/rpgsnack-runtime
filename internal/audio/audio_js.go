@@ -220,3 +220,11 @@ func StopBGM(fadeTimeInFrames int) {
 	theCurrentAudio.bgmName = ""
 	theCurrentAudio.bgmVolume = 0
 }
+
+func PauseBGM() {
+	// TODO: Implement this
+}
+
+func ResumeBGM() {
+	// TODO: Implement this
+}
