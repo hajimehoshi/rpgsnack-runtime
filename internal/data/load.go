@@ -17,6 +17,7 @@ package data
 import (
 	"encoding/json"
 	"fmt"
+	"path/filepath"
 
 	"github.com/vmihailenco/msgpack"
 	"golang.org/x/text/language"
@@ -68,11 +69,12 @@ type Project struct {
 }
 
 type LoadedData struct {
-	Game      *Game
-	Assets    map[string][]byte
-	Progress  []byte
-	Purchases []string
-	Language  language.Tag
+	Game           *Game
+	Assets         map[string][]byte
+	AssetsMetadata map[string]*AssetMetadata
+	Progress       []byte
+	Purchases      []string
+	Language       language.Tag
 }
 
 func Load(projectPath string) (*LoadedData, error) {
@@ -85,7 +87,7 @@ func Load(projectPath string) (*LoadedData, error) {
 		return nil, fmt.Errorf("data: parsing project data failed: %s", err.Error())
 	}
 	gameData := project.Data
-	var assets map[string][]byte
+	assets, assetsMetadata, err := parseAssets(data.Assets)
 	if err := msgpack.Unmarshal(data.Assets, &assets); err != nil {
 		return nil, fmt.Errorf("data: msgpack.Unmarshal error: %s", err.Error())
 	}
@@ -120,10 +122,35 @@ func Load(projectPath string) (*LoadedData, error) {
 	}
 
 	return &LoadedData{
-		Game:      gameData,
-		Assets:    assets,
-		Purchases: purchases,
-		Progress:  data.Progress,
-		Language:  tag,
+		Game:           gameData,
+		Assets:         assets,
+		AssetsMetadata: assetsMetadata,
+		Purchases:      purchases,
+		Progress:       data.Progress,
+		Language:       tag,
 	}, nil
+}
+
+func parseAssets(rawAssets []byte) (map[string][]byte, map[string]*AssetMetadata, error) {
+	var m map[string][]byte
+	assets := map[string][]byte{}
+	assetsMetadata := map[string]*AssetMetadata{}
+
+	if err := msgpack.Unmarshal(rawAssets, &m); err != nil {
+		return nil, nil, fmt.Errorf("data: msgpack.Unmarshal error: %s", err.Error())
+	}
+
+	for k, v := range m {
+		if filepath.Ext(k) == ".json" {
+			var assetMetadata *AssetMetadata
+			if err := unmarshalJSON(v, &assetMetadata); err != nil {
+				return nil, nil, fmt.Errorf("data: parsing asset metadata %s failed: %s", k, err.Error())
+			}
+			assetsMetadata[k] = assetMetadata
+		} else {
+			assets[k] = v
+		}
+	}
+
+	return assets, assetsMetadata, nil
 }

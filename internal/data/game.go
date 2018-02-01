@@ -47,6 +47,10 @@ type MessageStyle struct {
 	CharacterAnim     *CharacterAnim `json:"characterAnim"`
 }
 
+type AssetMetadata struct {
+	PassageTypes []PassageType `json:"passageTypes"`
+}
+
 type FinishTriggerType string
 
 const (

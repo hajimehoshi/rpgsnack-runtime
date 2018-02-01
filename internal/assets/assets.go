@@ -18,12 +18,14 @@ import (
 	"strings"
 
 	"github.com/hajimehoshi/ebiten"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 )
 
 var theAssets = &assets{}
 
-func Set(assets map[string][]uint8) error {
+func Set(assets map[string][]uint8, metadata map[string]*data.AssetMetadata) error {
 	theAssets.assets = assets
+	theAssets.metadata = metadata
 	theAssets.images = map[string]*ebiten.Image{}
 	for file, bin := range assets {
 		if strings.HasSuffix(file, ".png") {
@@ -38,8 +40,9 @@ func Set(assets map[string][]uint8) error {
 }
 
 type assets struct {
-	assets map[string][]uint8
-	images map[string]*ebiten.Image
+	assets   map[string][]uint8
+	metadata map[string]*data.AssetMetadata
+	images   map[string]*ebiten.Image
 }
 
 func Exists(path string) bool {
