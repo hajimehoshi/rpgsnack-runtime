@@ -621,6 +621,9 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		args := c.Args.(*data.CommandArgsSendAnalytics)
 		sceneManager.Requester().RequestSendAnalytics(args.EventName, "")
 		i.commandIterator.Advance()
+	case data.CommandNameRequestReview:
+		sceneManager.Requester().RequestReview()
+		i.commandIterator.Advance()
 	case data.CommandNameMoveCharacter:
 		if ch := gameState.Character(i.mapID, i.roomID, i.eventID); ch == nil {
 			i.commandIterator.Advance()

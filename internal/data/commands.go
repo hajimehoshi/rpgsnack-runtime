@@ -188,6 +188,7 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 	case CommandNameSave:
 	case CommandNameGotoTitle:
 	case CommandNameSyncIAP:
+	case CommandNameRequestReview:
 	case CommandNameUnlockAchievement:
 		var args *CommandArgsUnlockAchievement
 		if err := unmarshalJSON(tmp.Args, &args); err != nil {
@@ -454,6 +455,8 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 				d.DecodeNil()
 			case CommandNameSyncIAP:
 				d.DecodeNil()
+			case CommandNameRequestReview:
+				d.DecodeNil()
 			case CommandNameUnlockAchievement:
 				a := &CommandArgsUnlockAchievement{}
 				d.DecodeAny(a)
@@ -639,6 +642,7 @@ const (
 	CommandNameSyncIAP           CommandName = "sync_iap" // TODO: We might be able to remove this later
 	CommandNameShowAds           CommandName = "show_ads"
 	CommandNameOpenLink          CommandName = "open_link"
+	CommandNameRequestReview     CommandName = "request_review"
 	CommandNameSendAnalytics     CommandName = "send_analytics"
 
 	CommandNameAddItem       CommandName = "add_item"
