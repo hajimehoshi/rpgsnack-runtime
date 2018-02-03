@@ -30,6 +30,7 @@ import (
 	pathpkg "github.com/hajimehoshi/rpgsnack-runtime/internal/path"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/sort"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/tileset"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/variables"
 )
 
@@ -315,11 +316,20 @@ func (m *Map) removeRoutes(eventID int) {
 	}
 }
 
-func (m *Map) FindImage(imageID int) *ebiten.Image {
+func (m *Map) FindImageName(imageID int) string {
+	imageName := ""
 	for _, tileSetItem := range m.gameData.TileSets {
 		if tileSetItem.ID == imageID {
-			return assets.GetImage(tileSetItem.Name + ".png")
+			imageName = tileSetItem.Name
+			break
 		}
+	}
+	return imageName
+}
+
+func (m *Map) FindImage(imageID int) *ebiten.Image {
+	if imageName := m.FindImageName(imageID); imageName != "" {
+		return assets.GetImage(imageName + ".png")
 	}
 	return nil
 }
@@ -511,7 +521,7 @@ func (m *Map) FinishPlayerMovingByUserInput() {
 }
 
 func (m *Map) passableTile(x, y int) bool {
-	tileIndex := y*consts.TileXNum + x
+	tileIndex := tileset.TileIndex(x, y)
 	passageTypeOverrides := m.CurrentRoom().PassageTypeOverrides
 	if passageTypeOverrides != nil {
 		switch passageTypeOverrides[tileIndex] {

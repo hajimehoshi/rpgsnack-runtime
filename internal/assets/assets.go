@@ -53,3 +53,7 @@ func Exists(path string) bool {
 func GetResource(path string) []uint8 {
 	return theAssets.assets[path]
 }
+
+func GetMetadata(imageName string) *data.AssetMetadata {
+	return theAssets.metadata["images/"+imageName+"_metadata.json"]
+}

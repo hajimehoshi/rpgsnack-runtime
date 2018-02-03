@@ -31,6 +31,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/texts"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/tileset"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/ui"
 )
 
@@ -473,16 +474,10 @@ func (m *MapScene) handleBackButton() {
 func (m *MapScene) drawTileLayer(layer int, priority data.Priority) {
 	op := &ebiten.DrawImageOptions{}
 	room := m.gameState.Map().CurrentRoom()
-	// tile ID is consist of three section
-	// [8bit - x][8bit - y][15bit - image id]
-	const yOffset = 15
-	const xOffset = 23
-	imgIdMask := (1 << yOffset) - 1
-	yMask := (1 << xOffset) - 1 - imgIdMask
 
 	for j := 0; j < consts.TileYNum; j++ {
 		for i := 0; i < consts.TileXNum; i++ {
-			tileIndex := j*consts.TileXNum + i
+			tileIndex := tileset.TileIndex(i, j)
 			tile := room.Tiles[layer][tileIndex]
 			passageOverrideType := room.PassageTypeOverrides[tileIndex]
 			if layer == 2 || layer == 3 {
@@ -493,11 +488,11 @@ func (m *MapScene) drawTileLayer(layer int, priority data.Priority) {
 					continue
 				}
 			}
-			imageID := tile & imgIdMask
+			x, y, imageID := tileset.DecodeTile(tile)
 			tileSetImg := m.gameState.Map().FindImage(imageID)
 			if tileSetImg != nil {
-				sx := (tile >> xOffset) * consts.TileSize
-				sy := ((tile & yMask) >> yOffset) * consts.TileSize
+				sx := x * consts.TileSize
+				sy := y * consts.TileSize
 				r := image.Rect(sx, sy, sx+consts.TileSize, sy+consts.TileSize)
 				op.SourceRect = &r
 				dx := i * consts.TileSize
