@@ -479,16 +479,17 @@ func (m *MapScene) drawTileLayer(layer int, priority data.Priority) {
 		for i := 0; i < consts.TileXNum; i++ {
 			tileIndex := tileset.TileIndex(i, j)
 			tile := room.Tiles[layer][tileIndex]
-			passageOverrideType := room.PassageTypeOverrides[tileIndex]
+			x, y, imageID := tileset.DecodeTile(tile)
+			imageName := m.gameState.Map().FindImageName(imageID)
+			passageType := tileset.PassageType(imageName, x, y)
 			if layer == 2 || layer == 3 {
-				if passageOverrideType == data.PassageTypeOver && priority != data.PriorityTop {
+				if passageType == data.PassageTypeOver && priority != data.PriorityTop {
 					continue
 				}
-				if passageOverrideType != data.PassageTypeOver && priority == data.PriorityTop {
+				if passageType != data.PassageTypeOver && priority == data.PriorityTop {
 					continue
 				}
 			}
-			x, y, imageID := tileset.DecodeTile(tile)
 			tileSetImg := m.gameState.Map().FindImage(imageID)
 			if tileSetImg != nil {
 				sx := x * consts.TileSize

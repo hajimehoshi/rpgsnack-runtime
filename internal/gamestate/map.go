@@ -523,11 +523,16 @@ func (m *Map) FinishPlayerMovingByUserInput() {
 func (m *Map) passableTile(x, y int) bool {
 	tileIndex := tileset.TileIndex(x, y)
 	passageTypeOverrides := m.CurrentRoom().PassageTypeOverrides
-	if passageTypeOverrides != nil {
-		switch passageTypeOverrides[tileIndex] {
-		case data.PassageTypeOver:
-			return true
-		case data.PassageTypeBlock:
+	if passageTypeOverrides != nil && passageTypeOverrides[tileIndex] == data.PassageTypeBlock {
+		return false
+	}
+
+	for layer := 0; layer < 4; layer++ {
+		tile := m.CurrentRoom().Tiles[layer][tileIndex]
+		x, y, imageID := tileset.DecodeTile(tile)
+		imageName := m.FindImageName(imageID)
+		passageType := tileset.PassageType(imageName, x, y)
+		if passageType == data.PassageTypeBlock {
 			return false
 		}
 	}
