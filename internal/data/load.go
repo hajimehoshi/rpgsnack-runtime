@@ -113,13 +113,22 @@ func Load(projectPath string) (*LoadedData, error) {
 		tag = gameData.System.DefaultLanguage
 	}
 
-	// Keep only the language base so far.
-	// TODO: If the language is Chinese, the region code might be needed to keep.
 	base, _ := tag.Base()
-	tag, err = language.Compose(base)
-	if err != nil {
-		return nil, err
+	newTag, _ := language.Compose(base)
+	if newTag == language.Chinese {
+		// If the language is Chinese use zh-CN or zh-TW.
+		r, _ := tag.Region()
+		if r.String() != "CN" && r.String() != "TW" {
+			// If the language is just "zh" or other Chinese, use CN.
+			// There is no strong reason why CN is preferred.
+			r = language.MustParseRegion("CN")
+		}
+		newTag, err = language.Compose(base, r)
+		if err != nil {
+			return nil, err
+		}
 	}
+	tag = newTag
 
 	return &LoadedData{
 		Game:           gameData,
