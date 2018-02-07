@@ -51,7 +51,7 @@ func (s *scaledImage) At(x, y int) color.Color {
 	return s.image.At(x, y)
 }
 
-func Scale(f font.Face, scale int) font.Face {
+func scaleFont(f font.Face, scale int) font.Face {
 	if scale == 1 {
 		return f
 	}

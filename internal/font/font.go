@@ -49,9 +49,12 @@ func DrawText(screen *ebiten.Image, str string, ox, oy int, scale int, textAlign
 	// Use the same instance to use text cache efficiently.
 	f, ok := fonts[scale]
 	if !ok {
-		f = Scale(mplusbitmap.Gothic12r, scale)
+		f = scaleFont(mplusbitmap.Gothic12r, scale)
 		fonts[scale] = f
 	}
+
+	m := f.Metrics()
+	oy += (renderingLineHeight*scale - m.Height.Round()) / 2
 
 	b, _, _ := f.GlyphBounds('.')
 	dotX := -b.Min.X
