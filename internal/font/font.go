@@ -20,7 +20,6 @@ import (
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/text"
-	"github.com/hajimehoshi/go-mplus-bitmap"
 	"golang.org/x/image/font"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
@@ -30,15 +29,11 @@ const (
 	renderingLineHeight = 18
 )
 
-var (
-	fonts = map[int]font.Face{}
-)
-
 func MeasureSize(text string) (int, int) {
 	w := 0
 	h := 0
 	for _, l := range strings.Split(strings.TrimRight(text, "\n"), "\n") {
-		b, _ := font.BoundString(mplusbitmap.Gothic12r, l)
+		b, _ := font.BoundString(face(1), l)
 		w += (b.Max.X - b.Min.X).Ceil()
 		h += renderingLineHeight
 	}
@@ -46,13 +41,7 @@ func MeasureSize(text string) (int, int) {
 }
 
 func DrawText(screen *ebiten.Image, str string, ox, oy int, scale int, textAlign data.TextAlign, color color.Color, displayTextRuneCount int) {
-	// Use the same instance to use text cache efficiently.
-	f, ok := fonts[scale]
-	if !ok {
-		f = scaleFont(mplusbitmap.Gothic12r, scale)
-		fonts[scale] = f
-	}
-
+	f := face(scale)
 	m := f.Metrics()
 	oy += (renderingLineHeight*scale - m.Height.Round()) / 2
 
