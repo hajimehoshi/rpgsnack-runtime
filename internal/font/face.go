@@ -15,7 +15,7 @@
 package font
 
 import (
-	"github.com/hajimehoshi/go-mplus-bitmap"
+	"github.com/hajimehoshi/go-mplusbitmap"
 	"golang.org/x/image/font"
 )
 
