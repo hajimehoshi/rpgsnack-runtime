@@ -53,7 +53,7 @@ func DrawTextLang(screen *ebiten.Image, str string, ox, oy int, scale int, textA
 	m := f.Metrics()
 	oy += (renderingLineHeight*scale - m.Height.Round()) / 2
 
-	b, _, _ := f.GlyphBounds('.')
+	b, _, _ := f.GlyphBounds('M')
 	dotX := -b.Min.X
 	dotY := -b.Min.Y
 	for _, l := range strings.Split(str, "\n") {
