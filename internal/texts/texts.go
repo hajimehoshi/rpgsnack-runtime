@@ -104,4 +104,10 @@ and connect to the network`,
 ネットワークに接続しているか
 確認してください`,
 	},
+	language.SimplifiedChinese: {
+	// TODO: Implement this
+	},
+	language.TraditionalChinese: {
+	// TODO: Implement this
+	},
 }
