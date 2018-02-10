@@ -15,20 +15,100 @@
 package font
 
 import (
+	"bytes"
+	"compress/gzip"
+	"io/ioutil"
+
+	"github.com/golang/freetype/truetype"
+	"github.com/hajimehoshi/chinesegamefonts/scregular"
+	"github.com/hajimehoshi/chinesegamefonts/tcregular"
 	"github.com/hajimehoshi/go-mplusbitmap"
 	"golang.org/x/image/font"
+	"golang.org/x/text/language"
 )
 
 var (
-	faces = map[int]font.Face{}
+	scTTF *truetype.Font
+	tcTTF *truetype.Font
+
+	scFaces    = map[int]font.Face{}
+	tcFaces    = map[int]font.Face{}
+	mplusFaces = map[int]font.Face{}
 )
 
-func face(scale int) font.Face {
-	// Use the same instance to use text cache efficiently.
-	f, ok := faces[scale]
-	if !ok {
-		f = scaleFont(mplusbitmap.Gothic12r, scale)
-		faces[scale] = f
+func ensureSCTTF() *truetype.Font {
+	if scTTF != nil {
+		return scTTF
 	}
-	return f
+
+	r, err := gzip.NewReader(bytes.NewReader(scregular.CompressedTTF))
+	if err != nil {
+		panic(err)
+	}
+	bs, err := ioutil.ReadAll(r)
+	if err != nil {
+		panic(err)
+	}
+	scTTF, err = truetype.Parse(bs)
+	if err != nil {
+		panic(err)
+	}
+	return scTTF
+}
+
+func ensureTCTTF() *truetype.Font {
+	if tcTTF != nil {
+		return tcTTF
+	}
+
+	r, err := gzip.NewReader(bytes.NewReader(tcregular.CompressedTTF))
+	if err != nil {
+		panic(err)
+	}
+	bs, err := ioutil.ReadAll(r)
+	if err != nil {
+		panic(err)
+	}
+	tcTTF, err = truetype.Parse(bs)
+	if err != nil {
+		panic(err)
+	}
+	return tcTTF
+}
+
+func face(scale int, lang language.Tag) font.Face {
+	const dpi = 72
+
+	switch lang {
+	case language.SimplifiedChinese:
+		f, ok := scFaces[scale]
+		if !ok {
+			f = truetype.NewFace(ensureSCTTF(), &truetype.Options{
+				Size:    12 * 2,
+				DPI:     dpi,
+				Hinting: font.HintingFull,
+			})
+			scFaces[scale] = f
+		}
+		return f
+	case language.TraditionalChinese:
+		f, ok := tcFaces[scale]
+		if !ok {
+			f = truetype.NewFace(ensureTCTTF(), &truetype.Options{
+				Size:    12 * 2,
+				DPI:     dpi,
+				Hinting: font.HintingFull,
+			})
+			tcFaces[scale] = f
+		}
+		return f
+	default:
+		// Use the same instance to use text cache efficiently.
+		f, ok := mplusFaces[scale]
+		if !ok {
+			f = scaleFont(mplusbitmap.Gothic12r, scale)
+			mplusFaces[scale] = f
+		}
+		return f
+	}
 }

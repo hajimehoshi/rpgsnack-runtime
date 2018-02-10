@@ -23,6 +23,7 @@ import (
 	"golang.org/x/image/font"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
 )
 
 const (
@@ -33,7 +34,7 @@ func MeasureSize(text string) (int, int) {
 	w := 0
 	h := 0
 	for _, l := range strings.Split(strings.TrimRight(text, "\n"), "\n") {
-		b, _ := font.BoundString(face(1), l)
+		b, _ := font.BoundString(face(1, lang.Get()), l)
 		w += (b.Max.X - b.Min.X).Ceil()
 		h += renderingLineHeight
 	}
@@ -41,7 +42,7 @@ func MeasureSize(text string) (int, int) {
 }
 
 func DrawText(screen *ebiten.Image, str string, ox, oy int, scale int, textAlign data.TextAlign, color color.Color, displayTextRuneCount int) {
-	f := face(scale)
+	f := face(scale, lang.Get())
 	m := f.Metrics()
 	oy += (renderingLineHeight*scale - m.Height.Round()) / 2
 
