@@ -21,6 +21,8 @@ import (
 
 	"github.com/vmihailenco/msgpack"
 	"golang.org/x/text/language"
+
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
 )
 
 func min(a, b int) int {
@@ -113,22 +115,7 @@ func Load(projectPath string) (*LoadedData, error) {
 		tag = gameData.System.DefaultLanguage
 	}
 
-	base, _ := tag.Base()
-	newTag, _ := language.Compose(base)
-	if newTag == language.Chinese {
-		// If the language is Chinese use zh-Hans or zh-Hant.
-		s, _ := tag.Script()
-		if s.String() != "Hans" && s.String() != "Hant" {
-			// If the language is just "zh" or other Chinese, use Hans (simplified).
-			// There is no strong reason why Hans is preferred.
-			s = language.MustParseScript("Hans")
-		}
-		newTag, err = language.Compose(base, s)
-		if err != nil {
-			return nil, err
-		}
-	}
-	tag = newTag
+	tag = lang.Normalize(tag)
 
 	// Don't set the language here.
 	// Determining a language requires checking the game text data.

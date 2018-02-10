@@ -27,3 +27,23 @@ func Get() language.Tag {
 func Set(lang language.Tag) {
 	currentLang = lang
 }
+
+func Normalize(lang language.Tag) language.Tag {
+	base, _ := lang.Base()
+	newLang, _ := language.Compose(base)
+	if newLang == language.Chinese {
+		// If the language is Chinese use zh-Hans or zh-Hant.
+		s, _ := lang.Script()
+		if s.String() != "Hans" && s.String() != "Hant" {
+			// If the language is just "zh" or other Chinese, use Hans (simplified).
+			// There is no strong reason why Hans is preferred.
+			s = language.MustParseScript("Hans")
+		}
+		var err error
+		newLang, err = language.Compose(base, s)
+		if err != nil {
+			panic(err)
+		}
+	}
+	return newLang
+}

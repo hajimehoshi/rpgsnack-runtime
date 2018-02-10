@@ -76,10 +76,8 @@ func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
 			s.languageDialog.Hide()
 			lang := sceneManager.Game().Texts.Languages()[i]
 			lang = sceneManager.SetLanguage(lang)
-
-			base, _ := lang.Base()
 			s.waitingRequestID = sceneManager.GenerateRequestID()
-			sceneManager.Requester().RequestChangeLanguage(s.waitingRequestID, base.String())
+			sceneManager.Requester().RequestChangeLanguage(s.waitingRequestID, lang.String())
 		})
 	}
 

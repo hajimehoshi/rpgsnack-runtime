@@ -193,6 +193,7 @@ func (m *Manager) IsPurchased(key string) bool {
 }
 
 func (m *Manager) SetLanguage(language language.Tag) language.Tag {
+	language = lang.Normalize(language)
 	for _, l := range m.game.Texts.Languages() {
 		if l == language {
 			lang.Set(language)
