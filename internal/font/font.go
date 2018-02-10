@@ -49,7 +49,7 @@ func DrawText(screen *ebiten.Image, str string, ox, oy int, scale int, textAlign
 	b, _, _ := f.GlyphBounds('.')
 	dotX := -b.Min.X
 	dotY := -b.Min.Y
-	for _, l := range strings.Split(str, "\n") {
+	for _, l := range strings.Split(str[:displayTextRuneCount], "\n") {
 		x := ox + dotX.Floor()
 		y := oy + dotY.Floor()
 		_, a := font.BoundString(f, l)
