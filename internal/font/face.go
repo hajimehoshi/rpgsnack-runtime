@@ -84,7 +84,7 @@ func face(scale int, lang language.Tag) font.Face {
 		f, ok := scFaces[scale]
 		if !ok {
 			f = truetype.NewFace(ensureSCTTF(), &truetype.Options{
-				Size:    12 * 2,
+				Size:    12 * float64(scale),
 				DPI:     dpi,
 				Hinting: font.HintingFull,
 			})
@@ -95,7 +95,7 @@ func face(scale int, lang language.Tag) font.Face {
 		f, ok := tcFaces[scale]
 		if !ok {
 			f = truetype.NewFace(ensureTCTTF(), &truetype.Options{
-				Size:    12 * 2,
+				Size:    12 * float64(scale),
 				DPI:     dpi,
 				Hinting: font.HintingFull,
 			})
