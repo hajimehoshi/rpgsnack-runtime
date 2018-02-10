@@ -47,6 +47,8 @@ func DrawText(screen *ebiten.Image, str string, ox, oy int, scale int, textAlign
 }
 
 func DrawTextLang(screen *ebiten.Image, str string, ox, oy int, scale int, textAlign data.TextAlign, color color.Color, displayTextRuneCount int, lang language.Tag) {
+	str = string([]rune(str)[:displayTextRuneCount])
+
 	f := face(scale, lang)
 	m := f.Metrics()
 	oy += (renderingLineHeight*scale - m.Height.Round()) / 2
@@ -54,7 +56,7 @@ func DrawTextLang(screen *ebiten.Image, str string, ox, oy int, scale int, textA
 	b, _, _ := f.GlyphBounds('.')
 	dotX := -b.Min.X
 	dotY := -b.Min.Y
-	for _, l := range strings.Split(str[:displayTextRuneCount], "\n") {
+	for _, l := range strings.Split(str, "\n") {
 		x := ox + dotX.Floor()
 		y := oy + dotY.Floor()
 		_, a := font.BoundString(f, l)
