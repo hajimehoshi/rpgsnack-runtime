@@ -69,7 +69,7 @@ to remove ads from the game?`,
 		TextIDItemCheck:        "Check",
 
 		TextIDNewGameWarning: `You have a on-going game data.
-Do you want to clear the 
+Do you want to clear the
 progress to start a new game?`,
 		TextIDBackToTitle: "Do you want to go back to title?",
 		TextIDQuitGame:    "Do you want to quit the game?",
@@ -105,9 +105,59 @@ and connect to the network`,
 確認してください`,
 	},
 	language.SimplifiedChinese: {
-	// TODO: Implement this
+		// TODO: Translat this
+		TextIDNewGame:    "New Game",
+		TextIDResumeGame: "Resume Game",
+		TextIDYes:        "Yes",
+		TextIDNo:         "No",
+		TextIDOK:         "OK",
+		TextIDSettings:   "Settings",
+		TextIDLanguage:   "Language",
+		TextIDCredit:     "Credit",
+		TextIDRemoveAds:  "Remove Ads",
+		TextIDRemoveAdsDesc: `Would you like to pay %s
+to remove ads from the game?`,
+		TextIDReviewThisApp:    "Review This App",
+		TextIDRestorePurchases: "Restore Purchases",
+		TextIDMoreGames:        "More Games",
+		TextIDClose:            "Close",
+		TextIDItemCheck:        "Check",
+
+		TextIDNewGameWarning: `You have a on-going game data.
+Do you want to clear the
+progress to start a new game?`,
+		TextIDBackToTitle: "Do you want to go back to title?",
+		TextIDQuitGame:    "Do you want to quit the game?",
+		TextIDStoreError: `Failed to connect to the store.
+Please make sure to sign in
+and connect to the network`,
 	},
 	language.TraditionalChinese: {
-	// TODO: Implement this
+		// TODO: Translat this
+		TextIDNewGame:    "New Game",
+		TextIDResumeGame: "Resume Game",
+		TextIDYes:        "Yes",
+		TextIDNo:         "No",
+		TextIDOK:         "OK",
+		TextIDSettings:   "Settings",
+		TextIDLanguage:   "Language",
+		TextIDCredit:     "Credit",
+		TextIDRemoveAds:  "Remove Ads",
+		TextIDRemoveAdsDesc: `Would you like to pay %s
+to remove ads from the game?`,
+		TextIDReviewThisApp:    "Review This App",
+		TextIDRestorePurchases: "Restore Purchases",
+		TextIDMoreGames:        "More Games",
+		TextIDClose:            "Close",
+		TextIDItemCheck:        "Check",
+
+		TextIDNewGameWarning: `You have a on-going game data.
+Do you want to clear the
+progress to start a new game?`,
+		TextIDBackToTitle: "Do you want to go back to title?",
+		TextIDQuitGame:    "Do you want to quit the game?",
+		TextIDStoreError: `Failed to connect to the store.
+Please make sure to sign in
+and connect to the network`,
 	},
 }
