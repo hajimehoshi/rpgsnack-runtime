@@ -37,7 +37,10 @@ func MeasureSize(text string) (int, int) {
 	h := fixed.I(0)
 	for _, l := range strings.Split(strings.TrimRight(text, "\n"), "\n") {
 		b, _ := font.BoundString(face(1, lang.Get()), l)
-		w += b.Max.X - b.Min.X
+		nw := b.Max.X - b.Min.X
+		if nw > w {
+			w = nw
+		}
 		h += fixed.I(renderingLineHeight)
 	}
 	return w.Ceil(), h.Ceil()
