@@ -116,14 +116,14 @@ func Load(projectPath string) (*LoadedData, error) {
 	base, _ := tag.Base()
 	newTag, _ := language.Compose(base)
 	if newTag == language.Chinese {
-		// If the language is Chinese use zh-CN or zh-TW.
-		r, _ := tag.Region()
-		if r.String() != "CN" && r.String() != "TW" {
-			// If the language is just "zh" or other Chinese, use CN.
-			// There is no strong reason why CN is preferred.
-			r = language.MustParseRegion("CN")
+		// If the language is Chinese use zh-Hans or zh-Hant.
+		s, _ := tag.Script()
+		if s.String() != "Hans" && s.String() != "Hant" {
+			// If the language is just "zh" or other Chinese, use Hans (simplified).
+			// There is no strong reason why Hans is preferred.
+			s = language.MustParseScript("Hans")
 		}
-		newTag, err = language.Compose(base, r)
+		newTag, err = language.Compose(base, s)
 		if err != nil {
 			return nil, err
 		}
