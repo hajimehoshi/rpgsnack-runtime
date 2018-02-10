@@ -69,6 +69,7 @@ func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
 		n := display.Self.Name(l)
 		b := ui.NewButton((152-120)/2, 8+i*buttonDeltaY, 120, 20, "click")
 		b.Text = n
+		b.Lang = l
 		s.languageDialog.AddChild(b)
 		s.languageButtons = append(s.languageButtons, b)
 		b.SetOnPressed(func(_ *ui.Button) {

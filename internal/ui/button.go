@@ -18,6 +18,7 @@ import (
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten"
+	"golang.org/x/text/language"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
@@ -25,6 +26,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/font"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
 )
 
 type Button struct {
@@ -42,6 +44,7 @@ type Button struct {
 	pressing      bool
 	soundName     string
 	showFrame     bool
+	Lang          language.Tag
 	onPressed     func(button *Button)
 }
 
@@ -210,8 +213,12 @@ func (b *Button) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 	if b.Disabled {
 		c = color.RGBA{0x80, 0x80, 0x80, opacity}
 	}
-	if b.dropShadow {
-		font.DrawText(screen, b.Text, tx+consts.TextScale, ty+consts.TextScale, consts.TextScale, data.TextAlignCenter, color.Black, len([]rune(b.Text)))
+	l := b.Lang
+	if l == language.Und {
+		l = lang.Get()
 	}
-	font.DrawText(screen, b.Text, tx, ty, consts.TextScale, data.TextAlignCenter, c, len([]rune(b.Text)))
+	if b.dropShadow {
+		font.DrawTextLang(screen, b.Text, tx+consts.TextScale, ty+consts.TextScale, consts.TextScale, data.TextAlignCenter, color.Black, len([]rune(b.Text)), l)
+	}
+	font.DrawTextLang(screen, b.Text, tx, ty, consts.TextScale, data.TextAlignCenter, c, len([]rune(b.Text)), l)
 }

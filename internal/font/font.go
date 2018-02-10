@@ -21,6 +21,7 @@ import (
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/text"
 	"golang.org/x/image/font"
+	"golang.org/x/text/language"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
@@ -42,7 +43,11 @@ func MeasureSize(text string) (int, int) {
 }
 
 func DrawText(screen *ebiten.Image, str string, ox, oy int, scale int, textAlign data.TextAlign, color color.Color, displayTextRuneCount int) {
-	f := face(scale, lang.Get())
+	DrawTextLang(screen, str, ox, oy, scale, textAlign, color, displayTextRuneCount, lang.Get())
+}
+
+func DrawTextLang(screen *ebiten.Image, str string, ox, oy int, scale int, textAlign data.TextAlign, color color.Color, displayTextRuneCount int, lang language.Tag) {
+	f := face(scale, lang)
 	m := f.Metrics()
 	oy += (renderingLineHeight*scale - m.Height.Round()) / 2
 
