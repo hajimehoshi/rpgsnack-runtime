@@ -25,6 +25,7 @@ import (
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
 )
 
 type scene interface {
@@ -52,7 +53,6 @@ type Manager struct {
 	game                  *data.Game
 	progress              []byte
 	purchases             []string
-	language              language.Tag
 	interstitialAdsLoaded bool
 	rewardedAdsLoaded     bool
 	blackImage            *ebiten.Image
@@ -66,7 +66,7 @@ const (
 	PlatformDataKeyBackButton            PlatformDataKey = "backbutton"
 )
 
-func NewManager(width, height int, requester Requester, game *data.Game, progress []byte, purchases []string, language language.Tag) *Manager {
+func NewManager(width, height int, requester Requester, game *data.Game, progress []byte, purchases []string) *Manager {
 	m := &Manager{
 		width:             width,
 		height:            height,
@@ -80,7 +80,6 @@ func NewManager(width, height int, requester Requester, game *data.Game, progres
 	}
 	m.blackImage, _ = ebiten.NewImage(16, 16, ebiten.FilterNearest)
 	m.blackImage.Fill(color.Black)
-	m.SetLanguage(language)
 	return m
 }
 
@@ -193,19 +192,15 @@ func (m *Manager) IsPurchased(key string) bool {
 	return false
 }
 
-func (m *Manager) Language() language.Tag {
-	return m.language
-}
-
 func (m *Manager) SetLanguage(language language.Tag) language.Tag {
 	for _, l := range m.game.Texts.Languages() {
 		if l == language {
-			m.language = language
+			lang.Set(language)
 			return language
 		}
 	}
-	m.language = m.game.Texts.Languages()[0]
-	return m.language
+	lang.Set(m.game.Texts.Languages()[0])
+	return lang.Get()
 }
 
 func (m *Manager) GoTo(next scene) {

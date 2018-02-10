@@ -24,6 +24,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/gamestate"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/texts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/ui"
@@ -122,7 +123,7 @@ func (t *TitleScene) initUI(sceneManager *scene.Manager) {
 }
 
 func (t *TitleScene) Update(sceneManager *scene.Manager) error {
-	t.lang = sceneManager.Language()
+	t.lang = lang.Get()
 	if t.err != nil {
 		return t.err
 	}
@@ -152,14 +153,14 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 		t.handleBackButton()
 	}
 
-	t.newGameButton.Text = texts.Text(sceneManager.Language(), texts.TextIDNewGame)
-	t.resumeGameButton.Text = texts.Text(sceneManager.Language(), texts.TextIDResumeGame)
-	t.warningLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDNewGameWarning)
-	t.warningYesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDYes)
-	t.warningNoButton.Text = texts.Text(sceneManager.Language(), texts.TextIDNo)
-	t.quitLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDQuitGame)
-	t.quitYesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDYes)
-	t.quitNoButton.Text = texts.Text(sceneManager.Language(), texts.TextIDNo)
+	t.newGameButton.Text = texts.Text(lang.Get(), texts.TextIDNewGame)
+	t.resumeGameButton.Text = texts.Text(lang.Get(), texts.TextIDResumeGame)
+	t.warningLabel.Text = texts.Text(lang.Get(), texts.TextIDNewGameWarning)
+	t.warningYesButton.Text = texts.Text(lang.Get(), texts.TextIDYes)
+	t.warningNoButton.Text = texts.Text(lang.Get(), texts.TextIDNo)
+	t.quitLabel.Text = texts.Text(lang.Get(), texts.TextIDQuitGame)
+	t.quitYesButton.Text = texts.Text(lang.Get(), texts.TextIDYes)
+	t.quitNoButton.Text = texts.Text(lang.Get(), texts.TextIDNo)
 
 	if !sceneManager.HasProgress() {
 		t.resumeGameButton.Disabled = true

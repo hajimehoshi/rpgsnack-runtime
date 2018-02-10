@@ -27,6 +27,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/commanditerator"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/movecharacterstate"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/variables"
@@ -339,7 +340,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 	case data.CommandNameShowBalloon:
 		args := c.Args.(*data.CommandArgsShowBalloon)
 		if !i.waitingCommand {
-			content := sceneManager.Game().Texts.Get(sceneManager.Language(), args.ContentID)
+			content := sceneManager.Game().Texts.Get(lang.Get(), args.ContentID)
 			id := args.EventID
 			if id == 0 {
 				id = i.eventID
@@ -367,7 +368,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 	case data.CommandNameShowMessage:
 		args := c.Args.(*data.CommandArgsShowMessage)
 		if !i.waitingCommand {
-			content := sceneManager.Game().Texts.Get(sceneManager.Language(), args.ContentID)
+			content := sceneManager.Game().Texts.Get(lang.Get(), args.ContentID)
 			id := args.EventID
 			if id == 0 {
 				id = i.eventID

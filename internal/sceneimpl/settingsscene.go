@@ -22,6 +22,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/texts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/ui"
@@ -115,13 +116,13 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 		s.handleBackButton(sceneManager)
 	}
 
-	s.settingsLabel.Text = texts.Text(sceneManager.Language(), texts.TextIDSettings)
-	s.languageButton.Text = texts.Text(sceneManager.Language(), texts.TextIDLanguage)
-	s.creditButton.Text = texts.Text(sceneManager.Language(), texts.TextIDCredit)
-	s.reviewThisAppButton.Text = texts.Text(sceneManager.Language(), texts.TextIDReviewThisApp)
-	s.restorePurchasesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDRestorePurchases)
-	s.moreGamesButton.Text = texts.Text(sceneManager.Language(), texts.TextIDMoreGames)
-	s.closeButton.Text = texts.Text(sceneManager.Language(), texts.TextIDClose)
+	s.settingsLabel.Text = texts.Text(lang.Get(), texts.TextIDSettings)
+	s.languageButton.Text = texts.Text(lang.Get(), texts.TextIDLanguage)
+	s.creditButton.Text = texts.Text(lang.Get(), texts.TextIDCredit)
+	s.reviewThisAppButton.Text = texts.Text(lang.Get(), texts.TextIDReviewThisApp)
+	s.restorePurchasesButton.Text = texts.Text(lang.Get(), texts.TextIDRestorePurchases)
+	s.moreGamesButton.Text = texts.Text(lang.Get(), texts.TextIDMoreGames)
+	s.closeButton.Text = texts.Text(lang.Get(), texts.TextIDClose)
 
 	if s.waitingRequestID != 0 {
 		r := sceneManager.ReceiveResultIfExists(s.waitingRequestID)

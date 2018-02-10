@@ -16,6 +16,7 @@ package game
 
 import (
 	"github.com/hajimehoshi/ebiten"
+	"golang.org/x/text/language"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
@@ -43,6 +44,12 @@ func New(width, height int, requester scene.Requester) *Game {
 	}
 	g.loadGameData()
 	return g
+}
+
+var lang language.Tag
+
+func Language() language.Tag {
+	return lang
 }
 
 func (g *Game) loadGameData() {
@@ -80,7 +87,8 @@ func (g *Game) update() error {
 			g.loadingCh = nil
 			d := g.loadedData
 			assets.Set(d.Assets, d.AssetsMetadata)
-			g.sceneManager = scene.NewManager(g.width, g.height, g.requester, d.Game, d.Progress, d.Purchases, d.Language)
+			g.sceneManager = scene.NewManager(g.width, g.height, g.requester, d.Game, d.Progress, d.Purchases)
+			g.sceneManager.SetLanguage(d.Language)
 			g.sceneManager.InitScene(sceneimpl.NewTitleScene())
 		default:
 			return nil

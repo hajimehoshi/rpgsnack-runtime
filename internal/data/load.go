@@ -130,6 +130,9 @@ func Load(projectPath string) (*LoadedData, error) {
 	}
 	tag = newTag
 
+	// Don't set the language here.
+	// Determining a language requires checking the game text data.
+
 	return &LoadedData{
 		Game:           gameData,
 		Assets:         assets,

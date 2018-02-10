@@ -29,6 +29,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/font"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/gamestate"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/texts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/tileset"
@@ -332,7 +333,7 @@ func (m *MapScene) receiveRequest(sceneManager *scene.Manager) bool {
 		if err := json.Unmarshal(r.Data, &prices); err != nil {
 			panic(err)
 		}
-		text := texts.Text(sceneManager.Language(), texts.TextIDRemoveAdsDesc)
+		text := texts.Text(lang.Get(), texts.TextIDRemoveAdsDesc)
 		if _, ok := prices["ads_removal"]; ok {
 			priceText = prices["ads_removal"]
 		}
@@ -366,7 +367,7 @@ func (m *MapScene) isUIBusy() bool {
 }
 
 func (m *MapScene) updateUI(sceneManager *scene.Manager) {
-	l := sceneManager.Language()
+	l := lang.Get()
 	m.quitLabel.Text = texts.Text(l, texts.TextIDBackToTitle)
 	m.quitYesButton.Text = texts.Text(l, texts.TextIDYes)
 	m.quitNoButton.Text = texts.Text(l, texts.TextIDNo)

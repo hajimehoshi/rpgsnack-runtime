@@ -33,6 +33,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/hints"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/items"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/picture"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/variables"
@@ -508,7 +509,7 @@ func (g *Game) ShowMessage(interpreterID, eventID int, content string, backgroun
 func (g *Game) ShowChoices(sceneManager *scene.Manager, interpreterID int, choiceIDs []uuid.UUID) {
 	choices := []string{}
 	for _, id := range choiceIDs {
-		choice := sceneManager.Game().Texts.Get(sceneManager.Language(), id)
+		choice := sceneManager.Game().Texts.Get(lang.Get(), id)
 		choice = g.parseMessageSyntax(choice)
 		choices = append(choices, choice)
 	}
