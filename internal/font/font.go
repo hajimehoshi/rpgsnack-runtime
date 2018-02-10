@@ -21,6 +21,7 @@ import (
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/text"
 	"golang.org/x/image/font"
+	"golang.org/x/image/math/fixed"
 	"golang.org/x/text/language"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
@@ -32,14 +33,14 @@ const (
 )
 
 func MeasureSize(text string) (int, int) {
-	w := 0
-	h := 0
+	w := fixed.I(0)
+	h := fixed.I(0)
 	for _, l := range strings.Split(strings.TrimRight(text, "\n"), "\n") {
 		b, _ := font.BoundString(face(1, lang.Get()), l)
-		w += (b.Max.X - b.Min.X).Ceil()
-		h += renderingLineHeight
+		w += b.Max.X - b.Min.X
+		h += fixed.I(renderingLineHeight)
 	}
-	return w, h
+	return w.Ceil(), h.Ceil()
 }
 
 func DrawText(screen *ebiten.Image, str string, ox, oy int, scale int, textAlign data.TextAlign, color color.Color, displayTextRuneCount int) {
