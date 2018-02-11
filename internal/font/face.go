@@ -31,9 +31,8 @@ var (
 	scTTF *truetype.Font
 	tcTTF *truetype.Font
 
-	scFaces    = map[int]font.Face{}
-	tcFaces    = map[int]font.Face{}
-	mplusFaces = map[int]font.Face{}
+	scFaces = map[int]font.Face{}
+	tcFaces = map[int]font.Face{}
 )
 
 func ensureSCTTF() *truetype.Font {
@@ -103,12 +102,6 @@ func face(scale int, lang language.Tag) font.Face {
 		}
 		return f
 	default:
-		// Use the same instance to use text cache efficiently.
-		f, ok := mplusFaces[scale]
-		if !ok {
-			f = scaleFont(mplusbitmap.Gothic12r, scale)
-			mplusFaces[scale] = f
-		}
-		return f
+		return scaleFont(mplusbitmap.Gothic12r, scale)
 	}
 }
