@@ -42,14 +42,14 @@ type manifestResponse struct {
 	Body *manifestBody `json:"body"`
 }
 
-func fetch(path string) <-chan []uint8 {
+func fetch(path string) <-chan []byte {
 	// TODO: Use fetch API in the future.
-	ch := make(chan []uint8)
+	ch := make(chan []byte)
 	xhr := js.Global.Get("XMLHttpRequest").New()
 	xhr.Set("responseType", "arraybuffer")
 	xhr.Call("addEventListener", "load", func() {
 		res := xhr.Get("response")
-		ch <- js.Global.Get("Uint8Array").New(res).Interface().([]uint8)
+		ch <- js.Global.Get("Uint8Array").New(res).Interface().([]byte)
 		close(ch)
 	})
 	xhr.Call("open", "GET", path)
@@ -57,8 +57,8 @@ func fetch(path string) <-chan []uint8 {
 	return ch
 }
 
-func fetchProgress() <-chan []uint8 {
-	ch := make(chan []uint8)
+func fetchProgress() <-chan []byte {
+	ch := make(chan []byte)
 	go func() {
 		data := js.Global.Get("localStorage").Call("getItem", "progress")
 		if data == nil {
@@ -77,7 +77,7 @@ func fetchProgress() <-chan []uint8 {
 	return ch
 }
 
-func loadAssets(path string) ([]uint8, []uint8, error) {
+func loadAssets(path string) ([]byte, []byte, error) {
 	mBinary := <-fetch(path)
 
 	mr := manifestResponse{}
@@ -85,8 +85,8 @@ func loadAssets(path string) ([]uint8, []uint8, error) {
 		return nil, nil, fmt.Errorf("unmarshalJSON Error %s", err)
 	}
 
-	var projectData []uint8
-	assetData := make(map[string][]uint8, len(mr.Body.Manifest))
+	var projectData []byte
+	assetData := make(map[string][]byte, len(mr.Body.Manifest))
 
 	var wg sync.WaitGroup
 	for key, paths := range mr.Body.Manifest {
@@ -186,6 +186,6 @@ func loadRawData(projectPath string) (*rawData, error) {
 		Assets:    assets,
 		Progress:  <-fetchProgress(),
 		Purchases: nil, // TODO: Implement this
-		Language:  []uint8(fmt.Sprintf(`"%s"`, l)),
+		Language:  []byte(fmt.Sprintf(`"%s"`, l)),
 	}, nil
 }
