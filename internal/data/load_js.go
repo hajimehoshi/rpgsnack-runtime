@@ -158,23 +158,23 @@ func isLoopback() bool {
 }
 
 func loadRawData(projectPath string) (*rawData, error) {
-	// projectPath is ignored so far.
+	if projectPath == "" {
+		gameVersion, err := versionFromURL()
+		if err != nil {
+			return nil, err
+		}
 
-	gameVersion, err := versionFromURL()
-	if err != nil {
-		return nil, err
+		projectPath = fmt.Sprintf("/games/%s", gameVersion)
+		// TODO: This is a dirty hack to do tests on local machines.
+		// useDefaultURL should be specificed in another way e.g. from clients.
+		if isLoopback() {
+			// TODO: Stop hard-coding URLs.
+			const defaultURL = "https://rpgsnack-e85d3.appspot.com"
+			projectPath = defaultURL + projectPath
+		}
 	}
 
-	path := fmt.Sprintf("/games/%s", gameVersion)
-	// TODO: This is a dirty hack to do tests on local machines.
-	// useDefaultURL should be specificed in another way e.g. from clients.
-	if isLoopback() {
-		// TODO: Stop hard-coding URLs.
-		const defaultURL = "https://rpgsnack-e85d3.appspot.com"
-		path = defaultURL + path
-	}
-
-	project, assets, err := loadAssets(path)
+	project, assets, err := loadAssets(projectPath)
 	if err != nil {
 		return nil, err
 	}

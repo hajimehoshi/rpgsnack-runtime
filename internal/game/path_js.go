@@ -16,7 +16,21 @@
 
 package game
 
+import (
+	"net/url"
+
+	"github.com/gopherjs/gopherjs/js"
+)
+
 func projectPath() string {
-	// projectPath is no longer used. See internal/data/load_js.go
+	href := js.Global.Get("window").Get("location").Get("href").String()
+	u, err := url.Parse(href)
+	if err != nil {
+		panic(err)
+	}
+	vals := u.Query()["project_path"]
+	if len(vals) > 0 {
+		return vals[0]
+	}
 	return ""
 }
