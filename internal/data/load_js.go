@@ -77,19 +77,22 @@ func fetchProgress() <-chan []byte {
 	return ch
 }
 
-func loadAssets(path string) ([]byte, []byte, error) {
+func loadManifest(path string) (map[string][]string, error) {
 	mBinary := <-fetch(path)
 
 	mr := manifestResponse{}
 	if err := unmarshalJSON(mBinary, &mr); err != nil {
-		return nil, nil, fmt.Errorf("unmarshalJSON Error %s", err)
+		return nil, fmt.Errorf("unmarshalJSON Error %s", err)
 	}
+	return mr.Body.Manifest, nil
+}
 
+func loadAssets(manifest map[string][]string) ([]byte, []byte, error) {
 	var projectData []byte
-	assetData := make(map[string][]byte, len(mr.Body.Manifest))
+	assetData := make(map[string][]byte, len(manifest))
 
 	var wg sync.WaitGroup
-	for key, paths := range mr.Body.Manifest {
+	for key, paths := range manifest {
 		for _, value := range paths {
 			wg.Add(1)
 			go func(key, value string) {
@@ -174,7 +177,12 @@ func loadRawData(projectPath string) (*rawData, error) {
 		}
 	}
 
-	project, assets, err := loadAssets(projectPath)
+	manifest, err := loadManifest(projectPath)
+	if err != nil {
+		return nil, err
+	}
+
+	project, assets, err := loadAssets(manifest)
 	if err != nil {
 		return nil, err
 	}

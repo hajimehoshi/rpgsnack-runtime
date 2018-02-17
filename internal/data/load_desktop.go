@@ -47,28 +47,9 @@ func SavePath() string {
 	return *savePath
 }
 
-func loadAssets(projectPath string) ([]uint8, error) {
-	assets := map[string][]uint8{}
-	dirs := []string{
-		filepath.Join("audio", "bgm"),
-		filepath.Join("audio", "se"),
-		filepath.Join("images", "backgrounds"),
-		filepath.Join("images", "characters"),
-		filepath.Join("images", "fonts"),
-		filepath.Join("images", "foregrounds"),
-		filepath.Join("images", "icons"),
-		filepath.Join("images", "items", "preview"),
-		filepath.Join("images", "pictures"),
-		filepath.Join("images", "system", "common"),
-		filepath.Join("images", "system", "game"),
-		filepath.Join("images", "system", "footer"),
-		filepath.Join("images", "system", "itempreview"),
-		filepath.Join("images", "tilesets", "backgrounds"),
-		filepath.Join("images", "tilesets", "decorations"),
-		filepath.Join("images", "tilesets", "objects"),
-		filepath.Join("images", "titles"),
-	}
-	for _, dir := range dirs {
+func loadAssets(projectPath string) ([]byte, error) {
+	assets := map[string][]byte{}
+	for _, dir := range assetDirs {
 		images, err := ioutil.ReadDir(filepath.Join(projectPath, "assets", dir))
 		if err != nil {
 			if os.IsNotExist(err) {

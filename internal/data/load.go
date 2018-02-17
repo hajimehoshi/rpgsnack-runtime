@@ -25,6 +25,26 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
 )
 
+var assetDirs = []string{
+	filepath.Join("audio", "bgm"),
+	filepath.Join("audio", "se"),
+	filepath.Join("images", "backgrounds"),
+	filepath.Join("images", "characters"),
+	filepath.Join("images", "fonts"),
+	filepath.Join("images", "foregrounds"),
+	filepath.Join("images", "icons"),
+	filepath.Join("images", "items", "preview"),
+	filepath.Join("images", "pictures"),
+	filepath.Join("images", "system", "common"),
+	filepath.Join("images", "system", "game"),
+	filepath.Join("images", "system", "footer"),
+	filepath.Join("images", "system", "itempreview"),
+	filepath.Join("images", "tilesets", "backgrounds"),
+	filepath.Join("images", "tilesets", "decorations"),
+	filepath.Join("images", "tilesets", "objects"),
+	filepath.Join("images", "titles"),
+}
+
 func min(a, b int) int {
 	if a < b {
 		return a
