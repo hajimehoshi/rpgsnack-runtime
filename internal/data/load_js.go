@@ -77,14 +77,7 @@ func fetchProgress() <-chan []uint8 {
 	return ch
 }
 
-func loadAssets(gameVersion string, useDefaultURL bool) ([]uint8, []uint8, error) {
-	// TODO: Stop hard-coding URLs.
-	const defaultURL = "https://rpgsnack-e85d3.appspot.com"
-
-	path := fmt.Sprintf("/games/%s", gameVersion)
-	if useDefaultURL {
-		path = defaultURL + path
-	}
+func loadAssets(path string) ([]uint8, []uint8, error) {
 	mBinary := <-fetch(path)
 
 	mr := manifestResponse{}
@@ -124,47 +117,64 @@ func loadAssets(gameVersion string, useDefaultURL bool) ([]uint8, []uint8, error
 // TODO: Change the API from `web`.
 var gameVersionUrlRegexp = regexp.MustCompile(`\A/web/([0-9]+)\z`)
 
-func versionFromURL(url *url.URL) (string, error) {
-	v := url.Query().Get("version")
+func versionFromURL() (string, error) {
+	href := js.Global.Get("window").Get("location").Get("href").String()
+	u, err := url.Parse(href)
+	if err != nil {
+		panic(err)
+	}
+
+	v := u.Query().Get("version")
 	if v != "" {
 		return v, nil
 	}
-	arr := gameVersionUrlRegexp.FindStringSubmatch(url.Path)
+	arr := gameVersionUrlRegexp.FindStringSubmatch(u.Path)
 	if len(arr) == 2 {
 		return arr[1], nil
 	}
-	return "", fmt.Errorf("data: invalid URL: version is not specified?: %s", url)
+	return "", fmt.Errorf("data: invalid URL: version is not specified?: %s", u)
+}
+
+func isLoopback() bool {
+	href := js.Global.Get("window").Get("location").Get("href").String()
+	u, err := url.Parse(href)
+	if err != nil {
+		panic(err)
+	}
+
+	if u.Hostname() == "localhost" {
+		return true
+	}
+	if ip := net.ParseIP(u.Hostname()); ip != nil {
+		if ip.IsLoopback() {
+			return true
+		}
+		if ip.IsGlobalUnicast() {
+			return true
+		}
+	}
+
+	return false
 }
 
 func loadRawData(projectPath string) (*rawData, error) {
 	// projectPath is ignored so far.
 
-	href := js.Global.Get("window").Get("location").Get("href").String()
-	u, err := url.Parse(href)
+	gameVersion, err := versionFromURL()
 	if err != nil {
 		return nil, err
 	}
 
-	gameVersion, err := versionFromURL(u)
-	if err != nil {
-		return nil, err
-	}
-
+	path := fmt.Sprintf("/games/%s", gameVersion)
 	// TODO: This is a dirty hack to do tests on local machines.
 	// useDefaultURL should be specificed in another way e.g. from clients.
-	useDefaultURL := false
-	if u.Hostname() == "localhost" {
-		useDefaultURL = true
+	if isLoopback() {
+		// TODO: Stop hard-coding URLs.
+		const defaultURL = "https://rpgsnack-e85d3.appspot.com"
+		path = defaultURL + path
 	}
-	if ip := net.ParseIP(u.Hostname()); ip != nil {
-		if ip.IsLoopback() {
-			useDefaultURL = true
-		}
-		if ip.IsGlobalUnicast() {
-			useDefaultURL = true
-		}
-	}
-	project, assets, err := loadAssets(gameVersion, useDefaultURL)
+
+	project, assets, err := loadAssets(path)
 	if err != nil {
 		return nil, err
 	}
