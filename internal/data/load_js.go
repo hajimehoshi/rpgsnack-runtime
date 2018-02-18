@@ -18,6 +18,7 @@ package data
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net"
@@ -30,9 +31,6 @@ import (
 
 	"github.com/gopherjs/gopherjs/js"
 )
-
-// TODO: We should remove this hardcoded value in the future
-const storageUrl = "https://storage.googleapis.com/rpgsnack-e85d3.appspot.com"
 
 type manifestBody struct {
 	Manifest map[string][]string `json:"manifest"`
@@ -80,6 +78,11 @@ func fetchProgress() <-chan []byte {
 func loadManifest(path string) (map[string][]string, error) {
 	mBinary := <-fetch(path)
 
+	// On the localhost server, it's ok if the manifest file is not present.
+	if !json.Valid(mBinary) && isLoopback() {
+		return nil, nil
+	}
+
 	mr := manifestResponse{}
 	if err := unmarshalJSON(mBinary, &mr); err != nil {
 		return nil, fmt.Errorf("unmarshalJSON Error %s", err)
@@ -87,24 +90,31 @@ func loadManifest(path string) (map[string][]string, error) {
 	return mr.Body.Manifest, nil
 }
 
-func loadAssets(manifest map[string][]string) ([]byte, []byte, error) {
+func loadAssetsFromManifest(manifest map[string][]string) ([]byte, []byte, error) {
+	// TODO: We should remove this hardcoded value in the future
+	const storageUrl = "https://storage.googleapis.com/rpgsnack-e85d3.appspot.com"
+
 	var projectData []byte
 	assetData := make(map[string][]byte, len(manifest))
 
 	var wg sync.WaitGroup
 	for key, paths := range manifest {
-		for _, value := range paths {
-			wg.Add(1)
-			go func(key, value string) {
-				defer wg.Done()
-				if value == "project.json" {
-					projectData = <-fetch(fmt.Sprintf("%s/%s", storageUrl, key))
-				} else {
-					localPath := strings.Replace(value, "assets/", "", -1)
-					assetData[localPath] = <-fetch(fmt.Sprintf("%s/%s", storageUrl, key))
+		wg.Add(1)
+		go func(key string, paths []string) {
+			defer wg.Done()
+
+			bin := <-fetch(fmt.Sprintf("%s/%s", storageUrl, key))
+
+			for _, value := range paths {
+				switch {
+				case value == "project.json":
+					projectData = bin
+				case strings.HasPrefix(value, "assets/"):
+					localPath := strings.Replace(value, "assets/", "", 1)
+					assetData[localPath] = bin
 				}
-			}(key, value)
-		}
+			}
+		}(key, paths)
 	}
 
 	wg.Wait()
@@ -182,7 +192,9 @@ func loadRawData(projectPath string) (*rawData, error) {
 		return nil, err
 	}
 
-	project, assets, err := loadAssets(manifest)
+	// TODO: manifest might be nil on local server.
+
+	project, assets, err := loadAssetsFromManifest(manifest)
 	if err != nil {
 		return nil, err
 	}
