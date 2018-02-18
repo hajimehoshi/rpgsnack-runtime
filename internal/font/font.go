@@ -20,7 +20,6 @@ import (
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/text"
-	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
 	"golang.org/x/text/language"
 
@@ -38,7 +37,7 @@ func MeasureSize(text string) (int, int) {
 	w := fixed.I(0)
 	h := fixed.I(0)
 	for _, l := range strings.Split(strings.TrimRight(text, "\n"), "\n") {
-		b, _ := font.BoundString(face(1, lang.Get()), l)
+		b, _ := boundString(face(1, lang.Get()), l)
 		nw := b.Max.X - b.Min.X
 		if nw > w {
 			w = nw
@@ -73,7 +72,7 @@ func DrawTextLang(screen *ebiten.Image, str string, ox, oy int, scale int, textA
 	for _, l := range strings.Split(str, "\n") {
 		x := ox + dotX
 		y := oy + dotY(lang)*scale
-		_, a := font.BoundString(f, l)
+		_, a := boundString(f, l)
 		switch textAlign {
 		case data.TextAlignLeft:
 			// do nothing
