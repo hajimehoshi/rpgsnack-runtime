@@ -51,5 +51,5 @@ func (i *ImageView) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 	geoM.Scale(i.scale, i.scale)
 	geoM.Translate(float64(i.x+offsetX), float64(i.y+offsetY))
 	geoM.Scale(consts.TileScale, consts.TileScale)
-	i.image.Draw(screen, geoM, &ebiten.ColorM{})
+	i.image.Draw(screen, geoM, nil)
 }

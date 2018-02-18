@@ -300,12 +300,12 @@ func (i *Inventory) Draw(screen *ebiten.Image) {
 		op.GeoM.Scale(consts.TileScale, consts.TileScale)
 
 		if i.activeItemID == itemID {
-			i.activeCardSlot.Draw(screen, &op.GeoM, &ebiten.ColorM{})
+			i.activeCardSlot.Draw(screen, &op.GeoM, nil)
 		} else {
 			if i.mode == PreviewMode && item != nil && i.combineItemID == item.ID {
-				i.combineCardSlot.Draw(screen, &op.GeoM, &ebiten.ColorM{})
+				i.combineCardSlot.Draw(screen, &op.GeoM, nil)
 			} else {
-				i.cardSlot.Draw(screen, &op.GeoM, &ebiten.ColorM{})
+				i.cardSlot.Draw(screen, &op.GeoM, nil)
 			}
 		}
 
@@ -348,7 +348,7 @@ func (i *Inventory) Draw(screen *ebiten.Image) {
 			geoM := &ebiten.GeoM{}
 			geoM.Translate(float64(left+index*dotSpace), float64(i.y+26))
 			geoM.Scale(consts.TileScale, consts.TileScale)
-			imagePart.Draw(screen, geoM, &ebiten.ColorM{})
+			imagePart.Draw(screen, geoM, nil)
 		}
 	}
 }
