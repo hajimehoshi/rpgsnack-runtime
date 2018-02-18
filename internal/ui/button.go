@@ -164,15 +164,10 @@ func (b *Button) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 	geoM.Translate(float64(b.x+offsetX), float64(b.y+offsetY))
 	geoM.Scale(consts.TileScale, consts.TileScale)
 
-	colorM := &ebiten.ColorM{}
-	if b.Disabled {
-		colorM.ChangeHSV(0, 0, 1)
-		colorM.Scale(0.5, 0.5, 0.5, 1)
-	}
-
 	opacity := uint8(255)
 	if b.showFrame {
 		if b.Image != nil {
+			var colorM *ebiten.ColorM
 			image := b.Image
 			if b.Disabled {
 				if b.DisabledImage != nil {
@@ -181,6 +176,7 @@ func (b *Button) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 			} else {
 				if b.pressing {
 					if b.PressedImage == nil {
+						colorM = &ebiten.ColorM{}
 						colorM.ChangeHSV(0, 0, 1)
 						colorM.Scale(0.5, 0.5, 0.5, 1)
 					} else {
@@ -193,6 +189,13 @@ func (b *Button) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 			img := assets.GetImage("system/common/9patch_frame_off.png")
 			if b.pressing {
 				img = assets.GetImage("system/common/9patch_frame_on.png")
+			}
+
+			var colorM *ebiten.ColorM
+			if b.Disabled {
+				colorM = &ebiten.ColorM{}
+				colorM.ChangeHSV(0, 0, 1)
+				colorM.Scale(0.5, 0.5, 0.5, 1)
 			}
 			drawNinePatches(screen, img, b.width, b.height, geoM, colorM)
 		}

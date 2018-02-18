@@ -51,7 +51,9 @@ func (i *ImagePart) Draw(screen *ebiten.Image, geoM *ebiten.GeoM, colorM *ebiten
 	// TODO support NinePatch Drawing
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Concat(*geoM)
-	op.ColorM.Concat(*colorM)
+	if colorM != nil {
+		op.ColorM.Concat(*colorM)
+	}
 	op.SourceRect = i.srcRect
 	screen.DrawImage(i.image, op)
 }
