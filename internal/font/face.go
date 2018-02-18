@@ -15,13 +15,7 @@
 package font
 
 import (
-	"bytes"
-	"compress/gzip"
-	"io/ioutil"
-
 	"github.com/golang/freetype/truetype"
-	"github.com/hajimehoshi/chinesegamefonts/scregular"
-	"github.com/hajimehoshi/chinesegamefonts/tcregular"
 	"github.com/hajimehoshi/go-mplusbitmap"
 	"golang.org/x/image/font"
 	"golang.org/x/text/language"
@@ -40,11 +34,7 @@ func ensureSCTTF() *truetype.Font {
 		return scTTF
 	}
 
-	r, err := gzip.NewReader(bytes.NewReader(scregular.CompressedTTF))
-	if err != nil {
-		panic(err)
-	}
-	bs, err := ioutil.ReadAll(r)
+	bs, err := getSCTTF()
 	if err != nil {
 		panic(err)
 	}
@@ -60,11 +50,7 @@ func ensureTCTTF() *truetype.Font {
 		return tcTTF
 	}
 
-	r, err := gzip.NewReader(bytes.NewReader(tcregular.CompressedTTF))
-	if err != nil {
-		panic(err)
-	}
-	bs, err := ioutil.ReadAll(r)
+	bs, err := getTCTTF()
 	if err != nil {
 		panic(err)
 	}
