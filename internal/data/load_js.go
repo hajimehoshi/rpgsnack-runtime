@@ -18,7 +18,6 @@ package data
 
 import (
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net"
@@ -78,11 +77,6 @@ func fetchProgress() <-chan []byte {
 func loadManifest(path string) (map[string][]string, error) {
 	mBinary := <-fetch(path)
 
-	// On the localhost server, it's ok if the manifest file is not present.
-	if !json.Valid(mBinary) && isLoopback() {
-		return nil, nil
-	}
-
 	mr := manifestResponse{}
 	if err := unmarshalJSON(mBinary, &mr); err != nil {
 		return nil, fmt.Errorf("unmarshalJSON Error %s", err)
@@ -103,7 +97,11 @@ func loadAssetsFromManifest(manifest map[string][]string) ([]byte, []byte, error
 		go func(key string, paths []string) {
 			defer wg.Done()
 
-			bin := <-fetch(fmt.Sprintf("%s/%s", storageUrl, key))
+			url := key
+			if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
+				url = fmt.Sprintf("%s/%s", storageUrl, key)
+			}
+			bin := <-fetch(url)
 
 			for _, value := range paths {
 				switch {
