@@ -21,31 +21,56 @@ import (
 	"net/http"
 )
 
-const (
-	scURL = "https://rpgsnack-e85d3.appspot.com/static/fonts/scregular.subset.ttf"
-	tcURL = "https://rpgsnack-e85d3.appspot.com/static/fonts/tcregular.subset.ttf"
+type fontLoadingResult struct {
+	body []byte
+	err  error
+}
+
+var (
+	scCh = make(chan fontLoadingResult)
+	tcCh = make(chan fontLoadingResult)
 )
 
+func init() {
+	const (
+		scURL = "https://rpgsnack-e85d3.appspot.com/static/fonts/scregular.subset.ttf"
+		tcURL = "https://rpgsnack-e85d3.appspot.com/static/fonts/tcregular.subset.ttf"
+	)
+
+	go func() {
+		resp, err := http.Get(scURL)
+		if err != nil {
+			scCh <- fontLoadingResult{nil, err}
+			return
+		}
+		bs, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			scCh <- fontLoadingResult{nil, err}
+			return
+		}
+		scCh <- fontLoadingResult{bs, nil}
+	}()
+	go func() {
+		resp, err := http.Get(tcURL)
+		if err != nil {
+			tcCh <- fontLoadingResult{nil, err}
+			return
+		}
+		bs, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			tcCh <- fontLoadingResult{nil, err}
+			return
+		}
+		tcCh <- fontLoadingResult{bs, nil}
+	}()
+}
+
 func getSCTTF() ([]byte, error) {
-	resp, err := http.Get(scURL)
-	if err != nil {
-		return nil, err
-	}
-	bs, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	return bs, nil
+	r := <-scCh
+	return r.body, r.err
 }
 
 func getTCTTF() ([]byte, error) {
-	resp, err := http.Get(tcURL)
-	if err != nil {
-		return nil, err
-	}
-	bs, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	return bs, nil
+	r := <-tcCh
+	return r.body, r.err
 }
