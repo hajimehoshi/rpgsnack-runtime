@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// +build js
+// +build ignore
+
+// Always use audio_notjs.go as experiments.
 
 package audio
 
