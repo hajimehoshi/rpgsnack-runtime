@@ -30,6 +30,8 @@ import (
 
 const (
 	renderingLineHeight = 18
+	mplusDotY           = 12
+	notoDotY            = 11
 )
 
 func MeasureSize(text string) (int, int) {
@@ -50,6 +52,15 @@ func DrawText(screen *ebiten.Image, str string, ox, oy int, scale int, textAlign
 	DrawTextLang(screen, str, ox, oy, scale, textAlign, color, displayTextRuneCount, lang.Get())
 }
 
+func dotY(lang language.Tag) int {
+	switch lang {
+	case language.SimplifiedChinese, language.TraditionalChinese:
+		return notoDotY
+	default:
+		return mplusDotY
+	}
+}
+
 func DrawTextLang(screen *ebiten.Image, str string, ox, oy int, scale int, textAlign data.TextAlign, color color.Color, displayTextRuneCount int, lang language.Tag) {
 	str = string([]rune(str)[:displayTextRuneCount])
 
@@ -57,12 +68,11 @@ func DrawTextLang(screen *ebiten.Image, str string, ox, oy int, scale int, textA
 	m := f.Metrics()
 	oy += (renderingLineHeight*scale - m.Height.Round()) / 2
 
-	b, _, _ := f.GlyphBounds('M')
-	dotX := -b.Min.X
-	dotY := -b.Min.Y
+	b, _, _ := f.GlyphBounds('.')
+	dotX := (-b.Min.X).Floor()
 	for _, l := range strings.Split(str, "\n") {
-		x := ox + dotX.Floor()
-		y := oy + dotY.Floor()
+		x := ox + dotX
+		y := oy + dotY(lang)*scale
 		_, a := font.BoundString(f, l)
 		switch textAlign {
 		case data.TextAlignLeft:
