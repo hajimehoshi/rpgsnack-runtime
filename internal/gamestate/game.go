@@ -83,7 +83,7 @@ func NewGame() *Game {
 		rand:                 generateDefaultRand(),
 		autoSaveEnabled:      true,
 		playerControlEnabled: true,
-		inventoryVisible:     true,
+		inventoryVisible:     false,
 	}
 	return g
 }
