@@ -18,7 +18,7 @@ const (
 	PaletteWidth           = 10
 	TileSize               = 16
 	TileXNum               = 10
-	TileYNum               = 12
+	TileYNum               = 14
 	MapWidth               = TileXNum * TileSize * TileScale
 	MapHeight              = TileYNum * TileSize * TileScale
 	TileScale              = 3

@@ -99,7 +99,7 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 
 	screenW, screenH := sceneManager.Size()
 	m.offsetX = (screenW - consts.TileXNum*consts.TileSize*consts.TileScale) / 2
-	m.offsetY = screenH - consts.TileYNum*consts.TileSize*consts.TileScale - inventoryHeight
+	m.offsetY = screenH - consts.TileYNum*consts.TileSize*consts.TileScale
 	// offset y should be multiplies of TileScale for pixel-pefect rendering
 	m.offsetY -= m.offsetY % consts.TileScale
 
