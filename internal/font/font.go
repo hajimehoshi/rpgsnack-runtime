@@ -61,18 +61,20 @@ func dotY(lang language.Tag) int {
 }
 
 func DrawTextLang(screen *ebiten.Image, str string, ox, oy int, scale int, textAlign data.TextAlign, color color.Color, displayTextRuneCount int, lang language.Tag) {
-	str = string([]rune(str)[:displayTextRuneCount])
-
 	f := face(scale, lang)
 	m := f.Metrics()
 	oy += (renderingLineHeight*scale - m.Height.Round()) / 2
 
 	b, _, _ := f.GlyphBounds('.')
 	dotX := (-b.Min.X).Floor()
-	for _, l := range strings.Split(str, "\n") {
+
+	lines := strings.Split(str, "\n")
+	linesToShow := strings.Split(string([]rune(str)[:displayTextRuneCount]), "\n")
+
+	for i, l := range linesToShow {
 		x := ox + dotX
 		y := oy + dotY(lang)*scale
-		_, a := boundString(f, l)
+		_, a := boundString(f, lines[i])
 		switch textAlign {
 		case data.TextAlignLeft:
 			// do nothing
