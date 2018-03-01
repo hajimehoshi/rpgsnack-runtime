@@ -20,6 +20,7 @@ package data
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
@@ -61,7 +62,11 @@ func loadAssets(projectPath string) ([]byte, error) {
 			if strings.HasPrefix(i.Name(), ".") {
 				continue
 			}
-			b, err := ioutil.ReadFile(filepath.Join(projectPath, "assets", dir, i.Name()))
+			iPath := filepath.Join(projectPath, "assets", dir, i.Name())
+			if isDir(iPath) {
+				continue
+			}
+			b, err := ioutil.ReadFile(iPath)
 			if err != nil {
 				return nil, err
 			}
@@ -75,6 +80,19 @@ func loadAssets(projectPath string) ([]byte, error) {
 		return nil, err
 	}
 	return b, nil
+}
+
+func isDir(path string) bool {
+	f, err := os.Stat(path)
+	if err != nil {
+		fmt.Errorf("check isDir error: %s", err)
+	}
+
+	mode := f.Mode()
+	if mode.IsDir() {
+		return true
+	}
+	return false
 }
 
 func loadRawData(projectPath string) (*rawData, error) {

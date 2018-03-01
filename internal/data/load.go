@@ -40,6 +40,7 @@ var assetDirs = []string{
 	filepath.Join("images", "system", "footer"),
 	filepath.Join("images", "system", "itempreview"),
 	filepath.Join("images", "tilesets", "backgrounds"),
+	filepath.Join("images", "tilesets", "backgrounds", "autotiles"),
 	filepath.Join("images", "tilesets", "decorations"),
 	filepath.Join("images", "tilesets", "objects"),
 	filepath.Join("images", "titles"),
