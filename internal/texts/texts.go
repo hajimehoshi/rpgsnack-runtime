@@ -58,24 +58,26 @@ var texts = map[language.Tag]map[TextID]string{
 		TextIDOK:         "OK",
 		TextIDSettings:   "Settings",
 		TextIDLanguage:   "Language",
-		TextIDCredit:     "Credit",
+		TextIDCredit:     "Credits",
 		TextIDRemoveAds:  "Remove Ads",
-		TextIDRemoveAdsDesc: `Would you like to pay %s
-to remove ads from the game?`,
-		TextIDReviewThisApp:    "Review This App",
+		TextIDRemoveAdsDesc: `Would you like to remove ads
+from the game for %s?`,
+		TextIDReviewThisApp:    "Review this App",
 		TextIDRestorePurchases: "Restore Purchases",
 		TextIDMoreGames:        "More Games",
 		TextIDClose:            "Close",
 		TextIDItemCheck:        "Check",
 
-		TextIDNewGameWarning: `You have a on-going game data.
-Do you want to clear the
-progress to start a new game?`,
-		TextIDBackToTitle: "Do you want to go back to title?",
-		TextIDQuitGame:    "Do you want to quit the game?",
+		TextIDNewGameWarning: `You have on-going game data.
+Do you want to reset your
+progress and start a new game?`,
+		TextIDBackToTitle: "Are you sure you want to 
+go back to the title screen?",
+		TextIDQuitGame:    "Are you sure you want to 
+go quit the game?",
 		TextIDStoreError: `Failed to connect to the store.
 Please make sure to sign in
-and connect to the network`,
+and connect to the network.`,
 	},
 	language.German: {
 		TextIDNewGame:    "Neues Spiel",
