@@ -77,6 +77,32 @@ progress to start a new game?`,
 Please make sure to sign in
 and connect to the network`,
 	},
+	language.German: {
+		TextIDNewGame:    "Neues Spiel",
+		TextIDResumeGame: "Spiel forsetzen",
+		TextIDYes:        "Ja",
+		TextIDNo:         "Nein",
+		TextIDOK:         "OK",
+		TextIDSettings:   "Einstellungen",
+		TextIDLanguage:   "Sprache",
+		TextIDCredit:     "Danksagungen",
+		TextIDRemoveAds:  "Anzeigen entfernen",
+		TextIDRemoveAdsDesc: `Willst du Anzeigen für %s
+enfernen?`,
+		TextIDReviewThisApp:    "Rezension schreiben",
+		TextIDRestorePurchases: "Einkäufe wiederherstellen",
+		TextIDMoreGames:        "Mehr Spiele",
+		TextIDClose:            "Zurück",
+		TextIDItemCheck:        "Info",
+
+		TextIDNewGameWarning: `Willst du wirklich deinen Spielfortschritt
+löschen und nochmal von Vorne anfangen?`,
+		TextIDBackToTitle: "Willst du wirklich zurück zum Menü?",
+		TextIDQuitGame:    "Willst du wirklich das Spiel verlassen?",
+		TextIDStoreError: `Verbindung mit dem Store nicht möglich.
+Stelle sicher, dass du angemeldet
+und mit dem Internet verbindet bist.`,
+	},
 	language.Spanish: {
 		TextIDNewGame:    "Nuevo Juego",
 		TextIDResumeGame: "Reanudar Juego",
