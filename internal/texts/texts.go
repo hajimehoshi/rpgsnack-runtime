@@ -77,6 +77,31 @@ progress to start a new game?`,
 Please make sure to sign in
 and connect to the network`,
 	},
+	language.Spanish: {
+		TextIDNewGame:    "Nuevo Juego",
+		TextIDResumeGame: "Reanudar juego",
+		TextIDYes:        "Sí",
+		TextIDNo:         "No",
+		TextIDOK:         "OK",
+		TextIDSettings:   "Configuraciones",
+		TextIDLanguage:   "Idioma",
+		TextIDCredit:     "Créditos",
+		TextIDRemoveAds:  "Remover anuncios",
+		TextIDRemoveAdsDesc: `¿Te gustaría pagar %s
+para quitar los anuncios del juego?`,
+		TextIDReviewThisApp:    "Puntúa esta App",
+		TextIDRestorePurchases: "Restaurar Compra",
+		TextIDMoreGames:        "Más Juegos",
+		TextIDClose:            "Cerrar",
+		TextIDItemCheck:        "Revisar",
+
+		TextIDNewGameWarning: `Tienes datos del juego en curso.
+¿Quieres eliminar el progreso 
+e iniciar un nuevo juego?`,
+		TextIDBackToTitle: "¿Quieres volver al título?",
+		TextIDQuitGame:    "¿Quieres salir del juego?",
+		TextIDStoreError:  `Fallo al conectarse con la tienda. Por favor asegúrate de iniciar sesión y conectarse a internet`,
+	},
 	language.Japanese: {
 		TextIDNewGame:    "はじめから",
 		TextIDResumeGame: "つづきから",
