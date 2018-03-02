@@ -79,7 +79,7 @@ and connect to the network`,
 	},
 	language.Spanish: {
 		TextIDNewGame:    "Nuevo Juego",
-		TextIDResumeGame: "Reanudar juego",
+		TextIDResumeGame: "Reanudar Juego",
 		TextIDYes:        "Sí",
 		TextIDNo:         "No",
 		TextIDOK:         "OK",
