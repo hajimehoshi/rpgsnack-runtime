@@ -71,10 +71,10 @@ from the game for %s?`,
 		TextIDNewGameWarning: `You have on-going game data.
 Do you want to reset your
 progress and start a new game?`,
-		TextIDBackToTitle: "Are you sure you want to 
-go back to the title screen?",
-		TextIDQuitGame:    "Are you sure you want to 
-go quit the game?",
+		TextIDBackToTitle: `Are you sure you want to
+go back to the title screen?`,
+		TextIDQuitGame: `Are you sure you want to
+go quit the game?`,
 		TextIDStoreError: `Failed to connect to the store.
 Please make sure to sign in
 and connect to the network.`,
