@@ -184,7 +184,6 @@ e iniciar un nuevo juego?`,
 请确定你已经登录并已连上网络`,
 	},
 	language.TraditionalChinese: {
-		// TODO: Translat this
 		TextIDNewGame:    "新遊戲",
 		TextIDResumeGame: "繼續遊戲",
 		TextIDYes:        "確定",
