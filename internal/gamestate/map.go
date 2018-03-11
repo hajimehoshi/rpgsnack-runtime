@@ -529,9 +529,14 @@ func (m *Map) passableTile(x, y int) bool {
 
 	for layer := 0; layer < 4; layer++ {
 		tile := m.CurrentRoom().Tiles[layer][tileIndex]
-		x, y, imageID := tileset.DecodeTile(tile)
+		imageID := tileset.ExtractImageID(tile)
 		imageName := m.FindImageName(imageID)
-		passageType := tileset.PassageType(imageName, x, y)
+		index := 0
+		if !tileset.IsAutoTile(imageName) {
+			x, y := tileset.DecodeTile(tile)
+			index = tileset.TileIndex(x, y)
+		}
+		passageType := tileset.PassageType(imageName, index)
 		if passageType == data.PassageTypeBlock {
 			return false
 		}

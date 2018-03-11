@@ -49,6 +49,7 @@ type MessageStyle struct {
 
 type AssetMetadata struct {
 	PassageTypes []PassageType `json:"passageTypes"`
+	IsAutoTile   bool          `json:"isAutoTile"`
 }
 
 type FinishTriggerType string

@@ -480,9 +480,14 @@ func (m *MapScene) drawTileLayer(layer int, priority data.Priority) {
 		for i := 0; i < consts.TileXNum; i++ {
 			tileIndex := tileset.TileIndex(i, j)
 			tile := room.Tiles[layer][tileIndex]
-			x, y, imageID := tileset.DecodeTile(tile)
+			imageID := tileset.ExtractImageID(tile)
 			imageName := m.gameState.Map().FindImageName(imageID)
-			passageType := tileset.PassageType(imageName, x, y)
+			index := 0
+			if !tileset.IsAutoTile(imageName) {
+				x, y := tileset.DecodeTile(tile)
+				index = tileset.TileIndex(x, y)
+			}
+			passageType := tileset.PassageType(imageName, index)
 			if layer == 2 || layer == 3 {
 				if passageType == data.PassageTypeOver && priority != data.PriorityTop {
 					continue
@@ -491,20 +496,57 @@ func (m *MapScene) drawTileLayer(layer int, priority data.Priority) {
 					continue
 				}
 			}
-			tileSetImg := m.gameState.Map().FindImage(imageID)
-			if tileSetImg != nil {
-				sx := x * consts.TileSize
-				sy := y * consts.TileSize
-				r := image.Rect(sx, sy, sx+consts.TileSize, sy+consts.TileSize)
-				op.SourceRect = &r
-				dx := i * consts.TileSize
-				dy := j*consts.TileSize + m.offsetY/consts.TileScale
-				op.GeoM.Reset()
-				op.GeoM.Translate(float64(dx), float64(dy))
-				m.tilesImage.DrawImage(tileSetImg, op)
+			if tileset.IsAutoTile(imageName) {
+				m.drawAutoTile(tile, op, i, j)
+			} else {
+				m.drawTile(tile, op, i, j)
 			}
 		}
 	}
+}
+
+func (m *MapScene) drawTile(tile int, op *ebiten.DrawImageOptions, i int, j int) {
+	imageID := tileset.ExtractImageID(tile)
+	tileSetImg := m.gameState.Map().FindImage(imageID)
+	if tileSetImg == nil {
+		return
+	}
+	x, y := tileset.DecodeTile(tile)
+	sx := x * consts.TileSize
+	sy := y * consts.TileSize
+	r := image.Rect(sx, sy, sx+consts.TileSize, sy+consts.TileSize)
+	op.SourceRect = &r
+	dx := i * consts.TileSize
+	dy := j*consts.TileSize + m.offsetY/consts.TileScale
+	// op is created outside of this function and other parameters than GeoM
+	// and SourceRect are not modified so far.
+	op.GeoM.Reset()
+	op.GeoM.Translate(float64(dx), float64(dy))
+	m.tilesImage.DrawImage(tileSetImg, op)
+}
+
+func (m *MapScene) drawAutoTile(tile int, op *ebiten.DrawImageOptions, i int, j int) {
+	imageID := tileset.ExtractImageID(tile)
+	tileSetImg := m.gameState.Map().FindImage(imageID)
+	if tileSetImg == nil {
+		return
+	}
+	autoTileSlice := tileset.DecodeAutoTile(tile)
+	for index, value := range autoTileSlice {
+		x, y := tileset.GetAutoTilePos(index, value)
+		sx := x * consts.MiniTileSize
+		sy := y * consts.MiniTileSize
+		r := image.Rect(sx, sy, sx+consts.MiniTileSize, sy+consts.MiniTileSize)
+		op.SourceRect = &r
+		dx := i*consts.TileSize + index%2*consts.MiniTileSize
+		dy := j*consts.TileSize + index/2*consts.MiniTileSize + m.offsetY/consts.TileScale
+		// op is created outside of this function and other parameters
+		// than GeoM and SourceRect are not modified so far.
+		op.GeoM.Reset()
+		op.GeoM.Translate(float64(dx), float64(dy))
+		m.tilesImage.DrawImage(tileSetImg, op)
+	}
+
 }
 
 func (m *MapScene) drawTiles(priority data.Priority) {

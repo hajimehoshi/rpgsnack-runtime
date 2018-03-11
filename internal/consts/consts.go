@@ -17,6 +17,7 @@ package consts
 const (
 	PaletteWidth           = 10
 	TileSize               = 16
+	MiniTileSize           = 8
 	TileXNum               = 10
 	TileYNum               = 14
 	MapWidth               = TileXNum * TileSize * TileScale
