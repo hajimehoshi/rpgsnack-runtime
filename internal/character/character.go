@@ -547,6 +547,9 @@ func (c *Character) UpdateWithPage(page *data.Page) {
 	c.walking = page.Walking
 	c.through = page.Through
 	c.speed = page.Speed
+	c.opacity = page.Opacity
+	c.origOpacity = page.Opacity
+	c.targetOpacity = page.Opacity
 }
 
 func (c *Character) progressFrame(speedMultiplier int) {

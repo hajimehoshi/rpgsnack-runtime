@@ -44,6 +44,7 @@ type Page struct {
 	Priority   Priority             `json:"priority"`
 	Speed      Speed                `json:"speed"`
 	Trigger    Trigger              `json:"trigger"`
+	Opacity    int                  `json:"opacity"`
 	Route      *CommandArgsSetRoute `json:"route"`
 	Commands   []*Command           `json:"commands"`
 }
