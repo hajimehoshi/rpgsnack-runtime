@@ -71,6 +71,12 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 	c.Branches = tmp.Branches
 	switch c.Name {
 	case CommandNameNop:
+	case CommandNameMemo:
+		var args *CommandArgsMemo
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	case CommandNameIf:
 		var args *CommandArgsIf
 		if err := unmarshalJSON(tmp.Args, &args); err != nil {
@@ -368,6 +374,10 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 			switch c.Name {
 			case CommandNameNop:
 				d.DecodeNil()
+			case CommandNameMemo:
+				a := &CommandArgsMemo{}
+				d.DecodeAny(a)
+				c.Args = a
 			case CommandNameIf:
 				a := &CommandArgsIf{}
 				d.DecodeAny(a)
@@ -610,6 +620,7 @@ type CommandName string
 
 const (
 	CommandNameNop               CommandName = "nop"
+	CommandNameMemo              CommandName = "memo"
 	CommandNameIf                CommandName = "if"
 	CommandNameLabel             CommandName = "label"
 	CommandNameGoto              CommandName = "goto"
@@ -674,6 +685,10 @@ const (
 	CommandNameFinishPlayerMovingByUserInput CommandName = "finish_player_moving_by_user_input"
 	CommandNameExecEventHere                 CommandName = "exec_event_here"
 )
+
+type CommandArgsMemo struct {
+	ContentID uuid.UUID `json:"content" msgpack:"content"`
+}
 
 type CommandArgsIf struct {
 	Conditions []*Condition `json:"conditions" msgpack:"conditions"`

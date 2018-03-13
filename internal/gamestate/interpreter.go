@@ -978,6 +978,9 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		c := page.Commands
 		i.sub = i.createChild(gameState, e.EventID(), c)
 
+	case data.CommandNameMemo:
+		i.commandIterator.Advance()
+
 	default:
 		return false, fmt.Errorf("interpreter: invalid command: %s", c.Name)
 	}
