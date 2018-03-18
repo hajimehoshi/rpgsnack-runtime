@@ -510,7 +510,12 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		sub.repeat = args.Repeat
 		sub.routeSkip = args.Skip
 		if !args.Wait {
-			// TODO: What if set_route w/o waiting already exists for this event?
+			// Set 'route' true so that the new route command does not
+			// block the player's move (#380).
+			if id != 0 {
+				gameState.Map().removeRoutes(id)
+				sub.route = true
+			}
 			gameState.Map().addInterpreter(sub)
 			i.commandIterator.Advance()
 			return true, nil
