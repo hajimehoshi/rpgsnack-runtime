@@ -27,13 +27,13 @@ import (
 )
 
 type Game struct {
-	projectPath  string
-	width        int
-	height       int
-	requester    scene.Requester
-	sceneManager *scene.Manager
-	loadingCh    chan error
-	loadedData   *data.LoadedData
+	projectPath      string
+	width            int
+	height           int
+	requester        scene.Requester
+	sceneManager     *scene.Manager
+	loadProgressCh   chan data.LoadProgress
+	loadProgressRate float64
 }
 
 func New(width, height int, requester scene.Requester) *Game {
@@ -53,17 +53,11 @@ func Language() language.Tag {
 }
 
 func (g *Game) loadGameData() {
-	ch := make(chan error)
+	ch := make(chan data.LoadProgress, 4)
 	go func() {
-		defer close(ch)
-		d, err := data.Load(g.projectPath)
-		if err != nil {
-			ch <- err
-			return
-		}
-		g.loadedData = d
+		data.Load(g.projectPath, ch)
 	}()
-	g.loadingCh = ch
+	g.loadProgressCh = ch
 }
 
 func (g *Game) Update(screen *ebiten.Image) error {
@@ -78,17 +72,22 @@ func (g *Game) Update(screen *ebiten.Image) error {
 }
 
 func (g *Game) update() error {
-	if g.loadingCh != nil {
+	if g.loadProgressCh != nil {
 		select {
-		case err := <-g.loadingCh:
-			if err != nil {
-				return err
+		case d := <-g.loadProgressCh:
+			if d.Error != nil {
+				return d.Error
 			}
-			g.loadingCh = nil
-			d := g.loadedData
-			assets.Set(d.Assets, d.AssetsMetadata)
-			g.sceneManager = scene.NewManager(g.width, g.height, g.requester, d.Game, d.Progress, d.Purchases)
-			g.sceneManager.SetLanguage(d.Language)
+			g.loadProgressRate = d.Progress
+
+			if d.LoadedData == nil {
+				return nil
+			}
+			g.loadProgressCh = nil
+			da := d.LoadedData
+			assets.Set(da.Assets, da.AssetsMetadata)
+			g.sceneManager = scene.NewManager(g.width, g.height, g.requester, da.Game, da.Progress, da.Purchases)
+			g.sceneManager.SetLanguage(da.Language)
 			g.sceneManager.InitScene(sceneimpl.NewTitleScene())
 		default:
 			return nil
@@ -106,7 +105,8 @@ func (g *Game) update() error {
 }
 
 func (g *Game) draw(screen *ebiten.Image) {
-	if g.loadingCh != nil {
+	if g.loadProgressCh != nil {
+		println(g.loadProgressRate)
 		return
 	}
 	g.sceneManager.Draw(screen)

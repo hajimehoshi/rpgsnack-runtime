@@ -100,37 +100,77 @@ type LoadedData struct {
 	Language       language.Tag
 }
 
-func Load(projectPath string) (*LoadedData, error) {
+type LoadProgress struct {
+	Progress   float64
+	LoadedData *LoadedData
+	Error      error
+}
+
+func Load(projectPath string, progress chan<- LoadProgress) {
 	data, err := loadRawData(projectPath)
 	if err != nil {
-		return nil, fmt.Errorf("data: loadRawData failed: %s", err.Error())
+		progress <- LoadProgress{
+			Error: fmt.Errorf("data: loadRawData failed: %s", err.Error()),
+		}
+		return
 	}
+	progress <- LoadProgress{
+		Progress: 0.2,
+	}
+
 	var project *Project
 	if err := unmarshalJSON(data.Project, &project); err != nil {
-		return nil, fmt.Errorf("data: parsing project data failed: %s", err.Error())
+		progress <- LoadProgress{
+			Error: fmt.Errorf("data: parsing project data failed: %s", err.Error()),
+		}
+		return
 	}
 	gameData := project.Data
+	progress <- LoadProgress{
+		Progress: 0.4,
+	}
+
 	assets, assetsMetadata, err := parseAssets(data.Assets)
 	if err := msgpack.Unmarshal(data.Assets, &assets); err != nil {
-		return nil, fmt.Errorf("data: msgpack.Unmarshal error: %s", err.Error())
+		progress <- LoadProgress{
+			Error: fmt.Errorf("data: msgpack.Unmarshal error: %s", err.Error()),
+		}
+		return
 	}
+	progress <- LoadProgress{
+		Progress: 0.6,
+	}
+
 	var purchases []string
 	if data.Purchases != nil {
 		if err := unmarshalJSON(data.Purchases, &purchases); err != nil {
-			return nil, fmt.Errorf("data: parsing purchases data failed: %s", err.Error())
+			progress <- LoadProgress{
+				Error: fmt.Errorf("data: parsing purchases data failed: %s", err.Error()),
+			}
+			return
 		}
 	} else {
 		purchases = []string{}
 	}
+	progress <- LoadProgress{
+		Progress: 0.8,
+	}
+
 	var tag language.Tag
 	if data.Language != nil {
 		var langId string
 		if err := unmarshalJSON(data.Language, &langId); err != nil {
-			return nil, fmt.Errorf("data: parsing language data failed: %s", err.Error())
+			progress <- LoadProgress{
+				Error: fmt.Errorf("data: parsing language data failed: %s", err.Error()),
+			}
+			return
 		}
 		tag, err = language.Parse(langId)
 		if err != nil {
-			return nil, err
+			progress <- LoadProgress{
+				Error: err,
+			}
+			return
 		}
 	} else {
 		tag = gameData.System.DefaultLanguage
@@ -141,14 +181,18 @@ func Load(projectPath string) (*LoadedData, error) {
 	// Don't set the language here.
 	// Determining a language requires checking the game text data.
 
-	return &LoadedData{
-		Game:           gameData,
-		Assets:         assets,
-		AssetsMetadata: assetsMetadata,
-		Purchases:      purchases,
-		Progress:       data.Progress,
-		Language:       tag,
-	}, nil
+	progress <- LoadProgress{
+		Progress: 1,
+		LoadedData: &LoadedData{
+			Game:           gameData,
+			Assets:         assets,
+			AssetsMetadata: assetsMetadata,
+			Purchases:      purchases,
+			Progress:       data.Progress,
+			Language:       tag,
+		},
+	}
+	close(progress)
 }
 
 func parseAssets(rawAssets []byte) (map[string][]byte, map[string]*AssetMetadata, error) {
