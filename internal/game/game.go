@@ -15,7 +15,10 @@
 package game
 
 import (
+	"image/color"
+
 	"github.com/hajimehoshi/ebiten"
+	"github.com/hajimehoshi/ebiten/ebitenutil"
 	"golang.org/x/text/language"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
@@ -106,7 +109,13 @@ func (g *Game) update() error {
 
 func (g *Game) draw(screen *ebiten.Image) {
 	if g.loadProgressCh != nil {
-		println(g.loadProgressRate)
+		const barHeight = 8
+		w, h := screen.Size()
+		barWidth := float64(w)
+		y := float64(h-barHeight) / 2
+		ebitenutil.DrawRect(screen, 0, y, barWidth, barHeight, color.RGBA{0x80, 0x80, 0x80, 0x80})
+		activeWidth := barWidth * g.loadProgressRate
+		ebitenutil.DrawRect(screen, 0, y, activeWidth, barHeight, color.RGBA{0xff, 0xff, 0xff, 0xff})
 		return
 	}
 	g.sceneManager.Draw(screen)
