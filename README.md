@@ -26,7 +26,7 @@ Run `go run main.go /path/to/json/file`
 
 ```
 gopherjs serve
-go run $GOPATH/src/github.com/hajimehoshi/rpgsnack-runtime/tools/testserver/main.go -port 7800 -basepath <project path>
+go run $GOPATH/src/github.com/hajimehoshi/rpgsnack-runtime/tools/testserver/main.go -http=:7800 -basepath=<project path>
 open http://localhost:8080/github.com/hajimehoshi/rpgsnack-runtime?project_path=http://localhost:7800/
 ```
 

@@ -20,13 +20,12 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 )
 
 var (
 	basepath = flag.String("basepath", ".", "base filepath")
-	port     = flag.Int("port", 8000, "port number")
+	httpAddr = flag.String("http", ":8000", "HTTP address")
 )
 
 type ManifestBody struct {
@@ -88,7 +87,7 @@ func main() {
 	flag.Parse()
 
 	http.HandleFunc("/", handler)
-	if err := http.ListenAndServe(":"+strconv.Itoa(*port), nil); err != nil {
+	if err := http.ListenAndServe(*httpAddr, nil); err != nil {
 		panic(err)
 	}
 }
