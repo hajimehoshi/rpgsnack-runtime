@@ -95,7 +95,9 @@ func isDir(path string) bool {
 	return false
 }
 
-func loadRawData(projectPath string) (*rawData, error) {
+func loadRawData(projectPath string, progressCh chan<- float64) (*rawData, error) {
+	defer close(progressCh)
+
 	project, err := ioutil.ReadFile(filepath.Join(projectPath, "project.json"))
 	if err != nil {
 		return nil, err

@@ -107,15 +107,29 @@ type LoadProgress struct {
 }
 
 func Load(projectPath string, progress chan<- LoadProgress) {
-	data, err := loadRawData(projectPath)
+	defer close(progress)
+
+	rawDataProgress := make(chan float64, 16)
+	rawDataProgressDone := make(chan struct{})
+	go func() {
+		for v := range rawDataProgress {
+			progress <- LoadProgress{
+				Progress: v / 2,
+			}
+		}
+		close(rawDataProgressDone)
+	}()
+	data, err := loadRawData(projectPath, rawDataProgress)
 	if err != nil {
 		progress <- LoadProgress{
 			Error: fmt.Errorf("data: loadRawData failed: %s", err.Error()),
 		}
 		return
 	}
+	<-rawDataProgressDone
+
 	progress <- LoadProgress{
-		Progress: 0.2,
+		Progress: 0.6,
 	}
 
 	var project *Project
@@ -127,7 +141,7 @@ func Load(projectPath string, progress chan<- LoadProgress) {
 	}
 	gameData := project.Data
 	progress <- LoadProgress{
-		Progress: 0.4,
+		Progress: 0.7,
 	}
 
 	assets, assetsMetadata, err := parseAssets(data.Assets)
@@ -138,7 +152,7 @@ func Load(projectPath string, progress chan<- LoadProgress) {
 		return
 	}
 	progress <- LoadProgress{
-		Progress: 0.6,
+		Progress: 0.8,
 	}
 
 	var purchases []string
@@ -153,7 +167,7 @@ func Load(projectPath string, progress chan<- LoadProgress) {
 		purchases = []string{}
 	}
 	progress <- LoadProgress{
-		Progress: 0.8,
+		Progress: 0.9,
 	}
 
 	var tag language.Tag
@@ -192,7 +206,6 @@ func Load(projectPath string, progress chan<- LoadProgress) {
 			Language:       tag,
 		},
 	}
-	close(progress)
 }
 
 func parseAssets(rawAssets []byte) (map[string][]byte, map[string]*AssetMetadata, error) {

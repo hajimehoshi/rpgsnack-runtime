@@ -84,7 +84,7 @@ func loadManifest(path string) (map[string][]string, error) {
 	return mr.Body.Manifest, nil
 }
 
-func loadAssetsFromManifest(manifest map[string][]string) ([]byte, []byte, error) {
+func loadAssetsFromManifest(manifest map[string][]string, progress chan<- float64) ([]byte, []byte, error) {
 	// TODO: We should remove this hardcoded value in the future
 	const storageUrl = "https://storage.googleapis.com/rpgsnack-e85d3.appspot.com"
 
@@ -92,6 +92,7 @@ func loadAssetsFromManifest(manifest map[string][]string) ([]byte, []byte, error
 	assetData := make(map[string][]byte, len(manifest))
 
 	var wg sync.WaitGroup
+	loaded := 0
 	for key, paths := range manifest {
 		wg.Add(1)
 		go func(key string, paths []string) {
@@ -112,6 +113,8 @@ func loadAssetsFromManifest(manifest map[string][]string) ([]byte, []byte, error
 					assetData[localPath] = bin
 				}
 			}
+			loaded++
+			progress <- float64(loaded) / float64(len(manifest))
 		}(key, paths)
 	}
 
@@ -121,6 +124,7 @@ func loadAssetsFromManifest(manifest map[string][]string) ([]byte, []byte, error
 	if err != nil {
 		return nil, nil, fmt.Errorf("MsgPack Error %s", err)
 	}
+	progress <- 1
 
 	return projectData, b, nil
 }
@@ -168,7 +172,9 @@ func isLoopback() bool {
 	return false
 }
 
-func loadRawData(projectPath string) (*rawData, error) {
+func loadRawData(projectPath string, progress chan<- float64) (*rawData, error) {
+	defer close(progress)
+
 	if projectPath == "" {
 		gameVersion, err := versionFromURL()
 		if err != nil {
@@ -192,7 +198,7 @@ func loadRawData(projectPath string) (*rawData, error) {
 
 	// TODO: manifest might be nil on local server.
 
-	project, assets, err := loadAssetsFromManifest(manifest)
+	project, assets, err := loadAssetsFromManifest(manifest, progress)
 	if err != nil {
 		return nil, err
 	}
