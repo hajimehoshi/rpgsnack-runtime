@@ -41,7 +41,7 @@ var miniTilePosMap = map[int]map[int][]int{
 		1: []int{3, 0},
 		2: []int{3, 2},
 		3: []int{1, 4},
-		4: []int{2, 2},
+		4: []int{1, 2},
 		5: []int{3, 4},
 	},
 	// C
@@ -57,7 +57,7 @@ var miniTilePosMap = map[int]map[int][]int{
 		1: []int{3, 1},
 		2: []int{3, 5},
 		3: []int{1, 3},
-		4: []int{2, 5},
+		4: []int{1, 5},
 		5: []int{3, 3},
 	},
 }
