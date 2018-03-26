@@ -698,7 +698,7 @@ const (
 )
 
 type CommandArgsMemo struct {
-	ContentID uuid.UUID `json:"content" msgpack:"content"`
+	Content string `json:"content" msgpack:"content"`
 }
 
 type CommandArgsIf struct {
