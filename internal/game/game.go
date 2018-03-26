@@ -49,6 +49,17 @@ func New(width, height int, requester scene.Requester) *Game {
 	return g
 }
 
+func NewWithDefaultRequester(width, height int) (*Game, error) {
+	g := &Game{
+		projectLocation: projectLocation(),
+		width:           width,
+		height:          height,
+	}
+	g.loadGameData()
+	g.requester = &Requester{g}
+	return g, nil
+}
+
 var lang language.Tag
 
 func Language() language.Tag {

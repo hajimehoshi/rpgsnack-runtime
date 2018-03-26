@@ -1,4 +1,4 @@
-// Copyright 2017 Hajime Hoshi
+// copyright 2017 Hajime Hoshi
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,6 +20,12 @@ import (
 	"flag"
 )
 
+// Rewrite this by specifying -ldflags='-X github.com/hajimehoshi/rpgsnack-runtime/internal/game.defaultProjectLocation=<project path>'
+var defaultProjectLocation = ""
+
 func projectLocation() string {
-	return flag.Arg(0)
+	if flag.Arg(0) != "" {
+		return flag.Arg(0)
+	}
+	return defaultProjectLocation
 }

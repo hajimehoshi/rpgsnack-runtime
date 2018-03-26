@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// +build js
+// +build js gomobilebuild
 
 package data
 
@@ -74,6 +74,13 @@ func fetch(path string) <-chan fetchResult {
 
 func fetchProgress() <-chan []byte {
 	ch := make(chan []byte)
+	if js.Global == nil {
+		go func() {
+			ch <- nil
+			close(ch)
+		}()
+		return ch
+	}
 	go func() {
 		data := js.Global.Get("localStorage").Call("getItem", "progress")
 		if data == nil {
@@ -170,6 +177,10 @@ func loadAssetsFromManifest(manifest map[string][]string, progress chan<- float6
 var gameVersionUrlRegexp = regexp.MustCompile(`\A/web/([0-9]+)\z`)
 
 func gameIDFromURL() (string, error) {
+	if js.Global == nil {
+		panic("not reached")
+	}
+
 	href := js.Global.Get("window").Get("location").Get("href").String()
 	u, err := url.Parse(href)
 	if err != nil {
@@ -188,6 +199,10 @@ func gameIDFromURL() (string, error) {
 }
 
 func isLoopback() bool {
+	if js.Global == nil {
+		panic("not reached")
+	}
+
 	href := js.Global.Get("window").Get("location").Get("href").String()
 	u, err := url.Parse(href)
 	if err != nil {
@@ -209,28 +224,28 @@ func isLoopback() bool {
 	return false
 }
 
-func loadRawData(projectionLocation string, progress chan<- float64) (*rawData, error) {
+func loadRawData(projectLocation string, progress chan<- float64) (*rawData, error) {
 	defer close(progress)
 
 	// If a project path is not specified from the URL query,
 	// get the game ID from the URL path.
-	if projectionLocation == "" {
+	if projectLocation == "" && js.Global != nil {
 		gameID, err := gameIDFromURL()
 		if err != nil {
 			return nil, err
 		}
 
-		projectionLocation = fmt.Sprintf("/games/%s", gameID)
+		projectLocation = fmt.Sprintf("/games/%s", gameID)
 		// TODO: This is a dirty hack to do tests on local machines.
 		// useDefaultURL should be specificed in another way e.g. from clients.
 		if isLoopback() {
 			// TODO: Stop hard-coding URLs.
 			const defaultURL = "https://rpgsnack-e85d3.appspot.com"
-			projectionLocation = defaultURL + projectionLocation
+			projectLocation = defaultURL + projectLocation
 		}
 	}
 
-	manifest, err := loadManifest(projectionLocation)
+	manifest, err := loadManifest(projectLocation)
 	if err != nil {
 		return nil, err
 	}
@@ -242,7 +257,10 @@ func loadRawData(projectionLocation string, progress chan<- float64) (*rawData, 
 		return nil, err
 	}
 
-	l := js.Global.Get("navigator").Get("language").String()
+	l := "en"
+	if js.Global != nil {
+		l = js.Global.Get("navigator").Get("language").String()
+	}
 
 	return &rawData{
 		Project:   project,

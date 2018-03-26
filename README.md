@@ -12,6 +12,13 @@ RPGSnack Runtime
 
 Run `go run main.go /path/to/json/file`
 
+## How to run on Android (for testing)
+
+```sh
+go run $GOPATH/src/github.com/hajimehoshi/rpgsnack-runtime/tools/testserver/main.go -http=:7800 -basepath=<project local location>
+gomobile install -tags="gomobilebuild" -ldflags='-X= github.com/hajimehoshi/rpgsnack-runtime/internal/game.defaultProjectLocation=http://<your machine IP>:7800' github.com/hajimehoshi/rpgsnack-runtime
+```
+
 ## How to create .framework file for iOS
 
 1. Install gomobile with `go get golang.org/x/mobile/cmd/...`
@@ -24,7 +31,7 @@ Run `go run main.go /path/to/json/file`
 
 ## How to test on browsers
 
-```
+```sh
 gopherjs serve
 go run $GOPATH/src/github.com/hajimehoshi/rpgsnack-runtime/tools/testserver/main.go -http=:7800 -basepath=<project local location>
 # If basepath includes '~', '=' should be omitted like '-basepath= ~/foo/bar'
