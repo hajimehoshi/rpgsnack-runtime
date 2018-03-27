@@ -19,8 +19,10 @@ package data
 import (
 	"encoding/base64"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net"
+	"net/http"
 	"net/url"
 	"regexp"
 	"strings"
@@ -39,18 +41,34 @@ type manifestResponse struct {
 	Body *manifestBody `json:"body"`
 }
 
-func fetch(path string) <-chan []byte {
-	// TODO: Use fetch API in the future.
-	ch := make(chan []byte)
-	xhr := js.Global.Get("XMLHttpRequest").New()
-	xhr.Set("responseType", "arraybuffer")
-	xhr.Call("addEventListener", "load", func() {
-		res := xhr.Get("response")
-		ch <- js.Global.Get("Uint8Array").New(res).Interface().([]byte)
-		close(ch)
-	})
-	xhr.Call("open", "GET", path)
-	xhr.Call("send")
+type fetchResult struct {
+	Body []byte
+	Err  error
+}
+
+func fetch(path string) <-chan fetchResult {
+	ch := make(chan fetchResult)
+	go func() {
+		defer close(ch)
+
+		res, err := http.Get(path)
+		if err != nil {
+			ch <- fetchResult{
+				nil, err,
+			}
+			return
+		}
+		bs, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			ch <- fetchResult{
+				nil, err,
+			}
+			return
+		}
+		ch <- fetchResult{
+			bs, nil,
+		}
+	}()
 	return ch
 }
 
@@ -75,10 +93,13 @@ func fetchProgress() <-chan []byte {
 }
 
 func loadManifest(path string) (map[string][]string, error) {
-	mBinary := <-fetch(path)
+	res := <-fetch(path)
+	if res.Err != nil {
+		return nil, res.Err
+	}
 
 	mr := manifestResponse{}
-	if err := unmarshalJSON(mBinary, &mr); err != nil {
+	if err := unmarshalJSON(res.Body, &mr); err != nil {
 		return nil, fmt.Errorf("unmarshalJSON Error %s", err)
 	}
 	return mr.Body.Manifest, nil
@@ -93,6 +114,7 @@ func loadAssetsFromManifest(manifest map[string][]string, progress chan<- float6
 
 	var wg sync.WaitGroup
 	loaded := 0
+	errCh := make(chan error)
 	for key, paths := range manifest {
 		wg.Add(1)
 		go func(key string, paths []string) {
@@ -102,15 +124,20 @@ func loadAssetsFromManifest(manifest map[string][]string, progress chan<- float6
 			if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
 				url = fmt.Sprintf("%s/%s", storageUrl, key)
 			}
-			bin := <-fetch(url)
+			res := <-fetch(url)
+			if res.Err != nil {
+				// TODO: Use context.Context?
+				errCh <- res.Err
+				return
+			}
 
 			for _, value := range paths {
 				switch {
 				case value == "project.json":
-					projectData = bin
+					projectData = res.Body
 				case strings.HasPrefix(value, "assets/"):
 					localPath := strings.Replace(value, "assets/", "", 1)
-					assetData[localPath] = bin
+					assetData[localPath] = res.Body
 				}
 			}
 			loaded++
@@ -118,7 +145,17 @@ func loadAssetsFromManifest(manifest map[string][]string, progress chan<- float6
 		}(key, paths)
 	}
 
-	wg.Wait()
+	loadedCh := make(chan struct{})
+	go func() {
+		wg.Wait()
+		close(loadedCh)
+	}()
+
+	select {
+	case <-loadedCh:
+	case err := <-errCh:
+		return nil, nil, err
+	}
 
 	b, err := msgpack.Marshal(assetData)
 	if err != nil {
