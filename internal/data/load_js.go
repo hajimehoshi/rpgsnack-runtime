@@ -169,7 +169,7 @@ func loadAssetsFromManifest(manifest map[string][]string, progress chan<- float6
 // TODO: Change the API from `web`.
 var gameVersionUrlRegexp = regexp.MustCompile(`\A/web/([0-9]+)\z`)
 
-func versionFromURL() (string, error) {
+func gameIDFromURL() (string, error) {
 	href := js.Global.Get("window").Get("location").Get("href").String()
 	u, err := url.Parse(href)
 	if err != nil {
@@ -212,13 +212,15 @@ func isLoopback() bool {
 func loadRawData(projectPath string, progress chan<- float64) (*rawData, error) {
 	defer close(progress)
 
+	// If a project path is not specified from the URL query,
+	// get the game ID from the URL path.
 	if projectPath == "" {
-		gameVersion, err := versionFromURL()
+		gameID, err := gameIDFromURL()
 		if err != nil {
 			return nil, err
 		}
 
-		projectPath = fmt.Sprintf("/games/%s", gameVersion)
+		projectPath = fmt.Sprintf("/games/%s", gameID)
 		// TODO: This is a dirty hack to do tests on local machines.
 		// useDefaultURL should be specificed in another way e.g. from clients.
 		if isLoopback() {
