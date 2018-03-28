@@ -185,7 +185,7 @@ loadLoop:
 }
 
 // TODO: Change the API from `web`.
-var gameVersionUrlRegexp = regexp.MustCompile(`\A/web/([0-9]+)\z`)
+var gameIDUrlRegexp = regexp.MustCompile(`\A/web/([0-9]+)\z`)
 
 func gameIDFromURL() (string, error) {
 	if js.Global == nil {
@@ -202,7 +202,7 @@ func gameIDFromURL() (string, error) {
 	if v != "" {
 		return v, nil
 	}
-	arr := gameVersionUrlRegexp.FindStringSubmatch(u.Path)
+	arr := gameIDUrlRegexp.FindStringSubmatch(u.Path)
 	if len(arr) == 2 {
 		return arr[1], nil
 	}
