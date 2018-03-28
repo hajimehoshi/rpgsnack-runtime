@@ -49,9 +49,16 @@ func New(width, height int, requester scene.Requester) *Game {
 	return g
 }
 
+// Rewrite this by specifying -ldflags='-X github.com/hajimehoshi/rpgsnack-runtime/internal/game.injectedProjectLocation=<project path>'
+var injectedProjectLocation = ""
+
 func NewWithDefaultRequester(width, height int) (*Game, error) {
+	p := projectLocation()
+	if injectedProjectLocation != "" {
+		p = injectedProjectLocation
+	}
 	g := &Game{
-		projectLocation: projectLocation(),
+		projectLocation: p,
 		width:           width,
 		height:          height,
 	}

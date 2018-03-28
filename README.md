@@ -16,7 +16,7 @@ Run `go run main.go /path/to/json/file`
 
 ```sh
 go run $GOPATH/src/github.com/hajimehoshi/rpgsnack-runtime/tools/testserver/main.go -http=:7800 -basepath=<project local location>
-gomobile install -tags="gomobilebuild" -ldflags='-X= github.com/hajimehoshi/rpgsnack-runtime/internal/game.defaultProjectLocation=http://<your machine IP>:7800' github.com/hajimehoshi/rpgsnack-runtime
+gomobile install -tags="gomobilebuild" -ldflags='-X= github.com/hajimehoshi/rpgsnack-runtime/internal/game.injectedProjectLocation=http://<your machine IP>:7800' github.com/hajimehoshi/rpgsnack-runtime
 ```
 
 ## How to create .framework file for iOS

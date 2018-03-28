@@ -20,12 +20,6 @@ import (
 	"flag"
 )
 
-// Rewrite this by specifying -ldflags='-X github.com/hajimehoshi/rpgsnack-runtime/internal/game.defaultProjectLocation=<project path>'
-var defaultProjectLocation = ""
-
 func projectLocation() string {
-	if flag.Arg(0) != "" {
-		return flag.Arg(0)
-	}
-	return defaultProjectLocation
+	return flag.Arg(0)
 }
