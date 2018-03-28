@@ -15,8 +15,11 @@
 package game
 
 import (
+	"flag"
 	"image/color"
+	"net/url"
 
+	"github.com/gopherjs/gopherjs/js"
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
 	"golang.org/x/text/language"
@@ -52,11 +55,30 @@ func New(width, height int, requester scene.Requester) *Game {
 // Rewrite this by specifying -ldflags='-X github.com/hajimehoshi/rpgsnack-runtime/internal/game.injectedProjectLocation=<project path>'
 var injectedProjectLocation = ""
 
+func projectLocation() string {
+	if injectedProjectLocation != "" {
+		return injectedProjectLocation
+	}
+	if flag.Arg(0) != "" {
+		return flag.Arg(0)
+	}
+	if js.Global != nil {
+		href := js.Global.Get("window").Get("location").Get("href").String()
+		u, err := url.Parse(href)
+		if err != nil {
+			panic(err)
+		}
+		vals := u.Query()["project_location"]
+		if len(vals) > 0 {
+			return vals[0]
+		}
+	}
+	return ""
+}
+
 func NewWithDefaultRequester(width, height int) (*Game, error) {
 	p := projectLocation()
-	if injectedProjectLocation != "" {
-		p = injectedProjectLocation
-	}
+
 	g := &Game{
 		projectLocation: p,
 		width:           width,
