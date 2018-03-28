@@ -20,6 +20,6 @@ import (
 	"flag"
 )
 
-func projectPath() string {
+func projectLocation() string {
 	return flag.Arg(0)
 }

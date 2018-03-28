@@ -209,28 +209,28 @@ func isLoopback() bool {
 	return false
 }
 
-func loadRawData(projectPath string, progress chan<- float64) (*rawData, error) {
+func loadRawData(projectionLocation string, progress chan<- float64) (*rawData, error) {
 	defer close(progress)
 
 	// If a project path is not specified from the URL query,
 	// get the game ID from the URL path.
-	if projectPath == "" {
+	if projectionLocation == "" {
 		gameID, err := gameIDFromURL()
 		if err != nil {
 			return nil, err
 		}
 
-		projectPath = fmt.Sprintf("/games/%s", gameID)
+		projectionLocation = fmt.Sprintf("/games/%s", gameID)
 		// TODO: This is a dirty hack to do tests on local machines.
 		// useDefaultURL should be specificed in another way e.g. from clients.
 		if isLoopback() {
 			// TODO: Stop hard-coding URLs.
 			const defaultURL = "https://rpgsnack-e85d3.appspot.com"
-			projectPath = defaultURL + projectPath
+			projectionLocation = defaultURL + projectionLocation
 		}
 	}
 
-	manifest, err := loadManifest(projectPath)
+	manifest, err := loadManifest(projectionLocation)
 	if err != nil {
 		return nil, err
 	}

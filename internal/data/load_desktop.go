@@ -48,10 +48,10 @@ func SavePath() string {
 	return *savePath
 }
 
-func loadAssets(projectPath string) ([]byte, error) {
+func loadAssets(projectionLocation string) ([]byte, error) {
 	assets := map[string][]byte{}
 	for _, dir := range assetDirs {
-		images, err := ioutil.ReadDir(filepath.Join(projectPath, "assets", dir))
+		images, err := ioutil.ReadDir(filepath.Join(projectionLocation, "assets", dir))
 		if err != nil {
 			if os.IsNotExist(err) {
 				continue
@@ -62,7 +62,7 @@ func loadAssets(projectPath string) ([]byte, error) {
 			if strings.HasPrefix(i.Name(), ".") {
 				continue
 			}
-			iPath := filepath.Join(projectPath, "assets", dir, i.Name())
+			iPath := filepath.Join(projectionLocation, "assets", dir, i.Name())
 			if isDir(iPath) {
 				continue
 			}
@@ -95,10 +95,10 @@ func isDir(path string) bool {
 	return false
 }
 
-func loadRawData(projectPath string, progressCh chan<- float64) (*rawData, error) {
+func loadRawData(projectionLocation string, progressCh chan<- float64) (*rawData, error) {
 	defer close(progressCh)
 
-	project, err := ioutil.ReadFile(filepath.Join(projectPath, "project.json"))
+	project, err := ioutil.ReadFile(filepath.Join(projectionLocation, "project.json"))
 	if err != nil {
 		return nil, err
 	}
@@ -109,7 +109,7 @@ func loadRawData(projectPath string, progressCh chan<- float64) (*rawData, error
 		}
 		progress = nil
 	}
-	assets, err := loadAssets(projectPath)
+	assets, err := loadAssets(projectionLocation)
 	if err != nil {
 		return nil, err
 	}

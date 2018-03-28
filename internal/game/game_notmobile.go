@@ -19,9 +19,9 @@ package game
 
 func NewWithDefaultRequester(width, height int) (*Game, error) {
 	g := &Game{
-		projectPath: projectPath(),
-		width:       width,
-		height:      height,
+		projectLocation: projectLocation(),
+		width:           width,
+		height:          height,
 	}
 	g.loadGameData()
 	g.requester = &Requester{g}

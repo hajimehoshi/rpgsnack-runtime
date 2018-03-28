@@ -30,7 +30,7 @@ import (
 )
 
 type Game struct {
-	projectPath      string
+	projectLocation  string
 	width            int
 	height           int
 	requester        scene.Requester
@@ -58,7 +58,7 @@ func Language() language.Tag {
 func (g *Game) loadGameData() {
 	ch := make(chan data.LoadProgress, 4)
 	go func() {
-		data.Load(g.projectPath, ch)
+		data.Load(g.projectLocation, ch)
 	}()
 	g.loadProgressCh = ch
 }

@@ -25,7 +25,7 @@ var (
 	dataCh = make(chan *rawData, 1)
 )
 
-func loadRawData(projectPath string, progress chan<- float64) (*rawData, error) {
+func loadRawData(projectionLocation string, progress chan<- float64) (*rawData, error) {
 	defer close(progress)
 
 	return <-dataCh, nil

@@ -22,13 +22,13 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 )
 
-func projectPath() string {
+func projectLocation() string {
 	href := js.Global.Get("window").Get("location").Get("href").String()
 	u, err := url.Parse(href)
 	if err != nil {
 		panic(err)
 	}
-	vals := u.Query()["project_path"]
+	vals := u.Query()["project_location"]
 	if len(vals) > 0 {
 		return vals[0]
 	}

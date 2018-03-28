@@ -106,7 +106,7 @@ type LoadProgress struct {
 	Error      error
 }
 
-func Load(projectPath string, progress chan<- LoadProgress) {
+func Load(projectionLocation string, progress chan<- LoadProgress) {
 	defer close(progress)
 
 	rawDataProgress := make(chan float64, 16)
@@ -119,7 +119,7 @@ func Load(projectPath string, progress chan<- LoadProgress) {
 		}
 		close(rawDataProgressDone)
 	}()
-	data, err := loadRawData(projectPath, rawDataProgress)
+	data, err := loadRawData(projectionLocation, rawDataProgress)
 	if err != nil {
 		progress <- LoadProgress{
 			Error: fmt.Errorf("data: loadRawData failed: %s", err.Error()),
