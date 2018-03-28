@@ -117,10 +117,9 @@ func loadAssetsFromManifest(manifest map[string][]string, progress chan<- float6
 	const storageUrl = "https://storage.googleapis.com/rpgsnack-e85d3.appspot.com"
 
 	var projectData []byte
-	assetData := make(map[string][]byte, len(manifest))
 
 	var wg sync.WaitGroup
-	loaded := 0
+	loadedCh := make(chan map[string][]byte)
 	errCh := make(chan error)
 	for key, paths := range manifest {
 		wg.Add(1)
@@ -138,30 +137,42 @@ func loadAssetsFromManifest(manifest map[string][]string, progress chan<- float6
 				return
 			}
 
+			data := map[string][]byte{}
 			for _, value := range paths {
 				switch {
 				case value == "project.json":
 					projectData = res.Body
 				case strings.HasPrefix(value, "assets/"):
 					localPath := strings.Replace(value, "assets/", "", 1)
-					assetData[localPath] = res.Body
+					data[localPath] = res.Body
 				}
 			}
-			loaded++
-			progress <- float64(loaded) / float64(len(manifest))
+			loadedCh <- data
 		}(key, paths)
 	}
 
-	loadedCh := make(chan struct{})
 	go func() {
 		wg.Wait()
 		close(loadedCh)
 	}()
 
-	select {
-	case <-loadedCh:
-	case err := <-errCh:
-		return nil, nil, err
+	assetData := map[string][]byte{}
+	nloaded := 0
+loadLoop:
+	for {
+		select {
+		case data, ok := <-loadedCh:
+			if !ok {
+				break loadLoop
+			}
+			for k, v := range data {
+				assetData[k] = v
+			}
+			nloaded++
+			progress <- float64(nloaded) / float64(len(manifest))
+		case err := <-errCh:
+			return nil, nil, err
+		}
 	}
 
 	b, err := msgpack.Marshal(assetData)
