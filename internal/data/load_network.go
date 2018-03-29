@@ -93,6 +93,7 @@ func fetchProgress() <-chan []byte {
 	case runtime.GOARCH == "js":
 		go func() {
 			defer close(ch)
+
 			data := js.Global.Get("localStorage").Call("getItem", "progress")
 			if data == nil {
 				return
@@ -104,10 +105,43 @@ func fetchProgress() <-chan []byte {
 			}
 			ch <- b
 		}()
-	case runtime.GOOS == "android":
-		// TODO: Use tmp directory
+	default:
 		go func() {
-			close(ch)
+			defer close(ch)
+
+			progress, err := ioutil.ReadFile(SavePath())
+			if err != nil {
+				if !os.IsNotExist(err) {
+					log.Printf("reading %s failed: %v", SavePath(), err)
+				}
+				return
+			}
+			ch <- progress
+		}()
+	}
+	return ch
+}
+
+func fetchPurchases() <-chan []byte {
+	ch := make(chan []byte)
+	switch {
+	case runtime.GOARCH == "js":
+		go func() {
+			defer close(ch)
+			// Nothing
+		}()
+	default:
+		go func() {
+			defer close(ch)
+
+			progress, err := ioutil.ReadFile(PurchasesPath())
+			if err != nil {
+				if !os.IsNotExist(err) {
+					log.Printf("reading %s failed: %v", SavePath(), err)
+				}
+				return
+			}
+			ch <- progress
 		}()
 	}
 	return ch
@@ -310,7 +344,7 @@ func loadRawData(projectLocation string, progress chan<- float64) (*rawData, err
 		Project:   project,
 		Assets:    assets,
 		Progress:  <-fetchProgress(),
-		Purchases: nil, // TODO: Implement this
+		Purchases: <-fetchPurchases(),
 		Language:  langJson,
 	}, nil
 }
