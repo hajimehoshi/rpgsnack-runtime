@@ -19,8 +19,12 @@
 package game
 
 import (
+	"encoding/json"
 	"log"
+	"os"
 	"time"
+
+	datapkg "github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 )
 
 type Requester struct {
@@ -75,7 +79,24 @@ func (m *Requester) RequestShareImage(requestID int, title string, message strin
 
 func (m *Requester) RequestChangeLanguage(requestID int, lang string) {
 	log.Printf("request change language: requestID: %d, lang: %s", requestID, lang)
-	m.game.FinishChangeLanguage(requestID)
+	go func() {
+		defer m.game.FinishChangeLanguage(requestID)
+
+		f, err := os.Create(datapkg.LanguagePath())
+		if err != nil {
+			// TODO: Should pass err instead of string?
+			panic(err)
+		}
+		defer f.Close()
+
+		j, err := json.Marshal(lang)
+		if err != nil {
+			panic(err)
+		}
+		if _, err := f.Write(j); err != nil {
+			panic(err)
+		}
+	}()
 }
 
 func (m *Requester) RequestGetIAPPrices(requestID int) {

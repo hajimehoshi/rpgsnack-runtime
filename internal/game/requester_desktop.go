@@ -124,11 +124,11 @@ func (m *Requester) RequestShareImage(requestID int, title string, message strin
 func (m *Requester) RequestChangeLanguage(requestID int, lang string) {
 	log.Printf("request change language: requestID: %d, lang: %s", requestID, lang)
 	go func() {
+		defer m.game.FinishChangeLanguage(requestID)
 		f, err := os.Create(datapkg.LanguagePath())
 		if err != nil {
 			// TODO: Should pass err instead of string?
-			m.game.FinishChangeLanguage(requestID)
-			return
+			panic(err)
 		}
 		defer f.Close()
 		j, err := json.Marshal(lang)
@@ -136,10 +136,8 @@ func (m *Requester) RequestChangeLanguage(requestID int, lang string) {
 			panic(err)
 		}
 		if _, err := f.Write(j); err != nil {
-			m.game.FinishChangeLanguage(requestID)
-			return
+			panic(err)
 		}
-		m.game.FinishChangeLanguage(requestID)
 	}()
 }
 

@@ -24,6 +24,8 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"os"
+	"path/filepath"
 	"regexp"
 	"runtime"
 	"strings"
@@ -33,6 +35,10 @@ import (
 
 	"github.com/gopherjs/gopherjs/js"
 )
+
+func LanguagePath() string {
+	return filepath.Join(os.TempDir(), "language.json")
+}
 
 type manifestBody struct {
 	Manifest map[string][]string `json:"manifest"`
@@ -235,15 +241,23 @@ func isLoopback() bool {
 	return false
 }
 
-func loadLanguage() string {
+func loadLanguageJSON() ([]byte, error) {
+	const defaultLang = `"en"`
 	switch {
 	case runtime.GOARCH == "js":
-		return js.Global.Get("navigator").Get("language").String()
+		str := fmt.Sprintf(`"%s"`, js.Global.Get("navigator").Get("language").String())
+		return []byte(str), nil
 	case runtime.GOOS == "android":
-		// TODO: Use tmp directory
-		return "en"
+		langData, err := ioutil.ReadFile(LanguagePath())
+		if err != nil {
+			if !os.IsNotExist(err) {
+				return nil, err
+			}
+			return []byte(defaultLang), nil
+		}
+		return langData, nil
 	}
-	return "en"
+	return []byte(defaultLang), nil
 }
 
 func loadRawData(projectLocation string, progress chan<- float64) (*rawData, error) {
@@ -279,11 +293,16 @@ func loadRawData(projectLocation string, progress chan<- float64) (*rawData, err
 		return nil, err
 	}
 
+	langJson, err := loadLanguageJSON()
+	if err != nil {
+		return nil, err
+	}
+
 	return &rawData{
 		Project:   project,
 		Assets:    assets,
 		Progress:  <-fetchProgress(),
 		Purchases: nil, // TODO: Implement this
-		Language:  []byte(fmt.Sprintf(`"%s"`, loadLanguage())),
+		Language:  langJson,
 	}, nil
 }
