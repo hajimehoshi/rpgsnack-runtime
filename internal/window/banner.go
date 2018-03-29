@@ -28,6 +28,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/font"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
 )
 
 const (
@@ -128,6 +129,8 @@ func (b *banner) DecodeMsgpack(dec *msgpack.Decoder) error {
 }
 
 func newBanner(content string, eventID int, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign, interpreterID int, messageStyle *data.MessageStyle) *banner {
+	font.DrawTextToScratchPad(content, consts.TextScale, lang.Get())
+
 	b := &banner{
 		interpreterID: interpreterID,
 		content:       content,
