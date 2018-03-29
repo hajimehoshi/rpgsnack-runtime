@@ -25,6 +25,7 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
+	"runtime"
 	"strings"
 	"sync"
 
@@ -74,28 +75,27 @@ func fetch(path string) <-chan fetchResult {
 
 func fetchProgress() <-chan []byte {
 	ch := make(chan []byte)
-	if js.Global == nil {
+	switch {
+	case runtime.GOARCH == "js":
 		go func() {
-			ch <- nil
+			defer close(ch)
+			data := js.Global.Get("localStorage").Call("getItem", "progress")
+			if data == nil {
+				return
+			}
+			b, err := base64.StdEncoding.DecodeString(data.String())
+			if err != nil {
+				log.Printf("localStroge's progress is invalid: %v", err)
+				return
+			}
+			ch <- b
+		}()
+	case runtime.GOOS == "android":
+		// TODO: Use tmp directory
+		go func() {
 			close(ch)
 		}()
-		return ch
 	}
-	go func() {
-		data := js.Global.Get("localStorage").Call("getItem", "progress")
-		if data == nil {
-			close(ch)
-			return
-		}
-		b, err := base64.StdEncoding.DecodeString(data.String())
-		if err != nil {
-			log.Printf("localStroge's progress is invalid: %v", err)
-			close(ch)
-			return
-		}
-		ch <- b
-		close(ch)
-	}()
 	return ch
 }
 
@@ -188,7 +188,7 @@ loadLoop:
 var gameIDUrlRegexp = regexp.MustCompile(`\A/web/([0-9]+)\z`)
 
 func gameIDFromURL() (string, error) {
-	if js.Global == nil {
+	if runtime.GOARCH != "js" {
 		panic("not reached")
 	}
 
@@ -210,7 +210,7 @@ func gameIDFromURL() (string, error) {
 }
 
 func isLoopback() bool {
-	if js.Global == nil {
+	if runtime.GOARCH != "js" {
 		panic("not reached")
 	}
 
@@ -233,6 +233,17 @@ func isLoopback() bool {
 	}
 
 	return false
+}
+
+func loadLanguage() string {
+	switch {
+	case runtime.GOARCH == "js":
+		return js.Global.Get("navigator").Get("language").String()
+	case runtime.GOOS == "android":
+		// TODO: Use tmp directory
+		return "en"
+	}
+	return "en"
 }
 
 func loadRawData(projectLocation string, progress chan<- float64) (*rawData, error) {
@@ -268,16 +279,11 @@ func loadRawData(projectLocation string, progress chan<- float64) (*rawData, err
 		return nil, err
 	}
 
-	l := "en"
-	if js.Global != nil {
-		l = js.Global.Get("navigator").Get("language").String()
-	}
-
 	return &rawData{
 		Project:   project,
 		Assets:    assets,
 		Progress:  <-fetchProgress(),
 		Purchases: nil, // TODO: Implement this
-		Language:  []byte(fmt.Sprintf(`"%s"`, l)),
+		Language:  []byte(fmt.Sprintf(`"%s"`, loadLanguage())),
 	}, nil
 }
