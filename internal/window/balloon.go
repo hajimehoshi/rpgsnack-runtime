@@ -29,6 +29,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/font"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
 )
 
 const (
@@ -159,6 +160,8 @@ func (b *balloon) DecodeMsgpack(dec *msgpack.Decoder) error {
 }
 
 func newBalloon(x, y, width, height int, content string, balloonType data.BalloonType, interpreterID int, messageStyle *data.MessageStyle) *balloon {
+	font.DrawTextToScratchPad(content, consts.TextScale, lang.Get())
+
 	b := &balloon{
 		interpreterID: interpreterID,
 		content:       content,
@@ -208,6 +211,8 @@ func balloonSizeFromContent(content string, balloonType data.BalloonType) (int, 
 }
 
 func newBalloonWithArrow(content string, balloonType data.BalloonType, eventID int, interpreterID int, messageStyle *data.MessageStyle) *balloon {
+	font.DrawTextToScratchPad(content, consts.TextScale, lang.Get())
+
 	b := &balloon{
 		interpreterID: interpreterID,
 		content:       content,

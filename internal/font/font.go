@@ -60,6 +60,17 @@ func dotY(lang language.Tag) int {
 	}
 }
 
+var scratchPad *ebiten.Image
+
+func init() {
+	scratchPad, _ = ebiten.NewImage(16, 16, ebiten.FilterDefault)
+}
+
+func DrawTextToScratchPad(str string, scale int, lang language.Tag) {
+	f := face(scale, lang)
+	text.Draw(scratchPad, str, f, 0, 0, color.White)
+}
+
 func DrawTextLang(screen *ebiten.Image, str string, ox, oy int, scale int, textAlign data.TextAlign, color color.Color, displayTextRuneCount int, lang language.Tag) {
 	f := face(scale, lang)
 	m := f.Metrics()
