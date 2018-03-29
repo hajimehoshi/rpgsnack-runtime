@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// +build !android
-// +build !ios
 // +build !js
 
 package game
@@ -40,18 +38,19 @@ func (m *Requester) RequestUnlockAchievement(requestID int, achievementID int) {
 func (m *Requester) RequestSaveProgress(requestID int, data []uint8) {
 	log.Printf("request save progress: requestID: %d", requestID)
 	go func() {
+		defer m.game.FinishSaveProgress(requestID)
+
 		f, err := os.Create(datapkg.SavePath())
 		if err != nil {
 			// TODO: Should pass err instead of string?
-			m.game.FinishSaveProgress(requestID)
-			return
+			panic(err)
 		}
 		defer f.Close()
+
 		if _, err := f.Write(data); err != nil {
-			m.game.FinishSaveProgress(requestID)
+			panic(err)
 			return
 		}
-		m.game.FinishSaveProgress(requestID)
 	}()
 }
 
@@ -59,9 +58,8 @@ func (m *Requester) RequestPurchase(requestID int, productID string) {
 	log.Printf("request purchase: requestID: %d, productID: %s", requestID, productID)
 	go func() {
 		result := ([]uint8)("[]")
-		defer func() {
-			m.game.FinishPurchase(requestID, true, result)
-		}()
+		defer m.game.FinishPurchase(requestID, true, result)
+
 		var purchases []string
 		b, err := ioutil.ReadFile(datapkg.PurchasesPath())
 		if err != nil && !os.IsNotExist(err) {
@@ -78,14 +76,16 @@ func (m *Requester) RequestPurchase(requestID int, productID string) {
 				}
 			}
 		}
+
 		purchases = append(purchases, productID)
 		b, err = json.Marshal(purchases)
 		if err != nil {
 			panic(err)
 		}
+
 		result = b
 		if err := ioutil.WriteFile(datapkg.PurchasesPath(), b, 0666); err != nil {
-			return
+			panic(err)
 		}
 	}()
 }

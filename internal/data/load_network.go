@@ -36,6 +36,14 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 )
 
+func PurchasesPath() string {
+	return filepath.Join(os.TempDir(), "purchases.json")
+}
+
+func SavePath() string {
+	return filepath.Join(os.TempDir(), "save.msgpack")
+}
+
 func LanguagePath() string {
 	return filepath.Join(os.TempDir(), "language.json")
 }
