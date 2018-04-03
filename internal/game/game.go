@@ -18,6 +18,7 @@ import (
 	"flag"
 	"image/color"
 	"net/url"
+	"runtime"
 
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/hajimehoshi/ebiten"
@@ -149,13 +150,15 @@ func (g *Game) update() error {
 
 func (g *Game) draw(screen *ebiten.Image) {
 	if g.loadProgressCh != nil {
-		const barHeight = 8
-		w, h := screen.Size()
-		barWidth := float64(w)
-		y := float64(h-barHeight) / 2
-		ebitenutil.DrawRect(screen, 0, y, barWidth, barHeight, color.RGBA{0x80, 0x80, 0x80, 0x80})
-		activeWidth := barWidth * g.loadProgressRate
-		ebitenutil.DrawRect(screen, 0, y, activeWidth, barHeight, color.RGBA{0xff, 0xff, 0xff, 0xff})
+		if runtime.GOARCH == "js" {
+			const barHeight = 8
+			w, h := screen.Size()
+			barWidth := float64(w)
+			y := float64(h-barHeight) / 2
+			ebitenutil.DrawRect(screen, 0, y, barWidth, barHeight, color.RGBA{0x80, 0x80, 0x80, 0x80})
+			activeWidth := barWidth * g.loadProgressRate
+			ebitenutil.DrawRect(screen, 0, y, activeWidth, barHeight, color.RGBA{0xff, 0xff, 0xff, 0xff})
+		}
 		return
 	}
 	g.sceneManager.Draw(screen)
