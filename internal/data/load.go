@@ -169,10 +169,10 @@ func Load(projectionLocation string, progress chan<- LoadProgress) {
 	}
 
 	count := 0
-	for count < 4 {
+	for count < 6 {
 		select {
 		case loadedData.Game = <-gameDataCh:
-			count++
+			count += 3
 		case loadedData.Assets = <-assetsCh:
 			count++
 		case loadedData.AssetsMetadata = <-assetsMetadataCh:
@@ -186,7 +186,7 @@ func Load(projectionLocation string, progress chan<- LoadProgress) {
 			return
 		}
 		progress <- LoadProgress{
-			Progress: 0.5 + float64(count)/10,
+			Progress: 0.5 + float64(count)/((6+1)*2),
 		}
 	}
 

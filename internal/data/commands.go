@@ -17,6 +17,7 @@ package data
 import (
 	"encoding/json"
 	"fmt"
+	"runtime"
 
 	"github.com/google/uuid"
 	"github.com/vmihailenco/msgpack"
@@ -56,6 +57,8 @@ func (c *Command) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EndMap()
 	return e.Flush()
 }
+
+var commandUnmarshalingCount = 0
 
 func (c *Command) UnmarshalJSON(data []uint8) error {
 	type tmpCommand struct {
@@ -362,6 +365,12 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 		c.Args = args
 	default:
 		return fmt.Errorf("data: invalid command: %s", c.Name)
+	}
+
+	// Force context switching to avoid freezing (#463)
+	commandUnmarshalingCount++
+	if commandUnmarshalingCount%128 == 0 {
+		runtime.Gosched()
 	}
 	return nil
 }
