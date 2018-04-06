@@ -128,46 +128,70 @@ func Load(projectionLocation string, progress chan<- LoadProgress) {
 	}
 	<-rawDataProgressDone
 
-	progress <- LoadProgress{
-		Progress: 0.6,
-	}
+	gameDataCh := make(chan *Game)
+	assetsCh := make(chan map[string][]byte)
+	assetsMetadataCh := make(chan map[string]*AssetMetadata)
+	purchasesCh := make(chan []string)
+	errCh := make(chan error)
 
-	var project *Project
-	if err := unmarshalJSON(data.Project, &project); err != nil {
-		progress <- LoadProgress{
-			Error: fmt.Errorf("data: parsing project data failed: %s", err.Error()),
+	go func() {
+		var project *Project
+		if err := unmarshalJSON(data.Project, &project); err != nil {
+			errCh <- fmt.Errorf("data: parsing project data failed: %s", err.Error())
+			return
 		}
-		return
-	}
-	gameData := project.Data
-	progress <- LoadProgress{
-		Progress: 0.7,
-	}
-
-	assets, assetsMetadata, err := parseAssets(data.Assets)
-	if err := msgpack.Unmarshal(data.Assets, &assets); err != nil {
-		progress <- LoadProgress{
-			Error: fmt.Errorf("data: msgpack.Unmarshal error: %s", err.Error()),
+		gameDataCh <- project.Data
+	}()
+	go func() {
+		assets, assetsMetadata, err := parseAssets(data.Assets)
+		if err != nil {
+			errCh <- err
+			return
 		}
-		return
-	}
-	progress <- LoadProgress{
-		Progress: 0.8,
+		if err := msgpack.Unmarshal(data.Assets, &assets); err != nil {
+			errCh <- err
+			return
+		}
+		assetsCh <- assets
+		assetsMetadataCh <- assetsMetadata
+	}()
+	go func() {
+		var purchases []string
+		if data.Purchases != nil {
+			if err := unmarshalJSON(data.Purchases, &purchases); err != nil {
+				errCh <- fmt.Errorf("data: parsing purchases data failed: %s", err.Error())
+				return
+			}
+		} else {
+			purchases = []string{}
+		}
+		purchasesCh <- purchases
+	}()
+
+	loadedData := &LoadedData{
+		Progress: data.Progress,
 	}
 
-	var purchases []string
-	if data.Purchases != nil {
-		if err := unmarshalJSON(data.Purchases, &purchases); err != nil {
+	count := 0
+	for count < 4 {
+		select {
+		case loadedData.Game = <-gameDataCh:
+			count++
+		case loadedData.Assets = <-assetsCh:
+			count++
+		case loadedData.AssetsMetadata = <-assetsMetadataCh:
+			count++
+		case loadedData.Purchases = <-purchasesCh:
+			count++
+		case err := <-errCh:
 			progress <- LoadProgress{
-				Error: fmt.Errorf("data: parsing purchases data failed: %s", err.Error()),
+				Error: err,
 			}
 			return
 		}
-	} else {
-		purchases = []string{}
-	}
-	progress <- LoadProgress{
-		Progress: 0.9,
+		progress <- LoadProgress{
+			Progress: 0.5 + float64(count)/10,
+		}
 	}
 
 	var tag language.Tag
@@ -187,24 +211,16 @@ func Load(projectionLocation string, progress chan<- LoadProgress) {
 			return
 		}
 	} else {
-		tag = gameData.System.DefaultLanguage
+		tag = loadedData.Game.System.DefaultLanguage
 	}
-
-	tag = lang.Normalize(tag)
+	loadedData.Language = lang.Normalize(tag)
 
 	// Don't set the language here.
 	// Determining a language requires checking the game text data.
 
 	progress <- LoadProgress{
-		Progress: 1,
-		LoadedData: &LoadedData{
-			Game:           gameData,
-			Assets:         assets,
-			AssetsMetadata: assetsMetadata,
-			Purchases:      purchases,
-			Progress:       data.Progress,
-			Language:       tag,
-		},
+		Progress:   1,
+		LoadedData: loadedData,
 	}
 }
 
