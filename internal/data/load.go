@@ -148,10 +148,6 @@ func Load(projectionLocation string, progress chan<- LoadProgress) {
 			errCh <- err
 			return
 		}
-		if err := msgpack.Unmarshal(data.Assets, &assets); err != nil {
-			errCh <- err
-			return
-		}
 		assetsCh <- assets
 		assetsMetadataCh <- assetsMetadata
 	}()
@@ -196,14 +192,14 @@ func Load(projectionLocation string, progress chan<- LoadProgress) {
 
 	var tag language.Tag
 	if data.Language != nil {
-		var langId string
-		if err := unmarshalJSON(data.Language, &langId); err != nil {
+		var langID string
+		if err := unmarshalJSON(data.Language, &langID); err != nil {
 			progress <- LoadProgress{
 				Error: fmt.Errorf("data: parsing language data failed: %s", err.Error()),
 			}
 			return
 		}
-		tag, err = language.Parse(langId)
+		tag, err = language.Parse(langID)
 		if err != nil {
 			progress <- LoadProgress{
 				Error: err,
@@ -214,10 +210,6 @@ func Load(projectionLocation string, progress chan<- LoadProgress) {
 		tag = loadedData.Game.System.DefaultLanguage
 	}
 	loadedData.Language = lang.Normalize(tag)
-
-	// Don't set the language here.
-	// Determining a language requires checking the game text data.
-
 	progress <- LoadProgress{
 		Progress:   1,
 		LoadedData: loadedData,
