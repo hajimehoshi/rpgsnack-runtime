@@ -15,16 +15,79 @@
 package data
 
 import (
-	languagepkg "golang.org/x/text/language"
+	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/vmihailenco/msgpack"
+	languagepkg "golang.org/x/text/language"
 
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/sort"
 )
 
 type Texts struct {
 	data      map[uuid.UUID]map[languagepkg.Tag]string
 	languages []languagepkg.Tag
+}
+
+func sortLanguages(languages []languagepkg.Tag) {
+	sort.Slice(languages, func(i, j int) bool {
+		// English first
+		l := languages
+		if l[i] == languagepkg.English {
+			return true
+		}
+		if l[j] == languagepkg.English {
+			return false
+		}
+		return l[i].String() < l[j].String()
+	})
+}
+
+func (t *Texts) DecodeMsgpack(dec *msgpack.Decoder) error {
+	d := easymsgpack.NewDecoder(dec)
+	n := d.DecodeMapLen()
+	langs := map[languagepkg.Tag]struct{}{}
+	for i := 0; i < n; i++ {
+		switch k := d.DecodeString(); k {
+		case "data":
+			data := map[uuid.UUID]map[string]string{}
+			d.DecodeAny(&data)
+
+			t.data = map[uuid.UUID]map[languagepkg.Tag]string{}
+			for id, m := range data {
+				t.data[id] = map[languagepkg.Tag]string{}
+				for l, str := range m {
+					lang, err := languagepkg.Parse(l)
+					if err != nil {
+						return err
+					}
+
+					t.data[id][lang] = str
+
+					if _, ok := langs[lang]; !ok {
+						langs[lang] = struct{}{}
+					}
+				}
+			}
+		default:
+			if err := d.Error(); err != nil {
+				return fmt.Errorf("data: Text.DecodeMsgpack failed: %v", err)
+			}
+			return fmt.Errorf("data: Text.DecodeMsgpack: invalid command structure: %s", k)
+		}
+	}
+	if err := d.Error(); err != nil {
+		return fmt.Errorf("data: Text.DecodeMsgpack failed: %v", err)
+	}
+
+	t.languages = []languagepkg.Tag{}
+	for l := range langs {
+		t.languages = append(t.languages, l)
+	}
+	sortLanguages(t.languages)
+
+	return nil
 }
 
 func (t *Texts) UnmarshalJSON(data []uint8) error {
@@ -53,17 +116,7 @@ func (t *Texts) UnmarshalJSON(data []uint8) error {
 			t.data[id][lang] = text
 		}
 	}
-	sort.Slice(t.languages, func(i, j int) bool {
-		// English first
-		l := t.languages
-		if l[i] == languagepkg.English {
-			return true
-		}
-		if l[j] == languagepkg.English {
-			return false
-		}
-		return l[i].String() < l[j].String()
-	})
+	sortLanguages(t.languages)
 	return nil
 }
 
