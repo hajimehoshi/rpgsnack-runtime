@@ -29,7 +29,7 @@ type Texts struct {
 
 func (t *Texts) UnmarshalJSON(data []uint8) error {
 	type TextData struct {
-		Data map[string]string `json:data`
+		Data map[string]string `json:"data"`
 		// ignore "meta" key.
 	}
 	orig := map[uuid.UUID]TextData{}
