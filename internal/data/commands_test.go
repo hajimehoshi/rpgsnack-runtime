@@ -77,7 +77,7 @@ func TestSetVariable(t *testing.T) {
 		args := c.Args.(*CommandArgsSetVariable)
 		args2 := c2.Args.(*CommandArgsSetVariable)
 		if args2.ID != args.ID {
-			t.Errorf("got: %s, want: %s", args2.ID, args.ID)
+			t.Errorf("got: %d, want: %d", args2.ID, args.ID)
 		}
 		if args2.Op != args.Op {
 			t.Errorf("got: %s, want: %s", args2.Op, args.Op)

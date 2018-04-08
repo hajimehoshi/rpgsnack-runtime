@@ -25,7 +25,7 @@ import (
 func TestItemDefaultIncludes(t *testing.T) {
 	items := Items{}
 	if items.Includes(0) {
-		t.Errorf("output: %b, want %b", true, false)
+		t.Errorf("output: %t, want %t", true, false)
 	}
 }
 
@@ -38,32 +38,31 @@ func TestItemActiveItem(t *testing.T) {
 
 func TestItemDefaultCount(t *testing.T) {
 	items := Items{}
-	if len(items.Items()) != 0 {
-		t.Errorf("output: %d, want %d", len(items.Items()), 0)
+	if items.ItemNum() != 0 {
+		t.Errorf("output: %d, want %d", items.ItemNum(), 0)
 	}
 }
 
 func TestItemDefaultAdd(t *testing.T) {
 	items := Items{}
 	items.Add(1)
-	if len(items.Items()) != 1 {
-		t.Errorf("output: %d, want %d", len(items.Items()), 1)
+	if items.ItemNum() != 1 {
+		t.Errorf("output: %d, want %d", items.ItemNum(), 1)
 	}
 	if !items.Includes(1) {
-		t.Errorf("output: %b, want %b", false, true)
+		t.Errorf("output: %t, want %t", false, true)
 	}
 
-	i := items.Items()
-	if i[0] != 1 {
-		t.Errorf("output: %d, want %d", i[0], 1)
+	if items.ItemIDAt(0) != 1 {
+		t.Errorf("output: %d, want %d", items.ItemIDAt(0), 1)
 	}
 }
 
 func TestItemDefaultRemove(t *testing.T) {
 	items := Items{}
 	items.Remove(0)
-	if len(items.Items()) != 0 {
-		t.Errorf("output: %d, want %d", len(items.Items()), 0)
+	if items.ItemNum() != 0 {
+		t.Errorf("output: %d, want %d", items.ItemNum(), 0)
 	}
 }
 
@@ -78,8 +77,8 @@ func TestItemAddTwiceUnique(t *testing.T) {
 	items := Items{}
 	items.Add(1)
 	items.Add(2)
-	if len(items.Items()) != 2 {
-		t.Errorf("output: %d, want %d", len(items.Items()), 2)
+	if items.ItemNum() != 2 {
+		t.Errorf("output: %d, want %d", items.ItemNum(), 2)
 	}
 }
 
@@ -87,9 +86,8 @@ func TestItemAddTwiceDupe(t *testing.T) {
 	items := Items{}
 	items.Add(1)
 	items.Add(1)
-	i := items.Items()
-	if i[0] != 1 {
-		t.Errorf("output: %d, want %d", i[0], 1)
+	if items.ItemIDAt(0) != 1 {
+		t.Errorf("output: %d, want %d", items.ItemIDAt(0), 1)
 	}
 }
 
@@ -99,16 +97,15 @@ func TestItemRemove(t *testing.T) {
 	items.Add(3)
 	items.Add(2)
 	items.Remove(1)
-	if len(items.Items()) != 2 {
-		t.Errorf("output: %d, want %d", len(items.Items()), 2)
+	if items.ItemNum() != 2 {
+		t.Errorf("output: %d, want %d", items.ItemNum(), 2)
 	}
 
-	i := items.Items()
-	if i[0] != 3 {
-		t.Errorf("output: %d, want %d", i[0], 3)
+	if items.ItemIDAt(0) != 3 {
+		t.Errorf("output: %d, want %d", items.ItemIDAt(0), 3)
 	}
-	if i[1] != 2 {
-		t.Errorf("output: %d, want %d", i[1], 2)
+	if items.ItemIDAt(1) != 2 {
+		t.Errorf("output: %d, want %d", items.ItemIDAt(1), 2)
 	}
 }
 
@@ -151,7 +148,7 @@ func TestItemMarshalAndUnmarshal(t *testing.T) {
 	if newItems.ActiveItem() != 2 {
 		t.Errorf("output: %d, want %d", newItems.ActiveItem(), 2)
 	}
-	if len(newItems.Items()) != 3 {
-		t.Errorf("output: %d, want %d", len(newItems.Items()), 3)
+	if newItems.ItemNum() != 3 {
+		t.Errorf("output: %d, want %d", newItems.ItemNum(), 3)
 	}
 }
