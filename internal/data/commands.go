@@ -62,9 +62,9 @@ var commandUnmarshalingCount = 0
 
 func (c *Command) UnmarshalJSON(data []uint8) error {
 	type tmpCommand struct {
-		Name     CommandName     `json:"name" msgpack:"name"`
-		Branches [][]*Command    `json:"branches" msgpack:"branches"`
-		Args     json.RawMessage `json:"args" msgpack:"args"`
+		Name     CommandName     `json:"name"`
+		Branches [][]*Command    `json:"branches"`
+		Args     json.RawMessage `json:"args"`
 	}
 	var tmp *tmpCommand
 	if err := unmarshalJSON(data, &tmp); err != nil {
@@ -836,11 +836,11 @@ func (c *CommandArgsSetVariable) EncodeMsgpack(enc *msgpack.Encoder) error {
 
 func (c *CommandArgsSetVariable) UnmarshalJSON(data []uint8) error {
 	type tmpCommandArgsSetVariable struct {
-		ID        int                  `json:"id" msgpack:"id"`
-		Op        SetVariableOp        `json:"op" msgpack:"op"`
-		ValueType SetVariableValueType `json:"valueType" msgpack:"valueType"`
-		Value     json.RawMessage      `json:"value" msgpack:"value"`
-		Internal  bool                 `json:"internal" msgpack:"internal"`
+		ID        int                  `json:"id"`
+		Op        SetVariableOp        `json:"op"`
+		ValueType SetVariableValueType `json:"valueType"`
+		Value     json.RawMessage      `json:"value"`
+		Internal  bool                 `json:"internal"`
 	}
 	var tmp *tmpCommandArgsSetVariable
 	if err := unmarshalJSON(data, &tmp); err != nil {
@@ -1135,8 +1135,8 @@ func (c *CommandArgsSetCharacterProperty) EncodeMsgpack(enc *msgpack.Encoder) er
 
 func (c *CommandArgsSetCharacterProperty) UnmarshalJSON(data []uint8) error {
 	type tmpCommandArgsSetCharacterProperty struct {
-		Type  SetCharacterPropertyType `json:"type" msgpack:"type"`
-		Value json.RawMessage          `json:"value" msgpack:"value"`
+		Type  SetCharacterPropertyType `json:"type"`
+		Value json.RawMessage          `json:"value"`
 	}
 	var tmp *tmpCommandArgsSetCharacterProperty
 	if err := unmarshalJSON(data, &tmp); err != nil {
