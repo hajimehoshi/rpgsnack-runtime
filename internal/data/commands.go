@@ -363,6 +363,18 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 			return err
 		}
 		c.Args = args
+	case CommandNameChangeBackground:
+		var args *CommandArgsChangeBackground
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
+	case CommandNameChangeForeground:
+		var args *CommandArgsChangeForeground
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	default:
 		return fmt.Errorf("data: invalid command: %s", c.Name)
 	}
@@ -692,6 +704,8 @@ const (
 	CommandNameFadePicture        CommandName = "fade_picture"
 	CommandNameTintPicture        CommandName = "tint_picture"
 	CommandNameChangePictureImage CommandName = "change_picture_image"
+	CommandNameChangeBackground   CommandName = "change_background"
+	CommandNameChangeForeground   CommandName = "change_foreground"
 
 	// Route commands
 	CommandNameMoveCharacter        CommandName = "move_character"
@@ -1297,6 +1311,14 @@ type CommandArgsTintPicture struct {
 
 type CommandArgsChangePictureImage struct {
 	ID    int    `json:"id" msgpack:"id"`
+	Image string `json:"image" msgpack:"image"`
+}
+
+type CommandArgsChangeBackground struct {
+	Image string `json:"image" msgpack:"image"`
+}
+
+type CommandArgsChangeForeground struct {
 	Image string `json:"image" msgpack:"image"`
 }
 

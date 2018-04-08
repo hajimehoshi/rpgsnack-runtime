@@ -969,6 +969,16 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		gameState.pictures.ChangeImage(args.ID, args.Image)
 		i.commandIterator.Advance()
 
+	case data.CommandNameChangeBackground:
+		args := c.Args.(*data.CommandArgsChangeBackground)
+		gameState.Map().CurrentRoom().Background.Name = args.Image
+		i.commandIterator.Advance()
+
+	case data.CommandNameChangeForeground:
+		args := c.Args.(*data.CommandArgsChangeForeground)
+		gameState.Map().CurrentRoom().Foreground.Name = args.Image
+		i.commandIterator.Advance()
+
 	case data.CommandNameFinishPlayerMovingByUserInput:
 		gameState.currentMap.FinishPlayerMovingByUserInput()
 		i.commandIterator.Advance()
