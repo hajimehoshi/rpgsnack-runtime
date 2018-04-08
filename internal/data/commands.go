@@ -608,6 +608,14 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 				a := &CommandArgsChangePictureImage{}
 				d.DecodeAny(a)
 				c.Args = a
+			case CommandNameChangeBackground:
+				a := &CommandArgsChangeBackground{}
+				d.DecodeAny(a)
+				c.Args = a
+			case CommandNameChangeForeground:
+				a := &CommandArgsChangeForeground{}
+				d.DecodeAny(a)
+				c.Args = a
 			default:
 				if err := d.Error(); err != nil {
 					return fmt.Errorf("data: Command.DecodeMsgpack failed: %v", err)
