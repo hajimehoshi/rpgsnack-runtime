@@ -26,9 +26,9 @@ type System struct {
 
 func (s *System) UnmarshalJSON(data []uint8) error {
 	type tmpSystem struct {
-		InitialPosition *Position `json:"player"`
-		DefualtLanguage string    `json:"defaultLanguage"`
-		TitleBGM        BGM       `json:"titleBgm"`
+		InitialPosition *Position `json:"player" msgpack:"player"`
+		DefualtLanguage string    `json:"defaultLanguage" msgpack:"defaultLanguage"`
+		TitleBGM        BGM       `json:"titleBgm" msgpack:"titleBgm"`
 	}
 	var tmp *tmpSystem
 	if err := unmarshalJSON(data, &tmp); err != nil {
@@ -45,8 +45,8 @@ func (s *System) UnmarshalJSON(data []uint8) error {
 }
 
 type Position struct {
-	MapID  int `json:"mapId"`
-	RoomID int `json:"roomId"`
-	X      int `json:"x"`
-	Y      int `json:"y"`
+	MapID  int `json:"mapId" msgpack:"mapId"`
+	RoomID int `json:"roomId" msgpack:"roomId"`
+	X      int `json:"x" msgpack:"x"`
+	Y      int `json:"y" msgpack:"y"`
 }

@@ -19,34 +19,34 @@ const (
 )
 
 type Event struct {
-	ID    int     `json:"id"`
-	X     int     `json:"x"`
-	Y     int     `json:"y"`
-	Pages []*Page `json:"pages"`
+	ID    int     `json:"id" msgpack:"id"`
+	X     int     `json:"x" msgpack:"x"`
+	Y     int     `json:"y" msgpack:"y"`
+	Pages []*Page `json:"pages" msgpack:"pages"`
 }
 
 type CommonEvent struct {
-	ID       int        `json:"id"`
-	Name     string     `json:"name"`
-	Commands []*Command `json:"commands"`
+	ID       int        `json:"id" msgpack:"id"`
+	Name     string     `json:"name" msgpack:"name"`
+	Commands []*Command `json:"commands" msgpack:"commands"`
 }
 
 type Page struct {
-	Conditions []*Condition         `json:"conditions"`
-	Image      string               `json:"image"`
-	ImageType  ImageType            `json:"imageType"`
-	Frame      int                  `json:"frame"`
-	Dir        Dir                  `json:"dir"`
-	DirFix     bool                 `json:"dirFix"`
-	Walking    bool                 `json:"walking"`
-	Stepping   bool                 `json:"stepping"`
-	Through    bool                 `json:"through"`
-	Priority   Priority             `json:"priority"`
-	Speed      Speed                `json:"speed"`
-	Trigger    Trigger              `json:"trigger"`
-	Opacity    int                  `json:"opacity"`
-	Route      *CommandArgsSetRoute `json:"route"`
-	Commands   []*Command           `json:"commands"`
+	Conditions []*Condition         `json:"conditions" msgpack:"conditions"`
+	Image      string               `json:"image" msgpack:"image"`
+	ImageType  ImageType            `json:"imageType" msgpack:"imageType"`
+	Frame      int                  `json:"frame" msgpack:"frame"`
+	Dir        Dir                  `json:"dir" msgpack:"dir"`
+	DirFix     bool                 `json:"dirFix" msgpack:"dirFix"`
+	Walking    bool                 `json:"walking" msgpack:"walking"`
+	Stepping   bool                 `json:"stepping" msgpack:"stepping"`
+	Through    bool                 `json:"through" msgpack:"through"`
+	Priority   Priority             `json:"priority" msgpack:"priority"`
+	Speed      Speed                `json:"speed" msgpack:"speed"`
+	Trigger    Trigger              `json:"trigger" msgpack:"trigger"`
+	Opacity    int                  `json:"opacity" msgpack:"opacity"`
+	Route      *CommandArgsSetRoute `json:"route" msgpack:"route"`
+	Commands   []*Command           `json:"commands" msgpack:"commands"`
 }
 
 type Dir int

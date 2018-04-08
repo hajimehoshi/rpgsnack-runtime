@@ -15,26 +15,26 @@
 package data
 
 type Map struct {
-	ID    int     `json:"id"`
-	Name  string  `json:"name"`
-	Rooms []*Room `json:"rooms"`
+	ID    int     `json:"id" msgpack:"id"`
+	Name  string  `json:"name" msgpack:"name"`
+	Rooms []*Room `json:"rooms" msgpack:"rooms"`
 }
 
 type Room struct {
-	ID                   int           `json:"id"`
-	X                    int           `json:"x"`
-	Y                    int           `json:"y"`
-	Tiles                [][]int       `json:"tiles"`
-	Events               []*Event      `json:"events"`
-	Background           MapSprite     `json:"background"`
-	Foreground           MapSprite     `json:"foreground"`
-	PassageTypeOverrides []PassageType `json:"passageTypeOverrides"`
-	AutoBGM              bool          `json:"autoBGM"`
-	BGM                  BGM           `json:"bgm"`
+	ID                   int           `json:"id" msgpack:"id"`
+	X                    int           `json:"x" msgpack:"x"`
+	Y                    int           `json:"y" msgpack:"y"`
+	Tiles                [][]int       `json:"tiles" msgpack:"tiles"`
+	Events               []*Event      `json:"events" msgpack:"events"`
+	Background           MapSprite     `json:"background" msgpack:"background"`
+	Foreground           MapSprite     `json:"foreground" msgpack:"foreground"`
+	PassageTypeOverrides []PassageType `json:"passageTypeOverrides" msgpack:"passageTypeOverrides"`
+	AutoBGM              bool          `json:"autoBGM" msgpack:"autoBGM"`
+	BGM                  BGM           `json:"bgm" msgpack:"bgm"`
 }
 
 type MapSprite struct {
-	Name    string `json:"name"`
-	ScrollX int    `json:"scrollX"`
-	ScrollY int    `json:"scrollY"`
+	Name    string `json:"name" msgpack:"name"`
+	ScrollX int    `json:"scrollX" msgpack:"scrollX"`
+	ScrollY int    `json:"scrollY" msgpack:"scrollY"`
 }

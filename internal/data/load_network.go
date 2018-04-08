@@ -49,11 +49,11 @@ func LanguagePath() string {
 }
 
 type manifestBody struct {
-	Manifest map[string][]string `json:"manifest"`
+	Manifest map[string][]string `json:"manifest" msgpack:"manifest"`
 }
 
 type manifestResponse struct {
-	Body *manifestBody `json:"body"`
+	Body *manifestBody `json:"body" msgpack:"body"`
 }
 
 type fetchResult struct {
