@@ -54,12 +54,6 @@ type InterpreterIDGenerator interface {
 	GenerateInterpreterID() int
 }
 
-type ShopProduct struct {
-	Key  string `json:"key" msgpack:"key"`
-	Name string `json:"name" msgpack:"name"`
-	Desc string `json:"desc" msgpack:"desc"`
-}
-
 func NewInterpreter(idGen InterpreterIDGenerator, mapID, roomID, eventID int, commands []*data.Command) *Interpreter {
 	return &Interpreter{
 		id:              idGen.GenerateInterpreterID(),
@@ -222,7 +216,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		}
 		i.waitingRequestID = 0
 		switch r.Type {
-		case scene.RequestTypePurchase, scene.RequestTypeRewardedAds, scene.RequestTypeShowShop:
+		case scene.RequestTypePurchase, scene.RequestTypeRewardedAds:
 			if r.Succeeded {
 				i.commandIterator.Choose(0)
 			} else {
@@ -636,10 +630,6 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		args := c.Args.(*data.CommandArgsSendAnalytics)
 		sceneManager.Requester().RequestSendAnalytics(args.EventName, "")
 		i.commandIterator.Advance()
-	case data.CommandNameShowShop:
-		i.waitingRequestID = sceneManager.GenerateRequestID()
-		sceneManager.Requester().RequestShowShop(i.waitingRequestID, i.GetShopProductsData(sceneManager))
-		return false, nil
 	case data.CommandNameRequestReview:
 		sceneManager.Requester().RequestReview()
 		i.commandIterator.Advance()
@@ -1040,22 +1030,4 @@ func (i *Interpreter) Update(sceneManager *scene.Manager, gameState *Game) error
 		return nil
 	}
 	return nil
-}
-
-func (i *Interpreter) GetShopProductsData(sceneManager *scene.Manager) []byte {
-	shopProducts := []*ShopProduct{}
-	for _, iapProduct := range sceneManager.Game().IAPProducts {
-		if iapProduct.IsShop {
-			shopProducts = append(shopProducts, &ShopProduct{
-				Key:  iapProduct.Key,
-				Name: sceneManager.Game().Texts.Get(lang.Get(), iapProduct.Name),
-				Desc: sceneManager.Game().Texts.Get(lang.Get(), iapProduct.Desc),
-			})
-		}
-	}
-	b, err := json.Marshal(shopProducts)
-	if err != nil {
-		panic(err)
-	}
-	return b
 }

@@ -308,14 +308,6 @@ func (m *Manager) FinishGetIAPPrices(id int, success bool, prices []byte) {
 	}
 }
 
-func (m *Manager) FinishShowShop(id int, success bool) {
-	m.resultCh <- RequestResult{
-		ID:        id,
-		Type:      RequestTypeShowShop,
-		Succeeded: success,
-	}
-}
-
 func (m *Manager) SetPlatformData(key PlatformDataKey, value string) {
 	m.setPlatformDataCh <- setPlatformDataArgs{
 		key:   key,

@@ -157,9 +157,3 @@ func (m *Requester) RequestReview() {
 func (m *Requester) RequestSendAnalytics(eventName string, value string) {
 	log.Printf("request to send an analytics event: %s value: %s", eventName, value)
 }
-
-func (m *Requester) RequestShowShop(requestID int, data []byte) {
-	log.Printf("request to ShowShop")
-	//TODO Show mock shop UI
-	m.game.FinishShowShop(requestID, true)
-}
