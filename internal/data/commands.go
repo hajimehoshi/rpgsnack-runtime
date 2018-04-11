@@ -390,238 +390,13 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 	d := easymsgpack.NewDecoder(dec)
 	n := d.DecodeMapLen()
+	var args interface{}
 	for i := 0; i < n; i++ {
 		switch k := d.DecodeString(); k {
 		case "name":
 			c.Name = CommandName(d.DecodeString())
 		case "args":
-			if c.Name == "" {
-				return fmt.Errorf("data: 'name' should come before 'args'")
-			}
-			switch c.Name {
-			case CommandNameNop:
-				d.DecodeNil()
-			case CommandNameMemo:
-				a := &CommandArgsMemo{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameIf:
-				a := &CommandArgsIf{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameLabel:
-				a := &CommandArgsLabel{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameGoto:
-				a := &CommandArgsGoto{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameCallEvent:
-				a := &CommandArgsCallEvent{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameCallCommonEvent:
-				a := &CommandArgsCallCommonEvent{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameReturn:
-				d.DecodeNil()
-			case CommandNameEraseEvent:
-				d.DecodeNil()
-			case CommandNameWait:
-				a := &CommandArgsWait{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameShowBalloon:
-				a := &CommandArgsShowBalloon{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameShowMessage:
-				a := &CommandArgsShowMessage{}
-				d.DecodeAny(c.Args)
-				if a.TextAlign == "" {
-					a.TextAlign = TextAlignLeft
-				}
-				c.Args = a
-			case CommandNameShowHint:
-				d.DecodeNil()
-			case CommandNameShowChoices:
-				a := &CommandArgsShowChoices{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameSetSwitch:
-				a := &CommandArgsSetSwitch{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameSetSelfSwitch:
-				a := &CommandArgsSetSelfSwitch{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameSetVariable:
-				a := &CommandArgsSetVariable{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameTransfer:
-				a := &CommandArgsTransfer{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameSetRoute:
-				a := &CommandArgsSetRoute{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameTintScreen:
-				a := &CommandArgsTintScreen{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNamePlaySE:
-				a := &CommandArgsPlaySE{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNamePlayBGM:
-				a := &CommandArgsPlayBGM{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameStopBGM:
-				a := &CommandArgsStopBGM{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameSave:
-				d.DecodeNil()
-			case CommandNameGotoTitle:
-				d.DecodeNil()
-			case CommandNameSyncIAP:
-				d.DecodeNil()
-			case CommandNameRequestReview:
-				d.DecodeNil()
-			case CommandNameUnlockAchievement:
-				a := &CommandArgsUnlockAchievement{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameAutoSave:
-				a := &CommandArgsAutoSave{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNamePlayerControl:
-				a := &CommandArgsPlayerControl{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameWeather:
-				a := &CommandArgsWeather{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameControlHint:
-				a := &CommandArgsControlHint{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNamePurchase:
-				a := &CommandArgsPurchase{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameShowAds:
-				a := &CommandArgsShowAds{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameOpenLink:
-				a := &CommandArgsOpenLink{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameSendAnalytics:
-				a := &CommandArgsSendAnalytics{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameMoveCharacter:
-				a := &CommandArgsMoveCharacter{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameTurnCharacter:
-				a := &CommandArgsTurnCharacter{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameRotateCharacter:
-				a := &CommandArgsRotateCharacter{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameSetCharacterProperty:
-				a := &CommandArgsSetCharacterProperty{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameSetCharacterImage:
-				a := &CommandArgsSetCharacterImage{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameSetCharacterOpacity:
-				a := &CommandArgsSetCharacterOpacity{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameAddItem:
-				a := &CommandArgsAddItem{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameRemoveItem:
-				a := &CommandArgsRemoveItem{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameShowInventory:
-				d.DecodeNil()
-			case CommandNameHideInventory:
-				d.DecodeNil()
-			case CommandNameShowItem:
-				a := &CommandArgsShowItem{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameHideItem:
-				d.DecodeNil()
-			case CommandNameReplaceItem:
-				a := &CommandArgsReplaceItem{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameShowPicture:
-				a := &CommandArgsShowPicture{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameErasePicture:
-				a := &CommandArgsErasePicture{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameMovePicture:
-				a := &CommandArgsMovePicture{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameScalePicture:
-				a := &CommandArgsScalePicture{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameRotatePicture:
-				a := &CommandArgsRotatePicture{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameFadePicture:
-				a := &CommandArgsFadePicture{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameTintPicture:
-				a := &CommandArgsTintPicture{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameChangePictureImage:
-				a := &CommandArgsChangePictureImage{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameChangeBackground:
-				a := &CommandArgsChangeBackground{}
-				d.DecodeAny(a)
-				c.Args = a
-			case CommandNameChangeForeground:
-				a := &CommandArgsChangeForeground{}
-				d.DecodeAny(a)
-				c.Args = a
-			default:
-				if err := d.Error(); err != nil {
-					return fmt.Errorf("data: Command.DecodeMsgpack failed: %v", err)
-				}
-				return fmt.Errorf("data: Command.DecodeMsgpack: invalid command: %s", c.Name)
-			}
+			d.DecodeAny(&args)
 		case "branches":
 			if d.SkipCodeIfNil() {
 				continue
@@ -652,6 +427,320 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 	if err := d.Error(); err != nil {
 		return fmt.Errorf("data: Command.DecodeMsgpack failed: %v", err)
 	}
+
+	// TODO: Avoid re-encoding the arg
+	argsBin, err := msgpack.Marshal(args)
+	if err != nil {
+		return err
+	}
+
+	switch c.Name {
+	case CommandNameNop:
+	case CommandNameMemo:
+		a := &CommandArgsMemo{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameIf:
+		a := &CommandArgsIf{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameLabel:
+		a := &CommandArgsLabel{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameGoto:
+		a := &CommandArgsGoto{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameCallEvent:
+		a := &CommandArgsCallEvent{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameCallCommonEvent:
+		a := &CommandArgsCallCommonEvent{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameReturn:
+	case CommandNameEraseEvent:
+	case CommandNameWait:
+		a := &CommandArgsWait{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameShowBalloon:
+		a := &CommandArgsShowBalloon{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameShowMessage:
+		a := &CommandArgsShowMessage{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		if a.TextAlign == "" {
+			a.TextAlign = TextAlignLeft
+		}
+		c.Args = a
+	case CommandNameShowHint:
+	case CommandNameShowChoices:
+		a := &CommandArgsShowChoices{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameSetSwitch:
+		a := &CommandArgsSetSwitch{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameSetSelfSwitch:
+		a := &CommandArgsSetSelfSwitch{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameSetVariable:
+		a := &CommandArgsSetVariable{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameTransfer:
+		a := &CommandArgsTransfer{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameSetRoute:
+		a := &CommandArgsSetRoute{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameTintScreen:
+		a := &CommandArgsTintScreen{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNamePlaySE:
+		a := &CommandArgsPlaySE{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNamePlayBGM:
+		a := &CommandArgsPlayBGM{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameStopBGM:
+		a := &CommandArgsStopBGM{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameSave:
+	case CommandNameGotoTitle:
+	case CommandNameSyncIAP:
+	case CommandNameRequestReview:
+	case CommandNameUnlockAchievement:
+		a := &CommandArgsUnlockAchievement{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameAutoSave:
+		a := &CommandArgsAutoSave{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNamePlayerControl:
+		a := &CommandArgsPlayerControl{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameWeather:
+		a := &CommandArgsWeather{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameControlHint:
+		a := &CommandArgsControlHint{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNamePurchase:
+		a := &CommandArgsPurchase{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameShowAds:
+		a := &CommandArgsShowAds{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameOpenLink:
+		a := &CommandArgsOpenLink{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameSendAnalytics:
+		a := &CommandArgsSendAnalytics{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameMoveCharacter:
+		a := &CommandArgsMoveCharacter{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameTurnCharacter:
+		a := &CommandArgsTurnCharacter{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameRotateCharacter:
+		a := &CommandArgsRotateCharacter{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameSetCharacterProperty:
+		a := &CommandArgsSetCharacterProperty{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameSetCharacterImage:
+		a := &CommandArgsSetCharacterImage{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameSetCharacterOpacity:
+		a := &CommandArgsSetCharacterOpacity{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameAddItem:
+		a := &CommandArgsAddItem{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameRemoveItem:
+		a := &CommandArgsRemoveItem{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameShowInventory:
+	case CommandNameHideInventory:
+	case CommandNameShowItem:
+		a := &CommandArgsShowItem{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameHideItem:
+	case CommandNameReplaceItem:
+		a := &CommandArgsReplaceItem{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameShowPicture:
+		a := &CommandArgsShowPicture{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameErasePicture:
+		a := &CommandArgsErasePicture{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameMovePicture:
+		a := &CommandArgsMovePicture{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameScalePicture:
+		a := &CommandArgsScalePicture{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameRotatePicture:
+		a := &CommandArgsRotatePicture{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameFadePicture:
+		a := &CommandArgsFadePicture{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameTintPicture:
+		a := &CommandArgsTintPicture{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameChangePictureImage:
+		a := &CommandArgsChangePictureImage{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameChangeBackground:
+		a := &CommandArgsChangeBackground{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameChangeForeground:
+		a := &CommandArgsChangeForeground{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	default:
+		return fmt.Errorf("data: Command.DecodeMsgpack: invalid command: %s", c.Name)
+	}
+
 	return nil
 }
 
