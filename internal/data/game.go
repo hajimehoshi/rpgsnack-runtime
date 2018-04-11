@@ -85,8 +85,11 @@ type Hint struct {
 }
 
 type IAPProduct struct {
-	ID  int    `json:"id" msgpack:"id"`
-	Key string `json:"key" msgpack:"key"`
+	ID     int       `json:"id" msgpack:"id"`
+	Key    string    `json:"key" msgpack:"key"`
+	Name   uuid.UUID `json:"name" msgpack:"name"`
+	Desc   uuid.UUID `json:"desc" msgpack:"desc"`
+	IsShop bool      `json:"is_shop" msgpack:"is_shop"`
 }
 
 type Item struct {
