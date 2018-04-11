@@ -207,7 +207,7 @@ func Load(projectionLocation string, progress chan<- LoadProgress) {
 			return
 		}
 	} else {
-		tag = loadedData.Game.System.DefaultLanguage
+		tag = language.Tag(loadedData.Game.System.DefaultLanguage)
 	}
 	loadedData.Language = lang.Normalize(tag)
 	progress <- LoadProgress{

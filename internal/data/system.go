@@ -19,16 +19,16 @@ import (
 )
 
 type System struct {
-	InitialPosition *Position
-	DefaultLanguage language.Tag
-	TitleBGM        BGM
+	InitialPosition *Position `msgpack:"player"`
+	DefaultLanguage Language  `msgpack:"defaultLanguage"`
+	TitleBGM        BGM       `msgpack:"titleBgm"`
 }
 
 func (s *System) UnmarshalJSON(data []uint8) error {
 	type tmpSystem struct {
-		InitialPosition *Position `json:"player" msgpack:"player"`
-		DefualtLanguage string    `json:"defaultLanguage" msgpack:"defaultLanguage"`
-		TitleBGM        BGM       `json:"titleBgm" msgpack:"titleBgm"`
+		InitialPosition *Position `json:"player"`
+		DefualtLanguage string    `json:"defaultLanguage"`
+		TitleBGM        BGM       `json:"titleBgm"`
 	}
 	var tmp *tmpSystem
 	if err := unmarshalJSON(data, &tmp); err != nil {
@@ -40,7 +40,7 @@ func (s *System) UnmarshalJSON(data []uint8) error {
 	if err != nil {
 		return err
 	}
-	s.DefaultLanguage = l
+	s.DefaultLanguage = Language(l)
 	return nil
 }
 
