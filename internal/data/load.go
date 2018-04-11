@@ -88,7 +88,7 @@ type rawData struct {
 }
 
 type Project struct {
-	Data *Game `json:data`
+	Data *Game `json:"data" msgpack:"data"`
 }
 
 type LoadedData struct {
