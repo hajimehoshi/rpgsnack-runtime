@@ -98,9 +98,16 @@ func isDir(path string) bool {
 func loadRawData(projectionLocation string, progressCh chan<- float64) (*rawData, error) {
 	defer close(progressCh)
 
-	project, err := ioutil.ReadFile(filepath.Join(projectionLocation, "project.json"))
-	if err != nil {
+	project, err := ioutil.ReadFile(filepath.Join(projectionLocation, "project.msgpack"))
+	if err != nil && !os.IsNotExist(err) {
 		return nil, err
+	}
+	var projectJSON []byte
+	if project == nil {
+		projectJSON, err = ioutil.ReadFile(filepath.Join(projectionLocation, "project.json"))
+		if err != nil && !os.IsNotExist(err) {
+			return nil, err
+		}
 	}
 	progress, err := ioutil.ReadFile(*savePath)
 	if err != nil {
@@ -130,11 +137,12 @@ func loadRawData(projectionLocation string, progressCh chan<- float64) (*rawData
 	}
 
 	return &rawData{
-		Project:   project,
-		Assets:    assets,
-		Progress:  progress,
-		Purchases: purchases,
-		Language:  langData,
+		Project:     project,
+		ProjectJSON: projectJSON,
+		Assets:      assets,
+		Progress:    progress,
+		Purchases:   purchases,
+		Language:    langData,
 	}, nil
 }
 

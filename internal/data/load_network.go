@@ -160,15 +160,14 @@ func loadManifest(path string) (map[string][]string, error) {
 	return mr.Body.Manifest, nil
 }
 
-func loadAssetsFromManifest(manifest map[string][]string, progress chan<- float64) ([]byte, []byte, error) {
+func loadAssetsFromManifest(manifest map[string][]string, progress chan<- float64) (projectData, projectJSONData, assetData []byte, err error) {
 	// TODO: We should remove this hardcoded value in the future
 	const storageUrl = "https://storage.googleapis.com/rpgsnack-e85d3.appspot.com"
-
-	var projectData []byte
 
 	var wg sync.WaitGroup
 	loadedCh := make(chan map[string][]byte)
 	errCh := make(chan error)
+
 	for key, paths := range manifest {
 		wg.Add(1)
 		go func(key string, paths []string) {
@@ -189,6 +188,8 @@ func loadAssetsFromManifest(manifest map[string][]string, progress chan<- float6
 			for _, value := range paths {
 				switch {
 				case value == "project.json":
+					projectJSONData = res.Body
+				case value == "project.msgpack":
 					projectData = res.Body
 				case strings.HasPrefix(value, "assets/"):
 					localPath := strings.Replace(value, "assets/", "", 1)
@@ -204,7 +205,7 @@ func loadAssetsFromManifest(manifest map[string][]string, progress chan<- float6
 		close(loadedCh)
 	}()
 
-	assetData := map[string][]byte{}
+	assets := map[string][]byte{}
 	nloaded := 0
 loadLoop:
 	for {
@@ -214,22 +215,22 @@ loadLoop:
 				break loadLoop
 			}
 			for k, v := range data {
-				assetData[k] = v
+				assets[k] = v
 			}
 			nloaded++
 			progress <- float64(nloaded) / float64(len(manifest))
 		case err := <-errCh:
-			return nil, nil, err
+			return nil, nil, nil, err
 		}
 	}
 
-	b, err := msgpack.Marshal(assetData)
+	b, err := msgpack.Marshal(assets)
 	if err != nil {
-		return nil, nil, fmt.Errorf("MsgPack Error %s", err)
+		return nil, nil, nil, fmt.Errorf("MsgPack Error %s", err)
 	}
 	progress <- 1
 
-	return projectData, b, nil
+	return projectData, projectJSONData, b, nil
 }
 
 // TODO: Change the API from `web`.
@@ -330,22 +331,22 @@ func loadRawData(projectLocation string, progress chan<- float64) (*rawData, err
 
 	// TODO: manifest might be nil on local server.
 
-	project, assets, err := loadAssetsFromManifest(manifest, progress)
+	project, projectJSON, assets, err := loadAssetsFromManifest(manifest, progress)
 	if err != nil {
 		return nil, err
 	}
 
-	langJson, err := loadLanguageJSON()
+	langJSON, err := loadLanguageJSON()
 	if err != nil {
 		return nil, err
 	}
-
 	return &rawData{
-		Project:   project,
-		Assets:    assets,
-		Progress:  <-fetchProgress(),
-		Purchases: <-fetchPurchases(),
-		Language:  langJson,
+		Project:     project,
+		ProjectJSON: projectJSON,
+		Assets:      assets,
+		Progress:    <-fetchProgress(),
+		Purchases:   <-fetchPurchases(),
+		Language:    langJSON,
 	}, nil
 }
 

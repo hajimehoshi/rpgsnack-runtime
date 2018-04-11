@@ -50,10 +50,11 @@ func SetData(project []byte, assets []byte, progress []byte, purchases []byte, l
 		panic(err)
 	}
 	dataCh <- &rawData{
-		Project:   project,
-		Assets:    assets,
-		Progress:  progress,
-		Purchases: purchases,
-		Language:  l,
+		Project:     nil, // TODO: Implement msgpack version
+		ProjectJSON: project,
+		Assets:      assets,
+		Progress:    progress,
+		Purchases:   purchases,
+		Language:    l,
 	}
 }
