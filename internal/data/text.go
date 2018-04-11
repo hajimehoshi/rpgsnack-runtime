@@ -25,19 +25,38 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/sort"
 )
 
-type Texts struct {
-	data      map[uuid.UUID]map[languagepkg.Tag]string
-	languages []languagepkg.Tag
+type Language languagepkg.Tag
+
+func (l *Language) String() string {
+	return (*languagepkg.Tag)(l).String()
 }
 
-func sortLanguages(languages []languagepkg.Tag) {
+func (l *Language) DecodeMsgpack(dec *msgpack.Decoder) error {
+	str, err := dec.DecodeString()
+	if err != nil {
+		return err
+	}
+	lang, err := languagepkg.Parse(str)
+	if err != nil {
+		return err
+	}
+	*l = Language(lang)
+	return nil
+}
+
+type Texts struct {
+	data      map[uuid.UUID]map[Language]string
+	languages []Language
+}
+
+func sortLanguages(languages []Language) {
 	sort.Slice(languages, func(i, j int) bool {
 		// English first
 		l := languages
-		if l[i] == languagepkg.English {
+		if l[i] == Language(languagepkg.English) {
 			return true
 		}
-		if l[j] == languagepkg.English {
+		if l[j] == Language(languagepkg.English) {
 			return false
 		}
 		return l[i].String() < l[j].String()
@@ -47,29 +66,12 @@ func sortLanguages(languages []languagepkg.Tag) {
 func (t *Texts) DecodeMsgpack(dec *msgpack.Decoder) error {
 	d := easymsgpack.NewDecoder(dec)
 	n := d.DecodeMapLen()
-	langs := map[languagepkg.Tag]struct{}{}
 	for i := 0; i < n; i++ {
 		switch k := d.DecodeString(); k {
 		case "data":
-			data := map[uuid.UUID]map[string]string{}
+			data := map[uuid.UUID]map[Language]string{}
 			d.DecodeAny(&data)
-
-			t.data = map[uuid.UUID]map[languagepkg.Tag]string{}
-			for id, m := range data {
-				t.data[id] = map[languagepkg.Tag]string{}
-				for l, str := range m {
-					lang, err := languagepkg.Parse(l)
-					if err != nil {
-						return err
-					}
-
-					t.data[id][lang] = str
-
-					if _, ok := langs[lang]; !ok {
-						langs[lang] = struct{}{}
-					}
-				}
-			}
+			t.data = data
 		default:
 			if err := d.Error(); err != nil {
 				return fmt.Errorf("data: Text.DecodeMsgpack failed: %v", err)
@@ -77,11 +79,19 @@ func (t *Texts) DecodeMsgpack(dec *msgpack.Decoder) error {
 			return fmt.Errorf("data: Text.DecodeMsgpack: invalid command structure: %s", k)
 		}
 	}
+
+	langs := map[Language]struct{}{}
+	for _, d := range t.data {
+		for l := range d {
+			langs[l] = struct{}{}
+		}
+	}
+
 	if err := d.Error(); err != nil {
 		return fmt.Errorf("data: Text.DecodeMsgpack failed: %v", err)
 	}
 
-	t.languages = []languagepkg.Tag{}
+	t.languages = []Language{}
 	for l := range langs {
 		t.languages = append(t.languages, l)
 	}
@@ -99,21 +109,22 @@ func (t *Texts) UnmarshalJSON(data []uint8) error {
 	if err := unmarshalJSON(data, &orig); err != nil {
 		return err
 	}
-	langs := map[languagepkg.Tag]struct{}{}
-	t.languages = []languagepkg.Tag{}
-	t.data = map[uuid.UUID]map[languagepkg.Tag]string{}
+	langs := map[Language]struct{}{}
+	t.languages = []Language{}
+	t.data = map[uuid.UUID]map[Language]string{}
 	for id, textData := range orig {
-		t.data[id] = map[languagepkg.Tag]string{}
+		t.data[id] = map[Language]string{}
 		for langStr, text := range textData.Data {
 			lang, err := languagepkg.Parse(langStr)
 			if err != nil {
 				return err
 			}
-			if _, ok := langs[lang]; !ok {
-				t.languages = append(t.languages, lang)
-				langs[lang] = struct{}{}
+			l := Language(lang)
+			if _, ok := langs[l]; !ok {
+				t.languages = append(t.languages, l)
+				langs[l] = struct{}{}
 			}
-			t.data[id][lang] = text
+			t.data[id][l] = text
 		}
 	}
 	sortLanguages(t.languages)
@@ -121,9 +132,13 @@ func (t *Texts) UnmarshalJSON(data []uint8) error {
 }
 
 func (t *Texts) Languages() []languagepkg.Tag {
-	return t.languages
+	ls := make([]languagepkg.Tag, len(t.languages))
+	for i, l := range t.languages {
+		ls[i] = languagepkg.Tag(l)
+	}
+	return ls
 }
 
 func (t *Texts) Get(lang languagepkg.Tag, uuid uuid.UUID) string {
-	return t.data[uuid][lang]
+	return t.data[uuid][Language(lang)]
 }
