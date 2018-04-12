@@ -215,3 +215,7 @@ func (g *Game) FinishGetIAPPrices(id int, success bool, prices []uint8) {
 func (g *Game) SetPlatformData(key scene.PlatformDataKey, value string) {
 	g.sceneManager.SetPlatformData(key, value)
 }
+
+func (g *Game) FinishShowShop(id int, success bool) {
+	g.sceneManager.FinishShowShop(id, success)
+}
