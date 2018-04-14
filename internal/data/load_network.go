@@ -348,3 +348,7 @@ func loadRawData(projectLocation string, progress chan<- float64) (*rawData, err
 		Language:  langJson,
 	}, nil
 }
+
+func SetData(project []byte, assets []byte, progress []byte, purchases []byte, language string) {
+	// Not implemented
+}
