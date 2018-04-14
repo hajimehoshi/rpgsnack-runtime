@@ -26,6 +26,18 @@ var (
 	dataCh = make(chan *rawData, 1)
 )
 
+func PurchasesPath() string {
+	return ""
+}
+
+func LanguagePath() string {
+	return ""
+}
+
+func SavePath() string {
+	return ""
+}
+
 func loadRawData(projectionLocation string, progress chan<- float64) (*rawData, error) {
 	defer close(progress)
 
