@@ -987,8 +987,9 @@ func (c *CommandArgsSetVariable) UnmarshalJSON(data []uint8) error {
 func (c *CommandArgsSetVariable) DecodeMsgpack(dec *msgpack.Decoder) error {
 	d := easymsgpack.NewDecoder(dec)
 	n := d.DecodeMapLen()
+	var value interface{}
 	for i := 0; i < n; i++ {
-		switch d.DecodeString() {
+		switch k := d.DecodeString(); k {
 		case "id":
 			c.ID = d.DecodeInt()
 		case "op":
@@ -996,36 +997,61 @@ func (c *CommandArgsSetVariable) DecodeMsgpack(dec *msgpack.Decoder) error {
 		case "valueType":
 			c.ValueType = SetVariableValueType(d.DecodeString())
 		case "value":
-			switch c.ValueType {
-			case SetVariableValueTypeConstant:
-				c.Value = d.DecodeInt()
-			case SetVariableValueTypeVariable:
-				c.Value = d.DecodeInt()
-			case SetVariableValueTypeRandom:
-				if !d.SkipCodeIfNil() {
-					v := &SetVariableValueRandom{}
-					d.DecodeAny(v)
-					c.Value = v
-				}
-			case SetVariableValueTypeCharacter:
-				if !d.SkipCodeIfNil() {
-					v := &SetVariableCharacterArgs{}
-					d.DecodeAny(v)
-					c.Value = v
-				}
-			case SetVariableValueTypeIAPProduct:
-				c.Value = d.DecodeInt()
-			case SetVariableValueTypeSystem:
-				c.Value = SystemVariableType(d.DecodeString())
-			default:
-				return fmt.Errorf("data: CommandArgsSetVariable.DecodeMsgpack: invalid type: %s", c.ValueType)
-			}
+			d.DecodeAny(&value)
 		case "internal":
 			c.Internal = d.DecodeBool()
+		default:
+			if err := d.Error(); err != nil {
+				return fmt.Errorf("data: CommandArgsSetVariable.DecodeMsgpack failed: %v", err)
+			}
+			return fmt.Errorf("data: CommandArgsSetVariable.DecodeMsgpack: invalid argument: %s", k)
 		}
 	}
 	if err := d.Error(); err != nil {
 		return fmt.Errorf("data: CommandArgsSetVariable.DecodeMsgpack failed: %v", err)
+	}
+
+	// TODO: Avoid re-encoding the arg
+	valueBin, err := msgpack.Marshal(value)
+	if err != nil {
+		return err
+	}
+
+	switch c.ValueType {
+	case SetVariableValueTypeConstant:
+		v, ok := interfaceToInt(value)
+		if !ok {
+			return fmt.Errorf("data: CommandArgsSetVariable.DecodeMsgpack: constant value must be an integer; got %v", v)
+		}
+		c.Value = v
+	case SetVariableValueTypeVariable:
+		v, ok := interfaceToInt(value)
+		if !ok {
+			return fmt.Errorf("data: CommandArgsSetVariable.DecodeMsgpack: variable value must be an integer; got %v", v)
+		}
+		c.Value = v
+	case SetVariableValueTypeRandom:
+		v := &SetVariableValueRandom{}
+		if err := msgpack.Unmarshal(valueBin, v); err != nil {
+			return err
+		}
+		c.Value = v
+	case SetVariableValueTypeCharacter:
+		v := &SetVariableCharacterArgs{}
+		if err := msgpack.Unmarshal(valueBin, v); err != nil {
+			return err
+		}
+		c.Value = v
+	case SetVariableValueTypeIAPProduct:
+		v, ok := interfaceToInt(value)
+		if !ok {
+			return fmt.Errorf("data: CommandArgsSetVariable.DecodeMsgpack: IAP product value must be an integer; got %v", v)
+		}
+		c.Value = v
+	case SetVariableValueTypeSystem:
+		c.Value = SystemVariableType(value.(string))
+	default:
+		return fmt.Errorf("data: CommandArgsSetVariable.DecodeMsgpack: invalid type: %s", c.ValueType)
 	}
 	return nil
 }
@@ -1277,6 +1303,22 @@ func (c *CommandArgsSetCharacterProperty) UnmarshalJSON(data []uint8) error {
 	return nil
 }
 
+func interfaceToInt(v interface{}) (int, bool) {
+	switch v := v.(type) {
+	case int:
+		return v, true
+	case int8:
+		return int(v), true
+	case int16:
+		return int(v), true
+	case int32:
+		return int(v), true
+	case int64:
+		return int(v), true
+	}
+	return 0, false
+}
+
 func (c *CommandArgsSetCharacterProperty) DecodeMsgpack(dec *msgpack.Decoder) error {
 	d := easymsgpack.NewDecoder(dec)
 	n := d.DecodeMapLen()
@@ -1310,20 +1352,11 @@ func (c *CommandArgsSetCharacterProperty) DecodeMsgpack(dec *msgpack.Decoder) er
 	case SetCharacterPropertyTypeWalking:
 		c.Value = value.(bool)
 	case SetCharacterPropertyTypeSpeed:
-		switch value := value.(type) {
-		case int:
-			c.Value = Speed(value)
-		case int8:
-			c.Value = Speed(value)
-		case int16:
-			c.Value = Speed(value)
-		case int32:
-			c.Value = Speed(value)
-		case int64:
-			c.Value = Speed(value)
-		default:
-			return fmt.Errorf("data: CommandArgsSetCharacterProperty.DecodeMsgpack: speed must be an integer; got %v", value)
+		v, ok := interfaceToInt(value)
+		if !ok {
+			return fmt.Errorf("data: CommandArgsSetCharacterProperty.DecodeMsgpack: speed must be an integer; got %v", v)
 		}
+		c.Value = Speed(v)
 	default:
 		return fmt.Errorf("data: CommandArgsSetCharacterProperty.DecodeMsgpack: invalid type: %s", c.Type)
 	}
