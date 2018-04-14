@@ -518,7 +518,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		if !args.Wait {
 			// Set 'route' true so that the new route command does not
 			// block the player's move (#380).
-			if id != 0 {
+			if id != 0 && id != i.eventID {
 				gameState.Map().removeRoutes(id)
 				sub.route = true
 			}
