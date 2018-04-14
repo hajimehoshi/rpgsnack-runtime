@@ -17,7 +17,6 @@ package data
 import (
 	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/vmihailenco/msgpack"
 	languagepkg "golang.org/x/text/language"
 
@@ -45,7 +44,7 @@ func (l *Language) DecodeMsgpack(dec *msgpack.Decoder) error {
 }
 
 type Texts struct {
-	data      map[uuid.UUID]map[Language]string
+	data      map[UUID]map[Language]string
 	languages []Language
 }
 
@@ -69,7 +68,7 @@ func (t *Texts) DecodeMsgpack(dec *msgpack.Decoder) error {
 	for i := 0; i < n; i++ {
 		switch k := d.DecodeString(); k {
 		case "data":
-			data := map[uuid.UUID]map[Language]string{}
+			data := map[UUID]map[Language]string{}
 			d.DecodeAny(&data)
 			t.data = data
 		default:
@@ -105,13 +104,13 @@ func (t *Texts) UnmarshalJSON(data []uint8) error {
 		Data map[string]string `json:"data"`
 		// ignore "meta" key.
 	}
-	orig := map[uuid.UUID]TextData{}
+	orig := map[UUID]TextData{}
 	if err := unmarshalJSON(data, &orig); err != nil {
 		return err
 	}
 	langs := map[Language]struct{}{}
 	t.languages = []Language{}
-	t.data = map[uuid.UUID]map[Language]string{}
+	t.data = map[UUID]map[Language]string{}
 	for id, textData := range orig {
 		t.data[id] = map[Language]string{}
 		for langStr, text := range textData.Data {
@@ -139,6 +138,6 @@ func (t *Texts) Languages() []languagepkg.Tag {
 	return ls
 }
 
-func (t *Texts) Get(lang languagepkg.Tag, uuid uuid.UUID) string {
+func (t *Texts) Get(lang languagepkg.Tag, uuid UUID) string {
 	return t.data[uuid][Language(lang)]
 }

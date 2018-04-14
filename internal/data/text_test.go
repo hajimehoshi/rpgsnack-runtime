@@ -17,7 +17,6 @@ package data_test
 import (
 	"testing"
 
-	"github.com/google/uuid"
 	"github.com/vmihailenco/msgpack"
 	"golang.org/x/text/language"
 
@@ -25,9 +24,9 @@ import (
 )
 
 func TestTexts(t *testing.T) {
-	uuid1 := uuid.New()
-	uuid2 := uuid.New()
-	tmp := map[string]map[uuid.UUID]map[string]string{
+	uuid1 := NewUUID()
+	uuid2 := NewUUID()
+	tmp := map[string]map[UUID]map[string]string{
 		"data": {
 			uuid1: {
 				"en": "Hello",
@@ -51,7 +50,7 @@ func TestTexts(t *testing.T) {
 
 	cases := []struct {
 		lang language.Tag
-		uuid uuid.UUID
+		uuid UUID
 		text string
 	}{
 		{
