@@ -91,7 +91,7 @@ func (m *Requester) RequestSendAnalytics(eventName string, value string) {
 }
 
 func (m *Requester) RequestShowShop(requestID int, data []byte) {
-	log.Printf("request to ShowShop
+	log.Printf("request to ShowShop")
 	//TODO Show mock shop UI
 	m.game.FinishShowShop(requestID, true)
 }
