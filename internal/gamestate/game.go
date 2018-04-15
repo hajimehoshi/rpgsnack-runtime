@@ -343,7 +343,24 @@ func (g *Game) MeetsCondition(cond *data.Condition, eventID int) (bool, error) {
 	case data.ConditionTypeVariable:
 		id := cond.ID
 		v := g.variables.VariableValue(id)
-		rhs := int(cond.Value.(float64))
+		rhs := 0
+		// TODO: This is redundant: can we refactor them?
+		switch value := cond.Value.(type) {
+		case float32:
+			rhs = int(value)
+		case float64:
+			rhs = int(value)
+		case int:
+			rhs = value
+		case int8:
+			rhs = int(value)
+		case int16:
+			rhs = int(value)
+		case int32:
+			rhs = int(value)
+		case int64:
+			rhs = int(value)
+		}
 		switch cond.ValueType {
 		case data.ConditionValueTypeConstant:
 		case data.ConditionValueTypeVariable:
