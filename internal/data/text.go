@@ -15,12 +15,9 @@
 package data
 
 import (
-	"fmt"
-
 	"github.com/vmihailenco/msgpack"
 	languagepkg "golang.org/x/text/language"
 
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/sort"
 )
 
@@ -63,20 +60,17 @@ func sortLanguages(languages []Language) {
 }
 
 func (t *Texts) DecodeMsgpack(dec *msgpack.Decoder) error {
-	d := easymsgpack.NewDecoder(dec)
-	n := d.DecodeMapLen()
-	for i := 0; i < n; i++ {
-		switch k := d.DecodeString(); k {
-		case "data":
-			data := map[UUID]map[Language]string{}
-			d.DecodeAny(&data)
-			t.data = data
-		default:
-			if err := d.Error(); err != nil {
-				return fmt.Errorf("data: Text.DecodeMsgpack failed: %v", err)
-			}
-			return fmt.Errorf("data: Text.DecodeMsgpack: invalid command structure: %s", k)
-		}
+	type TextData struct {
+		Data map[Language]string `msgpack:"data"`
+		// ignore "meta" key.
+	}
+	var data map[UUID]TextData
+	if err := dec.Decode(&data); err != nil {
+		return err
+	}
+	t.data = map[UUID]map[Language]string{}
+	for uuid, textdata := range data {
+		t.data[uuid] = textdata.Data
 	}
 
 	langs := map[Language]struct{}{}
@@ -84,10 +78,6 @@ func (t *Texts) DecodeMsgpack(dec *msgpack.Decoder) error {
 		for l := range d {
 			langs[l] = struct{}{}
 		}
-	}
-
-	if err := d.Error(); err != nil {
-		return fmt.Errorf("data: Text.DecodeMsgpack failed: %v", err)
 	}
 
 	t.languages = []Language{}
