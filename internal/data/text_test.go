@@ -26,14 +26,16 @@ import (
 func TestTexts(t *testing.T) {
 	uuid1 := NewUUID()
 	uuid2 := NewUUID()
-	tmp := map[string]map[UUID]map[string]string{
-		"data": {
-			uuid1: {
+	tmp := map[UUID]map[string]map[string]string{
+		uuid1: {
+			"data": {
 				"en": "Hello",
 				"fr": "Bonjour",
 				"ja": "こんにちは",
 			},
-			uuid2: {
+		},
+		uuid2: {
+			"data": {
 				"en": "Good Bye",
 				"ja": "さようなら",
 			},
