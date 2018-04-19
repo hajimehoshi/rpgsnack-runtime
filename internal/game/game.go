@@ -184,6 +184,10 @@ func (g *Game) FinishPurchase(id int, success bool, purchases []uint8) {
 	g.sceneManager.FinishPurchase(id, success, purchases)
 }
 
+func (g *Game) FinishShowShop(id int, success bool, purchases []uint8) {
+	g.sceneManager.FinishShowShop(id, success, purchases)
+}
+
 func (g *Game) FinishRestorePurchases(id int, success bool, purchases []uint8) {
 	g.sceneManager.FinishRestorePurchases(id, success, purchases)
 }
@@ -214,8 +218,4 @@ func (g *Game) FinishGetIAPPrices(id int, success bool, prices []uint8) {
 
 func (g *Game) SetPlatformData(key scene.PlatformDataKey, value string) {
 	g.sceneManager.SetPlatformData(key, value)
-}
-
-func (g *Game) FinishShowShop(id int, success bool) {
-	g.sceneManager.FinishShowShop(id, success)
 }

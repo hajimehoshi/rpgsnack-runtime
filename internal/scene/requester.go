@@ -18,6 +18,7 @@ type Requester interface {
 	RequestUnlockAchievement(requestID int, achievementID int)
 	RequestSaveProgress(requestID int, data []byte)
 	RequestPurchase(requestID int, productID string)
+	RequestShowShop(requestID int, data string)
 	RequestRestorePurchases(requestID int)
 	RequestInterstitialAds(requestID int)
 	RequestRewardedAds(requestID int)
@@ -28,7 +29,6 @@ type Requester interface {
 	RequestGetIAPPrices(requestID int)
 	RequestReview()
 	RequestSendAnalytics(eventName string, value string)
-	RequestShowShop(requestID int, data []byte)
 }
 
 type RequestType int
@@ -37,6 +37,7 @@ const (
 	RequestTypeUnlockAchievement RequestType = iota
 	RequestTypeSaveProgress
 	RequestTypePurchase
+	RequestTypeShowShop
 	RequestTypeRestorePurchases
 	RequestTypeInterstitialAds
 	RequestTypeRewardedAds
@@ -44,7 +45,6 @@ const (
 	RequestTypeShareImage
 	RequestTypeChangeLanguage
 	RequestTypeIAPPrices
-	RequestTypeShowShop
 )
 
 type RequestResult struct {

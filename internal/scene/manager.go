@@ -107,7 +107,7 @@ func (m *Manager) Update() error {
 			m.interstitialAdsLoaded = false
 		case RequestTypeRewardedAds:
 			m.rewardedAdsLoaded = false
-		case RequestTypePurchase, RequestTypeRestorePurchases:
+		case RequestTypePurchase, RequestTypeRestorePurchases, RequestTypeShowShop:
 			if r.Succeeded {
 				var purchases []string
 				if err := json.Unmarshal(r.Data, &purchases); err != nil {
@@ -254,6 +254,15 @@ func (m *Manager) FinishPurchase(id int, success bool, purchases []byte) {
 	}
 }
 
+func (m *Manager) FinishShowShop(id int, success bool, purchases []byte) {
+	m.resultCh <- RequestResult{
+		ID:        id,
+		Type:      RequestTypeShowShop,
+		Succeeded: success,
+		Data:      purchases,
+	}
+}
+
 func (m *Manager) FinishRestorePurchases(id int, success bool, purchases []byte) {
 	m.resultCh <- RequestResult{
 		ID:        id,
@@ -305,14 +314,6 @@ func (m *Manager) FinishGetIAPPrices(id int, success bool, prices []byte) {
 		Type:      RequestTypeIAPPrices,
 		Succeeded: success,
 		Data:      prices,
-	}
-}
-
-func (m *Manager) FinishShowShop(id int, success bool) {
-	m.resultCh <- RequestResult{
-		ID:        id,
-		Type:      RequestTypeShowShop,
-		Succeeded: success,
 	}
 }
 

@@ -339,7 +339,7 @@ func (m *MapScene) receiveRequest(sceneManager *scene.Manager) bool {
 		}
 		m.removeAdsLabel.Text = fmt.Sprintf(text, priceText)
 		m.removeAdsDialog.Show()
-	case scene.RequestTypePurchase:
+	case scene.RequestTypePurchase, scene.RequestTypeShowShop:
 		// Note: Ideally we should show a notification toast to notify users about the result
 		// For now, the notifications are handled on the native platform side
 		if r.Succeeded {

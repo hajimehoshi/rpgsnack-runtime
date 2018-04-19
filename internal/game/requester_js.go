@@ -43,6 +43,12 @@ func (m *Requester) RequestPurchase(requestID int, productID string) {
 	m.game.FinishPurchase(requestID, true, nil)
 }
 
+func (m *Requester) RequestShowShop(requestID int, data string) {
+	log.Printf("request to ShowShop")
+	//TODO Show mock shop UI
+	m.game.FinishShowShop(requestID, true, nil)
+}
+
 func (m *Requester) RequestRestorePurchases(requestID int) {
 	log.Printf("request restore purchase: requestID: %d", requestID)
 	m.game.FinishRestorePurchases(requestID, true, nil)
@@ -88,10 +94,4 @@ func (m *Requester) RequestReview() {
 
 func (m *Requester) RequestSendAnalytics(eventName string, value string) {
 	log.Printf("request to send an analytics event: %s value: %s", eventName, value)
-}
-
-func (m *Requester) RequestShowShop(requestID int, data []byte) {
-	log.Printf("request to ShowShop")
-	//TODO Show mock shop UI
-	m.game.FinishShowShop(requestID, true)
 }

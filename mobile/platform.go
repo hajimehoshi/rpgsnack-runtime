@@ -37,6 +37,15 @@ func FinishPurchase(id int, success bool, purchases []uint8) {
 	theGame.FinishPurchase(id, success, p)
 }
 
+func FinishShowShop(id int, success bool, purchases []uint8) {
+	var p []uint8
+	if purchases != nil {
+		p = make([]uint8, len(purchases))
+		copy(p, purchases)
+	}
+	theGame.FinishShowShop(id, success, p)
+}
+
 func FinishRestorePurchases(id int, success bool, purchases []uint8) {
 	var p []uint8
 	if purchases != nil {
