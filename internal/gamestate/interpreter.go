@@ -981,12 +981,12 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 
 	case data.CommandNameChangeBackground:
 		args := c.Args.(*data.CommandArgsChangeBackground)
-		gameState.Map().CurrentRoom().Background.Name = args.Image
+		gameState.Map().SetBackground(args.Image)
 		i.commandIterator.Advance()
 
 	case data.CommandNameChangeForeground:
 		args := c.Args.(*data.CommandArgsChangeForeground)
-		gameState.Map().CurrentRoom().Foreground.Name = args.Image
+		gameState.Map().SetForeground(args.Image)
 		i.commandIterator.Advance()
 
 	case data.CommandNameFinishPlayerMovingByUserInput:

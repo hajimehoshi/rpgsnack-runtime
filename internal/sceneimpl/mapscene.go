@@ -565,11 +565,8 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	}
 	m.tilesImage.Fill(color.Black)
 
-	// TODO: This accesses *data.Game, but is it OK?
-	room := m.gameState.Map().CurrentRoom()
-
-	if room.Background.Name != "" {
-		m.gameState.Map().DrawFullscreenImage(m.tilesImage, assets.GetImage("backgrounds/"+room.Background.Name+".png"), 0, m.offsetY/consts.TileScale)
+	if m.gameState.Map().Background() != "" {
+		m.gameState.Map().DrawFullscreenImage(m.tilesImage, assets.GetImage("backgrounds/"+m.gameState.Map().Background()+".png"), 0, m.offsetY/consts.TileScale)
 	}
 	for k := 0; k < 3; k++ {
 		var p data.Priority
@@ -587,8 +584,8 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		m.drawTiles(p)
 		m.gameState.Map().DrawCharacters(m.tilesImage, p, 0, m.offsetY/consts.TileScale)
 	}
-	if room.Foreground.Name != "" {
-		m.gameState.Map().DrawFullscreenImage(m.tilesImage, assets.GetImage("foregrounds/"+room.Foreground.Name+".png"), 0, m.offsetY/consts.TileScale)
+	if m.gameState.Map().Foreground() != "" {
+		m.gameState.Map().DrawFullscreenImage(m.tilesImage, assets.GetImage("foregrounds/"+m.gameState.Map().Foreground()+".png"), 0, m.offsetY/consts.TileScale)
 	}
 
 	op := &ebiten.DrawImageOptions{}
