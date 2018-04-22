@@ -15,6 +15,8 @@
 package font
 
 import (
+	"sync"
+
 	"github.com/golang/freetype/truetype"
 	"github.com/hajimehoshi/go-mplusbitmap"
 	"golang.org/x/image/font"
@@ -31,9 +33,27 @@ var (
 )
 
 func init() {
-	face(1, language.English)
-	face(1, language.SimplifiedChinese)
-	face(1, language.TraditionalChinese)
+	wg := sync.WaitGroup{}
+
+	wg.Add(1)
+	go func() {
+		face(1, language.English)
+		wg.Done()
+	}()
+
+	wg.Add(1)
+	go func() {
+		face(1, language.SimplifiedChinese)
+		wg.Done()
+	}()
+
+	wg.Add(1)
+	go func() {
+		face(1, language.TraditionalChinese)
+		wg.Done()
+	}()
+
+	wg.Wait()
 }
 
 func ensureSCTTF() *truetype.Font {
