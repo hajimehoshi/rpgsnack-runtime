@@ -30,6 +30,12 @@ var (
 	tcFaces    = map[int]font.Face{}
 )
 
+func init() {
+	face(1, language.English)
+	face(1, language.SimplifiedChinese)
+	face(1, language.TraditionalChinese)
+}
+
 func ensureSCTTF() *truetype.Font {
 	if scTTF != nil {
 		return scTTF
