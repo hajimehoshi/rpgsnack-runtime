@@ -60,6 +60,9 @@ type Game struct {
 	lastPlayingBGMName   string
 	lastPlayingBGMVolume float64
 
+	backgrounds map[int]map[int]string
+	foregrounds map[int]map[int]string
+
 	// Fields that are not dumped
 	rand             Rand
 	waitingRequestID int
@@ -133,6 +136,32 @@ func (g *Game) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EncodeString("lastPlayingBGMVolume")
 	e.EncodeFloat64(audio.PlayingBGMVolume())
 
+	e.EncodeString("backgrounds")
+	e.BeginMap()
+	for id, m := range g.backgrounds {
+		e.EncodeInt(id)
+		e.BeginMap()
+		for id, r := range m {
+			e.EncodeInt(id)
+			e.EncodeString(r)
+		}
+		e.EndMap()
+	}
+	e.EndMap()
+
+	e.EncodeString("foregrounds")
+	e.BeginMap()
+	for id, m := range g.foregrounds {
+		e.EncodeInt(id)
+		e.BeginMap()
+		for id, r := range m {
+			e.EncodeInt(id)
+			e.EncodeString(r)
+		}
+		e.EndMap()
+	}
+	e.EndMap()
+
 	e.EndMap()
 	return e.Flush()
 }
@@ -192,6 +221,36 @@ func (g *Game) DecodeMsgpack(dec *msgpack.Decoder) error {
 			g.lastPlayingBGMName = d.DecodeString()
 		case "lastPlayingBGMVolume":
 			g.lastPlayingBGMVolume = d.DecodeFloat64()
+		case "backgrounds":
+			if !d.SkipCodeIfNil() {
+				n := d.DecodeMapLen()
+				g.backgrounds = map[int]map[int]string{}
+				for i := 0; i < n; i++ {
+					id := d.DecodeInt()
+					g.backgrounds[id] = map[int]string{}
+					n2 := d.DecodeMapLen()
+					for j := 0; j < n2; j++ {
+						id2 := d.DecodeInt()
+						r := d.DecodeString()
+						g.backgrounds[id][id2] = r
+					}
+				}
+			}
+		case "foregrounds":
+			if !d.SkipCodeIfNil() {
+				n := d.DecodeMapLen()
+				g.foregrounds = map[int]map[int]string{}
+				for i := 0; i < n; i++ {
+					id := d.DecodeInt()
+					g.foregrounds[id] = map[int]string{}
+					n2 := d.DecodeMapLen()
+					for j := 0; j < n2; j++ {
+						id2 := d.DecodeInt()
+						r := d.DecodeString()
+						g.foregrounds[id][id2] = r
+					}
+				}
+			}
 		default:
 			if err := d.Error(); err != nil {
 				return err
@@ -727,4 +786,46 @@ func (g *Game) SetEventItem(id int) {
 
 func (g *Game) InsertItemBefore(targetItemID int, insertItemID int) {
 	g.items.InsertBefore(targetItemID, insertItemID)
+}
+
+func (g *Game) SetBackground(mapID, roomID int, image string) {
+	if g.backgrounds == nil {
+		g.backgrounds = map[int]map[int]string{}
+	}
+	if _, ok := g.backgrounds[mapID]; !ok {
+		g.backgrounds[mapID] = map[int]string{}
+	}
+	g.backgrounds[mapID][roomID] = image
+}
+
+func (g *Game) SetForeground(mapID, roomID int, image string) {
+	if g.foregrounds == nil {
+		g.foregrounds = map[int]map[int]string{}
+	}
+	if _, ok := g.foregrounds[mapID]; !ok {
+		g.foregrounds[mapID] = map[int]string{}
+	}
+	g.foregrounds[mapID][roomID] = image
+}
+
+func (g *Game) Background(mapID, roomID int) string {
+	if g.backgrounds != nil {
+		if r, ok := g.backgrounds[mapID]; ok {
+			if img, ok := r[roomID]; ok {
+				return img
+			}
+		}
+	}
+	return ""
+}
+
+func (g *Game) Foreground(mapID, roomID int) string {
+	if g.foregrounds != nil {
+		if r, ok := g.foregrounds[mapID]; ok {
+			if img, ok := r[roomID]; ok {
+				return img
+			}
+		}
+	}
+	return ""
 }

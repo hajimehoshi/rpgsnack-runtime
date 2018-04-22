@@ -56,8 +56,6 @@ type Map struct {
 	interpreters                map[int]*Interpreter
 	playerInterpreterID         int
 	itemInterpreter             *Interpreter
-	backgrounds                 map[int]string
-	foregrounds                 map[int]string
 
 	// Fields that are not dumped
 	gameData                  *data.Game
@@ -117,22 +115,6 @@ func (m *Map) EncodeMsgpack(enc *msgpack.Encoder) error {
 
 	e.EncodeString("itemInterpreter")
 	e.EncodeInterface(m.itemInterpreter)
-
-	e.EncodeString("backgrounds")
-	e.BeginMap()
-	for k, v := range m.backgrounds {
-		e.EncodeInt(k)
-		e.EncodeString(v)
-	}
-	e.EndMap()
-
-	e.EncodeString("foregrounds")
-	e.BeginMap()
-	for k, v := range m.foregrounds {
-		e.EncodeInt(k)
-		e.EncodeString(v)
-	}
-	e.EndMap()
 
 	e.EndMap()
 	return e.Flush()
@@ -195,26 +177,6 @@ func (m *Map) DecodeMsgpack(dec *msgpack.Decoder) error {
 			if !d.SkipCodeIfNil() {
 				m.itemInterpreter = &Interpreter{}
 				d.DecodeInterface(m.itemInterpreter)
-			}
-		case "backgrounds":
-			if !d.SkipCodeIfNil() {
-				n := d.DecodeMapLen()
-				m.backgrounds = map[int]string{}
-				for i := 0; i < n; i++ {
-					k := d.DecodeInt()
-					v := d.DecodeString()
-					m.backgrounds[k] = v
-				}
-			}
-		case "foregrounds":
-			if !d.SkipCodeIfNil() {
-				n := d.DecodeMapLen()
-				m.foregrounds = map[int]string{}
-				for i := 0; i < n; i++ {
-					k := d.DecodeInt()
-					v := d.DecodeString()
-					m.foregrounds[k] = v
-				}
 			}
 		default:
 			if err := d.Error(); err != nil {
@@ -1072,34 +1034,16 @@ func (m *Map) StartCombineCommands(gameState *Game, combine *data.Combine) {
 	m.itemInterpreter = NewInterpreter(gameState, m.mapID, m.roomID, 0, combine.Commands)
 }
 
-func (m *Map) SetBackground(image string) {
-	if m.backgrounds == nil {
-		m.backgrounds = map[int]string{}
-	}
-	m.backgrounds[m.roomID] = image
-}
-
-func (m *Map) SetForeground(image string) {
-	if m.foregrounds == nil {
-		m.foregrounds = map[int]string{}
-	}
-	m.foregrounds[m.roomID] = image
-}
-
-func (m *Map) Background() string {
-	if m.backgrounds != nil {
-		if img, ok := m.backgrounds[m.roomID]; ok {
-			return img
-		}
+func (m *Map) Background(gameState *Game) string {
+	if img := gameState.Background(m.mapID, m.roomID); img != "" {
+		return img
 	}
 	return m.CurrentRoom().Background.Name
 }
 
-func (m *Map) Foreground() string {
-	if m.foregrounds != nil {
-		if v, ok := m.foregrounds[m.roomID]; ok {
-			return v
-		}
+func (m *Map) Foreground(gameState *Game) string {
+	if img := gameState.Foreground(m.mapID, m.roomID); img != "" {
+		return img
 	}
 	return m.CurrentRoom().Foreground.Name
 }
