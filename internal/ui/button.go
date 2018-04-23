@@ -32,8 +32,8 @@ import (
 type Button struct {
 	x             int
 	y             int
-	width         int
-	height        int
+	Width         int
+	Height        int
 	Visible       bool
 	Text          string
 	Disabled      bool
@@ -52,8 +52,8 @@ func NewButton(x, y, width, height int, soundName string) *Button {
 	return &Button{
 		x:          x,
 		y:          y,
-		width:      width,
-		height:     height,
+		Width:      width,
+		Height:     height,
 		Visible:    true,
 		soundName:  soundName,
 		dropShadow: false,
@@ -65,8 +65,8 @@ func NewTextButton(x, y, width, height int, soundName string) *Button {
 	return &Button{
 		x:          x,
 		y:          y,
-		width:      width,
-		height:     height,
+		Width:      width,
+		Height:     height,
 		Visible:    true,
 		soundName:  soundName,
 		dropShadow: false,
@@ -79,8 +79,8 @@ func NewImageButton(x, y int, image *ImagePart, pressedImage *ImagePart, soundNa
 	return &Button{
 		x:             x,
 		y:             y,
-		width:         w,
-		height:        h,
+		Width:         w,
+		Height:        h,
 		Visible:       true,
 		Image:         image,
 		PressedImage:  pressedImage,
@@ -106,8 +106,8 @@ func (b *Button) includesInput(offsetX, offsetY int) bool {
 	x -= offsetX
 	y -= offsetY
 
-	buttonWidth := b.width
-	buttonHeight := b.height
+	buttonWidth := b.Width
+	buttonHeight := b.Height
 	buttonX := b.x
 	buttonY := b.y
 
@@ -197,7 +197,7 @@ func (b *Button) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 				colorM.ChangeHSV(0, 0, 1)
 				colorM.Scale(0.5, 0.5, 0.5, 1)
 			}
-			drawNinePatches(screen, img, b.width, b.height, geoM, colorM)
+			drawNinePatches(screen, img, b.Width, b.Height, geoM, colorM)
 		}
 	} else {
 		if b.pressing {
@@ -207,10 +207,10 @@ func (b *Button) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 
 	_, th := font.MeasureSize(b.Text)
 	tx := (b.x + offsetX) * consts.TileScale
-	tx += b.width * consts.TileScale / 2
+	tx += b.Width * consts.TileScale / 2
 
 	ty := (b.y + offsetY) * consts.TileScale
-	ty += (b.height*consts.TileScale - th*consts.TextScale) / 2
+	ty += (b.Height*consts.TileScale - th*consts.TextScale) / 2
 
 	var c color.Color = color.RGBA{0xff, 0xff, 0xff, opacity}
 	if b.Disabled {

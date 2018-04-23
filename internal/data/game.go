@@ -86,6 +86,7 @@ type IAPProduct struct {
 	Name   UUID   `json:"name" msgpack:"name"`
 	Desc   UUID   `json:"desc" msgpack:"desc"`
 	IsShop bool   `json:"is_shop" msgpack:"is_shop"`
+	Tier   int    `json:"tier" msgpack:"tier"`
 }
 
 type Item struct {
@@ -118,4 +119,14 @@ func (g *Game) CreateDefaultMessageStyle() *MessageStyle {
 
 func (g *Game) CreateChoicesMessageStyle() *MessageStyle {
 	return &MessageStyle{TypingEffectDelay: 0}
+}
+
+func (g *Game) GetIAPProduct(key string) *IAPProduct {
+	var iap *IAPProduct
+	for _, p := range g.IAPProducts {
+		if p.Key == key {
+			iap = p
+		}
+	}
+	return iap
 }

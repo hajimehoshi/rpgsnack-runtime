@@ -192,6 +192,17 @@ func (m *Manager) IsPurchased(key string) bool {
 	return false
 }
 
+func (m *Manager) MaxPurchaseTier() int {
+	maxTier := 0
+	for _, p := range m.purchases {
+		iap := m.Game().GetIAPProduct(p)
+		if iap != nil && iap.Tier > maxTier {
+			maxTier = iap.Tier
+		}
+	}
+	return maxTier
+}
+
 func (m *Manager) SetLanguage(language language.Tag) language.Tag {
 	language = lang.Normalize(language)
 	for _, l := range m.game.Texts.Languages() {
