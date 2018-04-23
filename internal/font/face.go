@@ -33,6 +33,8 @@ var (
 )
 
 func init() {
+	startLoadingChineseFonts()
+
 	wg := sync.WaitGroup{}
 
 	wg.Add(1)

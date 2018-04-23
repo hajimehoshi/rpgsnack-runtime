@@ -25,6 +25,10 @@ import (
 	"github.com/hajimehoshi/chinesegamefonts/tcregular"
 )
 
+func startLoadingChineseFonts() {
+	// Do nothing
+}
+
 func getSCTTF() ([]byte, error) {
 	r, err := gzip.NewReader(bytes.NewReader(scregular.CompressedTTF))
 	if err != nil {

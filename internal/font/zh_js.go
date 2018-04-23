@@ -31,7 +31,7 @@ var (
 	tcCh = make(chan fontLoadingResult)
 )
 
-func init() {
+func startLoadingChineseFonts() {
 	const (
 		scURL = "https://rpgsnack-e85d3.appspot.com/static/fonts/scregular.subset.ttf"
 		tcURL = "https://rpgsnack-e85d3.appspot.com/static/fonts/tcregular.subset.ttf"
