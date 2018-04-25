@@ -68,14 +68,6 @@ func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
 
 	s.languageDialog = ui.NewDialog((w/consts.TileScale-160)/2+4, 4, 152, 232)
 
-	if sceneManager.MaxPurchaseTier() > 0 {
-		s.updateCreditsButton.Visible = true
-		s.creditButton.Width = 74
-	} else {
-		s.updateCreditsButton.Visible = false
-		s.creditButton.Width = 120
-	}
-
 	for i, l := range sceneManager.Game().Texts.Languages() {
 		i := i // i is captured by the below closure and it is needed to copy here.
 		n := display.Self.Name(l)
@@ -139,6 +131,14 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 	s.restorePurchasesButton.Text = texts.Text(lang.Get(), texts.TextIDRestorePurchases)
 	s.moreGamesButton.Text = texts.Text(lang.Get(), texts.TextIDMoreGames)
 	s.closeButton.Text = texts.Text(lang.Get(), texts.TextIDClose)
+
+	if sceneManager.MaxPurchaseTier() > 0 {
+		s.updateCreditsButton.Visible = true
+		s.creditButton.Width = 74
+	} else {
+		s.updateCreditsButton.Visible = false
+		s.creditButton.Width = 120
+	}
 
 	if s.waitingRequestID != 0 {
 		r := sceneManager.ReceiveResultIfExists(s.waitingRequestID)
