@@ -70,12 +70,10 @@ func init() {
 var scratchPadM sync.Mutex
 
 func DrawTextToScratchPad(str string, scale int, lang language.Tag) {
-	go func() {
-		scratchPadM.Lock()
-		f := face(scale, lang)
-		text.Draw(scratchPad, str, f, 0, 0, color.White)
-		scratchPadM.Unlock()
-	}()
+	scratchPadM.Lock()
+	f := face(scale, lang)
+	text.Draw(scratchPad, str, f, 0, 0, color.White)
+	scratchPadM.Unlock()
 }
 
 func DrawTextLang(screen *ebiten.Image, str string, ox, oy int, scale int, textAlign data.TextAlign, color color.Color, displayTextRuneCount int, lang language.Tag) {
