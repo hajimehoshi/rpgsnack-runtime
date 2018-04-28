@@ -23,10 +23,10 @@ gomobile install -tags="gomobilebuild" -ldflags='-X= github.com/hajimehoshi/rpgs
 
 ```sh
 go run $GOPATH/src/github.com/hajimehoshi/rpgsnack-runtime/tools/testserver/main.go -http=:7800 -basepath=<project local location>
-gomobile install -target=ios -tags="gomobilebuild" -ldflags='-X= github.com/hajimehoshi/rpgsnack-runtime/internal/game.injectedProjectLocation=http://<your machine IP>:7800' -work github.com/hajimehoshi/rpgsnack-runtime
+gomobile build -target=ios -tags="gomobilebuild" -ldflags='-X= github.com/hajimehoshi/rpgsnack-runtime/internal/game.injectedProjectLocation=http://<your machine IP>:7800' -work github.com/hajimehoshi/rpgsnack-runtime
 ```
 
-Then, open the WORK directory as the last command shows, and the open main.xcodeproj. Specify the singing and run it.
+Then, open the `WORK` directory as the last command shows, and the open `main.xcodeproj`. Specify the singing and run it.
 
 ## How to create .framework file for iOS
 
