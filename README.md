@@ -16,14 +16,14 @@ Run `go run main.go /path/to/json/file`
 
 ```sh
 go run $GOPATH/src/github.com/hajimehoshi/rpgsnack-runtime/tools/testserver/main.go -http=:7800 -basepath=<project local location>
-gomobile install -tags="gomobilebuild" -ldflags='-X= github.com/hajimehoshi/rpgsnack-runtime/internal/game.injectedProjectLocation=http://<your machine IP>:7800' github.com/hajimehoshi/rpgsnack-runtime
+gomobile install -tags="gomobilebuild" -ldflags='-X github.com/hajimehoshi/rpgsnack-runtime/internal/game.injectedProjectLocation=http://<your machine IP>:7800' github.com/hajimehoshi/rpgsnack-runtime
 ```
 
 ## How to run on iOS (for testing)
 
 ```sh
 go run $GOPATH/src/github.com/hajimehoshi/rpgsnack-runtime/tools/testserver/main.go -http=:7800 -basepath=<project local location>
-gomobile build -target=ios -tags="gomobilebuild" -ldflags='-X= github.com/hajimehoshi/rpgsnack-runtime/internal/game.injectedProjectLocation=http://<your machine IP>:7800' -work github.com/hajimehoshi/rpgsnack-runtime
+gomobile build -target=ios -tags="gomobilebuild" -ldflags='-X github.com/hajimehoshi/rpgsnack-runtime/internal/game.injectedProjectLocation=http://<your machine IP>:7800' -work github.com/hajimehoshi/rpgsnack-runtime
 ```
 
 Then, open the `WORK` directory as the last command shows, and the open `main.xcodeproj`. Specify the singing and run it.
