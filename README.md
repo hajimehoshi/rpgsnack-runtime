@@ -52,3 +52,9 @@ If you find some crashes, try
 ```
 rm -rf $GOPATH/pkg/*_js
 ```
+
+## How to test msgpack version of the project
+
+1. Install `json2msgpack` (via Homebrew)
+2. Run `json2msgpack -i project.json -o project.msgpack` at the project server
+3. Run the test server (`go run $GOPATH/src/github.com/hajimehoshi/rpgsnack-runtime/tools/testserver/main.go -http=:7800 -basepath=<project local location>`).
