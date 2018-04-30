@@ -25,12 +25,12 @@ import (
 	"github.com/hajimehoshi/ebiten"
 )
 
-func loadImage(path string, bin []uint8, filter ebiten.Filter) (*ebiten.Image, error) {
+func decodeImage(path string, bin []uint8) (*ebiten.Image, error) {
 	img, err := png.Decode(bytes.NewReader(bin))
 	if err != nil {
 		return nil, err
 	}
-	eimg, err := ebiten.NewImageFromImage(img, filter)
+	eimg, err := ebiten.NewImageFromImage(img, ebiten.FilterDefault)
 	if err != nil {
 		return nil, err
 	}
@@ -39,17 +39,35 @@ func loadImage(path string, bin []uint8, filter ebiten.Filter) (*ebiten.Image, e
 
 func GetLocalizeImage(key string, lang language.Tag) *ebiten.Image {
 	base, _ := lang.Base()
-	img, ok := theAssets.images[path.Join("images", key+"_"+base.String()+".png")]
-	if ok {
+	k := path.Join("images", key+"_"+base.String()+".png")
+	if img, ok := theAssets.images[k]; ok {
+		return img
+	}
+	if bin, ok := theAssets.assets[k]; ok {
+		img, err := decodeImage(k, bin)
+		if err != nil {
+			panic(fmt.Sprintf("assets: image decode error: %s, %v", k, err))
+		}
+		theAssets.images[k] = img
 		return img
 	}
 	return GetImage(key + ".png")
 }
 
 func GetImage(key string) *ebiten.Image {
-	img, ok := theAssets.images[path.Join("images", key)]
+	k := path.Join("images", key)
+	img, ok := theAssets.images[k]
 	if !ok {
-		panic(fmt.Sprintf("assets: image %s not found", key))
+		bin, ok := theAssets.assets[k]
+		if !ok {
+			panic(fmt.Sprintf("assets: image not found: %s", k))
+		}
+		var err error
+		img, err = decodeImage(k, bin)
+		if err != nil {
+			panic(fmt.Sprintf("assets: image decode error: %s, %v", k, err))
+		}
+		theAssets.images[k] = img
 	}
 	return img
 }

@@ -15,32 +15,21 @@
 package assets
 
 import (
-	"strings"
-
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 )
 
 var theAssets = &assets{}
 
-func Set(assets map[string][]uint8, metadata map[string]*data.AssetMetadata) error {
+func Set(assets map[string][]byte, metadata map[string]*data.AssetMetadata) error {
 	theAssets.assets = assets
 	theAssets.metadata = metadata
 	theAssets.images = map[string]*ebiten.Image{}
-	for file, bin := range assets {
-		if strings.HasSuffix(file, ".png") {
-			img, err := loadImage(file, bin, ebiten.FilterNearest)
-			if err != nil {
-				return err
-			}
-			theAssets.images[file] = img
-		}
-	}
 	return nil
 }
 
 type assets struct {
-	assets   map[string][]uint8
+	assets   map[string][]byte
 	metadata map[string]*data.AssetMetadata
 	images   map[string]*ebiten.Image
 }
@@ -50,7 +39,7 @@ func Exists(path string) bool {
 	return ok
 }
 
-func GetResource(path string) []uint8 {
+func GetResource(path string) []byte {
 	return theAssets.assets[path]
 }
 
