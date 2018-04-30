@@ -1188,6 +1188,10 @@ func (c *CommandArgsMoveCharacter) DecodeMsgpack(dec *msgpack.Decoder) error {
 			c.Dir = Dir(d.DecodeInt())
 		case "distance":
 			c.Distance = d.DecodeInt()
+		case "valueType":
+			c.ValueType = ValueType(d.DecodeString())
+		case "ignoreCharacters":
+			c.IgnoreCharacters = d.DecodeBool()
 		case "x":
 			c.X = d.DecodeInt()
 		case "y":
