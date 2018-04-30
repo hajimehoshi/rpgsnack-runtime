@@ -1166,6 +1166,12 @@ func (c *CommandArgsMoveCharacter) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EncodeString("distance")
 	e.EncodeInt(c.Distance)
 
+	e.EncodeString("valueType")
+	e.EncodeString(string(c.ValueType))
+
+	e.EncodeString("ignoreCharacters")
+	e.EncodeBool(c.IgnoreCharacters)
+
 	e.EncodeString("x")
 	e.EncodeInt(c.X)
 
@@ -1209,11 +1215,11 @@ func (c *CommandArgsMoveCharacter) DecodeMsgpack(dec *msgpack.Decoder) error {
 }
 
 type CommandArgsTurnCharacter struct {
-	Dir Dir `json:dir msgpack:"dir"`
+	Dir Dir `json:"dir" msgpack:"dir"`
 }
 
 type CommandArgsRotateCharacter struct {
-	Angle int `json:angle msgpack:"angle"`
+	Angle int `json:"angle" msgpack:"angle"`
 }
 
 type CommandArgsSetCharacterProperty struct {
