@@ -44,7 +44,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if err := ebiten.Run(g.Update, sw, sh, game.Scale(), game.Title()); err != nil {
+	if err := ebiten.Run(g.Update, sw, sh, game.Scale(), ""); err != nil {
 		log.Fatal(err)
 	}
 }

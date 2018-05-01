@@ -164,10 +164,6 @@ func (g *Game) draw(screen *ebiten.Image) {
 	g.sceneManager.Draw(screen)
 }
 
-func Title() string {
-	return "Clock of Atonement"
-}
-
 func (g *Game) Size() (int, int) {
 	return g.sceneManager.Size()
 }
