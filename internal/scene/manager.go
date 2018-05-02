@@ -80,9 +80,6 @@ func NewManager(width, height int, requester Requester, game *data.Game, progres
 	}
 	m.blackImage, _ = ebiten.NewImage(16, 16, ebiten.FilterNearest)
 	m.blackImage.Fill(color.Black)
-
-	// TODO: Use an appropriate title
-	ebiten.SetWindowTitle("RPGSnack game")
 	return m
 }
 
@@ -208,14 +205,24 @@ func (m *Manager) MaxPurchaseTier() int {
 
 func (m *Manager) SetLanguage(language language.Tag) language.Tag {
 	language = lang.Normalize(language)
+	found := false
 	for _, l := range m.game.Texts.Languages() {
 		if l == language {
-			lang.Set(language)
-			return language
+			found = true
+			break
 		}
 	}
-	lang.Set(m.game.Texts.Languages()[0])
-	return lang.Get()
+	if !found {
+		language = m.game.Texts.Languages()[0]
+	}
+
+	lang.Set(language)
+	title := m.game.Texts.Get(language, m.game.System.GameName)
+	if title == "" {
+		title = "(No Title)"
+	}
+	ebiten.SetWindowTitle(title)
+	return language
 }
 
 func (m *Manager) GoTo(next scene) {
