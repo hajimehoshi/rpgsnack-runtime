@@ -74,7 +74,7 @@ func Start(widthInDP int, heightInDP int, requester Requester) error {
 	height = int(float64(heightInDP) / scale)
 
 	g := game.New(width, height, requester)
-	if err := mobile.Start(g.Update, width, height, scale, game.Title()); err != nil {
+	if err := mobile.Start(g.Update, width, height, scale, ""); err != nil {
 		return err
 	}
 	theGame = g
