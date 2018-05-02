@@ -100,6 +100,7 @@ func (s *sprite) draw(screen *ebiten.Image) {
 	}
 	op.GeoM.Translate(s.x, s.y)
 	op.ColorM.Scale(1, 1, 1, float64(s.opacity)/255)
+	op.Filter = ebiten.FilterLinear
 	screen.DrawImage(img, op)
 }
 
@@ -109,7 +110,7 @@ type Weather struct {
 }
 
 func New(weatherType data.WeatherType) *Weather {
-	const spriteNum = 20
+	const spriteNum = 25
 
 	sprites := make([]*sprite, spriteNum)
 	for i := range sprites {
