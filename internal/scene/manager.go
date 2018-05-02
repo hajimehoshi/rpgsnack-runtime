@@ -80,6 +80,9 @@ func NewManager(width, height int, requester Requester, game *data.Game, progres
 	}
 	m.blackImage, _ = ebiten.NewImage(16, 16, ebiten.FilterNearest)
 	m.blackImage.Fill(color.Black)
+
+	// TODO: Use an appropriate title
+	ebiten.SetWindowTitle("RPGSnack game")
 	return m
 }
 
