@@ -22,6 +22,7 @@ type System struct {
 	InitialPosition *Position `msgpack:"player"`
 	DefaultLanguage Language  `msgpack:"defaultLanguage"`
 	TitleBGM        BGM       `msgpack:"titleBgm"`
+	GameName        UUID      `msgpack:"gameName"`
 }
 
 func (s *System) UnmarshalJSON(data []uint8) error {

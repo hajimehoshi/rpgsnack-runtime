@@ -65,6 +65,9 @@ func (u *UUID) DecodeMsgpack(dec *msgpack.Decoder) error {
 		return u.UnmarshalText(b)
 	case 16:
 		return u.UnmarshalBinary(b)
+	case 0:
+		*u = UUID(uuid.Nil)
+		return nil
 	default:
 		return fmt.Errorf("data: binary length must be 36 or 16; got %d", len(b))
 	}
