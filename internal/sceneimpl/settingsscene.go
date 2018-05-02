@@ -134,7 +134,7 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 
 	if sceneManager.MaxPurchaseTier() > 0 {
 		s.updateCreditsButton.Visible = true
-		s.creditButton.Width = 74
+		s.creditButton.Width = 76
 	} else {
 		s.updateCreditsButton.Visible = false
 		s.creditButton.Width = 120
