@@ -36,6 +36,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/picture"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/variables"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/weather"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/window"
 )
 
@@ -55,6 +56,7 @@ type Game struct {
 	autoSaveEnabled      bool
 	playerControlEnabled bool
 	inventoryVisible     bool
+	weatherType          data.WeatherType
 	cleared              bool
 
 	lastPlayingBGMName   string
@@ -67,6 +69,7 @@ type Game struct {
 	rand             Rand
 	waitingRequestID int
 	prices           map[string]string // TODO: We want to use https://godoc.org/golang.org/x/text/currency
+	weather          *weather.Weather
 }
 
 func generateDefaultRand() Rand {
@@ -126,6 +129,9 @@ func (g *Game) EncodeMsgpack(enc *msgpack.Encoder) error {
 
 	e.EncodeString("inventoryVisible")
 	e.EncodeBool(g.inventoryVisible)
+
+	e.EncodeString("weatherType")
+	e.EncodeString(string(g.weatherType))
 
 	e.EncodeString("cleared")
 	e.EncodeBool(g.cleared)
@@ -215,6 +221,8 @@ func (g *Game) DecodeMsgpack(dec *msgpack.Decoder) error {
 			g.playerControlEnabled = d.DecodeBool()
 		case "inventoryVisible":
 			g.inventoryVisible = d.DecodeBool()
+		case "weatherType":
+			g.SetWeather(data.WeatherType(d.DecodeString()))
 		case "cleared":
 			g.cleared = d.DecodeBool()
 		case "lastPlayingBGMName":
@@ -289,6 +297,7 @@ func (g *Game) Update(sceneManager *scene.Manager) error {
 			g.waitingRequestID = 0
 		}
 	}
+	g.weather.Update()
 	g.screen.Update()
 	playerY := 0
 	if g.currentMap.player != nil {
@@ -497,6 +506,10 @@ func (g *Game) RandomValue(min, max int) int {
 	return min + g.rand.Intn(max-min)
 }
 
+func (g *Game) DrawWeather(screen *ebiten.Image) {
+	g.weather.Draw(screen)
+}
+
 func (g *Game) DrawScreen(screen *ebiten.Image, tilesImage *ebiten.Image, op *ebiten.DrawImageOptions) {
 	g.screen.Draw(screen, tilesImage, op)
 }
@@ -614,6 +627,18 @@ func (g *Game) StartItemCommands(itemID int) {
 
 func (g *Game) SetPlayerDir(dir data.Dir) {
 	g.currentMap.player.SetDir(dir)
+}
+
+func (g *Game) SetWeather(weatherType data.WeatherType) {
+	if g.weatherType == weatherType {
+		return
+	}
+	g.weatherType = weatherType
+	if weatherType == data.WeatherTypeNone {
+		g.weather = nil
+		return
+	}
+	g.weather = weather.New(weatherType)
 }
 
 func (g *Game) TransferPlayerImmediately(roomID, x, y int, interpreter *Interpreter) {

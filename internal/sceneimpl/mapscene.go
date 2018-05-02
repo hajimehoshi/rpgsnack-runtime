@@ -588,6 +588,8 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		m.gameState.Map().DrawFullscreenImage(m.tilesImage, assets.GetImage("foregrounds/"+foreground+".png"), 0, m.offsetY/consts.TileScale)
 	}
 
+	m.gameState.DrawWeather(m.tilesImage)
+
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(consts.TileScale, consts.TileScale)
 	op.GeoM.Translate(float64(m.offsetX), 0)

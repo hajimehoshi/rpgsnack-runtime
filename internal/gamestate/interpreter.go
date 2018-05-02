@@ -575,7 +575,8 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		gameState.SetPlayerControlEnabled(args.Enabled)
 		i.commandIterator.Advance()
 	case data.CommandNameWeather:
-		// TODO: Implement this command in the future.
+		args := c.Args.(*data.CommandArgsWeather)
+		gameState.SetWeather(args.Type)
 		i.commandIterator.Advance()
 	case data.CommandNameGotoTitle:
 		return false, GoToTitle
