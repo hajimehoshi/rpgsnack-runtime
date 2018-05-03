@@ -252,21 +252,21 @@ func (m *Manager) ReceiveResultIfExists(id int) *RequestResult {
 	return nil
 }
 
-func (m *Manager) FinishUnlockAchievement(id int) {
+func (m *Manager) RespondUnlockAchievement(id int) {
 	m.resultCh <- RequestResult{
 		ID:   id,
 		Type: RequestTypeUnlockAchievement,
 	}
 }
 
-func (m *Manager) FinishSaveProgress(id int) {
+func (m *Manager) RespondSaveProgress(id int) {
 	m.resultCh <- RequestResult{
 		ID:   id,
 		Type: RequestTypeSaveProgress,
 	}
 }
 
-func (m *Manager) FinishPurchase(id int, success bool, purchases []byte) {
+func (m *Manager) RespondPurchase(id int, success bool, purchases []byte) {
 	m.resultCh <- RequestResult{
 		ID:        id,
 		Type:      RequestTypePurchase,
@@ -275,7 +275,7 @@ func (m *Manager) FinishPurchase(id int, success bool, purchases []byte) {
 	}
 }
 
-func (m *Manager) FinishShowShop(id int, success bool, purchases []byte) {
+func (m *Manager) RespondShowShop(id int, success bool, purchases []byte) {
 	m.resultCh <- RequestResult{
 		ID:        id,
 		Type:      RequestTypeShowShop,
@@ -284,7 +284,7 @@ func (m *Manager) FinishShowShop(id int, success bool, purchases []byte) {
 	}
 }
 
-func (m *Manager) FinishRestorePurchases(id int, success bool, purchases []byte) {
+func (m *Manager) RespondRestorePurchases(id int, success bool, purchases []byte) {
 	m.resultCh <- RequestResult{
 		ID:        id,
 		Type:      RequestTypeRestorePurchases,
@@ -293,14 +293,14 @@ func (m *Manager) FinishRestorePurchases(id int, success bool, purchases []byte)
 	}
 }
 
-func (m *Manager) FinishInterstitialAds(id int) {
+func (m *Manager) RespondInterstitialAds(id int) {
 	m.resultCh <- RequestResult{
 		ID:   id,
 		Type: RequestTypeInterstitialAds,
 	}
 }
 
-func (m *Manager) FinishRewardedAds(id int, success bool) {
+func (m *Manager) RespondRewardedAds(id int, success bool) {
 	m.resultCh <- RequestResult{
 		ID:        id,
 		Type:      RequestTypeRewardedAds,
@@ -308,28 +308,28 @@ func (m *Manager) FinishRewardedAds(id int, success bool) {
 	}
 }
 
-func (m *Manager) FinishOpenLink(id int) {
+func (m *Manager) RespondOpenLink(id int) {
 	m.resultCh <- RequestResult{
 		ID:   id,
 		Type: RequestTypeOpenLink,
 	}
 }
 
-func (m *Manager) FinishShareImage(id int) {
+func (m *Manager) RespondShareImage(id int) {
 	m.resultCh <- RequestResult{
 		ID:   id,
 		Type: RequestTypeShareImage,
 	}
 }
 
-func (m *Manager) FinishChangeLanguage(id int) {
+func (m *Manager) RespondChangeLanguage(id int) {
 	m.resultCh <- RequestResult{
 		ID:   id,
 		Type: RequestTypeChangeLanguage,
 	}
 }
 
-func (m *Manager) FinishGetIAPPrices(id int, success bool, prices []byte) {
+func (m *Manager) RespondGetIAPPrices(id int, success bool, prices []byte) {
 	m.resultCh <- RequestResult{
 		ID:        id,
 		Type:      RequestTypeIAPPrices,

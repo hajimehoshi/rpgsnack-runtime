@@ -32,13 +32,13 @@ type Requester struct {
 
 func (m *Requester) RequestUnlockAchievement(requestID int, achievementID int) {
 	log.Printf("request unlock achievement: requestID: %d, achievementID: %d", requestID, achievementID)
-	m.game.FinishUnlockAchievement(requestID)
+	m.game.RespondUnlockAchievement(requestID)
 }
 
 func (m *Requester) RequestSaveProgress(requestID int, data []uint8) {
 	log.Printf("request save progress: requestID: %d", requestID)
 	go func() {
-		defer m.game.FinishSaveProgress(requestID)
+		defer m.game.RespondSaveProgress(requestID)
 
 		f, err := os.Create(datapkg.SavePath())
 		if err != nil {
@@ -58,7 +58,7 @@ func (m *Requester) RequestPurchase(requestID int, productID string) {
 	log.Printf("request purchase: requestID: %d, productID: %s", requestID, productID)
 	go func() {
 		result := ([]uint8)("[]")
-		defer m.game.FinishPurchase(requestID, true, result)
+		defer m.game.RespondPurchase(requestID, true, result)
 
 		var purchases []string
 		b, err := ioutil.ReadFile(datapkg.PurchasesPath())
@@ -93,19 +93,19 @@ func (m *Requester) RequestPurchase(requestID int, productID string) {
 func (m *Requester) RequestShowShop(requestID int, data string) {
 	log.Printf("request to ShowShop")
 	//TODO Mock purchase selection
-	m.game.FinishShowShop(requestID, true, []byte("[\"bronze_support\"]"))
+	m.game.RespondShowShop(requestID, true, []byte("[\"bronze_support\"]"))
 }
 
 func (m *Requester) RequestRestorePurchases(requestID int) {
 	log.Printf("request restore purchase: requestID: %d", requestID)
-	m.game.FinishRestorePurchases(requestID, true, nil)
+	m.game.RespondRestorePurchases(requestID, true, nil)
 }
 
 func (m *Requester) RequestInterstitialAds(requestID int) {
 	log.Printf("request interstitial ads: requestID: %d", requestID)
 	go func() {
 		time.Sleep(time.Second)
-		m.game.FinishInterstitialAds(requestID)
+		m.game.RespondInterstitialAds(requestID)
 	}()
 }
 
@@ -113,24 +113,24 @@ func (m *Requester) RequestRewardedAds(requestID int) {
 	log.Printf("request rewarded ads: requestID: %d", requestID)
 	go func() {
 		time.Sleep(time.Second)
-		m.game.FinishRewardedAds(requestID, true)
+		m.game.RespondRewardedAds(requestID, true)
 	}()
 }
 
 func (m *Requester) RequestOpenLink(requestID int, linkType string, data string) {
 	log.Printf("request open link: requestID: %d %s %s", requestID, linkType, data)
-	m.game.FinishOpenLink(requestID)
+	m.game.RespondOpenLink(requestID)
 }
 
 func (m *Requester) RequestShareImage(requestID int, title string, message string, image string) {
 	log.Printf("request share image: requestID: %d, title: %s, message: %s, image: %s", requestID, title, message, image)
-	m.game.FinishShareImage(requestID)
+	m.game.RespondShareImage(requestID)
 }
 
 func (m *Requester) RequestChangeLanguage(requestID int, lang string) {
 	log.Printf("request change language: requestID: %d, lang: %s", requestID, lang)
 	go func() {
-		defer m.game.FinishChangeLanguage(requestID)
+		defer m.game.RespondChangeLanguage(requestID)
 		f, err := os.Create(datapkg.LanguagePath())
 		if err != nil {
 			// TODO: Should pass err instead of string?
@@ -149,7 +149,7 @@ func (m *Requester) RequestChangeLanguage(requestID int, lang string) {
 
 func (m *Requester) RequestGetIAPPrices(requestID int) {
 	log.Printf("request IAP prices: requestID: %d", requestID)
-	m.game.FinishGetIAPPrices(requestID, true, []byte("{\"ads_removal\": \"$0.99\"}"))
+	m.game.RespondGetIAPPrices(requestID, true, []byte("{\"ads_removal\": \"$0.99\"}"))
 }
 
 func (m *Requester) RequestTerminateGame() {

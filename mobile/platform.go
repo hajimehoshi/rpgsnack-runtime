@@ -22,63 +22,43 @@ import (
 
 type Requester scene.Requester
 
-func FinishUnlockAchievement(id int) (err error) {
+func RespondUnlockAchievement(id int) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			ok := false
 			err, ok = r.(error)
 			if !ok {
-				err = fmt.Errorf("error at FinishUnlockAchievement: %v", err)
+				err = fmt.Errorf("error at RespondUnlockAchievement: %v", err)
 			}
 		}
 	}()
 
-	theGame.FinishUnlockAchievement(id)
+	theGame.RespondUnlockAchievement(id)
 	return nil
 }
 
-func FinishSaveProgress(id int) (err error) {
+func RespondSaveProgress(id int) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			ok := false
 			err, ok = r.(error)
 			if !ok {
-				err = fmt.Errorf("error at FinishSaveProgress: %v", err)
+				err = fmt.Errorf("error at RespondSaveProgress: %v", err)
 			}
 		}
 	}()
 
-	theGame.FinishSaveProgress(id)
+	theGame.RespondSaveProgress(id)
 	return nil
 }
 
-func FinishPurchase(id int, success bool, purchases []uint8) (err error) {
+func RespondPurchase(id int, success bool, purchases []uint8) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			ok := false
 			err, ok = r.(error)
 			if !ok {
-				err = fmt.Errorf("error at FinishPurchase: %v", err)
-			}
-		}
-	}()
-
-	var p []uint8
-	if purchases != nil {
-		p = make([]uint8, len(purchases))
-		copy(p, purchases)
-	}
-	theGame.FinishPurchase(id, success, p)
-	return nil
-}
-
-func FinishShowShop(id int, success bool, purchases []uint8) (err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			ok := false
-			err, ok = r.(error)
-			if !ok {
-				err = fmt.Errorf("error at FinishShowShop: %v", err)
+				err = fmt.Errorf("error at RespondPurchase: %v", err)
 			}
 		}
 	}()
@@ -88,17 +68,17 @@ func FinishShowShop(id int, success bool, purchases []uint8) (err error) {
 		p = make([]uint8, len(purchases))
 		copy(p, purchases)
 	}
-	theGame.FinishShowShop(id, success, p)
+	theGame.RespondPurchase(id, success, p)
 	return nil
 }
 
-func FinishRestorePurchases(id int, success bool, purchases []uint8) (err error) {
+func RespondShowShop(id int, success bool, purchases []uint8) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			ok := false
 			err, ok = r.(error)
 			if !ok {
-				err = fmt.Errorf("error at FinishRestorePurchases: %v", err)
+				err = fmt.Errorf("error at RespondShowShop: %v", err)
 			}
 		}
 	}()
@@ -108,92 +88,112 @@ func FinishRestorePurchases(id int, success bool, purchases []uint8) (err error)
 		p = make([]uint8, len(purchases))
 		copy(p, purchases)
 	}
-	theGame.FinishRestorePurchases(id, success, p)
+	theGame.RespondShowShop(id, success, p)
 	return nil
 }
 
-func FinishInterstitialAds(id int) (err error) {
+func RespondRestorePurchases(id int, success bool, purchases []uint8) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			ok := false
 			err, ok = r.(error)
 			if !ok {
-				err = fmt.Errorf("error at FinishInterstitialAds: %v", err)
+				err = fmt.Errorf("error at RespondRestorePurchases: %v", err)
 			}
 		}
 	}()
 
-	theGame.FinishInterstitialAds(id)
+	var p []uint8
+	if purchases != nil {
+		p = make([]uint8, len(purchases))
+		copy(p, purchases)
+	}
+	theGame.RespondRestorePurchases(id, success, p)
 	return nil
 }
 
-func FinishRewardedAds(id int, success bool) (err error) {
+func RespondInterstitialAds(id int) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			ok := false
 			err, ok = r.(error)
 			if !ok {
-				err = fmt.Errorf("error at FinishRemoteAds: %v", err)
+				err = fmt.Errorf("error at RespondInterstitialAds: %v", err)
 			}
 		}
 	}()
 
-	theGame.FinishRewardedAds(id, success)
+	theGame.RespondInterstitialAds(id)
 	return nil
 }
 
-func FinishOpenLink(id int) (err error) {
+func RespondRewardedAds(id int, success bool) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			ok := false
 			err, ok = r.(error)
 			if !ok {
-				err = fmt.Errorf("error at FinishOpenLinks: %v", err)
+				err = fmt.Errorf("error at RespondRemoteAds: %v", err)
 			}
 		}
 	}()
 
-	theGame.FinishOpenLink(id)
+	theGame.RespondRewardedAds(id, success)
 	return nil
 }
 
-func FinishShareImage(id int) (err error) {
+func RespondOpenLink(id int) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			ok := false
 			err, ok = r.(error)
 			if !ok {
-				err = fmt.Errorf("error at FinishShareImage: %v", err)
+				err = fmt.Errorf("error at RespondOpenLinks: %v", err)
 			}
 		}
 	}()
 
-	theGame.FinishShareImage(id)
+	theGame.RespondOpenLink(id)
 	return nil
 }
 
-func FinishChangeLanguage(id int) (err error) {
+func RespondShareImage(id int) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			ok := false
 			err, ok = r.(error)
 			if !ok {
-				err = fmt.Errorf("error at FinishChangeLanguage: %v", err)
+				err = fmt.Errorf("error at RespondShareImage: %v", err)
 			}
 		}
 	}()
 
-	theGame.FinishChangeLanguage(id)
+	theGame.RespondShareImage(id)
 	return nil
 }
 
-func FinishGetIAPPrices(id int, success bool, prices []uint8) (err error) {
+func RespondChangeLanguage(id int) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			ok := false
 			err, ok = r.(error)
 			if !ok {
-				err = fmt.Errorf("error at FinishGetIAPPrices: %v", err)
+				err = fmt.Errorf("error at RespondChangeLanguage: %v", err)
+			}
+		}
+	}()
+
+	theGame.RespondChangeLanguage(id)
+	return nil
+}
+
+func RespondGetIAPPrices(id int, success bool, prices []uint8) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			ok := false
+			err, ok = r.(error)
+			if !ok {
+				err = fmt.Errorf("error at RespondGetIAPPrices: %v", err)
 			}
 		}
 	}()
@@ -203,7 +203,7 @@ func FinishGetIAPPrices(id int, success bool, prices []uint8) (err error) {
 		p = make([]uint8, len(prices))
 		copy(p, prices)
 	}
-	theGame.FinishGetIAPPrices(id, success, p)
+	theGame.RespondGetIAPPrices(id, success, p)
 	return nil
 }
 

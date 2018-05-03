@@ -168,48 +168,48 @@ func (g *Game) Size() (int, int) {
 	return g.sceneManager.Size()
 }
 
-func (g *Game) FinishUnlockAchievement(id int) {
-	g.sceneManager.FinishUnlockAchievement(id)
+func (g *Game) RespondUnlockAchievement(id int) {
+	g.sceneManager.RespondUnlockAchievement(id)
 }
 
-func (g *Game) FinishSaveProgress(id int) {
-	g.sceneManager.FinishSaveProgress(id)
+func (g *Game) RespondSaveProgress(id int) {
+	g.sceneManager.RespondSaveProgress(id)
 }
 
-func (g *Game) FinishPurchase(id int, success bool, purchases []uint8) {
-	g.sceneManager.FinishPurchase(id, success, purchases)
+func (g *Game) RespondPurchase(id int, success bool, purchases []uint8) {
+	g.sceneManager.RespondPurchase(id, success, purchases)
 }
 
-func (g *Game) FinishShowShop(id int, success bool, purchases []uint8) {
-	g.sceneManager.FinishShowShop(id, success, purchases)
+func (g *Game) RespondShowShop(id int, success bool, purchases []uint8) {
+	g.sceneManager.RespondShowShop(id, success, purchases)
 }
 
-func (g *Game) FinishRestorePurchases(id int, success bool, purchases []uint8) {
-	g.sceneManager.FinishRestorePurchases(id, success, purchases)
+func (g *Game) RespondRestorePurchases(id int, success bool, purchases []uint8) {
+	g.sceneManager.RespondRestorePurchases(id, success, purchases)
 }
 
-func (g *Game) FinishInterstitialAds(id int) {
-	g.sceneManager.FinishInterstitialAds(id)
+func (g *Game) RespondInterstitialAds(id int) {
+	g.sceneManager.RespondInterstitialAds(id)
 }
 
-func (g *Game) FinishRewardedAds(id int, success bool) {
-	g.sceneManager.FinishRewardedAds(id, success)
+func (g *Game) RespondRewardedAds(id int, success bool) {
+	g.sceneManager.RespondRewardedAds(id, success)
 }
 
-func (g *Game) FinishOpenLink(id int) {
-	g.sceneManager.FinishOpenLink(id)
+func (g *Game) RespondOpenLink(id int) {
+	g.sceneManager.RespondOpenLink(id)
 }
 
-func (g *Game) FinishShareImage(id int) {
-	g.sceneManager.FinishShareImage(id)
+func (g *Game) RespondShareImage(id int) {
+	g.sceneManager.RespondShareImage(id)
 }
 
-func (g *Game) FinishChangeLanguage(id int) {
-	g.sceneManager.FinishChangeLanguage(id)
+func (g *Game) RespondChangeLanguage(id int) {
+	g.sceneManager.RespondChangeLanguage(id)
 }
 
-func (g *Game) FinishGetIAPPrices(id int, success bool, prices []uint8) {
-	g.sceneManager.FinishGetIAPPrices(id, success, prices)
+func (g *Game) RespondGetIAPPrices(id int, success bool, prices []uint8) {
+	g.sceneManager.RespondGetIAPPrices(id, success, prices)
 }
 
 func (g *Game) SetPlatformData(key scene.PlatformDataKey, value string) {

@@ -29,49 +29,49 @@ type Requester struct {
 
 func (m *Requester) RequestUnlockAchievement(requestID int, achievementID int) {
 	log.Printf("request unlock achievement: requestID: %d, achievementID: %d", requestID, achievementID)
-	m.game.FinishUnlockAchievement(requestID)
+	m.game.RespondUnlockAchievement(requestID)
 }
 
 func (m *Requester) RequestSaveProgress(requestID int, data []uint8) {
 	log.Printf("request save progress: requestID: %d", requestID)
 	js.Global.Get("localStorage").Call("setItem", "progress", base64.StdEncoding.EncodeToString(data))
-	m.game.FinishSaveProgress(requestID)
+	m.game.RespondSaveProgress(requestID)
 }
 
 func (m *Requester) RequestPurchase(requestID int, productID string) {
 	log.Printf("request purchase: requestID: %d, productID: %s", requestID, productID)
-	m.game.FinishPurchase(requestID, true, nil)
+	m.game.RespondPurchase(requestID, true, nil)
 }
 
 func (m *Requester) RequestShowShop(requestID int, data string) {
 	log.Printf("request to ShowShop")
 	//TODO Show mock shop UI
-	m.game.FinishShowShop(requestID, true, nil)
+	m.game.RespondShowShop(requestID, true, nil)
 }
 
 func (m *Requester) RequestRestorePurchases(requestID int) {
 	log.Printf("request restore purchase: requestID: %d", requestID)
-	m.game.FinishRestorePurchases(requestID, true, nil)
+	m.game.RespondRestorePurchases(requestID, true, nil)
 }
 
 func (m *Requester) RequestInterstitialAds(requestID int) {
 	log.Printf("request interstitial ads: requestID: %d", requestID)
-	m.game.FinishInterstitialAds(requestID)
+	m.game.RespondInterstitialAds(requestID)
 }
 
 func (m *Requester) RequestRewardedAds(requestID int) {
 	log.Printf("request rewarded ads: requestID: %d", requestID)
-	m.game.FinishRewardedAds(requestID, true)
+	m.game.RespondRewardedAds(requestID, true)
 }
 
 func (m *Requester) RequestOpenLink(requestID int, linkType string, data string) {
 	log.Printf("request open link: requestID: %d %s %s", requestID, linkType, data)
-	m.game.FinishOpenLink(requestID)
+	m.game.RespondOpenLink(requestID)
 }
 
 func (m *Requester) RequestShareImage(requestID int, title string, message string, image string) {
 	log.Printf("request share image: requestID: %d, title: %s, message: %s, image: %s", requestID, title, message, image)
-	m.game.FinishShareImage(requestID)
+	m.game.RespondShareImage(requestID)
 }
 
 func (m *Requester) RequestTerminateGame() {
@@ -80,12 +80,12 @@ func (m *Requester) RequestTerminateGame() {
 
 func (m *Requester) RequestChangeLanguage(requestID int, lang string) {
 	log.Printf("request change language: requestID: %d, lang: %s", requestID, lang)
-	m.game.FinishChangeLanguage(requestID)
+	m.game.RespondChangeLanguage(requestID)
 }
 
 func (m *Requester) RequestGetIAPPrices(requestID int) {
 	log.Printf("request IAP prices: requestID: %d", requestID)
-	m.game.FinishGetIAPPrices(requestID, true, []byte("{\"ads_removal\": \"$0.99\"}"))
+	m.game.RespondGetIAPPrices(requestID, true, []byte("{\"ads_removal\": \"$0.99\"}"))
 }
 
 func (m *Requester) RequestReview() {
