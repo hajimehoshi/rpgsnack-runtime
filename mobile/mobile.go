@@ -29,19 +29,7 @@ var (
 	startCalled = make(chan struct{})
 )
 
-func SetData(project []byte, assets []byte, progress []byte, purchases []byte, language string) (err error) {
-	<-startCalled
-
-	defer func() {
-		if r := recover(); r != nil {
-			ok := false
-			err, ok = r.(error)
-			if !ok {
-				err = fmt.Errorf("error at SetData: %v", err)
-			}
-		}
-	}()
-
+func setData(project []byte, assets []byte, progress []byte, purchases []byte, language string) {
 	// Copy data here since the given data is just a reference and might be
 	// broken in the mobile side.
 	p := make([]byte, len(project))
@@ -63,7 +51,6 @@ func SetData(project []byte, assets []byte, progress []byte, purchases []byte, l
 	}
 
 	data.SetData(p, a, p1, p2, language)
-	return nil
 }
 
 func IsRunning() bool {
@@ -75,7 +62,7 @@ func IsRunning() bool {
 	}
 }
 
-func Start(widthInDP int, heightInDP int, requester Requester) (err error) {
+func Start(widthInDP int, heightInDP int, requester Requester, project []byte, assets []byte, progress []byte, purchases []byte, language string) (err error) {
 	defer func() {
 		close(startCalled)
 	}()
@@ -89,6 +76,8 @@ func Start(widthInDP int, heightInDP int, requester Requester) (err error) {
 			}
 		}
 	}()
+
+	setData(project, assets, progress, purchases, language)
 
 	const (
 		minWidth  = 480
