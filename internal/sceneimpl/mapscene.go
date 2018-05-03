@@ -517,7 +517,7 @@ func (m *MapScene) drawTile(tile int, op *ebiten.DrawImageOptions, i int, j int)
 	r := image.Rect(sx, sy, sx+consts.TileSize, sy+consts.TileSize)
 	op.SourceRect = &r
 	dx := i * consts.TileSize
-	dy := j * consts.TileSize
+	dy := j*consts.TileSize + m.offsetY/consts.TileScale
 	// op is created outside of this function and other parameters than GeoM
 	// and SourceRect are not modified so far.
 	op.GeoM.Reset()
@@ -539,7 +539,7 @@ func (m *MapScene) drawAutoTile(tile int, op *ebiten.DrawImageOptions, i int, j 
 		r := image.Rect(sx, sy, sx+consts.MiniTileSize, sy+consts.MiniTileSize)
 		op.SourceRect = &r
 		dx := i*consts.TileSize + index%2*consts.MiniTileSize
-		dy := j*consts.TileSize + index/2*consts.MiniTileSize
+		dy := j*consts.TileSize + index/2*consts.MiniTileSize + m.offsetY/consts.TileScale
 		// op is created outside of this function and other parameters
 		// than GeoM and SourceRect are not modified so far.
 		op.GeoM.Reset()
@@ -566,7 +566,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	m.tilesImage.Fill(color.Black)
 
 	if background := m.gameState.Map().Background(m.gameState); background != "" {
-		m.gameState.Map().DrawFullscreenImage(m.tilesImage, assets.GetImage("backgrounds/"+background+".png"))
+		m.gameState.Map().DrawFullscreenImage(m.tilesImage, assets.GetImage("backgrounds/"+background+".png"), 0, m.offsetY/consts.TileScale)
 	}
 	for k := 0; k < 3; k++ {
 		var p data.Priority
@@ -582,17 +582,17 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		}
 
 		m.drawTiles(p)
-		m.gameState.Map().DrawCharacters(m.tilesImage, p)
+		m.gameState.Map().DrawCharacters(m.tilesImage, p, 0, m.offsetY/consts.TileScale)
 	}
 	if foreground := m.gameState.Map().Foreground(m.gameState); foreground != "" {
-		m.gameState.Map().DrawFullscreenImage(m.tilesImage, assets.GetImage("foregrounds/"+foreground+".png"))
+		m.gameState.Map().DrawFullscreenImage(m.tilesImage, assets.GetImage("foregrounds/"+foreground+".png"), 0, m.offsetY/consts.TileScale)
 	}
 
 	m.gameState.DrawWeather(m.tilesImage)
 
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(consts.TileScale, consts.TileScale)
-	op.GeoM.Translate(float64(m.offsetX), float64(m.offsetY))
+	op.GeoM.Translate(float64(m.offsetX), 0)
 	m.gameState.DrawScreen(screen, m.tilesImage, op)
 	m.gameState.DrawPictures(screen, m.offsetX, m.offsetY)
 

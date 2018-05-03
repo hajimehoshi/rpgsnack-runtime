@@ -952,7 +952,7 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, gameState *G
 	return true
 }
 
-func (m *Map) DrawFullscreenImage(screen *ebiten.Image, texture *ebiten.Image) {
+func (m *Map) DrawFullscreenImage(screen *ebiten.Image, texture *ebiten.Image, offsetX, offsetY int) {
 	op := &ebiten.DrawImageOptions{}
 	w, h := texture.Size()
 	diff := h - consts.TileYNum*consts.TileSize
@@ -975,11 +975,11 @@ func (m *Map) DrawFullscreenImage(screen *ebiten.Image, texture *ebiten.Image) {
 		op.SourceRect = &r
 	}
 
-	op.GeoM.Translate(0, -float64(diff))
+	op.GeoM.Translate(float64(offsetX), float64(offsetY)-float64(diff))
 	screen.DrawImage(texture, op)
 }
 
-func (m *Map) DrawCharacters(screen *ebiten.Image, priority data.Priority) {
+func (m *Map) DrawCharacters(screen *ebiten.Image, priority data.Priority, offsetX, offsetY int) {
 	chars := []*character.Character{}
 	for _, e := range m.events {
 		page := m.currentPage(e)
@@ -1000,7 +1000,7 @@ func (m *Map) DrawCharacters(screen *ebiten.Image, priority data.Priority) {
 		return yi < yj
 	})
 	for _, c := range chars {
-		c.Draw(screen)
+		c.Draw(screen, offsetX, offsetY)
 	}
 }
 
