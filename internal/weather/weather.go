@@ -15,6 +15,7 @@
 package weather
 
 import (
+	"image/color"
 	"math"
 	"math/rand"
 
@@ -31,11 +32,7 @@ var (
 
 func init() {
 	rainImage, _ = ebiten.NewImage(1, 20, ebiten.FilterDefault)
-	pix := make([]byte, 4*1*20)
-	for i := range pix {
-		pix[i] = 0xff
-	}
-	rainImage.ReplacePixels(pix)
+	rainImage.Fill(color.White)
 }
 
 func init() {
