@@ -16,6 +16,7 @@ package mobile
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/hajimehoshi/ebiten/mobile"
 
@@ -26,9 +27,13 @@ import (
 var (
 	running bool
 	theGame *game.Game
+	m       sync.Mutex
 )
 
 func SetData(project []byte, assets []byte, progress []byte, purchases []byte, language string) (err error) {
+	m.Lock()
+	defer m.Unlock()
+
 	defer func() {
 		if r := recover(); r != nil {
 			ok := false
@@ -64,10 +69,16 @@ func SetData(project []byte, assets []byte, progress []byte, purchases []byte, l
 }
 
 func IsRunning() bool {
+	m.Lock()
+	defer m.Unlock()
+
 	return running
 }
 
 func Start(widthInDP int, heightInDP int, requester Requester) (err error) {
+	m.Lock()
+	defer m.Unlock()
+
 	defer func() {
 		if r := recover(); r != nil {
 			ok := false
@@ -105,6 +116,9 @@ func Start(widthInDP int, heightInDP int, requester Requester) (err error) {
 }
 
 func Update() (err error) {
+	m.Lock()
+	defer m.Unlock()
+
 	defer func() {
 		if r := recover(); r != nil {
 			ok := false
