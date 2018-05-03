@@ -16,7 +16,6 @@ package mobile
 
 import (
 	"fmt"
-	"sync"
 
 	"github.com/hajimehoshi/ebiten/mobile"
 
@@ -25,14 +24,13 @@ import (
 )
 
 var (
-	running bool
 	theGame *game.Game
-	m       sync.Mutex
+
+	startCalled = make(chan struct{})
 )
 
 func SetData(project []byte, assets []byte, progress []byte, purchases []byte, language string) (err error) {
-	m.Lock()
-	defer m.Unlock()
+	<-startCalled
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -69,15 +67,18 @@ func SetData(project []byte, assets []byte, progress []byte, purchases []byte, l
 }
 
 func IsRunning() bool {
-	m.Lock()
-	defer m.Unlock()
-
-	return running
+	select {
+	case <-startCalled:
+		return true
+	default:
+		return false
+	}
 }
 
 func Start(widthInDP int, heightInDP int, requester Requester) (err error) {
-	m.Lock()
-	defer m.Unlock()
+	defer func() {
+		close(startCalled)
+	}()
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -93,8 +94,6 @@ func Start(widthInDP int, heightInDP int, requester Requester) (err error) {
 		minWidth  = 480
 		minHeight = 672
 	)
-
-	running = true
 
 	width := 0
 	height := 0
@@ -116,8 +115,7 @@ func Start(widthInDP int, heightInDP int, requester Requester) (err error) {
 }
 
 func Update() (err error) {
-	m.Lock()
-	defer m.Unlock()
+	<-startCalled
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -132,9 +130,11 @@ func Update() (err error) {
 }
 
 func UpdateTouchesOnAndroid(action int, id int, x, y int) {
+	<-startCalled
 	mobile.UpdateTouchesOnAndroid(action, id, x, y)
 }
 
 func UpdateTouchesOnIOS(phase int, ptr int64, x, y int) {
+	<-startCalled
 	mobile.UpdateTouchesOnIOS(phase, ptr, x, y)
 }

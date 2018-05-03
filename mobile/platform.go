@@ -23,6 +23,8 @@ import (
 type Requester scene.Requester
 
 func RespondUnlockAchievement(id int) (err error) {
+	<-startCalled
+
 	defer func() {
 		if r := recover(); r != nil {
 			ok := false
@@ -38,6 +40,8 @@ func RespondUnlockAchievement(id int) (err error) {
 }
 
 func RespondSaveProgress(id int) (err error) {
+	<-startCalled
+
 	defer func() {
 		if r := recover(); r != nil {
 			ok := false
@@ -53,6 +57,8 @@ func RespondSaveProgress(id int) (err error) {
 }
 
 func RespondPurchase(id int, success bool, purchases []uint8) (err error) {
+	<-startCalled
+
 	defer func() {
 		if r := recover(); r != nil {
 			ok := false
@@ -73,6 +79,8 @@ func RespondPurchase(id int, success bool, purchases []uint8) (err error) {
 }
 
 func RespondShowShop(id int, success bool, purchases []uint8) (err error) {
+	<-startCalled
+
 	defer func() {
 		if r := recover(); r != nil {
 			ok := false
@@ -93,6 +101,8 @@ func RespondShowShop(id int, success bool, purchases []uint8) (err error) {
 }
 
 func RespondRestorePurchases(id int, success bool, purchases []uint8) (err error) {
+	<-startCalled
+
 	defer func() {
 		if r := recover(); r != nil {
 			ok := false
@@ -113,6 +123,8 @@ func RespondRestorePurchases(id int, success bool, purchases []uint8) (err error
 }
 
 func RespondInterstitialAds(id int) (err error) {
+	<-startCalled
+
 	defer func() {
 		if r := recover(); r != nil {
 			ok := false
@@ -128,6 +140,8 @@ func RespondInterstitialAds(id int) (err error) {
 }
 
 func RespondRewardedAds(id int, success bool) (err error) {
+	<-startCalled
+
 	defer func() {
 		if r := recover(); r != nil {
 			ok := false
@@ -143,6 +157,8 @@ func RespondRewardedAds(id int, success bool) (err error) {
 }
 
 func RespondOpenLink(id int) (err error) {
+	<-startCalled
+
 	defer func() {
 		if r := recover(); r != nil {
 			ok := false
@@ -158,6 +174,8 @@ func RespondOpenLink(id int) (err error) {
 }
 
 func RespondShareImage(id int) (err error) {
+	<-startCalled
+
 	defer func() {
 		if r := recover(); r != nil {
 			ok := false
@@ -173,6 +191,8 @@ func RespondShareImage(id int) (err error) {
 }
 
 func RespondChangeLanguage(id int) (err error) {
+	<-startCalled
+
 	defer func() {
 		if r := recover(); r != nil {
 			ok := false
@@ -188,6 +208,8 @@ func RespondChangeLanguage(id int) (err error) {
 }
 
 func RespondGetIAPPrices(id int, success bool, prices []uint8) (err error) {
+	<-startCalled
+
 	defer func() {
 		if r := recover(); r != nil {
 			ok := false
@@ -208,6 +230,8 @@ func RespondGetIAPPrices(id int, success bool, prices []uint8) (err error) {
 }
 
 func SetPlatformData(key string, value string) (err error) {
+	<-startCalled
+
 	defer func() {
 		if r := recover(); r != nil {
 			ok := false
