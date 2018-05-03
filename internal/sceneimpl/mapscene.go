@@ -74,6 +74,7 @@ type MapScene struct {
 	initialized          bool
 	offsetX              int
 	offsetY              int
+	animation            animation
 }
 
 func NewMapScene() *MapScene {
@@ -410,6 +411,8 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 }
 
 func (m *MapScene) Update(sceneManager *scene.Manager) error {
+	m.animation.Update()
+
 	if !m.initialized {
 		m.initUI(sceneManager)
 		m.initialized = true
@@ -565,7 +568,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	m.screenImage.Fill(color.Black)
 
 	if background := m.gameState.Map().Background(m.gameState); background != "" {
-		m.gameState.Map().DrawFullscreenImage(m.screenImage, assets.GetImage("backgrounds/"+background+".png"), 0, m.offsetY/consts.TileScale)
+		m.animation.Draw(m.screenImage, assets.GetImage("backgrounds/"+background+".png"), 0, m.offsetY/consts.TileScale)
 	}
 	for k := 0; k < 3; k++ {
 		var p data.Priority
@@ -586,7 +589,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		m.gameState.Map().DrawCharacters(m.screenImage, p, 0, m.offsetY/consts.TileScale)
 	}
 	if foreground := m.gameState.Map().Foreground(m.gameState); foreground != "" {
-		m.gameState.Map().DrawFullscreenImage(m.screenImage, assets.GetImage("foregrounds/"+foreground+".png"), 0, m.offsetY/consts.TileScale)
+		m.animation.Draw(m.screenImage, assets.GetImage("foregrounds/"+foreground+".png"), 0, m.offsetY/consts.TileScale)
 	}
 
 	m.gameState.DrawWeather(m.screenImage)

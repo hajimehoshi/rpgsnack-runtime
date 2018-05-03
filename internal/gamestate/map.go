@@ -17,7 +17,6 @@ package gamestate
 import (
 	"errors"
 	"fmt"
-	"image"
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/vmihailenco/msgpack"
@@ -33,8 +32,6 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/tileset"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/variables"
 )
-
-const animationInterval = 30
 
 type passableOnMap struct {
 	through          bool
@@ -60,7 +57,6 @@ type Map struct {
 	// Fields that are not dumped
 	gameData                  *data.Game
 	isPlayerMovingByUserInput bool
-	animationCounter          int
 }
 
 func NewMap() *Map {
@@ -225,7 +221,6 @@ func (m *Map) setRoomID(gameState *Game, id int, interpreter *Interpreter) error
 	if interpreter != nil {
 		m.addInterpreter(interpreter)
 	}
-	m.animationCounter = 0
 	return nil
 }
 
@@ -347,8 +342,6 @@ func (m *Map) Update(sceneManager *scene.Manager, gameState *Game) error {
 		m.player = character.NewPlayer(x, y)
 		m.setRoomID(gameState, roomID, nil)
 	}
-
-	m.animationCounter++
 
 	if m.itemInterpreter == nil {
 		is := []*Interpreter{}
@@ -950,33 +943,6 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, gameState *G
 		m.executingEventIDByUserInput = event.EventID()
 	}
 	return true
-}
-
-func (m *Map) DrawFullscreenImage(screen *ebiten.Image, texture *ebiten.Image, offsetX, offsetY int) {
-	op := &ebiten.DrawImageOptions{}
-	w, h := texture.Size()
-	diff := h - consts.TileYNum*consts.TileSize
-	mapWidth := consts.TileXNum * consts.TileSize
-
-	// This is a pingpong animation
-	// We might add/change loop based animations in near future
-	if w%mapWidth == 0 {
-		frameCount := 1
-		baseFrameCount := w / mapWidth
-		if baseFrameCount > 1 {
-			frameCount = baseFrameCount*2 - 2
-		}
-		frames := m.animationCounter / animationInterval
-		frame := frames % frameCount
-		if frame >= baseFrameCount {
-			frame = frameCount - frame
-		}
-		r := image.Rect(frame*mapWidth, 0, w, h)
-		op.SourceRect = &r
-	}
-
-	op.GeoM.Translate(float64(offsetX), float64(offsetY)-float64(diff))
-	screen.DrawImage(texture, op)
 }
 
 func (m *Map) DrawCharacters(screen *ebiten.Image, priority data.Priority, offsetX, offsetY int) {
