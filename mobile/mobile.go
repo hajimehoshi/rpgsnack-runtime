@@ -119,11 +119,9 @@ func Update() (err error) {
 }
 
 func UpdateTouchesOnAndroid(action int, id int, x, y int) {
-	<-startCalled
 	mobile.UpdateTouchesOnAndroid(action, id, x, y)
 }
 
 func UpdateTouchesOnIOS(phase int, ptr int64, x, y int) {
-	<-startCalled
 	mobile.UpdateTouchesOnIOS(phase, ptr, x, y)
 }
