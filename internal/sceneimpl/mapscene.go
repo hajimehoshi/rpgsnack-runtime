@@ -566,7 +566,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	m.tilesImage.Fill(color.Black)
 
 	if background := m.gameState.Map().Background(m.gameState); background != "" {
-		m.gameState.Map().DrawFullscreenImage(m.tilesImage, assets.GetImage("backgrounds/"+background+".png"), 0, m.offsetY/consts.TileScale)
+		m.gameState.Map().DrawFullscreenImage(m.tilesImage, assets.GetImage("backgrounds/"+background+".png"))
 	}
 	for k := 0; k < 3; k++ {
 		var p data.Priority
@@ -582,17 +582,17 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		}
 
 		m.drawTiles(p)
-		m.gameState.Map().DrawCharacters(m.tilesImage, p, 0, m.offsetY/consts.TileScale)
+		m.gameState.Map().DrawCharacters(m.tilesImage, p)
 	}
 	if foreground := m.gameState.Map().Foreground(m.gameState); foreground != "" {
-		m.gameState.Map().DrawFullscreenImage(m.tilesImage, assets.GetImage("foregrounds/"+foreground+".png"), 0, m.offsetY/consts.TileScale)
+		m.gameState.Map().DrawFullscreenImage(m.tilesImage, assets.GetImage("foregrounds/"+foreground+".png"))
 	}
 
 	m.gameState.DrawWeather(m.tilesImage)
 
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(consts.TileScale, consts.TileScale)
-	op.GeoM.Translate(float64(m.offsetX), 0)
+	op.GeoM.Translate(float64(m.offsetX), float64(m.offsetY))
 	m.gameState.DrawScreen(screen, m.tilesImage, op)
 	m.gameState.DrawPictures(screen, m.offsetX, m.offsetY)
 
