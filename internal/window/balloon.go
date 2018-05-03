@@ -260,14 +260,6 @@ func (b *balloon) position(screenWidth int, character *character.Character) (int
 	return x, y
 }
 
-func (b *balloon) arrowFlip(screenWidth int, character *character.Character) bool {
-	if !b.hasArrow {
-		return false
-	}
-	x, _ := b.position(screenWidth, character)
-	return consts.MapWidth == x+b.width
-}
-
 func (b *balloon) isClosed() bool {
 	return !b.opened && b.openingCount == 0 && b.closingCount == 0
 }
@@ -361,11 +353,6 @@ func (b *balloon) geoMForRate(screen *ebiten.Image, character *character.Charact
 		ax, ay := b.arrowPosition(sw, character)
 		cx = float64(ax)
 		cy = float64(ay) + balloonArrowHeight
-		if b.arrowFlip(sw, character) {
-			cx -= 4
-		} else {
-			cx += 4
-		}
 	}
 	g := ebiten.GeoM{}
 	g.Translate(-cx, -cy)
@@ -466,11 +453,12 @@ func (b *balloon) draw(screen *ebiten.Image, character *character.Character, off
 			ax, ay := b.arrowPosition(sw, character)
 			tx := ax
 			ty := ay - balloonArrowHeight
-			if b.arrowFlip(sw, character) {
-				// TODO: 4 is an arbitrary number. Define a const.
-				tx -= 4
-			} else {
-				tx += b.partSize()
+			tx += b.partSize()
+
+			const maxArrowX = consts.MapWidth - balloonArrowWidth - 8
+			if tx > maxArrowX {
+				op.GeoM.Scale(-1, 1)
+				tx = ax - b.partSize()
 			}
 			op.GeoM.Translate(float64(tx), float64(ty))
 			op.GeoM.Concat(*g)
