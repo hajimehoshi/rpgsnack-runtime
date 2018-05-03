@@ -45,7 +45,7 @@ type MapScene struct {
 	gameState            *gamestate.Game
 	moveDstX             int
 	moveDstY             int
-	tilesImage           *ebiten.Image
+	screenImage          *ebiten.Image
 	uiImage              *ebiten.Image
 	triggeringFailed     bool
 	initialState         bool
@@ -103,8 +103,7 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	// offset y should be multiplies of TileScale for pixel-pefect rendering
 	m.offsetY -= m.offsetY % consts.TileScale
 
-	// TODO: Rename tilesImage to screenImage, and create another tilesImage that doesn't consider offsets
-	m.tilesImage, _ = ebiten.NewImage(consts.TileXNum*consts.TileSize, screenH/consts.TileScale, ebiten.FilterNearest)
+	m.screenImage, _ = ebiten.NewImage(consts.TileXNum*consts.TileSize, screenH/consts.TileScale, ebiten.FilterNearest)
 	m.uiImage, _ = ebiten.NewImage(uiWidth*consts.TileScale, screenH, ebiten.FilterNearest)
 
 	screenShotImage, _ := ebiten.NewImage(480, 720, ebiten.FilterLinear)
@@ -522,7 +521,7 @@ func (m *MapScene) drawTile(tile int, op *ebiten.DrawImageOptions, i int, j int)
 	// and SourceRect are not modified so far.
 	op.GeoM.Reset()
 	op.GeoM.Translate(float64(dx), float64(dy))
-	m.tilesImage.DrawImage(tileSetImg, op)
+	m.screenImage.DrawImage(tileSetImg, op)
 }
 
 func (m *MapScene) drawAutoTile(tile int, op *ebiten.DrawImageOptions, i int, j int) {
@@ -544,7 +543,7 @@ func (m *MapScene) drawAutoTile(tile int, op *ebiten.DrawImageOptions, i int, j 
 		// than GeoM and SourceRect are not modified so far.
 		op.GeoM.Reset()
 		op.GeoM.Translate(float64(dx), float64(dy))
-		m.tilesImage.DrawImage(tileSetImg, op)
+		m.screenImage.DrawImage(tileSetImg, op)
 	}
 
 }
@@ -563,10 +562,10 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	if !m.initialized {
 		return
 	}
-	m.tilesImage.Fill(color.Black)
+	m.screenImage.Fill(color.Black)
 
 	if background := m.gameState.Map().Background(m.gameState); background != "" {
-		m.gameState.Map().DrawFullscreenImage(m.tilesImage, assets.GetImage("backgrounds/"+background+".png"), 0, m.offsetY/consts.TileScale)
+		m.gameState.Map().DrawFullscreenImage(m.screenImage, assets.GetImage("backgrounds/"+background+".png"), 0, m.offsetY/consts.TileScale)
 	}
 	for k := 0; k < 3; k++ {
 		var p data.Priority
@@ -582,18 +581,20 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		}
 
 		m.drawTiles(p)
-		m.gameState.Map().DrawCharacters(m.tilesImage, p, 0, m.offsetY/consts.TileScale)
+		// Characters can be rendered in the upper black area.
+		// That's why offset needs to be specified here.
+		m.gameState.Map().DrawCharacters(m.screenImage, p, 0, m.offsetY/consts.TileScale)
 	}
 	if foreground := m.gameState.Map().Foreground(m.gameState); foreground != "" {
-		m.gameState.Map().DrawFullscreenImage(m.tilesImage, assets.GetImage("foregrounds/"+foreground+".png"), 0, m.offsetY/consts.TileScale)
+		m.gameState.Map().DrawFullscreenImage(m.screenImage, assets.GetImage("foregrounds/"+foreground+".png"), 0, m.offsetY/consts.TileScale)
 	}
 
-	m.gameState.DrawWeather(m.tilesImage)
+	m.gameState.DrawWeather(m.screenImage)
 
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(consts.TileScale, consts.TileScale)
 	op.GeoM.Translate(float64(m.offsetX), 0)
-	m.gameState.DrawScreen(screen, m.tilesImage, op)
+	m.gameState.DrawScreen(screen, m.screenImage, op)
 	m.gameState.DrawPictures(screen, m.offsetX, m.offsetY)
 
 	if m.gameState.IsPlayerControlEnabled() && (m.gameState.Map().IsPlayerMovingByUserInput() || m.triggeringFailed) {

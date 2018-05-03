@@ -510,8 +510,8 @@ func (g *Game) DrawWeather(screen *ebiten.Image) {
 	g.weather.Draw(screen)
 }
 
-func (g *Game) DrawScreen(screen *ebiten.Image, tilesImage *ebiten.Image, op *ebiten.DrawImageOptions) {
-	g.screen.Draw(screen, tilesImage, op)
+func (g *Game) DrawScreen(screen *ebiten.Image, screenImage *ebiten.Image, op *ebiten.DrawImageOptions) {
+	g.screen.Draw(screen, screenImage, op)
 }
 
 func (g *Game) DrawWindows(screen *ebiten.Image, offsetX, offsetY int) {
