@@ -517,7 +517,7 @@ func (m *MapScene) drawTile(tile int, op *ebiten.DrawImageOptions, i int, j int)
 	r := image.Rect(sx, sy, sx+consts.TileSize, sy+consts.TileSize)
 	op.SourceRect = &r
 	dx := i * consts.TileSize
-	dy := j*consts.TileSize + m.offsetY/consts.TileScale
+	dy := j * consts.TileSize
 	// op is created outside of this function and other parameters than GeoM
 	// and SourceRect are not modified so far.
 	op.GeoM.Reset()
@@ -539,7 +539,7 @@ func (m *MapScene) drawAutoTile(tile int, op *ebiten.DrawImageOptions, i int, j 
 		r := image.Rect(sx, sy, sx+consts.MiniTileSize, sy+consts.MiniTileSize)
 		op.SourceRect = &r
 		dx := i*consts.TileSize + index%2*consts.MiniTileSize
-		dy := j*consts.TileSize + index/2*consts.MiniTileSize + m.offsetY/consts.TileScale
+		dy := j*consts.TileSize + index/2*consts.MiniTileSize
 		// op is created outside of this function and other parameters
 		// than GeoM and SourceRect are not modified so far.
 		op.GeoM.Reset()
