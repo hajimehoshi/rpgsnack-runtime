@@ -15,6 +15,8 @@
 package mobile
 
 import (
+	"fmt"
+
 	"github.com/hajimehoshi/ebiten/mobile"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
@@ -26,7 +28,17 @@ var (
 	theGame *game.Game
 )
 
-func SetData(project []byte, assets []byte, progress []byte, purchases []byte, language string) {
+func SetData(project []byte, assets []byte, progress []byte, purchases []byte, language string) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			ok := false
+			err, ok = r.(error)
+			if !ok {
+				err = fmt.Errorf("error at SetData: %v", err)
+			}
+		}
+	}()
+
 	// Copy data here since the given data is just a reference and might be
 	// broken in the mobile side.
 	p := make([]byte, len(project))
@@ -48,13 +60,24 @@ func SetData(project []byte, assets []byte, progress []byte, purchases []byte, l
 	}
 
 	data.SetData(p, a, p1, p2, language)
+	return nil
 }
 
 func IsRunning() bool {
 	return running
 }
 
-func Start(widthInDP int, heightInDP int, requester Requester) error {
+func Start(widthInDP int, heightInDP int, requester Requester) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			ok := false
+			err, ok = r.(error)
+			if !ok {
+				err = fmt.Errorf("error at Start: %v", err)
+			}
+		}
+	}()
+
 	const (
 		minWidth  = 480
 		minHeight = 672
@@ -81,7 +104,16 @@ func Start(widthInDP int, heightInDP int, requester Requester) error {
 	return nil
 }
 
-func Update() error {
+func Update() (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			ok := false
+			err, ok = r.(error)
+			if !ok {
+				err = fmt.Errorf("error at Update: %v", err)
+			}
+		}
+	}()
 	return mobile.Update()
 }
 
