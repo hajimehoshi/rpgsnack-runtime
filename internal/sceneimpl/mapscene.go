@@ -562,13 +562,18 @@ func (m *MapScene) drawTiles(priority data.Priority) {
 }
 
 func (m *MapScene) Draw(screen *ebiten.Image) {
+	const mapWidth = consts.TileXNum * consts.TileSize
+
 	if !m.initialized {
 		return
 	}
 	m.screenImage.Fill(color.Black)
 
 	if background := m.gameState.Map().Background(m.gameState); background != "" {
-		m.animation.Draw(m.screenImage, assets.GetImage("backgrounds/"+background+".png"), 0, m.offsetY/consts.TileScale)
+		img := assets.GetImage("backgrounds/" + background + ".png")
+		_, h := img.Size()
+		diff := h - consts.TileYNum*consts.TileSize
+		m.animation.Draw(m.screenImage, img, mapWidth, 0, m.offsetY/consts.TileScale-diff)
 	}
 	for k := 0; k < 3; k++ {
 		var p data.Priority
@@ -589,7 +594,10 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		m.gameState.Map().DrawCharacters(m.screenImage, p, 0, m.offsetY/consts.TileScale)
 	}
 	if foreground := m.gameState.Map().Foreground(m.gameState); foreground != "" {
-		m.animation.Draw(m.screenImage, assets.GetImage("foregrounds/"+foreground+".png"), 0, m.offsetY/consts.TileScale)
+		img := assets.GetImage("foregrounds/" + foreground + ".png")
+		_, h := img.Size()
+		diff := h - consts.TileYNum*consts.TileSize
+		m.animation.Draw(m.screenImage, img, mapWidth, 0, m.offsetY/consts.TileScale-diff)
 	}
 
 	m.gameState.DrawWeather(m.screenImage)

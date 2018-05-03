@@ -18,8 +18,6 @@ import (
 	"image"
 
 	"github.com/hajimehoshi/ebiten"
-
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 )
 
 const animationInterval = 30
@@ -32,29 +30,25 @@ func (a *animation) Update() {
 	a.counter++
 }
 
-func (a *animation) Draw(screen *ebiten.Image, texture *ebiten.Image, offsetX, offsetY int) {
+func (a *animation) Draw(screen *ebiten.Image, texture *ebiten.Image, frameWidth, offsetX, offsetY int) {
 	op := &ebiten.DrawImageOptions{}
 	w, h := texture.Size()
-	diff := h - consts.TileYNum*consts.TileSize
-	mapWidth := consts.TileXNum * consts.TileSize
 
 	// This is a pingpong animation
 	// We might add/change loop based animations in near future
-	if w%mapWidth == 0 {
-		frameCount := 1
-		baseFrameCount := w / mapWidth
-		if baseFrameCount > 1 {
-			frameCount = baseFrameCount*2 - 2
-		}
-		frames := a.counter / animationInterval
-		frame := frames % frameCount
-		if frame >= baseFrameCount {
-			frame = frameCount - frame
-		}
-		r := image.Rect(frame*mapWidth, 0, w, h)
-		op.SourceRect = &r
+	frameCount := 1
+	baseFrameCount := w / frameWidth
+	if baseFrameCount > 1 {
+		frameCount = baseFrameCount*2 - 2
 	}
+	frames := a.counter / animationInterval
+	frame := frames % frameCount
+	if frame >= baseFrameCount {
+		frame = frameCount - frame
+	}
+	r := image.Rect(frame*frameWidth, 0, w, h)
+	op.SourceRect = &r
 
-	op.GeoM.Translate(float64(offsetX), float64(offsetY)-float64(diff))
+	op.GeoM.Translate(float64(offsetX), float64(offsetY))
 	screen.DrawImage(texture, op)
 }

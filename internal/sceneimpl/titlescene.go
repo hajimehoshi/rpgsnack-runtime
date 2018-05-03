@@ -48,6 +48,8 @@ type TitleScene struct {
 	waitingRequestID int
 	initialized      bool
 	lang             language.Tag
+	animation        animation
+	bgImage          *ebiten.Image
 	err              error
 }
 
@@ -123,6 +125,8 @@ func (t *TitleScene) initUI(sceneManager *scene.Manager) {
 }
 
 func (t *TitleScene) Update(sceneManager *scene.Manager) error {
+	t.animation.Update()
+
 	t.lang = lang.Get()
 	if t.err != nil {
 		return t.err
@@ -199,6 +203,26 @@ func (t *TitleScene) Draw(screen *ebiten.Image) {
 	if !t.initialized {
 		return
 	}
+
+	if assets.ImageExists("titles/bg.png") {
+		const (
+			frameWidth  = 180
+			frameHeight = 180
+		)
+
+		if t.bgImage == nil {
+			t.bgImage, _ = ebiten.NewImage(frameWidth, frameHeight, ebiten.FilterDefault)
+		}
+		t.bgImage.Clear()
+		t.animation.Draw(t.bgImage, assets.GetImage("titles/bg.png"), frameWidth, 0, 0)
+
+		op := &ebiten.DrawImageOptions{}
+		sw, _ := screen.Size()
+		op.GeoM.Scale(consts.TileScale, consts.TileScale)
+		op.GeoM.Translate(float64(sw-frameWidth*consts.TileScale)/2, 0)
+		screen.DrawImage(t.bgImage, op)
+	}
+
 	timg := assets.GetLocalizeImage("titles/title", t.lang)
 	tw, _ := timg.Size()
 	sw, _ := screen.Size()

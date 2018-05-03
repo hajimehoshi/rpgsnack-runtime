@@ -54,6 +54,10 @@ func GetLocalizeImage(key string, lang language.Tag) *ebiten.Image {
 	return GetImage(key + ".png")
 }
 
+func ImageExists(key string) bool {
+	return Exists(path.Join("images", key))
+}
+
 func GetImage(key string) *ebiten.Image {
 	k := path.Join("images", key)
 	img, ok := theAssets.images[k]
