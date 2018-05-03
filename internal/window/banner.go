@@ -237,9 +237,9 @@ func (b *banner) position() (int, int) {
 	}
 	switch positionType {
 	case data.MessagePositionBottom:
-		y = consts.MapHeight/consts.TileScale - bannerHeight + bannerMarginY
+		y = consts.MapHeight - bannerHeight + bannerMarginY
 	case data.MessagePositionMiddle:
-		y = (consts.MapHeight/consts.TileScale-bannerHeight)/2 + bannerMarginY
+		y = (consts.MapHeight-bannerHeight)/2 + bannerMarginY
 	case data.MessagePositionTop:
 		y = bannerMarginY
 	}
@@ -259,7 +259,7 @@ func (b *banner) draw(screen *ebiten.Image, offsetX, offsetY int) {
 		rate = float64(b.closingCount) / float64(bannerMaxCount)
 	}
 	sw, _ := screen.Size()
-	dx := math.Floor(float64(sw/consts.TileScale-consts.TileXNum*consts.TileSize)/2 + float64(offsetX))
+	dx := math.Floor(float64(sw/consts.TileScale-consts.MapWidth)/2 + float64(offsetX))
 	dy := math.Floor(float64(offsetY))
 
 	switch b.background {
@@ -290,9 +290,9 @@ func (b *banner) draw(screen *ebiten.Image, offsetX, offsetY int) {
 		switch b.textAlign {
 		case data.TextAlignLeft:
 		case data.TextAlignCenter:
-			x += (consts.TileXNum*consts.TileSize - 2*bannerPaddingX) * consts.TileScale / 2
+			x += (consts.MapWidth - 2*bannerPaddingX) * consts.TileScale / 2
 		case data.TextAlignRight:
-			x += (consts.TileXNum*consts.TileSize - 2*bannerPaddingX) * consts.TileScale
+			x += (consts.MapWidth - 2*bannerPaddingX) * consts.TileScale
 		}
 		x += int(dx * consts.TileScale)
 		y += int(dy * consts.TileScale)

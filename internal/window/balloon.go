@@ -250,8 +250,8 @@ func (b *balloon) position(screenWidth int, character *character.Character) (int
 	}
 	ax, ay := b.arrowPosition(screenWidth, character)
 	x := ax - b.width/2
-	if consts.TileXNum*consts.TileSize < x+b.width {
-		x = consts.TileXNum*consts.TileSize - b.width
+	if consts.MapWidth < x+b.width {
+		x = consts.MapWidth - b.width
 	}
 	if x < 0 {
 		x = 0
@@ -265,7 +265,7 @@ func (b *balloon) arrowFlip(screenWidth int, character *character.Character) boo
 		return false
 	}
 	x, _ := b.position(screenWidth, character)
-	return consts.TileXNum*consts.TileSize == x+b.width
+	return consts.MapWidth == x+b.width
 }
 
 func (b *balloon) isClosed() bool {
@@ -436,7 +436,7 @@ func (b *balloon) ensureOffscreen() {
 
 func (b *balloon) draw(screen *ebiten.Image, character *character.Character, offsetX, offsetY int) {
 	sw, _ := screen.Size()
-	dx := math.Floor(float64(sw/consts.TileScale-consts.TileXNum*consts.TileSize)/2 + float64(offsetX))
+	dx := math.Floor(float64(sw/consts.TileScale-consts.MapWidth)/2 + float64(offsetX))
 	dy := math.Floor(float64(offsetY))
 	if b.openingRate() > 0 {
 		b.ensureOffscreen()

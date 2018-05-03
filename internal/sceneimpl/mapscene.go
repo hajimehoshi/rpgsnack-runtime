@@ -95,16 +95,16 @@ func NewMapSceneWithGame(game *gamestate.Game) *MapScene {
 func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	const (
 		inventoryHeight = 33 * consts.TileScale
-		uiWidth         = consts.TileXNum * consts.TileSize
+		uiWidth         = consts.MapWidth
 	)
 
 	screenW, screenH := sceneManager.Size()
-	m.offsetX = (screenW - consts.TileXNum*consts.TileSize*consts.TileScale) / 2
-	m.offsetY = screenH - consts.TileYNum*consts.TileSize*consts.TileScale
+	m.offsetX = (screenW - consts.MapWidth*consts.TileScale) / 2
+	m.offsetY = screenH - consts.MapHeight*consts.TileScale
 	// offset y should be multiplies of TileScale for pixel-pefect rendering
 	m.offsetY -= m.offsetY % consts.TileScale
 
-	m.screenImage, _ = ebiten.NewImage(consts.TileXNum*consts.TileSize, screenH/consts.TileScale, ebiten.FilterNearest)
+	m.screenImage, _ = ebiten.NewImage(consts.MapWidth, screenH/consts.TileScale, ebiten.FilterNearest)
 	m.uiImage, _ = ebiten.NewImage(uiWidth*consts.TileScale, screenH, ebiten.FilterNearest)
 
 	screenShotImage, _ := ebiten.NewImage(480, 720, ebiten.FilterLinear)
@@ -562,7 +562,7 @@ func (m *MapScene) drawTiles(priority data.Priority) {
 }
 
 func (m *MapScene) Draw(screen *ebiten.Image) {
-	const mapWidth = consts.TileXNum * consts.TileSize
+	const mapWidth = consts.MapWidth
 
 	if !m.initialized {
 		return
@@ -572,7 +572,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	if background := m.gameState.Map().Background(m.gameState); background != "" {
 		img := assets.GetImage("backgrounds/" + background + ".png")
 		_, h := img.Size()
-		diff := h - consts.TileYNum*consts.TileSize
+		diff := h - consts.MapHeight
 		m.animation.Draw(m.screenImage, img, mapWidth, 0, m.offsetY/consts.TileScale-diff)
 	}
 	for k := 0; k < 3; k++ {
@@ -596,7 +596,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	if foreground := m.gameState.Map().Foreground(m.gameState); foreground != "" {
 		img := assets.GetImage("foregrounds/" + foreground + ".png")
 		_, h := img.Size()
-		diff := h - consts.TileYNum*consts.TileSize
+		diff := h - consts.MapHeight
 		m.animation.Draw(m.screenImage, img, mapWidth, 0, m.offsetY/consts.TileScale-diff)
 	}
 

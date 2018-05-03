@@ -181,7 +181,7 @@ func (w *Windows) ShowChoices(sceneManager *scene.Manager, choices []string, int
 	for i, choice := range choices {
 		x := 0
 		y := i*choiceBalloonHeight + ymin
-		width := consts.TileXNum * consts.TileSize
+		width := consts.MapWidth
 		balloon := newBalloon(x, y, width, choiceBalloonHeight, choice, data.BalloonTypeNormal, interpreterID, sceneManager.Game().CreateChoicesMessageStyle())
 		w.choiceBalloons = append(w.choiceBalloons, balloon)
 		balloon.open()

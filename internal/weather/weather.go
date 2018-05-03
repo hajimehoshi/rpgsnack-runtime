@@ -61,8 +61,8 @@ type sprite struct {
 
 func (s *sprite) update() {
 	const (
-		screenWidth  = consts.TileXNum * consts.TileSize
-		screenHeight = consts.TileYNum * consts.TileSize
+		screenWidth  = consts.MapWidth
+		screenHeight = consts.MapHeight
 	)
 	switch s.weatherType {
 	case data.WeatherTypeRain:

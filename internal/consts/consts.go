@@ -20,8 +20,10 @@ const (
 	MiniTileSize           = 8
 	TileXNum               = 10
 	TileYNum               = 14
-	MapWidth               = TileXNum * TileSize * TileScale
-	MapHeight              = TileYNum * TileSize * TileScale
+	MapWidth               = TileXNum * TileSize
+	MapHeight              = TileYNum * TileSize
+	MapScaledWidth         = MapWidth * TileScale
+	MapScaledHeight        = MapHeight * TileScale
 	TileScale              = 3
 	TextScale              = 2
 	BigTextScale           = 3
