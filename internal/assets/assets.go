@@ -15,6 +15,8 @@
 package assets
 
 import (
+	"fmt"
+
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 )
@@ -40,9 +42,18 @@ func Exists(path string) bool {
 }
 
 func GetResource(path string) []byte {
-	return theAssets.assets[path]
+	r, ok := theAssets.assets[path]
+	if !ok {
+		panic(fmt.Sprintf("assets: resource not found: %s", path))
+	}
+	return r
 }
 
 func GetMetadata(imageName string) *data.AssetMetadata {
-	return theAssets.metadata["images/"+imageName+"_metadata.json"]
+	path := "images/" + imageName + "_metadata.json"
+	m, ok := theAssets.metadata[path]
+	if !ok {
+		panic(fmt.Sprintf("assets: metadata not found: %s", path))
+	}
+	return m
 }
