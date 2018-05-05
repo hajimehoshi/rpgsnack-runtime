@@ -82,6 +82,7 @@ func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
 			lang = sceneManager.SetLanguage(lang)
 			s.waitingRequestID = sceneManager.GenerateRequestID()
 			sceneManager.Requester().RequestChangeLanguage(s.waitingRequestID, lang.String())
+			s.updateButtonTexts()
 		})
 	}
 
@@ -113,6 +114,17 @@ func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
 	})
 }
 
+func (s *SettingsScene) updateButtonTexts() {
+	s.settingsLabel.Text = texts.Text(lang.Get(), texts.TextIDSettings)
+	s.languageButton.Text = texts.Text(lang.Get(), texts.TextIDLanguage)
+	s.creditButton.Text = texts.Text(lang.Get(), texts.TextIDCredit)
+	s.updateCreditsButton.Text = texts.Text(lang.Get(), texts.TextIDCreditEntry)
+	s.reviewThisAppButton.Text = texts.Text(lang.Get(), texts.TextIDReviewThisApp)
+	s.restorePurchasesButton.Text = texts.Text(lang.Get(), texts.TextIDRestorePurchases)
+	s.moreGamesButton.Text = texts.Text(lang.Get(), texts.TextIDMoreGames)
+	s.closeButton.Text = texts.Text(lang.Get(), texts.TextIDClose)
+}
+
 func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 	if !s.initialized {
 		s.initUI(sceneManager)
@@ -123,14 +135,7 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 		s.handleBackButton(sceneManager)
 	}
 
-	s.settingsLabel.Text = texts.Text(lang.Get(), texts.TextIDSettings)
-	s.languageButton.Text = texts.Text(lang.Get(), texts.TextIDLanguage)
-	s.creditButton.Text = texts.Text(lang.Get(), texts.TextIDCredit)
-	s.updateCreditsButton.Text = texts.Text(lang.Get(), texts.TextIDCreditEntry)
-	s.reviewThisAppButton.Text = texts.Text(lang.Get(), texts.TextIDReviewThisApp)
-	s.restorePurchasesButton.Text = texts.Text(lang.Get(), texts.TextIDRestorePurchases)
-	s.moreGamesButton.Text = texts.Text(lang.Get(), texts.TextIDMoreGames)
-	s.closeButton.Text = texts.Text(lang.Get(), texts.TextIDClose)
+	s.updateButtonTexts()
 
 	if sceneManager.MaxPurchaseTier() > 0 {
 		s.updateCreditsButton.Visible = true

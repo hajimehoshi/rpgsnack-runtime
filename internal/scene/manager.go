@@ -115,6 +115,8 @@ func (m *Manager) Update() error {
 				}
 				m.purchases = purchases
 			}
+		default:
+			// There is no action here. It's ok to ignore.
 		}
 	case a := <-m.setPlatformDataCh:
 		switch a.key {
