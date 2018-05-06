@@ -16,6 +16,7 @@ package game
 
 import (
 	"flag"
+	"fmt"
 	"image/color"
 	"net/url"
 	"runtime"
@@ -34,20 +35,27 @@ import (
 )
 
 type Game struct {
-	projectLocation  string
-	width            int
-	height           int
-	requester        scene.Requester
-	sceneManager     *scene.Manager
-	loadProgressCh   chan data.LoadProgress
-	loadProgressRate float64
+	projectLocation   string
+	width             int
+	height            int
+	requester         scene.Requester
+	sceneManager      *scene.Manager
+	loadProgressCh    chan data.LoadProgress
+	loadProgressRate  float64
+	setPlatformDataCh chan setPlatformDataArgs
+}
+
+type setPlatformDataArgs struct {
+	key   scene.PlatformDataKey
+	value string
 }
 
 func New(width, height int, requester scene.Requester) *Game {
 	g := &Game{
-		width:     width,
-		height:    height,
-		requester: requester,
+		width:             width,
+		height:            height,
+		requester:         requester,
+		setPlatformDataCh: make(chan setPlatformDataArgs, 1),
 	}
 	g.loadGameData()
 	return g
@@ -137,6 +145,13 @@ func (g *Game) update() error {
 			return nil
 		}
 	}
+
+	select {
+	case a := <-g.setPlatformDataCh:
+		g.sceneManager.SetPlatformData(a.key, a.value)
+	default:
+	}
+
 	input.Update()
 	if err := audio.Update(); err != nil {
 		return err
@@ -212,6 +227,15 @@ func (g *Game) RespondGetIAPPrices(id int, success bool, prices []uint8) {
 	g.sceneManager.RespondGetIAPPrices(id, success, prices)
 }
 
-func (g *Game) SetPlatformData(key scene.PlatformDataKey, value string) {
-	g.sceneManager.SetPlatformData(key, value)
+func (g *Game) SetPlatformData(key scene.PlatformDataKey, value string) error {
+	args := setPlatformDataArgs{
+		key:   key,
+		value: value,
+	}
+	select {
+	case g.setPlatformDataCh <- args:
+		return nil
+	default:
+		return fmt.Errorf("game: failed to send 'setPlatformDataCh: key: %s, value: %s", key, value)
+	}
 }
