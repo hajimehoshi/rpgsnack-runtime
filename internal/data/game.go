@@ -14,6 +14,12 @@
 
 package data
 
+import (
+	"encoding/json"
+
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
+)
+
 type CombineType string
 
 const (
@@ -104,6 +110,12 @@ type Combine struct {
 	Commands []*Command  `json:"commands" msgpack:"commands"`
 }
 
+type ShopProduct struct {
+	Key  string `json:"key" msgpack:"key"`
+	Name string `json:"name" msgpack:"name"`
+	Desc string `json:"desc" msgpack:"desc"`
+}
+
 func (g *Game) CreateCombine(itemID1, itemID2 int) *Combine {
 	for _, combine := range g.Combines {
 		if (combine.Item1 == itemID1 && combine.Item2 == itemID2) || (combine.Type == CombineTypeCombine && combine.Item1 == itemID2 && combine.Item2 == itemID1) {
@@ -129,4 +141,22 @@ func (g *Game) GetIAPProduct(key string) *IAPProduct {
 		}
 	}
 	return iap
+}
+
+func (g *Game) GetShopProductsData() []byte {
+	shopProducts := []*ShopProduct{}
+	for _, iapProduct := range g.IAPProducts {
+		if iapProduct.IsShop {
+			shopProducts = append(shopProducts, &ShopProduct{
+				Key:  iapProduct.Key,
+				Name: g.Texts.Get(lang.Get(), iapProduct.Name),
+				Desc: g.Texts.Get(lang.Get(), iapProduct.Desc),
+			})
+		}
+	}
+	b, err := json.Marshal(shopProducts)
+	if err != nil {
+		panic(err)
+	}
+	return b
 }
