@@ -522,6 +522,9 @@ func (m *Map) passableTile(x, y int) bool {
 
 	for layer := 0; layer < 4; layer++ {
 		tile := m.CurrentRoom().Tiles[layer][tileIndex]
+		if tile == 0 {
+			continue
+		}
 		imageID := tileset.ExtractImageID(tile)
 		imageName := m.FindImageName(imageID)
 		index := 0

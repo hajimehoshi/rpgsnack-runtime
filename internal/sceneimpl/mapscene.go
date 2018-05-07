@@ -482,6 +482,9 @@ func (m *MapScene) drawTileLayer(layer int, priority data.Priority) {
 		for i := 0; i < consts.TileXNum; i++ {
 			tileIndex := tileset.TileIndex(i, j)
 			tile := room.Tiles[layer][tileIndex]
+			if tile == 0 {
+				continue
+			}
 			imageID := tileset.ExtractImageID(tile)
 			imageName := m.gameState.Map().FindImageName(imageID)
 			index := 0
