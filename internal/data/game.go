@@ -114,6 +114,7 @@ type ShopProduct struct {
 	Key  string `json:"key" msgpack:"key"`
 	Name string `json:"name" msgpack:"name"`
 	Desc string `json:"desc" msgpack:"desc"`
+	Tier int    `json:"tier" msgpack:"tier"`
 }
 
 func (g *Game) CreateCombine(itemID1, itemID2 int) *Combine {
@@ -151,6 +152,7 @@ func (g *Game) GetShopProductsData() []byte {
 				Key:  iapProduct.Key,
 				Name: g.Texts.Get(lang.Get(), iapProduct.Name),
 				Desc: g.Texts.Get(lang.Get(), iapProduct.Desc),
+				Tier: iapProduct.Tier,
 			})
 		}
 	}
