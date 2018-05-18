@@ -102,10 +102,10 @@ enfernen?`,
 		TextIDNewGameWarning: `Willst du wirklich deinen
 Spielfortschritt löschen und 
 nochmal von Vorne anfangen?`,
-		TextIDBackToTitle: "Willst du wirklich 
-zurück zum Menü?",
-		TextIDQuitGame:    "Willst du wirklich 
-das Spiel verlassen?",
+		TextIDBackToTitle: `Willst du wirklich 
+zurück zum Menü?`,
+		TextIDQuitGame: `Willst du wirklich 
+das Spiel verlassen?`,
 		TextIDStoreError: `Verbindung mit dem Store nicht möglich.
 Stelle sicher, dass du angemeldet
 und mit dem Internet verbindet bist.`,
