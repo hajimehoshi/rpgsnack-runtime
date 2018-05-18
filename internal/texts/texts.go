@@ -186,7 +186,7 @@ e iniciar un nuevo juego?`,
 		TextIDNewGameWarning: `系统已经存在一个中断存档。
 开始新游戏会导致中断存档被清除。
 你确定要重新开始新游戏吗?`,
-		TextIDBackToTitle: "返回主菜单?",
+		TextIDBackToTitle: "返回主选单?",
 		TextIDQuitGame:    "退出游戏?",
 		TextIDStoreError: `无法连接商店。
 请确定你已经登录并已连上网络`,
@@ -213,7 +213,7 @@ e iniciar un nuevo juego?`,
 		TextIDNewGameWarning: `系統已經存在一個中斷存檔。
 開始新遊戲會導致中斷存檔被清除。
 你確定要重新開始新遊戲嗎？`,
-		TextIDBackToTitle: "返回主菜單?",
+		TextIDBackToTitle: "返回主選單?",
 		TextIDQuitGame:    "退出遊戲?",
 		TextIDStoreError: `無法連接商店。
 請確定你已經登錄並已連上網絡`,
