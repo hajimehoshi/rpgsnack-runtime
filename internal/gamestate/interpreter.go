@@ -633,7 +633,8 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		i.commandIterator.Advance()
 	case data.CommandNameShowShop:
 		i.waitingRequestID = sceneManager.GenerateRequestID()
-		sceneManager.Requester().RequestShowShop(i.waitingRequestID, string(sceneManager.Game().GetShopProductsData()))
+		args := c.Args.(*data.CommandArgsShowShop)
+		sceneManager.Requester().RequestShowShop(i.waitingRequestID, string(sceneManager.Game().GetShopProductsData(args.Products)))
 		return false, nil
 	case data.CommandNameRequestReview:
 		sceneManager.Requester().RequestReview()

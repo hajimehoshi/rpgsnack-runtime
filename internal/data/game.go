@@ -87,12 +87,11 @@ type Hint struct {
 }
 
 type IAPProduct struct {
-	ID     int    `json:"id" msgpack:"id"`
-	Key    string `json:"key" msgpack:"key"`
-	Name   UUID   `json:"name" msgpack:"name"`
-	Desc   UUID   `json:"desc" msgpack:"desc"`
-	IsShop bool   `json:"is_shop" msgpack:"is_shop"`
-	Tier   int    `json:"tier" msgpack:"tier"`
+	ID   int    `json:"id" msgpack:"id"`
+	Key  string `json:"key" msgpack:"key"`
+	Name UUID   `json:"name" msgpack:"name"`
+	Desc UUID   `json:"desc" msgpack:"desc"`
+	Tier int    `json:"tier" msgpack:"tier"`
 }
 
 type Item struct {
@@ -144,10 +143,21 @@ func (g *Game) GetIAPProduct(key string) *IAPProduct {
 	return iap
 }
 
-func (g *Game) GetShopProductsData() []byte {
-	shopProducts := []*ShopProduct{}
+func (g *Game) getIAPProductByID(id int) *IAPProduct {
 	for _, iapProduct := range g.IAPProducts {
-		if iapProduct.IsShop {
+		if iapProduct.ID == id {
+			return iapProduct
+		}
+	}
+
+	return nil
+}
+
+func (g *Game) GetShopProductsData(products []int) []byte {
+	shopProducts := []*ShopProduct{}
+	for _, productID := range products {
+		iapProduct := g.getIAPProductByID(productID)
+		if iapProduct != nil {
 			shopProducts = append(shopProducts, &ShopProduct{
 				Key:  iapProduct.Key,
 				Name: g.Texts.Get(lang.Get(), iapProduct.Name),

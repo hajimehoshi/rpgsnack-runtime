@@ -252,6 +252,11 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 		}
 		c.Args = args
 	case CommandNameShowShop:
+		var args *CommandArgsShowShop
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	case CommandNameMoveCharacter:
 		var args *CommandArgsMoveCharacter
 		if err := unmarshalJSON(tmp.Args, &args); err != nil {
@@ -615,6 +620,12 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 		}
 		c.Args = a
 	case CommandNameShowShop:
+		a := &CommandArgsShowShop{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+
 	case CommandNameMoveCharacter:
 		a := &CommandArgsMoveCharacter{}
 		if err := msgpack.Unmarshal(argsBin, a); err != nil {
@@ -1121,6 +1132,10 @@ type CommandArgsOpenLink struct {
 
 type CommandArgsSendAnalytics struct {
 	EventName string `json:"eventName" msgpack:"eventName"`
+}
+
+type CommandArgsShowShop struct {
+	Products []int `json:"products" msgpack:"products"`
 }
 
 type CommandArgsAutoSave struct {
