@@ -227,6 +227,10 @@ func (g *Game) RespondGetIAPPrices(id int, success bool, prices []uint8) {
 	g.sceneManager.RespondGetIAPPrices(id, success, prices)
 }
 
+func (g *Game) RespondAsset(id int, success bool, data []byte) {
+	g.sceneManager.RespondAsset(id, success, data)
+}
+
 func (g *Game) SetPlatformData(key scene.PlatformDataKey, value string) error {
 	args := setPlatformDataArgs{
 		key:   key,

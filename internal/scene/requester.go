@@ -29,6 +29,7 @@ type Requester interface {
 	RequestGetIAPPrices(requestID int)
 	RequestReview()
 	RequestSendAnalytics(eventName string, value string)
+	RequestAsset(requestID int, key string)
 }
 
 type RequestType int
@@ -45,6 +46,7 @@ const (
 	RequestTypeShareImage
 	RequestTypeChangeLanguage
 	RequestTypeIAPPrices
+	RequestTypeAsset
 )
 
 type RequestResult struct {

@@ -247,3 +247,25 @@ func SetPlatformData(key string, value string) (err error) {
 	}
 	return nil
 }
+
+func RespondAsset(id int, success bool, data []uint8) (err error) {
+	<-startCalled
+
+	defer func() {
+		if r := recover(); r != nil {
+			ok := false
+			err, ok = r.(error)
+			if !ok {
+				err = fmt.Errorf("error at RespondAsset: %v", err)
+			}
+		}
+	}()
+
+	var d []uint8
+	if data != nil {
+		d = make([]uint8, len(data))
+		copy(d, data)
+	}
+	theGame.RespondAsset(id, success, d)
+	return nil
+}

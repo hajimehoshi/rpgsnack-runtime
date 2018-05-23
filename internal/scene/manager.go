@@ -354,3 +354,12 @@ func (m *Manager) InterstitialAdsLoaded() bool {
 func (m *Manager) RewardedAdsLoaded() bool {
 	return m.rewardedAdsLoaded
 }
+
+func (m *Manager) RespondAsset(id int, success bool, data []byte) {
+	m.resultCh <- RequestResult{
+		ID:        id,
+		Type:      RequestTypeAsset,
+		Succeeded: success,
+		Data:      data,
+	}
+}
