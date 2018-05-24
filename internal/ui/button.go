@@ -44,6 +44,7 @@ type Button struct {
 	pressing      bool
 	soundName     string
 	showFrame     bool
+	TextColor     color.Color
 	Lang          language.Tag
 	onPressed     func(button *Button)
 }
@@ -58,6 +59,7 @@ func NewButton(x, y, width, height int, soundName string) *Button {
 		soundName:  soundName,
 		dropShadow: false,
 		showFrame:  true,
+		TextColor:  color.White,
 	}
 }
 
@@ -71,6 +73,7 @@ func NewTextButton(x, y, width, height int, soundName string) *Button {
 		soundName:  soundName,
 		dropShadow: false,
 		showFrame:  false,
+		TextColor:  color.White,
 	}
 }
 
@@ -88,6 +91,7 @@ func NewImageButton(x, y int, image *ImagePart, pressedImage *ImagePart, soundNa
 		soundName:     soundName,
 		dropShadow:    true,
 		showFrame:     true,
+		TextColor:     color.White,
 	}
 }
 
@@ -212,9 +216,14 @@ func (b *Button) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 	ty := (b.y + offsetY) * consts.TileScale
 	ty += (b.Height*consts.TileScale - th*consts.TextScale) / 2
 
-	var c color.Color = color.RGBA{0xff, 0xff, 0xff, opacity}
+	cr, cg, cb, ca := b.TextColor.RGBA()
+	r8 := uint8(cr >> 8)
+	g8 := uint8(cg >> 8)
+	b8 := uint8(cb >> 8)
+
+	var c color.Color = color.RGBA{r8, g8, b8, uint8(ca * uint32(opacity) / 255)}
 	if b.Disabled {
-		c = color.RGBA{0x80, 0x80, 0x80, opacity}
+		c = color.RGBA{r8, g8, b8, uint8(ca * uint32(opacity) / (2 * 255))}
 	}
 	l := b.Lang
 	if l == language.Und {
