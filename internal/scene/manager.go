@@ -28,6 +28,8 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
 )
 
+var TierTypes = [...]string{"tier1_donation", "tier2_donation", "tier3_donation"}
+
 type scene interface {
 	Update(manager *Manager) error
 	Draw(screen *ebiten.Image)
@@ -198,8 +200,15 @@ func (m *Manager) MaxPurchaseTier() int {
 	maxTier := 0
 	for _, p := range m.purchases {
 		iap := m.Game().GetIAPProduct(p)
-		if iap != nil && iap.Tier > maxTier {
-			maxTier = iap.Tier
+		if iap == nil {
+			continue
+		}
+		for i, tierType := range TierTypes {
+			if iap.Type == tierType {
+				if maxTier < i+1 {
+					maxTier = i + 1
+				}
+			}
 		}
 	}
 	return maxTier

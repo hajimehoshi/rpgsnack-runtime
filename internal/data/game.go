@@ -91,7 +91,7 @@ type IAPProduct struct {
 	Key  string `json:"key" msgpack:"key"`
 	Name UUID   `json:"name" msgpack:"name"`
 	Desc UUID   `json:"desc" msgpack:"desc"`
-	Tier int    `json:"tier" msgpack:"tier"`
+	Type string `json:"type" msgpack:"type"`
 }
 
 type Item struct {
@@ -113,7 +113,7 @@ type ShopProduct struct {
 	Key  string `json:"key" msgpack:"key"`
 	Name string `json:"name" msgpack:"name"`
 	Desc string `json:"desc" msgpack:"desc"`
-	Tier int    `json:"tier" msgpack:"tier"`
+	Type string `json:"type" msgpack:"type"`
 }
 
 func (g *Game) CreateCombine(itemID1, itemID2 int) *Combine {
@@ -162,7 +162,7 @@ func (g *Game) GetShopProductsData(products []int) []byte {
 				Key:  iapProduct.Key,
 				Name: g.Texts.Get(lang.Get(), iapProduct.Name),
 				Desc: g.Texts.Get(lang.Get(), iapProduct.Desc),
-				Tier: iapProduct.Tier,
+				Type: iapProduct.Type,
 			})
 		}
 	}
