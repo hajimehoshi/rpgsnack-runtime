@@ -18,6 +18,7 @@ import (
 	"github.com/hajimehoshi/ebiten"
 	"github.com/vmihailenco/msgpack"
 	"golang.org/x/text/language"
+	"image/color"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
@@ -34,6 +35,7 @@ type TitleScene struct {
 	init             bool
 	newGameButton    *ui.Button
 	resumeGameButton *ui.Button
+	removeAdsButton  *ui.Button
 	settingsButton   *ui.Button
 	moregamesButton  *ui.Button
 	warningDialog    *ui.Dialog
@@ -64,9 +66,11 @@ func (t *TitleScene) initUI(sceneManager *scene.Manager) {
 	settingsIcon := ui.NewImagePart(assets.GetImage("system/common/icon_settings.png"))
 	moreGamesIcon := ui.NewImagePart(assets.GetImage("system/common/icon_moregames.png"))
 
-	t.resumeGameButton = ui.NewTextButton((w/consts.TileScale-120)/2, 208, 120, 20, "click")
-	t.titleLine = ui.NewImageView((w/consts.TileScale-120)/2+20, 206, 1.0, ui.NewImagePart(assets.GetImage("system/common/title_line.png")))
-	t.newGameButton = ui.NewTextButton((w/consts.TileScale-120)/2, 184, 120, 20, "click")
+	t.resumeGameButton = ui.NewTextButton((w/consts.TileScale-120)/2, 196, 120, 20, "click")
+	t.titleLine = ui.NewImageView((w/consts.TileScale-120)/2+20, 196, 1.0, ui.NewImagePart(assets.GetImage("system/common/title_line.png")))
+	t.newGameButton = ui.NewTextButton((w/consts.TileScale-120)/2, 178, 120, 20, "click")
+	t.removeAdsButton = ui.NewTextButton((w/consts.TileScale-120)/2, 220, 120, 20, "click")
+	t.removeAdsButton.TextColor = color.RGBA{0xc8, 0xc8, 0xc8, 0xff}
 	t.settingsButton = ui.NewImageButton(w/consts.TileScale-16, h/consts.TileScale-16, settingsIcon, settingsIcon, "click")
 	t.moregamesButton = ui.NewImageButton(4, h/consts.TileScale-16, moreGamesIcon, moreGamesIcon, "click")
 	t.warningDialog = ui.NewDialog((w/consts.TileScale-160)/2+4, 64, 152, 124)
@@ -115,6 +119,12 @@ func (t *TitleScene) initUI(sceneManager *scene.Manager) {
 		audio.StopBGM(0)
 		sceneManager.GoToWithFading(NewMapSceneWithGame(game), 60)
 	})
+	t.removeAdsButton.SetOnPressed(func(_ *ui.Button) {
+		i := sceneManager.Game().GetIAPProductByType("ads_removal")
+		if i != nil {
+			sceneManager.Requester().RequestShowShop(t.waitingRequestID, string(sceneManager.Game().GetShopProductsData([]int{i.ID})))
+		}
+	})
 	t.settingsButton.SetOnPressed(func(_ *ui.Button) {
 		sceneManager.GoTo(NewSettingsScene())
 	})
@@ -159,6 +169,7 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 
 	t.newGameButton.Text = texts.Text(lang.Get(), texts.TextIDNewGame)
 	t.resumeGameButton.Text = texts.Text(lang.Get(), texts.TextIDResumeGame)
+	t.removeAdsButton.Text = texts.Text(lang.Get(), texts.TextIDRemoveAds)
 	t.warningLabel.Text = texts.Text(lang.Get(), texts.TextIDNewGameWarning)
 	t.warningYesButton.Text = texts.Text(lang.Get(), texts.TextIDYes)
 	t.warningNoButton.Text = texts.Text(lang.Get(), texts.TextIDNo)
@@ -177,9 +188,13 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 	if !t.warningDialog.Visible() && !t.quitDialog.Visible() {
 		t.newGameButton.Update()
 		t.resumeGameButton.Update()
+		t.removeAdsButton.Update()
 		t.settingsButton.Update()
 		t.moregamesButton.Update()
 	}
+
+	t.removeAdsButton.Visible = !sceneManager.IsAdsRemoved() && sceneManager.Game().GetIAPProductByType("ads_removal") != nil
+
 	return nil
 }
 
@@ -235,6 +250,7 @@ func (t *TitleScene) Draw(screen *ebiten.Image) {
 		t.newGameButton.Draw(screen)
 		t.titleLine.Draw(screen)
 		t.resumeGameButton.Draw(screen)
+		t.removeAdsButton.Draw(screen)
 		t.settingsButton.Draw(screen)
 		t.moregamesButton.Draw(screen)
 	}

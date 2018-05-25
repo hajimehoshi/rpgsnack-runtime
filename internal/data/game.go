@@ -143,6 +143,16 @@ func (g *Game) GetIAPProduct(key string) *IAPProduct {
 	return iap
 }
 
+func (g *Game) GetIAPProductByType(t string) *IAPProduct {
+	for _, iapProduct := range g.IAPProducts {
+		if iapProduct.Type == t {
+			return iapProduct
+		}
+	}
+
+	return nil
+}
+
 func (g *Game) getIAPProductByID(id int) *IAPProduct {
 	for _, iapProduct := range g.IAPProducts {
 		if iapProduct.ID == id {

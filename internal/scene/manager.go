@@ -214,6 +214,11 @@ func (m *Manager) MaxPurchaseTier() int {
 	return maxTier
 }
 
+func (m *Manager) IsAdsRemoved() bool {
+	i := m.Game().GetIAPProductByType("ads_removal")
+	return i != nil && m.IsPurchased(i.Key)
+}
+
 func (m *Manager) SetLanguage(language language.Tag) language.Tag {
 	language = lang.Normalize(language)
 	found := false
