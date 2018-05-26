@@ -26,7 +26,8 @@ import (
 )
 
 var (
-	screenSize = flag.String("screensize", "480x720", "screen size like 480x720")
+	screenSize  = flag.String("screensize", "480x720", "screen size like 480x720")
+	screenScale = flag.Float64("screenscale", 1.0, "screen scale like 1.0")
 )
 
 func main() {
@@ -44,7 +45,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if err := ebiten.Run(g.Update, sw, sh, game.Scale(), ""); err != nil {
+	if err := ebiten.Run(g.Update, sw, sh, game.Scale()*(*screenScale), ""); err != nil {
 		log.Fatal(err)
 	}
 }
