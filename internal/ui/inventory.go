@@ -15,14 +15,16 @@
 package ui
 
 import (
+	"image/color"
 	"math"
 
 	"github.com/hajimehoshi/ebiten"
-
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
 
 type InventoryMode int
@@ -35,6 +37,7 @@ const (
 type Inventory struct {
 	x                   int
 	y                   int
+	itemLabel           *Label
 	visible             bool
 	disabled            bool
 	items               []*data.Item
@@ -108,9 +111,15 @@ func NewInventory(x, y int) *Inventory {
 	frameCover := NewImageView(x+frameXMargin, y+4, 1.0, NewImagePart(assets.GetImage("system/footer/inventory_mask.png")))
 	frameBase := NewImageView(x+frameXMargin, y+4, 1.0, NewImagePart(assets.GetImage("system/footer/inventory_bg.png")))
 
+	itemLabel := NewLabel(x+80, y+28)
+	itemLabel.Scale = 1.5
+	itemLabel.Color = color.RGBA{0x3B, 0x58, 0x48, 0xff}
+	itemLabel.TextAlign = data.TextAlignCenter
+
 	return &Inventory{
 		x:               x,
 		y:               y,
+		itemLabel:       itemLabel,
 		visible:         true,
 		items:           []*data.Item{},
 		activeItemID:    0,
@@ -193,10 +202,18 @@ func (i *Inventory) isTouchingScroll() bool {
 	return sx <= touchX && touchX < sx+scrollBarWidth*consts.TileScale && sy <= touchY && touchY < sy+scrollBarHeight*consts.TileScale
 }
 
-func (i *Inventory) Update() {
+func (i *Inventory) Update(sceneManager *scene.Manager) {
 	if !i.visible {
 		return
 	}
+
+	activeItem := i.activeItem()
+	if activeItem != nil {
+		i.itemLabel.Text = sceneManager.Game().Texts.Get(lang.Get(), activeItem.Name)
+	} else {
+		i.itemLabel.Text = ""
+	}
+
 	if i.disabled {
 		return
 	}
@@ -266,6 +283,21 @@ func (i *Inventory) Update() {
 			i.autoScrolling = false
 		}
 	}
+
+	i.itemLabel.Update()
+}
+
+func (i *Inventory) activeItem() *data.Item {
+	for index := 0; index < i.slotCount(); index++ {
+		var item *data.Item
+		if index < len(i.items) {
+			item = i.items[index]
+			if i.activeItemID == item.ID {
+				return item
+			}
+		}
+	}
+	return nil
 }
 
 func (i *Inventory) Draw(screen *ebiten.Image) {
@@ -276,16 +308,13 @@ func (i *Inventory) Draw(screen *ebiten.Image) {
 	i.bgPanel.Draw(screen)
 	i.frameBase.Draw(screen)
 
-	var activeItem *data.Item
+	activeItem := i.activeItem()
 	for index := 0; index < i.slotCount(); index++ {
 		var item *data.Item
 		itemID := -2
 		if index < len(i.items) {
 			item = i.items[index]
 			itemID = item.ID
-			if i.activeItemID == item.ID {
-				activeItem = item
-			}
 		}
 
 		tx := float64((i.x + frameXMargin + frameXPadding + index*itemSize) + (i.scrollX+i.dragX)/consts.TileScale)
@@ -351,6 +380,7 @@ func (i *Inventory) Draw(screen *ebiten.Image) {
 			imagePart.Draw(screen, geoM, nil)
 		}
 	}
+	i.itemLabel.Draw(screen)
 }
 
 func (i *Inventory) SetMode(mode InventoryMode) {

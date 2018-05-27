@@ -94,7 +94,7 @@ func NewMapSceneWithGame(game *gamestate.Game) *MapScene {
 
 func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	const (
-		inventoryHeight = 33 * consts.TileScale
+		inventoryHeight = 49 * consts.TileScale
 		uiWidth         = consts.MapWidth
 	)
 
@@ -401,7 +401,7 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 	m.inventory.SetDisabled(m.gameState.Map().IsBlockingEventExecuting())
 	m.inventory.SetItems(m.gameState.Items().Items(sceneManager.Game().Items))
 	m.inventory.SetActiveItemID(m.gameState.Items().ActiveItem())
-	m.inventory.Update()
+	m.inventory.Update(sceneManager)
 
 	m.itemPreviewPopup.Update(l)
 	m.itemPreviewPopup.SetEnabled(!m.gameState.Map().IsBlockingEventExecuting())

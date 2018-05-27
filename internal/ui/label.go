@@ -25,15 +25,21 @@ import (
 )
 
 type Label struct {
-	x    int
-	y    int
-	Text string
+	x         int
+	y         int
+	Text      string
+	Scale     float64
+	Color     color.Color
+	TextAlign data.TextAlign
 }
 
 func NewLabel(x, y int) *Label {
 	return &Label{
-		x: x,
-		y: y,
+		x:         x,
+		y:         y,
+		Color:     color.White,
+		Scale:     1.0,
+		TextAlign: data.TextAlignLeft,
 	}
 }
 
@@ -50,5 +56,5 @@ func (l *Label) Draw(screen *ebiten.Image) {
 func (l *Label) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 	tx := (l.x + offsetX) * consts.TileScale
 	ty := (l.y + offsetY) * consts.TileScale
-	font.DrawText(screen, l.Text, tx, ty, consts.TextScale, data.TextAlignLeft, color.White, len([]rune(l.Text)))
+	font.DrawText(screen, l.Text, tx, ty, int(float64(consts.TextScale)*l.Scale), l.TextAlign, l.Color, len([]rune(l.Text)))
 }
