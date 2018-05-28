@@ -513,6 +513,10 @@ func (m *Map) FinishPlayerMovingByUserInput() {
 	m.isPlayerMovingByUserInput = false
 }
 
+func (m *Map) FocusingCharacter() *character.Character {
+	return m.player
+}
+
 func (m *Map) passableTile(x, y int) bool {
 	tileIndex := tileset.TileIndex(x, y)
 	passageTypeOverrides := m.CurrentRoom().PassageTypeOverrides

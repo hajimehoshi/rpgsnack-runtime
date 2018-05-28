@@ -74,6 +74,7 @@ type MapScene struct {
 	initialized          bool
 	offsetX              int
 	offsetY              int
+	scrollLock           bool
 	animation            animation
 }
 
@@ -92,6 +93,33 @@ func NewMapSceneWithGame(game *gamestate.Game) *MapScene {
 	return m
 }
 
+func (m *MapScene) updateOffsetY(sceneManager *scene.Manager) {
+	_, sh := sceneManager.Size()
+	m.offsetY = sh - consts.MapScaledHeight
+
+	if m.scrollLock {
+		return
+	}
+
+	character := m.gameState.Map().FocusingCharacter()
+	// character can be nil for the very first Update() loop
+	if character == nil {
+		return
+	}
+	_, y := character.DrawPosition()
+	t := -y*consts.TileScale + sh/2
+
+	if t > 0 {
+		t = 0
+	}
+
+	if t < sh-consts.MapScaledHeight {
+		t = sh - consts.MapScaledHeight
+	}
+
+	m.offsetY = t
+}
+
 func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	const (
 		inventoryHeight = 49 * consts.TileScale
@@ -100,9 +128,7 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 
 	screenW, screenH := sceneManager.Size()
 	m.offsetX = (screenW - consts.MapWidth*consts.TileScale) / 2
-	m.offsetY = screenH - consts.MapHeight*consts.TileScale
-	// offset y should be multiplies of TileScale for pixel-pefect rendering
-	m.offsetY -= m.offsetY % consts.TileScale
+	m.offsetY = 0
 
 	m.screenImage, _ = ebiten.NewImage(consts.MapWidth, screenH/consts.TileScale, ebiten.FilterNearest)
 	m.uiImage, _ = ebiten.NewImage(uiWidth*consts.TileScale, screenH, ebiten.FilterNearest)
@@ -289,6 +315,7 @@ func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) {
 	}
 
 	m.markerAnimationFrame = 0
+
 	x, y := input.Position()
 	if y < ui.HeaderTouchAreaHeight {
 		return
@@ -300,7 +327,9 @@ func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) {
 	}
 	tx := x / consts.TileSize / consts.TileScale
 	ty := y / consts.TileSize / consts.TileScale
-	if tx < 0 || consts.TileXNum <= tx || ty < 0 || consts.TileYNum <= ty {
+	// The bottom line of the map should not be tappable as that space is
+	// reserved to avoid conflict with iPhoneX's HomeIndicator
+	if tx < 0 || consts.TileXNum <= tx || ty < 0 || consts.TileYNum-1 <= ty {
 		return
 	}
 	m.moveDstX = tx
@@ -447,7 +476,9 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 		}
 		return err
 	}
+
 	m.runEventIfNeeded(sceneManager)
+	m.updateOffsetY(sceneManager)
 	return nil
 }
 
