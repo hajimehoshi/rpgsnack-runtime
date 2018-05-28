@@ -36,6 +36,7 @@ const (
 	TextIDReviewThisApp
 	TextIDRestorePurchases
 	TextIDMoreGames
+	TextIDMenu
 	TextIDBackToTitle
 	TextIDClose
 	TextIDItemCheck
@@ -69,6 +70,7 @@ from the game for %s?`,
 		TextIDMoreGames:        "More Games",
 		TextIDClose:            "Close",
 		TextIDItemCheck:        "Check",
+		TextIDMenu:             "Menu",
 
 		TextIDNewGameWarning: `You have on-going game data.
 Do you want to reset your
@@ -99,6 +101,8 @@ enfernen?`,
 		TextIDMoreGames:        "Mehr Spiele",
 		TextIDClose:            "Zurück",
 		TextIDItemCheck:        "Info",
+		TextIDMenu:             "Menü",
+
 		TextIDNewGameWarning: `Willst du wirklich deinen
 Spielfortschritt löschen und 
 nochmal von Vorne anfangen?`,
@@ -128,6 +132,7 @@ para quitar los anuncios del juego?`,
 		TextIDMoreGames:        "Más Juegos",
 		TextIDClose:            "Cerrar",
 		TextIDItemCheck:        "Revisar",
+		TextIDMenu:             "Menú",
 
 		TextIDNewGameWarning: `Tienes datos del juego en curso.
 ¿Quieres eliminar el progreso 
@@ -154,6 +159,7 @@ e iniciar un nuevo juego?`,
 		TextIDMoreGames:        "ほかのゲーム",
 		TextIDClose:            "閉じる",
 		TextIDItemCheck:        "チェック",
+		TextIDMenu:             "タイトル",
 
 		TextIDNewGameWarning: `進行中のゲームデータがあります。
 進行中のゲームデータを消して、
@@ -182,6 +188,7 @@ e iniciar un nuevo juego?`,
 		TextIDMoreGames:        "更多游戏",
 		TextIDClose:            "关闭",
 		TextIDItemCheck:        "查看",
+		TextIDMenu:             "主选单",
 
 		TextIDNewGameWarning: `系统已经存在一个中断存档。
 开始新游戏会导致中断存档被清除。
@@ -209,6 +216,7 @@ e iniciar un nuevo juego?`,
 		TextIDMoreGames:        "更多遊戲",
 		TextIDClose:            "關閉",
 		TextIDItemCheck:        "查看",
+		TextIDMenu:             "主選單",
 
 		TextIDNewGameWarning: `系統已經存在一個中斷存檔。
 開始新遊戲會導致中斷存檔被清除。

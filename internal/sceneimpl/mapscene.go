@@ -51,7 +51,7 @@ type MapScene struct {
 	initialState         bool
 	cameraButton         *ui.Button
 	cameraTaking         bool
-	titleButton          *ui.Button
+	gameHeader           *ui.GameHeader
 	screenShotImage      *ebiten.Image
 	screenShotDialog     *ui.Dialog
 	quitDialog           *ui.Dialog
@@ -115,7 +115,8 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	m.screenShotImage = screenShotImage
 	m.screenShotDialog = ui.NewDialog((uiWidth-160)/2+4, 4, 152, 232)
 	m.screenShotDialog.AddChild(ui.NewImageView(8, 8, 1.0/consts.TileScale/2, ui.NewImagePart(m.screenShotImage)))
-	m.titleButton = ui.NewImageButton(4, 2, ui.NewImagePart(assets.GetImage("system/game/button_home_off.png")), ui.NewImagePart(assets.GetImage("system/game/button_home_on.png")), "click")
+
+	m.gameHeader = ui.NewGameHeader()
 
 	// TODO: Implement the camera functionality later
 	m.cameraButton.Visible = false
@@ -160,7 +161,7 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	m.quitNoButton.SetOnPressed(func(_ *ui.Button) {
 		m.quitDialog.Hide()
 	})
-	m.titleButton.SetOnPressed(func(_ *ui.Button) {
+	m.gameHeader.SetOnTitlePressed(func() {
 		m.quitDialog.Show()
 	})
 	m.storeErrorOkButton.SetOnPressed(func(_ *ui.Button) {
@@ -289,6 +290,9 @@ func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) {
 
 	m.markerAnimationFrame = 0
 	x, y := input.Position()
+	if y < ui.HeaderTouchAreaHeight {
+		return
+	}
 	x -= m.offsetX
 	y -= m.offsetY
 	if x < 0 || y < 0 {
@@ -387,8 +391,7 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 	m.removeAdsDialog.Update()
 
 	m.cameraButton.Update()
-	m.titleButton.Disabled = m.gameState.Map().IsBlockingEventExecuting() || m.quitDialog.Visible()
-	m.titleButton.Update()
+	m.gameHeader.Update(m.quitDialog.Visible())
 
 	m.removeAdsButton.Disabled = m.gameState.Map().IsBlockingEventExecuting()
 	m.removeAdsButton.Update()
@@ -639,15 +642,15 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	m.inventory.Draw(m.uiImage)
 
 	m.cameraButton.Draw(m.uiImage)
-	m.titleButton.Draw(m.uiImage)
 	m.removeAdsButton.Draw(m.uiImage)
+
+	m.gameState.DrawWindows(m.uiImage, 0, m.offsetY/consts.TileScale)
+	m.gameHeader.Draw(m.uiImage)
 
 	m.screenShotDialog.Draw(m.uiImage)
 	m.quitDialog.Draw(m.uiImage)
 	m.storeErrorDialog.Draw(m.uiImage)
 	m.removeAdsDialog.Draw(m.uiImage)
-
-	m.gameState.DrawWindows(m.uiImage, 0, m.offsetY/consts.TileScale)
 
 	op = &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(m.offsetX), 0)
