@@ -131,7 +131,6 @@ func (g *GameHeader) Draw(screen *ebiten.Image) {
 	w, h := g.blackImage.Size()
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(float64(sw)/float64(w), float64(headerHeight*4)/float64(h))
-	op.ColorM.Scale(1, 1, 1, 1)
 	op.GeoM.Translate(float64(0), float64(-dy*4))
 	screen.DrawImage(g.blackImage, op)
 
