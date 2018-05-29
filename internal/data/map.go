@@ -14,6 +14,14 @@
 
 package data
 
+type RoomLayoutMode string
+
+const (
+	RoomLayoutModeFixBottom RoomLayoutMode = "fix_bottom"
+	RoomLayoutModeFixCenter RoomLayoutMode = "fix_center"
+	RoomLayoutModeScroll    RoomLayoutMode = "scroll"
+)
+
 type Map struct {
 	ID    int     `json:"id" msgpack:"id"`
 	Name  string  `json:"name" msgpack:"name"`
@@ -21,16 +29,17 @@ type Map struct {
 }
 
 type Room struct {
-	ID                   int           `json:"id" msgpack:"id"`
-	X                    int           `json:"x" msgpack:"x"`
-	Y                    int           `json:"y" msgpack:"y"`
-	Tiles                [][]int       `json:"tiles" msgpack:"tiles"`
-	Events               []*Event      `json:"events" msgpack:"events"`
-	Background           MapSprite     `json:"background" msgpack:"background"`
-	Foreground           MapSprite     `json:"foreground" msgpack:"foreground"`
-	PassageTypeOverrides []PassageType `json:"passageTypeOverrides" msgpack:"passageTypeOverrides"`
-	AutoBGM              bool          `json:"autoBGM" msgpack:"autoBGM"`
-	BGM                  BGM           `json:"bgm" msgpack:"bgm"`
+	ID                   int            `json:"id" msgpack:"id"`
+	X                    int            `json:"x" msgpack:"x"`
+	Y                    int            `json:"y" msgpack:"y"`
+	Tiles                [][]int        `json:"tiles" msgpack:"tiles"`
+	Events               []*Event       `json:"events" msgpack:"events"`
+	Background           MapSprite      `json:"background" msgpack:"background"`
+	Foreground           MapSprite      `json:"foreground" msgpack:"foreground"`
+	PassageTypeOverrides []PassageType  `json:"passageTypeOverrides" msgpack:"passageTypeOverrides"`
+	AutoBGM              bool           `json:"autoBGM" msgpack:"autoBGM"`
+	BGM                  BGM            `json:"bgm" msgpack:"bgm"`
+	LayoutMode           RoomLayoutMode `json:"layoutMode" msgpack:"layoutMode"`
 }
 
 type MapSprite struct {

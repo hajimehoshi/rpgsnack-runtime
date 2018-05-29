@@ -74,7 +74,6 @@ type MapScene struct {
 	initialized          bool
 	offsetX              int
 	offsetY              int
-	scrollLock           bool
 	animation            animation
 }
 
@@ -95,29 +94,37 @@ func NewMapSceneWithGame(game *gamestate.Game) *MapScene {
 
 func (m *MapScene) updateOffsetY(sceneManager *scene.Manager) {
 	_, sh := sceneManager.Size()
-	m.offsetY = sh - consts.MapScaledHeight
 
-	if m.scrollLock {
-		return
+	switch m.gameState.Map().CurrentRoom().LayoutMode {
+	case data.RoomLayoutModeFixBottom:
+		m.offsetY = sh - consts.MapScaledHeight
+
+	case data.RoomLayoutModeFixCenter:
+		m.offsetY = (sh - consts.MapScaledHeight) / 2
+		// Adjust the screen so that the bottom snaps to the grid
+		m.offsetY -= m.offsetY % (consts.TileSize * consts.TileScale)
+
+	case data.RoomLayoutModeScroll:
+		character := m.gameState.Map().FocusingCharacter()
+		// character can be nil for the very first Update() loop
+		if character == nil {
+			return
+		}
+		_, y := character.DrawPosition()
+		t := -y*consts.TileScale + sh/2
+
+		if t > 0 {
+			t = 0
+		}
+
+		if t < sh-consts.MapScaledHeight {
+			t = sh - consts.MapScaledHeight
+		}
+		m.offsetY = t
+
+	default:
+		panic(fmt.Sprintf("invalid layout mode: %s", m.gameState.Map().CurrentRoom().LayoutMode))
 	}
-
-	character := m.gameState.Map().FocusingCharacter()
-	// character can be nil for the very first Update() loop
-	if character == nil {
-		return
-	}
-	_, y := character.DrawPosition()
-	t := -y*consts.TileScale + sh/2
-
-	if t > 0 {
-		t = 0
-	}
-
-	if t < sh-consts.MapScaledHeight {
-		t = sh - consts.MapScaledHeight
-	}
-
-	m.offsetY = t
 }
 
 func (m *MapScene) initUI(sceneManager *scene.Manager) {
