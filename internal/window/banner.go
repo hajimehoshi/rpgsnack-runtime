@@ -36,7 +36,6 @@ const (
 	bannerWidth    = 160
 	bannerHeight   = 75
 	bannerPaddingX = 4
-	bannerMarginY  = 9
 )
 
 type banner struct {
@@ -224,7 +223,7 @@ func (b *banner) stopCharacterAnim(character *character.Character) {
 	character.RestoreStoredState()
 }
 
-func (b *banner) position() (int, int) {
+func (b *banner) position(screen *ebiten.Image) (int, int) {
 	x := 0
 	y := 0
 	positionType := b.positionType
@@ -235,13 +234,15 @@ func (b *banner) position() (int, int) {
 			positionType = data.MessagePositionTop
 		}
 	}
+	_, sh := screen.Size()
+	h := sh / consts.TileScale
 	switch positionType {
 	case data.MessagePositionBottom:
-		y = consts.MapHeight - bannerHeight + bannerMarginY
+		y = h - bannerHeight
 	case data.MessagePositionMiddle:
-		y = (consts.MapHeight-bannerHeight)/2 + bannerMarginY
+		y = (h - bannerHeight) / 2
 	case data.MessagePositionTop:
-		y = bannerMarginY
+		y = 0
 	}
 	return x, y
 }
@@ -271,7 +272,7 @@ func (b *banner) draw(screen *ebiten.Image, offsetX, offsetY int) {
 	case data.MessageBackgroundBanner:
 		if rate > 0 {
 			img := assets.GetImage("system/game/banner.png")
-			x, y := b.position()
+			x, y := b.position(screen)
 			op := &ebiten.DrawImageOptions{}
 			op.GeoM.Translate(float64(x), float64(y))
 			op.GeoM.Translate(float64(dx), float64(dy))
@@ -284,7 +285,7 @@ func (b *banner) draw(screen *ebiten.Image, offsetX, offsetY int) {
 	if b.opened {
 		displayTextLength := b.typingEffect.getCurrentTextRuneCount()
 		_, th := font.MeasureSize(b.content)
-		x, y := b.position()
+		x, y := b.position(screen)
 		x = (x + bannerPaddingX) * consts.TileScale
 		y = y*consts.TileScale + (bannerHeight*consts.TileScale-th*textScale)/2
 		switch b.textAlign {
