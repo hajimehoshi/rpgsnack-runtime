@@ -45,8 +45,8 @@ func (m *Requester) RequestPurchase(requestID int, productID string) {
 
 func (m *Requester) RequestShowShop(requestID int, data string) {
 	log.Printf("request to ShowShop")
-	//TODO Show mock shop UI
-	m.game.RespondShowShop(requestID, true, nil)
+	//TODO Mock purchase selection
+	m.game.RespondShowShop(requestID, true, []byte("[\"bronze_support\"]"))
 }
 
 func (m *Requester) RequestRestorePurchases(requestID int) {
