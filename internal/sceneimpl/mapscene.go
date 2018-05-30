@@ -96,6 +96,11 @@ func NewMapSceneWithGame(game *gamestate.Game) *MapScene {
 func (m *MapScene) updateOffsetY(sceneManager *scene.Manager) {
 	_, sh := sceneManager.Size()
 
+	if sh >= consts.SuperLargeScreenHeight {
+		m.offsetY = 0
+		return
+	}
+
 	bottomOffset := consts.TileSize * consts.TileScale
 	if sceneManager.HasExtraBottomGrid() {
 		bottomOffset = 0
