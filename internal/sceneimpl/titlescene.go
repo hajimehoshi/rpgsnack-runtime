@@ -55,6 +55,10 @@ type TitleScene struct {
 	err              error
 }
 
+const (
+	footerHeight = 280
+)
+
 func NewTitleScene() *TitleScene {
 	t := &TitleScene{}
 	return t
@@ -66,13 +70,17 @@ func (t *TitleScene) initUI(sceneManager *scene.Manager) {
 	settingsIcon := ui.NewImagePart(assets.GetImage("system/common/icon_settings.png"))
 	moreGamesIcon := ui.NewImagePart(assets.GetImage("system/common/icon_moregames.png"))
 
-	t.resumeGameButton = ui.NewTextButton((w/consts.TileScale-120)/2, 196, 120, 20, "click")
-	t.titleLine = ui.NewImageView((w/consts.TileScale-120)/2+20, 196, 1.0, ui.NewImagePart(assets.GetImage("system/common/title_line.png")))
-	t.newGameButton = ui.NewTextButton((w/consts.TileScale-120)/2, 178, 120, 20, "click")
-	t.removeAdsButton = ui.NewTextButton((w/consts.TileScale-120)/2, 220, 120, 20, "click")
+	by := 16
+	if sceneManager.HasExtraBottomGrid() {
+		by = 32
+	}
+	t.resumeGameButton = ui.NewTextButton((w/consts.TileScale-120)/2, h/consts.TileScale-by-32, 120, 20, "click")
+	t.titleLine = ui.NewImageView((w/consts.TileScale-120)/2+20, h/consts.TileScale-by-32, 1.0, ui.NewImagePart(assets.GetImage("system/common/title_line.png")))
+	t.newGameButton = ui.NewTextButton((w/consts.TileScale-120)/2, h/consts.TileScale-by-52, 120, 20, "click")
+	t.removeAdsButton = ui.NewTextButton((w/consts.TileScale-120)/2, h/consts.TileScale-by-8, 120, 20, "click")
 	t.removeAdsButton.TextColor = color.RGBA{0xc8, 0xc8, 0xc8, 0xff}
-	t.settingsButton = ui.NewImageButton(w/consts.TileScale-16, h/consts.TileScale-16, settingsIcon, settingsIcon, "click")
-	t.moregamesButton = ui.NewImageButton(4, h/consts.TileScale-16, moreGamesIcon, moreGamesIcon, "click")
+	t.settingsButton = ui.NewImageButton(w/consts.TileScale-16, h/consts.TileScale-by, settingsIcon, settingsIcon, "click")
+	t.moregamesButton = ui.NewImageButton(4, h/consts.TileScale-by, moreGamesIcon, moreGamesIcon, "click")
 	t.warningDialog = ui.NewDialog((w/consts.TileScale-160)/2+4, 64, 152, 124)
 	t.warningLabel = ui.NewLabel(16, 8)
 	t.warningYesButton = ui.NewButton((152-120)/2, 72, 120, 20, "click")
@@ -214,22 +222,31 @@ func (t *TitleScene) handleBackButton() {
 	t.quitDialog.Show()
 }
 
-func (t *TitleScene) Draw(screen *ebiten.Image) {
-	if !t.initialized {
-		return
-	}
+func (t *TitleScene) DrawFooter(screen *ebiten.Image) {
+	fimg := assets.GetImage("system/common/title_footer.png")
+	_, sh := screen.Size()
 
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(0, float64(sh-footerHeight))
+	screen.DrawImage(fimg, op)
+}
+
+func (t *TitleScene) DrawBackgroundAnimation(screen *ebiten.Image) {
+	_, sh := screen.Size()
 	if assets.ImageExists("titles/bg.png") {
 		const (
-			frameWidth  = 180
-			frameHeight = 180
+			frameWidth  = 160
+			frameHeight = 280
 		)
 
 		if t.bgImage == nil {
 			t.bgImage, _ = ebiten.NewImage(frameWidth, frameHeight, ebiten.FilterDefault)
 		}
 		t.bgImage.Clear()
-		t.animation.Draw(t.bgImage, assets.GetImage("titles/bg.png"), frameWidth, 0, 0)
+		// We would like to focus on the 1/3 point of the title image
+		// This allows it to show the title "nicely" on any device
+		ty := ((sh-footerHeight)/consts.TileScale - frameHeight) / 3
+		t.animation.Draw(t.bgImage, assets.GetImage("titles/bg.png"), frameWidth, 0, ty)
 
 		op := &ebiten.DrawImageOptions{}
 		sw, _ := screen.Size()
@@ -237,13 +254,26 @@ func (t *TitleScene) Draw(screen *ebiten.Image) {
 		op.GeoM.Translate(float64(sw-frameWidth*consts.TileScale)/2, 0)
 		screen.DrawImage(t.bgImage, op)
 	}
+}
+
+func (t *TitleScene) DrawTitle(screen *ebiten.Image) {
 
 	timg := assets.GetLocalizeImage("titles/title", t.lang)
-	tw, _ := timg.Size()
-	sw, _ := screen.Size()
+	tw, th := timg.Size()
+	sw, sh := screen.Size()
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate((float64(sw)-float64(tw))/2, 0)
+	op.GeoM.Translate((float64(sw)-float64(tw))/2, float64(sh-footerHeight-th)/2)
 	screen.DrawImage(timg, op)
+}
+
+func (t *TitleScene) Draw(screen *ebiten.Image) {
+	if !t.initialized {
+		return
+	}
+
+	t.DrawBackgroundAnimation(screen)
+	t.DrawFooter(screen)
+	t.DrawTitle(screen)
 
 	// TODO: hide buttons to avoid visual conflicts between the dialog and the buttons
 	if !t.warningDialog.Visible() && !t.quitDialog.Visible() {
