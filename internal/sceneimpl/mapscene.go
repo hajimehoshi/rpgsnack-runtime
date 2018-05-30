@@ -74,6 +74,7 @@ type MapScene struct {
 	initialized          bool
 	offsetX              int
 	offsetY              int
+	inventoryHeight      int
 	animation            animation
 }
 
@@ -95,9 +96,13 @@ func NewMapSceneWithGame(game *gamestate.Game) *MapScene {
 func (m *MapScene) updateOffsetY(sceneManager *scene.Manager) {
 	_, sh := sceneManager.Size()
 
+	bottomOffset := consts.TileSize * consts.TileScale
+	if sceneManager.HasExtraBottomGrid() {
+		bottomOffset = 0
+	}
 	switch m.gameState.Map().CurrentRoom().LayoutMode {
 	case data.RoomLayoutModeFixBottom:
-		m.offsetY = sh - consts.MapScaledHeight
+		m.offsetY = sh - consts.MapScaledHeight + bottomOffset
 
 	case data.RoomLayoutModeFixCenter:
 		m.offsetY = (sh - consts.MapScaledHeight) / 2
@@ -117,8 +122,8 @@ func (m *MapScene) updateOffsetY(sceneManager *scene.Manager) {
 			t = 0
 		}
 
-		if t < sh-consts.MapScaledHeight {
-			t = sh - consts.MapScaledHeight
+		if t < sh-consts.MapScaledHeight+bottomOffset {
+			t = sh - consts.MapScaledHeight + bottomOffset
 		}
 		m.offsetY = t
 
@@ -129,10 +134,14 @@ func (m *MapScene) updateOffsetY(sceneManager *scene.Manager) {
 
 func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	const (
-		inventoryHeight = 49 * consts.TileScale
-		uiWidth         = consts.MapWidth
+		uiWidth = consts.MapWidth
 	)
 
+	if sceneManager.HasExtraBottomGrid() {
+		m.inventoryHeight = 49 * consts.TileScale
+	} else {
+		m.inventoryHeight = (49 - consts.TileSize) * consts.TileScale
+	}
 	screenW, screenH := sceneManager.Size()
 	m.offsetX = (screenW - consts.MapWidth*consts.TileScale) / 2
 	m.offsetY = 0
@@ -178,7 +187,7 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	m.removeAdsDialog.AddChild(m.removeAdsYesButton)
 	m.removeAdsDialog.AddChild(m.removeAdsNoButton)
 
-	m.inventory = ui.NewInventory(0, (screenH-inventoryHeight)/consts.TileScale)
+	m.inventory = ui.NewInventory(0, (screenH-m.inventoryHeight)/consts.TileScale, sceneManager.HasExtraBottomGrid())
 	m.itemPreviewPopup = ui.NewItemPreviewPopup(int(screenH/consts.TileScale) - 160)
 	m.quitDialog.AddChild(m.quitLabel)
 

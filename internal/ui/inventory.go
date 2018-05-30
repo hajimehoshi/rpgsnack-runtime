@@ -37,6 +37,7 @@ const (
 type Inventory struct {
 	x                   int
 	y                   int
+	showItemName        bool
 	itemLabel           *Label
 	visible             bool
 	disabled            bool
@@ -89,7 +90,7 @@ const (
 	dotSpace            = 8
 )
 
-func NewInventory(x, y int) *Inventory {
+func NewInventory(x, y int, showItemName bool) *Inventory {
 	backButton := NewImageButton(
 		x,
 		y,
@@ -119,6 +120,7 @@ func NewInventory(x, y int) *Inventory {
 	return &Inventory{
 		x:               x,
 		y:               y,
+		showItemName:    showItemName,
 		itemLabel:       itemLabel,
 		visible:         true,
 		items:           []*data.Item{},
@@ -208,7 +210,7 @@ func (i *Inventory) Update(sceneManager *scene.Manager) {
 	}
 
 	activeItem := i.activeItem()
-	if activeItem != nil {
+	if i.showItemName && activeItem != nil {
 		i.itemLabel.Text = sceneManager.Game().Texts.Get(lang.Get(), activeItem.Name)
 	} else {
 		i.itemLabel.Text = ""

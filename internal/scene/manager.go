@@ -23,6 +23,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten"
 
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
@@ -94,6 +95,10 @@ func (m *Manager) InitScene(scene scene) {
 
 func (m *Manager) Size() (int, int) {
 	return m.width, m.height
+}
+
+func (m *Manager) HasExtraBottomGrid() bool {
+	return m.height > consts.SuperLargeScreenHeight
 }
 
 func (m *Manager) Requester() Requester {

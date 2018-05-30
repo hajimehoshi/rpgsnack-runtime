@@ -28,4 +28,5 @@ const (
 	TextScale              = 2
 	BigTextScale           = 3
 	MaxFullscreenImageSize = 304
+	SuperLargeScreenHeight = (TileYNum - 1) * TileSize * TileScale // For devices like iPhoneX
 )
