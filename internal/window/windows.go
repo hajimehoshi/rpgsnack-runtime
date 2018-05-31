@@ -405,6 +405,6 @@ func (w *Windows) Draw(screen *ebiten.Image, characters []*character.Character, 
 	}
 
 	if w.banner != nil {
-		w.banner.draw(screen, offsetX, offsetY)
+		w.banner.draw(screen, offsetX, 0)
 	}
 }

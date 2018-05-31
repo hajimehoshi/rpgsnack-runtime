@@ -235,14 +235,16 @@ func (b *banner) position(screen *ebiten.Image) (int, int) {
 		}
 	}
 	_, sh := screen.Size()
-	h := sh / consts.TileScale
+	cy := (sh/consts.TileScale - bannerHeight) / 2
+	ty := (consts.GuaranteedVisibleMapHeight - bannerHeight) / 2
+
 	switch positionType {
 	case data.MessagePositionBottom:
-		y = h - bannerHeight
+		y = cy + ty
 	case data.MessagePositionMiddle:
-		y = (h - bannerHeight) / 2
+		y = cy
 	case data.MessagePositionTop:
-		y = 0
+		y = cy - ty
 	}
 	return x, y
 }

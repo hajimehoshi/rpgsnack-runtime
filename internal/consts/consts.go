@@ -15,18 +15,20 @@
 package consts
 
 const (
-	PaletteWidth           = 10
-	TileSize               = 16
-	MiniTileSize           = 8
-	TileXNum               = 10
-	TileYNum               = 22
-	MapWidth               = TileXNum * TileSize
-	MapHeight              = TileYNum * TileSize
-	MapScaledWidth         = MapWidth * TileScale
-	MapScaledHeight        = MapHeight * TileScale
-	TileScale              = 3
-	TextScale              = 2
-	BigTextScale           = 3
-	MaxFullscreenImageSize = 304
-	SuperLargeScreenHeight = (TileYNum - 1) * TileSize * TileScale // For devices like iPhoneX
+	PaletteWidth               = 10
+	TileSize                   = 16
+	MiniTileSize               = 8
+	TileXNum                   = 10
+	TileYNum                   = 22
+	GuaranteedVisibleTileYNum  = 14
+	MapWidth                   = TileXNum * TileSize
+	MapHeight                  = TileYNum * TileSize
+	GuaranteedVisibleMapHeight = GuaranteedVisibleTileYNum * TileSize
+	MapScaledWidth             = MapWidth * TileScale
+	MapScaledHeight            = MapHeight * TileScale
+	TileScale                  = 3
+	TextScale                  = 2
+	BigTextScale               = 3
+	MaxFullscreenImageSize     = 304
+	SuperLargeScreenHeight     = (TileYNum - 1) * TileSize * TileScale // For devices like iPhoneX
 )
