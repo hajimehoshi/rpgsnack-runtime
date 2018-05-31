@@ -514,8 +514,8 @@ func (g *Game) DrawScreen(screen *ebiten.Image, screenImage *ebiten.Image, op *e
 	g.screen.Draw(screen, screenImage, op)
 }
 
-func (g *Game) DrawWindows(screen *ebiten.Image, offsetX, offsetY int) {
-	g.windows.Draw(screen, g.createCharacterList(), offsetX, offsetY)
+func (g *Game) DrawWindows(screen *ebiten.Image, offsetX, offsetY, windowOffsetY int) {
+	g.windows.Draw(screen, g.createCharacterList(), offsetX, offsetY, windowOffsetY)
 }
 
 func (g *Game) createCharacterList() []*character.Character {

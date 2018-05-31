@@ -74,6 +74,7 @@ type MapScene struct {
 	initialized          bool
 	offsetX              int
 	offsetY              int
+	windowOffsetY        int
 	inventoryHeight      int
 	animation            animation
 }
@@ -96,15 +97,16 @@ func NewMapSceneWithGame(game *gamestate.Game) *MapScene {
 func (m *MapScene) updateOffsetY(sceneManager *scene.Manager) {
 	_, sh := sceneManager.Size()
 
+	// In case the device is super large (iPhoneX),
+	// we do not do any of the layout work here
+	// as we are always going to show the fullscreen
 	if sh >= consts.SuperLargeScreenHeight {
 		m.offsetY = 0
+		m.windowOffsetY = sceneManager.BottomOffset()
 		return
 	}
-
 	bottomOffset := consts.TileSize * consts.TileScale
-	if sceneManager.HasExtraBottomGrid() {
-		bottomOffset = 0
-	}
+
 	switch m.gameState.Map().CurrentRoom().LayoutMode {
 	case data.RoomLayoutModeFixBottom:
 		m.offsetY = sh - consts.MapScaledHeight + bottomOffset
@@ -135,6 +137,7 @@ func (m *MapScene) updateOffsetY(sceneManager *scene.Manager) {
 	default:
 		panic(fmt.Sprintf("invalid layout mode: %s", m.gameState.Map().CurrentRoom().LayoutMode))
 	}
+	m.windowOffsetY = 0
 }
 
 func (m *MapScene) initUI(sceneManager *scene.Manager) {
@@ -696,7 +699,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	m.cameraButton.Draw(m.uiImage)
 	m.removeAdsButton.Draw(m.uiImage)
 
-	m.gameState.DrawWindows(m.uiImage, 0, m.offsetY/consts.TileScale)
+	m.gameState.DrawWindows(m.uiImage, 0, m.offsetY/consts.TileScale, m.windowOffsetY/consts.TileScale)
 	m.gameHeader.Draw(m.uiImage)
 
 	m.screenShotDialog.Draw(m.uiImage)

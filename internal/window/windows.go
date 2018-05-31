@@ -342,6 +342,7 @@ func (w *Windows) Update(playerY int, sceneManager *scene.Manager, characters []
 		ymax := h / consts.TileScale
 		ymin := ymax - len(w.choiceBalloons)*choiceBalloonHeight
 		_, y := input.Position()
+		y += sceneManager.BottomOffset()
 		y /= consts.TileScale
 		if y < ymin || ymax <= y {
 			return
@@ -389,7 +390,7 @@ func (w *Windows) Update(playerY int, sceneManager *scene.Manager, characters []
 	}
 }
 
-func (w *Windows) Draw(screen *ebiten.Image, characters []*character.Character, offsetX, offsetY int) {
+func (w *Windows) Draw(screen *ebiten.Image, characters []*character.Character, offsetX, offsetY, windowOffsetY int) {
 	for _, b := range w.balloons {
 		if b == nil {
 			continue
@@ -400,7 +401,7 @@ func (w *Windows) Draw(screen *ebiten.Image, characters []*character.Character, 
 		if b == nil {
 			continue
 		}
-		b.draw(screen, nil, offsetX, 0)
+		b.draw(screen, nil, offsetX, -windowOffsetY)
 	}
 
 	if w.banner != nil {

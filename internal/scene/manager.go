@@ -97,8 +97,15 @@ func (m *Manager) Size() (int, int) {
 	return m.width, m.height
 }
 
+func (m *Manager) BottomOffset() int {
+	if m.height > consts.SuperLargeScreenHeight {
+		return consts.TileSize * consts.TileScale
+	}
+	return 0
+}
+
 func (m *Manager) HasExtraBottomGrid() bool {
-	return m.height > consts.SuperLargeScreenHeight
+	return m.BottomOffset() > 0
 }
 
 func (m *Manager) Requester() Requester {
