@@ -72,15 +72,15 @@ func (t *TitleScene) initUI(sceneManager *scene.Manager) {
 
 	by := 16
 	if sceneManager.HasExtraBottomGrid() {
-		by = 32
+		by = 36
 	}
 	t.resumeGameButton = ui.NewTextButton((w/consts.TileScale-120)/2, h/consts.TileScale-by-32, 120, 20, "click")
 	t.titleLine = ui.NewImageView((w/consts.TileScale-120)/2+20, h/consts.TileScale-by-32, 1.0, ui.NewImagePart(assets.GetImage("system/common/title_line.png")))
 	t.newGameButton = ui.NewTextButton((w/consts.TileScale-120)/2, h/consts.TileScale-by-52, 120, 20, "click")
 	t.removeAdsButton = ui.NewTextButton((w/consts.TileScale-120)/2, h/consts.TileScale-by-8, 120, 20, "click")
 	t.removeAdsButton.TextColor = color.RGBA{0xc8, 0xc8, 0xc8, 0xff}
-	t.settingsButton = ui.NewImageButton(w/consts.TileScale-16, h/consts.TileScale-by, settingsIcon, settingsIcon, "click")
-	t.moregamesButton = ui.NewImageButton(4, h/consts.TileScale-by, moreGamesIcon, moreGamesIcon, "click")
+	t.settingsButton = ui.NewImageButton(w/consts.TileScale-24, h/consts.TileScale-by, settingsIcon, settingsIcon, "click")
+	t.moregamesButton = ui.NewImageButton(12, h/consts.TileScale-by, moreGamesIcon, moreGamesIcon, "click")
 	t.warningDialog = ui.NewDialog((w/consts.TileScale-160)/2+4, (h)/(2*consts.TileScale)-64, 152, 124)
 	t.warningLabel = ui.NewLabel(16, 8)
 	t.warningYesButton = ui.NewButton((152-120)/2, 72, 120, 20, "click")
