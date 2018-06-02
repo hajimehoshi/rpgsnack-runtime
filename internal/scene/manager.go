@@ -41,9 +41,12 @@ type setPlatformDataArgs struct {
 	value string
 }
 
+type ScreenSizer interface {
+	ScreenSize() (int, int)
+}
+
 type Manager struct {
-	width                 int
-	height                int
+	screenSizer           ScreenSizer
 	requester             Requester
 	current               scene
 	next                  scene
@@ -69,10 +72,9 @@ const (
 	PlatformDataKeyBackButton            PlatformDataKey = "backbutton"
 )
 
-func NewManager(width, height int, requester Requester, game *data.Game, progress []byte, purchases []string) *Manager {
+func NewManager(screenSizer ScreenSizer, requester Requester, game *data.Game, progress []byte, purchases []string) *Manager {
 	m := &Manager{
-		width:             width,
-		height:            height,
+		screenSizer:       screenSizer,
 		requester:         &requesterImpl{Requester: requester},
 		resultCh:          make(chan RequestResult, 1),
 		results:           map[int]*RequestResult{},
@@ -94,11 +96,11 @@ func (m *Manager) InitScene(scene scene) {
 }
 
 func (m *Manager) Size() (int, int) {
-	return m.width, m.height
+	return m.screenSizer.ScreenSize()
 }
 
 func (m *Manager) BottomOffset() int {
-	if m.height > consts.SuperLargeScreenHeight {
+	if _, h := m.screenSizer.ScreenSize(); h > consts.SuperLargeScreenHeight {
 		return consts.TileSize * consts.TileScale
 	}
 	return 0

@@ -62,6 +62,22 @@ func IsRunning() bool {
 	}
 }
 
+func adjustScreenSize(widthInDP, heightInDP int) (width, height int, scale float64) {
+	const (
+		minWidth  = 480
+		minHeight = 672
+	)
+
+	if float64(heightInDP)/float64(widthInDP) > float64(minHeight)/minWidth {
+		scale = float64(widthInDP) / minWidth
+	} else {
+		scale = float64(heightInDP) / minHeight
+	}
+	width = int(float64(widthInDP) / scale)
+	height = int(float64(heightInDP) / scale)
+	return width, height, scale
+}
+
 func Start(widthInDP int, heightInDP int, requester Requester, project []byte, assets []byte, progress []byte, purchases []byte, language string) (err error) {
 	defer func() {
 		close(startCalled)
@@ -79,28 +95,19 @@ func Start(widthInDP int, heightInDP int, requester Requester, project []byte, a
 
 	setData(project, assets, progress, purchases, language)
 
-	const (
-		minWidth  = 480
-		minHeight = 672
-	)
-
-	width := 0
-	height := 0
-	scale := 0.0
-	if float64(heightInDP)/float64(widthInDP) > float64(minHeight)/minWidth {
-		scale = float64(widthInDP) / minWidth
-	} else {
-		scale = float64(heightInDP) / minHeight
-	}
-	width = int(float64(widthInDP) / scale)
-	height = int(float64(heightInDP) / scale)
-
+	width, height, scale := adjustScreenSize(widthInDP, heightInDP)
 	g := game.New(width, height, requester)
 	if err := mobile.Start(g.Update, width, height, scale, ""); err != nil {
 		return err
 	}
 	theGame = g
 	return nil
+}
+
+func SetScreenSize(widthInDP, heightInDP int) {
+	// TODO: Need to adjust scale?
+	width, height, _ := adjustScreenSize(widthInDP, heightInDP)
+	theGame.SetScreenSize(width, height)
 }
 
 func Update() (err error) {
