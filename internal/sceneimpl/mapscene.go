@@ -171,7 +171,7 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	// TODO: Implement the camera functionality later
 	m.cameraButton.Visible = false
 
-	m.quitDialog = ui.NewDialog((uiWidth-160)/2+4, 64, 152, 124)
+	m.quitDialog = ui.NewDialog((uiWidth-160)/2+4, screenH/(2*consts.TileScale)-64, 152, 124)
 	m.quitLabel = ui.NewLabel(16, 8)
 	m.quitYesButton = ui.NewButton((152-120)/2, 72, 120, 20, "click")
 	m.quitNoButton = ui.NewButton((152-120)/2, 96, 120, 20, "cancel")

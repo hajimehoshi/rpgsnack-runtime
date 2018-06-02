@@ -53,20 +53,21 @@ func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
 		buttonDeltaY  = 24
 	)
 
-	w, _ := sceneManager.Size()
+	w, h := sceneManager.Size()
 
 	tx := (w/consts.TileScale - 120) / 2
-	s.settingsLabel = ui.NewLabel(16, 8)
-	s.languageButton = ui.NewButton(tx, buttonOffsetX+1*buttonDeltaY, 120, 20, "click")
-	s.creditButton = ui.NewButton(tx, buttonOffsetX+2*buttonDeltaY, 120, 20, "click")
-	s.updateCreditsButton = ui.NewButton(tx+80, buttonOffsetX+2*buttonDeltaY, 40, 20, "click")
+	ty := (h - 640) / (2 * consts.TileScale)
+	s.settingsLabel = ui.NewLabel(16, ty+8)
+	s.languageButton = ui.NewButton(tx, ty+buttonOffsetX+1*buttonDeltaY, 120, 20, "click")
+	s.creditButton = ui.NewButton(tx, ty+buttonOffsetX+2*buttonDeltaY, 120, 20, "click")
+	s.updateCreditsButton = ui.NewButton(tx+80, ty+buttonOffsetX+2*buttonDeltaY, 40, 20, "click")
 
-	s.reviewThisAppButton = ui.NewButton(tx, buttonOffsetX+3*buttonDeltaY, 120, 20, "click")
-	s.restorePurchasesButton = ui.NewButton(tx, buttonOffsetX+4*buttonDeltaY, 120, 20, "click")
-	s.moreGamesButton = ui.NewButton(tx, buttonOffsetX+5*buttonDeltaY, 120, 20, "click")
-	s.closeButton = ui.NewButton(tx, buttonOffsetX+6*buttonDeltaY, 120, 20, "cancel")
+	s.reviewThisAppButton = ui.NewButton(tx, ty+buttonOffsetX+3*buttonDeltaY, 120, 20, "click")
+	s.restorePurchasesButton = ui.NewButton(tx, ty+buttonOffsetX+4*buttonDeltaY, 120, 20, "click")
+	s.moreGamesButton = ui.NewButton(tx, ty+buttonOffsetX+5*buttonDeltaY, 120, 20, "click")
+	s.closeButton = ui.NewButton(tx, ty+buttonOffsetX+6*buttonDeltaY, 120, 20, "cancel")
 
-	s.languageDialog = ui.NewDialog((w/consts.TileScale-160)/2+4, 4, 152, 232)
+	s.languageDialog = ui.NewDialog((w/consts.TileScale-160)/2+4, h/(2*consts.TileScale)-80, 152, 160)
 
 	for i, l := range sceneManager.Game().Texts.Languages() {
 		i := i // i is captured by the below closure and it is needed to copy here.

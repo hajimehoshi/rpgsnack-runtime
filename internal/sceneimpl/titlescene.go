@@ -81,7 +81,7 @@ func (t *TitleScene) initUI(sceneManager *scene.Manager) {
 	t.removeAdsButton.TextColor = color.RGBA{0xc8, 0xc8, 0xc8, 0xff}
 	t.settingsButton = ui.NewImageButton(w/consts.TileScale-16, h/consts.TileScale-by, settingsIcon, settingsIcon, "click")
 	t.moregamesButton = ui.NewImageButton(4, h/consts.TileScale-by, moreGamesIcon, moreGamesIcon, "click")
-	t.warningDialog = ui.NewDialog((w/consts.TileScale-160)/2+4, 64, 152, 124)
+	t.warningDialog = ui.NewDialog((w/consts.TileScale-160)/2+4, (h)/(2*consts.TileScale)-64, 152, 124)
 	t.warningLabel = ui.NewLabel(16, 8)
 	t.warningYesButton = ui.NewButton((152-120)/2, 72, 120, 20, "click")
 	t.warningNoButton = ui.NewButton((152-120)/2, 96, 120, 20, "cancel")
@@ -89,7 +89,7 @@ func (t *TitleScene) initUI(sceneManager *scene.Manager) {
 	t.warningDialog.AddChild(t.warningYesButton)
 	t.warningDialog.AddChild(t.warningNoButton)
 
-	t.quitDialog = ui.NewDialog((w/consts.TileScale-160)/2+4, 64, 152, 124)
+	t.quitDialog = ui.NewDialog((w/consts.TileScale-160)/2+4, (h)/(2*consts.TileScale)-64, 152, 124)
 	t.quitLabel = ui.NewLabel(16, 8)
 	t.quitYesButton = ui.NewButton((152-120)/2, 72, 120, 20, "click")
 	t.quitNoButton = ui.NewButton((152-120)/2, 96, 120, 20, "cancel")
