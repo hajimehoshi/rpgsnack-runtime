@@ -193,3 +193,7 @@ func (s *SettingsScene) Draw(screen *ebiten.Image) {
 	s.closeButton.Draw(screen)
 	s.languageDialog.Draw(screen)
 }
+
+func (s *SettingsScene) Resize() {
+	s.initialized = false
+}

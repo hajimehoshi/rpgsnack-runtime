@@ -725,3 +725,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	msg = ""
 	font.DrawText(screen, msg, 160+m.offsetX, 8, consts.TextScale, data.TextAlignLeft, color.White, len([]rune(msg)))
 }
+
+func (m *MapScene) Resize() {
+	m.initialized = false
+}

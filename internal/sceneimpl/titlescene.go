@@ -287,3 +287,7 @@ func (t *TitleScene) Draw(screen *ebiten.Image) {
 	t.warningDialog.Draw(screen)
 	t.quitDialog.Draw(screen)
 }
+
+func (t *TitleScene) Resize() {
+	t.initialized = false
+}

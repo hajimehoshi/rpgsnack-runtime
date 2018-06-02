@@ -34,6 +34,7 @@ var TierTypes = [...]string{"tier1_donation", "tier2_donation", "tier3_donation"
 type scene interface {
 	Update(manager *Manager) error
 	Draw(screen *ebiten.Image)
+	Resize()
 }
 
 type setPlatformDataArgs struct {
@@ -41,12 +42,9 @@ type setPlatformDataArgs struct {
 	value string
 }
 
-type ScreenSizer interface {
-	ScreenSize() (int, int)
-}
-
 type Manager struct {
-	screenSizer           ScreenSizer
+	width                 int
+	height                int
 	requester             Requester
 	current               scene
 	next                  scene
@@ -72,9 +70,10 @@ const (
 	PlatformDataKeyBackButton            PlatformDataKey = "backbutton"
 )
 
-func NewManager(screenSizer ScreenSizer, requester Requester, game *data.Game, progress []byte, purchases []string) *Manager {
+func NewManager(width, height int, requester Requester, game *data.Game, progress []byte, purchases []string) *Manager {
 	m := &Manager{
-		screenSizer:       screenSizer,
+		width:             width,
+		height:            height,
 		requester:         &requesterImpl{Requester: requester},
 		resultCh:          make(chan RequestResult, 1),
 		results:           map[int]*RequestResult{},
@@ -96,11 +95,17 @@ func (m *Manager) InitScene(scene scene) {
 }
 
 func (m *Manager) Size() (int, int) {
-	return m.screenSizer.ScreenSize()
+	return m.width, m.height
+}
+
+func (m *Manager) SetScreenSize(width, height int) {
+	m.width = width
+	m.height = height
+	m.current.Resize()
 }
 
 func (m *Manager) BottomOffset() int {
-	if _, h := m.screenSizer.ScreenSize(); h > consts.SuperLargeScreenHeight {
+	if m.height > consts.SuperLargeScreenHeight {
 		return consts.TileSize * consts.TileScale
 	}
 	return 0

@@ -106,6 +106,9 @@ func (g *Game) SetScreenSize(width, height int) {
 	g.width = width
 	g.height = height
 	ebiten.SetScreenSize(width, height)
+	if g.sceneManager != nil {
+		g.sceneManager.SetScreenSize(width, height)
+	}
 }
 
 var lang language.Tag
@@ -148,7 +151,7 @@ func (g *Game) update() error {
 			g.loadProgressCh = nil
 			da := d.LoadedData
 			assets.Set(da.Assets, da.AssetsMetadata)
-			g.sceneManager = scene.NewManager(g, g.requester, da.Game, da.Progress, da.Purchases)
+			g.sceneManager = scene.NewManager(g.width, g.height, g.requester, da.Game, da.Progress, da.Purchases)
 			g.sceneManager.SetLanguage(da.Language)
 			g.sceneManager.InitScene(sceneimpl.NewTitleScene())
 		default:
