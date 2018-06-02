@@ -202,7 +202,7 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	m.removeAdsButton.Visible = false // TODO: Clock of Atonement does not need this feature, so turn it off for now
 
 	m.quitYesButton.SetOnPressed(func(_ *ui.Button) {
-		if m.gameState.IsAutoSaveEnabled() {
+		if m.gameState.IsAutoSaveEnabled() && !m.gameState.Map().IsBlockingEventExecuting() {
 			m.gameState.RequestSave(sceneManager)
 		}
 		audio.Stop()
