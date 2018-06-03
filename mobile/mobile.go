@@ -29,14 +29,11 @@ var (
 	startCalled = make(chan struct{})
 )
 
-func setData(project []byte, assets []byte, progress []byte, purchases []byte, language string) {
+func setData(project []byte, assets [][]byte, progress []byte, purchases []byte, language string) {
 	// Copy data here since the given data is just a reference and might be
 	// broken in the mobile side.
 	p := make([]byte, len(project))
 	copy(p, project)
-
-	a := make([]byte, len(assets))
-	copy(a, assets)
 
 	var p1 []byte
 	if progress != nil {
@@ -50,7 +47,7 @@ func setData(project []byte, assets []byte, progress []byte, purchases []byte, l
 		copy(p2, purchases)
 	}
 
-	data.SetData(p, a, p1, p2, language)
+	data.SetData(p, assets, p1, p2, language)
 }
 
 func IsRunning() bool {
@@ -78,7 +75,17 @@ func adjustScreenSize(widthInDP, heightInDP int) (width, height int, scale float
 	return width, height, scale
 }
 
-func Start(widthInDP int, heightInDP int, requester Requester, project []byte, assets []byte, progress []byte, purchases []byte, language string) (err error) {
+var assetBytes [][]byte
+
+func AppendAssetBytes(bytes []byte) {
+	// Copy data here since the given data is just a reference and might be
+	// broken in the mobile side.
+	bs := make([]byte, len(bytes))
+	copy(bs, bytes)
+	assetBytes = append(assetBytes, bs)
+}
+
+func Start(widthInDP int, heightInDP int, requester Requester, project []byte, progress []byte, purchases []byte, language string) (err error) {
 	defer func() {
 		close(startCalled)
 	}()
@@ -93,7 +100,7 @@ func Start(widthInDP int, heightInDP int, requester Requester, project []byte, a
 		}
 	}()
 
-	setData(project, assets, progress, purchases, language)
+	setData(project, assetBytes, progress, purchases, language)
 
 	width, height, scale := adjustScreenSize(widthInDP, heightInDP)
 	g := game.New(width, height, requester)

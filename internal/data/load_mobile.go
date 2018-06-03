@@ -44,7 +44,7 @@ func loadRawData(projectionLocation string, progress chan<- float64) (*rawData, 
 	return <-dataCh, nil
 }
 
-func SetData(project []byte, assets []byte, progress []byte, purchases []byte, language string) {
+func SetData(project []byte, assets [][]byte, progress []byte, purchases []byte, language string) {
 	l, err := json.Marshal(language)
 	if err != nil {
 		panic(err)

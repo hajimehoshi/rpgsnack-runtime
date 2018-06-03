@@ -17,6 +17,7 @@ package data
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"path/filepath"
 
 	"github.com/vmihailenco/msgpack"
@@ -81,7 +82,7 @@ func unmarshalJSON(data []uint8, v interface{}) error {
 type rawData struct {
 	Project     []byte
 	ProjectJSON []byte
-	Assets      []byte
+	Assets      [][]byte
 	Progress    []byte
 	Purchases   []byte
 	Language    []byte
@@ -104,6 +105,22 @@ type LoadProgress struct {
 	Progress   float64
 	LoadedData *LoadedData
 	Error      error
+}
+
+type assetsReader struct {
+	rawAssets [][]byte
+}
+
+func (a *assetsReader) Read(buf []byte) (int, error) {
+	if len(a.rawAssets) == 0 {
+		return 0, io.EOF
+	}
+	n := copy(buf, a.rawAssets[0])
+	a.rawAssets[0] = a.rawAssets[0][n:]
+	if len(a.rawAssets[0]) == 0 {
+		a.rawAssets = a.rawAssets[1:]
+	}
+	return n, nil
 }
 
 func Load(projectionLocation string, progress chan<- LoadProgress) {
@@ -151,7 +168,7 @@ func Load(projectionLocation string, progress chan<- LoadProgress) {
 		gameDataCh <- project.Data
 	}()
 	go func() {
-		assets, assetsMetadata, err := parseAssets(data.Assets)
+		assets, assetsMetadata, err := parseAssets(&assetsReader{data.Assets})
 		if err != nil {
 			errCh <- err
 			return
@@ -224,12 +241,12 @@ func Load(projectionLocation string, progress chan<- LoadProgress) {
 	}
 }
 
-func parseAssets(rawAssets []byte) (map[string][]byte, map[string]*AssetMetadata, error) {
+func parseAssets(rawAssets io.Reader) (map[string][]byte, map[string]*AssetMetadata, error) {
 	var m map[string][]byte
 	assets := map[string][]byte{}
 	assetsMetadata := map[string]*AssetMetadata{}
 
-	if err := msgpack.Unmarshal(rawAssets, &m); err != nil {
+	if err := msgpack.NewDecoder(rawAssets).Decode(&m); err != nil {
 		return nil, nil, fmt.Errorf("data: msgpack.Unmarshal error: %s", err.Error())
 	}
 

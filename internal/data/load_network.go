@@ -343,7 +343,7 @@ func loadRawData(projectLocation string, progress chan<- float64) (*rawData, err
 	return &rawData{
 		Project:     project,
 		ProjectJSON: projectJSON,
-		Assets:      assets,
+		Assets:      [][]byte{assets},
 		Progress:    <-fetchProgress(),
 		Purchases:   <-fetchPurchases(),
 		Language:    langJSON,

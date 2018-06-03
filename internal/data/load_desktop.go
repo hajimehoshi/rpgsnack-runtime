@@ -139,7 +139,7 @@ func loadRawData(projectionLocation string, progressCh chan<- float64) (*rawData
 	return &rawData{
 		Project:     project,
 		ProjectJSON: projectJSON,
-		Assets:      assets,
+		Assets:      [][]byte{assets},
 		Progress:    progress,
 		Purchases:   purchases,
 		Language:    langData,
