@@ -58,21 +58,21 @@ func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
 	tx := (w/consts.TileScale - 120) / 2
 	ty := (h - 640) / (2 * consts.TileScale)
 	s.settingsLabel = ui.NewLabel(16, ty+8)
-	s.languageButton = ui.NewButton(tx, ty+buttonOffsetX+1*buttonDeltaY, 120, 20, "click")
-	s.creditButton = ui.NewButton(tx, ty+buttonOffsetX+2*buttonDeltaY, 120, 20, "click")
-	s.updateCreditsButton = ui.NewButton(tx+80, ty+buttonOffsetX+2*buttonDeltaY, 40, 20, "click")
+	s.languageButton = ui.NewButton(tx, ty+buttonOffsetX+1*buttonDeltaY, 120, 20, "system/click")
+	s.creditButton = ui.NewButton(tx, ty+buttonOffsetX+2*buttonDeltaY, 120, 20, "system/click")
+	s.updateCreditsButton = ui.NewButton(tx+80, ty+buttonOffsetX+2*buttonDeltaY, 40, 20, "system/click")
 
-	s.reviewThisAppButton = ui.NewButton(tx, ty+buttonOffsetX+3*buttonDeltaY, 120, 20, "click")
-	s.restorePurchasesButton = ui.NewButton(tx, ty+buttonOffsetX+4*buttonDeltaY, 120, 20, "click")
-	s.moreGamesButton = ui.NewButton(tx, ty+buttonOffsetX+5*buttonDeltaY, 120, 20, "click")
-	s.closeButton = ui.NewButton(tx, ty+buttonOffsetX+6*buttonDeltaY, 120, 20, "cancel")
+	s.reviewThisAppButton = ui.NewButton(tx, ty+buttonOffsetX+3*buttonDeltaY, 120, 20, "system/click")
+	s.restorePurchasesButton = ui.NewButton(tx, ty+buttonOffsetX+4*buttonDeltaY, 120, 20, "system/click")
+	s.moreGamesButton = ui.NewButton(tx, ty+buttonOffsetX+5*buttonDeltaY, 120, 20, "system/click")
+	s.closeButton = ui.NewButton(tx, ty+buttonOffsetX+6*buttonDeltaY, 120, 20, "system/cancel")
 
 	s.languageDialog = ui.NewDialog((w/consts.TileScale-160)/2+4, h/(2*consts.TileScale)-80, 152, 160)
 
 	for i, l := range sceneManager.Game().Texts.Languages() {
 		i := i // i is captured by the below closure and it is needed to copy here.
 		n := display.Self.Name(l)
-		b := ui.NewButton((152-120)/2, 8+i*buttonDeltaY, 120, 20, "click")
+		b := ui.NewButton((152-120)/2, 8+i*buttonDeltaY, 120, 20, "system/click")
 		b.Text = n
 		b.Lang = l
 		s.languageDialog.AddChild(b)
@@ -170,12 +170,12 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 
 func (s *SettingsScene) handleBackButton(sceneManager *scene.Manager) {
 	if s.languageDialog.Visible() {
-		audio.PlaySE("cancel", 1.0)
+		audio.PlaySE("system/cancel", 1.0)
 		s.languageDialog.Hide()
 		return
 	}
 
-	audio.PlaySE("cancel", 1.0)
+	audio.PlaySE("system/cancel", 1.0)
 	sceneManager.GoTo(NewTitleScene())
 }
 

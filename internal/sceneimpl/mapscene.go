@@ -161,7 +161,7 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	camera, _ := ebiten.NewImage(12, 12, ebiten.FilterNearest)
 	camera.Fill(color.RGBA{0xff, 0, 0, 0xff})
 	cameraImagePart := ui.NewImagePart(camera)
-	m.cameraButton = ui.NewImageButton(0, 0, cameraImagePart, cameraImagePart, "click")
+	m.cameraButton = ui.NewImageButton(0, 0, cameraImagePart, cameraImagePart, "system/click")
 	m.screenShotImage = screenShotImage
 	m.screenShotDialog = ui.NewDialog((uiWidth-160)/2+4, 4, 152, 232)
 	m.screenShotDialog.AddChild(ui.NewImageView(8, 8, 1.0/consts.TileScale/2, ui.NewImagePart(m.screenShotImage)))
@@ -173,8 +173,8 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 
 	m.quitDialog = ui.NewDialog((uiWidth-160)/2+4, screenH/(2*consts.TileScale)-64, 152, 124)
 	m.quitLabel = ui.NewLabel(16, 8)
-	m.quitYesButton = ui.NewButton((152-120)/2, 72, 120, 20, "click")
-	m.quitNoButton = ui.NewButton((152-120)/2, 96, 120, 20, "cancel")
+	m.quitYesButton = ui.NewButton((152-120)/2, 72, 120, 20, "system/click")
+	m.quitNoButton = ui.NewButton((152-120)/2, 96, 120, 20, "system/cancel")
 
 	m.quitDialog.AddChild(m.quitLabel)
 	m.quitDialog.AddChild(m.quitYesButton)
@@ -182,15 +182,15 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 
 	m.storeErrorDialog = ui.NewDialog((uiWidth-160)/2+4, 64, 152, 124)
 	m.storeErrorLabel = ui.NewLabel(16, 8)
-	m.storeErrorOkButton = ui.NewButton((152-120)/2, 96, 120, 20, "click")
+	m.storeErrorOkButton = ui.NewButton((152-120)/2, 96, 120, 20, "system/click")
 	m.storeErrorDialog.AddChild(m.storeErrorLabel)
 	m.storeErrorDialog.AddChild(m.storeErrorOkButton)
 
-	m.removeAdsButton = ui.NewButton(104, 8, 52, 12, "click")
+	m.removeAdsButton = ui.NewButton(104, 8, 52, 12, "system/click")
 	m.removeAdsDialog = ui.NewDialog((uiWidth-160)/2+4, 64, 152, 124)
 	m.removeAdsLabel = ui.NewLabel(16, 8)
-	m.removeAdsYesButton = ui.NewButton((152-120)/2, 72, 120, 20, "click")
-	m.removeAdsNoButton = ui.NewButton((152-120)/2, 96, 120, 20, "cancel")
+	m.removeAdsYesButton = ui.NewButton((152-120)/2, 72, 120, 20, "system/click")
+	m.removeAdsNoButton = ui.NewButton((152-120)/2, 96, 120, 20, "system/cancel")
 	m.removeAdsDialog.AddChild(m.removeAdsLabel)
 	m.removeAdsDialog.AddChild(m.removeAdsYesButton)
 	m.removeAdsDialog.AddChild(m.removeAdsNoButton)
@@ -517,18 +517,18 @@ func (m *MapScene) handleBackButton() {
 	}
 
 	if m.storeErrorDialog.Visible() {
-		audio.PlaySE("cancel", 1.0)
+		audio.PlaySE("system/cancel", 1.0)
 		m.storeErrorDialog.Hide()
 		return
 	}
 
 	if m.quitDialog.Visible() {
-		audio.PlaySE("cancel", 1.0)
+		audio.PlaySE("system/cancel", 1.0)
 		m.quitDialog.Hide()
 		return
 	}
 
-	audio.PlaySE("click", 1.0)
+	audio.PlaySE("system/click", 1.0)
 	m.quitDialog.Show()
 }
 

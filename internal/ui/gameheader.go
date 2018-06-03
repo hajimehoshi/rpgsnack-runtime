@@ -42,7 +42,7 @@ type GameHeader struct {
 }
 
 func NewGameHeader() *GameHeader {
-	titleButton := NewTextButton(10, 2, 24, 12, "click")
+	titleButton := NewTextButton(10, 2, 24, 12, "system/click")
 	l := lang.Get()
 	titleButton.Text = texts.Text(l, texts.TextIDMenu)
 	titleButton.Disabled = true

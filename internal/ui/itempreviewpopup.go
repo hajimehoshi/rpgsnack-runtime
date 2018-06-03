@@ -45,7 +45,7 @@ func NewItemPreviewPopup(y int) *ItemPreviewPopup {
 		5,
 		NewImagePart(assets.GetImage("system/itempreview/cancel_off.png")),
 		NewImagePart(assets.GetImage("system/itempreview/cancel_on.png")),
-		"cancel",
+		"system/cancel",
 	)
 
 	actionButton := NewImageButton(
@@ -53,7 +53,7 @@ func NewItemPreviewPopup(y int) *ItemPreviewPopup {
 		93,
 		NewImagePart(assets.GetImage("system/itempreview/action_button_off.png")),
 		NewImagePart(assets.GetImage("system/itempreview/action_button_on.png")),
-		"click",
+		"system/click",
 	)
 	frameImage := assets.GetImage("system/itempreview/details.png")
 	previewBoxImage := assets.GetImage("system/itempreview/preview_box.png")

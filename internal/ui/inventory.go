@@ -96,7 +96,7 @@ func NewInventory(x, y int, showItemName bool) *Inventory {
 		y,
 		NewImagePart(assets.GetImage("system/footer/back_button.png")),
 		NewImagePart(assets.GetImage("system/footer/back_button_on.png")),
-		"cancel",
+		"system/cancel",
 	)
 
 	infoButton := NewImageButton(
@@ -104,7 +104,7 @@ func NewInventory(x, y int, showItemName bool) *Inventory {
 		y+buttonOffsetY,
 		NewImagePart(assets.GetImage("system/footer/info_button_off.png")),
 		NewImagePart(assets.GetImage("system/footer/info_button_on.png")),
-		"click",
+		"system/click",
 	)
 	infoButton.DisabledImage = NewImagePart(assets.GetImage("system/footer/info_button_disabled.png"))
 

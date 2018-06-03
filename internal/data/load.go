@@ -29,6 +29,7 @@ import (
 var assetDirs = []string{
 	filepath.Join("audio", "bgm"),
 	filepath.Join("audio", "se"),
+	filepath.Join("audio", "se", "system"),
 	filepath.Join("images", "backgrounds"),
 	filepath.Join("images", "characters"),
 	filepath.Join("images", "fonts"),
