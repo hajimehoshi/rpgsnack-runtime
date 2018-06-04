@@ -34,6 +34,7 @@ type Button struct {
 	y             int
 	Width         int
 	Height        int
+	TouchExpand   int
 	Visible       bool
 	Text          string
 	Disabled      bool
@@ -110,10 +111,10 @@ func (b *Button) includesInput(offsetX, offsetY int) bool {
 	x -= offsetX
 	y -= offsetY
 
-	buttonWidth := b.Width
-	buttonHeight := b.Height
-	buttonX := b.x
-	buttonY := b.y
+	buttonWidth := b.Width + b.TouchExpand*2
+	buttonHeight := b.Height + b.TouchExpand*2
+	buttonX := b.x - b.TouchExpand
+	buttonY := b.y - b.TouchExpand
 
 	if buttonX <= x && x < buttonX+buttonWidth && buttonY <= y && y < buttonY+buttonHeight {
 		return true

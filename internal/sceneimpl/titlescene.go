@@ -80,7 +80,9 @@ func (t *TitleScene) initUI(sceneManager *scene.Manager) {
 	t.removeAdsButton = ui.NewTextButton((w/consts.TileScale-120)/2+20, h/consts.TileScale-by-8, 80, 20, "system/click")
 	t.removeAdsButton.TextColor = color.RGBA{0xc8, 0xc8, 0xc8, 0xff}
 	t.settingsButton = ui.NewImageButton(w/consts.TileScale-24, h/consts.TileScale-by, settingsIcon, settingsIcon, "system/click")
+	t.settingsButton.TouchExpand = 10
 	t.moregamesButton = ui.NewImageButton(12, h/consts.TileScale-by, moreGamesIcon, moreGamesIcon, "system/click")
+	t.moregamesButton.TouchExpand = 10
 	t.warningDialog = ui.NewDialog((w/consts.TileScale-160)/2+4, (h)/(2*consts.TileScale)-64, 152, 124)
 	t.warningLabel = ui.NewLabel(16, 8)
 	t.warningYesButton = ui.NewButton((152-120)/2, 72, 120, 20, "system/click")
