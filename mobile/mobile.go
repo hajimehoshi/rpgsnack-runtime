@@ -112,9 +112,8 @@ func Start(widthInDP int, heightInDP int, requester Requester, project []byte, p
 }
 
 func SetScreenSize(widthInDP, heightInDP int) {
-	// TODO: Need to adjust scale?
-	width, height, _ := adjustScreenSize(widthInDP, heightInDP)
-	theGame.SetScreenSize(width, height)
+	width, height, scale := adjustScreenSize(widthInDP, heightInDP)
+	theGame.SetScreenSize(width, height, scale)
 }
 
 func Update() (err error) {

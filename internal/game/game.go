@@ -102,10 +102,11 @@ func (g *Game) ScreenSize() (int, int) {
 	return g.width, g.height
 }
 
-func (g *Game) SetScreenSize(width, height int) {
+func (g *Game) SetScreenSize(width, height int, scale float64) {
 	g.width = width
 	g.height = height
 	ebiten.SetScreenSize(width, height)
+	ebiten.SetScreenScale(scale)
 	if g.sceneManager != nil {
 		g.sceneManager.SetScreenSize(width, height)
 	}
