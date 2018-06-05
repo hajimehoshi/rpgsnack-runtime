@@ -203,7 +203,7 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 		t.moregamesButton.Update()
 	}
 
-	t.removeAdsButton.Visible = !sceneManager.IsAdsRemoved() && sceneManager.Game().GetIAPProductByType("ads_removal") != nil
+	t.removeAdsButton.Visible = sceneManager.IsAdsRemovable() && !sceneManager.IsAdsRemoved()
 
 	return nil
 }
