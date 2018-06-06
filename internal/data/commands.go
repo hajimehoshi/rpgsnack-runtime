@@ -562,7 +562,6 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 		}
 		c.Args = a
 	case CommandNameSave:
-	case CommandNameFinishPlayerMovingByUserInput:
 	case CommandNameGotoTitle:
 	case CommandNameSyncIAP:
 	case CommandNameRequestReview:
@@ -750,6 +749,8 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 			return err
 		}
 		c.Args = a
+	case CommandNameFinishPlayerMovingByUserInput:
+	case CommandNameExecEventHere:
 	default:
 		return fmt.Errorf("data: Command.DecodeMsgpack: invalid command: %s", c.Name)
 	}

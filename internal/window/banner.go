@@ -81,6 +81,9 @@ func (b *banner) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EncodeString("background")
 	e.EncodeString(string(b.background))
 
+	e.EncodeString("messageStyle")
+	e.EncodeAny(b.messageStyle)
+
 	e.EncodeString("typingEffect")
 	e.EncodeInterface(b.typingEffect)
 
@@ -112,7 +115,14 @@ func (b *banner) DecodeMsgpack(dec *msgpack.Decoder) error {
 			b.textAlign = data.TextAlign(d.DecodeString())
 		case "background":
 			b.background = data.MessageBackground(d.DecodeString())
+		case "messageStyle":
+			// TODO: This should not be nil?
+			if !d.SkipCodeIfNil() {
+				b.messageStyle = &data.MessageStyle{}
+				d.DecodeAny(b.messageStyle)
+			}
 		case "typingEffect":
+			// TODO: This should not be nil?
 			if !d.SkipCodeIfNil() {
 				b.typingEffect = &typingEffect{}
 				d.DecodeInterface(b.typingEffect)
