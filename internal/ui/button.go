@@ -221,10 +221,10 @@ func (b *Button) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 	r8 := uint8(cr >> 8)
 	g8 := uint8(cg >> 8)
 	b8 := uint8(cb >> 8)
-
-	var c color.Color = color.RGBA{r8, g8, b8, uint8(ca * uint32(opacity) / 255)}
+	a8 := uint8(ca >> 8)
+	var c color.Color = color.RGBA{r8, g8, b8, uint8(uint16(a8) * uint16(opacity) / 255)}
 	if b.Disabled {
-		c = color.RGBA{r8, g8, b8, uint8(ca * uint32(opacity) / (2 * 255))}
+		c = color.RGBA{r8, g8, b8, uint8(uint16(a8) * uint16(opacity) / (2 * 255))}
 	}
 	l := b.Lang
 	if l == language.Und {
