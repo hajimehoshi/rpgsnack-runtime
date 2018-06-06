@@ -562,6 +562,7 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 		}
 		c.Args = a
 	case CommandNameSave:
+	case CommandNameFinishPlayerMovingByUserInput:
 	case CommandNameGotoTitle:
 	case CommandNameSyncIAP:
 	case CommandNameRequestReview:
