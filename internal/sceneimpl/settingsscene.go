@@ -36,36 +36,43 @@ type SettingsScene struct {
 	reviewThisAppButton    *ui.Button
 	restorePurchasesButton *ui.Button
 	moreGamesButton        *ui.Button
+	shopButton             *ui.Button
 	closeButton            *ui.Button
 	languageDialog         *ui.Dialog
 	languageButtons        []*ui.Button
 	waitingRequestID       int
 	initialized            bool
+	baseX                  int
+	baseY                  int
 }
+
+const (
+	buttonOffsetY = 4
+	buttonDeltaY  = 24
+)
 
 func NewSettingsScene() *SettingsScene {
 	return &SettingsScene{}
 }
 
+func (s *SettingsScene) calcButtonY(index int) int {
+	return s.baseY + buttonOffsetY + index*buttonDeltaY
+}
+
 func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
-	const (
-		buttonOffsetX = 4
-		buttonDeltaY  = 24
-	)
-
 	w, h := sceneManager.Size()
+	s.baseX = (w/consts.TileScale - 120) / 2
+	s.baseY = (h - 640) / (2 * consts.TileScale)
 
-	tx := (w/consts.TileScale - 120) / 2
-	ty := (h - 640) / (2 * consts.TileScale)
-	s.settingsLabel = ui.NewLabel(16, ty+8)
-	s.languageButton = ui.NewButton(tx, ty+buttonOffsetX+1*buttonDeltaY, 120, 20, "system/click")
-	s.creditButton = ui.NewButton(tx, ty+buttonOffsetX+2*buttonDeltaY, 120, 20, "system/click")
-	s.updateCreditsButton = ui.NewButton(tx+80, ty+buttonOffsetX+2*buttonDeltaY, 40, 20, "system/click")
-
-	s.reviewThisAppButton = ui.NewButton(tx, ty+buttonOffsetX+3*buttonDeltaY, 120, 20, "system/click")
-	s.restorePurchasesButton = ui.NewButton(tx, ty+buttonOffsetX+4*buttonDeltaY, 120, 20, "system/click")
-	s.moreGamesButton = ui.NewButton(tx, ty+buttonOffsetX+5*buttonDeltaY, 120, 20, "system/click")
-	s.closeButton = ui.NewButton(tx, ty+buttonOffsetX+6*buttonDeltaY, 120, 20, "system/cancel")
+	s.settingsLabel = ui.NewLabel(16, s.baseY+8)
+	s.languageButton = ui.NewButton(s.baseX, s.calcButtonY(1), 120, 20, "system/click")
+	s.shopButton = ui.NewButton(s.baseX, s.calcButtonY(2), 120, 20, "system/click")
+	s.creditButton = ui.NewButton(s.baseX, s.calcButtonY(2), 120, 20, "system/click")
+	s.updateCreditsButton = ui.NewButton(s.baseX+80, s.calcButtonY(2), 40, 20, "system/click")
+	s.reviewThisAppButton = ui.NewButton(s.baseX, s.calcButtonY(3), 120, 20, "system/click")
+	s.restorePurchasesButton = ui.NewButton(s.baseX, s.calcButtonY(4), 120, 20, "system/click")
+	s.moreGamesButton = ui.NewButton(s.baseX, s.calcButtonY(5), 120, 20, "system/click")
+	s.closeButton = ui.NewButton(s.baseX, s.calcButtonY(6), 120, 20, "system/cancel")
 
 	s.languageDialog = ui.NewDialog((w/consts.TileScale-160)/2+4, h/(2*consts.TileScale)-80, 152, 160)
 
@@ -113,6 +120,9 @@ func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
 	s.closeButton.SetOnPressed(func(_ *ui.Button) {
 		sceneManager.GoTo(NewTitleScene())
 	})
+	s.shopButton.SetOnPressed(func(_ *ui.Button) {
+		sceneManager.Requester().RequestShowShop(s.waitingRequestID, string(sceneManager.Game().GetDefaultShopProductsData()))
+	})
 }
 
 func (s *SettingsScene) updateButtonTexts() {
@@ -123,6 +133,7 @@ func (s *SettingsScene) updateButtonTexts() {
 	s.reviewThisAppButton.Text = texts.Text(lang.Get(), texts.TextIDReviewThisApp)
 	s.restorePurchasesButton.Text = texts.Text(lang.Get(), texts.TextIDRestorePurchases)
 	s.moreGamesButton.Text = texts.Text(lang.Get(), texts.TextIDMoreGames)
+	s.shopButton.Text = texts.Text(lang.Get(), texts.TextIDShop)
 	s.closeButton.Text = texts.Text(lang.Get(), texts.TextIDClose)
 }
 
@@ -154,9 +165,25 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 		return nil
 	}
 
+	itemOffset := 0
+	if sceneManager.Game().IsDefaultShopAvailable() {
+		s.shopButton.Visible = true
+		itemOffset = 1
+	} else {
+		s.shopButton.Visible = false
+	}
+
+	s.creditButton.SetY(s.calcButtonY(itemOffset + 2))
+	s.updateCreditsButton.SetY(s.calcButtonY(itemOffset + 2))
+	s.reviewThisAppButton.SetY(s.calcButtonY(itemOffset + 3))
+	s.restorePurchasesButton.SetY(s.calcButtonY(itemOffset + 4))
+	s.moreGamesButton.SetY(s.calcButtonY(itemOffset + 5))
+	s.closeButton.SetY(s.calcButtonY(itemOffset + 6))
+
 	s.languageDialog.Update()
 	if !s.languageDialog.Visible() {
 		s.languageButton.Update()
+		s.shopButton.Update()
 		s.creditButton.Update()
 		s.updateCreditsButton.Update()
 		s.reviewThisAppButton.Update()
@@ -185,6 +212,7 @@ func (s *SettingsScene) Draw(screen *ebiten.Image) {
 	}
 	s.settingsLabel.Draw(screen)
 	s.languageButton.Draw(screen)
+	s.shopButton.Draw(screen)
 	s.creditButton.Draw(screen)
 	s.updateCreditsButton.Draw(screen)
 	s.reviewThisAppButton.Draw(screen)

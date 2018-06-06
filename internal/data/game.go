@@ -39,6 +39,7 @@ type Game struct {
 	CommonEvents  []*CommonEvent  `json:"commonEvents" msgpack:"commonEvents"`
 	System        *System         `json:"system" msgpack:"system"`
 	MessageStyles []*MessageStyle `json:"messageStyles" msgpack:"messageStyles"`
+	Shops         []*Shop         `json:"shops" msgpack:"shops"`
 }
 
 type MessageStyle struct {
@@ -107,6 +108,10 @@ type Combine struct {
 	Item2    int         `json:"item2" msgpack:"item2"`
 	Type     CombineType `json:"type" msgpack:"type"`
 	Commands []*Command  `json:"commands" msgpack:"commands"`
+}
+
+type Shop struct {
+	Products []int `json:"products" msgpack:"products"`
 }
 
 type ShopProduct struct {
@@ -181,4 +186,15 @@ func (g *Game) GetShopProductsData(products []int) []byte {
 		panic(err)
 	}
 	return b
+}
+
+func (g *Game) GetDefaultShopProductsData() []byte {
+	if g.IsDefaultShopAvailable() {
+		return g.GetShopProductsData(g.Shops[0].Products)
+	}
+	return nil
+}
+
+func (g *Game) IsDefaultShopAvailable() bool {
+	return len(g.Shops) > 0 && len(g.Shops[0].Products) > 0
 }

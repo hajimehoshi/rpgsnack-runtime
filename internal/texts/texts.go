@@ -42,6 +42,7 @@ const (
 	TextIDItemCheck
 	TextIDQuitGame
 	TextIDStoreError
+	TextIDShop
 )
 
 func Text(lang language.Tag, id TextID) string {
@@ -62,6 +63,7 @@ var texts = map[language.Tag]map[TextID]string{
 		TextIDLanguage:    "Language",
 		TextIDCredit:      "Credits",
 		TextIDCreditEntry: "Entry",
+		TextIDShop:        "Shop",
 		TextIDRemoveAds:   "Remove Ads",
 		TextIDRemoveAdsDesc: `Would you like to remove ads
 from the game for %s?`,
@@ -93,6 +95,7 @@ and connect to the network.`,
 		TextIDLanguage:    "Sprache",
 		TextIDCredit:      "Danksagungen",
 		TextIDCreditEntry: "Eintrag",
+		TextIDShop:        "Geschäft",
 		TextIDRemoveAds:   "Anzeigen entfernen",
 		TextIDRemoveAdsDesc: `Willst du Anzeigen für %s
 enfernen?`,
@@ -124,6 +127,7 @@ und mit dem Internet verbindet bist.`,
 		TextIDLanguage:    "Idioma",
 		TextIDCredit:      "Créditos",
 		TextIDCreditEntry: "Entrada",
+		TextIDShop:        "Tienda",
 		TextIDRemoveAds:   "Remover anuncios",
 		TextIDRemoveAdsDesc: `¿Te gustaría pagar %s
 para quitar los anuncios del juego?`,
@@ -151,6 +155,7 @@ e iniciar un nuevo juego?`,
 		TextIDLanguage:    "言語",
 		TextIDCredit:      "クレジット",
 		TextIDCreditEntry: "登録",
+		TextIDShop:        "ショップ",
 		TextIDRemoveAds:   "広告を消す",
 		TextIDRemoveAdsDesc: `%sを支払って、
 広告を消去しますか？`,
@@ -180,6 +185,7 @@ e iniciar un nuevo juego?`,
 		TextIDLanguage:    "语言",
 		TextIDCredit:      "制作人员",
 		TextIDCreditEntry: "注册",
+		TextIDShop:        "店",
 		TextIDRemoveAds:   "移除广告",
 		TextIDRemoveAdsDesc: `你希望支付%s
 来移除游戏里的广告吗?`,
@@ -208,6 +214,7 @@ e iniciar un nuevo juego?`,
 		TextIDLanguage:    "語言",
 		TextIDCredit:      "製作人員",
 		TextIDCreditEntry: "註冊",
+		TextIDShop:        "店",
 		TextIDRemoveAds:   "移除廣告",
 		TextIDRemoveAdsDesc: `你希望支付%s
 來移除遊戲裡的廣告嗎?`,
