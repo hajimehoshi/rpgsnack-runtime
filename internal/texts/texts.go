@@ -143,7 +143,40 @@ para quitar los anuncios del juego?`,
 e iniciar un nuevo juego?`,
 		TextIDBackToTitle: "¿Quieres volver al título?",
 		TextIDQuitGame:    "¿Quieres salir del juego?",
-		TextIDStoreError:  `Fallo al conectarse con la tienda. Por favor asegúrate de iniciar sesión y conectarse a internet`,
+		TextIDStoreError: `Fallo al conectarse con la tienda. 
+Por favor asegúrate de iniciar 
+sesión y conectarse a internet`,
+	},
+	language.Portuguese: {
+		TextIDNewGame:     "Novo Jogo",
+		TextIDResumeGame:  "Resume Game",
+		TextIDYes:         "Sim",
+		TextIDNo:          "não",
+		TextIDOK:          "OK",
+		TextIDSettings:    "Configurações",
+		TextIDLanguage:    "Language",
+		TextIDCredit:      "Créditos",
+		TextIDCreditEntry: "Input",
+		TextIDShop:        "Loja",
+		TextIDRemoveAds:   "Remover anúncios",
+		TextIDRemoveAdsDesc: `Você gostaria de pagar% s
+remover anúncios do jogo?`,
+		TextIDReviewThisApp:    "Avalie este aplicativo",
+		TextIDRestorePurchases: "Restaurar Compra",
+		TextIDMoreGames:        "Mais jogos",
+		TextIDClose:            "Fechar",
+		TextIDItemCheck:        "Revisão",
+		TextIDMenu:             "Menu",
+		TextIDNewGameWarning: `Você tem dados do jogo em 
+andamento. 
+Você deseja excluir o progresso 
+e começar um novo jogo?`,
+		TextIDBackToTitle: "Você quer retornar ao título?",
+		TextIDQuitGame:    "Você quer sair do jogo?",
+		TextIDStoreError: `Falha ao conectar-se ao 
+armazenamento. 
+Por favor, certifique-se de fazer 
+o login e se conectar à internet`,
 	},
 	language.Japanese: {
 		TextIDNewGame:     "はじめから",
