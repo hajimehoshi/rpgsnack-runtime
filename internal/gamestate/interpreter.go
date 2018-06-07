@@ -236,10 +236,6 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		default:
 			i.commandIterator.Advance()
 		}
-		switch r.Type {
-		case scene.RequestTypeRewardedAds, scene.RequestTypeInterstitialAds:
-			audio.ResumeBGM()
-		}
 		return true, nil
 	}
 	c := i.commandIterator.Command()
@@ -619,7 +615,6 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		case data.ShowAdsTypeInterstitial:
 			sceneManager.Requester().RequestInterstitialAds(i.waitingRequestID)
 		}
-		audio.PauseBGM()
 		return false, nil
 	case data.CommandNameOpenLink:
 		args := c.Args.(*data.CommandArgsOpenLink)
