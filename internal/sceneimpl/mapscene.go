@@ -173,7 +173,7 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 
 	m.quitDialog = ui.NewDialog((uiWidth-160)/2+4, screenH/(2*consts.TileScale)-64, 152, 124)
 	m.quitLabel = ui.NewLabel(16, 8)
-	m.quitYesButton = ui.NewButton((152-120)/2, 72, 120, 20, "system/click")
+	m.quitYesButton = ui.NewButton((152-120)/2, 72, 120, 20, "")
 	m.quitNoButton = ui.NewButton((152-120)/2, 96, 120, 20, "system/cancel")
 
 	m.quitDialog.AddChild(m.quitLabel)
