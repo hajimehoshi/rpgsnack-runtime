@@ -39,6 +39,7 @@ import (
 const (
 	markerAnimationInterval = 2
 	markerSize              = 16
+	itemPreviewPopupMargin  = 80
 )
 
 type MapScene struct {
@@ -196,7 +197,7 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	m.removeAdsDialog.AddChild(m.removeAdsNoButton)
 
 	m.inventory = ui.NewInventory(0, (screenH-m.inventoryHeight)/consts.TileScale, sceneManager.HasExtraBottomGrid())
-	m.itemPreviewPopup = ui.NewItemPreviewPopup(int(screenH/consts.TileScale) - 160)
+	m.itemPreviewPopup = ui.NewItemPreviewPopup(int(screenH/consts.TileScale) - m.inventoryHeight - itemPreviewPopupMargin)
 	m.quitDialog.AddChild(m.quitLabel)
 
 	m.removeAdsButton.Visible = false // TODO: Clock of Atonement does not need this feature, so turn it off for now
