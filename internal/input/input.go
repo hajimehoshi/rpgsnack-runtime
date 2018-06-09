@@ -16,6 +16,7 @@ package input
 
 import (
 	"github.com/hajimehoshi/ebiten"
+	"github.com/hajimehoshi/ebiten/inpututil"
 )
 
 var theInput = &input{}
@@ -28,6 +29,10 @@ type input struct {
 	offsetY        int
 	backPressCount int
 	prevPressCount int
+}
+
+func IsTurboButtonTriggered() bool {
+	return inpututil.IsKeyJustPressed(ebiten.KeyT)
 }
 
 func SetOffset(offsetX, offsetY int) {

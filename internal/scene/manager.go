@@ -60,6 +60,7 @@ type Manager struct {
 	interstitialAdsLoaded bool
 	rewardedAdsLoaded     bool
 	blackImage            *ebiten.Image
+	turbo                 bool
 }
 
 type PlatformDataKey string
@@ -152,22 +153,32 @@ func (m *Manager) Update() error {
 		}
 	default:
 	}
-	if m.next != nil {
-		if m.fadingCount > 0 {
-			if m.fadingCount <= m.fadingCountMax/2 {
+
+	if input.IsTurboButtonTriggered() {
+		m.turbo = !m.turbo
+	}
+	n := 1
+	if m.turbo {
+		n = 3
+	}
+	for i := 0; i < n; i++ {
+		if m.next != nil {
+			if m.fadingCount > 0 {
+				if m.fadingCount <= m.fadingCountMax/2 {
+					m.current = m.next
+					m.next = nil
+				}
+			} else {
 				m.current = m.next
 				m.next = nil
 			}
-		} else {
-			m.current = m.next
-			m.next = nil
 		}
-	}
-	if err := m.current.Update(m); err != nil {
-		return err
-	}
-	if 0 < m.fadingCount {
-		m.fadingCount--
+		if err := m.current.Update(m); err != nil {
+			return err
+		}
+		if 0 < m.fadingCount {
+			m.fadingCount--
+		}
 	}
 	return nil
 }
