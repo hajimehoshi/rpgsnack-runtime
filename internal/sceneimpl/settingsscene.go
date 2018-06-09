@@ -121,6 +121,7 @@ func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
 		sceneManager.GoTo(NewTitleScene())
 	})
 	s.shopButton.SetOnPressed(func(_ *ui.Button) {
+		s.waitingRequestID = sceneManager.GenerateRequestID()
 		sceneManager.Requester().RequestShowShop(s.waitingRequestID, string(sceneManager.Game().GetDefaultShopProductsData()))
 	})
 }
