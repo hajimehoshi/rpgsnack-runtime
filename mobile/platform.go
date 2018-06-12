@@ -242,9 +242,7 @@ func SetPlatformData(key string, value string) (err error) {
 		}
 	}()
 
-	if err := theGame.SetPlatformData(scene.PlatformDataKey(key), value); err != nil {
-		return err
-	}
+	theGame.SetPlatformData(scene.PlatformDataKey(key), value)
 	return nil
 }
 
