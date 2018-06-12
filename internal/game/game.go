@@ -16,7 +16,6 @@ package game
 
 import (
 	"flag"
-	"fmt"
 	"image/color"
 	"net/url"
 	"runtime"
@@ -245,15 +244,12 @@ func (g *Game) RespondAsset(id int, success bool, data []byte) {
 	g.sceneManager.RespondAsset(id, success, data)
 }
 
-func (g *Game) SetPlatformData(key scene.PlatformDataKey, value string) error {
+func (g *Game) SetPlatformData(key scene.PlatformDataKey, value string) {
 	args := setPlatformDataArgs{
 		key:   key,
 		value: value,
 	}
-	select {
-	case g.setPlatformDataCh <- args:
-		return nil
-	default:
-		return fmt.Errorf("game: failed to send 'setPlatformDataCh: key: %s, value: %s", key, value)
-	}
+	go func() {
+		g.setPlatformDataCh <- args
+	}()
 }
