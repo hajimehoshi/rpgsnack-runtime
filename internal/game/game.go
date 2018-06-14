@@ -23,7 +23,6 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
-	"golang.org/x/text/language"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
@@ -109,12 +108,6 @@ func (g *Game) SetScreenSize(width, height int, scale float64) {
 	if g.sceneManager != nil {
 		g.sceneManager.SetScreenSize(width, height)
 	}
-}
-
-var lang language.Tag
-
-func Language() language.Tag {
-	return lang
 }
 
 func (g *Game) loadGameData() {
