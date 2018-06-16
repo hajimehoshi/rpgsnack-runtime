@@ -106,6 +106,9 @@ func (b *balloon) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EncodeString("balloonType")
 	e.EncodeString(string(b.balloonType))
 
+	e.EncodeString("messageStyle")
+	e.EncodeAny(b.messageStyle)
+
 	e.EncodeString("typingEffect")
 	e.EncodeInterface(b.typingEffect)
 
@@ -146,6 +149,11 @@ func (b *balloon) DecodeMsgpack(dec *msgpack.Decoder) error {
 			b.opened = d.DecodeBool()
 		case "balloonType":
 			b.balloonType = data.BalloonType(d.DecodeString())
+		case "messageStyle":
+			if !d.SkipCodeIfNil() {
+				b.messageStyle = &data.MessageStyle{}
+				d.DecodeAny(b.messageStyle)
+			}
 		case "typingEffect":
 			if !d.SkipCodeIfNil() {
 				b.typingEffect = &typingEffect{}
