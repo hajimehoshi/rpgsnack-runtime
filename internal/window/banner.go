@@ -40,6 +40,7 @@ const (
 
 type banner struct {
 	interpreterID int
+	contentID     data.UUID
 	content       string
 	openingCount  int
 	closingCount  int
@@ -59,6 +60,9 @@ func (b *banner) EncodeMsgpack(enc *msgpack.Encoder) error {
 
 	e.EncodeString("interpreterId")
 	e.EncodeInt(b.interpreterID)
+
+	e.EncodeString("contentID")
+	e.EncodeInterface(b.contentID)
 
 	e.EncodeString("content")
 	e.EncodeString(b.content)
@@ -101,6 +105,8 @@ func (b *banner) DecodeMsgpack(dec *msgpack.Decoder) error {
 		switch d.DecodeString() {
 		case "interpreterId":
 			b.interpreterID = d.DecodeInt()
+		case "contentID":
+			d.DecodeInterface(&b.contentID)
 		case "content":
 			b.content = d.DecodeString()
 		case "openingCount":
@@ -137,11 +143,12 @@ func (b *banner) DecodeMsgpack(dec *msgpack.Decoder) error {
 	return nil
 }
 
-func newBanner(content string, eventID int, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign, interpreterID int, messageStyle *data.MessageStyle) *banner {
+func newBanner(contentID data.UUID, content string, eventID int, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign, interpreterID int, messageStyle *data.MessageStyle) *banner {
 	font.DrawTextToScratchPad(content, consts.TextScale, lang.Get())
 
 	b := &banner{
 		interpreterID: interpreterID,
+		contentID:     contentID,
 		content:       content,
 		background:    background,
 		positionType:  positionType,
@@ -150,6 +157,13 @@ func newBanner(content string, eventID int, background data.MessageBackground, p
 		eventID:       eventID,
 	}
 	return b
+}
+
+func (b *banner) SetContent(content string) {
+	b.content = content
+	if b.typingEffect != nil {
+		b.typingEffect.SetContent(b.content)
+	}
 }
 
 func (b *banner) isClosed() bool {

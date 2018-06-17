@@ -578,20 +578,22 @@ func (g *Game) ChosenWindowIndex() int {
 	return g.windows.ChosenIndex()
 }
 
-func (g *Game) ShowBalloon(interpreterID, mapID, roomID, eventID int, content string, balloonType data.BalloonType, messageStyle *data.MessageStyle) bool {
+func (g *Game) ShowBalloon(sceneManager *scene.Manager, interpreterID, mapID, roomID, eventID int, contentID data.UUID, balloonType data.BalloonType, messageStyle *data.MessageStyle) bool {
 	ch := g.Character(mapID, roomID, eventID)
 	if ch == nil {
 		return false
 	}
 
+	content := sceneManager.Game().Texts.Get(lang.Get(), contentID)
 	content = g.parseMessageSyntax(content)
-	g.windows.ShowBalloon(content, balloonType, eventID, interpreterID, messageStyle)
+	g.windows.ShowBalloon(contentID, content, balloonType, eventID, interpreterID, messageStyle)
 	return true
 }
 
-func (g *Game) ShowMessage(interpreterID, eventID int, content string, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign, messageStyle *data.MessageStyle) {
+func (g *Game) ShowMessage(sceneManager *scene.Manager, interpreterID, eventID int, contentID data.UUID, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign, messageStyle *data.MessageStyle) {
+	content := sceneManager.Game().Texts.Get(lang.Get(), contentID)
 	content = g.parseMessageSyntax(content)
-	g.windows.ShowMessage(content, eventID, background, positionType, textAlign, interpreterID, messageStyle)
+	g.windows.ShowMessage(contentID, content, eventID, background, positionType, textAlign, interpreterID, messageStyle)
 }
 
 func (g *Game) ShowChoices(sceneManager *scene.Manager, interpreterID int, choiceIDs []data.UUID) {
@@ -601,7 +603,7 @@ func (g *Game) ShowChoices(sceneManager *scene.Manager, interpreterID int, choic
 		choice = g.parseMessageSyntax(choice)
 		choices = append(choices, choice)
 	}
-	g.windows.ShowChoices(sceneManager, choices, interpreterID)
+	g.windows.ShowChoices(sceneManager, choiceIDs, choices, interpreterID)
 }
 
 func (g *Game) SetSwitchValue(id int, value bool) {

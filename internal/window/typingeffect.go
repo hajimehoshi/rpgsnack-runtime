@@ -29,14 +29,15 @@ type typingEffect struct {
 	content                   string
 	soundEffect               string
 	isSEPlayedInPreviousFrame bool
+	delay                     int
 }
 
 func newTypingEffect(content string, delay int, soundEffect string) *typingEffect {
 	t := &typingEffect{
-		content:      content,
-		animMaxCount: len([]rune(content)) * delay,
-		soundEffect:  soundEffect,
+		soundEffect: soundEffect,
+		delay:       delay,
 	}
+	t.SetContent(content)
 	return t
 }
 
@@ -62,6 +63,9 @@ func (t *typingEffect) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EncodeString("playedSE")
 	e.EncodeBool(t.isSEPlayedInPreviousFrame)
 
+	e.EncodeString("delay")
+	e.EncodeInt(t.delay)
+
 	e.EndMap()
 	return e.Flush()
 }
@@ -83,6 +87,8 @@ func (t *typingEffect) DecodeMsgpack(dec *msgpack.Decoder) error {
 			t.soundEffect = d.DecodeString()
 		case "playedSE":
 			t.isSEPlayedInPreviousFrame = d.DecodeBool()
+		case "delay":
+			t.delay = d.DecodeInt()
 		}
 	}
 	if err := d.Error(); err != nil {
@@ -97,6 +103,16 @@ func (t *typingEffect) isAnimating() bool {
 
 func (t *typingEffect) skipAnim() {
 	t.animCount = t.animMaxCount
+}
+
+func (t *typingEffect) SetContent(content string) {
+	t.content = content
+	t.animMaxCount = len([]rune(content)) * t.delay
+	// Finish animation forcely.
+	if t.animCount > 0 {
+		t.animCount = t.animMaxCount
+		t.allTextDisplayed = true
+	}
 }
 
 func (t *typingEffect) update() {

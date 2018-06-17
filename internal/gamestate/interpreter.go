@@ -27,7 +27,6 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/commanditerator"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/movecharacterstate"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/variables"
@@ -336,13 +335,12 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 	case data.CommandNameShowBalloon:
 		args := c.Args.(*data.CommandArgsShowBalloon)
 		if !i.waitingCommand {
-			content := sceneManager.Game().Texts.Get(lang.Get(), args.ContentID)
 			id := args.EventID
 			if id == 0 {
 				id = i.eventID
 			}
 			messageStyle := i.findMessageStyle(sceneManager, args.MessageStyleID)
-			if gameState.ShowBalloon(i.id, i.mapID, i.roomID, id, content, args.BalloonType, messageStyle) {
+			if gameState.ShowBalloon(sceneManager, i.id, i.mapID, i.roomID, id, args.ContentID, args.BalloonType, messageStyle) {
 				i.waitingCommand = true
 				return false, nil
 			}
@@ -364,14 +362,13 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 	case data.CommandNameShowMessage:
 		args := c.Args.(*data.CommandArgsShowMessage)
 		if !i.waitingCommand {
-			content := sceneManager.Game().Texts.Get(lang.Get(), args.ContentID)
 			id := args.EventID
 			if id == 0 {
 				id = i.eventID
 			}
 
 			messageStyle := i.findMessageStyle(sceneManager, args.MessageStyleID)
-			gameState.ShowMessage(i.id, id, content, args.Background, args.PositionType, args.TextAlign, messageStyle)
+			gameState.ShowMessage(sceneManager, i.id, id, args.ContentID, args.Background, args.PositionType, args.TextAlign, messageStyle)
 			i.waitingCommand = true
 			return false, nil
 		}

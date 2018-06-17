@@ -259,7 +259,6 @@ func (t *TitleScene) DrawBackgroundAnimation(screen *ebiten.Image) {
 }
 
 func (t *TitleScene) DrawTitle(screen *ebiten.Image) {
-
 	timg := assets.GetLocalizeImage("titles/title", t.lang)
 	tw, th := timg.Size()
 	sw, sh := screen.Size()

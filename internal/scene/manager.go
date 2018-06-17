@@ -100,9 +100,11 @@ func (m *Manager) Size() (int, int) {
 }
 
 func (m *Manager) SetScreenSize(width, height int) {
-	m.width = width
-	m.height = height
-	m.current.Resize()
+	if m.width != width || m.height != height {
+		m.width = width
+		m.height = height
+		m.current.Resize()
+	}
 }
 
 func (m *Manager) BottomOffset() int {

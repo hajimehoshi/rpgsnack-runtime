@@ -23,6 +23,7 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
+	"golang.org/x/text/language"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
@@ -41,6 +42,8 @@ type Game struct {
 	loadProgressCh    chan data.LoadProgress
 	loadProgressRate  float64
 	setPlatformDataCh chan setPlatformDataArgs
+	langs             []language.Tag
+	screenshots       *screenshots
 }
 
 type setPlatformDataArgs struct {
@@ -125,7 +128,9 @@ func (g *Game) Update(screen *ebiten.Image) error {
 	if ebiten.IsRunningSlowly() {
 		return nil
 	}
-	g.draw(screen)
+	if err := g.draw(screen); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -147,6 +152,7 @@ func (g *Game) update() error {
 			g.sceneManager = scene.NewManager(g.width, g.height, g.requester, da.Game, da.Progress, da.Purchases)
 			g.sceneManager.SetLanguage(da.Language)
 			g.sceneManager.InitScene(sceneimpl.NewTitleScene())
+			g.langs = da.Game.Texts.Languages()
 		default:
 			return nil
 		}
@@ -163,13 +169,24 @@ func (g *Game) update() error {
 		return err
 	}
 	takeCPUProfileIfAvailable()
+
+	if g.screenshots == nil && input.IsScreenshotButtonTriggered() {
+		g.screenshots = newScreenshots(g.width, g.height, g.langs)
+	}
+	if g.screenshots != nil {
+		g.screenshots.update(g)
+		if g.screenshots.isFinished() {
+			g.screenshots = nil
+		}
+	}
+
 	if err := g.sceneManager.Update(); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (g *Game) draw(screen *ebiten.Image) {
+func (g *Game) draw(screen *ebiten.Image) error {
 	if g.loadProgressCh != nil {
 		if runtime.GOARCH == "js" {
 			const barHeight = 8
@@ -180,9 +197,16 @@ func (g *Game) draw(screen *ebiten.Image) {
 			activeWidth := barWidth * g.loadProgressRate
 			ebitenutil.DrawRect(screen, 0, y, activeWidth, barHeight, color.RGBA{0xff, 0xff, 0xff, 0xff})
 		}
-		return
+		return nil
 	}
 	g.sceneManager.Draw(screen)
+
+	if g.screenshots != nil {
+		if err := g.screenshots.tryDumpScreenshots(screen); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (g *Game) Size() (int, int) {

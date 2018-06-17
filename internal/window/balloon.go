@@ -47,6 +47,7 @@ type balloon struct {
 	height         int
 	hasArrow       bool
 	eventID        int
+	contentID      data.UUID
 	content        string
 	contentOffsetX int
 	contentOffsetY int
@@ -84,6 +85,9 @@ func (b *balloon) EncodeMsgpack(enc *msgpack.Encoder) error {
 
 	e.EncodeString("eventID")
 	e.EncodeInt(b.eventID)
+
+	e.EncodeString("contentID")
+	e.EncodeInterface(b.contentID)
 
 	e.EncodeString("content")
 	e.EncodeString(b.content)
@@ -135,6 +139,8 @@ func (b *balloon) DecodeMsgpack(dec *msgpack.Decoder) error {
 			b.hasArrow = d.DecodeBool()
 		case "eventID":
 			b.eventID = d.DecodeInt()
+		case "contentID":
+			d.DecodeInterface(&b.contentID)
 		case "content":
 			b.content = d.DecodeString()
 		case "contentOffsetX":
@@ -167,11 +173,12 @@ func (b *balloon) DecodeMsgpack(dec *msgpack.Decoder) error {
 	return nil
 }
 
-func newBalloon(x, y, width, height int, content string, balloonType data.BalloonType, interpreterID int, messageStyle *data.MessageStyle) *balloon {
+func newBalloon(x, y, width, height int, contentID data.UUID, content string, balloonType data.BalloonType, interpreterID int, messageStyle *data.MessageStyle) *balloon {
 	font.DrawTextToScratchPad(content, consts.TextScale, lang.Get())
 
 	b := &balloon{
 		interpreterID: interpreterID,
+		contentID:     contentID,
 		content:       content,
 		x:             x,
 		y:             y,
@@ -218,23 +225,34 @@ func balloonSizeFromContent(content string, balloonType data.BalloonType) (int, 
 	return w, h, contentOffsetX, contentOffsetY
 }
 
-func newBalloonWithArrow(content string, balloonType data.BalloonType, eventID int, interpreterID int, messageStyle *data.MessageStyle) *balloon {
+func newBalloonWithArrow(contentID data.UUID, content string, balloonType data.BalloonType, eventID int, interpreterID int, messageStyle *data.MessageStyle) *balloon {
 	font.DrawTextToScratchPad(content, consts.TextScale, lang.Get())
 
 	b := &balloon{
 		interpreterID: interpreterID,
-		content:       content,
+		contentID:     contentID,
 		hasArrow:      true,
 		eventID:       eventID,
 		balloonType:   balloonType,
 		messageStyle:  messageStyle,
 	}
-	w, h, contentOffsetX, contentOffsetY := balloonSizeFromContent(content, balloonType)
-	b.width = w
-	b.height = h
-	b.contentOffsetX = contentOffsetX
-	b.contentOffsetY = contentOffsetY
+	b.SetContent(content)
 	return b
+}
+
+func (b *balloon) SetContent(content string) {
+	b.content = content
+	if b.hasArrow {
+		w, h, contentOffsetX, contentOffsetY := balloonSizeFromContent(b.content, b.balloonType)
+		b.width = w
+		b.height = h
+		b.contentOffsetX = contentOffsetX
+		b.contentOffsetY = contentOffsetY
+	}
+	if b.typingEffect != nil {
+		b.typingEffect.SetContent(b.content)
+	}
+	b.offscreen = nil
 }
 
 func (b *balloon) skipTypingAnim() {

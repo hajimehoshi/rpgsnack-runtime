@@ -19,12 +19,14 @@ import (
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/vmihailenco/msgpack"
+	"golang.org/x/text/language"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
 
@@ -34,15 +36,19 @@ const (
 )
 
 type Windows struct {
-	nextBalloon               *balloon
-	balloons                  []*balloon // TODO: Rename?
-	choiceBalloons            []*balloon
-	banner                    *banner
+	nextBalloon    *balloon
+	balloons       []*balloon // TODO: Rename?
+	choiceBalloons []*balloon
+	banner         *banner
+
 	chosenIndex               int
 	choosing                  bool
 	choosingInterpreterID     int
 	chosenBalloonWaitingCount int
 	hasChosenIndex            bool
+
+	// Not dump
+	lastLang language.Tag
 }
 
 func (w *Windows) EncodeMsgpack(enc *msgpack.Encoder) error {
@@ -157,20 +163,20 @@ func (w *Windows) HasChosenIndex() bool {
 	return w.hasChosenIndex
 }
 
-func (w *Windows) ShowBalloon(content string, balloonType data.BalloonType, eventID int, interpreterID int, messageStyle *data.MessageStyle) {
+func (w *Windows) ShowBalloon(contentID data.UUID, content string, balloonType data.BalloonType, eventID int, interpreterID int, messageStyle *data.MessageStyle) {
 	if w.nextBalloon != nil {
 		panic("not reach")
 	}
 	// TODO: How to call newBalloonCenter?
-	w.nextBalloon = newBalloonWithArrow(content, balloonType, eventID, interpreterID, messageStyle)
+	w.nextBalloon = newBalloonWithArrow(contentID, content, balloonType, eventID, interpreterID, messageStyle)
 }
 
-func (w *Windows) ShowMessage(content string, eventID int, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign, interpreterID int, messageStyle *data.MessageStyle) {
-	w.banner = newBanner(content, eventID, background, positionType, textAlign, interpreterID, messageStyle)
+func (w *Windows) ShowMessage(contentID data.UUID, content string, eventID int, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign, interpreterID int, messageStyle *data.MessageStyle) {
+	w.banner = newBanner(contentID, content, eventID, background, positionType, textAlign, interpreterID, messageStyle)
 	w.banner.open()
 }
 
-func (w *Windows) ShowChoices(sceneManager *scene.Manager, choices []string, interpreterID int) {
+func (w *Windows) ShowChoices(sceneManager *scene.Manager, choiceIDs []data.UUID, choices []string, interpreterID int) {
 	// TODO: w.chosenBalloonWaitingCount should be 0 here!
 	if w.chosenBalloonWaitingCount > 0 {
 		panic("not reach")
@@ -182,7 +188,7 @@ func (w *Windows) ShowChoices(sceneManager *scene.Manager, choices []string, int
 		x := 0
 		y := i*choiceBalloonHeight + ymin
 		width := consts.MapWidth
-		balloon := newBalloon(x, y, width, choiceBalloonHeight, choice, data.BalloonTypeNormal, interpreterID, sceneManager.Game().CreateChoicesMessageStyle())
+		balloon := newBalloon(x, y, width, choiceBalloonHeight, choiceIDs[i], choice, data.BalloonTypeNormal, interpreterID, sceneManager.Game().CreateChoicesMessageStyle())
 		w.choiceBalloons = append(w.choiceBalloons, balloon)
 		balloon.open()
 	}
@@ -316,6 +322,32 @@ func (w *Windows) findCharacterByEventID(characters []*character.Character, even
 }
 
 func (w *Windows) Update(playerY int, sceneManager *scene.Manager, characters []*character.Character) {
+	if w.lastLang == language.Und {
+		w.lastLang = lang.Get()
+	}
+
+	if w.lastLang != lang.Get() {
+		for _, b := range w.balloons {
+			if b == nil {
+				continue
+			}
+			content := sceneManager.Game().Texts.Get(lang.Get(), b.contentID)
+			b.SetContent(content)
+		}
+		for _, b := range w.choiceBalloons {
+			if b == nil {
+				continue
+			}
+			content := sceneManager.Game().Texts.Get(lang.Get(), b.contentID)
+			b.SetContent(content)
+		}
+		if w.banner != nil {
+			content := sceneManager.Game().Texts.Get(lang.Get(), w.banner.contentID)
+			w.banner.SetContent(content)
+		}
+		w.lastLang = lang.Get()
+	}
+
 	if !w.choosing {
 		// 0 means to check all balloons.
 		// TODO: Don't use magic numbers.

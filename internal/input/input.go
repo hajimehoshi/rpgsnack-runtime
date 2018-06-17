@@ -35,6 +35,10 @@ func IsTurboButtonTriggered() bool {
 	return inpututil.IsKeyJustPressed(ebiten.KeyT)
 }
 
+func IsScreenshotButtonTriggered() bool {
+	return inpututil.IsKeyJustPressed(ebiten.KeyS)
+}
+
 func SetOffset(offsetX, offsetY int) {
 	theInput.offsetX = offsetX
 	theInput.offsetY = offsetY
