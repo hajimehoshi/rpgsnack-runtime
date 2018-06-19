@@ -32,10 +32,14 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/variables"
 )
 
+const (
+	playerEventID = -1
+)
+
 type Interpreter struct {
 	id                 int
-	mapID              int // Note: This doesn't make sense when eventID == -1
-	roomID             int // Note: This doesn't make sense when eventID == -1
+	mapID              int // Note: This doesn't make sense when eventID == playerEventID
+	roomID             int // Note: This doesn't make sense when eventID == playerEventID
 	eventID            int
 	commandIterator    *commanditerator.CommandIterator
 	waitingCount       int
@@ -502,13 +506,16 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		sub := i.createChild(gameState, id, args.Commands)
 		sub.repeat = args.Repeat
 		sub.routeSkip = args.Skip
+
+		// Set 'route' true so that the new route command does not
+		// block the player's move (#380).
+		if !args.Wait && args.Repeat && id != playerEventID {
+			sub.route = true
+			// Remove the current route, and then override it.
+			gameState.Map().removeRoutes(id)
+		}
+
 		if !args.Wait {
-			// Set 'route' true so that the new route command does not
-			// block the player's move (#380).
-			if id != 0 && id != i.eventID {
-				gameState.Map().removeRoutes(id)
-				sub.route = true
-			}
 			gameState.Map().addInterpreter(sub)
 			i.commandIterator.Advance()
 			return true, nil
