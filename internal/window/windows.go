@@ -181,12 +181,10 @@ func (w *Windows) ShowChoices(sceneManager *scene.Manager, choiceIDs []data.UUID
 	if w.chosenBalloonWaitingCount > 0 {
 		panic("not reach")
 	}
-	_, h := sceneManager.Size()
-	ymin := h/consts.TileScale - len(choices)*choiceBalloonHeight
 	w.choiceBalloons = nil
 	for i, choice := range choices {
 		x := 0
-		y := i*choiceBalloonHeight + ymin
+		y := i * choiceBalloonHeight
 		width := consts.MapWidth
 		balloon := newBalloon(x, y, width, choiceBalloonHeight, choiceIDs[i], choice, data.BalloonTypeNormal, interpreterID, sceneManager.Game().CreateChoicesMessageStyle())
 		w.choiceBalloons = append(w.choiceBalloons, balloon)
@@ -429,11 +427,12 @@ func (w *Windows) Draw(screen *ebiten.Image, characters []*character.Character, 
 		}
 		b.draw(screen, w.findCharacterByEventID(characters, b.eventID), offsetX, offsetY)
 	}
+	_, sh := screen.Size()
 	for _, b := range w.choiceBalloons {
 		if b == nil {
 			continue
 		}
-		b.draw(screen, nil, offsetX, -windowOffsetY)
+		b.draw(screen, nil, offsetX, sh/consts.TileScale-windowOffsetY-len(w.choiceBalloons)*choiceBalloonHeight)
 	}
 
 	if w.banner != nil {
