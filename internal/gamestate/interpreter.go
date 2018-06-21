@@ -48,6 +48,7 @@ type Interpreter struct {
 	repeat             bool
 	sub                *Interpreter
 	route              bool // True when used for event routing property.
+	pageRoute          bool
 	routeSkip          bool
 	parallel           bool
 	waitingRequestID   int // Note: When this is not 0, the game state can't be saved.
@@ -104,6 +105,9 @@ func (i *Interpreter) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EncodeString("route")
 	e.EncodeBool(i.route)
 
+	e.EncodeString("pageRoute")
+	e.EncodeBool(i.pageRoute)
+
 	e.EncodeString("routeSkip")
 	e.EncodeBool(i.routeSkip)
 
@@ -153,6 +157,8 @@ func (i *Interpreter) DecodeMsgpack(dec *msgpack.Decoder) error {
 			}
 		case "route":
 			i.route = d.DecodeBool()
+		case "pageRoute":
+			i.pageRoute = d.DecodeBool()
 		case "routeSkip":
 			i.routeSkip = d.DecodeBool()
 		case "parallel":
@@ -183,6 +189,7 @@ func (i *Interpreter) IsExecuting() bool {
 func (i *Interpreter) createChild(gameState InterpreterIDGenerator, eventID int, commands []*data.Command) *Interpreter {
 	child := NewInterpreter(gameState, i.mapID, i.roomID, eventID, commands)
 	child.route = i.route
+	child.pageRoute = i.pageRoute
 	return child
 }
 
@@ -507,19 +514,22 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		sub.repeat = args.Repeat
 		sub.routeSkip = args.Skip
 
-		// Set 'route' true so that the new route command does not
-		// block the player's move (#380).
-		if !args.Wait && args.Repeat && id != playerEventID {
-			sub.route = true
-			// Remove the current route, and then override it.
-			gameState.Map().removeRoutes(id)
+		if id != playerEventID && !args.Internal {
+			gameState.Map().removeNonPageRoutes(id)
 		}
 
 		if !args.Wait {
+			// Set 'route' true so that the new route command does not
+			// block the player's move (#380).
+			if id != playerEventID {
+				sub.route = true
+			}
+
 			gameState.Map().addInterpreter(sub)
 			i.commandIterator.Advance()
 			return true, nil
 		}
+
 		i.sub = sub
 	case data.CommandNameTintScreen:
 		if !i.waitingCommand {

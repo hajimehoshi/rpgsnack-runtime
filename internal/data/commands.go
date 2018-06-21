@@ -1083,6 +1083,7 @@ type CommandArgsSetRoute struct {
 	Repeat   bool       `json:"repeat" msgpack:"repeat"`
 	Skip     bool       `json:"skip" msgpack:"skip"`
 	Wait     bool       `json:"wait" msgpack:"wait"`
+	Internal bool       `json:"internal" msgpack:"internal"`
 	Commands []*Command `json:"commands" msgpack:"commands"`
 }
 

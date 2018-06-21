@@ -299,6 +299,21 @@ func (m *Map) currentPage(event *character.Character) *data.Page {
 
 var GoToTitle = errors.New("go to title")
 
+func (m *Map) removeNonPageRoutes(eventID int) {
+	ids := []int{}
+	for _, i := range m.interpreters {
+		if i.eventID != eventID {
+			continue
+		}
+		if i.route && !i.pageRoute {
+			ids = append(ids, i.id)
+		}
+	}
+	for _, id := range ids {
+		delete(m.interpreters, id)
+	}
+}
+
 func (m *Map) removeRoutes(eventID int) {
 	ids := []int{}
 	for id, i := range m.interpreters {
@@ -345,15 +360,29 @@ func (m *Map) Update(sceneManager *scene.Manager, gameState *Game) error {
 
 	if m.itemInterpreter == nil {
 		is := []*Interpreter{}
+
+		adoptedRoutes := map[int]*Interpreter{}
 		for _, i := range m.interpreters {
+			if i.route {
+				oldInt, ok := adoptedRoutes[i.eventID]
+				// Prefer non-page-route.
+				if !ok || (oldInt.pageRoute && !i.pageRoute) {
+					adoptedRoutes[i.eventID] = i
+				}
+			}
 			is = append(is, i)
 		}
 		sort.Slice(is, func(i, j int) bool {
 			return is[i].id < is[j].id
 		})
 		for _, i := range is {
-			if i.route && m.executingEventIDByUserInput == i.eventID {
-				continue
+			if i.route {
+				if m.executingEventIDByUserInput == i.eventID {
+					continue
+				}
+				if adoptedRoutes[i.eventID] != i {
+					continue
+				}
 			}
 			if err := i.Update(sceneManager, gameState); err != nil {
 				return err
@@ -424,6 +453,7 @@ func (m *Map) refreshEvents(gameState *Game) error {
 		}
 		interpreter := NewInterpreter(gameState, m.mapID, m.roomID, e.EventID(), commands)
 		interpreter.route = true
+		interpreter.pageRoute = true
 		m.addInterpreter(interpreter)
 	}
 	return nil
@@ -659,10 +689,11 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, gameState *G
 		{
 			Name: data.CommandNameSetRoute,
 			Args: &data.CommandArgsSetRoute{
-				EventID: character.PlayerEventID,
-				Repeat:  false,
-				Skip:    false,
-				Wait:    true,
+				EventID:  character.PlayerEventID,
+				Repeat:   false,
+				Skip:     false,
+				Wait:     true,
+				Internal: true,
 				Commands: []*data.Command{
 					{
 						Name: data.CommandNameSetCharacterProperty,
@@ -719,6 +750,7 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, gameState *G
 					Repeat:   false,
 					Skip:     true,
 					Wait:     true,
+					Internal: true,
 					Commands: []*data.Command{c},
 				},
 			},
@@ -823,10 +855,11 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, gameState *G
 		&data.Command{
 			Name: data.CommandNameSetRoute,
 			Args: &data.CommandArgsSetRoute{
-				EventID: character.PlayerEventID,
-				Repeat:  false,
-				Skip:    false,
-				Wait:    true,
+				EventID:  character.PlayerEventID,
+				Repeat:   false,
+				Skip:     false,
+				Wait:     true,
+				Internal: true,
 				Commands: []*data.Command{
 					{
 						Name: data.CommandNameSetCharacterProperty,
@@ -897,10 +930,11 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, gameState *G
 					&data.Command{
 						Name: data.CommandNameSetRoute,
 						Args: &data.CommandArgsSetRoute{
-							EventID: event.EventID(),
-							Repeat:  false,
-							Skip:    false,
-							Wait:    true,
+							EventID:  event.EventID(),
+							Repeat:   false,
+							Skip:     false,
+							Wait:     true,
+							Internal: true,
 							Commands: []*data.Command{
 								{
 									Name: data.CommandNameTurnCharacter,
@@ -926,10 +960,11 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, gameState *G
 					&data.Command{
 						Name: data.CommandNameSetRoute,
 						Args: &data.CommandArgsSetRoute{
-							EventID: event.EventID(),
-							Repeat:  false,
-							Skip:    false,
-							Wait:    true,
+							EventID:  event.EventID(),
+							Repeat:   false,
+							Skip:     false,
+							Wait:     true,
+							Internal: true,
 							Commands: []*data.Command{
 								{
 									Name: data.CommandNameTurnCharacter,
