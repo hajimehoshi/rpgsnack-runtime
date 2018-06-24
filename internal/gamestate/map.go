@@ -202,6 +202,7 @@ func (m *Map) waitingRequestResponse() bool {
 
 func (m *Map) setRoomID(gameState *Game, id int, interpreter *Interpreter) error {
 	m.roomID = id
+	m.executingEventIDByUserInput = 0
 	m.events = nil
 	m.eventPageIndices = map[int]int{}
 
@@ -377,7 +378,7 @@ func (m *Map) Update(sceneManager *scene.Manager, gameState *Game) error {
 		})
 		for _, i := range is {
 			if i.route {
-				if m.executingEventIDByUserInput == i.eventID {
+				if i.pageRoute && m.executingEventIDByUserInput == i.eventID {
 					continue
 				}
 				if adoptedRoutes[i.eventID] != i {
