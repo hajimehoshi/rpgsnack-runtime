@@ -709,14 +709,27 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, gameState *G
 	}
 	cs := pathpkg.RouteCommandsToEventCommands(path)
 
+	const (
+		oldXID = iota + variables.ReservedID
+		oldYID
+		newXID
+		newYID
+		moveCompleted
+	)
+
 	const labelPlayerMoved = "playerMoved"
-	for _, c := range cs {
-		const (
-			oldXID = iota + variables.ReservedID
-			oldYID
-			newXID
-			newYID
-		)
+	commands = append(commands,
+		&data.Command{
+			Name: data.CommandNameSetVariable,
+			Args: &data.CommandArgsSetVariable{
+				ID:        moveCompleted,
+				Op:        data.SetVariableOpAssign,
+				ValueType: data.SetVariableValueTypeConstant,
+				Value:     0,
+				Internal:  true,
+			},
+		})
+	for i, c := range cs {
 		commands = append(commands,
 			// Get the original position.
 			&data.Command{
@@ -802,51 +815,64 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, gameState *G
 				},
 			},
 		)
-		c1 := &data.Command{
-			Name: data.CommandNameIf,
-			Args: &data.CommandArgsIf{
-				Conditions: []*data.Condition{
-					{
-						Type:      data.ConditionTypeVariable,
-						ID:        oldXID,
-						Comp:      data.ConditionCompEqualTo,
-						ValueType: data.ConditionValueTypeVariable,
-						Value:     float64(newXID),
-					},
-				},
-			},
-			Branches: [][]*data.Command{
-				{},
-			},
-		}
-		c2 := &data.Command{
-			Name: data.CommandNameIf,
-			Args: &data.CommandArgsIf{
-				Conditions: []*data.Condition{
-					{
-						Type:      data.ConditionTypeVariable,
-						ID:        oldYID,
-						Comp:      data.ConditionCompEqualTo,
-						ValueType: data.ConditionValueTypeVariable,
-						Value:     float64(newYID),
-					},
-				},
-			},
-			Branches: [][]*data.Command{
-				{
-					{
-						Name: data.CommandNameGoto,
-						Args: &data.CommandArgsGoto{
-							Label: labelPlayerMoved,
+		if i < len(cs)-1 {
+			c1 := &data.Command{
+				Name: data.CommandNameIf,
+				Args: &data.CommandArgsIf{
+					Conditions: []*data.Condition{
+						{
+							Type:      data.ConditionTypeVariable,
+							ID:        oldXID,
+							Comp:      data.ConditionCompEqualTo,
+							ValueType: data.ConditionValueTypeVariable,
+							Value:     float64(newXID),
 						},
 					},
 				},
-			},
+				Branches: [][]*data.Command{
+					{},
+				},
+			}
+			c2 := &data.Command{
+				Name: data.CommandNameIf,
+				Args: &data.CommandArgsIf{
+					Conditions: []*data.Condition{
+						{
+							Type:      data.ConditionTypeVariable,
+							ID:        oldYID,
+							Comp:      data.ConditionCompEqualTo,
+							ValueType: data.ConditionValueTypeVariable,
+							Value:     float64(newYID),
+						},
+					},
+				},
+				Branches: [][]*data.Command{
+					{
+						{
+							Name: data.CommandNameGoto,
+							Args: &data.CommandArgsGoto{
+								Label: labelPlayerMoved,
+							},
+						},
+					},
+				},
+			}
+			c1.Branches[0] = append(c1.Branches[0], c2)
+			commands = append(commands, c1)
 		}
-		c1.Branches[0] = append(c1.Branches[0], c2)
-		commands = append(commands, c1)
 	}
 	commands = append(commands,
+		// Complete all the moving.
+		&data.Command{
+			Name: data.CommandNameSetVariable,
+			Args: &data.CommandArgsSetVariable{
+				ID:        moveCompleted,
+				Op:        data.SetVariableOpAssign,
+				ValueType: data.SetVariableValueTypeConstant,
+				Value:     1,
+				Internal:  true,
+			},
+		},
 		&data.Command{
 			Name: data.CommandNameLabel,
 			Args: &data.CommandArgsLabel{
@@ -896,6 +922,30 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, gameState *G
 					{
 						Name: data.CommandNameExecEventHere,
 					},
+					{
+						Name: data.CommandNameReturn,
+					},
+				},
+			},
+		},
+	)
+
+	commands = append(commands,
+		&data.Command{
+			Name: data.CommandNameIf,
+			Args: &data.CommandArgsIf{
+				Conditions: []*data.Condition{
+					{
+						Type:      data.ConditionTypeVariable,
+						ID:        moveCompleted,
+						Comp:      data.ConditionCompEqualTo,
+						ValueType: data.ConditionValueTypeConstant,
+						Value:     0,
+					},
+				},
+			},
+			Branches: [][]*data.Command{
+				{
 					{
 						Name: data.CommandNameReturn,
 					},
