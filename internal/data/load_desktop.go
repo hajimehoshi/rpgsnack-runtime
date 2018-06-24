@@ -146,6 +146,6 @@ func loadRawData(projectionLocation string, progressCh chan<- float64) (*rawData
 	}, nil
 }
 
-func SetData(project []byte, assets []byte, progress []byte, purchases []byte, language string) {
+func SetData(project []byte, assets [][]byte, progress []byte, purchases []byte, language string) {
 	// Not implemented
 }
