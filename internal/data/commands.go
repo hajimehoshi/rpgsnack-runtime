@@ -1034,13 +1034,13 @@ func (c *CommandArgsSetVariable) DecodeMsgpack(dec *msgpack.Decoder) error {
 	case SetVariableValueTypeConstant:
 		v, ok := interfaceToInt(value)
 		if !ok {
-			return fmt.Errorf("data: CommandArgsSetVariable.DecodeMsgpack: constant value must be an integer; got %v", v)
+			return fmt.Errorf("data: CommandArgsSetVariable.DecodeMsgpack: constant value must be an integer; got %v", value)
 		}
 		c.Value = v
 	case SetVariableValueTypeVariable:
 		v, ok := interfaceToInt(value)
 		if !ok {
-			return fmt.Errorf("data: CommandArgsSetVariable.DecodeMsgpack: variable value must be an integer; got %v", v)
+			return fmt.Errorf("data: CommandArgsSetVariable.DecodeMsgpack: variable value must be an integer; got %v", value)
 		}
 		c.Value = v
 	case SetVariableValueTypeRandom:
@@ -1058,7 +1058,7 @@ func (c *CommandArgsSetVariable) DecodeMsgpack(dec *msgpack.Decoder) error {
 	case SetVariableValueTypeIAPProduct:
 		v, ok := interfaceToInt(value)
 		if !ok {
-			return fmt.Errorf("data: CommandArgsSetVariable.DecodeMsgpack: IAP product value must be an integer; got %v", v)
+			return fmt.Errorf("data: CommandArgsSetVariable.DecodeMsgpack: IAP product value must be an integer; got %v", value)
 		}
 		c.Value = v
 	case SetVariableValueTypeSystem:
@@ -1382,7 +1382,7 @@ func (c *CommandArgsSetCharacterProperty) DecodeMsgpack(dec *msgpack.Decoder) er
 	case SetCharacterPropertyTypeSpeed:
 		v, ok := interfaceToInt(value)
 		if !ok {
-			return fmt.Errorf("data: CommandArgsSetCharacterProperty.DecodeMsgpack: speed must be an integer; got %v", v)
+			return fmt.Errorf("data: CommandArgsSetCharacterProperty.DecodeMsgpack: speed must be an integer; got %v", value)
 		}
 		c.Value = Speed(v)
 	default:
