@@ -340,6 +340,10 @@ func loadRawData(projectLocation string, progress chan<- float64) (*rawData, err
 	if err != nil {
 		return nil, err
 	}
+	if project == nil && projectJSON == nil {
+		return nil, fmt.Errorf("data: project file not found")
+	}
+
 	return &rawData{
 		Project:     project,
 		ProjectJSON: projectJSON,
