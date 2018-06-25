@@ -1335,13 +1335,23 @@ func interfaceToInt(v interface{}) (int, bool) {
 	switch v := v.(type) {
 	case int:
 		return v, true
+	case uint:
+		return int(v), true
 	case int8:
+		return int(v), true
+	case uint8:
 		return int(v), true
 	case int16:
 		return int(v), true
+	case uint16:
+		return int(v), true
 	case int32:
 		return int(v), true
+	case uint32:
+		return int(v), true
 	case int64:
+		return int(v), true
+	case uint64:
 		return int(v), true
 	}
 	return 0, false
