@@ -24,6 +24,7 @@ import (
 	"github.com/vmihailenco/msgpack"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/commanditerator"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
@@ -32,14 +33,10 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/variables"
 )
 
-const (
-	playerEventID = -1
-)
-
 type Interpreter struct {
 	id                 int
-	mapID              int // Note: This doesn't make sense when eventID == playerEventID
-	roomID             int // Note: This doesn't make sense when eventID == playerEventID
+	mapID              int // Note: This doesn't make sense when eventID == PlayerEventID
+	roomID             int // Note: This doesn't make sense when eventID == PlayerEventID
 	eventID            int
 	commandIterator    *commanditerator.CommandIterator
 	waitingCount       int
@@ -514,14 +511,14 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		sub.repeat = args.Repeat
 		sub.routeSkip = args.Skip
 
-		if id != playerEventID && !args.Internal {
+		if id != character.PlayerEventID && !args.Internal {
 			gameState.Map().removeNonPageRoutes(id)
 		}
 
 		if !args.Wait {
-			// Set 'route' true so that the new route command does not
-			// block the player's move (#380).
-			if id != playerEventID {
+			if id != character.PlayerEventID {
+				// Set 'route' true so that the new route command does not
+				// block the player's move (#380).
 				sub.route = true
 			}
 

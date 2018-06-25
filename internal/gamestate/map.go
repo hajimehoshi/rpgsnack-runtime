@@ -57,6 +57,7 @@ type Map struct {
 	// Fields that are not dumped
 	gameData                  *data.Game
 	isPlayerMovingByUserInput bool
+	origSpeed                 data.Speed
 }
 
 func NewMap() *Map {
@@ -227,6 +228,13 @@ func (m *Map) setRoomID(gameState *Game, id int, interpreter *Interpreter) error
 
 func (m *Map) IsBlockingEventExecuting() bool {
 	for _, i := range m.interpreters {
+		if i.id == m.playerInterpreterID {
+			if m.IsPlayerMovingByUserInput() {
+				continue
+			} else if i.IsExecuting() {
+				return true
+			}
+		}
 		if i.route {
 			continue
 		}
@@ -673,14 +681,19 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, gameState *G
 	if len(path) == 0 {
 		return false
 	}
+
 	// The player can move. Let's save the state here just before starting moving.
-	if gameState.IsAutoSaveEnabled() {
+	if gameState.IsAutoSaveEnabled() && !m.IsPlayerMovingByUserInput() {
 		gameState.RequestSave(sceneManager)
 	}
 
-	// The player's speed is never changed by another events during the player walks
-	// by user input.
-	origSpeed := m.player.Speed()
+	if _, ok := m.interpreters[m.playerInterpreterID]; ok {
+		delete(m.interpreters, m.playerInterpreterID)
+	} else {
+		// The player's speed is never changed by another events during the player walks
+		// by user input.
+		m.origSpeed = m.player.Speed()
+	}
 
 	// Set this true before executing other interpreters, or
 	// the calculated path can be invalidated.
@@ -892,7 +905,7 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, gameState *G
 						Name: data.CommandNameSetCharacterProperty,
 						Args: &data.CommandArgsSetCharacterProperty{
 							Type:  data.SetCharacterPropertyTypeSpeed,
-							Value: origSpeed,
+							Value: m.origSpeed,
 						},
 					},
 				},
