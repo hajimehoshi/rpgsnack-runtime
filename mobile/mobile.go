@@ -62,7 +62,7 @@ func IsRunning() bool {
 func adjustScreenSize(widthInDP, heightInDP int) (width, height int, scale float64) {
 	const (
 		minWidth  = 480
-		minHeight = 672
+		minHeight = 720
 	)
 
 	if float64(heightInDP)/float64(widthInDP) > float64(minHeight)/minWidth {
