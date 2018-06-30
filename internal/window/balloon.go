@@ -87,7 +87,7 @@ func (b *balloon) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EncodeInt(b.eventID)
 
 	e.EncodeString("contentID")
-	e.EncodeInterface(b.contentID)
+	e.EncodeInterface(&b.contentID)
 
 	e.EncodeString("content")
 	e.EncodeString(b.content)

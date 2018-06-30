@@ -216,8 +216,19 @@ func (e *Encoder) EncodeString(v string) {
 	})
 }
 
+func isNil(v interface{}) bool {
+	if v == nil {
+		return true
+	}
+	switch rv := reflect.ValueOf(v); rv.Kind() {
+	case reflect.Chan, reflect.Func, reflect.Map, reflect.Ptr, reflect.Interface, reflect.Slice:
+		return rv.IsNil()
+	}
+	return false
+}
+
 func (e *Encoder) EncodeInterface(v msgpack.CustomEncoder) {
-	if v == nil || reflect.ValueOf(v).IsNil() {
+	if isNil(v) {
 		e.EncodeNil()
 		return
 	}
@@ -229,7 +240,7 @@ func (e *Encoder) EncodeInterface(v msgpack.CustomEncoder) {
 }
 
 func (e *Encoder) EncodeAny(v interface{}) {
-	if v == nil || reflect.ValueOf(v).IsNil() {
+	if isNil(v) {
 		e.EncodeNil()
 		return
 	}

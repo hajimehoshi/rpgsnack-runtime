@@ -62,7 +62,7 @@ func (b *banner) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EncodeInt(b.interpreterID)
 
 	e.EncodeString("contentID")
-	e.EncodeInterface(b.contentID)
+	e.EncodeInterface(&b.contentID)
 
 	e.EncodeString("content")
 	e.EncodeString(b.content)

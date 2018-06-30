@@ -27,27 +27,27 @@ func NewUUID() UUID {
 	return UUID(uuid.New())
 }
 
-func (u UUID) String() string {
-	return uuid.UUID(u).String()
+func (u *UUID) String() string {
+	return (*uuid.UUID)(u).String()
 }
 
-func (u UUID) MarshalText() ([]byte, error) {
-	return uuid.UUID(u).MarshalText()
+func (u *UUID) MarshalText() ([]byte, error) {
+	return (*uuid.UUID)(u).MarshalText()
 }
 
 func (u *UUID) UnmarshalText(data []byte) error {
 	return (*uuid.UUID)(u).UnmarshalText(data)
 }
 
-func (u UUID) MarshalBinary() ([]byte, error) {
-	return uuid.UUID(u).MarshalBinary()
+func (u *UUID) MarshalBinary() ([]byte, error) {
+	return (*uuid.UUID)(u).MarshalBinary()
 }
 
 func (u *UUID) UnmarshalBinary(data []byte) error {
 	return (*uuid.UUID)(u).UnmarshalBinary(data)
 }
 
-func (u UUID) EncodeMsgpack(enc *msgpack.Encoder) error {
+func (u *UUID) EncodeMsgpack(enc *msgpack.Encoder) error {
 	b, err := u.MarshalBinary()
 	if err != nil {
 		return err
