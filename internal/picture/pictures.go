@@ -22,7 +22,6 @@ import (
 	"github.com/vmihailenco/msgpack"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/interpolation"
@@ -31,7 +30,6 @@ import (
 
 type Pictures struct {
 	pictures []*picture
-	screen   *ebiten.Image
 }
 
 func (p *Pictures) EncodeMsgpack(enc *msgpack.Encoder) error {
@@ -139,21 +137,12 @@ func (p *Pictures) Update() {
 }
 
 func (p *Pictures) Draw(screen *ebiten.Image, offsetX, offsetY int) {
-	if p.screen == nil {
-		p.screen, _ = ebiten.NewImage(consts.TileSize*consts.TileXNum, consts.TileSize*consts.TileYNum, ebiten.FilterNearest)
-	}
-	p.screen.Clear()
 	for _, pic := range p.pictures {
 		if pic == nil {
 			continue
 		}
-		pic.draw(p.screen)
+		pic.draw(screen, offsetX, offsetY)
 	}
-
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(consts.TileScale, consts.TileScale)
-	op.GeoM.Translate(float64(offsetX), float64(offsetY))
-	screen.DrawImage(p.screen, op)
 }
 
 func (p *Pictures) Add(id int, name string, x, y int, scaleX, scaleY, angle, opacity float64, originX, originY float64, blendType data.ShowPictureBlendType) {
@@ -315,7 +304,7 @@ func (p *picture) update() {
 	p.tint.Update()
 }
 
-func (p *picture) draw(screen *ebiten.Image) {
+func (p *picture) draw(screen *ebiten.Image, offsetX, offsetY int) {
 	sx, sy := p.image.Size()
 
 	op := &ebiten.DrawImageOptions{}
@@ -323,6 +312,7 @@ func (p *picture) draw(screen *ebiten.Image) {
 	op.GeoM.Scale(p.scaleX.Current(), p.scaleY.Current())
 	op.GeoM.Rotate(p.angle.Current())
 	op.GeoM.Translate(p.x.Current(), p.y.Current())
+	op.GeoM.Translate(float64(offsetX), float64(offsetY))
 
 	p.tint.Apply(&op.ColorM)
 	if p.opacity.Current() < 1 {
