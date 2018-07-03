@@ -20,6 +20,7 @@ import (
 
 	eaudio "github.com/hajimehoshi/ebiten/audio"
 	"github.com/hajimehoshi/ebiten/audio/mp3"
+	"github.com/hajimehoshi/ebiten/audio/vorbis"
 	"github.com/hajimehoshi/ebiten/audio/wav"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
@@ -149,12 +150,25 @@ func (a *audio) Stop() {
 
 func (a *audio) getPlayer(path string, loop bool) (*eaudio.Player, error) {
 	mp3Path := path + ".mp3"
+	oggPath := path + ".ogg"
 	wavPath := path + ".wav"
 	if assets.Exists(mp3Path) {
 		bin := assets.GetResource(mp3Path)
 		s, err := mp3.Decode(a.context, eaudio.BytesReadSeekCloser(bin))
 		if err != nil {
 			return nil, fmt.Errorf("audio: decode error: %s, %v", mp3Path, err)
+		}
+		if loop {
+			return eaudio.NewPlayer(a.context, eaudio.NewInfiniteLoop(s, s.Length()))
+		}
+		return eaudio.NewPlayer(a.context, s)
+	}
+
+	if assets.Exists(oggPath) {
+		bin := assets.GetResource(oggPath)
+		s, err := vorbis.Decode(a.context, eaudio.BytesReadSeekCloser(bin))
+		if err != nil {
+			return nil, fmt.Errorf("audio: decode error: %s, %v", oggPath, err)
 		}
 		if loop {
 			return eaudio.NewPlayer(a.context, eaudio.NewInfiniteLoop(s, s.Length()))
