@@ -161,7 +161,7 @@ func (m *Manager) Update() error {
 	}
 	n := 1
 	if m.turbo {
-		n = 3
+		n = 5
 	}
 	for i := 0; i < n; i++ {
 		if m.next != nil {
