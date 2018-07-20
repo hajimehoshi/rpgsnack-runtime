@@ -51,23 +51,33 @@ type GameState interface {
 	Character(mapID, roomID, eventID int) *character.Character
 }
 
-func (s *State) setMoveTarget(gameState GameState, x int, y int, ignoreCharacters bool) bool {
+func (s *State) calcNextStepToMoveTarget(gameState GameState, x int, y int, ignoreCharacters bool) bool {
 	ch := s.character(gameState)
 	cx, cy := ch.Position()
 	f := func(x, y int) bool {
 		return gameState.MapPassableAt(ch.Through(), x, y, ignoreCharacters)
 	}
-	path, lastX, lastY := path.Calc(atFunc(f), cx, cy, x, y)
-	s.path = path
-	s.distanceCount = len(path)
-	if x != lastX || y != lastY {
-		if !s.routeSkip {
-			return false
-		}
-		s.terminated = true
-	}
+	path, _, _ := path.Calc(atFunc(f), cx, cy, x, y)
 
-	return true
+	// Adopt the only one step.
+	if len(path) > 0 {
+		s.path = path[:1]
+		s.distanceCount = 1
+		return true
+	}
+	s.path = nil
+	s.distanceCount = 0
+	return false
+}
+
+func (s *State) moveTarget(gameState GameState) (int, int) {
+	if s.args.Type != data.MoveCharacterTypeTarget {
+		panic("not reached")
+	}
+	if s.args.ValueType == data.ValueTypeVariable {
+		return gameState.VariableValue(s.args.X), gameState.VariableValue(s.args.Y)
+	}
+	return s.args.X, s.args.Y
 }
 
 func New(gameState GameState, mapID, roomID, eventID int, args *data.CommandArgsMoveCharacter, routeSkip bool) *State {
@@ -82,15 +92,6 @@ func New(gameState GameState, mapID, roomID, eventID int, args *data.CommandArgs
 	case data.MoveCharacterTypeDirection, data.MoveCharacterTypeForward, data.MoveCharacterTypeBackward:
 		s.distanceCount = s.args.Distance
 	case data.MoveCharacterTypeTarget:
-		if args.ValueType == data.ValueTypeVariable {
-			if !s.setMoveTarget(gameState, gameState.VariableValue(args.X), gameState.VariableValue(args.Y), args.IgnoreCharacters) {
-				return nil
-			}
-		} else {
-			if !s.setMoveTarget(gameState, args.X, args.Y, args.IgnoreCharacters) {
-				return nil
-			}
-		}
 	case data.MoveCharacterTypeRandom, data.MoveCharacterTypeToward:
 		s.distanceCount = 1
 
@@ -199,6 +200,7 @@ func (s *State) Update(gameState GameState) {
 	if c == nil {
 		return
 	}
+
 	// Check IsMoving() first since the character might be moving at this time.
 	if c.IsMoving() {
 		return
@@ -206,6 +208,18 @@ func (s *State) Update(gameState GameState) {
 	if s.terminated {
 		return
 	}
+
+	if s.args.Type == data.MoveCharacterTypeTarget {
+		// Calculate path for each step.
+		x, y := s.moveTarget(gameState)
+		if !s.calcNextStepToMoveTarget(gameState, x, y, s.args.IgnoreCharacters) {
+			if s.routeSkip {
+				s.terminated = true
+				return
+			}
+		}
+	}
+
 	if s.distanceCount > 0 && !s.waiting {
 		dx, dy := c.Position()
 		var dir data.Dir
@@ -254,23 +268,31 @@ func (s *State) Update(gameState GameState) {
 		}
 		if !gameState.MapPassableAt(c.Through(), dx, dy, false) {
 			c.Turn(dir)
-			if !s.routeSkip {
-				return
+			if s.routeSkip {
+				s.terminated = true
+				s.distanceCount = 0
 			}
-			// Skip
-			s.terminated = true
-			s.distanceCount = 0
-			// TODO: Can continue Update.
 			return
 		}
 		c.Move(dir)
 		s.waiting = true
 		return
 	}
-	s.distanceCount--
+
+	// One moving is just finished.
+	if s.distanceCount > 0 {
+		s.distanceCount--
+	}
 	s.waiting = false
+
 	if s.distanceCount > 0 {
 		return
+	}
+	if s.args.Type == data.MoveCharacterTypeTarget {
+		cx, cy := c.Position()
+		if x, y := s.moveTarget(gameState); x != cx || y != cy {
+			return
+		}
 	}
 	s.terminated = true
 }

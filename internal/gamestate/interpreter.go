@@ -203,7 +203,8 @@ func (i *Interpreter) findMessageStyle(sceneManager *scene.Manager, messageStyle
 }
 
 func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game) (bool, error) {
-	if !gameState.CanWindowProceed(i.id) {
+	// TODO: CanWindowProceed should always return true for route interpreters?
+	if !i.route && !gameState.CanWindowProceed(i.id) {
 		return false, nil
 	}
 	if i.sub != nil {
