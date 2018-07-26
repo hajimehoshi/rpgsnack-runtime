@@ -23,6 +23,7 @@ type System struct {
 	DefaultLanguage Language  `msgpack:"defaultLanguage"`
 	TitleBGM        BGM       `msgpack:"titleBgm"`
 	GameName        UUID      `msgpack:"gameName"`
+	TitleTextColor  string    `msgpack:"titleTextColor"`
 }
 
 func (s *System) UnmarshalJSON(data []uint8) error {
@@ -30,6 +31,7 @@ func (s *System) UnmarshalJSON(data []uint8) error {
 		InitialPosition *Position `json:"player"`
 		DefualtLanguage string    `json:"defaultLanguage"`
 		TitleBGM        BGM       `json:"titleBgm"`
+		TitleTextColor  string    `json:"titleTextColor"`
 	}
 	var tmp *tmpSystem
 	if err := unmarshalJSON(data, &tmp); err != nil {
@@ -37,6 +39,7 @@ func (s *System) UnmarshalJSON(data []uint8) error {
 	}
 	s.InitialPosition = tmp.InitialPosition
 	s.TitleBGM = tmp.TitleBGM
+	s.TitleTextColor = tmp.TitleTextColor
 	l, err := language.Parse(tmp.DefualtLanguage)
 	if err != nil {
 		return err

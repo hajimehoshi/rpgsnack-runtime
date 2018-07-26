@@ -179,6 +179,14 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 
 	t.newGameButton.Text = texts.Text(lang.Get(), texts.TextIDNewGame)
 	t.resumeGameButton.Text = texts.Text(lang.Get(), texts.TextIDResumeGame)
+	if sceneManager.Game().System.TitleTextColor == "black" {
+		t.newGameButton.TextColor = color.Black
+		t.resumeGameButton.TextColor = color.Black
+	} else {
+		t.newGameButton.TextColor = color.White
+		t.resumeGameButton.TextColor = color.White
+	}
+
 	t.removeAdsButton.Text = texts.Text(lang.Get(), texts.TextIDRemoveAds)
 	t.warningLabel.Text = texts.Text(lang.Get(), texts.TextIDNewGameWarning)
 	t.warningYesButton.Text = texts.Text(lang.Get(), texts.TextIDYes)
