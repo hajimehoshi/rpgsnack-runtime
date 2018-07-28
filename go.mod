@@ -5,7 +5,7 @@ require (
 	github.com/golang/protobuf v1.1.0 // indirect
 	github.com/google/uuid v0.0.0-20171129191014-dec09d789f3d
 	github.com/gopherjs/gopherjs v0.0.0-20180628210949-0892b62f0d9f
-	github.com/hajimehoshi/chinesegamefonts v0.0.0-20180322180657-46a13f6eb21d
+	github.com/hajimehoshi/chinesegamefonts v1.0.0
 	github.com/hajimehoshi/ebiten v0.0.0-20180728122542-59bcbca37916
 	github.com/hajimehoshi/go-mplusbitmap v1.0.1
 	github.com/vmihailenco/msgpack v3.3.3+incompatible
@@ -15,3 +15,5 @@ require (
 	golang.org/x/text v0.3.0
 	google.golang.org/appengine v1.1.0 // indirect
 )
+
+replace github.com/hajimehoshi/ebiten => ../ebiten

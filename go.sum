@@ -12,8 +12,8 @@ github.com/gopherjs/gopherjs v0.0.0-20180628210949-0892b62f0d9f h1:FDM3EtwZLyhW4
 github.com/gopherjs/gopherjs v0.0.0-20180628210949-0892b62f0d9f/go.mod h1:wJfORRmW1u3UXTncJ5qlYoELFm8eSnnEO6hX4iZ3EWY=
 github.com/gopherjs/gopherwasm v0.1.1 h1:R/3+SfgCFStiql6ICfyfke1WtpglfjIvTEBux8R1euc=
 github.com/gopherjs/gopherwasm v0.1.1/go.mod h1:kx4n9a+MzHH0BJJhvlsQ65hqLFXDO/m256AsaDPQ+/4=
-github.com/hajimehoshi/chinesegamefonts v0.0.0-20180322180657-46a13f6eb21d h1:Td1W72yyxn8oNfPG0RAgC0R0vbyslJLqNEnkZPky8cM=
-github.com/hajimehoshi/chinesegamefonts v0.0.0-20180322180657-46a13f6eb21d/go.mod h1:kRfzUo98u2nOoBUsTDUoYdIy22sINnditpMrchMtwc4=
+github.com/hajimehoshi/chinesegamefonts v1.0.0 h1:/7JNFMh7pkaSl0Z5hEcq6yJFnVM490XPlBGLH6VBQqo=
+github.com/hajimehoshi/chinesegamefonts v1.0.0/go.mod h1:kRfzUo98u2nOoBUsTDUoYdIy22sINnditpMrchMtwc4=
 github.com/hajimehoshi/ebiten v0.0.0-20180728122542-59bcbca37916 h1:/sa3SEqkcj7gjT/kHVQB9+mV99UbdwyITYwdVXV1cYc=
 github.com/hajimehoshi/ebiten v0.0.0-20180728122542-59bcbca37916/go.mod h1:WDRRL4/BtjYC8KIDLucYNar1iPWOrgq51nL2KQJGrVg=
 github.com/hajimehoshi/go-mp3 v0.1.1 h1:Y33fAdTma70fkrxnc9u50Uq0lV6eZ+bkAlssdMmCwUc=
