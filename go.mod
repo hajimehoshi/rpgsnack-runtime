@@ -15,5 +15,3 @@ require (
 	golang.org/x/text v0.3.0
 	google.golang.org/appengine v1.1.0 // indirect
 )
-
-replace github.com/hajimehoshi/ebiten => ../ebiten
