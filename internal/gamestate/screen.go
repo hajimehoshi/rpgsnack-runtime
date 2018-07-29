@@ -21,7 +21,6 @@ import (
 	"github.com/hajimehoshi/ebiten"
 	"github.com/vmihailenco/msgpack"
 
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/tint"
 )
@@ -155,12 +154,16 @@ func (s *Screen) fadeColorTranslate() (r, g, b, a float64) {
 	return
 }
 
-func (s *Screen) Draw(screen *ebiten.Image, img *ebiten.Image, op *ebiten.DrawImageOptions) {
+func (s *Screen) ApplyTintColor(c *ebiten.ColorM) {
+	// TODO: When s.fadeOut is true, Apply should not be used for backward compatibility?
+	s.tint.Apply(c)
+}
+
+func (s *Screen) Draw(img *ebiten.Image) {
 	fadeRate := 0.0
 	if s.fadedOut {
 		fadeRate = 1
 	} else {
-		s.tint.Apply(&op.ColorM)
 		if s.fadeInCount > 0 {
 			fadeRate = float64(s.fadeInCount) / float64(s.fadeInMaxCount)
 		}
@@ -168,7 +171,6 @@ func (s *Screen) Draw(screen *ebiten.Image, img *ebiten.Image, op *ebiten.DrawIm
 			fadeRate = 1 - float64(s.fadeOutCount)/float64(s.fadeOutMaxCount)
 		}
 	}
-	screen.DrawImage(img, op)
 
 	if fadeRate > 0 {
 		op := &ebiten.DrawImageOptions{}
@@ -177,13 +179,9 @@ func (s *Screen) Draw(screen *ebiten.Image, img *ebiten.Image, op *ebiten.DrawIm
 		sx := float64(targetW) / float64(w)
 		sy := float64(targetH) / float64(h)
 		op.GeoM.Scale(sx, sy)
-		op.GeoM.Scale(consts.TileScale, consts.TileScale)
-		sw, _ := screen.Size()
-		tx := (float64(sw) - consts.MapWidth*consts.TileScale) / 2
-		op.GeoM.Translate(tx, 0)
 		op.ColorM.Translate(s.fadeColorTranslate())
 		op.ColorM.Scale(1, 1, 1, fadeRate)
-		screen.DrawImage(emptyImage, op)
+		img.DrawImage(emptyImage, op)
 	}
 }
 

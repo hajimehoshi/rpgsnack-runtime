@@ -663,12 +663,14 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	}
 
 	m.gameState.DrawWeather(m.screenImage)
-	m.gameState.DrawPictures(m.screenImage, m.offsetX/consts.TileScale, m.offsetY/consts.TileScale)
+	m.gameState.DrawScreen(m.screenImage)
+	m.gameState.DrawPictures(m.screenImage, 0, m.offsetY/consts.TileScale)
 
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(consts.TileScale, consts.TileScale)
 	op.GeoM.Translate(float64(m.offsetX), 0)
-	m.gameState.DrawScreen(screen, m.screenImage, op)
+	m.gameState.ApplyTintColor(&op.ColorM)
+	screen.DrawImage(m.screenImage, op)
 
 	if m.gameState.IsPlayerControlEnabled() && (m.gameState.Map().IsPlayerMovingByUserInput() || m.triggeringFailed) {
 		x, y := m.moveDstX, m.moveDstY
