@@ -20,6 +20,8 @@ github.com/hajimehoshi/go-mp3 v0.1.1 h1:Y33fAdTma70fkrxnc9u50Uq0lV6eZ+bkAlssdMmC
 github.com/hajimehoshi/go-mp3 v0.1.1/go.mod h1:4i+c5pDNKDrxl1iu9iG90/+fhP37lio6gNhjCx9WBJw=
 github.com/hajimehoshi/go-mplusbitmap v1.0.1 h1:Q7vA2o/9uIXS0isGPeXc4ahLMFBfZl592OZgb/MH90w=
 github.com/hajimehoshi/go-mplusbitmap v1.0.1/go.mod h1:zW+y7DzqcVGNiGVPga2gau26lxIzv7zvtOEjgMiz6pU=
+github.com/hajimehoshi/oggloop v0.0.0-20180730010327-c7cf68761483 h1:UNw0zKKVWvY+zhAUSoxLrd0ku5JBId99tfIKa/6wafY=
+github.com/hajimehoshi/oggloop v0.0.0-20180730010327-c7cf68761483/go.mod h1:WpQQsMK4togvtViNd+e/oiVlI25cEGiMMT99sSd8eNI=
 github.com/hajimehoshi/oto v0.1.1 h1:EG+WxxeAfde1mI0adhLYvGbKgDCxm7bCTd6g+JIA6vI=
 github.com/hajimehoshi/oto v0.1.1/go.mod h1:hUiLWeBQnbDu4pZsAhOnGqMI1ZGibS6e2qhQdfpwz04=
 github.com/jakecoffman/cp v0.1.0/go.mod h1:a3xPx9N8RyFAACD644t2dj/nK4SuLg1v+jL61m2yVo4=

@@ -15,6 +15,7 @@
 package audio
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 
@@ -22,6 +23,7 @@ import (
 	"github.com/hajimehoshi/ebiten/audio/mp3"
 	"github.com/hajimehoshi/ebiten/audio/vorbis"
 	"github.com/hajimehoshi/ebiten/audio/wav"
+	"github.com/hajimehoshi/oggloop"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/interpolation"
@@ -166,12 +168,23 @@ func (a *audio) getPlayer(path string, loop bool) (*eaudio.Player, error) {
 
 	if assets.Exists(oggPath) {
 		bin := assets.GetResource(oggPath)
+		start, length, err := oggloop.Read(bytes.NewReader(bin))
+		if err != nil {
+			return nil, fmt.Errorf("audio: oggloop error: %s, %v", oggPath, err)
+		}
 		s, err := vorbis.Decode(a.context, eaudio.BytesReadSeekCloser(bin))
 		if err != nil {
 			return nil, fmt.Errorf("audio: decode error: %s, %v", oggPath, err)
 		}
 		if loop {
-			return eaudio.NewPlayer(a.context, eaudio.NewInfiniteLoop(s, s.Length()))
+			var stream eaudio.ReadSeekCloser
+			if start == 0 && length == 0 {
+				stream = eaudio.NewInfiniteLoop(s, s.Length())
+			} else {
+				// 4 = 2 [channels] * 2 [bytes]
+				stream = eaudio.NewInfiniteLoopWithIntro(s, start*4, length*4)
+			}
+			return eaudio.NewPlayer(a.context, stream)
 		}
 		return eaudio.NewPlayer(a.context, s)
 	}

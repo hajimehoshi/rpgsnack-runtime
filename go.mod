@@ -8,6 +8,7 @@ require (
 	github.com/hajimehoshi/chinesegamefonts v1.0.0
 	github.com/hajimehoshi/ebiten v0.0.0-20180728122542-59bcbca37916
 	github.com/hajimehoshi/go-mplusbitmap v1.0.1
+	github.com/hajimehoshi/oggloop v0.0.0-20180730010327-c7cf68761483
 	github.com/vmihailenco/msgpack v3.3.3+incompatible
 	golang.org/x/image v0.0.0-20180708004352-c73c2afc3b81
 	golang.org/x/net v0.0.0-20180724234803-3673e40ba225 // indirect
