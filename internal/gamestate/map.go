@@ -687,8 +687,12 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, gameState *G
 		gameState.RequestSave(sceneManager)
 	}
 
+	checkBottomEvent := false
 	if _, ok := m.interpreters[m.playerInterpreterID]; ok {
 		delete(m.interpreters, m.playerInterpreterID)
+		// As the last existing interpreter is aborted without checking the event existence,
+		// checking events is necessary before moving the player.
+		checkBottomEvent = true
 	} else {
 		// The player's speed is never changed by another events during the player walks
 		// by user input.
@@ -729,8 +733,33 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, gameState *G
 		newYID
 		moveCompleted
 	)
-
 	const labelPlayerMoved = "playerMoved"
+
+	if checkBottomEvent {
+		commands = append(commands,
+			&data.Command{
+				Name: data.CommandNameIf,
+				Args: &data.CommandArgsIf{
+					Conditions: []*data.Condition{
+						{
+							Type:  data.ConditionTypeSpecial,
+							Value: specialConditionEventExistsAtPlayer,
+						},
+					},
+				},
+				Branches: [][]*data.Command{
+					{
+						{
+							Name: data.CommandNameGoto,
+							Args: &data.CommandArgsGoto{
+								Label: labelPlayerMoved,
+							},
+						},
+					},
+				},
+			})
+	}
+
 	commands = append(commands,
 		&data.Command{
 			Name: data.CommandNameSetVariable,
