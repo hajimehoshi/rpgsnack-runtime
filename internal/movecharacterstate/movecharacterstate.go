@@ -222,6 +222,7 @@ func (s *State) Update(gameState GameState) {
 
 	if s.distanceCount > 0 && !s.waiting {
 		dx, dy := c.Position()
+		turnOnly := false
 		var dir data.Dir
 		switch s.args.Type {
 		case data.MoveCharacterTypeDirection:
@@ -236,6 +237,18 @@ func (s *State) Update(gameState GameState) {
 				dir = data.DirDown
 			case path.RouteCommandMoveLeft:
 				dir = data.DirLeft
+			case path.RouteCommandTurnUp:
+				dir = data.DirUp
+				turnOnly = true
+			case path.RouteCommandTurnRight:
+				dir = data.DirRight
+				turnOnly = true
+			case path.RouteCommandTurnDown:
+				dir = data.DirDown
+				turnOnly = true
+			case path.RouteCommandTurnLeft:
+				dir = data.DirLeft
+				turnOnly = true
 			default:
 				panic("not reached")
 			}
@@ -266,15 +279,19 @@ func (s *State) Update(gameState GameState) {
 		default:
 			panic("not reached")
 		}
-		if !gameState.MapPassableAt(c.Through(), dx, dy, false) {
+		if turnOnly {
 			c.Turn(dir)
-			if s.routeSkip {
-				s.terminated = true
-				s.distanceCount = 0
+		} else {
+			if !gameState.MapPassableAt(c.Through(), dx, dy, false) {
+				c.Turn(dir)
+				if s.routeSkip {
+					s.terminated = true
+					s.distanceCount = 0
+				}
+				return
 			}
-			return
+			c.Move(dir)
 		}
-		c.Move(dir)
 		s.waiting = true
 		return
 	}
