@@ -47,6 +47,7 @@ type MapScene struct {
 	moveDstX             int
 	moveDstY             int
 	screenImage          *ebiten.Image
+	tintScreenImage      *ebiten.Image
 	uiImage              *ebiten.Image
 	triggeringFailed     bool
 	initialState         bool
@@ -156,6 +157,7 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	m.offsetY = 0
 
 	m.screenImage, _ = ebiten.NewImage(consts.MapWidth, screenH/consts.TileScale, ebiten.FilterNearest)
+	m.tintScreenImage, _ = ebiten.NewImage(consts.MapWidth, screenH/consts.TileScale, ebiten.FilterDefault)
 	m.uiImage, _ = ebiten.NewImage(uiWidth*consts.TileScale, screenH, ebiten.FilterNearest)
 
 	screenShotImage, _ := ebiten.NewImage(480, 720, ebiten.FilterLinear)
@@ -664,13 +666,18 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 
 	m.gameState.DrawWeather(m.screenImage)
 	m.gameState.DrawScreen(m.screenImage)
-	m.gameState.DrawPictures(m.screenImage, 0, m.offsetY/consts.TileScale)
 
 	op := &ebiten.DrawImageOptions{}
+	m.gameState.ApplyTintColor(&op.ColorM)
+	op.CompositeMode = ebiten.CompositeModeCopy
+	m.tintScreenImage.DrawImage(m.screenImage, op)
+
+	m.gameState.DrawPictures(m.tintScreenImage, 0, m.offsetY/consts.TileScale)
+
+	op = &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(consts.TileScale, consts.TileScale)
 	op.GeoM.Translate(float64(m.offsetX), 0)
-	m.gameState.ApplyTintColor(&op.ColorM)
-	screen.DrawImage(m.screenImage, op)
+	screen.DrawImage(m.tintScreenImage, op)
 
 	if m.gameState.IsPlayerControlEnabled() && (m.gameState.Map().IsPlayerMovingByUserInput() || m.triggeringFailed) {
 		x, y := m.moveDstX, m.moveDstY
