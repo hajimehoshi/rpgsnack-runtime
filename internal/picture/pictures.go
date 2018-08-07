@@ -153,7 +153,7 @@ func (p *Pictures) Add(id int, name string, x, y int, scaleX, scaleY, angle, opa
 		x:         interpolation.New(float64(x)),
 		y:         interpolation.New(float64(y)),
 		scaleX:    interpolation.New(scaleX),
-		scaleY:    interpolation.New(scaleX),
+		scaleY:    interpolation.New(scaleY),
 		angle:     interpolation.New(angle),
 		opacity:   interpolation.New(opacity),
 		originX:   originX,
