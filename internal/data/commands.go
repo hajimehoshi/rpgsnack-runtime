@@ -325,6 +325,10 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 		if err := unmarshalJSON(tmp.Args, &args); err != nil {
 			return err
 		}
+		// TODO Implement Decoder
+		if args.Priority == "" {
+			args.Priority = PicturePriorityOverlay
+		}
 		c.Args = args
 	case CommandNameErasePicture:
 		var args *CommandArgsErasePicture
@@ -693,6 +697,10 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 		a := &CommandArgsShowPicture{}
 		if err := msgpack.Unmarshal(argsBin, a); err != nil {
 			return err
+		}
+		// TODO Implement Decoder
+		if a.Priority == "" {
+			a.Priority = PicturePriorityOverlay
 		}
 		c.Args = a
 	case CommandNameErasePicture:
@@ -1452,6 +1460,7 @@ type CommandArgsShowPicture struct {
 	ScaleY       int                  `json:"scaleY" msgpack:"scaleY"`
 	Angle        int                  `json:"angle" msgpack:"angle"`
 	Opacity      int                  `json:"opacity" msgpack:"opacity"`
+	Priority     PicturePriorityType  `json:"priority" msgpack:"priority"`
 	BlendType    ShowPictureBlendType `json:"blendType" msgpack:"blendType"`
 }
 
@@ -1647,4 +1656,12 @@ const (
 	MessageBackgroundDim         MessageBackground = "dim"
 	MessageBackgroundTransparent MessageBackground = "transparent"
 	MessageBackgroundBanner      MessageBackground = "banner"
+)
+
+type PicturePriorityType string
+
+const (
+	PicturePriorityBottom  PicturePriorityType = "bottom"
+	PicturePriorityTop     PicturePriorityType = "top"
+	PicturePriorityOverlay PicturePriorityType = "overlay"
 )

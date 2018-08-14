@@ -645,6 +645,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		case 0:
 			p = data.PriorityBottom
 		case 1:
+			m.gameState.DrawPictures(m.screenImage, 0, m.offsetY/consts.TileScale, data.PicturePriorityBottom)
 			p = data.PriorityMiddle
 		case 2:
 			p = data.PriorityTop
@@ -657,6 +658,9 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		// That's why offset needs to be specified here.
 		m.gameState.Map().DrawCharacters(m.screenImage, p, 0, m.offsetY/consts.TileScale)
 	}
+
+	m.gameState.DrawPictures(m.screenImage, 0, m.offsetY/consts.TileScale, data.PicturePriorityTop)
+
 	if foreground := m.gameState.Map().Foreground(m.gameState); foreground != "" {
 		img := assets.GetImage("foregrounds/" + foreground + ".png")
 		_, h := img.Size()
@@ -672,7 +676,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	op.CompositeMode = ebiten.CompositeModeCopy
 	m.tintScreenImage.DrawImage(m.screenImage, op)
 
-	m.gameState.DrawPictures(m.tintScreenImage, 0, m.offsetY/consts.TileScale)
+	m.gameState.DrawPictures(m.tintScreenImage, 0, m.offsetY/consts.TileScale, data.PicturePriorityOverlay)
 
 	op = &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(consts.TileScale, consts.TileScale)

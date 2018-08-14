@@ -136,16 +136,18 @@ func (p *Pictures) Update() {
 	}
 }
 
-func (p *Pictures) Draw(screen *ebiten.Image, offsetX, offsetY int) {
+func (p *Pictures) Draw(screen *ebiten.Image, offsetX, offsetY int, priority data.PicturePriorityType) {
 	for _, pic := range p.pictures {
 		if pic == nil {
 			continue
 		}
-		pic.draw(screen, offsetX, offsetY)
+		if pic.priority == priority {
+			pic.draw(screen, offsetX, offsetY)
+		}
 	}
 }
 
-func (p *Pictures) Add(id int, name string, x, y int, scaleX, scaleY, angle, opacity float64, originX, originY float64, blendType data.ShowPictureBlendType) {
+func (p *Pictures) Add(id int, name string, x, y int, scaleX, scaleY, angle, opacity float64, originX, originY float64, blendType data.ShowPictureBlendType, priority data.PicturePriorityType) {
 	p.ensurePictures(id)
 	p.pictures[id] = &picture{
 		imageName: name,
@@ -159,6 +161,7 @@ func (p *Pictures) Add(id int, name string, x, y int, scaleX, scaleY, angle, opa
 		originX:   originX,
 		originY:   originY,
 		blendType: blendType,
+		priority:  priority,
 	}
 }
 
@@ -180,6 +183,7 @@ type picture struct {
 	originX   float64
 	originY   float64
 	blendType data.ShowPictureBlendType
+	priority  data.PicturePriorityType
 }
 
 func (p *picture) EncodeMsgpack(enc *msgpack.Encoder) error {
@@ -218,6 +222,9 @@ func (p *picture) EncodeMsgpack(enc *msgpack.Encoder) error {
 
 	e.EncodeString("blendType")
 	e.EncodeString(string(p.blendType))
+
+	e.EncodeString("priority")
+	e.EncodeString(string(p.priority))
 
 	e.EndMap()
 	return e.Flush()
@@ -258,7 +265,14 @@ func (p *picture) DecodeMsgpack(dec *msgpack.Decoder) error {
 			p.originY = d.DecodeFloat64()
 		case "blendType":
 			p.blendType = data.ShowPictureBlendType(d.DecodeString())
+		case "priority":
+			p.priority = data.PicturePriorityType(d.DecodeString())
 		}
+	}
+
+	// TODO Implement Decoder
+	if p.priority == "" {
+		p.priority = data.PicturePriorityOverlay
 	}
 
 	if err := d.Error(); err != nil {

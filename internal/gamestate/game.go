@@ -529,8 +529,8 @@ func (g *Game) createCharacterList() []*character.Character {
 	return cs
 }
 
-func (g *Game) DrawPictures(screen *ebiten.Image, offsetX, offsetY int) {
-	g.pictures.Draw(screen, offsetX, offsetY)
+func (g *Game) DrawPictures(screen *ebiten.Image, offsetX, offsetY int, priority data.PicturePriorityType) {
+	g.pictures.Draw(screen, offsetX, offsetY, priority)
 }
 
 func (g *Game) Character(mapID, roomID, eventID int) *character.Character {
