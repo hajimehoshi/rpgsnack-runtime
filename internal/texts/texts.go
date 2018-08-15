@@ -266,4 +266,34 @@ o login e se conectar à internet`,
 		TextIDStoreError: `無法連接商店。
 請確定你已經登錄並已連上網絡`,
 	},
+	language.Korean: {
+		TextIDNewGame:     "처음부터",
+		TextIDResumeGame:  "이어서",
+		TextIDYes:         "네",
+		TextIDNo:          "아니오",
+		TextIDOK:          "OK",
+		TextIDSettings:    "설정",
+		TextIDLanguage:    "언어",
+		TextIDCredit:      "크레딧",
+		TextIDCreditEntry: "등록",
+		TextIDShop:        "상점",
+		TextIDRemoveAds:   "광고 제거",
+		TextIDRemoveAdsDesc: `%s를 지불하고, 
+광고를 제거하시겠습니까?`,
+		TextIDReviewThisApp:    "이 앱을 리뷰한다",
+		TextIDRestorePurchases: "구입정보 복구",
+		TextIDMoreGames:        "다른 게임",
+		TextIDClose:            "닫기",
+		TextIDItemCheck:        "체크",
+		TextIDMenu:             "타이틀",
+
+		TextIDNewGameWarning: `진행중인 게임 데이터가 있습니다.
+진행중인 게임 데이터를 지우고,
+새로 게임을 시작하시겠습니까?`,
+		TextIDBackToTitle: "타이틀 화면으로 돌아가시겠습니까?",
+		TextIDQuitGame:    "게임을 종료하시겠습니까?",
+		TextIDStoreError: `스토어에 접속 실패했습니다.
+네트워크 접속이 되어있는지
+확인해주세요`,
+	},
 }
