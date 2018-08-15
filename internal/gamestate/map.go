@@ -358,12 +358,13 @@ func (m *Map) Update(sceneManager *scene.Manager, gameState *Game) error {
 	// Remove this if possible.
 	m.gameData = sceneManager.Game()
 	if m.player == nil {
-		pos := sceneManager.Game().System.InitialPosition
+		state := sceneManager.Game().System.InitialPlayerState
 		x, y, roomID := 0, 0, 1
-		if pos != nil {
-			x, y, roomID = pos.X, pos.Y, pos.RoomID
+		if state != nil {
+			x, y, roomID = state.X, state.Y, state.RoomID
 		}
 		m.player = character.NewPlayer(x, y)
+		m.player.SetImage(state.ImageType, state.Image)
 		m.setRoomID(gameState, roomID, nil)
 	}
 

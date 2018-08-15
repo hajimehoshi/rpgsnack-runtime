@@ -19,25 +19,25 @@ import (
 )
 
 type System struct {
-	InitialPosition *Position `msgpack:"player"`
-	DefaultLanguage Language  `msgpack:"defaultLanguage"`
-	TitleBGM        BGM       `msgpack:"titleBgm"`
-	GameName        UUID      `msgpack:"gameName"`
-	TitleTextColor  string    `msgpack:"titleTextColor"`
+	InitialPlayerState *InitialPlayerState `msgpack:"player"`
+	DefaultLanguage    Language            `msgpack:"defaultLanguage"`
+	TitleBGM           BGM                 `msgpack:"titleBgm"`
+	GameName           UUID                `msgpack:"gameName"`
+	TitleTextColor     string              `msgpack:"titleTextColor"`
 }
 
 func (s *System) UnmarshalJSON(data []uint8) error {
 	type tmpSystem struct {
-		InitialPosition *Position `json:"player"`
-		DefualtLanguage string    `json:"defaultLanguage"`
-		TitleBGM        BGM       `json:"titleBgm"`
-		TitleTextColor  string    `json:"titleTextColor"`
+		InitialPlayerState *InitialPlayerState `json:"player"`
+		DefualtLanguage    string              `json:"defaultLanguage"`
+		TitleBGM           BGM                 `json:"titleBgm"`
+		TitleTextColor     string              `json:"titleTextColor"`
 	}
 	var tmp *tmpSystem
 	if err := unmarshalJSON(data, &tmp); err != nil {
 		return err
 	}
-	s.InitialPosition = tmp.InitialPosition
+	s.InitialPlayerState = tmp.InitialPlayerState
 	s.TitleBGM = tmp.TitleBGM
 	s.TitleTextColor = tmp.TitleTextColor
 	l, err := language.Parse(tmp.DefualtLanguage)
@@ -48,9 +48,11 @@ func (s *System) UnmarshalJSON(data []uint8) error {
 	return nil
 }
 
-type Position struct {
-	MapID  int `json:"mapId" msgpack:"mapId"`
-	RoomID int `json:"roomId" msgpack:"roomId"`
-	X      int `json:"x" msgpack:"x"`
-	Y      int `json:"y" msgpack:"y"`
+type InitialPlayerState struct {
+	Image     string    `json:"image" msgpack:"image"`
+	ImageType ImageType `json:"imageType" msgpack:"imageType"`
+	MapID     int       `json:"mapId" msgpack:"mapId"`
+	RoomID    int       `json:"roomId" msgpack:"roomId"`
+	X         int       `json:"x" msgpack:"x"`
+	Y         int       `json:"y" msgpack:"y"`
 }
