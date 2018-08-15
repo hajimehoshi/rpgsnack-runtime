@@ -347,6 +347,12 @@ func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) {
 	if y < ui.HeaderTouchAreaHeight {
 		return
 	}
+
+	_, sh := sceneManager.Size()
+	if m.gameState.InventoryVisible() && y > sh-m.inventoryHeight {
+		return
+	}
+
 	x -= m.offsetX
 	y -= m.offsetY
 	if x < 0 || y < 0 {
