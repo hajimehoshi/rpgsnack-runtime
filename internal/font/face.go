@@ -18,7 +18,7 @@ import (
 	"sync"
 
 	"github.com/golang/freetype/truetype"
-	"github.com/hajimehoshi/go-mplusbitmap"
+	"github.com/hajimehoshi/bitmapfont"
 	"golang.org/x/image/font"
 	"golang.org/x/text/language"
 )
@@ -27,9 +27,9 @@ var (
 	scTTF *truetype.Font
 	tcTTF *truetype.Font
 
-	mplusFaces = map[int]font.Face{}
-	scFaces    = map[int]font.Face{}
-	tcFaces    = map[int]font.Face{}
+	bfFaces = map[int]font.Face{}
+	scFaces = map[int]font.Face{}
+	tcFaces = map[int]font.Face{}
 )
 
 func init() {
@@ -117,10 +117,10 @@ func face(scale int, lang language.Tag) font.Face {
 		}
 		return f
 	default:
-		f, ok := mplusFaces[scale]
+		f, ok := bfFaces[scale]
 		if !ok {
-			f = scaleFont(mplusbitmap.Gothic12r, scale)
-			mplusFaces[scale] = f
+			f = scaleFont(bitmapfont.Gothic12r, scale)
+			bfFaces[scale] = f
 		}
 		return f
 	}
