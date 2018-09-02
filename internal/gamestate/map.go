@@ -293,14 +293,14 @@ func (m *Map) calcPageIndex(gameState *Game, ch *character.Character) (int, erro
 	return -1, nil
 }
 
-func (m *Map) currentPage(event *character.Character) *data.Page {
+func (m *Map) currentPage(event *character.Character) (*data.Page, int) {
 	i := m.eventPageIndices[event.EventID()]
 	if i == -1 {
-		return nil
+		return nil, 0
 	}
 	for _, e := range m.CurrentRoom().Events {
 		if e.ID == event.EventID() {
-			return e.Pages[i]
+			return e.Pages[i], i
 		}
 	}
 	panic("not reached")
@@ -419,7 +419,7 @@ func (m *Map) Update(sceneManager *scene.Manager, gameState *Game) error {
 	for _, e := range m.events {
 		e.Update()
 	}
-	m.tryRunParallelEvent(gameState)
+	m.updateParallelEvent(gameState)
 	if m.IsPlayerMovingByUserInput() {
 		return nil
 	}
@@ -440,7 +440,7 @@ func (m *Map) refreshEvents(gameState *Game) error {
 		}
 		m.removeRoutes(e.EventID())
 		m.eventPageIndices[e.EventID()] = index
-		page := m.currentPage(e)
+		page, pageIndex := m.currentPage(e)
 		e.UpdateWithPage(page)
 		if page == nil {
 			continue
@@ -461,7 +461,7 @@ func (m *Map) refreshEvents(gameState *Game) error {
 				},
 			},
 		}
-		interpreter := NewInterpreter(gameState, m.mapID, m.roomID, e.EventID(), commands)
+		interpreter := NewInterpreter(gameState, m.mapID, m.roomID, e.EventID(), pageIndex, commands)
 		interpreter.route = true
 		interpreter.pageRoute = true
 		m.addInterpreter(interpreter)
@@ -480,23 +480,37 @@ func (m *Map) eventsAt(x, y int) []*character.Character {
 	return es
 }
 
-func (m *Map) tryRunParallelEvent(gameState *Game) {
-events:
+func (m *Map) updateParallelEvent(gameState *Game) {
 	for _, e := range m.events {
-		page := m.currentPage(e)
+		// If the event is already executing, check the condition.
+		id := e.EventID()
+		interpreterToRemove := -1
+		for _, i := range m.interpreters {
+			if !i.parallel {
+				continue
+			}
+			if i.mapID == m.mapID && i.roomID == m.roomID && i.eventID == id {
+				// Check the condition and suspend
+				if _, pageIndex := m.currentPage(e); pageIndex == i.pageIndex {
+					interpreterToRemove = i.id
+					break
+				}
+			}
+		}
+		if interpreterToRemove != -1 {
+			delete(m.interpreters, interpreterToRemove)
+			continue
+		}
+
+		page, pageIndex := m.currentPage(e)
 		if page == nil {
 			continue
 		}
 		if page.Trigger != data.TriggerParallel {
 			continue
 		}
-		// Skip if the event is already executing
-		for _, i := range m.interpreters {
-			if i.mapID == m.mapID && i.roomID == m.roomID && i.eventID == e.EventID() {
-				continue events
-			}
-		}
-		i := NewInterpreter(gameState, m.mapID, m.roomID, e.EventID(), page.Commands)
+
+		i := NewInterpreter(gameState, m.mapID, m.roomID, e.EventID(), pageIndex, page.Commands)
 		i.parallel = true
 		m.addInterpreter(i)
 		return
@@ -508,7 +522,7 @@ func (m *Map) tryRunAutoEvent(gameState *Game) {
 		return
 	}
 	for _, e := range m.events {
-		page := m.currentPage(e)
+		page, pageIndex := m.currentPage(e)
 		if page == nil {
 			continue
 		}
@@ -516,7 +530,7 @@ func (m *Map) tryRunAutoEvent(gameState *Game) {
 			continue
 		}
 		// The event is not executed here since IsBlockingEventExecuting returns false.
-		i := NewInterpreter(gameState, m.mapID, m.roomID, e.EventID(), page.Commands)
+		i := NewInterpreter(gameState, m.mapID, m.roomID, e.EventID(), pageIndex, page.Commands)
 		m.addInterpreter(i)
 		return
 	}
@@ -612,7 +626,7 @@ func (m *Map) Passable(through bool, x, y int, ignoreCharacters bool) bool {
 		if e.Through() {
 			continue
 		}
-		if page := m.currentPage(e); page != nil && page.Priority == data.PriorityMiddle {
+		if page, _ := m.currentPage(e); page != nil && page.Priority == data.PriorityMiddle {
 			return false
 		}
 	}
@@ -629,7 +643,7 @@ func (m *Map) TryRunDirectEvent(gameState *Game, x, y int) bool {
 	}
 	es := m.eventsAt(x, y)
 	for _, e := range es {
-		page := m.currentPage(e)
+		page, pageIndex := m.currentPage(e)
 		if page == nil {
 			continue
 		}
@@ -639,7 +653,7 @@ func (m *Map) TryRunDirectEvent(gameState *Game, x, y int) bool {
 		if page.Trigger != data.TriggerDirect {
 			continue
 		}
-		i := NewInterpreter(gameState, m.mapID, m.roomID, e.EventID(), page.Commands)
+		i := NewInterpreter(gameState, m.mapID, m.roomID, e.EventID(), pageIndex, page.Commands)
 		m.addInterpreter(i)
 		return true
 	}
@@ -648,7 +662,7 @@ func (m *Map) TryRunDirectEvent(gameState *Game, x, y int) bool {
 
 func (m *Map) executableEventAt(x, y int) *character.Character {
 	for _, e := range m.eventsAt(x, y) {
-		page := m.currentPage(e)
+		page, _ := m.currentPage(e)
 		if page == nil {
 			continue
 		}
@@ -998,7 +1012,7 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, gameState *G
 	)
 
 	if event != nil {
-		page := m.currentPage(event)
+		page, _ := m.currentPage(event)
 		if page != nil && page.Trigger == data.TriggerPlayer {
 			origDir := event.Dir()
 			var dir data.Dir
@@ -1072,7 +1086,7 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, gameState *G
 			}
 		}
 	}
-	i := NewInterpreter(gameState, m.mapID, m.roomID, character.PlayerEventID, commands)
+	i := NewInterpreter(gameState, m.mapID, m.roomID, character.PlayerEventID, 0, commands)
 	m.addInterpreter(i)
 	m.playerInterpreterID = i.id
 	if event != nil {
@@ -1084,7 +1098,7 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, gameState *G
 func (m *Map) DrawCharacters(screen *ebiten.Image, priority data.Priority, offsetX, offsetY int) {
 	chars := []*character.Character{}
 	for _, e := range m.events {
-		page := m.currentPage(e)
+		page, _ := m.currentPage(e)
 		if page == nil {
 			continue
 		}
@@ -1123,7 +1137,7 @@ func (m *Map) StartItemCommands(gameState *Game, itemID int) {
 	if item.Commands == nil {
 		return
 	}
-	m.itemInterpreter = NewInterpreter(gameState, m.mapID, m.roomID, 0, item.Commands)
+	m.itemInterpreter = NewInterpreter(gameState, m.mapID, m.roomID, 0, 0, item.Commands)
 }
 
 func (m *Map) StartCombineCommands(gameState *Game, combine *data.Combine) {
@@ -1133,7 +1147,7 @@ func (m *Map) StartCombineCommands(gameState *Game, combine *data.Combine) {
 	if combine == nil {
 		return
 	}
-	m.itemInterpreter = NewInterpreter(gameState, m.mapID, m.roomID, 0, combine.Commands)
+	m.itemInterpreter = NewInterpreter(gameState, m.mapID, m.roomID, 0, 0, combine.Commands)
 }
 
 func (m *Map) Background(gameState *Game) string {
