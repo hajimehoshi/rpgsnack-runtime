@@ -908,8 +908,15 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 	case data.CommandNameScalePicture:
 		if i.waitingCount == 0 {
 			args := c.Args.(*data.CommandArgsScalePicture)
-			scaleX := float64(args.ScaleX) / 100
-			scaleY := float64(args.ScaleY) / 100
+
+			tx := args.ScaleX
+			ty := args.ScaleY
+			if args.ScaleValueType == data.ValueTypeVariable {
+				tx = gameState.VariableValue(tx)
+				ty = gameState.VariableValue(ty)
+			}
+			scaleX := float64(tx) / 100
+			scaleY := float64(ty) / 100
 			gameState.pictures.Scale(args.ID, scaleX, scaleY, args.Time*6)
 			if !args.Wait {
 				i.commandIterator.Advance()
@@ -928,7 +935,12 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 	case data.CommandNameRotatePicture:
 		if i.waitingCount == 0 {
 			args := c.Args.(*data.CommandArgsRotatePicture)
-			angle := float64(args.Angle) * math.Pi / 180
+
+			t := args.Angle
+			if args.AngleValueType == data.ValueTypeVariable {
+				t = gameState.VariableValue(t)
+			}
+			angle := float64(t) * math.Pi / 180
 			gameState.pictures.Rotate(args.ID, angle, args.Time*6)
 			if !args.Wait {
 				i.commandIterator.Advance()

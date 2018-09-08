@@ -1478,18 +1478,20 @@ type CommandArgsMovePicture struct {
 }
 
 type CommandArgsScalePicture struct {
-	ID     int  `json:"id" msgpack:"id"`
-	ScaleX int  `json:"scaleX" msgpack:"scaleX"`
-	ScaleY int  `json:"scaleY" msgpack:"scaleY"`
-	Time   int  `json:"time" msgpack:"time"`
-	Wait   bool `json:"wait" msgpack:"wait"`
+	ID             int       `json:"id" msgpack:"id"`
+	ScaleX         int       `json:"scaleX" msgpack:"scaleX"`
+	ScaleY         int       `json:"scaleY" msgpack:"scaleY"`
+	ScaleValueType ValueType `json:"scaleValueType" msgpack:"scaleValueType"`
+	Time           int       `json:"time" msgpack:"time"`
+	Wait           bool      `json:"wait" msgpack:"wait"`
 }
 
 type CommandArgsRotatePicture struct {
-	ID    int  `json:"id" msgpack:"id"`
-	Angle int  `json:"angle" msgpack:"angle"`
-	Time  int  `json:"time" msgpack:"time"`
-	Wait  bool `json:"wait" msgpack:"wait"`
+	ID             int       `json:"id" msgpack:"id"`
+	Angle          int       `json:"angle" msgpack:"angle"`
+	AngleValueType ValueType `json:"angleValueType" msgpack:"angleValueType"`
+	Time           int       `json:"time" msgpack:"time"`
+	Wait           bool      `json:"wait" msgpack:"wait"`
 }
 
 type CommandArgsFadePicture struct {
