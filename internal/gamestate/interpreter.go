@@ -825,11 +825,12 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		i.commandIterator.Advance()
 
 	case data.CommandNameShowInventory:
-		gameState.SetInventoryVisible(true)
+		args := c.Args.(*data.CommandArgsShowInventory)
+		gameState.ShowInventory(args.Group)
 		i.commandIterator.Advance()
 
 	case data.CommandNameHideInventory:
-		gameState.SetInventoryVisible(false)
+		gameState.HideInventory()
 		i.commandIterator.Advance()
 
 	case data.CommandNameShowItem:

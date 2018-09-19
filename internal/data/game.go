@@ -97,6 +97,7 @@ type IAPProduct struct {
 
 type Item struct {
 	ID       int        `json:"id" msgpack:"id"`
+	Group    int        `json:"group" msgpack:"group"`
 	Name     UUID       `json:"name" msgpack:"name"`
 	Icon     string     `json:"icon" msgpack:"icon"`
 	Commands []*Command `json:"commands" msgpack:"commands"`

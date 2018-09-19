@@ -464,7 +464,7 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 		m.inventory.Hide()
 	}
 	m.inventory.SetDisabled(m.gameState.Map().IsBlockingEventExecuting())
-	m.inventory.SetItems(m.gameState.Items().Items(sceneManager.Game().Items))
+	m.inventory.SetItems(m.gameState.Items().Items())
 	m.inventory.SetActiveItemID(m.gameState.Items().ActiveItem())
 	m.inventory.Update(sceneManager)
 

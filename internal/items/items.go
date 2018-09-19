@@ -28,12 +28,17 @@ type Items struct {
 	activeItem  int
 	combineItem int
 	eventItem   int
+	activeGroup int
+	dataItems   []*data.Item // Do not save
+	activeItems []*data.Item // Do not save
 }
 
 func NewItems(items []int, activeItem int) *Items {
 	return &Items{
-		items:      items,
-		activeItem: activeItem,
+		items:       items,
+		activeItem:  activeItem,
+		activeGroup: 0,
+		dataItems:   []*data.Item{},
 	}
 }
 
@@ -52,6 +57,8 @@ func (i *Items) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EncodeInt(i.combineItem)
 	e.EncodeString("eventItem")
 	e.EncodeInt(i.eventItem)
+	e.EncodeString("activeGroup")
+	e.EncodeInt(i.activeGroup)
 	e.EndMap()
 	return e.Flush()
 }
@@ -75,6 +82,8 @@ func (i *Items) DecodeMsgpack(dec *msgpack.Decoder) error {
 			i.combineItem = d.DecodeInt()
 		case "eventItem":
 			i.eventItem = d.DecodeInt()
+		case "activeGroup":
+			i.activeGroup = d.DecodeInt()
 		}
 	}
 	if err := d.Error(); err != nil {
@@ -112,24 +121,30 @@ func (i *Items) SetEventItem(id int) {
 	i.eventItem = id
 }
 
-func (i *Items) Items(dataItems []*data.Item) []*data.Item {
-	idToItem := map[int]*data.Item{}
-	for _, i := range dataItems {
-		idToItem[i.ID] = i
+func (i *Items) Items() []*data.Item {
+	if i.activeItems == nil {
+		idToItem := map[int]*data.Item{}
+		for _, i := range i.dataItems {
+			idToItem[i.ID] = i
+		}
+		is := []*data.Item{}
+		for _, id := range i.items {
+			item := idToItem[id]
+			if item.Group == i.activeGroup {
+				is = append(is, item)
+			}
+		}
+		i.activeItems = is
 	}
-	is := []*data.Item{}
-	for _, id := range i.items {
-		is = append(is, idToItem[id])
-	}
-	return is
+	return i.activeItems
 }
 
 func (i *Items) ItemIDAt(index int) int {
-	return i.items[index]
+	return i.Items()[index].ID
 }
 
 func (i *Items) ItemNum() int {
-	return len(i.items)
+	return len(i.Items())
 }
 
 func (i *Items) Add(id int) {
@@ -140,6 +155,7 @@ func (i *Items) Add(id int) {
 	if i.index(id) < 0 {
 		i.items = append(i.items, id)
 	}
+	i.activeItems = nil
 }
 
 func (i *Items) InsertBefore(targetItemID int, insertItemID int) {
@@ -155,6 +171,7 @@ func (i *Items) InsertBefore(targetItemID int, insertItemID int) {
 		copy(i.items[index+1:], i.items[index:])
 		i.items[index] = insertItemID
 	}
+	i.activeItems = nil
 }
 
 func (i *Items) Remove(id int) {
@@ -170,6 +187,7 @@ func (i *Items) Remove(id int) {
 	if id == i.activeItem {
 		i.activeItem = 0
 	}
+	i.activeItems = nil
 }
 
 func (i *Items) Activate(id int) {
@@ -186,4 +204,16 @@ func (i *Items) SetCombineItem(id int) {
 
 func (i *Items) Deactivate() {
 	i.activeItem = 0
+}
+
+func (i *Items) SetDataItems(dataItems []*data.Item) {
+	i.dataItems = dataItems
+}
+
+func (i *Items) SetActiveItemGroup(group int) {
+	if i.activeGroup != group {
+		i.activeItem = 0
+		i.activeGroup = group
+		i.activeItems = nil
+	}
 }

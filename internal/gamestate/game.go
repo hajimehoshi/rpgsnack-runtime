@@ -287,6 +287,7 @@ func (g *Game) MapPassableAt(through bool, x, y int, ignoreCharacters bool) bool
 }
 
 func (g *Game) Update(sceneManager *scene.Manager) error {
+	g.items.SetDataItems(sceneManager.Game().Items)
 	if g.lastPlayingBGMName != "" {
 		audio.PlayBGM(g.lastPlayingBGMName, g.lastPlayingBGMVolume, 0)
 		g.lastPlayingBGMName = ""
@@ -323,8 +324,13 @@ func (g *Game) SetBGM(bgm data.BGM) {
 	}
 }
 
-func (g *Game) SetInventoryVisible(visible bool) {
-	g.inventoryVisible = visible
+func (g *Game) ShowInventory(group int) {
+	g.inventoryVisible = true
+	g.items.SetActiveItemGroup(group)
+}
+
+func (g *Game) HideInventory() {
+	g.inventoryVisible = false
 }
 
 func (g *Game) InventoryVisible() bool {

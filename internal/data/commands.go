@@ -306,6 +306,11 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 		}
 		c.Args = args
 	case CommandNameShowInventory:
+		var args *CommandArgsShowInventory
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	case CommandNameHideInventory:
 	case CommandNameShowItem:
 		var args *CommandArgsShowItem
@@ -679,6 +684,11 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 		}
 		c.Args = a
 	case CommandNameShowInventory:
+		a := &CommandArgsShowInventory{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
 	case CommandNameHideInventory:
 	case CommandNameShowItem:
 		a := &CommandArgsShowItem{}
@@ -1427,6 +1437,10 @@ type CommandArgsRemoveItem struct {
 
 type CommandArgsShowItem struct {
 	ID int `json:"id" msgpack:"id"`
+}
+
+type CommandArgsShowInventory struct {
+	Group int `json:"group" msgpack:"group"`
 }
 
 type CommandArgsReplaceItem struct {
