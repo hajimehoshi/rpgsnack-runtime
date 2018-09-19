@@ -38,7 +38,6 @@ type Interpreter struct {
 	mapID              int // Note: This doesn't make sense when eventID == PlayerEventID
 	roomID             int // Note: This doesn't make sense when eventID == PlayerEventID
 	eventID            int
-	pageIndex          int
 	commandIterator    *commanditerator.CommandIterator
 	waitingCount       int
 	waitingCommand     bool
@@ -56,13 +55,12 @@ type InterpreterIDGenerator interface {
 	GenerateInterpreterID() int
 }
 
-func NewInterpreter(idGen InterpreterIDGenerator, mapID, roomID, eventID, pageIndex int, commands []*data.Command) *Interpreter {
+func NewInterpreter(idGen InterpreterIDGenerator, mapID, roomID, eventID int, commands []*data.Command) *Interpreter {
 	return &Interpreter{
 		id:              idGen.GenerateInterpreterID(),
 		mapID:           mapID,
 		roomID:          roomID,
 		eventID:         eventID,
-		pageIndex:       pageIndex,
 		commandIterator: commanditerator.New(commands),
 	}
 }
@@ -82,9 +80,6 @@ func (i *Interpreter) EncodeMsgpack(enc *msgpack.Encoder) error {
 
 	e.EncodeString("eventId")
 	e.EncodeInt(i.eventID)
-
-	e.EncodeString("pageIndex")
-	e.EncodeInt(i.pageIndex)
 
 	e.EncodeString("commandIterator")
 	e.EncodeInterface(i.commandIterator)
@@ -136,8 +131,6 @@ func (i *Interpreter) DecodeMsgpack(dec *msgpack.Decoder) error {
 			i.roomID = d.DecodeInt()
 		case "eventId":
 			i.eventID = d.DecodeInt()
-		case "pageIndex":
-			i.pageIndex = d.DecodeInt()
 		case "commandIterator":
 			if !d.SkipCodeIfNil() {
 				i.commandIterator = &commanditerator.CommandIterator{}
@@ -190,8 +183,8 @@ func (i *Interpreter) IsExecuting() bool {
 	return i.commandIterator != nil
 }
 
-func (i *Interpreter) createChild(gameState InterpreterIDGenerator, eventID int, pageIndex int, commands []*data.Command) *Interpreter {
-	child := NewInterpreter(gameState, i.mapID, i.roomID, eventID, pageIndex, commands)
+func (i *Interpreter) createChild(gameState InterpreterIDGenerator, eventID int, commands []*data.Command) *Interpreter {
+	child := NewInterpreter(gameState, i.mapID, i.roomID, eventID, commands)
 	child.route = i.route
 	child.pageRoute = i.pageRoute
 	return child
@@ -305,7 +298,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		}
 		page := event.Pages[args.PageIndex]
 		commands := page.Commands
-		i.sub = i.createChild(gameState, eventID, args.PageIndex, commands)
+		i.sub = i.createChild(gameState, eventID, commands)
 
 	case data.CommandNameCallCommonEvent:
 		args := c.Args.(*data.CommandArgsCallCommonEvent)
@@ -320,8 +313,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		if c == nil {
 			return false, fmt.Errorf("invalid common event ID: %d", eventID)
 		}
-		// TODO: Is this correct to the pass event id and the page index here?
-		i.sub = i.createChild(gameState, i.eventID, i.pageIndex, c.Commands)
+		i.sub = i.createChild(gameState, i.eventID, c.Commands)
 
 	case data.CommandNameReturn:
 		i.commandIterator.Terminate()
@@ -406,7 +398,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		for _, h := range sceneManager.Game().Hints {
 			if h.ID == hintId {
 				c := h.Commands
-				i.sub = i.createChild(gameState, i.eventID, i.pageIndex, c)
+				i.sub = i.createChild(gameState, i.eventID, c)
 				hasHint = true
 				break
 			}
@@ -516,7 +508,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		if id == 0 {
 			id = i.eventID
 		}
-		sub := i.createChild(gameState, id, i.pageIndex, args.Commands)
+		sub := i.createChild(gameState, id, args.Commands)
 		sub.repeat = args.Repeat
 		sub.routeSkip = args.Skip
 
@@ -1022,12 +1014,12 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			i.commandIterator.Advance()
 			break
 		}
-		page, pageIndex := gameState.currentMap.currentPage(e)
+		page := gameState.currentMap.currentPage(e)
 		if page == nil {
 			panic("not reached")
 		}
 		c := page.Commands
-		i.sub = i.createChild(gameState, e.EventID(), pageIndex, c)
+		i.sub = i.createChild(gameState, e.EventID(), c)
 
 	case data.CommandNameMemo:
 		i.commandIterator.Advance()
