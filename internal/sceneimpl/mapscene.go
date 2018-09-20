@@ -337,9 +337,6 @@ func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) {
 		m.triggeringFailed = false
 		return
 	}
-	if !input.Triggered() {
-		return
-	}
 
 	m.markerAnimationFrame = 0
 
@@ -360,6 +357,15 @@ func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) {
 	}
 	tx := x / consts.TileSize / consts.TileScale
 	ty := y / consts.TileSize / consts.TileScale
+
+	if input.Pressed() {
+		m.gameState.Map().SetPressedPosition(tx, ty)
+	}
+
+	if !input.Triggered() {
+		return
+	}
+
 	// The bottom line of the map should not be tappable as that space is
 	// reserved to avoid conflict with iPhoneX's HomeIndicator
 	if tx < 0 || consts.TileXNum <= tx || ty < 0 || consts.TileYNum-1 <= ty {

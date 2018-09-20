@@ -58,12 +58,16 @@ type Map struct {
 	gameData                  *data.Game
 	isPlayerMovingByUserInput bool
 	origSpeed                 data.Speed
+	pressedMapX               int
+	pressedMapY               int
 }
 
 func NewMap() *Map {
 	m := &Map{
 		mapID:        1,
 		interpreters: map[int]*Interpreter{},
+		pressedMapX:  -1,
+		pressedMapY:  -1,
 	}
 	return m
 }
@@ -425,6 +429,9 @@ func (m *Map) Update(sceneManager *scene.Manager, gameState *Game) error {
 	}
 	m.tryRunAutoEvent(gameState)
 
+	m.pressedMapX = -1
+	m.pressedMapY = -1
+
 	return nil
 }
 
@@ -621,6 +628,15 @@ func (m *Map) Passable(through bool, x, y int, ignoreCharacters bool) bool {
 		return false
 	}
 	return true
+}
+
+func (m *Map) SetPressedPosition(x, y int) {
+	m.pressedMapX = x
+	m.pressedMapY = y
+}
+
+func (m *Map) GetPressedPosition() (int, int) {
+	return m.pressedMapX, m.pressedMapY
 }
 
 func (m *Map) TryRunDirectEvent(gameState *Game, x, y int) bool {

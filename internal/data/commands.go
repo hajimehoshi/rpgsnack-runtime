@@ -1592,6 +1592,7 @@ const (
 	SetVariableCharacterTypeRoomY     SetVariableCharacterType = "room_y"
 	SetVariableCharacterTypeScreenX   SetVariableCharacterType = "screen_x"
 	SetVariableCharacterTypeScreenY   SetVariableCharacterType = "screen_y"
+	SetVariableCharacterTypeIsPressed SetVariableCharacterType = "pressed"
 )
 
 type ShowAdsType string

@@ -742,6 +742,12 @@ func (g *Game) SetVariable(sceneManager *scene.Manager, variableID int, op data.
 			rhs, _ = ch.DrawPosition()
 		case data.SetVariableCharacterTypeScreenY:
 			_, rhs = ch.DrawPosition()
+		case data.SetVariableCharacterTypeIsPressed:
+			x, y := ch.Position()
+			pressX, pressY := g.currentMap.GetPressedPosition()
+			if x == pressX && y == pressY {
+				rhs = 1
+			}
 		default:
 			return fmt.Errorf("gamestate: not implemented yet (set_variable): type %s", args.Type)
 		}
