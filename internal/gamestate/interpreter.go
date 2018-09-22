@@ -210,6 +210,8 @@ func (i *Interpreter) findMessageStyle(sceneManager *scene.Manager, messageStyle
 }
 
 func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game) (bool, error) {
+	// TODO: Instead of returnning boolean value, return enum value for code readability.
+
 	// TODO: CanWindowProceed should always return true for route interpreters?
 	if !i.route && !gameState.CanWindowProceed(i.id) {
 		return false, nil
@@ -218,11 +220,13 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		if err := i.sub.Update(sceneManager, gameState); err != nil {
 			return false, err
 		}
-		if !i.sub.IsExecuting() {
-			i.sub = nil
-			i.commandIterator.Advance()
+		if i.sub.IsExecuting() {
+			return false, nil
 		}
-		return false, nil
+		i.sub = nil
+		i.commandIterator.Advance()
+		// Continue
+		return true, nil
 	}
 	if i.waitingRequestID != 0 {
 		r := sceneManager.ReceiveResultIfExists(i.waitingRequestID)
@@ -1036,6 +1040,8 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 	default:
 		return false, fmt.Errorf("interpreter: invalid command: %s", c.Name)
 	}
+
+	// Continue
 	return true, nil
 }
 
