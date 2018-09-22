@@ -492,7 +492,7 @@ func (m *Map) tryRunParallelEvent(gameState *Game) {
 		page, pageIndex := m.currentPage(e)
 
 		// If there is already an executing interpreter, check the condition.
-		// 1) If all the conditions are same, the new interpreter won't work and the existing interpreter
+		// 1) If all the conditions are same, the new interpreter won't start and the existing interpreter
 		//    continues.
 		// 2) If all the conditions but the page index are same, the new interpreter starts and the existing
 		//    interpreter stops.
@@ -532,7 +532,6 @@ func (m *Map) tryRunParallelEvent(gameState *Game) {
 		i := NewInterpreter(gameState, m.mapID, m.roomID, e.EventID(), pageIndex, page.Commands)
 		i.parallel = true
 		m.addInterpreter(i)
-		return
 	}
 }
 
