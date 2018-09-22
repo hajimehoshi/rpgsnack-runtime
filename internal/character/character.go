@@ -37,7 +37,13 @@ const (
 	iconHeight    = 16
 )
 
-var characterFileRegexp = regexp.MustCompile(".*_([0-9]+)_([0-9]+)")
+var characterFileRegexp = regexp.MustCompile(".*_([0-9]+)_([0-9]+)(_loop)?")
+
+type ImageInfo struct {
+	SizeW int
+	SizeH int
+	Loop  bool
+}
 
 type StoredState struct {
 	speed     data.Speed
@@ -73,13 +79,14 @@ type Character struct {
 	opacityMaxCount int
 
 	// Not dumped
-	sizeW       int
-	sizeH       int
-	dirCount    int
-	frameCount  int
-	imageW      int
-	imageH      int
-	storedState *StoredState
+	sizeW          int
+	sizeH          int
+	dirCount       int
+	frameCount     int
+	imageW         int
+	imageH         int
+	storedState    *StoredState
+	imageInfoCache *ImageInfo
 }
 
 func NewPlayer(x, y int) *Character {
@@ -299,6 +306,35 @@ func (c *Character) getImage() *ebiten.Image {
 	panic("character: invalid image type:" + c.imageType)
 }
 
+func (c *Character) imageInfo() *ImageInfo {
+	if c.imageInfoCache != nil {
+		return c.imageInfoCache
+	}
+
+	arr := characterFileRegexp.FindStringSubmatch(c.imageName)
+	if len(arr) != 4 {
+		log.Printf("Invalid image is loaded: %s", c.imageName)
+		c.imageInfoCache = &ImageInfo{
+			SizeW: 0,
+			SizeH: 0,
+			Loop:  false,
+		}
+	} else {
+		sizeW, _ := strconv.Atoi(arr[1])
+		sizeH, _ := strconv.Atoi(arr[2])
+		loop := arr[3] == "_loop"
+
+		c.imageInfoCache = &ImageInfo{
+			SizeW: sizeW,
+			SizeH: sizeH,
+			Loop:  loop,
+		}
+	}
+
+	return c.imageInfoCache
+
+}
+
 func (c *Character) ImageSize() (int, int) {
 	if c.imageName == "" {
 		return 0, 0
@@ -312,6 +348,11 @@ func (c *Character) ImageSize() (int, int) {
 	return c.imageW, c.imageH
 }
 
+func (c *Character) Loop() bool {
+	info := c.imageInfo()
+	return info.Loop
+}
+
 func (c *Character) Size() (int, int) {
 	if c.imageName == "" {
 		return 0, 0
@@ -320,14 +361,9 @@ func (c *Character) Size() (int, int) {
 		return iconWidth, iconHeight
 	}
 	if c.sizeW == 0 || c.sizeH == 0 {
-		arr := characterFileRegexp.FindStringSubmatch(c.imageName)
-
-		if len(arr) != 3 {
-			log.Printf("Invalid image is loaded: %s", c.imageName)
-			return 0, 0
-		}
-		c.sizeW, _ = strconv.Atoi(arr[1])
-		c.sizeH, _ = strconv.Atoi(arr[2])
+		info := c.imageInfo()
+		c.sizeW = info.SizeW
+		c.sizeH = info.SizeH
 
 		// Validate to see if the character size is valid
 		if c.sizeW == 0 || c.sizeH == 0 || c.imageW%c.sizeW != 0 || c.imageH%c.sizeH != 0 {
@@ -486,6 +522,8 @@ func (c *Character) SetImage(imageType data.ImageType, imageName string) {
 	c.sizeH = 0
 	c.dirCount = 0
 	c.frameCount = 0
+	c.steppingDir = 1
+	c.imageInfoCache = nil
 }
 
 func (c *Character) SetFrame(frame int) {
@@ -561,11 +599,20 @@ func (c *Character) progressFrame(speedMultiplier int) {
 		c.frame += c.steppingDir
 	}
 
-	if c.frame >= c.FrameCount()-1 {
-		c.steppingDir = -1
-	}
-	if c.frame <= 0 {
-		c.steppingDir = 1
+	if c.Loop() {
+		if c.frame >= c.FrameCount() {
+			c.frame = 0
+		}
+		if c.frame < 0 {
+			c.steppingDir = c.FrameCount() - 1
+		}
+	} else {
+		if c.frame >= c.FrameCount()-1 {
+			c.steppingDir = -1
+		}
+		if c.frame <= 0 {
+			c.steppingDir = 1
+		}
 	}
 }
 
