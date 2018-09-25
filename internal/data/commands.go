@@ -85,6 +85,12 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 			return err
 		}
 		c.Args = args
+	case CommandNameGroup:
+		var args *CommandArgsGroup
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	case CommandNameLabel:
 		var args *CommandArgsLabel
 		if err := unmarshalJSON(tmp.Args, &args); err != nil {
@@ -782,6 +788,7 @@ const (
 	CommandNameNop               CommandName = "nop"
 	CommandNameMemo              CommandName = "memo"
 	CommandNameIf                CommandName = "if"
+	CommandNameGroup             CommandName = "group"
 	CommandNameLabel             CommandName = "label"
 	CommandNameGoto              CommandName = "goto"
 	CommandNameCallEvent         CommandName = "call_event"
@@ -856,6 +863,10 @@ type CommandArgsMemo struct {
 
 type CommandArgsIf struct {
 	Conditions []*Condition `json:"conditions" msgpack:"conditions"`
+}
+
+type CommandArgsGroup struct {
+	Name string `json:"name" msgpack:"name"`
 }
 
 type CommandArgsLabel struct {

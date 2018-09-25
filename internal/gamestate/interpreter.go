@@ -281,6 +281,9 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		} else {
 			i.commandIterator.Advance()
 		}
+	case data.CommandNameGroup:
+		i.commandIterator.Choose(0)
+
 	case data.CommandNameLabel:
 		i.commandIterator.Advance()
 	case data.CommandNameGoto:
