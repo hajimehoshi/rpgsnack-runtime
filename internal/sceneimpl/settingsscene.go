@@ -36,6 +36,7 @@ type SettingsScene struct {
 	reviewThisAppButton    *ui.Button
 	restorePurchasesButton *ui.Button
 	moreGamesButton        *ui.Button
+	privacyPolicyButton    *ui.Button
 	shopButton             *ui.Button
 	closeButton            *ui.Button
 	languageDialog         *ui.Dialog
@@ -72,7 +73,8 @@ func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
 	s.reviewThisAppButton = ui.NewButton(s.baseX, s.calcButtonY(3), 120, 20, "system/click")
 	s.restorePurchasesButton = ui.NewButton(s.baseX, s.calcButtonY(4), 120, 20, "system/click")
 	s.moreGamesButton = ui.NewButton(s.baseX, s.calcButtonY(5), 120, 20, "system/click")
-	s.closeButton = ui.NewButton(s.baseX, s.calcButtonY(6), 120, 20, "system/cancel")
+	s.privacyPolicyButton = ui.NewButton(s.baseX, s.calcButtonY(6), 120, 20, "system/click")
+	s.closeButton = ui.NewButton(s.baseX, s.calcButtonY(7), 120, 20, "system/cancel")
 
 	s.languageDialog = ui.NewDialog((w/consts.TileScale-160)/2+4, h/(2*consts.TileScale)-80, 152, 160)
 
@@ -117,6 +119,10 @@ func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
 		s.waitingRequestID = sceneManager.GenerateRequestID()
 		sceneManager.Requester().RequestOpenLink(s.waitingRequestID, "more", "")
 	})
+	s.privacyPolicyButton.SetOnPressed(func(_ *ui.Button) {
+		s.waitingRequestID = sceneManager.GenerateRequestID()
+		sceneManager.Requester().RequestOpenLink(s.waitingRequestID, "privacy", "")
+	})
 	s.closeButton.SetOnPressed(func(_ *ui.Button) {
 		sceneManager.GoTo(NewTitleScene())
 	})
@@ -134,6 +140,7 @@ func (s *SettingsScene) updateButtonTexts() {
 	s.reviewThisAppButton.Text = texts.Text(lang.Get(), texts.TextIDReviewThisApp)
 	s.restorePurchasesButton.Text = texts.Text(lang.Get(), texts.TextIDRestorePurchases)
 	s.moreGamesButton.Text = texts.Text(lang.Get(), texts.TextIDMoreGames)
+	s.privacyPolicyButton.Text = texts.Text(lang.Get(), texts.TextIDPrivacyPolicy)
 	s.shopButton.Text = texts.Text(lang.Get(), texts.TextIDShop)
 	s.closeButton.Text = texts.Text(lang.Get(), texts.TextIDClose)
 }
@@ -179,7 +186,8 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 	s.reviewThisAppButton.SetY(s.calcButtonY(itemOffset + 3))
 	s.restorePurchasesButton.SetY(s.calcButtonY(itemOffset + 4))
 	s.moreGamesButton.SetY(s.calcButtonY(itemOffset + 5))
-	s.closeButton.SetY(s.calcButtonY(itemOffset + 6))
+	s.privacyPolicyButton.SetY(s.calcButtonY(itemOffset + 6))
+	s.closeButton.SetY(s.calcButtonY(itemOffset + 7))
 
 	s.languageDialog.Update()
 	if !s.languageDialog.Visible() {
@@ -190,6 +198,7 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 		s.reviewThisAppButton.Update()
 		s.restorePurchasesButton.Update()
 		s.moreGamesButton.Update()
+		s.privacyPolicyButton.Update()
 		s.closeButton.Update()
 	}
 
@@ -219,6 +228,7 @@ func (s *SettingsScene) Draw(screen *ebiten.Image) {
 	s.reviewThisAppButton.Draw(screen)
 	s.restorePurchasesButton.Draw(screen)
 	s.moreGamesButton.Draw(screen)
+	s.privacyPolicyButton.Draw(screen)
 	s.closeButton.Draw(screen)
 	s.languageDialog.Draw(screen)
 }
