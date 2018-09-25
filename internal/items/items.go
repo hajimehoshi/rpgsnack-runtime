@@ -130,7 +130,7 @@ func (i *Items) Items() []*data.Item {
 		is := []*data.Item{}
 		for _, id := range i.items {
 			item := idToItem[id]
-			if item.Group == i.activeGroup {
+			if item != nil && item.Group == i.activeGroup {
 				is = append(is, item)
 			}
 		}
@@ -208,6 +208,7 @@ func (i *Items) Deactivate() {
 
 func (i *Items) SetDataItems(dataItems []*data.Item) {
 	i.dataItems = dataItems
+	i.activeItems = nil
 }
 
 func (i *Items) SetActiveItemGroup(group int) {
