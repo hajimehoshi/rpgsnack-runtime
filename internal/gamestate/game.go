@@ -434,6 +434,14 @@ func (g *Game) MeetsCondition(cond *data.Condition, eventID int) (bool, error) {
 			rhs = int(value)
 		case int64:
 			rhs = int(value)
+		case uint8:
+			rhs = int(value)
+		case uint16:
+			rhs = int(value)
+		case uint32:
+			rhs = int(value)
+		case uint64:
+			rhs = int(value)
 		}
 		switch cond.ValueType {
 		case data.ConditionValueTypeConstant:
