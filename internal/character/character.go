@@ -567,6 +567,7 @@ func (c *Character) UpdateWithPage(page *data.Page) {
 	c.imageH = 0
 	c.sizeW = 0
 	c.sizeH = 0
+	c.imageInfoCache = nil
 	if page == nil {
 		c.imageName = ""
 		c.dirFix = false
@@ -708,7 +709,7 @@ func (c *Character) Draw(screen *ebiten.Image, offsetX, offsetY int) {
 	case 4:
 		sy = dirIndex * charH
 	default:
-		panic(fmt.Sprintf("not supported DirCount %d", c.DirCount()))
+		panic(fmt.Sprintf("not supported DirCount %s %d", c.imageName, c.DirCount()))
 	}
 
 	r := image.Rect(sx, sy, sx+charW, sy+charH)
