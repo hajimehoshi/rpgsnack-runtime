@@ -468,6 +468,12 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 			return err
 		}
 		c.Args = a
+	case CommandNameGroup:
+		a := &CommandArgsGroup{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
 	case CommandNameLabel:
 		a := &CommandArgsLabel{}
 		if err := msgpack.Unmarshal(argsBin, a); err != nil {
