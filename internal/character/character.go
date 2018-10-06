@@ -567,6 +567,7 @@ func (c *Character) UpdateWithPage(page *data.Page) {
 	c.imageH = 0
 	c.sizeW = 0
 	c.sizeH = 0
+	c.frameCount = 0
 	c.imageInfoCache = nil
 	if page == nil {
 		c.imageName = ""
