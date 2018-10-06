@@ -610,9 +610,11 @@ func (c *Character) progressFrame(speedMultiplier int) {
 		}
 	} else {
 		if c.frame >= c.FrameCount()-1 {
+			c.frame = c.FrameCount() - 1
 			c.steppingDir = -1
 		}
 		if c.frame <= 0 {
+			c.frame = 0
 			c.steppingDir = 1
 		}
 	}
