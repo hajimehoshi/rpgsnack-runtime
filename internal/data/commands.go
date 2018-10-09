@@ -1481,6 +1481,7 @@ const (
 
 type CommandArgsShowPicture struct {
 	ID           int                  `json:"id" msgpack:"id"`
+	IDValueType  ValueType            `json:"idValueType" msgpack:"idValueType"`
 	Image        string               `json:"image" msgpack:"image"`
 	OriginX      float64              `json:"originX" msgpack:"originX"`
 	OriginY      float64              `json:"originY" msgpack:"originY"`
@@ -1496,11 +1497,13 @@ type CommandArgsShowPicture struct {
 }
 
 type CommandArgsErasePicture struct {
-	ID int `json:"id" msgpack:"id"`
+	ID          int       `json:"id" msgpack:"id"`
+	IDValueType ValueType `json:"idValueType" msgpack:"idValueType"`
 }
 
 type CommandArgsMovePicture struct {
 	ID           int       `json:"id" msgpack:"id"`
+	IDValueType  ValueType `json:"idValueType" msgpack:"idValueType"`
 	X            int       `json:"x" msgpack:"x"`
 	Y            int       `json:"y" msgpack:"y"`
 	PosValueType ValueType `json:"posValueType" msgpack:"posValueType"`
@@ -1510,6 +1513,7 @@ type CommandArgsMovePicture struct {
 
 type CommandArgsScalePicture struct {
 	ID             int       `json:"id" msgpack:"id"`
+	IDValueType    ValueType `json:"idValueType" msgpack:"idValueType"`
 	ScaleX         int       `json:"scaleX" msgpack:"scaleX"`
 	ScaleY         int       `json:"scaleY" msgpack:"scaleY"`
 	ScaleValueType ValueType `json:"scaleValueType" msgpack:"scaleValueType"`
@@ -1519,6 +1523,7 @@ type CommandArgsScalePicture struct {
 
 type CommandArgsRotatePicture struct {
 	ID             int       `json:"id" msgpack:"id"`
+	IDValueType    ValueType `json:"idValueType" msgpack:"idValueType"`
 	Angle          int       `json:"angle" msgpack:"angle"`
 	AngleValueType ValueType `json:"angleValueType" msgpack:"angleValueType"`
 	Time           int       `json:"time" msgpack:"time"`
@@ -1526,25 +1531,29 @@ type CommandArgsRotatePicture struct {
 }
 
 type CommandArgsFadePicture struct {
-	ID      int  `json:"id" msgpack:"id"`
-	Opacity int  `json:"opacity" msgpack:"opacity"`
-	Time    int  `json:"time" msgpack:"time"`
-	Wait    bool `json:"wait" msgpack:"wait"`
+	ID               int       `json:"id" msgpack:"id"`
+	IDValueType      ValueType `json:"idValueType" msgpack:"idValueType"`
+	Opacity          int       `json:"opacity" msgpack:"opacity"`
+	OpacityValueType ValueType `json:"opacityValueType" msgpack:"opacityValueType"`
+	Time             int       `json:"time" msgpack:"time"`
+	Wait             bool      `json:"wait" msgpack:"wait"`
 }
 
 type CommandArgsTintPicture struct {
-	ID    int  `json:"id" msgpack:"id"`
-	Red   int  `json:"red" msgpack:"red"`
-	Green int  `json:"green" msgpack:"green"`
-	Blue  int  `json:"blue" msgpack:"blue"`
-	Gray  int  `json:"gray" msgpack:"gray"`
-	Time  int  `json:"time" msgpack:"time"`
-	Wait  bool `json:"wait" msgpack:"wait"`
+	ID          int       `json:"id" msgpack:"id"`
+	IDValueType ValueType `json:"idValueType" msgpack:"idValueType"`
+	Red         int       `json:"red" msgpack:"red"`
+	Green       int       `json:"green" msgpack:"green"`
+	Blue        int       `json:"blue" msgpack:"blue"`
+	Gray        int       `json:"gray" msgpack:"gray"`
+	Time        int       `json:"time" msgpack:"time"`
+	Wait        bool      `json:"wait" msgpack:"wait"`
 }
 
 type CommandArgsChangePictureImage struct {
-	ID    int    `json:"id" msgpack:"id"`
-	Image string `json:"image" msgpack:"image"`
+	ID          int       `json:"id" msgpack:"id"`
+	IDValueType ValueType `json:"idValueType" msgpack:"idValueType"`
+	Image       string    `json:"image" msgpack:"image"`
 }
 
 type CommandArgsChangeBackground struct {

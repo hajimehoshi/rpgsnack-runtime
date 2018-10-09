@@ -873,6 +873,10 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		args := c.Args.(*data.CommandArgsShowPicture)
 		x := args.X
 		y := args.Y
+		id := args.ID
+		if args.IDValueType == data.ValueTypeVariable {
+			id = gameState.VariableValue(id)
+		}
 		if args.PosValueType == data.ValueTypeVariable {
 			x = gameState.VariableValue(x)
 			y = gameState.VariableValue(y)
@@ -881,24 +885,32 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		scaleY := float64(args.ScaleY) / 100
 		angle := float64(args.Angle) * math.Pi / 180
 		opacity := float64(args.Opacity) / 255
-		gameState.pictures.Add(args.ID, args.Image, x, y, scaleX, scaleY, angle, opacity, args.OriginX, args.OriginY, args.BlendType, args.Priority)
+		gameState.pictures.Add(id, args.Image, x, y, scaleX, scaleY, angle, opacity, args.OriginX, args.OriginY, args.BlendType, args.Priority)
 		i.commandIterator.Advance()
 
 	case data.CommandNameErasePicture:
 		args := c.Args.(*data.CommandArgsErasePicture)
-		gameState.pictures.Remove(args.ID)
+		id := args.ID
+		if args.IDValueType == data.ValueTypeVariable {
+			id = gameState.VariableValue(id)
+		}
+		gameState.pictures.Remove(id)
 		i.commandIterator.Advance()
 
 	case data.CommandNameMovePicture:
 		if i.waitingCount == 0 {
 			args := c.Args.(*data.CommandArgsMovePicture)
+			id := args.ID
+			if args.IDValueType == data.ValueTypeVariable {
+				id = gameState.VariableValue(id)
+			}
 			x := args.X
 			y := args.Y
 			if args.PosValueType == data.ValueTypeVariable {
 				x = gameState.VariableValue(x)
 				y = gameState.VariableValue(y)
 			}
-			gameState.pictures.MoveTo(args.ID, x, y, args.Time*6)
+			gameState.pictures.MoveTo(id, x, y, args.Time*6)
 			if !args.Wait {
 				i.commandIterator.Advance()
 				return true, nil
@@ -917,6 +929,11 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		if i.waitingCount == 0 {
 			args := c.Args.(*data.CommandArgsScalePicture)
 
+			id := args.ID
+			if args.IDValueType == data.ValueTypeVariable {
+				id = gameState.VariableValue(id)
+			}
+
 			tx := args.ScaleX
 			ty := args.ScaleY
 			if args.ScaleValueType == data.ValueTypeVariable {
@@ -925,7 +942,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			}
 			scaleX := float64(tx) / 100
 			scaleY := float64(ty) / 100
-			gameState.pictures.Scale(args.ID, scaleX, scaleY, args.Time*6)
+			gameState.pictures.Scale(id, scaleX, scaleY, args.Time*6)
 			if !args.Wait {
 				i.commandIterator.Advance()
 				return true, nil
@@ -944,12 +961,17 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		if i.waitingCount == 0 {
 			args := c.Args.(*data.CommandArgsRotatePicture)
 
+			id := args.ID
+			if args.IDValueType == data.ValueTypeVariable {
+				id = gameState.VariableValue(id)
+			}
+
 			t := args.Angle
 			if args.AngleValueType == data.ValueTypeVariable {
 				t = gameState.VariableValue(t)
 			}
 			angle := float64(t) * math.Pi / 180
-			gameState.pictures.Rotate(args.ID, angle, args.Time*6)
+			gameState.pictures.Rotate(id, angle, args.Time*6)
 			if !args.Wait {
 				i.commandIterator.Advance()
 				return true, nil
@@ -967,8 +989,17 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 	case data.CommandNameFadePicture:
 		if i.waitingCount == 0 {
 			args := c.Args.(*data.CommandArgsFadePicture)
-			opacity := float64(args.Opacity) / 255
-			gameState.pictures.Fade(args.ID, opacity, args.Time*6)
+			id := args.ID
+			if args.IDValueType == data.ValueTypeVariable {
+				id = gameState.VariableValue(id)
+			}
+
+			opacity := args.Opacity
+			if args.OpacityValueType == data.ValueTypeVariable {
+				opacity = gameState.VariableValue(opacity)
+			}
+			o := float64(opacity) / 255
+			gameState.pictures.Fade(id, o, args.Time*6)
 			if !args.Wait {
 				i.commandIterator.Advance()
 				return true, nil
@@ -986,11 +1017,16 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 	case data.CommandNameTintPicture:
 		if i.waitingCount == 0 {
 			args := c.Args.(*data.CommandArgsTintPicture)
+			id := args.ID
+			if args.IDValueType == data.ValueTypeVariable {
+				id = gameState.VariableValue(id)
+			}
+
 			r := float64(args.Red) / 255
 			g := float64(args.Green) / 255
 			b := float64(args.Blue) / 255
 			gray := float64(args.Gray) / 255
-			gameState.pictures.Tint(args.ID, r, g, b, gray, args.Time*6)
+			gameState.pictures.Tint(id, r, g, b, gray, args.Time*6)
 			if !args.Wait {
 				i.commandIterator.Advance()
 				return true, nil
@@ -1007,7 +1043,12 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 
 	case data.CommandNameChangePictureImage:
 		args := c.Args.(*data.CommandArgsChangePictureImage)
-		gameState.pictures.ChangeImage(args.ID, args.Image)
+		id := args.ID
+		if args.IDValueType == data.ValueTypeVariable {
+			id = gameState.VariableValue(id)
+		}
+
+		gameState.pictures.ChangeImage(id, args.Image)
 		i.commandIterator.Advance()
 
 	case data.CommandNameChangeBackground:
