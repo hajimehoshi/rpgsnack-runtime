@@ -375,7 +375,7 @@ func (g *Game) RequestSave(sceneManager *scene.Manager) bool {
 
 var reMessage = regexp.MustCompile(`\\([a-zA-Z])\[([^\]]+)\]`)
 
-func (g *Game) parseMessageSyntax(str string) string {
+func (g *Game) ParseMessageSyntax(str string) string {
 	return reMessage.ReplaceAllStringFunc(str, func(part string) string {
 		name := strings.ToLower(part[1:2])
 		args := part[3 : len(part)-1]
@@ -603,14 +603,14 @@ func (g *Game) ShowBalloon(sceneManager *scene.Manager, interpreterID, mapID, ro
 	}
 
 	content := sceneManager.Game().Texts.Get(lang.Get(), contentID)
-	content = g.parseMessageSyntax(content)
+	content = g.ParseMessageSyntax(content)
 	g.windows.ShowBalloon(contentID, content, balloonType, eventID, interpreterID, messageStyle)
 	return true
 }
 
 func (g *Game) ShowMessage(sceneManager *scene.Manager, interpreterID, eventID int, contentID data.UUID, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign, messageStyle *data.MessageStyle) {
 	content := sceneManager.Game().Texts.Get(lang.Get(), contentID)
-	content = g.parseMessageSyntax(content)
+	content = g.ParseMessageSyntax(content)
 	g.windows.ShowMessage(contentID, content, eventID, background, positionType, textAlign, interpreterID, messageStyle)
 }
 
@@ -618,7 +618,7 @@ func (g *Game) ShowChoices(sceneManager *scene.Manager, interpreterID int, choic
 	choices := []string{}
 	for _, id := range choiceIDs {
 		choice := sceneManager.Game().Texts.Get(lang.Get(), id)
-		choice = g.parseMessageSyntax(choice)
+		choice = g.ParseMessageSyntax(choice)
 		choices = append(choices, choice)
 	}
 	g.windows.ShowChoices(sceneManager, choiceIDs, choices, interpreterID)

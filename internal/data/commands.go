@@ -865,6 +865,7 @@ const (
 
 type CommandArgsMemo struct {
 	Content string `json:"content" msgpack:"content"`
+	Log     bool   `json:"log" msgpack:"log"`
 }
 
 type CommandArgsIf struct {

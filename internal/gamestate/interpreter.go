@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"image/color"
+	"log"
 	"math"
 	"strconv"
 
@@ -1079,6 +1080,10 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		i.sub = i.createChild(gameState, e.EventID(), pageIndex, c)
 
 	case data.CommandNameMemo:
+		args := c.Args.(*data.CommandArgsMemo)
+		if args.Log {
+			log.Print(gameState.ParseMessageSyntax(args.Content))
+		}
 		i.commandIterator.Advance()
 
 	default:
