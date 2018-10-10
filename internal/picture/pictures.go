@@ -149,9 +149,13 @@ func (p *Pictures) Draw(screen *ebiten.Image, offsetX, offsetY int, priority dat
 
 func (p *Pictures) Add(id int, name string, x, y int, scaleX, scaleY, angle, opacity float64, originX, originY float64, blendType data.ShowPictureBlendType, priority data.PicturePriorityType) {
 	p.ensurePictures(id)
+	var image *ebiten.Image
+	if name != "" {
+		image = assets.GetImage("pictures/" + name + ".png")
+	}
 	p.pictures[id] = &picture{
 		imageName: name,
-		image:     assets.GetImage("pictures/" + name + ".png"),
+		image:     image,
 		x:         interpolation.New(float64(x)),
 		y:         interpolation.New(float64(y)),
 		scaleX:    interpolation.New(scaleX),
@@ -305,7 +309,11 @@ func (p *picture) setTint(red, green, blue, gray float64, count int) {
 
 func (p *picture) changeImage(imageName string) {
 	p.imageName = imageName
-	p.image = assets.GetImage("pictures/" + p.imageName + ".png")
+	if imageName == "" {
+		p.image = nil
+	} else {
+		p.image = assets.GetImage("pictures/" + p.imageName + ".png")
+	}
 }
 
 func (p *picture) update() {
@@ -319,6 +327,10 @@ func (p *picture) update() {
 }
 
 func (p *picture) draw(screen *ebiten.Image, offsetX, offsetY int) {
+	if p.image == nil {
+		return
+	}
+
 	sx, sy := p.image.Size()
 
 	op := &ebiten.DrawImageOptions{}
