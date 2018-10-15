@@ -333,10 +333,6 @@ func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) {
 		m.triggeringFailed = false
 		return
 	}
-	if m.gameState.Map().IsBlockingEventExecuting() {
-		m.triggeringFailed = false
-		return
-	}
 
 	m.markerAnimationFrame = 0
 
@@ -360,6 +356,11 @@ func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) {
 
 	if input.Pressed() {
 		m.gameState.Map().SetPressedPosition(tx, ty)
+	}
+
+	if m.gameState.Map().IsBlockingEventExecuting() {
+		m.triggeringFailed = false
+		return
 	}
 
 	if !input.Triggered() {
