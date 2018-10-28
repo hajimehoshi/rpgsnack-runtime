@@ -55,6 +55,16 @@ func (m *Map) Rooms() []*Room {
 	return m.impl.Rooms
 }
 
+func (m *Map) UnmarshalJSON(data []byte) error {
+	m.json = data
+	return nil
+}
+
+func (m *Map) UnmarshalMsgpack(data []byte) error {
+	m.msgpack = data
+	return nil
+}
+
 func (m *Map) ensureEncoded() error {
 	if m.impl != nil {
 		return nil
@@ -84,16 +94,6 @@ type MapImpl struct {
 	ID    int     `json:"id" msgpack:"id"`
 	Name  string  `json:"name" msgpack:"name"`
 	Rooms []*Room `json:"rooms" msgpack:"rooms"`
-}
-
-func (m *Map) UnmarshalJSON(data []byte) error {
-	m.json = data
-	return nil
-}
-
-func (m *Map) UnmarshalMsgpack(data []byte) error {
-	m.msgpack = data
-	return nil
 }
 
 type Room struct {

@@ -216,7 +216,8 @@ func (m *Map) setRoomID(gameState *Game, id int, interpreter *Interpreter) error
 	}
 
 	for _, e := range m.CurrentRoom().Events {
-		event := character.NewEvent(e.ID, e.X, e.Y)
+		x, y := e.Position()
+		event := character.NewEvent(e.ID(), x, y)
 		m.events = append(m.events, event)
 		m.eventPageIndices[event.EventID()] = character.PlayerEventID
 	}
@@ -274,7 +275,7 @@ func (m *Map) calcPageIndex(gameState *Game, ch *character.Character) (int, erro
 	}
 	var event *data.Event
 	for _, e := range m.CurrentRoom().Events {
-		if e.ID == ch.EventID() {
+		if e.ID() == ch.EventID() {
 			event = e
 			break
 		}
@@ -284,9 +285,9 @@ func (m *Map) calcPageIndex(gameState *Game, ch *character.Character) (int, erro
 		// the event was deleted by the game editor.
 		return -1, nil
 	}
-	for i := len(event.Pages) - 1; i >= 0; i-- {
-		page := event.Pages[i]
-		m, err := m.meetsPageCondition(gameState, page, event.ID)
+	for i := len(event.Pages()) - 1; i >= 0; i-- {
+		page := event.Pages()[i]
+		m, err := m.meetsPageCondition(gameState, page, event.ID())
 		if err != nil {
 			return 0, err
 		}
@@ -303,8 +304,8 @@ func (m *Map) currentPage(event *character.Character) (*data.Page, int) {
 		return nil, 0
 	}
 	for _, e := range m.CurrentRoom().Events {
-		if e.ID == event.EventID() {
-			return e.Pages[i], i
+		if e.ID() == event.EventID() {
+			return e.Pages()[i], i
 		}
 	}
 	panic("not reached")

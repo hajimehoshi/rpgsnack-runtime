@@ -301,7 +301,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		// TODO: Should i.mapID and i.roomID be considered here?
 		var event *data.Event
 		for _, e := range gameState.CurrentEvents() {
-			if e.ID == eventID {
+			if e.ID() == eventID {
 				event = e
 				break
 			}
@@ -311,7 +311,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			i.commandIterator.Advance()
 			return true, nil
 		}
-		page := event.Pages[args.PageIndex]
+		page := event.Pages()[args.PageIndex]
 		commands := page.Commands
 		i.sub = i.createChild(gameState, eventID, args.PageIndex, commands)
 

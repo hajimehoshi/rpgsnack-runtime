@@ -14,11 +14,83 @@
 
 package data
 
+import (
+	"encoding/json"
+	"runtime"
+
+	"github.com/vmihailenco/msgpack"
+)
+
 const (
 	SelfSwitchNum = 4
 )
 
 type Event struct {
+	impl    *EventImpl
+	json    []byte
+	msgpack []byte
+}
+
+func (e *Event) ID() int {
+	if err := e.ensureEncoded(); err != nil {
+		panic(err)
+	}
+	return e.impl.ID
+}
+
+func (e *Event) Position() (int, int) {
+	if err := e.ensureEncoded(); err != nil {
+		panic(err)
+	}
+	return e.impl.X, e.impl.Y
+}
+
+func (e *Event) Pages() []*Page {
+	if err := e.ensureEncoded(); err != nil {
+		panic(err)
+	}
+	return e.impl.Pages
+}
+
+func (e *Event) UnmarshalJSON(data []byte) error {
+	e.json = data
+	return nil
+}
+
+func (e *Event) UnmarshalMsgpack(data []byte) error {
+	e.msgpack = data
+	return nil
+}
+
+func (e *Event) ensureEncoded() error {
+	if e.impl != nil {
+		return nil
+	}
+
+	var impl *EventImpl
+	if e.msgpack != nil {
+		if err := msgpack.Unmarshal(e.msgpack, &impl); err != nil {
+			return err
+		}
+		e.impl = impl
+		// Call Gosched() to force context switch not to cause audio noise.
+		runtime.Gosched()
+		return nil
+	}
+
+	if e.json != nil {
+		if err := json.Unmarshal(e.json, &impl); err != nil {
+			return err
+		}
+		e.impl = impl
+		runtime.Gosched()
+		return nil
+	}
+
+	panic("not reached")
+}
+
+type EventImpl struct {
 	ID    int     `json:"id" msgpack:"id"`
 	X     int     `json:"x" msgpack:"x"`
 	Y     int     `json:"y" msgpack:"y"`
