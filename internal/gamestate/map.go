@@ -561,7 +561,7 @@ func (m *Map) transferPlayerImmediately(gameState *Game, roomID, x, y int, inter
 
 func (m *Map) currentMap() *data.Map {
 	for _, d := range m.gameData.Maps {
-		if d.ID == m.mapID {
+		if d.ID() == m.mapID {
 			return d
 		}
 	}
@@ -569,7 +569,7 @@ func (m *Map) currentMap() *data.Map {
 }
 
 func (m *Map) CurrentRoom() *data.Room {
-	for _, r := range m.currentMap().Rooms {
+	for _, r := range m.currentMap().Rooms() {
 		if r.ID == m.roomID {
 			return r
 		}
