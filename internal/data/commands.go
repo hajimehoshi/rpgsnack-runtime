@@ -401,7 +401,7 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 
 	// Force context switching to avoid freezing (#463)
 	commandUnmarshalingCount++
-	if commandUnmarshalingCount%128 == 0 {
+	if commandUnmarshalingCount%8 == 0 {
 		runtime.Gosched()
 	}
 	return nil
@@ -783,6 +783,11 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 	case CommandNameExecEventHere:
 	default:
 		return fmt.Errorf("data: Command.DecodeMsgpack: invalid command: %s", c.Name)
+	}
+
+	commandUnmarshalingCount++
+	if commandUnmarshalingCount%8 == 0 {
+		runtime.Gosched()
 	}
 
 	return nil

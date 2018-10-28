@@ -16,7 +16,6 @@ package data
 
 import (
 	"encoding/json"
-	"runtime"
 
 	"github.com/vmihailenco/msgpack"
 )
@@ -73,8 +72,6 @@ func (e *Event) ensureEncoded() error {
 			return err
 		}
 		e.impl = impl
-		// Call Gosched() to force context switch not to cause audio noise.
-		runtime.Gosched()
 		return nil
 	}
 
@@ -83,7 +80,6 @@ func (e *Event) ensureEncoded() error {
 			return err
 		}
 		e.impl = impl
-		runtime.Gosched()
 		return nil
 	}
 
