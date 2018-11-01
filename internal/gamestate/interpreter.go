@@ -298,7 +298,18 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		if eventID == 0 {
 			eventID = i.eventID
 		}
-		// TODO: Should i.mapID and i.roomID be considered here?
+
+		if i.mapID != gameState.currentMap.mapID {
+			// TODO: warning?
+			i.commandIterator.Advance()
+			return true, nil
+		}
+		if i.roomID != gameState.currentMap.roomID {
+			// TODO: warning?
+			i.commandIterator.Advance()
+			return true, nil
+		}
+
 		var event *data.Event
 		for _, e := range gameState.CurrentEvents() {
 			if e.ID() == eventID {
