@@ -699,6 +699,7 @@ func (c *Character) Draw(screen *ebiten.Image, offsetX, offsetY int) {
 	scaleY := 1.0
 	switch c.DirCount() {
 	case 1:
+		sy = 0
 	case 2:
 		sy = dirIndex / 2 * charH
 	case 3:
