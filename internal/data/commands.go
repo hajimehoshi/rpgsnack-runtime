@@ -1478,6 +1478,13 @@ const (
 	ValueTypeVariable ValueType = "variable"
 )
 
+type SelectType string
+
+const (
+	SelectTypeSingle SelectType = "single"
+	SelectTypeMulti  SelectType = "multi"
+)
+
 type ShowPictureBlendType string
 
 const (
@@ -1503,8 +1510,9 @@ type CommandArgsShowPicture struct {
 }
 
 type CommandArgsErasePicture struct {
-	ID          int       `json:"id" msgpack:"id"`
-	IDValueType ValueType `json:"idValueType" msgpack:"idValueType"`
+	ID          interface{} `json:"id" msgpack:"id"`
+	IDValueType ValueType   `json:"idValueType" msgpack:"idValueType"`
+	SelectType  SelectType  `json:"selectType" msgpack:"selectType"`
 }
 
 type CommandArgsMovePicture struct {

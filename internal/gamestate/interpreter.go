@@ -902,11 +902,29 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 
 	case data.CommandNameErasePicture:
 		args := c.Args.(*data.CommandArgsErasePicture)
-		id := args.ID
-		if args.IDValueType == data.ValueTypeVariable {
-			id = gameState.VariableValue(id)
+		if args.SelectType == data.SelectTypeMulti {
+			ids := make([]int, 2)
+			interfaces := args.ID.([]interface{})
+			for i := 0; i < 2; i++ {
+				ids[i] = int(interfaces[i].(float64))
+			}
+
+			id1 := ids[0]
+			id2 := ids[1]
+			for i := id1; i < id2; i++ {
+				id := i
+				if args.IDValueType == data.ValueTypeVariable {
+					id = gameState.VariableValue(i)
+				}
+				gameState.pictures.Remove(id)
+			}
+		} else {
+			id := int(args.ID.(float64))
+			if args.IDValueType == data.ValueTypeVariable {
+				id = gameState.VariableValue(id)
+			}
+			gameState.pictures.Remove(id)
 		}
-		gameState.pictures.Remove(id)
 		i.commandIterator.Advance()
 
 	case data.CommandNameMovePicture:
