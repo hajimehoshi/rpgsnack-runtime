@@ -151,7 +151,7 @@ func (p *Pictures) Add(id int, name string, x, y int, scaleX, scaleY, angle, opa
 	p.ensurePictures(id)
 	var image *ebiten.Image
 	if name != "" {
-		image = assets.GetImage("pictures/" + name + ".png")
+		image = assets.GetLocalizeImage("pictures/" + name)
 	}
 	p.pictures[id] = &picture{
 		imageName: name,

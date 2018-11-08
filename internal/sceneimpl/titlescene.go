@@ -17,7 +17,6 @@ package sceneimpl
 import (
 	"github.com/hajimehoshi/ebiten"
 	"github.com/vmihailenco/msgpack"
-	"golang.org/x/text/language"
 	"image/color"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
@@ -49,7 +48,6 @@ type TitleScene struct {
 	titleLine        *ui.ImageView
 	waitingRequestID int
 	initialized      bool
-	lang             language.Tag
 	animation        animation
 	bgImage          *ebiten.Image
 	err              error
@@ -147,7 +145,6 @@ func (t *TitleScene) initUI(sceneManager *scene.Manager) {
 func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 	t.animation.Update()
 
-	t.lang = lang.Get()
 	if t.err != nil {
 		return t.err
 	}
@@ -267,7 +264,7 @@ func (t *TitleScene) DrawBackgroundAnimation(screen *ebiten.Image) {
 }
 
 func (t *TitleScene) DrawTitle(screen *ebiten.Image) {
-	timg := assets.GetLocalizeImage("titles/title", t.lang)
+	timg := assets.GetLocalizeImage("titles/title")
 	tw, th := timg.Size()
 	sw, sh := screen.Size()
 	op := &ebiten.DrawImageOptions{}

@@ -20,9 +20,8 @@ import (
 	"image/png"
 	"path"
 
-	"golang.org/x/text/language"
-
 	"github.com/hajimehoshi/ebiten"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
 )
 
 func decodeImage(path string, bin []uint8) (*ebiten.Image, error) {
@@ -37,9 +36,9 @@ func decodeImage(path string, bin []uint8) (*ebiten.Image, error) {
 	return eimg, nil
 }
 
-func GetLocalizeImage(key string, lang language.Tag) *ebiten.Image {
-	base, _ := lang.Base()
-	k := path.Join("images", key+"_"+base.String()+".png")
+func GetLocalizeImage(key string) *ebiten.Image {
+	s := lang.Normalize(lang.Get()).String()
+	k := path.Join("images", key+"@"+s+".png")
 	if img, ok := theAssets.images[k]; ok {
 		return img
 	}
