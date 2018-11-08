@@ -37,7 +37,7 @@ import (
 )
 
 const (
-	markerAnimationInterval = 2
+	markerAnimationInterval = 4
 	markerSize              = 16
 	itemPreviewPopupMargin  = 80
 )
@@ -334,8 +334,6 @@ func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) {
 		return
 	}
 
-	m.markerAnimationFrame = 0
-
 	x, y := input.Position()
 	if y < ui.HeaderTouchAreaHeight {
 		return
@@ -367,6 +365,7 @@ func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) {
 		return
 	}
 
+	m.markerAnimationFrame = 0
 	// The bottom line of the map should not be tappable as that space is
 	// reserved to avoid conflict with iPhoneX's HomeIndicator
 	if tx < 0 || consts.TileXNum <= tx || ty < 0 || consts.TileYNum-1 <= ty {
