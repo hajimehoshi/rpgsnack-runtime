@@ -30,9 +30,9 @@ func showUsage() {
 	fmt.Fprintf(os.Stderr, "packer PROJECT_PATH\n")
 }
 
-var resourceRe = regexp.MustCompile(`^[a-zA-Z0-9_-@]+(\.[a-zA-Z0-9_-@]+)*(\.(mp3|ogg|png|wav))?$`)
+var resourceRe = regexp.MustCompile(`^[a-zA-Z0-9_@-]+(\.[a-zA-Z0-9_@-]+)*\.(mp3|ogg|png|wav)$`)
 
-func isResourceFile(path string) bool {
+func IsResourceFile(path string) bool {
 	return resourceRe.MatchString(filepath.Base(path))
 }
 
@@ -45,7 +45,7 @@ func run(in, out string) error {
 		if info.IsDir() {
 			return nil
 		}
-		if isResourceFile(path) {
+		if IsResourceFile(path) {
 			resources = append(resources, path)
 		}
 		return nil
