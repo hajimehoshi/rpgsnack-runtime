@@ -1394,6 +1394,12 @@ func InterfaceToInt(v interface{}) (int, bool) {
 		return int(v), true
 	case uint64:
 		return int(v), true
+	case float32:
+		// TODO: This should not happen?
+		return int(v), true
+	case float64:
+		// This happens when the data is in JSON.
+		return int(v), true
 	}
 	return 0, false
 }
