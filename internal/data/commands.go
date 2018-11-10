@@ -1073,13 +1073,13 @@ func (c *CommandArgsSetVariable) DecodeMsgpack(dec *msgpack.Decoder) error {
 
 	switch c.ValueType {
 	case SetVariableValueTypeConstant:
-		v, ok := interfaceToInt(value)
+		v, ok := InterfaceToInt(value)
 		if !ok {
 			return fmt.Errorf("data: CommandArgsSetVariable.DecodeMsgpack: constant value must be an integer; got %v", value)
 		}
 		c.Value = v
 	case SetVariableValueTypeVariable:
-		v, ok := interfaceToInt(value)
+		v, ok := InterfaceToInt(value)
 		if !ok {
 			return fmt.Errorf("data: CommandArgsSetVariable.DecodeMsgpack: variable value must be an integer; got %v", value)
 		}
@@ -1097,7 +1097,7 @@ func (c *CommandArgsSetVariable) DecodeMsgpack(dec *msgpack.Decoder) error {
 		}
 		c.Value = v
 	case SetVariableValueTypeIAPProduct:
-		v, ok := interfaceToInt(value)
+		v, ok := InterfaceToInt(value)
 		if !ok {
 			return fmt.Errorf("data: CommandArgsSetVariable.DecodeMsgpack: IAP product value must be an integer; got %v", value)
 		}
@@ -1372,7 +1372,7 @@ func (c *CommandArgsSetCharacterProperty) UnmarshalJSON(data []uint8) error {
 	return nil
 }
 
-func interfaceToInt(v interface{}) (int, bool) {
+func InterfaceToInt(v interface{}) (int, bool) {
 	switch v := v.(type) {
 	case int:
 		return v, true
@@ -1431,7 +1431,7 @@ func (c *CommandArgsSetCharacterProperty) DecodeMsgpack(dec *msgpack.Decoder) er
 	case SetCharacterPropertyTypeWalking:
 		c.Value = value.(bool)
 	case SetCharacterPropertyTypeSpeed:
-		v, ok := interfaceToInt(value)
+		v, ok := InterfaceToInt(value)
 		if !ok {
 			return fmt.Errorf("data: CommandArgsSetCharacterProperty.DecodeMsgpack: speed must be an integer; got %v", value)
 		}

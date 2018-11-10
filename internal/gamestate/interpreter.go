@@ -906,7 +906,11 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			ids := make([]int, 2)
 			interfaces := args.ID.([]interface{})
 			for i := 0; i < 2; i++ {
-				ids[i] = int(interfaces[i].(float64))
+				ok := false
+				ids[i], ok = data.InterfaceToInt(interfaces[i])
+				if !ok {
+					return false, fmt.Errorf("gamestate: %v must be integer but not", interfaces[i])
+				}
 			}
 
 			id1 := ids[0]
@@ -919,7 +923,10 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 				gameState.pictures.Remove(id)
 			}
 		} else {
-			id := int(args.ID.(float64))
+			id, ok := data.InterfaceToInt(args.ID)
+			if !ok {
+				return false, fmt.Errorf("gamestate: %v must be integer but not", args.ID)
+			}
 			if args.IDValueType == data.ValueTypeVariable {
 				id = gameState.VariableValue(id)
 			}
