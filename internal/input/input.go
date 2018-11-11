@@ -25,8 +25,6 @@ type input struct {
 	pressCount     int
 	x              int
 	y              int
-	offsetX        int
-	offsetY        int
 	backPressCount int
 	prevPressCount int
 }
@@ -39,13 +37,8 @@ func IsScreenshotButtonTriggered() bool {
 	return inpututil.IsKeyJustPressed(ebiten.KeyS)
 }
 
-func SetOffset(offsetX, offsetY int) {
-	theInput.offsetX = offsetX
-	theInput.offsetY = offsetY
-}
-
-func Update() {
-	theInput.Update()
+func Update(scaleX, scaleY float64) {
+	theInput.Update(scaleX, scaleY)
 }
 
 func Pressed() bool {
@@ -72,24 +65,28 @@ func Position() (int, int) {
 	return theInput.Position()
 }
 
-func (i *input) updatePointerDevices() {
+func (i *input) updatePointerDevices(scaleX, scaleY float64) {
 	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
 		i.pressCount++
 		i.x, i.y = ebiten.CursorPosition()
+		i.x = int(float64(i.x) / scaleX)
+		i.y = int(float64(i.y) / scaleY)
 		return
 	}
 	touches := ebiten.Touches()
 	if len(touches) > 0 {
 		i.pressCount++
 		i.x, i.y = touches[0].Position()
+		i.x = int(float64(i.x) / scaleX)
+		i.y = int(float64(i.y) / scaleY)
 		return
 	}
 	i.pressCount = 0
 }
 
-func (i *input) Update() {
+func (i *input) Update(scaleX, scaleY float64) {
 	i.prevPressCount = i.pressCount
-	i.updatePointerDevices()
+	i.updatePointerDevices(scaleX, scaleY)
 	if i.backPressCount > 0 {
 		i.backPressCount--
 	}
@@ -108,7 +105,7 @@ func (i *input) Triggered() bool {
 }
 
 func (i *input) Position() (int, int) {
-	return i.x - i.offsetX, i.y - i.offsetY
+	return i.x, i.y
 }
 
 func (i *input) BackButtonPressed() bool {

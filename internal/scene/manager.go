@@ -61,6 +61,7 @@ type Manager struct {
 	rewardedAdsLoaded     bool
 	blackImage            *ebiten.Image
 	turbo                 bool
+	offscreen             *ebiten.Image
 }
 
 type PlatformDataKey string
@@ -83,8 +84,10 @@ func NewManager(width, height int, requester Requester, game *data.Game, progres
 		progress:          progress,
 		purchases:         purchases,
 	}
-	m.blackImage, _ = ebiten.NewImage(16, 16, ebiten.FilterNearest)
+	m.blackImage, _ = ebiten.NewImage(16, 16, ebiten.FilterDefault)
 	m.blackImage.Fill(color.Black)
+	w, h := m.Size()
+	m.offscreen, _ = ebiten.NewImage(w, h, ebiten.FilterDefault)
 	return m
 }
 
@@ -96,13 +99,17 @@ func (m *Manager) InitScene(scene scene) {
 }
 
 func (m *Manager) Size() (int, int) {
-	return m.width, m.height
+	// Logical width is always a constant value.
+	return consts.MapScaledWidth, m.height
 }
 
 func (m *Manager) SetScreenSize(width, height int) {
 	if m.width != width || m.height != height {
 		m.width = width
 		m.height = height
+		m.offscreen.Dispose()
+		w, h := m.Size()
+		m.offscreen, _ = ebiten.NewImage(w, h, ebiten.FilterDefault)
 		m.current.Resize()
 	}
 }
@@ -185,7 +192,27 @@ func (m *Manager) Update() error {
 	return nil
 }
 
+func (m *Manager) WidthScale() float64 {
+	ow, _ := m.offscreen.Size()
+	return float64(m.width) / float64(ow)
+}
+
 func (m *Manager) Draw(screen *ebiten.Image) {
+	s := m.WidthScale()
+	if s == 1 {
+		m.drawImpl(screen)
+		return
+	}
+
+	m.offscreen.Clear()
+	m.drawImpl(m.offscreen)
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Scale(s, 1)
+	op.Filter = ebiten.FilterLinear
+	screen.DrawImage(m.offscreen, op)
+}
+
+func (m *Manager) drawImpl(screen *ebiten.Image) {
 	m.current.Draw(screen)
 	if 0 < m.fadingCount {
 		alpha := 0.0

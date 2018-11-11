@@ -74,7 +74,6 @@ type MapScene struct {
 	waitingRequestID     int
 	isAdsRemoved         bool
 	initialized          bool
-	offsetX              int
 	offsetY              int
 	windowOffsetY        int
 	inventoryHeight      int
@@ -152,8 +151,7 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	} else {
 		m.inventoryHeight = (49 - consts.TileSize) * consts.TileScale
 	}
-	screenW, screenH := sceneManager.Size()
-	m.offsetX = (screenW - consts.MapWidth*consts.TileScale) / 2
+	_, screenH := sceneManager.Size()
 	m.offsetY = 0
 
 	m.screenImage, _ = ebiten.NewImage(consts.MapWidth, screenH/consts.TileScale, ebiten.FilterNearest)
@@ -343,7 +341,6 @@ func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) {
 		return
 	}
 
-	x -= m.offsetX
 	y -= m.offsetY
 	if x < 0 || y < 0 {
 		return
@@ -447,10 +444,6 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 	m.removeAdsYesButton.Text = texts.Text(l, texts.TextIDYes)
 	m.removeAdsNoButton.Text = texts.Text(l, texts.TextIDNo)
 	m.removeAdsButton.Text = texts.Text(l, texts.TextIDRemoveAds)
-
-	// Call SetOffset as temporary hack for UI input
-	input.SetOffset(m.offsetX, 0)
-	defer input.SetOffset(0, 0)
 
 	m.quitDialog.Update()
 	m.screenShotDialog.Update()
@@ -691,7 +684,6 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 
 	op = &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(consts.TileScale, consts.TileScale)
-	op.GeoM.Translate(float64(m.offsetX), 0)
 	screen.DrawImage(m.tintScreenImage, op)
 
 	if m.gameState.IsPlayerControlEnabled() && (m.gameState.Map().IsPlayerMovingByUserInput() || m.triggeringFailed) {
@@ -699,7 +691,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(x*consts.TileSize), float64(y*consts.TileSize))
 		op.GeoM.Scale(consts.TileScale, consts.TileScale)
-		op.GeoM.Translate(float64(m.offsetX), float64(m.offsetY))
+		op.GeoM.Translate(0, float64(m.offsetY))
 
 		numFrames := m.markerAnimationFrame / markerAnimationInterval
 		src := image.Rect(markerSize*numFrames, 0, markerSize*(1+numFrames), markerSize)
@@ -733,7 +725,6 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	m.removeAdsDialog.Draw(m.uiImage)
 
 	op = &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(float64(m.offsetX), 0)
 	screen.DrawImage(m.uiImage, op)
 
 	if m.cameraTaking {
@@ -748,7 +739,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 
 	msg := fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS())
 	msg = ""
-	font.DrawText(screen, msg, 160+m.offsetX, 8, consts.TextScale, data.TextAlignLeft, color.White, len([]rune(msg)))
+	font.DrawText(screen, msg, 160, 8, consts.TextScale, data.TextAlignLeft, color.White, len([]rune(msg)))
 }
 
 func (m *MapScene) Resize() {
