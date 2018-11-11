@@ -61,11 +61,11 @@ type Inventory struct {
 	bgPanel             *ImageView
 	frameCover          *ImageView
 	frameBase           *ImageView
-	activeCardSlot      *ImagePart
-	combineCardSlot     *ImagePart
-	cardSlot            *ImagePart
-	activeDot           *ImagePart
-	dot                 *ImagePart
+	activeCardSlot      *ebiten.Image
+	combineCardSlot     *ebiten.Image
+	cardSlot            *ebiten.Image
+	activeDot           *ebiten.Image
+	dot                 *ebiten.Image
 	mode                InventoryMode
 
 	onSlotPressed func(inventory *Inventory, index int)
@@ -94,23 +94,23 @@ func NewInventory(x, y int, showItemName bool) *Inventory {
 	backButton := NewImageButton(
 		x,
 		y,
-		NewImagePart(assets.GetImage("system/footer/back_button.png")),
-		NewImagePart(assets.GetImage("system/footer/back_button_on.png")),
+		assets.GetImage("system/footer/back_button.png"),
+		assets.GetImage("system/footer/back_button_on.png"),
 		"system/cancel",
 	)
 
 	infoButton := NewImageButton(
 		x+buttonOffsetX,
 		y+buttonOffsetY,
-		NewImagePart(assets.GetImage("system/footer/info_button_off.png")),
-		NewImagePart(assets.GetImage("system/footer/info_button_on.png")),
+		assets.GetImage("system/footer/info_button_off.png"),
+		assets.GetImage("system/footer/info_button_on.png"),
 		"system/click",
 	)
-	infoButton.DisabledImage = NewImagePart(assets.GetImage("system/footer/info_button_disabled.png"))
+	infoButton.DisabledImage = assets.GetImage("system/footer/info_button_disabled.png")
 
-	bgPanel := NewImageView(x, y, 1.0, NewImagePart(assets.GetImage("system/footer/panel.png")))
-	frameCover := NewImageView(x+frameXMargin, y+4, 1.0, NewImagePart(assets.GetImage("system/footer/inventory_mask.png")))
-	frameBase := NewImageView(x+frameXMargin, y+4, 1.0, NewImagePart(assets.GetImage("system/footer/inventory_bg.png")))
+	bgPanel := NewImageView(x, y, 1.0, assets.GetImage("system/footer/panel.png"))
+	frameCover := NewImageView(x+frameXMargin, y+4, 1.0, assets.GetImage("system/footer/inventory_mask.png"))
+	frameBase := NewImageView(x+frameXMargin, y+4, 1.0, assets.GetImage("system/footer/inventory_bg.png"))
 
 	itemLabel := NewLabel(x+80, y+28)
 	itemLabel.Scale = 1.5
@@ -131,11 +131,11 @@ func NewInventory(x, y int, showItemName bool) *Inventory {
 		bgPanel:         bgPanel,
 		frameCover:      frameCover,
 		frameBase:       frameBase,
-		cardSlot:        NewImagePart(assets.GetImage("system/footer/item_holder.png")),
-		activeCardSlot:  NewImagePart(assets.GetImage("system/footer/item_holder_active.png")),
-		combineCardSlot: NewImagePart(assets.GetImage("system/footer/item_holder_selected.png")),
-		dot:             NewImagePart(assets.GetImage("system/footer/dot_off.png")),
-		activeDot:       NewImagePart(assets.GetImage("system/footer/dot_on.png")),
+		cardSlot:        assets.GetImage("system/footer/item_holder.png"),
+		activeCardSlot:  assets.GetImage("system/footer/item_holder_active.png"),
+		combineCardSlot: assets.GetImage("system/footer/item_holder_selected.png"),
+		dot:             assets.GetImage("system/footer/dot_off.png"),
+		activeDot:       assets.GetImage("system/footer/dot_on.png"),
 		pageIndex:       0,
 		targetPageIndex: 0,
 		mode:            DefaultMode,
@@ -331,12 +331,12 @@ func (i *Inventory) Draw(screen *ebiten.Image) {
 		op.GeoM.Scale(consts.TileScale, consts.TileScale)
 
 		if i.activeItemID == itemID {
-			i.activeCardSlot.Draw(screen, &op.GeoM, nil)
+			screen.DrawImage(i.activeCardSlot, op)
 		} else {
 			if i.mode == PreviewMode && item != nil && i.combineItemID == item.ID {
-				i.combineCardSlot.Draw(screen, &op.GeoM, nil)
+				screen.DrawImage(i.combineCardSlot, op)
 			} else {
-				i.cardSlot.Draw(screen, &op.GeoM, nil)
+				screen.DrawImage(i.cardSlot, op)
 			}
 		}
 
@@ -369,17 +369,18 @@ func (i *Inventory) Draw(screen *ebiten.Image) {
 
 	// We only show dots UI if there are more than one page
 	if i.pageCount() > 1 {
+		op := &ebiten.DrawImageOptions{}
 		for index := 0; index < i.pageCount(); index++ {
-			var imagePart *ImagePart
+			var imagePart *ebiten.Image
 			if index == i.pageIndex {
 				imagePart = i.activeDot
 			} else {
 				imagePart = i.dot
 			}
-			geoM := &ebiten.GeoM{}
-			geoM.Translate(float64(left+index*dotSpace), float64(i.y+26))
-			geoM.Scale(consts.TileScale, consts.TileScale)
-			imagePart.Draw(screen, geoM, nil)
+			op.GeoM.Reset()
+			op.GeoM.Translate(float64(left+index*dotSpace), float64(i.y+26))
+			op.GeoM.Scale(consts.TileScale, consts.TileScale)
+			screen.DrawImage(imagePart, op)
 		}
 	}
 	i.itemLabel.Draw(screen)

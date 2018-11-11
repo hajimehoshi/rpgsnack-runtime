@@ -43,16 +43,16 @@ func NewItemPreviewPopup(y int) *ItemPreviewPopup {
 	closeButton := NewImageButton(
 		135,
 		5,
-		NewImagePart(assets.GetImage("system/itempreview/cancel_off.png")),
-		NewImagePart(assets.GetImage("system/itempreview/cancel_on.png")),
+		assets.GetImage("system/itempreview/cancel_off.png"),
+		assets.GetImage("system/itempreview/cancel_on.png"),
 		"system/cancel",
 	)
 
 	actionButton := NewImageButton(
 		54,
 		93,
-		NewImagePart(assets.GetImage("system/itempreview/action_button_off.png")),
-		NewImagePart(assets.GetImage("system/itempreview/action_button_on.png")),
+		assets.GetImage("system/itempreview/action_button_off.png"),
+		assets.GetImage("system/itempreview/action_button_on.png"),
 		"system/click",
 	)
 	frameImage := assets.GetImage("system/itempreview/details.png")

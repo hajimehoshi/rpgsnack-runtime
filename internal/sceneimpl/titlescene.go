@@ -65,15 +65,15 @@ func NewTitleScene() *TitleScene {
 func (t *TitleScene) initUI(sceneManager *scene.Manager) {
 	w, h := sceneManager.Size()
 
-	settingsIcon := ui.NewImagePart(assets.GetImage("system/common/icon_settings.png"))
-	moreGamesIcon := ui.NewImagePart(assets.GetImage("system/common/icon_moregames.png"))
+	settingsIcon := assets.GetImage("system/common/icon_settings.png")
+	moreGamesIcon := assets.GetImage("system/common/icon_moregames.png")
 
 	by := 16
 	if sceneManager.HasExtraBottomGrid() {
 		by = 36
 	}
 	t.resumeGameButton = ui.NewTextButton((w/consts.TileScale-120)/2, h/consts.TileScale-by-32, 120, 20, "system/start")
-	t.titleLine = ui.NewImageView((w/consts.TileScale-120)/2+20, h/consts.TileScale-by-32, 1.0, ui.NewImagePart(assets.GetImage("system/common/title_line.png")))
+	t.titleLine = ui.NewImageView((w/consts.TileScale-120)/2+20, h/consts.TileScale-by-32, 1.0, assets.GetImage("system/common/title_line.png"))
 	t.newGameButton = ui.NewTextButton((w/consts.TileScale-120)/2, h/consts.TileScale-by-52, 120, 20, "system/start")
 	t.removeAdsButton = ui.NewTextButton((w/consts.TileScale-120)/2+20, h/consts.TileScale-by-8, 80, 20, "system/click")
 	t.removeAdsButton.TextColor = color.RGBA{0xc8, 0xc8, 0xc8, 0xff}
