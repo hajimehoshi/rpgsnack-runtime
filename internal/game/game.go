@@ -125,7 +125,7 @@ func (g *Game) Update(screen *ebiten.Image) error {
 	if err := g.update(); err != nil {
 		return err
 	}
-	if ebiten.IsRunningSlowly() {
+	if ebiten.IsDrawingSkipped() {
 		return nil
 	}
 	if err := g.draw(screen); err != nil {
