@@ -716,10 +716,8 @@ func (c *Character) Draw(screen *ebiten.Image, offsetX, offsetY int) {
 		panic(fmt.Sprintf("not supported DirCount %s %d", c.imageName, c.DirCount()))
 	}
 
-	r := image.Rect(sx, sy, sx+charW, sy+charH)
-	op.SourceRect = &r
 	op.ColorM.Scale(1, 1, 1, float64(c.opacity)/255)
 	op.GeoM.Scale(scaleX, scaleY)
 	op.GeoM.Translate(float64(offsetX), float64(offsetY))
-	screen.DrawImage(c.getImage(), op)
+	screen.DrawImage(c.getImage().SubImage(image.Rect(sx, sy, sx+charW, sy+charH)).(*ebiten.Image), op)
 }

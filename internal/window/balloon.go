@@ -439,10 +439,8 @@ func (b *balloon) ensureOffscreen() {
 			case ph - 1:
 				sy += s * 2
 			}
-			r := image.Rect(sx, sy, sx+s, sy+s)
-			op.SourceRect = &r
 			op.GeoM.Translate(float64(i*s), float64(j*s))
-			b.offscreen.DrawImage(img, op)
+			b.offscreen.DrawImage(img.SubImage(image.Rect(sx, sy, sx+s, sy+s)).(*ebiten.Image), op)
 		}
 	}
 }
@@ -466,13 +464,12 @@ func (b *balloon) draw(screen *ebiten.Image, character *character.Character, off
 		if b.hasArrow && (b.balloonType == data.BalloonTypeNormal ||
 			b.balloonType == data.BalloonTypeThink) {
 			op := &ebiten.DrawImageOptions{}
+			var r image.Rectangle
 			switch b.balloonType {
 			case data.BalloonTypeNormal:
-				r := image.Rect(12, 0, 12+balloonArrowWidth, balloonArrowHeight)
-				op.SourceRect = &r
+				r = image.Rect(12, 0, 12+balloonArrowWidth, balloonArrowHeight)
 			case data.BalloonTypeThink:
-				r := image.Rect(18, 0, 18+balloonArrowWidth, balloonArrowHeight)
-				op.SourceRect = &r
+				r = image.Rect(18, 0, 18+balloonArrowWidth, balloonArrowHeight)
 			default:
 				panic("not reached")
 			}
@@ -489,7 +486,7 @@ func (b *balloon) draw(screen *ebiten.Image, character *character.Character, off
 			op.GeoM.Translate(float64(tx), float64(ty))
 			op.GeoM.Concat(*g)
 			op.GeoM.Scale(consts.TileScale, consts.TileScale)
-			screen.DrawImage(img, op)
+			screen.DrawImage(img.SubImage(r).(*ebiten.Image), op)
 		}
 	}
 	if b.opened {

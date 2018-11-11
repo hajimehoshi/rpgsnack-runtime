@@ -23,8 +23,16 @@ import (
 func drawNinePatches(dst, src *ebiten.Image, width, height int, geoM *ebiten.GeoM, colorM *ebiten.ColorM) {
 	const partSize = 4
 
+	parts := make([]*ebiten.Image, 9)
+	for j := 0; j < 3; j++ {
+		for i := 0; i < 3; i++ {
+			x := i*partSize
+			y := j*partSize
+			parts[j*3+i] = src.SubImage(image.Rect(x, y, x+partSize, y+partSize)).(*ebiten.Image)
+		}
+	}
+
 	xn, yn := width/partSize, height/partSize
-	r := &image.Rectangle{}
 	op := &ebiten.DrawImageOptions{}
 	if colorM != nil {
 		op.ColorM.Concat(*colorM)
@@ -35,9 +43,9 @@ func drawNinePatches(dst, src *ebiten.Image, width, height int, geoM *ebiten.Geo
 		case 0:
 			sy = 0
 		case yn - 1:
-			sy = 2 * partSize
+			sy = 2
 		default:
-			sy = 1 * partSize
+			sy = 1
 		}
 		for i := 0; i < xn; i++ {
 			sx := 0
@@ -45,19 +53,14 @@ func drawNinePatches(dst, src *ebiten.Image, width, height int, geoM *ebiten.Geo
 			case 0:
 				sx = 0
 			case xn - 1:
-				sx = 2 * partSize
+				sx = 2
 			default:
-				sx = 1 * partSize
+				sx = 1
 			}
-			r.Min.X = sx
-			r.Min.Y = sy
-			r.Max.X = sx + partSize
-			r.Max.Y = sy + partSize
-			op.SourceRect = r
 			op.GeoM.Reset()
 			op.GeoM.Translate(float64(i*partSize), float64(j*partSize))
 			op.GeoM.Concat(*geoM)
-			dst.DrawImage(src, op)
+			dst.DrawImage(parts[sy*3+sx], op)
 		}
 	}
 }

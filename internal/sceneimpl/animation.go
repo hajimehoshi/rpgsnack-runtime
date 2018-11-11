@@ -46,9 +46,6 @@ func (a *animation) Draw(screen *ebiten.Image, texture *ebiten.Image, frameWidth
 	if frame >= baseFrameCount {
 		frame = frameCount - frame
 	}
-	r := image.Rect(frame*frameWidth, 0, w, h)
-	op.SourceRect = &r
-
 	op.GeoM.Translate(float64(offsetX), float64(offsetY))
-	screen.DrawImage(texture, op)
+	screen.DrawImage(texture.SubImage(image.Rect(frame*frameWidth, 0, w, h)).(*ebiten.Image), op)
 }

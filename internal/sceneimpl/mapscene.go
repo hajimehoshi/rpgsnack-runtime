@@ -584,15 +584,12 @@ func (m *MapScene) drawTile(tile int, op *ebiten.DrawImageOptions, i int, j int)
 	x, y := tileset.DecodeTile(tile)
 	sx := x * consts.TileSize
 	sy := y * consts.TileSize
-	r := image.Rect(sx, sy, sx+consts.TileSize, sy+consts.TileSize)
-	op.SourceRect = &r
 	dx := i * consts.TileSize
 	dy := j*consts.TileSize + m.offsetY/consts.TileScale
-	// op is created outside of this function and other parameters than GeoM
-	// and SourceRect are not modified so far.
+	// op is created outside of this function and other parameters than GeoM is not modified so far.
 	op.GeoM.Reset()
 	op.GeoM.Translate(float64(dx), float64(dy))
-	m.screenImage.DrawImage(tileSetImg, op)
+	m.screenImage.DrawImage(tileSetImg.SubImage(image.Rect(sx, sy, sx+consts.TileSize, sy+consts.TileSize)).(*ebiten.Image), op)
 }
 
 func (m *MapScene) drawAutoTile(tile int, op *ebiten.DrawImageOptions, i int, j int) {
@@ -606,15 +603,12 @@ func (m *MapScene) drawAutoTile(tile int, op *ebiten.DrawImageOptions, i int, j 
 		x, y := tileset.GetAutoTilePos(index, value)
 		sx := x * consts.MiniTileSize
 		sy := y * consts.MiniTileSize
-		r := image.Rect(sx, sy, sx+consts.MiniTileSize, sy+consts.MiniTileSize)
-		op.SourceRect = &r
 		dx := i*consts.TileSize + index%2*consts.MiniTileSize
 		dy := j*consts.TileSize + index/2*consts.MiniTileSize + m.offsetY/consts.TileScale
-		// op is created outside of this function and other parameters
-		// than GeoM and SourceRect are not modified so far.
+		// op is created outside of this function and other parameters is not modified so far.
 		op.GeoM.Reset()
 		op.GeoM.Translate(float64(dx), float64(dy))
-		m.screenImage.DrawImage(tileSetImg, op)
+		m.screenImage.DrawImage(tileSetImg.SubImage(image.Rect(sx, sy, sx+consts.MiniTileSize, sy+consts.MiniTileSize)).(*ebiten.Image), op)
 	}
 
 }
@@ -694,10 +688,8 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		op.GeoM.Translate(0, float64(m.offsetY))
 
 		numFrames := m.markerAnimationFrame / markerAnimationInterval
-		src := image.Rect(markerSize*numFrames, 0, markerSize*(1+numFrames), markerSize)
-		op.SourceRect = &src
 		markerImage := assets.GetImage("system/game/marker.png")
-		screen.DrawImage(markerImage, op)
+		screen.DrawImage(markerImage.SubImage(image.Rect(markerSize*numFrames, 0, markerSize*(1+numFrames), markerSize)).(*ebiten.Image), op)
 
 		w, _ := markerImage.Size()
 		frameCount := w / markerSize
