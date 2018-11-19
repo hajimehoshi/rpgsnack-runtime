@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	SelfSwitchNum = 4
+	SelfSwitchNum = 10
 )
 
 type Event struct {
