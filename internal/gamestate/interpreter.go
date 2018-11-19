@@ -915,7 +915,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 
 			id1 := ids[0]
 			id2 := ids[1]
-			for i := id1; i < id2; i++ {
+			for i := id1; i <= id2; i++ {
 				id := i
 				if args.IDValueType == data.ValueTypeVariable {
 					id = gameState.VariableValue(i)
