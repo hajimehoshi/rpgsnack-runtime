@@ -193,9 +193,9 @@ func (s Speed) SteppingIncrementFrames() int {
 	case Speed4:
 		return 4
 	case Speed5:
-		return 5
-	case Speed6:
 		return 6
+	case Speed6:
+		return 12
 	}
 	return 0
 }
