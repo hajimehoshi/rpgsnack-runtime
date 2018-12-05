@@ -36,6 +36,7 @@ type State struct {
 	path          []path.RouteCommand
 	waiting       bool
 	terminated    bool
+	dir           data.Dir
 }
 
 type atFunc func(x, y int) bool
@@ -88,16 +89,35 @@ func New(gameState GameState, mapID, roomID, eventID int, args *data.CommandArgs
 		args:      args,
 		routeSkip: routeSkip,
 	}
-	switch s.args.Type {
-	case data.MoveCharacterTypeDirection, data.MoveCharacterTypeForward, data.MoveCharacterTypeBackward:
-		s.distanceCount = s.args.Distance
-	case data.MoveCharacterTypeTarget:
-	case data.MoveCharacterTypeRandom, data.MoveCharacterTypeToward:
-		s.distanceCount = 1
 
+	c := s.character(gameState)
+	switch s.args.Type {
+	case data.MoveCharacterTypeTarget:
+		break
+	case data.MoveCharacterTypeDirection:
+		s.distanceCount = s.args.Distance
+		s.dir = s.args.Dir
+	case data.MoveCharacterTypeForward:
+		s.distanceCount = s.args.Distance
+		s.dir = c.Dir()
+	case data.MoveCharacterTypeBackward:
+		s.distanceCount = s.args.Distance
+		s.dir = (c.Dir() + 2) % 4
+	case data.MoveCharacterTypeToward:
+		log.Printf("not implemented yet (move_character): type %s", s.args.Type)
+		s.distanceCount = s.args.Distance
+		s.dir = c.Dir()
+	case data.MoveCharacterTypeAgainst:
+		log.Printf("not implemented yet (move_character): type %s", s.args.Type)
+		s.distanceCount = s.args.Distance
+		s.dir = c.Dir()
+	case data.MoveCharacterTypeRandom:
+		s.distanceCount = s.args.Distance
+		s.dir = data.Dir(gameState.RandomValue(0, 4))
 	default:
 		panic("not reached")
 	}
+
 	return s
 }
 
@@ -136,6 +156,9 @@ func (s *State) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EncodeString("terminated")
 	e.EncodeBool(s.terminated)
 
+	e.EncodeString("dir")
+	e.EncodeInt(int(s.dir))
+
 	e.EndMap()
 	return e.Flush()
 }
@@ -172,6 +195,8 @@ func (s *State) DecodeMsgpack(dec *msgpack.Decoder) error {
 			s.waiting = d.DecodeBool()
 		case "terminated":
 			s.terminated = d.DecodeBool()
+		case "dir":
+			s.dir = data.Dir(d.DecodeInt())
 		}
 	}
 	if err := d.Error(); err != nil {
@@ -223,10 +248,8 @@ func (s *State) Update(gameState GameState) {
 	if s.distanceCount > 0 && !s.waiting {
 		dx, dy := c.Position()
 		turnOnly := false
-		var dir data.Dir
+		dir := s.dir
 		switch s.args.Type {
-		case data.MoveCharacterTypeDirection:
-			dir = s.args.Dir
 		case data.MoveCharacterTypeTarget:
 			switch s.path[len(s.path)-s.distanceCount] {
 			case path.RouteCommandMoveUp:
@@ -252,20 +275,6 @@ func (s *State) Update(gameState GameState) {
 			default:
 				panic("not reached")
 			}
-		case data.MoveCharacterTypeForward:
-			dir = c.Dir()
-		case data.MoveCharacterTypeBackward:
-			dir = (c.Dir() + 2) % 4
-		case data.MoveCharacterTypeToward:
-			log.Printf("not implemented yet (move_character): type %s", s.args.Type)
-			dir = c.Dir()
-		case data.MoveCharacterTypeAgainst:
-			log.Printf("not implemented yet (move_character): type %s", s.args.Type)
-			dir = c.Dir()
-		case data.MoveCharacterTypeRandom:
-			dir = data.Dir(gameState.RandomValue(0, 4))
-		default:
-			panic("not reached")
 		}
 		switch dir {
 		case data.DirUp:
