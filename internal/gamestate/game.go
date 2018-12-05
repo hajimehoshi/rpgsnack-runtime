@@ -64,6 +64,7 @@ type Game struct {
 
 	backgrounds map[int]map[int]string
 	foregrounds map[int]map[int]string
+	playerSpeed data.Speed
 
 	// Fields that are not dumped
 	rand             Rand
@@ -89,6 +90,7 @@ func NewGame() *Game {
 		autoSaveEnabled:      true,
 		playerControlEnabled: true,
 		inventoryVisible:     false,
+		playerSpeed:          data.Speed5,
 	}
 	return g
 }
@@ -141,6 +143,9 @@ func (g *Game) EncodeMsgpack(enc *msgpack.Encoder) error {
 
 	e.EncodeString("lastPlayingBGMVolume")
 	e.EncodeFloat64(audio.PlayingBGMVolume())
+
+	e.EncodeString("playerSpeed")
+	e.EncodeInt(int(g.playerSpeed))
 
 	e.EncodeString("backgrounds")
 	e.BeginMap()
@@ -229,6 +234,8 @@ func (g *Game) DecodeMsgpack(dec *msgpack.Decoder) error {
 			g.lastPlayingBGMName = d.DecodeString()
 		case "lastPlayingBGMVolume":
 			g.lastPlayingBGMVolume = d.DecodeFloat64()
+		case "playerSpeed":
+			g.playerSpeed = data.Speed(d.DecodeInt())
 		case "backgrounds":
 			if !d.SkipCodeIfNil() {
 				n := d.DecodeMapLen()
@@ -879,4 +886,12 @@ func (g *Game) Foreground(mapID, roomID int) string {
 		}
 	}
 	return ""
+}
+
+func (g *Game) PlayerSpeed() data.Speed {
+	return g.playerSpeed
+}
+
+func (g *Game) SetPlayerSpeed(value data.Speed) {
+	g.playerSpeed = value
 }

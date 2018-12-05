@@ -603,6 +603,10 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		args := c.Args.(*data.CommandArgsPlayerControl)
 		gameState.SetPlayerControlEnabled(args.Enabled)
 		i.commandIterator.Advance()
+	case data.CommandNamePlayerSpeed:
+		args := c.Args.(*data.CommandArgsPlayerSpeed)
+		gameState.SetPlayerSpeed(args.Value)
+		i.commandIterator.Advance()
 	case data.CommandNameWeather:
 		args := c.Args.(*data.CommandArgsWeather)
 		gameState.SetWeather(args.Type)

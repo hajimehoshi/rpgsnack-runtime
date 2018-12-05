@@ -760,7 +760,7 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, gameState *G
 						Name: data.CommandNameSetCharacterProperty,
 						Args: &data.CommandArgsSetCharacterProperty{
 							Type:  data.SetCharacterPropertyTypeSpeed,
-							Value: data.Speed5,
+							Value: gameState.PlayerSpeed(),
 						},
 					},
 				},

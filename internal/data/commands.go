@@ -221,6 +221,12 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 			return err
 		}
 		c.Args = args
+	case CommandNamePlayerSpeed:
+		var args *CommandArgsPlayerSpeed
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	case CommandNameWeather:
 		var args *CommandArgsWeather
 		if err := unmarshalJSON(tmp.Args, &args); err != nil {
@@ -604,6 +610,12 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 			return err
 		}
 		c.Args = a
+	case CommandNamePlayerSpeed:
+		a := &CommandArgsPlayerSpeed{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
 	case CommandNameWeather:
 		a := &CommandArgsWeather{}
 		if err := msgpack.Unmarshal(argsBin, a); err != nil {
@@ -825,6 +837,7 @@ const (
 	CommandNameAutoSave          CommandName = "autosave"
 	CommandNameGameClear         CommandName = "game_clear"
 	CommandNamePlayerControl     CommandName = "player_control"
+	CommandNamePlayerSpeed       CommandName = "player_speed"
 	CommandNameWeather           CommandName = "weather"
 	CommandNameUnlockAchievement CommandName = "unlock_achievement"
 	CommandNameControlHint       CommandName = "control_hint"
@@ -1188,6 +1201,10 @@ type CommandArgsAutoSave struct {
 
 type CommandArgsPlayerControl struct {
 	Enabled bool `json:"enabled" msgpack:"enabled"`
+}
+
+type CommandArgsPlayerSpeed struct {
+	Value Speed `json:"value" msgpack:"value"`
 }
 
 type CommandArgsWeather struct {
