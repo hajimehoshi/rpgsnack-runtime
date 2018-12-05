@@ -302,7 +302,7 @@ func (g *Game) Update(sceneManager *scene.Manager) error {
 	g.screen.Update()
 	playerY := 0
 	if g.currentMap.player != nil {
-		_, playerY = g.currentMap.player.Position()
+		_, playerY = g.currentMap.player.DrawPosition()
 	}
 	g.windows.Update(playerY, sceneManager, g.createCharacterList())
 	g.pictures.Update()

@@ -252,9 +252,11 @@ func (b *banner) position(screen *ebiten.Image) (int, int) {
 	y := 0
 	positionType := b.positionType
 	if positionType == data.MessagePositionAuto {
-		if b.playerY < consts.TileYNum/2 {
-			positionType = data.MessagePositionBottom
-		} else {
+		positionType = data.MessagePositionMiddle
+		// If player's Y coordinate is 40%~60%,
+		// we treat the player is in "middle",
+		// which is likely to overlap with "middle" positioned banner
+		if consts.MapHeight*2/5 < b.playerY && b.playerY < consts.MapHeight*3/5 {
 			positionType = data.MessagePositionTop
 		}
 	}
