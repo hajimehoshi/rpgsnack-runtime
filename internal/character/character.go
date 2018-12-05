@@ -687,9 +687,6 @@ func (c *Character) Draw(screen *ebiten.Image, offsetX, offsetY int) {
 	if c.imageName == "" || !c.visible || c.erased {
 		return
 	}
-	op := &ebiten.DrawImageOptions{}
-	x, y := c.DrawPosition()
-	op.GeoM.Translate(float64(x), float64(y))
 	charW, charH := c.Size()
 	dirIndex := c.dirToIndex(c.dir)
 
@@ -703,9 +700,9 @@ func (c *Character) Draw(screen *ebiten.Image, offsetX, offsetY int) {
 	case 2:
 		sy = dirIndex / 2 * charH
 	case 3:
-		if dirIndex == 4 {
+		if dirIndex == 3 {
 			// Reuse the second frame and mirror it
-			sy = 2 * charH
+			sy = 1 * charH
 			scaleX = -1.0
 		} else {
 			sy = dirIndex * charH
@@ -716,8 +713,12 @@ func (c *Character) Draw(screen *ebiten.Image, offsetX, offsetY int) {
 		panic(fmt.Sprintf("not supported DirCount %s %d", c.imageName, c.DirCount()))
 	}
 
-	op.ColorM.Scale(1, 1, 1, float64(c.opacity)/255)
+	op := &ebiten.DrawImageOptions{}
+	x, y := c.DrawPosition()
+	op.GeoM.Translate(float64(-charW/2), float64(-charH/2))
 	op.GeoM.Scale(scaleX, scaleY)
-	op.GeoM.Translate(float64(offsetX), float64(offsetY))
+	op.GeoM.Translate(float64(charW/2), float64(charH/2))
+	op.GeoM.Translate(float64(x+offsetX), float64(y+offsetY))
+	op.ColorM.Scale(1, 1, 1, float64(c.opacity)/255)
 	screen.DrawImage(c.getImage().SubImage(image.Rect(sx, sy, sx+charW, sy+charH)).(*ebiten.Image), op)
 }
