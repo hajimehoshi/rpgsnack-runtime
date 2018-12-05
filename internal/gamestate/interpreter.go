@@ -214,7 +214,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 	// TODO: Instead of returnning boolean value, return enum value for code readability.
 
 	// TODO: CanWindowProceed should always return true for route interpreters?
-	if !i.route && !gameState.CanWindowProceed(i.id) {
+	if !i.route && !i.parallel && !gameState.CanWindowProceed(i.id) {
 		return false, nil
 	}
 	if i.sub != nil {
