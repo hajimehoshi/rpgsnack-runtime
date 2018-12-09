@@ -21,6 +21,7 @@ import (
 	"github.com/hajimehoshi/ebiten"
 	"github.com/vmihailenco/msgpack"
 
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/tint"
 )
@@ -39,6 +40,12 @@ type Screen struct {
 	fadeOutMaxCount int
 	fadedOut        bool
 	fadeColor       color.RGBA
+
+	shakeCount     int
+	shakeMaxCount  int
+	shakePower     int
+	shakeSpeed     int
+	shakeDirection data.ShakeDirection
 }
 
 func (s *Screen) EncodeMsgpack(enc *msgpack.Encoder) error {
@@ -67,6 +74,17 @@ func (s *Screen) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EncodeInt(int(s.fadeColor.A))
 	e.EndArray()
 
+	e.EncodeString("shakeCount")
+	e.EncodeInt(s.shakeCount)
+	e.EncodeString("shakeMaxCount")
+	e.EncodeInt(s.shakeMaxCount)
+	e.EncodeString("shakePower")
+	e.EncodeInt(s.shakePower)
+	e.EncodeString("shakeSpeed")
+	e.EncodeInt(s.shakeSpeed)
+	e.EncodeString("shakeDirection")
+	e.EncodeString(string(s.shakeDirection))
+
 	e.EndMap()
 	return e.Flush()
 }
@@ -75,7 +93,7 @@ func (s *Screen) DecodeMsgpack(dec *msgpack.Decoder) error {
 	d := easymsgpack.NewDecoder(dec)
 	n := d.DecodeMapLen()
 	for i := 0; i < n; i++ {
-		switch d.DecodeString() {
+		switch k := d.DecodeString(); k {
 		case "tint":
 			d.DecodeInterface(&s.tint)
 		case "fadeInCount":
@@ -89,7 +107,7 @@ func (s *Screen) DecodeMsgpack(dec *msgpack.Decoder) error {
 		case "fadedOut":
 			s.fadedOut = d.DecodeBool()
 		case "fadeColor":
-			n = d.DecodeArrayLen()
+			n := d.DecodeArrayLen()
 			if n != 4 {
 				for i := 0; i < n; i++ {
 					d.Skip()
@@ -100,6 +118,20 @@ func (s *Screen) DecodeMsgpack(dec *msgpack.Decoder) error {
 			s.fadeColor.G = uint8(d.DecodeInt())
 			s.fadeColor.B = uint8(d.DecodeInt())
 			s.fadeColor.A = uint8(d.DecodeInt())
+		case "shakeCount":
+			s.shakeCount = d.DecodeInt()
+		case "shakeMaxCount":
+			s.shakeMaxCount = d.DecodeInt()
+		case "shakePower":
+			s.shakePower = d.DecodeInt()
+		case "shakeSpeed":
+			s.shakeSpeed = d.DecodeInt()
+		case "shakeDirection":
+			s.shakeDirection = data.ShakeDirection(d.DecodeString())
+		default:
+			if err := d.Error(); err != nil {
+				return fmt.Errorf("gamestate: Screen.DecodeMsgpack failed: invalid key: %s", k)
+			}
 		}
 	}
 	if err := d.Error(); err != nil {
@@ -121,6 +153,33 @@ func (s *Screen) fadeIn(count int) {
 func (s *Screen) fadeOut(count int) {
 	s.fadeOutCount = count
 	s.fadeOutMaxCount = count
+}
+
+const infiniteCount = (1 << 31) - 1
+
+func (s *Screen) startShaking(power, speed, count int, dir data.ShakeDirection) {
+	s.shakePower = power
+	s.shakeSpeed = speed
+	if count > 0 {
+		s.shakeCount = count
+		s.shakeMaxCount = count
+	} else {
+		s.shakeCount = infiniteCount
+		s.shakeMaxCount = infiniteCount
+	}
+	s.shakeDirection = dir
+}
+
+func (s *Screen) stopShaking() {
+	s.shakePower = 0
+	s.shakeSpeed = 0
+	s.shakeCount = 0
+	s.shakeMaxCount = 0
+	s.shakeDirection = data.ShakeDirectionHorizontal
+}
+
+func (s *Screen) isShaking() bool {
+	return s.shakeCount > 0
 }
 
 func (s *Screen) setFadeColor(fadeColor color.Color) {
@@ -159,6 +218,38 @@ func (s *Screen) ApplyTintColor(c *ebiten.ColorM) {
 	s.tint.Apply(c)
 }
 
+func (s *Screen) ApplyShake(g *ebiten.GeoM) {
+	if s.shakeCount == 0 {
+		return
+	}
+
+	duration := s.shakeMaxCount - s.shakeCount + 1
+	amp := s.shakePower * 2
+	delta := (s.shakePower * s.shakeSpeed * duration) / 10
+	delta %= amp * 4
+	switch {
+	case delta < amp:
+		// Do nothing
+	case delta < amp*2:
+		delta -= amp
+		delta = amp - delta
+	case delta < amp*3:
+		delta -= amp * 2
+		delta = -delta
+	default:
+		delta -= amp * 3
+		delta = -amp + delta
+	}
+	if s.shakeDirection == data.ShakeDirectionVertical {
+		g.Translate(0, float64(delta))
+	} else {
+		g.Translate(float64(delta), 0)
+	}
+	if s.shakeMaxCount == infiniteCount && delta == 0 {
+		s.shakeCount = s.shakeMaxCount
+	}
+}
+
 func (s *Screen) Draw(img *ebiten.Image) {
 	fadeRate := 0.0
 	if s.fadedOut {
@@ -195,5 +286,8 @@ func (s *Screen) Update() {
 		if s.fadeOutCount == 0 {
 			s.fadedOut = true
 		}
+	}
+	if s.shakeCount > 0 {
+		s.shakeCount--
 	}
 }

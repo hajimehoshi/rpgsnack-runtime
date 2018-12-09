@@ -175,6 +175,12 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 			return err
 		}
 		c.Args = args
+	case CommandNameShake:
+		var args *CommandArgsShake
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	case CommandNameTintScreen:
 		var args *CommandArgsTintScreen
 		if err := unmarshalJSON(tmp.Args, &args); err != nil {
@@ -564,6 +570,12 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 			return err
 		}
 		c.Args = a
+	case CommandNameShake:
+		a := &CommandArgsShake{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
 	case CommandNameTintScreen:
 		a := &CommandArgsTintScreen{}
 		if err := msgpack.Unmarshal(argsBin, a); err != nil {
@@ -829,6 +841,7 @@ const (
 	CommandNameTransfer          CommandName = "transfer"
 	CommandNameSetRoute          CommandName = "set_route"
 	CommandNameTintScreen        CommandName = "tint_screen"
+	CommandNameShake             CommandName = "shake"
 	CommandNamePlaySE            CommandName = "play_se"
 	CommandNamePlayBGM           CommandName = "play_bgm"
 	CommandNameStopBGM           CommandName = "stop_bgm"
@@ -1139,6 +1152,14 @@ type CommandArgsSetRoute struct {
 	Wait     bool       `json:"wait" msgpack:"wait"`
 	Internal bool       `json:"internal" msgpack:"internal"`
 	Commands []*Command `json:"commands" msgpack:"commands"`
+}
+
+type CommandArgsShake struct {
+	Power     int            `json:"power" msgpack:"power"`
+	Speed     int            `json:"speed" msgpack:"speed"`
+	Time      int            `json:"time" msgpack:"time"`
+	Wait      bool           `json:"wait" msgpack:"wait"`
+	Direction ShakeDirection `json:"direction" msgpack:"direction"`
 }
 
 type CommandArgsTintScreen struct {
@@ -1744,4 +1765,11 @@ const (
 	PicturePriorityBottom  PicturePriorityType = "bottom"
 	PicturePriorityTop     PicturePriorityType = "top"
 	PicturePriorityOverlay PicturePriorityType = "overlay"
+)
+
+type ShakeDirection string
+
+const (
+	ShakeDirectionHorizontal ShakeDirection = "horizontal"
+	ShakeDirectionVertical   ShakeDirection = "vertical"
 )

@@ -677,7 +677,12 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	m.gameState.DrawPictures(m.tintScreenImage, 0, m.offsetY/consts.TileScale, data.PicturePriorityOverlay)
 
 	op = &ebiten.DrawImageOptions{}
+	m.gameState.ApplyShake(&op.GeoM)
 	op.GeoM.Scale(consts.TileScale, consts.TileScale)
+	// If the screen is shaking, there is a region in the screen that is not rendered. Clear first.
+	if op.GeoM.Element(0, 2) != 0 || op.GeoM.Element(1, 2) != 0 {
+		screen.Clear()
+	}
 	screen.DrawImage(m.tintScreenImage, op)
 
 	if m.gameState.IsPlayerControlEnabled() && (m.gameState.Map().IsPlayerMovingByUserInput() || m.triggeringFailed) {

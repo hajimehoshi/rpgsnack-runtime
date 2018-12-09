@@ -556,6 +556,26 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		}
 
 		i.sub = sub
+	case data.CommandNameShake:
+		if !i.waitingCommand {
+			args := c.Args.(*data.CommandArgsShake)
+			if args.Time != 0 {
+				gameState.StartShaking(args.Power, args.Speed, args.Time*6, args.Direction)
+			} else {
+				gameState.StopShaking()
+			}
+			forever := args.Time == -1
+			if !args.Wait || forever {
+				i.commandIterator.Advance()
+				return true, nil
+			}
+			i.waitingCommand = args.Wait
+		}
+		if gameState.IsShaking() {
+			return false, nil
+		}
+		i.waitingCommand = false
+		i.commandIterator.Advance()
 	case data.CommandNameTintScreen:
 		if !i.waitingCommand {
 			args := c.Args.(*data.CommandArgsTintScreen)

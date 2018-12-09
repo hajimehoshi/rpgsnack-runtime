@@ -535,6 +535,10 @@ func (g *Game) ApplyTintColor(c *ebiten.ColorM) {
 	g.screen.ApplyTintColor(c)
 }
 
+func (g *Game) ApplyShake(geo *ebiten.GeoM) {
+	g.screen.ApplyShake(geo)
+}
+
 func (g *Game) DrawScreen(screenImage *ebiten.Image) {
 	g.screen.Draw(screenImage)
 }
@@ -699,6 +703,18 @@ func (g *Game) FadeIn(time int) {
 
 func (g *Game) FadeOut(time int) {
 	g.screen.fadeOut(time)
+}
+
+func (g *Game) StartShaking(power, speed, count int, dir data.ShakeDirection) {
+	g.screen.startShaking(power, speed, count, dir)
+}
+
+func (g *Game) StopShaking() {
+	g.screen.stopShaking()
+}
+
+func (g *Game) IsShaking() bool {
+	return g.screen.isShaking()
 }
 
 func (g *Game) StartTint(red, green, blue, gray float64, time int) {
