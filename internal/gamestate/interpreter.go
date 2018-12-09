@@ -632,6 +632,11 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		gameState.SetWeather(args.Type)
 		i.commandIterator.Advance()
 	case data.CommandNameGotoTitle:
+		args := c.Args.(*data.CommandArgsGotoTitle)
+		if args.Save {
+			i.commandIterator.Advance()
+			gameState.RequestSave(sceneManager)
+		}
 		return false, GoToTitle
 	case data.CommandNameSyncIAP:
 		i.waitingRequestID = sceneManager.GenerateRequestID()

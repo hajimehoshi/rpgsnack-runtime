@@ -103,6 +103,12 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 			return err
 		}
 		c.Args = args
+	case CommandNameGotoTitle:
+		var args *CommandArgsGotoTitle
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	case CommandNameCallEvent:
 		var args *CommandArgsCallEvent
 		if err := unmarshalJSON(tmp.Args, &args); err != nil {
@@ -206,7 +212,6 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 		}
 		c.Args = args
 	case CommandNameSave:
-	case CommandNameGotoTitle:
 	case CommandNameSyncIAP:
 	case CommandNameRequestReview:
 	case CommandNameUnlockAchievement:
@@ -498,6 +503,12 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 			return err
 		}
 		c.Args = a
+	case CommandNameGotoTitle:
+		a := &CommandArgsGotoTitle{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
 	case CommandNameCallEvent:
 		a := &CommandArgsCallEvent{}
 		if err := msgpack.Unmarshal(argsBin, a); err != nil {
@@ -601,7 +612,6 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 		}
 		c.Args = a
 	case CommandNameSave:
-	case CommandNameGotoTitle:
 	case CommandNameSyncIAP:
 	case CommandNameRequestReview:
 	case CommandNameUnlockAchievement:
@@ -913,6 +923,10 @@ type CommandArgsLabel struct {
 
 type CommandArgsGoto struct {
 	Label string `json:"label" msgpack:"label"`
+}
+
+type CommandArgsGotoTitle struct {
+	Save bool `json:"save" msgpack:"save"`
 }
 
 type CommandArgsCallEvent struct {
