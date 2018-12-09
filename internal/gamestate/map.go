@@ -689,7 +689,15 @@ func (m *Map) TryRunDirectEvent(gameState *Game, x, y int) bool {
 }
 
 func (m *Map) executableEventAt(x, y int) *character.Character {
+	// When the player is through-mode, any event should not be triggered (#710).
+	if m.player.Through() {
+		return nil
+	}
 	for _, e := range m.eventsAt(x, y) {
+		// When an event is through-mode, the event should not be triggered (#710).
+		if e.Through() {
+			continue
+		}
 		page, _ := m.currentPage(e)
 		if page == nil {
 			continue

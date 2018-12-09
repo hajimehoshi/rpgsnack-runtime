@@ -336,8 +336,7 @@ func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) {
 		return
 	}
 
-	_, sh := sceneManager.Size()
-	if m.gameState.InventoryVisible() && y > sh-m.inventoryHeight {
+	if _, sh := sceneManager.Size(); m.gameState.InventoryVisible() && y > sh-m.inventoryHeight {
 		return
 	}
 
