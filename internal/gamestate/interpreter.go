@@ -610,8 +610,8 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		audio.StopBGM(args.FadeTime * 6)
 		i.commandIterator.Advance()
 	case data.CommandNameSave:
-		gameState.RequestSave(sceneManager)
 		i.commandIterator.Advance()
+		gameState.RequestSave(sceneManager)
 	case data.CommandNameAutoSave:
 		args := c.Args.(*data.CommandArgsAutoSave)
 		gameState.SetAutoSaveEnabled(args.Enabled)
