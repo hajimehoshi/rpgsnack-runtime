@@ -121,6 +121,7 @@ func (a *audio) Update() error {
 		if err := a.playing.Rewind(); err != nil {
 			return err
 		}
+		delete(a.players, a.playingBGMName)
 		a.playing = nil
 		a.playingBGMName = ""
 		a.toStopBGM = false
