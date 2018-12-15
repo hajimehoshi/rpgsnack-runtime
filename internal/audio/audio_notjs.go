@@ -117,10 +117,7 @@ func (a *audio) Update() error {
 		a.playing.SetVolume(a.bgmVolume.Current() * volumeBias)
 	}
 	if a.toStopBGM && !a.bgmVolume.IsChanging() {
-		a.playing.Pause()
-		if err := a.playing.Rewind(); err != nil {
-			return err
-		}
+		a.playing.Close()
 		delete(a.players, a.playingBGMName)
 		a.playing = nil
 		a.playingBGMName = ""
@@ -130,6 +127,7 @@ func (a *audio) Update() error {
 	closed := []*eaudio.Player{}
 	for p := range a.sePlayers {
 		if !p.IsPlaying() {
+			p.Close()
 			closed = append(closed, p)
 		}
 	}
