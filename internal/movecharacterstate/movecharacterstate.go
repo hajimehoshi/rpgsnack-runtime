@@ -58,8 +58,7 @@ func (s *State) calcNextStepToMoveTarget(gameState GameState, x int, y int, igno
 	f := func(x, y int) bool {
 		return gameState.MapPassableAt(ch.Through(), x, y, ignoreCharacters)
 	}
-	path, _, _ := path.Calc(atFunc(f), cx, cy, x, y)
-
+	path, _, _ := path.Calc(atFunc(f), cx, cy, x, y, true)
 	// Adopt the only one step.
 	if len(path) > 0 {
 		s.path = path[:1]

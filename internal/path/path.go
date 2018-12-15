@@ -35,7 +35,7 @@ type Passable interface {
 	At(x, y int) bool
 }
 
-func Calc(passable Passable, startX, startY, goalX, goalY int) ([]RouteCommand, int, int) {
+func Calc(passable Passable, startX, startY, goalX, goalY int, mustReachGoal bool) ([]RouteCommand, int, int) {
 	type pos struct {
 		X, Y int
 	}
@@ -107,6 +107,9 @@ func Calc(passable Passable, startX, startY, goalX, goalY int) ([]RouteCommand, 
 		}
 	}
 	lastP := passable.At(goalX, goalY)
+	if !lastP && mustReachGoal {
+		return nil, 0, 0
+	}
 	lastX, lastY := goalX, goalY
 	if !lastP && len(path) > 0 {
 		switch path[len(path)-1] {

@@ -728,7 +728,7 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, gameState *G
 	path, lastPlayerX, lastPlayerY := pathpkg.Calc(&passableOnMap{
 		through: m.player.Through(),
 		m:       m,
-	}, px, py, x, y)
+	}, px, py, x, y, false)
 	if len(path) == 0 {
 		return false
 	}

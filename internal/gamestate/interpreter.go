@@ -710,9 +710,6 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		if i.moveCharacterState == nil {
 			args := c.Args.(*data.CommandArgsMoveCharacter)
 			skip := i.routeSkip
-			if args.Type == data.MoveCharacterTypeTarget {
-				skip = false
-			}
 			m := movecharacterstate.New(
 				gameState,
 				i.mapID,
