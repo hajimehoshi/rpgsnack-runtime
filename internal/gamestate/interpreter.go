@@ -384,6 +384,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		if gameState.IsWindowAnimating(i.id) {
 			return false, nil
 		}
+
 		// Advance command index first and check the next command.
 		i.commandIterator.Advance()
 		if !i.commandIterator.IsTerminated() {

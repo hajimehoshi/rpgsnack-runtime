@@ -164,7 +164,6 @@ func (g *Game) update() error {
 	default:
 	}
 
-	input.Update(g.sceneManager.WidthScale(), 1)
 	if err := audio.Update(); err != nil {
 		return err
 	}

@@ -130,6 +130,7 @@ func (m *Manager) Requester() Requester {
 }
 
 func (m *Manager) Update() error {
+	triggerBack := false
 	select {
 	case r := <-m.resultCh:
 		m.results[r.ID] = &r
@@ -156,7 +157,7 @@ func (m *Manager) Update() error {
 		case PlatformDataKeyRewardedAdsLoaded:
 			m.rewardedAdsLoaded = true
 		case PlatformDataKeyBackButton:
-			input.TriggerBackButton()
+			triggerBack = true
 		default:
 			log.Printf("platform data key not implemented: %s", a.key)
 		}
@@ -171,6 +172,11 @@ func (m *Manager) Update() error {
 		n = 5
 	}
 	for i := 0; i < n; i++ {
+		input.Update(m.widthScale(), 1)
+		if triggerBack {
+			input.TriggerBackButton()
+			triggerBack = false
+		}
 		if m.next != nil {
 			if m.fadingCount > 0 {
 				if m.fadingCount <= m.fadingCountMax/2 {
@@ -192,13 +198,13 @@ func (m *Manager) Update() error {
 	return nil
 }
 
-func (m *Manager) WidthScale() float64 {
+func (m *Manager) widthScale() float64 {
 	ow, _ := m.offscreen.Size()
 	return float64(m.width) / float64(ow)
 }
 
 func (m *Manager) Draw(screen *ebiten.Image) {
-	s := m.WidthScale()
+	s := m.widthScale()
 	if s == 1 {
 		m.drawImpl(screen)
 		return
