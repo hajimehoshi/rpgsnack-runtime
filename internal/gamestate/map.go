@@ -1149,6 +1149,9 @@ func (m *Map) DrawCharacters(screen *ebiten.Image, priority data.Priority, offse
 	sort.Slice(chars, func(i, j int) bool {
 		_, yi := chars[i].DrawFootPosition()
 		_, yj := chars[j].DrawFootPosition()
+		if yi == yj {
+			return j < i
+		}
 		return yi < yj
 	})
 	for _, c := range chars {
