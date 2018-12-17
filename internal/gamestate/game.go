@@ -882,26 +882,26 @@ func (g *Game) SetForeground(mapID, roomID int, image string) {
 	g.foregrounds[mapID][roomID] = image
 }
 
-func (g *Game) Background(mapID, roomID int) string {
+func (g *Game) Background(mapID, roomID int) (string, bool) {
 	if g.backgrounds != nil {
 		if r, ok := g.backgrounds[mapID]; ok {
 			if img, ok := r[roomID]; ok {
-				return img
+				return img, true
 			}
 		}
 	}
-	return ""
+	return "", false
 }
 
-func (g *Game) Foreground(mapID, roomID int) string {
+func (g *Game) Foreground(mapID, roomID int) (string, bool) {
 	if g.foregrounds != nil {
 		if r, ok := g.foregrounds[mapID]; ok {
 			if img, ok := r[roomID]; ok {
-				return img
+				return img, true
 			}
 		}
 	}
-	return ""
+	return "", false
 }
 
 func (g *Game) PlayerSpeed() data.Speed {

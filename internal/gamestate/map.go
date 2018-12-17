@@ -1187,14 +1187,14 @@ func (m *Map) StartCombineCommands(gameState *Game, combine *data.Combine) {
 }
 
 func (m *Map) Background(gameState *Game) string {
-	if img := gameState.Background(m.mapID, m.roomID); img != "" {
+	if img, ok := gameState.Background(m.mapID, m.roomID); ok {
 		return img
 	}
 	return m.CurrentRoom().Background.Name
 }
 
 func (m *Map) Foreground(gameState *Game) string {
-	if img := gameState.Foreground(m.mapID, m.roomID); img != "" {
+	if img, ok := gameState.Foreground(m.mapID, m.roomID); ok {
 		return img
 	}
 	return m.CurrentRoom().Foreground.Name
