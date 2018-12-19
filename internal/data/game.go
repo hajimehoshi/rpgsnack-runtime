@@ -88,11 +88,12 @@ type Hint struct {
 }
 
 type IAPProduct struct {
-	ID   int    `json:"id" msgpack:"id"`
-	Key  string `json:"key" msgpack:"key"`
-	Name UUID   `json:"name" msgpack:"name"`
-	Desc UUID   `json:"desc" msgpack:"desc"`
-	Type string `json:"type" msgpack:"type"`
+	ID      int    `json:"id" msgpack:"id"`
+	Key     string `json:"key" msgpack:"key"`
+	Name    UUID   `json:"name" msgpack:"name"`
+	Desc    UUID   `json:"desc" msgpack:"desc"`
+	Details UUID   `json:"details" msgpack:"details"`
+	Type    string `json:"type" msgpack:"type"`
 }
 
 type Item struct {
@@ -116,10 +117,11 @@ type Shop struct {
 }
 
 type ShopProduct struct {
-	Key  string `json:"key" msgpack:"key"`
-	Name string `json:"name" msgpack:"name"`
-	Desc string `json:"desc" msgpack:"desc"`
-	Type string `json:"type" msgpack:"type"`
+	Key     string `json:"key" msgpack:"key"`
+	Name    string `json:"name" msgpack:"name"`
+	Desc    string `json:"desc" msgpack:"desc"`
+	Details string `json:"details" msgpack:"details"`
+	Type    string `json:"type" msgpack:"type"`
 }
 
 func (g *Game) CreateCombine(itemID1, itemID2 int) *Combine {
@@ -175,10 +177,11 @@ func (g *Game) GetShopProductsData(products []int) []byte {
 		iapProduct := g.getIAPProductByID(productID)
 		if iapProduct != nil {
 			shopProducts = append(shopProducts, &ShopProduct{
-				Key:  iapProduct.Key,
-				Name: g.Texts.Get(lang.Get(), iapProduct.Name),
-				Desc: g.Texts.Get(lang.Get(), iapProduct.Desc),
-				Type: iapProduct.Type,
+				Key:     iapProduct.Key,
+				Name:    g.Texts.Get(lang.Get(), iapProduct.Name),
+				Desc:    g.Texts.Get(lang.Get(), iapProduct.Desc),
+				Details: g.Texts.Get(lang.Get(), iapProduct.Details),
+				Type:    iapProduct.Type,
 			})
 		}
 	}
