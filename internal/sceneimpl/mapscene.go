@@ -636,13 +636,14 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		diff := h - consts.MapHeight
 		m.animation.Draw(m.screenImage, img, mapWidth, 0, m.offsetY/consts.TileScale-diff)
 	}
+
+	m.gameState.DrawPictures(m.screenImage, 0, m.offsetY/consts.TileScale, data.PicturePriorityBottom)
 	for k := 0; k < 3; k++ {
 		var p data.Priority
 		switch k {
 		case 0:
 			p = data.PriorityBottom
 		case 1:
-			m.gameState.DrawPictures(m.screenImage, 0, m.offsetY/consts.TileScale, data.PicturePriorityBottom)
 			p = data.PriorityMiddle
 		case 2:
 			p = data.PriorityTop
