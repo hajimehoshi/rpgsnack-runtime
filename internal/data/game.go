@@ -15,9 +15,14 @@
 package data
 
 import (
-	"encoding/json"
-
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
+)
+
+type ShopType string
+
+const (
+	ShopTypeMain ShopType = "main"
+	ShopTypeHome ShopType = "home"
 )
 
 type CombineType string
@@ -113,7 +118,8 @@ type Combine struct {
 }
 
 type Shop struct {
-	Products []int `json:"products" msgpack:"products"`
+	Name     ShopType `json:"name" msgpack:"name"`
+	Products []int    `json:"products" msgpack:"products"`
 }
 
 type ShopProduct struct {
@@ -171,7 +177,7 @@ func (g *Game) getIAPProductByID(id int) *IAPProduct {
 	return nil
 }
 
-func (g *Game) GetShopProductsData(products []int) []byte {
+func (g *Game) GetShopProducts(products []int) []*ShopProduct {
 	shopProducts := []*ShopProduct{}
 	for _, productID := range products {
 		iapProduct := g.getIAPProductByID(productID)
@@ -185,20 +191,18 @@ func (g *Game) GetShopProductsData(products []int) []byte {
 			})
 		}
 	}
-	b, err := json.Marshal(shopProducts)
-	if err != nil {
-		panic(err)
-	}
-	return b
+	return shopProducts
 }
 
-func (g *Game) GetDefaultShopProductsData() []byte {
-	if g.IsDefaultShopAvailable() {
-		return g.GetShopProductsData(g.Shops[0].Products)
+func (g *Game) GetShop(name ShopType) *Shop {
+	for _, shop := range g.Shops {
+		if shop.Name == name {
+			return shop
+		}
 	}
 	return nil
 }
 
-func (g *Game) IsDefaultShopAvailable() bool {
-	return len(g.Shops) > 0 && len(g.Shops[0].Products) > 0
+func (g *Game) IsShopAvailable(name ShopType) bool {
+	return g.GetShop(name) != nil
 }

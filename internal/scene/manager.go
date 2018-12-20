@@ -261,6 +261,19 @@ func (m *Manager) IsPurchased(key string) bool {
 	return false
 }
 
+func (m *Manager) GetShopProductsData(name data.ShopType) []byte {
+	shop := m.Game().GetShop(name)
+	if shop == nil {
+		return nil
+	}
+	shopProducts := m.Game().GetShopProducts(shop.Products)
+	b, err := json.Marshal(shopProducts)
+	if err != nil {
+		panic(err)
+	}
+	return b
+}
+
 func (m *Manager) MaxPurchaseTier() int {
 	maxTier := 0
 	for _, p := range m.purchases {

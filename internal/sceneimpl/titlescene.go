@@ -22,6 +22,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/gamestate"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
@@ -128,9 +129,8 @@ func (t *TitleScene) initUI(sceneManager *scene.Manager) {
 		sceneManager.GoToWithFading(NewMapSceneWithGame(game), 60)
 	})
 	t.removeAdsButton.SetOnPressed(func(_ *ui.Button) {
-		i := sceneManager.Game().GetIAPProductByType("ads_removal")
-		if i != nil {
-			sceneManager.Requester().RequestShowShop(t.waitingRequestID, string(sceneManager.Game().GetShopProductsData([]int{i.ID})))
+		if sceneManager.Game().IsShopAvailable(data.ShopTypeHome) {
+			sceneManager.Requester().RequestShowShop(t.waitingRequestID, string(sceneManager.GetShopProductsData(data.ShopTypeHome)))
 		}
 	})
 	t.settingsButton.SetOnPressed(func(_ *ui.Button) {

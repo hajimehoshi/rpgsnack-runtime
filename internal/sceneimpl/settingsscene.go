@@ -21,6 +21,7 @@ import (
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
@@ -128,7 +129,7 @@ func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
 	})
 	s.shopButton.SetOnPressed(func(_ *ui.Button) {
 		s.waitingRequestID = sceneManager.GenerateRequestID()
-		sceneManager.Requester().RequestShowShop(s.waitingRequestID, string(sceneManager.Game().GetDefaultShopProductsData()))
+		sceneManager.Requester().RequestShowShop(s.waitingRequestID, string(sceneManager.GetShopProductsData(data.ShopTypeMain)))
 	})
 }
 
@@ -174,7 +175,7 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 	}
 
 	itemOffset := 0
-	if sceneManager.Game().IsDefaultShopAvailable() {
+	if sceneManager.Game().IsShopAvailable(data.ShopTypeMain) {
 		s.shopButton.Visible = true
 		itemOffset = 1
 	} else {
