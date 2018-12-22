@@ -130,7 +130,7 @@ func (t *TitleScene) initUI(sceneManager *scene.Manager) {
 	})
 	t.removeAdsButton.SetOnPressed(func(_ *ui.Button) {
 		if sceneManager.Game().IsShopAvailable(data.ShopTypeHome) {
-			sceneManager.Requester().RequestShowShop(t.waitingRequestID, string(sceneManager.GetShopProductsData(data.ShopTypeHome)))
+			sceneManager.Requester().RequestShowShop(t.waitingRequestID, string(sceneManager.ShopProductsDataByShop(data.ShopTypeHome)))
 		}
 	})
 	t.settingsButton.SetOnPressed(func(_ *ui.Button) {

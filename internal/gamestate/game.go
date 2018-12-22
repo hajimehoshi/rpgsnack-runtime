@@ -785,15 +785,8 @@ func (g *Game) SetVariable(sceneManager *scene.Manager, variableID int, op data.
 	case data.SetVariableValueTypeIAPProduct:
 		rhs = 0
 		id := value.(int)
-		var key string
-		for _, i := range sceneManager.Game().IAPProducts {
-			if i.ID == id {
-				key = i.Key
-				break
-			}
-		}
 		rhs = 0
-		if sceneManager.IsPurchased(key) {
+		if sceneManager.IsUnlocked(id) {
 			rhs = 1
 		}
 	case data.SetVariableValueTypeSystem:

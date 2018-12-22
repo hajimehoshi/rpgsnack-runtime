@@ -261,13 +261,60 @@ func (m *Manager) IsPurchased(key string) bool {
 	return false
 }
 
-func (m *Manager) GetShopProductsData(name data.ShopType) []byte {
+func (m *Manager) IsUnlocked(id int) bool {
+	ip := m.Game().IAPProductByID(id)
+	if m.IsPurchased(ip.Key) {
+		return true
+	}
+	for _, bi := range ip.Bundles {
+		bip := m.Game().IAPProductByID(bi)
+		if m.IsPurchased(bip.Key) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (m *Manager) IsAvailable(id int) bool {
+	ip := m.Game().IAPProductByID(id)
+	if m.IsPurchased(ip.Key) {
+		return true
+	}
+
+	for _, tip := range m.game.IAPProducts {
+		if m.IsPurchased(tip.Key) {
+			for _, bi := range tip.Bundles {
+				if bi == id {
+					return false
+				}
+			}
+		}
+
+	}
+
+	return true
+}
+
+func (m *Manager) ShopProductsDataByShop(name data.ShopType) []byte {
 	shop := m.Game().GetShop(name)
 	if shop == nil {
 		return nil
 	}
-	shopProducts := m.Game().GetShopProducts(shop.Products)
-	b, err := json.Marshal(shopProducts)
+	return m.GetShopProductsData(shop.Products)
+}
+
+func (m *Manager) GetShopProductsData(products []int) []byte {
+	data := []*data.ShopProduct{}
+	shopProducts := m.Game().GetShopProducts(products)
+	for _, shopProduct := range shopProducts {
+		if m.IsAvailable(shopProduct.ID) {
+			shopProduct.Unlocked = m.IsUnlocked(shopProduct.ID)
+			data = append(data, shopProduct)
+		}
+	}
+
+	b, err := json.Marshal(data)
 	if err != nil {
 		panic(err)
 	}

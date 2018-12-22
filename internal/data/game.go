@@ -94,6 +94,7 @@ type Hint struct {
 
 type IAPProduct struct {
 	ID      int    `json:"id" msgpack:"id"`
+	Bundles []int  `json:"bundles" msgpack:"bundles"`
 	Key     string `json:"key" msgpack:"key"`
 	Name    UUID   `json:"name" msgpack:"name"`
 	Desc    UUID   `json:"desc" msgpack:"desc"`
@@ -123,11 +124,13 @@ type Shop struct {
 }
 
 type ShopProduct struct {
-	Key     string `json:"key" msgpack:"key"`
-	Name    string `json:"name" msgpack:"name"`
-	Desc    string `json:"desc" msgpack:"desc"`
-	Details string `json:"details" msgpack:"details"`
-	Type    string `json:"type" msgpack:"type"`
+	ID       int    `json:"id" msgpack:"id"`
+	Key      string `json:"key" msgpack:"key"`
+	Name     string `json:"name" msgpack:"name"`
+	Desc     string `json:"desc" msgpack:"desc"`
+	Details  string `json:"details" msgpack:"details"`
+	Type     string `json:"type" msgpack:"type"`
+	Unlocked bool   `json:"unlocked" msgpack:"unlocked"`
 }
 
 func (g *Game) CreateCombine(itemID1, itemID2 int) *Combine {
@@ -167,7 +170,7 @@ func (g *Game) GetIAPProductByType(t string) *IAPProduct {
 	return nil
 }
 
-func (g *Game) getIAPProductByID(id int) *IAPProduct {
+func (g *Game) IAPProductByID(id int) *IAPProduct {
 	for _, iapProduct := range g.IAPProducts {
 		if iapProduct.ID == id {
 			return iapProduct
@@ -180,9 +183,10 @@ func (g *Game) getIAPProductByID(id int) *IAPProduct {
 func (g *Game) GetShopProducts(products []int) []*ShopProduct {
 	shopProducts := []*ShopProduct{}
 	for _, productID := range products {
-		iapProduct := g.getIAPProductByID(productID)
+		iapProduct := g.IAPProductByID(productID)
 		if iapProduct != nil {
 			shopProducts = append(shopProducts, &ShopProduct{
+				ID:      iapProduct.ID,
 				Key:     iapProduct.Key,
 				Name:    g.Texts.Get(lang.Get(), iapProduct.Name),
 				Desc:    g.Texts.Get(lang.Get(), iapProduct.Desc),

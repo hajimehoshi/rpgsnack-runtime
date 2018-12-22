@@ -698,14 +698,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 	case data.CommandNameShowShop:
 		i.waitingRequestID = sceneManager.GenerateRequestID()
 		args := c.Args.(*data.CommandArgsShowShop)
-
-		shopProducts := sceneManager.Game().GetShopProducts(args.Products)
-		b, err := json.Marshal(shopProducts)
-		if err != nil {
-			panic(err)
-		}
-
-		sceneManager.Requester().RequestShowShop(i.waitingRequestID, string(b))
+		sceneManager.Requester().RequestShowShop(i.waitingRequestID, string(sceneManager.GetShopProductsData(args.Products)))
 		return false, nil
 	case data.CommandNameRequestReview:
 		sceneManager.Requester().RequestReview()
