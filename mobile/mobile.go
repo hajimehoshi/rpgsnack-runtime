@@ -16,6 +16,7 @@ package mobile
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/hajimehoshi/ebiten/mobile"
 
@@ -70,8 +71,8 @@ func adjustScreenSize(widthInDP, heightInDP int) (width, height int, scale float
 	} else {
 		scale = float64(heightInDP) / minHeight
 	}
-	width = int(float64(widthInDP) / scale)
-	height = int(float64(heightInDP) / scale)
+	width = int(math.Ceil(float64(widthInDP) / scale))
+	height = int(math.Ceil(float64(heightInDP) / scale))
 	return width, height, scale
 }
 
