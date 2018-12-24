@@ -26,8 +26,8 @@ func drawNinePatches(dst, src *ebiten.Image, width, height int, geoM *ebiten.Geo
 	parts := make([]*ebiten.Image, 9)
 	for j := 0; j < 3; j++ {
 		for i := 0; i < 3; i++ {
-			x := i*partSize
-			y := j*partSize
+			x := i * partSize
+			y := j * partSize
 			parts[j*3+i] = src.SubImage(image.Rect(x, y, x+partSize, y+partSize)).(*ebiten.Image)
 		}
 	}
