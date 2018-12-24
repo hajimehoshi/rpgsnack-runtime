@@ -55,6 +55,7 @@ type Map struct {
 	itemInterpreter             *Interpreter
 
 	// Fields that are not dumped
+	isTitle                   bool
 	gameData                  *data.Game
 	isPlayerMovingByUserInput bool
 	origSpeed                 data.Speed
@@ -63,12 +64,17 @@ type Map struct {
 }
 
 func NewMap() *Map {
-	m := &Map{
+	return &Map{
 		mapID:        1,
 		interpreters: map[int]*Interpreter{},
 		pressedMapX:  -1,
 		pressedMapY:  -1,
 	}
+}
+
+func NewTitleMap() *Map {
+	m := NewMap()
+	m.isTitle = true
 	return m
 }
 
@@ -363,13 +369,19 @@ func (m *Map) Update(sceneManager *scene.Manager, gameState *Game) error {
 	// Remove this if possible.
 	m.gameData = sceneManager.Game()
 	if m.player == nil {
-		state := sceneManager.Game().System.InitialPlayerState
 		x, y, roomID := 0, 0, 1
-		if state != nil {
-			x, y, roomID = state.X, state.Y, state.RoomID
+		// sceneManager.Game().System.Title can be nil for old games.
+		if m.isTitle && sceneManager.Game().System.Title != nil {
+			m.player = character.NewPlayer(0, 0)
+			roomID = sceneManager.Game().System.Title.RoomID
+		} else {
+			state := sceneManager.Game().System.InitialPlayerState
+			if state != nil {
+				x, y, roomID = state.X, state.Y, state.RoomID
+			}
+			m.player = character.NewPlayer(x, y)
+			m.player.SetImage(state.ImageType, state.Image)
 		}
-		m.player = character.NewPlayer(x, y)
-		m.player.SetImage(state.ImageType, state.Image)
 		m.setRoomID(gameState, roomID, nil)
 	}
 

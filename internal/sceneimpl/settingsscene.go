@@ -52,6 +52,8 @@ type SettingsScene struct {
 	initialized bool
 	baseX       int
 	baseY       int
+
+	err error
 }
 
 const (
@@ -148,7 +150,12 @@ func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
 		sceneManager.Requester().RequestOpenLink(s.waitingRequestID, "privacy", "")
 	})
 	s.closeButton.SetOnPressed(func(_ *ui.Button) {
-		sceneManager.GoTo(NewTitleScene())
+		g, err := SavedGame(sceneManager)
+		if err != nil {
+			s.err = err
+			return
+		}
+		sceneManager.GoTo(NewTitleMapScene(g))
 	})
 	s.shopButton.SetOnPressed(func(_ *ui.Button) {
 		s.waitingRequestID = sceneManager.GenerateRequestID()
@@ -173,6 +180,10 @@ func (s *SettingsScene) updateButtonTexts() {
 }
 
 func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
+	if s.err != nil {
+		return s.err
+	}
+
 	if !s.initialized {
 		s.initUI(sceneManager)
 		s.initialized = true
@@ -248,7 +259,12 @@ func (s *SettingsScene) handleBackButton(sceneManager *scene.Manager) {
 	}
 
 	audio.PlaySE("system/cancel", 1.0)
-	sceneManager.GoTo(NewTitleScene())
+	g, err := SavedGame(sceneManager)
+	if err != nil {
+		s.err = err
+		return
+	}
+	sceneManager.GoTo(NewTitleMapScene(g))
 }
 
 func (s *SettingsScene) Draw(screen *ebiten.Image) {

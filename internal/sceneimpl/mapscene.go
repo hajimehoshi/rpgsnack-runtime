@@ -21,6 +21,7 @@ import (
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten"
+	"github.com/vmihailenco/msgpack"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
@@ -70,6 +71,7 @@ type MapScene struct {
 	removeAdsNoButton    *ui.Button
 	inventory            *ui.Inventory
 	itemPreviewPopup     *ui.ItemPreviewPopup
+	titleView            *ui.TitleView
 	markerAnimationFrame int
 	waitingRequestID     int
 	isAdsRemoved         bool
@@ -78,6 +80,8 @@ type MapScene struct {
 	windowOffsetY        int
 	inventoryHeight      int
 	animation            animation
+
+	err error
 }
 
 func NewMapScene() *MapScene {
@@ -91,6 +95,28 @@ func NewMapScene() *MapScene {
 func NewMapSceneWithGame(game *gamestate.Game) *MapScene {
 	m := &MapScene{
 		gameState: game,
+	}
+	return m
+}
+
+type sceneMaker struct{}
+
+func (s *sceneMaker) NewMapScene() scene.Scene {
+	return NewMapScene()
+}
+
+func (s *sceneMaker) NewMapSceneWithGame(game *gamestate.Game) scene.Scene {
+	return NewMapSceneWithGame(game)
+}
+
+func (s *sceneMaker) NewSettingsScene() scene.Scene {
+	return NewSettingsScene()
+}
+
+func NewTitleMapScene(savedGame *gamestate.Game) *MapScene {
+	m := &MapScene{
+		gameState: gamestate.NewTitleGame(savedGame),
+		titleView: ui.NewTitleView(&sceneMaker{}),
 	}
 	return m
 }
@@ -141,6 +167,17 @@ func (m *MapScene) updateOffsetY(sceneManager *scene.Manager) {
 	m.windowOffsetY = 0
 }
 
+func SavedGame(sceneManager *scene.Manager) (*gamestate.Game, error) {
+	if sceneManager.HasProgress() {
+		var savedGame *gamestate.Game
+		if err := msgpack.Unmarshal(sceneManager.Progress(), &savedGame); err != nil {
+			return nil, err
+		}
+		return savedGame, nil
+	}
+	return nil, nil
+}
+
 func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	const (
 		uiWidth = consts.MapWidth
@@ -166,7 +203,9 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	m.screenShotDialog = ui.NewDialog((uiWidth-160)/2+4, 4, 152, 232)
 	m.screenShotDialog.AddChild(ui.NewImageView(8, 8, 1.0/consts.TileScale/2, m.screenShotImage))
 
-	m.gameHeader = ui.NewGameHeader()
+	if m.titleView == nil {
+		m.gameHeader = ui.NewGameHeader()
+	}
 
 	// TODO: Implement the camera functionality later
 	m.cameraButton.Visible = false
@@ -206,14 +245,21 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 			m.gameState.RequestSave(sceneManager)
 		}
 		audio.Stop()
-		sceneManager.GoToWithFading(NewTitleScene(), 30)
+		g, err := SavedGame(sceneManager)
+		if err != nil {
+			m.err = err
+			return
+		}
+		sceneManager.GoToWithFading(NewTitleMapScene(g), 30)
 	})
 	m.quitNoButton.SetOnPressed(func(_ *ui.Button) {
 		m.quitDialog.Hide()
 	})
-	m.gameHeader.SetOnTitlePressed(func() {
-		m.quitDialog.Show()
-	})
+	if m.gameHeader != nil {
+		m.gameHeader.SetOnTitlePressed(func() {
+			m.quitDialog.Show()
+		})
+	}
 	m.storeErrorOkButton.SetOnPressed(func(_ *ui.Button) {
 		m.storeErrorDialog.Hide()
 	})
@@ -327,6 +373,11 @@ func (m *MapScene) updatePurchasesState(sceneManager *scene.Manager) {
 
 func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) {
 	if m.itemPreviewPopup.Visible() {
+		m.triggeringFailed = false
+		return
+	}
+
+	if m.titleView != nil {
 		m.triggeringFailed = false
 		return
 	}
@@ -450,7 +501,9 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 	m.removeAdsDialog.Update()
 
 	m.cameraButton.Update()
-	m.gameHeader.Update(m.quitDialog.Visible())
+	if m.gameHeader != nil {
+		m.gameHeader.Update(m.quitDialog.Visible())
+	}
 
 	m.removeAdsButton.Disabled = m.gameState.Map().IsBlockingEventExecuting()
 	m.removeAdsButton.Update()
@@ -470,9 +523,17 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 
 	// Event handling
 	m.updateItemPreviewPopupVisibility(sceneManager)
+
+	if m.titleView != nil {
+		m.titleView.Update(sceneManager)
+	}
 }
 
 func (m *MapScene) Update(sceneManager *scene.Manager) error {
+	if m.err != nil {
+		return m.err
+	}
+
 	m.animation.Update()
 
 	if !m.initialized {
@@ -514,7 +575,12 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 
 func (m *MapScene) goToTitle(sceneManager *scene.Manager) {
 	audio.Stop()
-	sceneManager.GoToWithFading(NewTitleScene(), 60)
+	g, err := SavedGame(sceneManager)
+	if err != nil {
+		m.err = err
+		return
+	}
+	sceneManager.GoToWithFading(NewTitleMapScene(g), 60)
 }
 
 func (m *MapScene) handleBackButton() {
@@ -714,7 +780,9 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	m.removeAdsButton.Draw(m.uiImage)
 
 	m.gameState.DrawWindows(m.uiImage, 0, m.offsetY/consts.TileScale, m.windowOffsetY/consts.TileScale)
-	m.gameHeader.Draw(m.uiImage)
+	if m.gameHeader != nil {
+		m.gameHeader.Draw(m.uiImage)
+	}
 
 	m.screenShotDialog.Draw(m.uiImage)
 	m.quitDialog.Draw(m.uiImage)
@@ -732,6 +800,10 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		w, _ := m.screenShotImage.Size()
 		op.GeoM.Translate((float64(w)-float64(sw))/2, 0)
 		m.screenShotImage.DrawImage(m.uiImage, nil)
+	}
+
+	if m.titleView != nil {
+		m.titleView.Draw(screen)
 	}
 
 	msg := fmt.Sprintf("FPS: %0.2f", ebiten.CurrentFPS())

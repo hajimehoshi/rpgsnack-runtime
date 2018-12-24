@@ -100,6 +100,7 @@ func (t *TitleView) initUI(sceneManager *scene.Manager) {
 	})
 	t.startGameButton.SetOnPressed(func(_ *Button) {
 		if sceneManager.HasProgress() {
+			// TODO: Remove this logic from UI.
 			var game *gamestate.Game
 			if err := msgpack.Unmarshal(sceneManager.Progress(), &game); err != nil {
 				t.err = err

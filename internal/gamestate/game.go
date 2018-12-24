@@ -67,6 +67,7 @@ type Game struct {
 	playerSpeed data.Speed
 
 	// Fields that are not dumped
+	isTitle          bool
 	rand             Rand
 	waitingRequestID int
 	prices           map[string]string // TODO: We want to use https://godoc.org/golang.org/x/text/currency
@@ -89,9 +90,31 @@ func NewGame() *Game {
 		rand:                 generateDefaultRand(),
 		autoSaveEnabled:      true,
 		playerControlEnabled: true,
-		inventoryVisible:     false,
 		playerSpeed:          data.Speed5,
 	}
+	return g
+}
+
+func NewTitleGame(savedGame *Game) *Game {
+	g := &Game{
+		currentMap:           NewTitleMap(),
+		hints:                &hints.Hints{},
+		items:                &items.Items{},
+		variables:            &variables.Variables{},
+		screen:               &Screen{},
+		windows:              &window.Windows{},
+		pictures:             &picture.Pictures{},
+		rand:                 generateDefaultRand(),
+		playerControlEnabled: true,
+		playerSpeed:          data.Speed5,
+		isTitle:              true,
+	}
+
+	if savedGame != nil {
+		g.items = savedGame.items
+		g.variables = savedGame.variables
+	}
+
 	return g
 }
 
@@ -361,6 +384,9 @@ func (g *Game) IsPlayerControlEnabled() bool {
 }
 
 func (g *Game) RequestSave(sceneManager *scene.Manager) bool {
+	if g.isTitle {
+		return false
+	}
 	// If there is an unfinished request, stop saving the progress.
 	if g.waitingRequestID != 0 {
 		return false

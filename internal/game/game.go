@@ -151,7 +151,11 @@ func (g *Game) update() error {
 			assets.Set(da.Assets, da.AssetsMetadata)
 			g.sceneManager = scene.NewManager(g.width, g.height, g.requester, da.Game, da.Progress, da.Purchases)
 			g.sceneManager.SetLanguage(da.Language)
-			g.sceneManager.InitScene(sceneimpl.NewTitleScene())
+			savedGame, err := sceneimpl.SavedGame(g.sceneManager)
+			if err != nil {
+				return err
+			}
+			g.sceneManager.InitScene(sceneimpl.NewTitleMapScene(savedGame))
 			g.langs = da.Game.Texts.Languages()
 		default:
 			return nil
