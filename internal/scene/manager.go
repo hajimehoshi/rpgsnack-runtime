@@ -31,7 +31,7 @@ import (
 
 var TierTypes = [...]string{"tier1_donation", "tier2_donation", "tier3_donation"}
 
-type scene interface {
+type Scene interface {
 	Update(manager *Manager) error
 	Draw(screen *ebiten.Image)
 	Resize()
@@ -46,8 +46,8 @@ type Manager struct {
 	width                 int
 	height                int
 	requester             Requester
-	current               scene
-	next                  scene
+	current               Scene
+	next                  Scene
 	fadingCountMax        int
 	fadingCount           int
 	lastRequestID         int
@@ -91,7 +91,7 @@ func NewManager(width, height int, requester Requester, game *data.Game, progres
 	return m
 }
 
-func (m *Manager) InitScene(scene scene) {
+func (m *Manager) InitScene(scene Scene) {
 	if m.current != nil {
 		panic("not reach")
 	}
@@ -375,11 +375,11 @@ func (m *Manager) SetLanguage(language language.Tag) language.Tag {
 	return language
 }
 
-func (m *Manager) GoTo(next scene) {
+func (m *Manager) GoTo(next Scene) {
 	m.GoToWithFading(next, 0)
 }
 
-func (m *Manager) GoToWithFading(next scene, frames int) {
+func (m *Manager) GoToWithFading(next Scene, frames int) {
 	if 0 < m.fadingCount {
 		// TODO: Should panic here?
 		return
