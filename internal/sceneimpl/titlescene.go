@@ -264,6 +264,11 @@ func (t *TitleScene) DrawBackgroundAnimation(screen *ebiten.Image) {
 }
 
 func (t *TitleScene) DrawTitle(screen *ebiten.Image) {
+	// TODO: titles/title is used in games before 'title as map' was introduced.
+	// Remove this usage in the future.
+	if !assets.Exists("titles/title") {
+		return
+	}
 	timg := assets.GetLocalizeImage("titles/title")
 	tw, th := timg.Size()
 	sw, sh := screen.Size()
