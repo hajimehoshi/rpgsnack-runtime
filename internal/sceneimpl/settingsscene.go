@@ -36,16 +36,22 @@ type SettingsScene struct {
 	updateCreditsButton    *ui.Button
 	reviewThisAppButton    *ui.Button
 	restorePurchasesButton *ui.Button
-	moreGamesButton        *ui.Button
+	resetGameButton        *ui.Button
 	privacyPolicyButton    *ui.Button
 	shopButton             *ui.Button
 	closeButton            *ui.Button
-	languageDialog         *ui.Dialog
-	languageButtons        []*ui.Button
-	waitingRequestID       int
-	initialized            bool
-	baseX                  int
-	baseY                  int
+
+	languageDialog   *ui.Dialog
+	languageButtons  []*ui.Button
+	warningDialog    *ui.Dialog
+	warningLabel     *ui.Label
+	warningYesButton *ui.Button
+	warningNoButton  *ui.Button
+	waitingRequestID int
+
+	initialized bool
+	baseX       int
+	baseY       int
 }
 
 const (
@@ -73,7 +79,7 @@ func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
 	s.updateCreditsButton = ui.NewButton(s.baseX+80, s.calcButtonY(2), 40, 20, "system/click")
 	s.reviewThisAppButton = ui.NewButton(s.baseX, s.calcButtonY(3), 120, 20, "system/click")
 	s.restorePurchasesButton = ui.NewButton(s.baseX, s.calcButtonY(4), 120, 20, "system/click")
-	s.moreGamesButton = ui.NewButton(s.baseX, s.calcButtonY(5), 120, 20, "system/click")
+	s.resetGameButton = ui.NewButton(s.baseX, s.calcButtonY(5), 120, 20, "system/click")
 	s.privacyPolicyButton = ui.NewButton(s.baseX, s.calcButtonY(6), 120, 20, "system/click")
 	s.closeButton = ui.NewButton(s.baseX, s.calcButtonY(7), 120, 20, "system/cancel")
 
@@ -100,6 +106,7 @@ func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
 	s.languageButton.SetOnPressed(func(_ *ui.Button) {
 		s.languageDialog.Show()
 	})
+
 	s.creditButton.SetOnPressed(func(_ *ui.Button) {
 		s.waitingRequestID = sceneManager.GenerateRequestID()
 		sceneManager.Requester().RequestOpenLink(s.waitingRequestID, "show_credit", "menu")
@@ -116,10 +123,26 @@ func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
 		s.waitingRequestID = sceneManager.GenerateRequestID()
 		sceneManager.Requester().RequestRestorePurchases(s.waitingRequestID)
 	})
-	s.moreGamesButton.SetOnPressed(func(_ *ui.Button) {
-		s.waitingRequestID = sceneManager.GenerateRequestID()
-		sceneManager.Requester().RequestOpenLink(s.waitingRequestID, "more", "")
+
+	s.resetGameButton.SetOnPressed(func(_ *ui.Button) {
+		s.warningDialog.Show()
 	})
+	s.warningDialog = ui.NewDialog((w/consts.TileScale-160)/2+4, (h)/(2*consts.TileScale)-64, 152, 124)
+	s.warningLabel = ui.NewLabel(16, 8)
+	s.warningYesButton = ui.NewButton((152-120)/2, 72, 120, 20, "system/click")
+	s.warningNoButton = ui.NewButton((152-120)/2, 96, 120, 20, "system/cancel")
+	s.warningDialog.AddChild(s.warningLabel)
+	s.warningDialog.AddChild(s.warningYesButton)
+	s.warningDialog.AddChild(s.warningNoButton)
+	s.warningYesButton.SetOnPressed(func(_ *ui.Button) {
+		sceneManager.SetProgress(nil)
+		// TODO: Remove save.msgpack immediately or override it?
+		s.warningDialog.Hide()
+	})
+	s.warningNoButton.SetOnPressed(func(_ *ui.Button) {
+		s.warningDialog.Hide()
+	})
+
 	s.privacyPolicyButton.SetOnPressed(func(_ *ui.Button) {
 		s.waitingRequestID = sceneManager.GenerateRequestID()
 		sceneManager.Requester().RequestOpenLink(s.waitingRequestID, "privacy", "")
@@ -140,7 +163,10 @@ func (s *SettingsScene) updateButtonTexts() {
 	s.updateCreditsButton.Text = texts.Text(lang.Get(), texts.TextIDCreditEntry)
 	s.reviewThisAppButton.Text = texts.Text(lang.Get(), texts.TextIDReviewThisApp)
 	s.restorePurchasesButton.Text = texts.Text(lang.Get(), texts.TextIDRestorePurchases)
-	s.moreGamesButton.Text = texts.Text(lang.Get(), texts.TextIDMoreGames)
+	s.resetGameButton.Text = texts.Text(lang.Get(), texts.TextIDResetGame)
+	s.warningLabel.Text = texts.Text(lang.Get(), texts.TextIDNewGameWarning)
+	s.warningYesButton.Text = texts.Text(lang.Get(), texts.TextIDYes)
+	s.warningNoButton.Text = texts.Text(lang.Get(), texts.TextIDNo)
 	s.privacyPolicyButton.Text = texts.Text(lang.Get(), texts.TextIDPrivacyPolicy)
 	s.shopButton.Text = texts.Text(lang.Get(), texts.TextIDShop)
 	s.closeButton.Text = texts.Text(lang.Get(), texts.TextIDClose)
@@ -186,19 +212,22 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 	s.updateCreditsButton.SetY(s.calcButtonY(itemOffset + 2))
 	s.reviewThisAppButton.SetY(s.calcButtonY(itemOffset + 3))
 	s.restorePurchasesButton.SetY(s.calcButtonY(itemOffset + 4))
-	s.moreGamesButton.SetY(s.calcButtonY(itemOffset + 5))
+	s.resetGameButton.SetY(s.calcButtonY(itemOffset + 5))
 	s.privacyPolicyButton.SetY(s.calcButtonY(itemOffset + 6))
 	s.closeButton.SetY(s.calcButtonY(itemOffset + 7))
 
+	s.resetGameButton.Disabled = !sceneManager.HasProgress()
+
 	s.languageDialog.Update()
-	if !s.languageDialog.Visible() {
+	s.warningDialog.Update()
+	if !s.languageDialog.Visible() && !s.warningDialog.Visible() {
 		s.languageButton.Update()
 		s.shopButton.Update()
 		s.creditButton.Update()
 		s.updateCreditsButton.Update()
 		s.reviewThisAppButton.Update()
 		s.restorePurchasesButton.Update()
-		s.moreGamesButton.Update()
+		s.resetGameButton.Update()
 		s.privacyPolicyButton.Update()
 		s.closeButton.Update()
 	}
@@ -210,6 +239,11 @@ func (s *SettingsScene) handleBackButton(sceneManager *scene.Manager) {
 	if s.languageDialog.Visible() {
 		audio.PlaySE("system/cancel", 1.0)
 		s.languageDialog.Hide()
+		return
+	}
+	if s.warningDialog.Visible() {
+		audio.PlaySE("system/cancel", 1.0)
+		s.warningDialog.Hide()
 		return
 	}
 
@@ -228,10 +262,11 @@ func (s *SettingsScene) Draw(screen *ebiten.Image) {
 	s.updateCreditsButton.Draw(screen)
 	s.reviewThisAppButton.Draw(screen)
 	s.restorePurchasesButton.Draw(screen)
-	s.moreGamesButton.Draw(screen)
+	s.resetGameButton.Draw(screen)
 	s.privacyPolicyButton.Draw(screen)
 	s.closeButton.Draw(screen)
 	s.languageDialog.Draw(screen)
+	s.warningDialog.Draw(screen)
 }
 
 func (s *SettingsScene) Resize() {

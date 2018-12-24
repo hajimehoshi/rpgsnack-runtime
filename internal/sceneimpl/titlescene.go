@@ -33,20 +33,14 @@ import (
 
 type TitleScene struct {
 	init             bool
-	newGameButton    *ui.Button
-	resumeGameButton *ui.Button
+	startGameButton  *ui.Button
 	removeAdsButton  *ui.Button
 	settingsButton   *ui.Button
 	moregamesButton  *ui.Button
-	warningDialog    *ui.Dialog
-	warningLabel     *ui.Label
-	warningYesButton *ui.Button
-	warningNoButton  *ui.Button
 	quitDialog       *ui.Dialog
 	quitLabel        *ui.Label
 	quitYesButton    *ui.Button
 	quitNoButton     *ui.Button
-	titleLine        *ui.ImageView
 	waitingRequestID int
 	initialized      bool
 	animation        animation
@@ -73,22 +67,13 @@ func (t *TitleScene) initUI(sceneManager *scene.Manager) {
 	if sceneManager.HasExtraBottomGrid() {
 		by = 36
 	}
-	t.resumeGameButton = ui.NewTextButton((w/consts.TileScale-120)/2, h/consts.TileScale-by-32, 120, 20, "system/start")
-	t.titleLine = ui.NewImageView((w/consts.TileScale-120)/2+20, h/consts.TileScale-by-32, 1.0, assets.GetImage("system/common/title_line.png"))
-	t.newGameButton = ui.NewTextButton((w/consts.TileScale-120)/2, h/consts.TileScale-by-52, 120, 20, "system/start")
+	t.startGameButton = ui.NewTextButton((w/consts.TileScale-120)/2, h/consts.TileScale-by-32, 120, 20, "system/start")
 	t.removeAdsButton = ui.NewTextButton((w/consts.TileScale-120)/2+20, h/consts.TileScale-by-8, 80, 20, "system/click")
 	t.removeAdsButton.TextColor = color.RGBA{0xc8, 0xc8, 0xc8, 0xff}
 	t.settingsButton = ui.NewImageButton(w/consts.TileScale-24, h/consts.TileScale-by, settingsIcon, settingsIcon, "system/click")
 	t.settingsButton.TouchExpand = 10
 	t.moregamesButton = ui.NewImageButton(12, h/consts.TileScale-by, moreGamesIcon, moreGamesIcon, "system/click")
 	t.moregamesButton.TouchExpand = 10
-	t.warningDialog = ui.NewDialog((w/consts.TileScale-160)/2+4, (h)/(2*consts.TileScale)-64, 152, 124)
-	t.warningLabel = ui.NewLabel(16, 8)
-	t.warningYesButton = ui.NewButton((152-120)/2, 72, 120, 20, "system/click")
-	t.warningNoButton = ui.NewButton((152-120)/2, 96, 120, 20, "system/cancel")
-	t.warningDialog.AddChild(t.warningLabel)
-	t.warningDialog.AddChild(t.warningYesButton)
-	t.warningDialog.AddChild(t.warningNoButton)
 
 	t.quitDialog = ui.NewDialog((w/consts.TileScale-160)/2+4, (h)/(2*consts.TileScale)-64, 152, 124)
 	t.quitLabel = ui.NewLabel(16, 8)
@@ -98,35 +83,25 @@ func (t *TitleScene) initUI(sceneManager *scene.Manager) {
 	t.quitDialog.AddChild(t.quitYesButton)
 	t.quitDialog.AddChild(t.quitNoButton)
 
-	t.warningYesButton.SetOnPressed(func(_ *ui.Button) {
-		audio.StopBGM(0)
-		sceneManager.GoToWithFading(NewMapScene(), 60)
-	})
-	t.warningNoButton.SetOnPressed(func(_ *ui.Button) {
-		t.warningDialog.Hide()
-	})
 	t.quitYesButton.SetOnPressed(func(_ *ui.Button) {
 		sceneManager.Requester().RequestTerminateGame()
 	})
 	t.quitNoButton.SetOnPressed(func(_ *ui.Button) {
 		t.quitDialog.Hide()
 	})
-	t.newGameButton.SetOnPressed(func(_ *ui.Button) {
+	t.startGameButton.SetOnPressed(func(_ *ui.Button) {
 		if sceneManager.HasProgress() {
-			t.warningDialog.Show()
+			var game *gamestate.Game
+			if err := msgpack.Unmarshal(sceneManager.Progress(), &game); err != nil {
+				t.err = err
+				return
+			}
+			audio.StopBGM(0)
+			sceneManager.GoToWithFading(NewMapSceneWithGame(game), 60)
 		} else {
 			audio.StopBGM(0)
 			sceneManager.GoToWithFading(NewMapScene(), 60)
 		}
-	})
-	t.resumeGameButton.SetOnPressed(func(_ *ui.Button) {
-		var game *gamestate.Game
-		if err := msgpack.Unmarshal(sceneManager.Progress(), &game); err != nil {
-			t.err = err
-			return
-		}
-		audio.StopBGM(0)
-		sceneManager.GoToWithFading(NewMapSceneWithGame(game), 60)
 	})
 	t.removeAdsButton.SetOnPressed(func(_ *ui.Button) {
 		if sceneManager.Game().IsShopAvailable(data.ShopTypeHome) {
@@ -174,35 +149,25 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 		t.handleBackButton()
 	}
 
-	t.newGameButton.Text = texts.Text(lang.Get(), texts.TextIDNewGame)
-	t.resumeGameButton.Text = texts.Text(lang.Get(), texts.TextIDResumeGame)
-	if sceneManager.Game().System.TitleTextColor == "black" {
-		t.newGameButton.TextColor = color.Black
-		t.resumeGameButton.TextColor = color.Black
+	if sceneManager.HasProgress() {
+		t.startGameButton.Text = texts.Text(lang.Get(), texts.TextIDResumeGame)
 	} else {
-		t.newGameButton.TextColor = color.White
-		t.resumeGameButton.TextColor = color.White
+		t.startGameButton.Text = texts.Text(lang.Get(), texts.TextIDNewGame)
+	}
+	if sceneManager.Game().System.TitleTextColor == "black" {
+		t.startGameButton.TextColor = color.Black
+	} else {
+		t.startGameButton.TextColor = color.White
 	}
 
 	t.removeAdsButton.Text = texts.Text(lang.Get(), texts.TextIDRemoveAds)
-	t.warningLabel.Text = texts.Text(lang.Get(), texts.TextIDNewGameWarning)
-	t.warningYesButton.Text = texts.Text(lang.Get(), texts.TextIDYes)
-	t.warningNoButton.Text = texts.Text(lang.Get(), texts.TextIDNo)
 	t.quitLabel.Text = texts.Text(lang.Get(), texts.TextIDQuitGame)
 	t.quitYesButton.Text = texts.Text(lang.Get(), texts.TextIDYes)
 	t.quitNoButton.Text = texts.Text(lang.Get(), texts.TextIDNo)
 
-	if !sceneManager.HasProgress() {
-		t.resumeGameButton.Disabled = true
-	} else {
-		t.resumeGameButton.Disabled = false
-	}
-
-	t.warningDialog.Update()
 	t.quitDialog.Update()
-	if !t.warningDialog.Visible() && !t.quitDialog.Visible() {
-		t.newGameButton.Update()
-		t.resumeGameButton.Update()
+	if !t.quitDialog.Visible() {
+		t.startGameButton.Update()
 		t.removeAdsButton.Update()
 		t.settingsButton.Update()
 		t.moregamesButton.Update()
@@ -214,11 +179,6 @@ func (t *TitleScene) Update(sceneManager *scene.Manager) error {
 }
 
 func (t *TitleScene) handleBackButton() {
-	if t.warningDialog.Visible() {
-		audio.PlaySE("system/cancel", 1.0)
-		t.warningDialog.Hide()
-		return
-	}
 	if t.quitDialog.Visible() {
 		audio.PlaySE("system/cancel", 1.0)
 		t.quitDialog.Hide()
@@ -287,15 +247,12 @@ func (t *TitleScene) Draw(screen *ebiten.Image) {
 	t.DrawTitle(screen)
 
 	// TODO: hide buttons to avoid visual conflicts between the dialog and the buttons
-	if !t.warningDialog.Visible() && !t.quitDialog.Visible() {
-		t.newGameButton.Draw(screen)
-		t.titleLine.Draw(screen)
-		t.resumeGameButton.Draw(screen)
+	if !t.quitDialog.Visible() {
+		t.startGameButton.Draw(screen)
 		t.removeAdsButton.Draw(screen)
 		t.settingsButton.Draw(screen)
 		t.moregamesButton.Draw(screen)
 	}
-	t.warningDialog.Draw(screen)
 	t.quitDialog.Draw(screen)
 }
 
