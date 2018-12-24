@@ -137,8 +137,10 @@ func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
 	s.warningDialog.AddChild(s.warningYesButton)
 	s.warningDialog.AddChild(s.warningNoButton)
 	s.warningYesButton.SetOnPressed(func(_ *ui.Button) {
+		id := sceneManager.GenerateRequestID()
+		s.waitingRequestID = id
+		sceneManager.Requester().RequestSaveProgress(id, nil)
 		sceneManager.SetProgress(nil)
-		// TODO: Remove save.msgpack immediately or override it?
 		s.warningDialog.Hide()
 	})
 	s.warningNoButton.SetOnPressed(func(_ *ui.Button) {

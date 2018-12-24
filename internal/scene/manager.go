@@ -241,7 +241,7 @@ func (m *Manager) Game() *data.Game {
 }
 
 func (m *Manager) HasProgress() bool {
-	return m.progress != nil
+	return len(m.progress) > 0
 }
 
 func (m *Manager) Progress() []byte {
