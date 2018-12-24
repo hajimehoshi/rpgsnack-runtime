@@ -26,7 +26,7 @@ type TitleScene struct {
 	view *ui.TitleView
 }
 
-type sceneMaker struct {}
+type sceneMaker struct{}
 
 func (s *sceneMaker) NewMapScene() scene.Scene {
 	return NewMapScene()
