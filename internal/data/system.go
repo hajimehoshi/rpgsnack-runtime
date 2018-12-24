@@ -18,7 +18,13 @@ import (
 	"golang.org/x/text/language"
 )
 
+type Title struct {
+	MapID  int `json:"mapId" msgpack:"mapId"`
+	RoomID int `json:"roomId" msgpack:"roomId"`
+}
+
 type System struct {
+	Title              *Title              `msgpack:"title"`
 	InitialPlayerState *InitialPlayerState `msgpack:"player"`
 	DefaultLanguage    Language            `msgpack:"defaultLanguage"`
 	TitleBGM           BGM                 `msgpack:"titleBgm"`
@@ -28,6 +34,7 @@ type System struct {
 
 func (s *System) UnmarshalJSON(data []uint8) error {
 	type tmpSystem struct {
+		Title              *Title              `json:"title"`
 		InitialPlayerState *InitialPlayerState `json:"player"`
 		DefualtLanguage    string              `json:"defaultLanguage"`
 		TitleBGM           BGM                 `json:"titleBgm"`
@@ -37,6 +44,7 @@ func (s *System) UnmarshalJSON(data []uint8) error {
 	if err := unmarshalJSON(data, &tmp); err != nil {
 		return err
 	}
+	s.Title = tmp.Title
 	s.InitialPlayerState = tmp.InitialPlayerState
 	s.TitleBGM = tmp.TitleBGM
 	s.TitleTextColor = tmp.TitleTextColor
