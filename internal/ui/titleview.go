@@ -103,6 +103,7 @@ func (t *TitleView) initUI(sceneManager *scene.Manager) {
 		t.quitDialog.Hide()
 	})
 	t.startGameButton.SetOnPressed(func(_ *Button) {
+		audio.Stop()
 		if sceneManager.HasProgress() {
 			// TODO: Remove this logic from UI.
 			var game *gamestate.Game
@@ -110,10 +111,8 @@ func (t *TitleView) initUI(sceneManager *scene.Manager) {
 				t.err = err
 				return
 			}
-			audio.StopBGM(0)
 			sceneManager.GoToWithFading(t.sceneMaker.NewMapSceneWithGame(game), 60)
 		} else {
-			audio.StopBGM(0)
 			sceneManager.GoToWithFading(t.sceneMaker.NewMapScene(), 60)
 		}
 	})

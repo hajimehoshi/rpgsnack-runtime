@@ -139,11 +139,11 @@ func (b *Button) update(visible bool, offsetX, offsetY int) {
 	}
 	if !input.Pressed() {
 		b.pressing = false
-		if b.soundName != "" {
-			audio.PlaySE(b.soundName, 1.0)
-		}
 		if b.onPressed != nil {
 			b.onPressed(b)
+		}
+		if b.soundName != "" {
+			audio.PlaySE(b.soundName, 1.0)
 		}
 		return
 	}
