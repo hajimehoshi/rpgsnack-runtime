@@ -208,7 +208,7 @@ func (t *TitleView) drawFooter(screen *ebiten.Image) {
 func (t *TitleView) drawTitle(screen *ebiten.Image) {
 	// TODO: titles/title is used in games before 'title as map' was introduced.
 	// Remove this usage in the future.
-	if !assets.Exists("titles/title") {
+	if !assets.ImageExists("titles/title") {
 		return
 	}
 	timg := assets.GetLocalizeImage("titles/title")
