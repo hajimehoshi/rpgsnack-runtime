@@ -50,13 +50,14 @@ type TitleView struct {
 	waitingRequestID int
 	initialized      bool
 	bgImage          *ebiten.Image
+	footerOffset     int
 	err              error
 
 	sceneMaker SceneMaker
 }
 
 const (
-	footerHeight = 280
+	footerHeight = 192
 )
 
 func NewTitleView(sceneMaker SceneMaker) *TitleView {
@@ -73,11 +74,14 @@ func (t *TitleView) initUI(sceneManager *scene.Manager) {
 	moreGamesIcon := assets.GetImage("system/common/icon_moregames.png")
 
 	by := 16
+	t.footerOffset = 0
 	if sceneManager.HasExtraBottomGrid() {
 		by = 36
+		t.footerOffset = 48
 	}
+
 	t.startGameButton = NewTextButton((w/consts.TileScale-120)/2, h/consts.TileScale-by-32, 120, 20, "system/start")
-	t.removeAdsButton = NewTextButton((w/consts.TileScale-120)/2+20, h/consts.TileScale-by-8, 80, 20, "system/click")
+	t.removeAdsButton = NewTextButton((w/consts.TileScale-120)/2+20, h/consts.TileScale-by-4, 80, 20, "system/click")
 	t.removeAdsButton.TextColor = color.RGBA{0xc8, 0xc8, 0xc8, 0xff}
 	t.settingsButton = NewImageButton(w/consts.TileScale-24, h/consts.TileScale-by, settingsIcon, settingsIcon, "system/click")
 	t.settingsButton.TouchExpand = 10
@@ -202,7 +206,7 @@ func (t *TitleView) drawFooter(screen *ebiten.Image) {
 	_, sh := screen.Size()
 
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(0, float64(sh-footerHeight))
+	op.GeoM.Translate(0, float64(sh-footerHeight-t.footerOffset))
 	screen.DrawImage(fimg, op)
 }
 
