@@ -813,4 +813,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 
 func (m *MapScene) Resize() {
 	m.initialized = false
+	if m.titleView != nil {
+		m.titleView.Resize()
+	}
 }
