@@ -91,7 +91,7 @@ and connect to the network.`,
 	},
 	language.German: {
 		TextIDNewGame:     "Neues Spiel",
-		TextIDResetGame:   "Reset Game", // TODO
+		TextIDResetGame:   "Spiel zurücksetzen",
 		TextIDResumeGame:  "Spiel forsetzen",
 		TextIDYes:         "Ja",
 		TextIDNo:          "Nein",
@@ -125,7 +125,7 @@ und mit dem Internet verbindet bist.`,
 	},
 	language.Spanish: {
 		TextIDNewGame:     "Nuevo Juego",
-		TextIDResetGame:   "Reset Game", // TODO
+		TextIDResetGame:   "Reiniciar el juego", // TODO Review
 		TextIDResumeGame:  "Reanudar Juego",
 		TextIDYes:         "Sí",
 		TextIDNo:          "No",
@@ -157,7 +157,7 @@ sesión y conectarse a internet`,
 	},
 	language.Portuguese: {
 		TextIDNewGame:     "Novo Jogo",
-		TextIDResetGame:   "Reset Game", // TODO
+		TextIDResetGame:   "Redefinir Jogo", // TODO Review
 		TextIDResumeGame:  "Resume Game",
 		TextIDYes:         "Sim",
 		TextIDNo:          "não",
@@ -190,7 +190,7 @@ o login e se conectar à internet`,
 	},
 	language.Japanese: {
 		TextIDNewGame:     "はじめから",
-		TextIDResetGame:   "ゲームのリセット", // TODO
+		TextIDResetGame:   "ゲームのリセット",
 		TextIDResumeGame:  "つづきから",
 		TextIDYes:         "はい",
 		TextIDNo:          "いいえ",
@@ -222,7 +222,7 @@ o login e se conectar à internet`,
 	},
 	language.SimplifiedChinese: {
 		TextIDNewGame:     "新游戏",
-		TextIDResetGame:   "Reset Game", // TODO
+		TextIDResetGame:   "重置游戏", // TODO Review
 		TextIDResumeGame:  "继续游戏",
 		TextIDYes:         "确定",
 		TextIDNo:          "取消",
@@ -253,7 +253,7 @@ o login e se conectar à internet`,
 	},
 	language.TraditionalChinese: {
 		TextIDNewGame:     "新遊戲",
-		TextIDResetGame:   "Reset Game", // TODO
+		TextIDResetGame:   "重置遊戲", // TODO Review
 		TextIDResumeGame:  "繼續遊戲",
 		TextIDYes:         "確定",
 		TextIDNo:          "取消",
@@ -284,7 +284,7 @@ o login e se conectar à internet`,
 	},
 	language.Korean: {
 		TextIDNewGame:     "처음부터",
-		TextIDResetGame:   "Reset Game", // TODO
+		TextIDResetGame:   "게임 다시 설정", // TODO Review
 		TextIDResumeGame:  "이어서",
 		TextIDYes:         "네",
 		TextIDNo:          "아니오",
