@@ -639,10 +639,6 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			gameState.RequestSave(sceneManager)
 		}
 		return false, GoToTitle
-	case data.CommandNameSyncIAP:
-		i.waitingRequestID = sceneManager.GenerateRequestID()
-		sceneManager.Requester().RequestGetIAPPrices(i.waitingRequestID)
-		return false, nil
 	case data.CommandNameUnlockAchievement:
 		// TODO: Remove this command in the future.
 		// Implement passive achievements instead.

@@ -212,7 +212,6 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 		}
 		c.Args = args
 	case CommandNameSave:
-	case CommandNameSyncIAP:
 	case CommandNameRequestReview:
 	case CommandNameUnlockAchievement:
 		var args *CommandArgsUnlockAchievement
@@ -612,7 +611,6 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 		}
 		c.Args = a
 	case CommandNameSave:
-	case CommandNameSyncIAP:
 	case CommandNameRequestReview:
 	case CommandNameUnlockAchievement:
 		a := &CommandArgsUnlockAchievement{}
@@ -865,7 +863,6 @@ const (
 	CommandNameUnlockAchievement CommandName = "unlock_achievement"
 	CommandNameControlHint       CommandName = "control_hint"
 	CommandNamePurchase          CommandName = "start_iap"
-	CommandNameSyncIAP           CommandName = "sync_iap" // TODO: We might be able to remove this later
 	CommandNameShowAds           CommandName = "show_ads"
 	CommandNameOpenLink          CommandName = "open_link"
 	CommandNameRequestReview     CommandName = "request_review"
