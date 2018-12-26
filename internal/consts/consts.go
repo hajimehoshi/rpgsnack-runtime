@@ -32,3 +32,7 @@ const (
 	MaxFullscreenImageSize     = 304
 	SuperLargeScreenHeight     = (TileYNum - 1) * TileSize * TileScale // For devices like iPhoneX
 )
+
+func CeilDiv(x, y int) int {
+	return (x-1)/y + 1
+}

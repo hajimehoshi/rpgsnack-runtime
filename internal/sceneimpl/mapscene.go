@@ -191,8 +191,8 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	_, screenH := sceneManager.Size()
 	m.offsetY = 0
 
-	m.screenImage, _ = ebiten.NewImage(consts.MapWidth, screenH/consts.TileScale, ebiten.FilterNearest)
-	m.tintScreenImage, _ = ebiten.NewImage(consts.MapWidth, screenH/consts.TileScale, ebiten.FilterDefault)
+	m.screenImage, _ = ebiten.NewImage(consts.MapWidth, consts.CeilDiv(screenH, consts.TileScale), ebiten.FilterNearest)
+	m.tintScreenImage, _ = ebiten.NewImage(consts.MapWidth, consts.CeilDiv(screenH, consts.TileScale), ebiten.FilterDefault)
 	m.uiImage, _ = ebiten.NewImage(uiWidth*consts.TileScale, screenH, ebiten.FilterNearest)
 
 	screenShotImage, _ := ebiten.NewImage(480, 720, ebiten.FilterLinear)
@@ -234,8 +234,8 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	m.removeAdsDialog.AddChild(m.removeAdsYesButton)
 	m.removeAdsDialog.AddChild(m.removeAdsNoButton)
 
-	m.inventory = ui.NewInventory(0, (screenH-m.inventoryHeight)/consts.TileScale, sceneManager.HasExtraBottomGrid())
-	m.itemPreviewPopup = ui.NewItemPreviewPopup(int(screenH/consts.TileScale) - m.inventoryHeight - itemPreviewPopupMargin)
+	m.inventory = ui.NewInventory(0, consts.CeilDiv(screenH-m.inventoryHeight, consts.TileScale), sceneManager.HasExtraBottomGrid())
+	m.itemPreviewPopup = ui.NewItemPreviewPopup(consts.CeilDiv(screenH, consts.TileScale) - m.inventoryHeight - itemPreviewPopupMargin)
 	m.quitDialog.AddChild(m.quitLabel)
 
 	m.removeAdsButton.Visible = false // TODO: Clock of Atonement does not need this feature, so turn it off for now
