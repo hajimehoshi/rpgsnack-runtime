@@ -1162,7 +1162,7 @@ func (m *Map) DrawCharacters(screen *ebiten.Image, priority data.Priority, offse
 		_, yi := chars[i].DrawFootPosition()
 		_, yj := chars[j].DrawFootPosition()
 		if yi == yj {
-			return j < i
+			return chars[j].EventID() < chars[i].EventID()
 		}
 		return yi < yj
 	})
