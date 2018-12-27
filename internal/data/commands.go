@@ -411,6 +411,12 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 			return err
 		}
 		c.Args = args
+	case CommandNameSpecial:
+		var args *CommandArgsSpecial
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	default:
 		return fmt.Errorf("data: invalid command: %s", c.Name)
 	}
@@ -811,6 +817,12 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 			return err
 		}
 		c.Args = a
+	case CommandNameSpecial:
+		a := &CommandArgsSpecial{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
 	case CommandNameFinishPlayerMovingByUserInput:
 	case CommandNameExecEventHere:
 	default:
@@ -897,6 +909,7 @@ const (
 	CommandNameSetCharacterOpacity  CommandName = "set_character_opacity"
 
 	// Special commands
+	CommandNameSpecial                       CommandName = "special"
 	CommandNameFinishPlayerMovingByUserInput CommandName = "finish_player_moving_by_user_input"
 	CommandNameExecEventHere                 CommandName = "exec_event_here"
 )
@@ -1631,6 +1644,10 @@ type CommandArgsChangeBackground struct {
 
 type CommandArgsChangeForeground struct {
 	Image string `json:"image" msgpack:"image"`
+}
+
+type CommandArgsSpecial struct {
+	Content string `json:"content" msgpack:"content"`
 }
 
 type SetVariableOp string

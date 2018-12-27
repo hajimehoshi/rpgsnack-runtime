@@ -1121,6 +1121,10 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		gameState.SetForeground(i.mapID, i.roomID, args.Image)
 		i.commandIterator.Advance()
 
+	case data.CommandNameSpecial:
+		// TODO: Implement this.
+		i.commandIterator.Advance()
+
 	case data.CommandNameFinishPlayerMovingByUserInput:
 		gameState.currentMap.FinishPlayerMovingByUserInput()
 		i.commandIterator.Advance()
