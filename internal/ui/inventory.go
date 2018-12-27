@@ -261,14 +261,14 @@ func (i *Inventory) Update(sceneManager *scene.Manager) {
 	}
 
 	i.infoButton.Update()
-	i.infoButton.Disabled = false
+	i.infoButton.disabled = false
 	if i.activeItemID == 0 || i.mode == PreviewMode {
-		i.infoButton.Disabled = true
+		i.infoButton.disabled = true
 	}
 	i.backButton.Update()
-	i.backButton.Disabled = false
+	i.backButton.disabled = false
 	if i.mode == DefaultMode {
-		i.backButton.Disabled = true
+		i.backButton.disabled = true
 	}
 
 	if i.autoScrolling {

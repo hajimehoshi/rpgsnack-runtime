@@ -82,11 +82,11 @@ func (t *TitleView) initUI(sceneManager *scene.Manager) {
 
 	t.startGameButton = NewTextButton((w/consts.TileScale-120)/2, h/consts.TileScale-by-32, 120, 20, "system/start")
 	t.removeAdsButton = NewTextButton((w/consts.TileScale-120)/2+20, h/consts.TileScale-by-4, 80, 20, "system/click")
-	t.removeAdsButton.TextColor = color.RGBA{0xc8, 0xc8, 0xc8, 0xff}
+	t.removeAdsButton.textColor = color.RGBA{0xc8, 0xc8, 0xc8, 0xff}
 	t.settingsButton = NewImageButton(w/consts.TileScale-24, h/consts.TileScale-by, settingsIcon, settingsIcon, "system/click")
-	t.settingsButton.TouchExpand = 10
+	t.settingsButton.touchExpand = 10
 	t.moregamesButton = NewImageButton(12, h/consts.TileScale-by, moreGamesIcon, moreGamesIcon, "system/click")
-	t.moregamesButton.TouchExpand = 10
+	t.moregamesButton.touchExpand = 10
 
 	t.quitDialog = NewDialog((w/consts.TileScale-160)/2+4, (h)/(2*consts.TileScale)-64, 152, 124)
 	t.quitLabel = NewLabel(16, 8)
@@ -161,20 +161,20 @@ func (t *TitleView) Update(sceneManager *scene.Manager) error {
 	}
 
 	if sceneManager.HasProgress() {
-		t.startGameButton.Text = texts.Text(lang.Get(), texts.TextIDResumeGame)
+		t.startGameButton.text = texts.Text(lang.Get(), texts.TextIDResumeGame)
 	} else {
-		t.startGameButton.Text = texts.Text(lang.Get(), texts.TextIDNewGame)
+		t.startGameButton.text = texts.Text(lang.Get(), texts.TextIDNewGame)
 	}
 	if sceneManager.Game().System.TitleTextColor == "black" {
-		t.startGameButton.TextColor = color.Black
+		t.startGameButton.textColor = color.Black
 	} else {
-		t.startGameButton.TextColor = color.White
+		t.startGameButton.textColor = color.White
 	}
 
-	t.removeAdsButton.Text = texts.Text(lang.Get(), texts.TextIDRemoveAds)
+	t.removeAdsButton.text = texts.Text(lang.Get(), texts.TextIDRemoveAds)
 	t.quitLabel.Text = texts.Text(lang.Get(), texts.TextIDQuitGame)
-	t.quitYesButton.Text = texts.Text(lang.Get(), texts.TextIDYes)
-	t.quitNoButton.Text = texts.Text(lang.Get(), texts.TextIDNo)
+	t.quitYesButton.text = texts.Text(lang.Get(), texts.TextIDYes)
+	t.quitNoButton.text = texts.Text(lang.Get(), texts.TextIDNo)
 
 	t.quitDialog.Update()
 	if !t.quitDialog.Visible() {
@@ -184,7 +184,7 @@ func (t *TitleView) Update(sceneManager *scene.Manager) error {
 		t.moregamesButton.Update()
 	}
 
-	t.removeAdsButton.Visible = sceneManager.IsAdsRemovable() && !sceneManager.IsAdsRemoved()
+	t.removeAdsButton.visible = sceneManager.IsAdsRemovable() && !sceneManager.IsAdsRemoved()
 
 	return nil
 }

@@ -83,7 +83,7 @@ func (i *ItemPreviewPopup) Update(lang language.Tag) {
 	for _, n := range i.nodes {
 		n.UpdateAsChild(i.visible, 0, i.y)
 	}
-	i.actionButton.Text = texts.Text(lang, texts.TextIDItemCheck)
+	i.actionButton.text = texts.Text(lang, texts.TextIDItemCheck)
 }
 
 func (i *ItemPreviewPopup) Show() {
@@ -111,8 +111,8 @@ func (i *ItemPreviewPopup) SetOnActionPressed(f func(itemPreviewPopup *ItemPrevi
 }
 
 func (i *ItemPreviewPopup) SetEnabled(enabled bool) {
-	i.actionButton.Disabled = !enabled
-	i.closeButton.Disabled = !enabled
+	i.actionButton.disabled = !enabled
+	i.closeButton.disabled = !enabled
 }
 
 func (i *ItemPreviewPopup) SetActiveItem(item *data.Item) {

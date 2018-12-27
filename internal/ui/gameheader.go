@@ -23,10 +23,12 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/texts"
 )
 
-const revealFrames = 16
-const headerHeight = 12
-const closeFrames = 100
-const HeaderTouchAreaHeight = 48
+const (
+	revealFrames          = 16
+	headerHeight          = 12
+	closeFrames           = 100
+	HeaderTouchAreaHeight = 48
+)
 
 type GameHeader struct {
 	x              int
@@ -44,8 +46,8 @@ type GameHeader struct {
 func NewGameHeader() *GameHeader {
 	titleButton := NewTextButton(10, 2, 24, 12, "system/click")
 	l := lang.Get()
-	titleButton.Text = texts.Text(l, texts.TextIDMenu)
-	titleButton.Disabled = true
+	titleButton.text = texts.Text(l, texts.TextIDMenu)
+	titleButton.disabled = true
 
 	blackImage, _ := ebiten.NewImage(16, 16, ebiten.FilterNearest)
 	blackImage.Fill(color.Black)
@@ -73,14 +75,14 @@ func (g *GameHeader) SetOnTitlePressed(f func()) {
 }
 
 func (g *GameHeader) Open() {
-	g.titleButton.Disabled = true
+	g.titleButton.disabled = true
 	g.isOpening = true
 	g.isClosing = false
 	g.autoCloseTimer = 0
 }
 
 func (g *GameHeader) Close() {
-	g.titleButton.Disabled = true
+	g.titleButton.disabled = true
 	g.isOpening = false
 	g.isClosing = true
 	g.autoCloseTimer = 0
@@ -98,7 +100,7 @@ func (g *GameHeader) Update(paused bool) {
 		if g.revealRatio > 1.0 {
 			g.revealRatio = 1.0
 			g.isOpening = false
-			g.titleButton.Disabled = false
+			g.titleButton.disabled = false
 		}
 	}
 	if g.isClosing {

@@ -32,12 +32,12 @@ import (
 type Button struct {
 	x             int
 	y             int
-	Width         int
-	Height        int
-	TouchExpand   int
-	Visible       bool
-	Text          string
-	Disabled      bool
+	width         int
+	height        int
+	touchExpand   int
+	visible       bool
+	text          string
+	disabled      bool
 	Image         *ebiten.Image
 	PressedImage  *ebiten.Image
 	DisabledImage *ebiten.Image
@@ -45,22 +45,23 @@ type Button struct {
 	pressing      bool
 	soundName     string
 	showFrame     bool
-	TextColor     color.Color
+	textColor     color.Color
 	Lang          language.Tag
-	onPressed     func(button *Button)
+
+	onPressed func(button *Button)
 }
 
 func NewButton(x, y, width, height int, soundName string) *Button {
 	return &Button{
 		x:          x,
 		y:          y,
-		Width:      width,
-		Height:     height,
-		Visible:    true,
+		width:      width,
+		height:     height,
+		visible:    true,
 		soundName:  soundName,
 		dropShadow: false,
 		showFrame:  true,
-		TextColor:  color.White,
+		textColor:  color.White,
 	}
 }
 
@@ -68,13 +69,13 @@ func NewTextButton(x, y, width, height int, soundName string) *Button {
 	return &Button{
 		x:          x,
 		y:          y,
-		Width:      width,
-		Height:     height,
-		Visible:    true,
+		width:      width,
+		height:     height,
+		visible:    true,
 		soundName:  soundName,
 		dropShadow: false,
 		showFrame:  false,
-		TextColor:  color.White,
+		textColor:  color.White,
 	}
 }
 
@@ -83,21 +84,45 @@ func NewImageButton(x, y int, image *ebiten.Image, pressedImage *ebiten.Image, s
 	return &Button{
 		x:             x,
 		y:             y,
-		Width:         w,
-		Height:        h,
-		Visible:       true,
+		width:         w,
+		height:        h,
+		visible:       true,
 		Image:         image,
 		PressedImage:  pressedImage,
 		DisabledImage: nil,
 		soundName:     soundName,
 		dropShadow:    true,
 		showFrame:     true,
-		TextColor:     color.White,
+		textColor:     color.White,
 	}
 }
 
 func (b *Button) SetY(y int) {
 	b.y = y
+}
+
+func (b *Button) SetWidth(width int) {
+	b.width = width
+}
+
+func (b *Button) SetText(text string) {
+	b.text = text
+}
+
+func (b *Button) Show() {
+	b.visible = true
+}
+
+func (b *Button) Hide() {
+	b.visible = false
+}
+
+func (b *Button) Enable() {
+	b.disabled = false
+}
+
+func (b *Button) Disable() {
+	b.disabled = true
 }
 
 func (b *Button) SetOnPressed(onPressed func(button *Button)) {
@@ -111,10 +136,10 @@ func (b *Button) includesInput(offsetX, offsetY int) bool {
 	x -= offsetX
 	y -= offsetY
 
-	buttonWidth := b.Width + b.TouchExpand*2
-	buttonHeight := b.Height + b.TouchExpand*2
-	buttonX := b.x - b.TouchExpand
-	buttonY := b.y - b.TouchExpand
+	buttonWidth := b.width + b.touchExpand*2
+	buttonHeight := b.height + b.touchExpand*2
+	buttonX := b.x - b.touchExpand
+	buttonY := b.y - b.touchExpand
 
 	if buttonX <= x && x < buttonX+buttonWidth && buttonY <= y && y < buttonY+buttonHeight {
 		return true
@@ -126,10 +151,10 @@ func (b *Button) update(visible bool, offsetX, offsetY int) {
 	if !visible {
 		return
 	}
-	if !b.Visible {
+	if !b.visible {
 		return
 	}
-	if b.Disabled {
+	if b.disabled {
 		return
 	}
 	if !b.pressing {
@@ -163,7 +188,7 @@ func (b *Button) Draw(screen *ebiten.Image) {
 }
 
 func (b *Button) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
-	if !b.Visible {
+	if !b.visible {
 		return
 	}
 
@@ -175,7 +200,7 @@ func (b *Button) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 	if b.showFrame {
 		if b.Image != nil {
 			image := b.Image
-			if b.Disabled {
+			if b.disabled {
 				if b.DisabledImage != nil {
 					image = b.DisabledImage
 				}
@@ -196,11 +221,11 @@ func (b *Button) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 				img = assets.GetImage("system/common/9patch_frame_on.png")
 			}
 
-			if b.Disabled {
+			if b.disabled {
 				op.ColorM.ChangeHSV(0, 0, 1)
 				op.ColorM.Scale(0.5, 0.5, 0.5, 1)
 			}
-			drawNinePatches(screen, img, b.Width, b.Height, &op.GeoM, &op.ColorM)
+			drawNinePatches(screen, img, b.width, b.height, &op.GeoM, &op.ColorM)
 		}
 	} else {
 		if b.pressing {
@@ -208,20 +233,20 @@ func (b *Button) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 		}
 	}
 
-	_, th := font.MeasureSize(b.Text)
+	_, th := font.MeasureSize(b.text)
 	tx := (b.x + offsetX) * consts.TileScale
-	tx += b.Width * consts.TileScale / 2
+	tx += b.width * consts.TileScale / 2
 
 	ty := (b.y + offsetY) * consts.TileScale
-	ty += (b.Height*consts.TileScale - th*consts.TextScale) / 2
+	ty += (b.height*consts.TileScale - th*consts.TextScale) / 2
 
-	cr, cg, cb, ca := b.TextColor.RGBA()
+	cr, cg, cb, ca := b.textColor.RGBA()
 	r8 := uint8(cr >> 8)
 	g8 := uint8(cg >> 8)
 	b8 := uint8(cb >> 8)
 	a8 := uint8(ca >> 8)
 	var c color.Color = color.RGBA{r8, g8, b8, uint8(uint16(a8) * uint16(opacity) / 255)}
-	if b.Disabled {
+	if b.disabled {
 		c = color.RGBA{r8, g8, b8, uint8(uint16(a8) * uint16(opacity) / (2 * 255))}
 	}
 	l := b.Lang
@@ -229,7 +254,7 @@ func (b *Button) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 		l = lang.Get()
 	}
 	if b.dropShadow {
-		font.DrawTextLang(screen, b.Text, tx+consts.TextScale, ty+consts.TextScale, consts.TextScale, data.TextAlignCenter, color.Black, len([]rune(b.Text)), l)
+		font.DrawTextLang(screen, b.text, tx+consts.TextScale, ty+consts.TextScale, consts.TextScale, data.TextAlignCenter, color.Black, len([]rune(b.text)), l)
 	}
-	font.DrawTextLang(screen, b.Text, tx, ty, consts.TextScale, data.TextAlignCenter, c, len([]rune(b.Text)), l)
+	font.DrawTextLang(screen, b.text, tx, ty, consts.TextScale, data.TextAlignCenter, c, len([]rune(b.text)), l)
 }

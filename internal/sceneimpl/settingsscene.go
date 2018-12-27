@@ -91,7 +91,7 @@ func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
 		i := i // i is captured by the below closure and it is needed to copy here.
 		n := display.Self.Name(l)
 		b := ui.NewButton((152-120)/2, 8+i*buttonDeltaY, 120, 20, "system/click")
-		b.Text = n
+		b.SetText(n)
 		b.Lang = l
 		s.languageDialog.AddChild(b)
 		s.languageButtons = append(s.languageButtons, b)
@@ -167,18 +167,18 @@ func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
 
 func (s *SettingsScene) updateButtonTexts() {
 	s.settingsLabel.Text = texts.Text(lang.Get(), texts.TextIDSettings)
-	s.languageButton.Text = texts.Text(lang.Get(), texts.TextIDLanguage)
-	s.creditButton.Text = texts.Text(lang.Get(), texts.TextIDCredit)
-	s.updateCreditsButton.Text = texts.Text(lang.Get(), texts.TextIDCreditEntry)
-	s.reviewThisAppButton.Text = texts.Text(lang.Get(), texts.TextIDReviewThisApp)
-	s.restorePurchasesButton.Text = texts.Text(lang.Get(), texts.TextIDRestorePurchases)
-	s.resetGameButton.Text = texts.Text(lang.Get(), texts.TextIDResetGame)
+	s.languageButton.SetText(texts.Text(lang.Get(), texts.TextIDLanguage))
+	s.creditButton.SetText(texts.Text(lang.Get(), texts.TextIDCredit))
+	s.updateCreditsButton.SetText(texts.Text(lang.Get(), texts.TextIDCreditEntry))
+	s.reviewThisAppButton.SetText(texts.Text(lang.Get(), texts.TextIDReviewThisApp))
+	s.restorePurchasesButton.SetText(texts.Text(lang.Get(), texts.TextIDRestorePurchases))
+	s.resetGameButton.SetText(texts.Text(lang.Get(), texts.TextIDResetGame))
 	s.warningLabel.Text = texts.Text(lang.Get(), texts.TextIDNewGameWarning)
-	s.warningYesButton.Text = texts.Text(lang.Get(), texts.TextIDYes)
-	s.warningNoButton.Text = texts.Text(lang.Get(), texts.TextIDNo)
-	s.privacyPolicyButton.Text = texts.Text(lang.Get(), texts.TextIDPrivacyPolicy)
-	s.shopButton.Text = texts.Text(lang.Get(), texts.TextIDShop)
-	s.closeButton.Text = texts.Text(lang.Get(), texts.TextIDClose)
+	s.warningYesButton.SetText(texts.Text(lang.Get(), texts.TextIDYes))
+	s.warningNoButton.SetText(texts.Text(lang.Get(), texts.TextIDNo))
+	s.privacyPolicyButton.SetText(texts.Text(lang.Get(), texts.TextIDPrivacyPolicy))
+	s.shopButton.SetText(texts.Text(lang.Get(), texts.TextIDShop))
+	s.closeButton.SetText(texts.Text(lang.Get(), texts.TextIDClose))
 }
 
 func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
@@ -198,11 +198,11 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 	s.updateButtonTexts()
 
 	if sceneManager.MaxPurchaseTier() > 0 {
-		s.updateCreditsButton.Visible = true
-		s.creditButton.Width = 76
+		s.updateCreditsButton.Show()
+		s.creditButton.SetWidth(76)
 	} else {
-		s.updateCreditsButton.Visible = false
-		s.creditButton.Width = 120
+		s.updateCreditsButton.Hide()
+		s.creditButton.SetWidth(120)
 	}
 
 	if s.waitingRequestID != 0 {
@@ -215,10 +215,10 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 
 	itemOffset := 0
 	if sceneManager.Game().IsShopAvailable(data.ShopTypeMain) {
-		s.shopButton.Visible = true
+		s.shopButton.Show()
 		itemOffset = 1
 	} else {
-		s.shopButton.Visible = false
+		s.shopButton.Hide()
 	}
 
 	s.creditButton.SetY(s.calcButtonY(itemOffset + 2))
@@ -229,7 +229,11 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 	s.privacyPolicyButton.SetY(s.calcButtonY(itemOffset + 6))
 	s.closeButton.SetY(s.calcButtonY(itemOffset + 7))
 
-	s.resetGameButton.Disabled = !sceneManager.HasProgress()
+	if sceneManager.HasProgress() {
+		s.resetGameButton.Enable()
+	} else {
+		s.resetGameButton.Disable()
+	}
 
 	s.languageDialog.Update()
 	s.warningDialog.Update()

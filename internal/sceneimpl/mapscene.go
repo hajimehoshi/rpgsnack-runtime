@@ -208,7 +208,7 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	}
 
 	// TODO: Implement the camera functionality later
-	m.cameraButton.Visible = false
+	m.cameraButton.Hide()
 
 	m.quitDialog = ui.NewDialog((uiWidth-160)/2+4, screenH/(2*consts.TileScale)-64, 152, 124)
 	m.quitLabel = ui.NewLabel(16, 8)
@@ -238,7 +238,7 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	m.itemPreviewPopup = ui.NewItemPreviewPopup(consts.CeilDiv(screenH, consts.TileScale) - m.inventoryHeight - itemPreviewPopupMargin)
 	m.quitDialog.AddChild(m.quitLabel)
 
-	m.removeAdsButton.Visible = false // TODO: Clock of Atonement does not need this feature, so turn it off for now
+	m.removeAdsButton.Hide() // TODO: Clock of Atonement does not need this feature, so turn it off for now
 
 	m.quitYesButton.SetOnPressed(func(_ *ui.Button) {
 		if m.gameState.IsAutoSaveEnabled() && !m.gameState.Map().IsBlockingEventExecuting() {
@@ -487,13 +487,13 @@ func (m *MapScene) isUIBusy() bool {
 func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 	l := lang.Get()
 	m.quitLabel.Text = texts.Text(l, texts.TextIDBackToTitle)
-	m.quitYesButton.Text = texts.Text(l, texts.TextIDYes)
-	m.quitNoButton.Text = texts.Text(l, texts.TextIDNo)
+	m.quitYesButton.SetText(texts.Text(l, texts.TextIDYes))
+	m.quitNoButton.SetText(texts.Text(l, texts.TextIDNo))
 	m.storeErrorLabel.Text = texts.Text(l, texts.TextIDStoreError)
-	m.storeErrorOkButton.Text = texts.Text(l, texts.TextIDOK)
-	m.removeAdsYesButton.Text = texts.Text(l, texts.TextIDYes)
-	m.removeAdsNoButton.Text = texts.Text(l, texts.TextIDNo)
-	m.removeAdsButton.Text = texts.Text(l, texts.TextIDRemoveAds)
+	m.storeErrorOkButton.SetText(texts.Text(l, texts.TextIDOK))
+	m.removeAdsYesButton.SetText(texts.Text(l, texts.TextIDYes))
+	m.removeAdsNoButton.SetText(texts.Text(l, texts.TextIDNo))
+	m.removeAdsButton.SetText(texts.Text(l, texts.TextIDRemoveAds))
 
 	m.quitDialog.Update()
 	m.screenShotDialog.Update()
@@ -505,7 +505,11 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 		m.gameHeader.Update(m.quitDialog.Visible())
 	}
 
-	m.removeAdsButton.Disabled = m.gameState.Map().IsBlockingEventExecuting()
+	if m.gameState.Map().IsBlockingEventExecuting() {
+		m.removeAdsButton.Disable()
+	} else {
+		m.removeAdsButton.Enable()
+	}
 	m.removeAdsButton.Update()
 
 	if m.gameState.InventoryVisible() {
