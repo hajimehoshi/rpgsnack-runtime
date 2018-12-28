@@ -294,7 +294,7 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 			}
 		case ui.PreviewMode:
 			combineItemID := 0
-			if m.gameState.Items().ActiveItem() > 0 {
+			if m.gameState.Items().ActiveItem() > 0 && sceneManager.Game().IsCombineAvailable() {
 				if activeItemID != itemID {
 					combineItemID = itemID
 				}

@@ -210,3 +210,7 @@ func (g *Game) GetShop(name ShopType) *Shop {
 func (g *Game) IsShopAvailable(name ShopType) bool {
 	return g.GetShop(name) != nil
 }
+
+func (g *Game) IsCombineAvailable() bool {
+	return len(g.Combines) > 0
+}
