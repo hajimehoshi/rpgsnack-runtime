@@ -107,6 +107,7 @@ func NewInventory(x, y int, showItemName bool) *Inventory {
 		"system/click",
 	)
 	infoButton.DisabledImage = assets.GetImage("system/footer/info_button_disabled.png")
+	infoButton.disabled = true
 
 	bgPanel := NewImageView(x, y, 1.0, assets.GetImage("system/footer/panel.png"))
 	frameCover := NewImageView(x+frameXMargin, y+4, 1.0, assets.GetImage("system/footer/inventory_mask.png"))
