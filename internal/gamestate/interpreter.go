@@ -246,7 +246,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			if r.Succeeded {
 				var prices map[string]string
 				if err := json.Unmarshal(r.Data, &prices); err != nil {
-					panic(err)
+					return false, err
 				}
 				gameState.SetPrices(prices)
 				i.commandIterator.Choose(0)
@@ -1122,7 +1122,17 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		i.commandIterator.Advance()
 
 	case data.CommandNameSpecial:
-		// TODO: Implement this.
+		args := c.Args.(*data.CommandArgsSpecial)
+		var content map[string]interface{}
+		if err := json.Unmarshal([]byte(args.Content), &content); err != nil {
+			return false, err
+		}
+		switch name := content["name"].(string); name {
+		case "shake_start_game_button":
+			gameState.ShakeStartGameButton()
+		default:
+			return false, fmt.Errorf("gamestate: invalid special command name: %q", name)
+		}
 		i.commandIterator.Advance()
 
 	case data.CommandNameFinishPlayerMovingByUserInput:

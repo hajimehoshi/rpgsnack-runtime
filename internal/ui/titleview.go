@@ -16,6 +16,7 @@ package ui
 
 import (
 	"image/color"
+	"math/rand"
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/vmihailenco/msgpack"
@@ -54,6 +55,8 @@ type TitleView struct {
 	err              error
 
 	sceneMaker SceneMaker
+
+	shakeStartGameButtonCount int
 }
 
 const (
@@ -66,6 +69,15 @@ func NewTitleView(sceneMaker SceneMaker) *TitleView {
 	}
 	return t
 }
+
+func (t *TitleView) startGameButtonX(sceneManager *scene.Manager) int {
+	w, _ := sceneManager.Size()
+	return (w/consts.TileScale - 120) / 2
+}
+
+const (
+	shakeFrame = 15
+)
 
 func (t *TitleView) initUI(sceneManager *scene.Manager) {
 	w, h := sceneManager.Size()
@@ -80,7 +92,7 @@ func (t *TitleView) initUI(sceneManager *scene.Manager) {
 		t.footerOffset = 48
 	}
 
-	t.startGameButton = NewTextButton((w/consts.TileScale-120)/2, h/consts.TileScale-by-32, 120, 20, "system/start")
+	t.startGameButton = NewTextButton(t.startGameButtonX(sceneManager), h/consts.TileScale-by-32, 120, 20, "system/start")
 	t.removeAdsButton = NewTextButton((w/consts.TileScale-120)/2+20, h/consts.TileScale-by-4, 80, 20, "system/click")
 	t.removeAdsButton.textColor = color.RGBA{0xc8, 0xc8, 0xc8, 0xff}
 	t.settingsButton = NewImageButton(w/consts.TileScale-24, h/consts.TileScale-by, settingsIcon, settingsIcon, "system/click")
@@ -186,6 +198,22 @@ func (t *TitleView) Update(sceneManager *scene.Manager) error {
 
 	t.removeAdsButton.visible = sceneManager.IsAdsRemovable() && !sceneManager.IsAdsRemoved()
 
+	x := t.startGameButtonX(sceneManager)
+	t.startGameButton.SetX(x)
+	if t.shakeStartGameButtonCount > 0 {
+		tx := 0
+		switch {
+		case t.shakeStartGameButtonCount >= shakeFrame*2:
+			tx = rand.Intn(5) - 2
+		case t.shakeStartGameButtonCount >= shakeFrame:
+			// Do nothing
+		default:
+			tx = rand.Intn(5) - 2
+		}
+		t.startGameButton.SetX(x + tx)
+		t.shakeStartGameButtonCount--
+	}
+
 	return nil
 }
 
@@ -243,4 +271,8 @@ func (t *TitleView) Draw(screen *ebiten.Image) {
 
 func (t *TitleView) Resize() {
 	t.initialized = false
+}
+
+func (t *TitleView) ShakeStartGameButton() {
+	t.shakeStartGameButtonCount = shakeFrame * 3
 }

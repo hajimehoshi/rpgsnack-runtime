@@ -67,11 +67,12 @@ type Game struct {
 	playerSpeed data.Speed
 
 	// Fields that are not dumped
-	isTitle          bool
-	rand             Rand
-	waitingRequestID int
-	prices           map[string]string // TODO: We want to use https://godoc.org/golang.org/x/text/currency
-	weather          *weather.Weather
+	isTitle                bool
+	rand                   Rand
+	waitingRequestID       int
+	prices                 map[string]string // TODO: We want to use https://godoc.org/golang.org/x/text/currency
+	weather                *weather.Weather
+	onShakeStartGameButton func()
 }
 
 func generateDefaultRand() Rand {
@@ -95,19 +96,20 @@ func NewGame() *Game {
 	return g
 }
 
-func NewTitleGame(savedGame *Game) *Game {
+func NewTitleGame(savedGame *Game, onShakeStartGameButton func()) *Game {
 	g := &Game{
-		currentMap:           NewTitleMap(),
-		hints:                &hints.Hints{},
-		items:                &items.Items{},
-		variables:            &variables.Variables{},
-		screen:               &Screen{},
-		windows:              &window.Windows{},
-		pictures:             &picture.Pictures{},
-		rand:                 generateDefaultRand(),
-		playerControlEnabled: true,
-		playerSpeed:          data.Speed5,
-		isTitle:              true,
+		currentMap:             NewTitleMap(),
+		hints:                  &hints.Hints{},
+		items:                  &items.Items{},
+		variables:              &variables.Variables{},
+		screen:                 &Screen{},
+		windows:                &window.Windows{},
+		pictures:               &picture.Pictures{},
+		rand:                   generateDefaultRand(),
+		playerControlEnabled:   true,
+		playerSpeed:            data.Speed5,
+		isTitle:                true,
+		onShakeStartGameButton: onShakeStartGameButton,
 	}
 
 	if savedGame != nil {
@@ -929,4 +931,10 @@ func (g *Game) PlayerSpeed() data.Speed {
 
 func (g *Game) SetPlayerSpeed(value data.Speed) {
 	g.playerSpeed = value
+}
+
+func (g *Game) ShakeStartGameButton() {
+	if g.onShakeStartGameButton != nil {
+		g.onShakeStartGameButton()
+	}
 }

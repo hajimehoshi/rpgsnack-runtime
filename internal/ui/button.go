@@ -97,6 +97,10 @@ func NewImageButton(x, y int, image *ebiten.Image, pressedImage *ebiten.Image, s
 	}
 }
 
+func (b *Button) SetX(x int) {
+	b.x = x
+}
+
 func (b *Button) SetY(y int) {
 	b.y = y
 }

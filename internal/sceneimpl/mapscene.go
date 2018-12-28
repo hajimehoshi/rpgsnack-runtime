@@ -115,9 +115,9 @@ func (s *sceneMaker) NewSettingsScene() scene.Scene {
 
 func NewTitleMapScene(savedGame *gamestate.Game) *MapScene {
 	m := &MapScene{
-		gameState: gamestate.NewTitleGame(savedGame),
 		titleView: ui.NewTitleView(&sceneMaker{}),
 	}
+	m.gameState = gamestate.NewTitleGame(savedGame, m.shakeStartGameButton)
 	return m
 }
 
@@ -820,4 +820,8 @@ func (m *MapScene) Resize() {
 	if m.titleView != nil {
 		m.titleView.Resize()
 	}
+}
+
+func (m *MapScene) shakeStartGameButton() {
+	m.titleView.ShakeStartGameButton()
 }
