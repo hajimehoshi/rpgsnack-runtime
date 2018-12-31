@@ -84,6 +84,7 @@ func DrawTextLang(screen *ebiten.Image, str string, ox, oy int, scale int, textA
 	b, _, _ := f.GlyphBounds('.')
 	dotX := (-b.Min.X).Floor()
 
+	str = strings.Replace(str, "\r\n", "\n", -1)
 	lines := strings.Split(str, "\n")
 	linesToShow := strings.Split(string([]rune(str)[:displayTextRuneCount]), "\n")
 
