@@ -421,7 +421,7 @@ func (g *Game) ParseMessageSyntax(str string) string {
 		case "v":
 			id, err := strconv.Atoi(args)
 			if err != nil {
-				panic(fmt.Sprintf("not reach: %s", err))
+				return fmt.Sprintf("(error:%v)", part)
 			}
 			return strconv.Itoa(g.variables.VariableValue(id))
 		}
