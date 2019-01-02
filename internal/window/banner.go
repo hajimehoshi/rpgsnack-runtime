@@ -159,7 +159,7 @@ func newBanner(contentID data.UUID, content string, eventID int, background data
 	return b
 }
 
-func (b *banner) SetContent(content string) {
+func (b *banner) setContent(content string) {
 	b.content = content
 	if b.typingEffect != nil {
 		b.typingEffect.SetContent(b.content)

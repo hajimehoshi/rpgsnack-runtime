@@ -330,18 +330,18 @@ func (w *Windows) Update(playerY int, sceneManager *scene.Manager, characters []
 				continue
 			}
 			content := sceneManager.Game().Texts.Get(lang.Get(), b.contentID)
-			b.SetContent(content)
+			b.setContent(content)
 		}
 		for _, b := range w.choiceBalloons {
 			if b == nil {
 				continue
 			}
 			content := sceneManager.Game().Texts.Get(lang.Get(), b.contentID)
-			b.SetContent(content)
+			b.setContent(content)
 		}
 		if w.banner != nil {
 			content := sceneManager.Game().Texts.Get(lang.Get(), w.banner.contentID)
-			w.banner.SetContent(content)
+			w.banner.setContent(content)
 		}
 		w.lastLang = lang.Get()
 	}
