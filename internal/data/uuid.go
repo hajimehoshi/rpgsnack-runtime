@@ -27,6 +27,11 @@ func NewUUID() UUID {
 	return UUID(uuid.New())
 }
 
+func UUIDFromString(s string) (UUID, error) {
+	u, err := uuid.Parse(s)
+	return UUID(u), err
+}
+
 func (u *UUID) String() string {
 	return (*uuid.UUID)(u).String()
 }

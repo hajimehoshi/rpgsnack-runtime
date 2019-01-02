@@ -1801,3 +1801,17 @@ const (
 	ShakeDirectionHorizontal ShakeDirection = "horizontal"
 	ShakeDirectionVertical   ShakeDirection = "vertical"
 )
+
+type OpenLinkType string
+
+const (
+	OpenLinkTypeApp        OpenLinkType = "app"
+	OpenLinkTypeURL        OpenLinkType = "url"
+	OpenLinkTypeReview     OpenLinkType = "review"
+	OpenLinkTypeShowCredit OpenLinkType = "show_credit"
+	OpenLinkTypePostCredit OpenLinkType = "post_credit"
+	OpenLinkTypeMore       OpenLinkType = "more"
+	OpenLinkTypeFacebook   OpenLinkType = "fb"
+	OpenLinkTypeTwitter    OpenLinkType = "twitter"
+	OpenLinkTypeShare      OpenLinkType = "share"
+)

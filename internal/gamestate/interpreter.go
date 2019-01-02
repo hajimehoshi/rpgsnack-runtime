@@ -29,6 +29,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/commanditerator"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/movecharacterstate"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/variables"
@@ -684,8 +685,15 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 	case data.CommandNameOpenLink:
 		args := c.Args.(*data.CommandArgsOpenLink)
 		i.waitingRequestID = sceneManager.GenerateRequestID()
-		// TODO: Define data.OpenLinkType
-		sceneManager.Requester().RequestOpenLink(i.waitingRequestID, args.Type, args.Data)
+		content := args.Data
+		if data.OpenLinkType(args.Type) == data.OpenLinkTypeShare {
+			uuid, err := data.UUIDFromString(args.Data)
+			if err != nil {
+				panic(err)
+			}
+			content = sceneManager.Game().Texts.Get(lang.Get(), uuid)
+		}
+		sceneManager.Requester().RequestOpenLink(i.waitingRequestID, args.Type, content)
 		return false, nil
 	case data.CommandNameSendAnalytics:
 		args := c.Args.(*data.CommandArgsSendAnalytics)
