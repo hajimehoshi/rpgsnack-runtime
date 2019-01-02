@@ -79,7 +79,7 @@ func (s *SplashScene) Update(sceneManager *scene.Manager) error {
 }
 
 func (s *SplashScene) Draw(screen *ebiten.Image) {
-	img := assets.GetLocalizeImage("system/splash/info")
+	img := assets.GetLocalizedImage("system/splash/info")
 	sw, sh := img.Size()
 	dw, dh := screen.Size()
 

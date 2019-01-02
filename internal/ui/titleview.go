@@ -243,7 +243,7 @@ func (t *TitleView) drawTitle(screen *ebiten.Image) {
 	if !assets.ImageExists("titles/title") {
 		return
 	}
-	timg := assets.GetLocalizeImage("titles/title")
+	timg := assets.GetLocalizedImage("titles/title")
 	tw, th := timg.Size()
 	sw, sh := screen.Size()
 	op := &ebiten.DrawImageOptions{}
