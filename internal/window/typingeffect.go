@@ -25,7 +25,6 @@ import (
 type typingEffect struct {
 	animCount                 int
 	animMaxCount              int
-	allTextDisplayed          bool
 	content                   string
 	soundEffect               string
 	isSEPlayedInPreviousFrame bool
@@ -50,9 +49,6 @@ func (t *typingEffect) EncodeMsgpack(enc *msgpack.Encoder) error {
 
 	e.EncodeString("animMaxCount")
 	e.EncodeInt(t.animMaxCount)
-
-	e.EncodeString("allTextDisplayed")
-	e.EncodeBool(t.allTextDisplayed)
 
 	e.EncodeString("content")
 	e.EncodeString(t.content)
@@ -79,8 +75,6 @@ func (t *typingEffect) DecodeMsgpack(dec *msgpack.Decoder) error {
 			t.animCount = d.DecodeInt()
 		case "animMaxCount":
 			t.animMaxCount = d.DecodeInt()
-		case "allTextDisplayed":
-			t.allTextDisplayed = d.DecodeBool()
 		case "content":
 			t.content = d.DecodeString()
 		case "soundEffect":
@@ -98,7 +92,7 @@ func (t *typingEffect) DecodeMsgpack(dec *msgpack.Decoder) error {
 }
 
 func (t *typingEffect) isAnimating() bool {
-	return !t.allTextDisplayed
+	return t.animCount < t.animMaxCount
 }
 
 func (t *typingEffect) skipAnim() {
@@ -111,7 +105,6 @@ func (t *typingEffect) SetContent(content string) {
 	// Finish animation forcely.
 	if t.animCount > 0 {
 		t.animCount = t.animMaxCount
-		t.allTextDisplayed = true
 	}
 }
 
@@ -119,9 +112,6 @@ func (t *typingEffect) update() {
 	prevTextRuneCount := t.getCurrentTextRuneCount()
 	if t.animCount < t.animMaxCount {
 		t.animCount++
-	}
-	if t.animCount == t.animMaxCount {
-		t.allTextDisplayed = true
 	}
 	currentTextRuneCount := t.getCurrentTextRuneCount()
 	if currentTextRuneCount > 0 && currentTextRuneCount != prevTextRuneCount {
