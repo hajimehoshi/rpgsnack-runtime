@@ -13,7 +13,6 @@ require (
 	github.com/vmihailenco/msgpack v3.3.3+incompatible
 	golang.org/x/image v0.0.0-20180926015637-991ec62608f3
 	golang.org/x/net v0.0.0-20180724234803-3673e40ba225 // indirect
-	golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f // indirect
 	golang.org/x/text v0.3.0
 	google.golang.org/appengine v1.1.0 // indirect
 )
