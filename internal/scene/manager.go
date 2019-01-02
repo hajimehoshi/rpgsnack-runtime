@@ -48,8 +48,10 @@ type Manager struct {
 	requester             Requester
 	current               Scene
 	next                  Scene
-	fadingCountMax        int
-	fadingCount           int
+	fadingInCountMax      int
+	fadingInCount         int
+	fadingOutCountMax     int
+	fadingOutCount        int
 	lastRequestID         int
 	resultCh              chan RequestResult
 	results               map[int]*RequestResult
@@ -72,7 +74,7 @@ const (
 	PlatformDataKeyBackButton            PlatformDataKey = "backbutton"
 )
 
-func NewManager(width, height int, requester Requester, game *data.Game, progress []byte, purchases []string) *Manager {
+func NewManager(width, height int, requester Requester, game *data.Game, progress []byte, purchases []string, fadingInCount int) *Manager {
 	m := &Manager{
 		width:             width,
 		height:            height,
@@ -83,6 +85,8 @@ func NewManager(width, height int, requester Requester, game *data.Game, progres
 		game:              game,
 		progress:          progress,
 		purchases:         purchases,
+		fadingInCount:     fadingInCount,
+		fadingInCountMax:  fadingInCount,
 	}
 	m.blackImage, _ = ebiten.NewImage(16, 16, ebiten.FilterDefault)
 	m.blackImage.Fill(color.Black)
@@ -178,12 +182,7 @@ func (m *Manager) Update() error {
 			triggerBack = false
 		}
 		if m.next != nil {
-			if m.fadingCount > 0 {
-				if m.fadingCount <= m.fadingCountMax/2 {
-					m.current = m.next
-					m.next = nil
-				}
-			} else {
+			if m.fadingOutCount == 0 {
 				m.current = m.next
 				m.next = nil
 			}
@@ -191,8 +190,10 @@ func (m *Manager) Update() error {
 		if err := m.current.Update(m); err != nil {
 			return err
 		}
-		if 0 < m.fadingCount {
-			m.fadingCount--
+		if 0 < m.fadingOutCount {
+			m.fadingOutCount--
+		} else if 0 < m.fadingInCount {
+			m.fadingInCount--
 		}
 	}
 	return nil
@@ -220,12 +221,12 @@ func (m *Manager) Draw(screen *ebiten.Image) {
 
 func (m *Manager) drawImpl(screen *ebiten.Image) {
 	m.current.Draw(screen)
-	if 0 < m.fadingCount {
+	if 0 < m.fadingInCount || 0 < m.fadingOutCount {
 		alpha := 0.0
-		if m.fadingCount > m.fadingCountMax/2 {
-			alpha = 1 - float64(m.fadingCount-m.fadingCountMax/2)/float64(m.fadingCountMax/2)
+		if 0 < m.fadingOutCount {
+			alpha = 1 - float64(m.fadingOutCount)/float64(m.fadingOutCountMax)
 		} else {
-			alpha = float64(m.fadingCount) / float64(m.fadingCountMax/2)
+			alpha = float64(m.fadingInCount) / float64(m.fadingInCountMax)
 		}
 		sw, sh := screen.Size()
 		w, h := m.blackImage.Size()
@@ -376,17 +377,19 @@ func (m *Manager) SetLanguage(language language.Tag) language.Tag {
 }
 
 func (m *Manager) GoTo(next Scene) {
-	m.GoToWithFading(next, 0)
+	m.GoToWithFading(next, 0, 0)
 }
 
-func (m *Manager) GoToWithFading(next Scene, frames int) {
-	if 0 < m.fadingCount {
+func (m *Manager) GoToWithFading(next Scene, fadingOutCount, fadingInCount int) {
+	if 0 < m.fadingInCount || 0 < m.fadingOutCount {
 		// TODO: Should panic here?
 		return
 	}
 	m.next = next
-	m.fadingCount = frames
-	m.fadingCountMax = frames
+	m.fadingInCount = fadingInCount
+	m.fadingInCountMax = fadingInCount
+	m.fadingOutCount = fadingOutCount
+	m.fadingOutCountMax = fadingOutCount
 }
 
 func (m *Manager) GenerateRequestID() int {

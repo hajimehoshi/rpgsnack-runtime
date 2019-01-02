@@ -54,7 +54,14 @@ func GetLocalizeImage(key string) *ebiten.Image {
 }
 
 func ImageExists(key string) bool {
-	return Exists(path.Join("images", key+".png"))
+	if Exists(path.Join("images", key+".png")) {
+		return true
+	}
+	s := lang.Normalize(lang.Get()).String()
+	if Exists(path.Join("images", key+"@"+s+".png")) {
+		return true
+	}
+	return false
 }
 
 func GetImage(key string) *ebiten.Image {

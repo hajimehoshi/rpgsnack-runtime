@@ -123,9 +123,9 @@ func (t *TitleView) initUI(sceneManager *scene.Manager) {
 				t.err = err
 				return
 			}
-			sceneManager.GoToWithFading(t.sceneMaker.NewMapSceneWithGame(game), 60)
+			sceneManager.GoToWithFading(t.sceneMaker.NewMapSceneWithGame(game), 30, 30)
 		} else {
-			sceneManager.GoToWithFading(t.sceneMaker.NewMapScene(), 60)
+			sceneManager.GoToWithFading(t.sceneMaker.NewMapScene(), 30, 30)
 		}
 	})
 	t.removeAdsButton.SetOnPressed(func(_ *Button) {

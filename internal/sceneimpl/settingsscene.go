@@ -152,7 +152,7 @@ func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
 		sceneManager.Requester().RequestOpenLink(s.waitingRequestID, "privacy", "")
 	})
 	s.closeButton.SetOnPressed(func(_ *ui.Button) {
-		g, err := SavedGame(sceneManager)
+		g, err := savedGame(sceneManager)
 		if err != nil {
 			s.err = err
 			return
@@ -265,7 +265,7 @@ func (s *SettingsScene) handleBackButton(sceneManager *scene.Manager) {
 	}
 
 	audio.PlaySE("system/cancel", 1.0)
-	g, err := SavedGame(sceneManager)
+	g, err := savedGame(sceneManager)
 	if err != nil {
 		s.err = err
 		return

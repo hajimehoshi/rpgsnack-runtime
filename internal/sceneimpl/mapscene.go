@@ -21,7 +21,6 @@ import (
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten"
-	"github.com/vmihailenco/msgpack"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
@@ -167,17 +166,6 @@ func (m *MapScene) updateOffsetY(sceneManager *scene.Manager) {
 	m.windowOffsetY = 0
 }
 
-func SavedGame(sceneManager *scene.Manager) (*gamestate.Game, error) {
-	if sceneManager.HasProgress() {
-		var savedGame *gamestate.Game
-		if err := msgpack.Unmarshal(sceneManager.Progress(), &savedGame); err != nil {
-			return nil, err
-		}
-		return savedGame, nil
-	}
-	return nil, nil
-}
-
 func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	const (
 		uiWidth = consts.MapWidth
@@ -245,12 +233,12 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 			m.gameState.RequestSave(sceneManager)
 		}
 		audio.Stop()
-		g, err := SavedGame(sceneManager)
+		g, err := savedGame(sceneManager)
 		if err != nil {
 			m.err = err
 			return
 		}
-		sceneManager.GoToWithFading(NewTitleMapScene(g), 30)
+		sceneManager.GoToWithFading(NewTitleMapScene(g), FadingCount, FadingCount)
 	})
 	m.quitNoButton.SetOnPressed(func(_ *ui.Button) {
 		m.quitDialog.Hide()
@@ -579,12 +567,12 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 
 func (m *MapScene) goToTitle(sceneManager *scene.Manager) {
 	audio.Stop()
-	g, err := SavedGame(sceneManager)
+	g, err := savedGame(sceneManager)
 	if err != nil {
 		m.err = err
 		return
 	}
-	sceneManager.GoToWithFading(NewTitleMapScene(g), 60)
+	sceneManager.GoToWithFading(NewTitleMapScene(g), FadingCount, FadingCount)
 }
 
 func (m *MapScene) handleBackButton() {
