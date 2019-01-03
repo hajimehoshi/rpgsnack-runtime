@@ -17,6 +17,7 @@ package window
 import (
 	"fmt"
 	"image/color"
+	"strings"
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/vmihailenco/msgpack"
@@ -33,6 +34,7 @@ type typingEffect struct {
 	soundEffect               string
 	isSEPlayedInPreviousFrame bool
 	delay                     int
+	forceQuit                 bool
 }
 
 func newTypingEffect(content string, delay int, soundEffect string) *typingEffect {
@@ -63,6 +65,9 @@ func (t *typingEffect) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EncodeString("delay")
 	e.EncodeInt(t.delay)
 
+	e.EncodeString("forceQuit")
+	e.EncodeBool(t.forceQuit)
+
 	e.EndMap()
 	return e.Flush()
 }
@@ -82,6 +87,8 @@ func (t *typingEffect) DecodeMsgpack(dec *msgpack.Decoder) error {
 			t.isSEPlayedInPreviousFrame = d.DecodeBool()
 		case "delay":
 			t.delay = d.DecodeInt()
+		case "forceQuit":
+			t.forceQuit = d.DecodeBool()
 		}
 	}
 	if err := d.Error(); err != nil {
@@ -98,7 +105,14 @@ func (t *typingEffect) isAnimating() bool {
 	return t.animCount < t.animMaxCount()
 }
 
-func (t *typingEffect) skipAnim() {
+func (t *typingEffect) shouldCloseWindow() bool {
+	return !t.isAnimating() && t.forceQuit
+}
+
+func (t *typingEffect) trySkipAnim() {
+	if t.forceQuit {
+		return
+	}
 	t.animCount = t.animMaxCount()
 }
 
@@ -107,6 +121,10 @@ func (t *typingEffect) SetContent(content string) {
 	// Finish animation forcely.
 	if t.animCount > 0 {
 		t.animCount = t.animMaxCount()
+	}
+	if strings.Contains(content, `\^`) {
+		t.content = t.content[:strings.Index(t.content, `\^`)]
+		t.forceQuit = true
 	}
 }
 

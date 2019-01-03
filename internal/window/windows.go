@@ -396,7 +396,7 @@ func (w *Windows) Update(playerY int, sceneManager *scene.Manager, characters []
 		}
 		b.update(w.findCharacterByEventID(characters, b.eventID))
 		if b.isAnimating() && input.Triggered() {
-			b.skipTypingAnim()
+			b.trySkipTypingAnim()
 		} else if b.isClosed() {
 			w.balloons[i] = nil
 		}
@@ -413,7 +413,7 @@ func (w *Windows) Update(playerY int, sceneManager *scene.Manager, characters []
 	if w.banner != nil {
 		w.banner.update(playerY, w.findCharacterByEventID(characters, w.banner.eventID))
 		if w.banner.isAnimating() && input.Triggered() {
-			w.banner.skipTypingAnim()
+			w.banner.trySkipTypingAnim()
 		} else if w.banner.isClosed() {
 			w.banner = nil
 		}

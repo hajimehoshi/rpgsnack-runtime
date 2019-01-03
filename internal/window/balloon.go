@@ -255,8 +255,8 @@ func (b *balloon) setContent(content string) {
 	b.offscreen = nil
 }
 
-func (b *balloon) skipTypingAnim() {
-	b.typingEffect.skipAnim()
+func (b *balloon) trySkipTypingAnim() {
+	b.typingEffect.trySkipAnim()
 }
 
 func (b *balloon) arrowPosition(screenWidth int, character *character.Character) (int, int) {
@@ -342,6 +342,9 @@ func (b *balloon) update(character *character.Character) {
 		b.typingEffect.update()
 		if !b.typingEffect.isAnimating() && b.characterAnimFinishTrigger() == data.FinishTriggerTypeMessage {
 			b.stopCharacterAnim(character)
+		}
+		if b.typingEffect.shouldCloseWindow() {
+			b.close()
 		}
 	}
 }

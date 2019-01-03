@@ -178,8 +178,8 @@ func (b *banner) isAnimating() bool {
 	return b.openingCount > 0 || b.closingCount > 0 || b.typingEffect.isAnimating()
 }
 
-func (b *banner) skipTypingAnim() {
-	b.typingEffect.skipAnim()
+func (b *banner) trySkipTypingAnim() {
+	b.typingEffect.trySkipAnim()
 }
 
 func (b *banner) open() {
@@ -217,6 +217,9 @@ func (b *banner) update(playerY int, character *character.Character) error {
 		b.typingEffect.update()
 		if !b.typingEffect.isAnimating() && b.characterAnimFinishTrigger() == data.FinishTriggerTypeMessage {
 			b.stopCharacterAnim(character)
+		}
+		if b.typingEffect.shouldCloseWindow() {
+			b.close()
 		}
 	}
 	b.playerY = playerY
