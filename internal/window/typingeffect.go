@@ -102,7 +102,7 @@ func (t *typingEffect) animMaxCount() int {
 }
 
 func (t *typingEffect) isAnimating() bool {
-	return t.animCount < t.animMaxCount()
+	return t.animCount > 0
 }
 
 func (t *typingEffect) shouldCloseWindow() bool {
@@ -113,25 +113,22 @@ func (t *typingEffect) trySkipAnim() {
 	if t.forceQuit {
 		return
 	}
-	t.animCount = t.animMaxCount()
+	t.animCount = 0
 }
 
 func (t *typingEffect) SetContent(content string) {
 	t.content = content
-	// Finish animation forcely.
-	if t.animCount > 0 {
-		t.animCount = t.animMaxCount()
-	}
 	if strings.Contains(content, `\^`) {
 		t.content = t.content[:strings.Index(t.content, `\^`)]
 		t.forceQuit = true
 	}
+	t.animCount = t.animMaxCount()
 }
 
 func (t *typingEffect) update() {
 	prevTextRuneCount := t.getCurrentTextRuneCount()
-	if t.animCount < t.animMaxCount() {
-		t.animCount++
+	if t.animCount > 0 {
+		t.animCount--
 	}
 	currentTextRuneCount := t.getCurrentTextRuneCount()
 	if currentTextRuneCount > 0 && currentTextRuneCount != prevTextRuneCount {
@@ -174,8 +171,10 @@ func (t *typingEffect) draw(screen *ebiten.Image, x, y int, textScale int, textA
 }
 
 func (t *typingEffect) getCurrentTextRuneCount() int {
+	l := len([]rune(t.content))
 	if t.animMaxCount() > 0 {
-		return len([]rune(t.content)) * t.animCount / t.animMaxCount()
+		m := t.animMaxCount()
+		return l * (m - t.animCount) / m
 	}
-	return len([]rune(t.content))
+	return l
 }
