@@ -43,7 +43,7 @@ Then, open the `WORK` directory as the last command shows, and the open `main.xc
 ```sh
 gopherjs serve
 go run $GOPATH/src/github.com/hajimehoshi/rpgsnack-runtime/tools/testserver/main.go -http=:7800 -basepath=<project local location>
-# If basepath includes '~', '=' should be omitted like '-basepath= ~/foo/bar'
+# If basepath includes '~', '=' should be omitted like '-basepath ~/foo/bar'
 open http://localhost:8080/github.com/hajimehoshi/rpgsnack-runtime?project_location=http://localhost:7800/
 ```
 
