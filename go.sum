@@ -22,9 +22,7 @@ github.com/hajimehoshi/bitmapfont v1.1.1 h1:H1wQ6QXA8kSp+plARsIMCTVb5iOZHq/OP3uy
 github.com/hajimehoshi/bitmapfont v1.1.1/go.mod h1:Hamfxgney7tDSmVOSDh2AWzoDH70OaC+P24zc02Gum4=
 github.com/hajimehoshi/chinesegamefonts v1.0.0 h1:/7JNFMh7pkaSl0Z5hEcq6yJFnVM490XPlBGLH6VBQqo=
 github.com/hajimehoshi/chinesegamefonts v1.0.0/go.mod h1:kRfzUo98u2nOoBUsTDUoYdIy22sINnditpMrchMtwc4=
-github.com/hajimehoshi/ebiten v0.0.0-20180728122542-59bcbca37916 h1:/sa3SEqkcj7gjT/kHVQB9+mV99UbdwyITYwdVXV1cYc=
-github.com/hajimehoshi/ebiten v0.0.0-20180728122542-59bcbca37916/go.mod h1:WDRRL4/BtjYC8KIDLucYNar1iPWOrgq51nL2KQJGrVg=
-github.com/hajimehoshi/ebiten v1.9.0-alpha.0.20190101161654-623bfde0079b h1:tfq4hHpmvnZS5ocuqzsYpkKy+y8Y+G/Qv25Q4dEuoo8=
+github.com/hajimehoshi/ebiten v1.9.0-alpha.0.20190101161654-623bfde0079b h1:mheHARXUlWflgRVu5iAYcqYCUZtHwpovRRIi4oSO4vc=
 github.com/hajimehoshi/ebiten v1.9.0-alpha.0.20190101161654-623bfde0079b/go.mod h1:bDc06bcT8w9wWXmxPnomOb7koO6/HveNved+g4OurkM=
 github.com/hajimehoshi/go-mp3 v0.1.1 h1:Y33fAdTma70fkrxnc9u50Uq0lV6eZ+bkAlssdMmCwUc=
 github.com/hajimehoshi/go-mp3 v0.1.1/go.mod h1:4i+c5pDNKDrxl1iu9iG90/+fhP37lio6gNhjCx9WBJw=
