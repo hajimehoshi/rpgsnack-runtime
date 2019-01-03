@@ -16,15 +16,19 @@ package window
 
 import (
 	"fmt"
+	"image/color"
+
+	"github.com/hajimehoshi/ebiten"
+	"github.com/vmihailenco/msgpack"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
-	"github.com/vmihailenco/msgpack"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/font"
 )
 
 type typingEffect struct {
 	animCount                 int
-	animMaxCount              int
 	content                   string
 	soundEffect               string
 	isSEPlayedInPreviousFrame bool
@@ -46,9 +50,6 @@ func (t *typingEffect) EncodeMsgpack(enc *msgpack.Encoder) error {
 
 	e.EncodeString("animCount")
 	e.EncodeInt(t.animCount)
-
-	e.EncodeString("animMaxCount")
-	e.EncodeInt(t.animMaxCount)
 
 	e.EncodeString("content")
 	e.EncodeString(t.content)
@@ -73,8 +74,6 @@ func (t *typingEffect) DecodeMsgpack(dec *msgpack.Decoder) error {
 		switch d.DecodeString() {
 		case "animCount":
 			t.animCount = d.DecodeInt()
-		case "animMaxCount":
-			t.animMaxCount = d.DecodeInt()
 		case "content":
 			t.content = d.DecodeString()
 		case "soundEffect":
@@ -91,26 +90,29 @@ func (t *typingEffect) DecodeMsgpack(dec *msgpack.Decoder) error {
 	return nil
 }
 
+func (t *typingEffect) animMaxCount() int {
+	return len([]rune(t.content)) * t.delay
+}
+
 func (t *typingEffect) isAnimating() bool {
-	return t.animCount < t.animMaxCount
+	return t.animCount < t.animMaxCount()
 }
 
 func (t *typingEffect) skipAnim() {
-	t.animCount = t.animMaxCount
+	t.animCount = t.animMaxCount()
 }
 
 func (t *typingEffect) SetContent(content string) {
 	t.content = content
-	t.animMaxCount = len([]rune(content)) * t.delay
 	// Finish animation forcely.
 	if t.animCount > 0 {
-		t.animCount = t.animMaxCount
+		t.animCount = t.animMaxCount()
 	}
 }
 
 func (t *typingEffect) update() {
 	prevTextRuneCount := t.getCurrentTextRuneCount()
-	if t.animCount < t.animMaxCount {
+	if t.animCount < t.animMaxCount() {
 		t.animCount++
 	}
 	currentTextRuneCount := t.getCurrentTextRuneCount()
@@ -131,9 +133,31 @@ func (t *typingEffect) playSE() {
 	}
 }
 
+func (t *typingEffect) draw(screen *ebiten.Image, x, y int, textScale int, textAlign data.TextAlign, textColor color.Color, edgeColor color.Color, shadowColor color.Color) {
+	c := t.getCurrentTextRuneCount()
+	if shadowColor != nil {
+		// Shadow
+		font.DrawText(screen, t.content, x+textScale*2, y, textScale, textAlign, shadowColor, c)
+		font.DrawText(screen, t.content, x-textScale*2, y, textScale, textAlign, shadowColor, c)
+		font.DrawText(screen, t.content, x, y+textScale*2, textScale, textAlign, shadowColor, c)
+		font.DrawText(screen, t.content, x, y-textScale*2, textScale, textAlign, shadowColor, c)
+		font.DrawText(screen, t.content, x+textScale, y+textScale, textScale, textAlign, shadowColor, c)
+		font.DrawText(screen, t.content, x-textScale, y+textScale, textScale, textAlign, shadowColor, c)
+		font.DrawText(screen, t.content, x+textScale, y-textScale, textScale, textAlign, shadowColor, c)
+		font.DrawText(screen, t.content, x-textScale, y-textScale, textScale, textAlign, shadowColor, c)
+
+		// Edge
+		font.DrawText(screen, t.content, x+textScale, y, textScale, textAlign, edgeColor, c)
+		font.DrawText(screen, t.content, x-textScale, y, textScale, textAlign, edgeColor, c)
+		font.DrawText(screen, t.content, x, y+textScale, textScale, textAlign, edgeColor, c)
+		font.DrawText(screen, t.content, x, y-textScale, textScale, textAlign, edgeColor, c)
+	}
+	font.DrawText(screen, t.content, x, y, textScale, textAlign, textColor, c)
+}
+
 func (t *typingEffect) getCurrentTextRuneCount() int {
-	if t.animMaxCount > 0 {
-		return len([]rune(t.content)) * t.animCount / t.animMaxCount
+	if t.animMaxCount() > 0 {
+		return len([]rune(t.content)) * t.animCount / t.animMaxCount()
 	}
 	return len([]rune(t.content))
 }

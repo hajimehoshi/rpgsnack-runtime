@@ -311,7 +311,6 @@ func (b *banner) draw(screen *ebiten.Image, offsetX, offsetY int) {
 	}
 
 	if b.opened {
-		displayTextLength := b.typingEffect.getCurrentTextRuneCount()
 		_, th := font.MeasureSize(b.content)
 		x, y := b.position(screen)
 		x = (x + bannerPaddingX) * consts.TileScale
@@ -326,23 +325,12 @@ func (b *banner) draw(screen *ebiten.Image, offsetX, offsetY int) {
 		x += int(dx * consts.TileScale)
 		y += int(dy * consts.TileScale)
 
+		var edgeColor color.Color
+		var shadowColor color.Color
 		if textEdge {
-			shadowColor := color.RGBA{0, 0, 0, 64}
-			font.DrawText(screen, b.content, x+textScale*2, y, textScale, b.textAlign, shadowColor, displayTextLength)
-			font.DrawText(screen, b.content, x-textScale*2, y, textScale, b.textAlign, shadowColor, displayTextLength)
-			font.DrawText(screen, b.content, x, y+textScale*2, textScale, b.textAlign, shadowColor, displayTextLength)
-			font.DrawText(screen, b.content, x, y-textScale*2, textScale, b.textAlign, shadowColor, displayTextLength)
-			font.DrawText(screen, b.content, x+textScale, y+textScale, textScale, b.textAlign, shadowColor, displayTextLength)
-			font.DrawText(screen, b.content, x-textScale, y+textScale, textScale, b.textAlign, shadowColor, displayTextLength)
-			font.DrawText(screen, b.content, x+textScale, y-textScale, textScale, b.textAlign, shadowColor, displayTextLength)
-			font.DrawText(screen, b.content, x-textScale, y-textScale, textScale, b.textAlign, shadowColor, displayTextLength)
-
-			edgeColor := color.Black
-			font.DrawText(screen, b.content, x+textScale, y, textScale, b.textAlign, edgeColor, displayTextLength)
-			font.DrawText(screen, b.content, x-textScale, y, textScale, b.textAlign, edgeColor, displayTextLength)
-			font.DrawText(screen, b.content, x, y+textScale, textScale, b.textAlign, edgeColor, displayTextLength)
-			font.DrawText(screen, b.content, x, y-textScale, textScale, b.textAlign, edgeColor, displayTextLength)
+			edgeColor = color.Black
+			shadowColor = color.RGBA{0, 0, 0, 64}
 		}
-		font.DrawText(screen, b.content, x, y, textScale, b.textAlign, color.White, displayTextLength)
+		b.typingEffect.draw(screen, x, y, textScale, b.textAlign, color.White, edgeColor, shadowColor)
 	}
 }

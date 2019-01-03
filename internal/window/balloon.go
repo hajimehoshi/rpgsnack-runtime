@@ -496,6 +496,6 @@ func (b *balloon) draw(screen *ebiten.Image, character *character.Character, off
 		y = (y + my + b.contentOffsetY) * consts.TileScale
 		x += int(dx * consts.TileScale)
 		y += int(dy * consts.TileScale)
-		font.DrawText(screen, b.content, x, y, consts.TextScale, data.TextAlignLeft, color.Black, b.typingEffect.getCurrentTextRuneCount())
+		b.typingEffect.draw(screen, x, y, consts.TextScale, data.TextAlignLeft, color.Black, nil, nil)
 	}
 }
