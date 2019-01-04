@@ -365,6 +365,9 @@ func (w *Windows) Update(playerY int, sceneManager *scene.Manager, characters []
 				}
 				b.close()
 			}
+			if w.banner != nil {
+				w.banner.close()
+			}
 			w.hasChosenIndex = false
 		}
 	} else if w.choosing && w.isOpened(0) && input.Triggered() {
