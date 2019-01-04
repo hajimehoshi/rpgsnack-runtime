@@ -29,8 +29,9 @@ import (
 )
 
 type typingEffect struct {
-	animCount                 int
-	content                   string
+	index                     int
+	delayCount                int
+	content                   []rune
 	soundEffect               string
 	isSEPlayedInPreviousFrame bool
 	delay                     int
@@ -50,11 +51,14 @@ func (t *typingEffect) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e := easymsgpack.NewEncoder(enc)
 	e.BeginMap()
 
-	e.EncodeString("animCount")
-	e.EncodeInt(t.animCount)
+	e.EncodeString("index")
+	e.EncodeInt(t.index)
+
+	e.EncodeString("delayCount")
+	e.EncodeInt(t.delayCount)
 
 	e.EncodeString("content")
-	e.EncodeString(t.content)
+	e.EncodeString(string(t.content))
 
 	e.EncodeString("soundEffect")
 	e.EncodeString(t.soundEffect)
@@ -77,10 +81,12 @@ func (t *typingEffect) DecodeMsgpack(dec *msgpack.Decoder) error {
 	n := d.DecodeMapLen()
 	for i := 0; i < n; i++ {
 		switch d.DecodeString() {
-		case "animCount":
-			t.animCount = d.DecodeInt()
+		case "index":
+			t.index = d.DecodeInt()
+		case "delayCount":
+			t.delayCount = d.DecodeInt()
 		case "content":
-			t.content = d.DecodeString()
+			t.content = []rune(d.DecodeString())
 		case "soundEffect":
 			t.soundEffect = d.DecodeString()
 		case "playedSE":
@@ -97,12 +103,8 @@ func (t *typingEffect) DecodeMsgpack(dec *msgpack.Decoder) error {
 	return nil
 }
 
-func (t *typingEffect) animMaxCount() int {
-	return len([]rune(t.content)) * t.delay
-}
-
 func (t *typingEffect) isAnimating() bool {
-	return t.animCount > 0
+	return t.delayCount > 0
 }
 
 func (t *typingEffect) shouldCloseWindow() bool {
@@ -113,26 +115,33 @@ func (t *typingEffect) trySkipAnim() {
 	if t.forceQuit {
 		return
 	}
-	t.animCount = 0
+	t.delayCount = 0
 }
 
 func (t *typingEffect) SetContent(content string) {
-	t.content = content
+	t.content = []rune(content)
 	if strings.Contains(content, `\^`) {
-		t.content = t.content[:strings.Index(t.content, `\^`)]
+		t.content = []rune(content[:strings.Index(content, `\^`)])
 		t.forceQuit = true
 	}
-	t.animCount = t.animMaxCount()
+	t.delayCount = t.delay
+	if t.delay == 0 {
+		t.index = len(t.content)
+	}
 }
 
 func (t *typingEffect) update() {
-	prevTextRuneCount := t.getCurrentTextRuneCount()
-	if t.animCount > 0 {
-		t.animCount--
+	if t.delayCount > 0 {
+		t.delayCount--
 	}
-	currentTextRuneCount := t.getCurrentTextRuneCount()
-	if currentTextRuneCount > 0 && currentTextRuneCount != prevTextRuneCount {
-		t.playSE()
+	if t.delayCount == 0 {
+		if t.index < len(t.content) {
+			t.index++
+			t.playSE()
+		}
+		if t.index < len(t.content) {
+			t.delayCount = t.delay
+		}
 	}
 }
 
@@ -140,7 +149,7 @@ func (t *typingEffect) playSE() {
 	if t.soundEffect == "" {
 		return
 	}
-	if !t.isSEPlayedInPreviousFrame && t.content[t.getCurrentTextRuneCount()-1] != ' ' {
+	if !t.isSEPlayedInPreviousFrame && t.content[t.index-1] != ' ' {
 		audio.PlaySE(t.soundEffect, 0.2)
 		t.isSEPlayedInPreviousFrame = true
 	} else {
@@ -149,32 +158,24 @@ func (t *typingEffect) playSE() {
 }
 
 func (t *typingEffect) draw(screen *ebiten.Image, x, y int, textScale int, textAlign data.TextAlign, textColor color.Color, edgeColor color.Color, shadowColor color.Color) {
-	c := t.getCurrentTextRuneCount()
+	i := t.index
+	str := string(t.content)
 	if shadowColor != nil {
 		// Shadow
-		font.DrawText(screen, t.content, x+textScale*2, y, textScale, textAlign, shadowColor, c)
-		font.DrawText(screen, t.content, x-textScale*2, y, textScale, textAlign, shadowColor, c)
-		font.DrawText(screen, t.content, x, y+textScale*2, textScale, textAlign, shadowColor, c)
-		font.DrawText(screen, t.content, x, y-textScale*2, textScale, textAlign, shadowColor, c)
-		font.DrawText(screen, t.content, x+textScale, y+textScale, textScale, textAlign, shadowColor, c)
-		font.DrawText(screen, t.content, x-textScale, y+textScale, textScale, textAlign, shadowColor, c)
-		font.DrawText(screen, t.content, x+textScale, y-textScale, textScale, textAlign, shadowColor, c)
-		font.DrawText(screen, t.content, x-textScale, y-textScale, textScale, textAlign, shadowColor, c)
+		font.DrawText(screen, str, x+textScale*2, y, textScale, textAlign, shadowColor, i)
+		font.DrawText(screen, str, x-textScale*2, y, textScale, textAlign, shadowColor, i)
+		font.DrawText(screen, str, x, y+textScale*2, textScale, textAlign, shadowColor, i)
+		font.DrawText(screen, str, x, y-textScale*2, textScale, textAlign, shadowColor, i)
+		font.DrawText(screen, str, x+textScale, y+textScale, textScale, textAlign, shadowColor, i)
+		font.DrawText(screen, str, x-textScale, y+textScale, textScale, textAlign, shadowColor, i)
+		font.DrawText(screen, str, x+textScale, y-textScale, textScale, textAlign, shadowColor, i)
+		font.DrawText(screen, str, x-textScale, y-textScale, textScale, textAlign, shadowColor, i)
 
 		// Edge
-		font.DrawText(screen, t.content, x+textScale, y, textScale, textAlign, edgeColor, c)
-		font.DrawText(screen, t.content, x-textScale, y, textScale, textAlign, edgeColor, c)
-		font.DrawText(screen, t.content, x, y+textScale, textScale, textAlign, edgeColor, c)
-		font.DrawText(screen, t.content, x, y-textScale, textScale, textAlign, edgeColor, c)
+		font.DrawText(screen, str, x+textScale, y, textScale, textAlign, edgeColor, i)
+		font.DrawText(screen, str, x-textScale, y, textScale, textAlign, edgeColor, i)
+		font.DrawText(screen, str, x, y+textScale, textScale, textAlign, edgeColor, i)
+		font.DrawText(screen, str, x, y-textScale, textScale, textAlign, edgeColor, i)
 	}
-	font.DrawText(screen, t.content, x, y, textScale, textAlign, textColor, c)
-}
-
-func (t *typingEffect) getCurrentTextRuneCount() int {
-	l := len([]rune(t.content))
-	if t.animMaxCount() > 0 {
-		m := t.animMaxCount()
-		return l * (m - t.animCount) / m
-	}
-	return l
+	font.DrawText(screen, str, x, y, textScale, textAlign, textColor, i)
 }
