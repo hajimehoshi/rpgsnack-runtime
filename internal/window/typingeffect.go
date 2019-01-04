@@ -29,12 +29,14 @@ import (
 )
 
 type typingEffect struct {
+	content     []rune
+	soundEffect string
+	delay       int
+
+	// These members are not dumped.
 	index                     int
 	delayCount                int
-	content                   []rune
-	soundEffect               string
 	isSEPlayedInPreviousFrame bool
-	delay                     int
 }
 
 func newTypingEffect(content string, delay int, soundEffect string) *typingEffect {
@@ -50,20 +52,11 @@ func (t *typingEffect) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e := easymsgpack.NewEncoder(enc)
 	e.BeginMap()
 
-	e.EncodeString("index")
-	e.EncodeInt(t.index)
-
-	e.EncodeString("delayCount")
-	e.EncodeInt(t.delayCount)
-
 	e.EncodeString("content")
 	e.EncodeString(string(t.content))
 
 	e.EncodeString("soundEffect")
 	e.EncodeString(t.soundEffect)
-
-	e.EncodeString("playedSE")
-	e.EncodeBool(t.isSEPlayedInPreviousFrame)
 
 	e.EncodeString("delay")
 	e.EncodeInt(t.delay)
@@ -75,18 +68,13 @@ func (t *typingEffect) EncodeMsgpack(enc *msgpack.Encoder) error {
 func (t *typingEffect) DecodeMsgpack(dec *msgpack.Decoder) error {
 	d := easymsgpack.NewDecoder(dec)
 	n := d.DecodeMapLen()
+	content := ""
 	for i := 0; i < n; i++ {
 		switch d.DecodeString() {
-		case "index":
-			t.index = d.DecodeInt()
-		case "delayCount":
-			t.delayCount = d.DecodeInt()
 		case "content":
-			t.content = []rune(d.DecodeString())
+			content = d.DecodeString()
 		case "soundEffect":
 			t.soundEffect = d.DecodeString()
-		case "playedSE":
-			t.isSEPlayedInPreviousFrame = d.DecodeBool()
 		case "delay":
 			t.delay = d.DecodeInt()
 		}
@@ -94,6 +82,7 @@ func (t *typingEffect) DecodeMsgpack(dec *msgpack.Decoder) error {
 	if err := d.Error(); err != nil {
 		return fmt.Errorf("window: typingEffect.DecodeMsgpack failed: %v", err)
 	}
+	t.SetContent(content)
 	return nil
 }
 
