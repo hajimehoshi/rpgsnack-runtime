@@ -134,7 +134,7 @@ func (t *typingEffect) forceQuit() bool {
 }
 
 func (t *typingEffect) isAnimating() bool {
-	return t.delayCount > 0
+	return t.delayCount > 0 || t.index < t.lastIndex()
 }
 
 func (t *typingEffect) lastIndex() int {
@@ -154,7 +154,8 @@ func (t *typingEffect) trySkipAnim() {
 	if t.forceQuit() {
 		return
 	}
-	t.delayCount = 0
+	// Give 1 delay so that isAnimation() still returns false in the frame when trySkipAnim() is called.
+	t.delayCount = 1
 	t.index = t.lastIndex()
 }
 
@@ -190,7 +191,9 @@ func (t *typingEffect) update() {
 			}
 		}
 		t.isSEPlayedInPreviousFrame = played
-		t.delayCount = t.delay
+		if t.index < t.lastIndex() {
+			t.delayCount = t.delay
+		}
 	}
 }
 
