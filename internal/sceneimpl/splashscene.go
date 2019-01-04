@@ -21,6 +21,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/gamestate"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
 
@@ -70,8 +71,11 @@ func (s *SplashScene) Update(sceneManager *scene.Manager) error {
 	if err != nil {
 		return err
 	}
-
 	s.count--
+	if input.Triggered() {
+		s.count = 0
+	}
+
 	if s.count == 0 {
 		sceneManager.GoToWithFading(NewTitleMapScene(g), FadingCount, FadingCount)
 	}
