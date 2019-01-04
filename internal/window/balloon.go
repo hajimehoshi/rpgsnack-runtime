@@ -243,7 +243,7 @@ func newBalloonWithArrow(contentID data.UUID, content string, balloonType data.B
 func (b *balloon) setContent(content string) {
 	b.content = content
 	if b.hasArrow {
-		w, h, contentOffsetX, contentOffsetY := balloonSizeFromContent(b.content, b.balloonType)
+		w, h, contentOffsetX, contentOffsetY := balloonSizeFromContent(visibleContent(b.content), b.balloonType)
 		b.width = w
 		b.height = h
 		b.contentOffsetX = contentOffsetX

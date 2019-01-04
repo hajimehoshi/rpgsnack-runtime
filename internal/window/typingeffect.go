@@ -35,7 +35,6 @@ type typingEffect struct {
 	soundEffect               string
 	isSEPlayedInPreviousFrame bool
 	delay                     int
-	forceQuit                 bool
 }
 
 func newTypingEffect(content string, delay int, soundEffect string) *typingEffect {
@@ -69,9 +68,6 @@ func (t *typingEffect) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EncodeString("delay")
 	e.EncodeInt(t.delay)
 
-	e.EncodeString("forceQuit")
-	e.EncodeBool(t.forceQuit)
-
 	e.EndMap()
 	return e.Flush()
 }
@@ -93,8 +89,6 @@ func (t *typingEffect) DecodeMsgpack(dec *msgpack.Decoder) error {
 			t.isSEPlayedInPreviousFrame = d.DecodeBool()
 		case "delay":
 			t.delay = d.DecodeInt()
-		case "forceQuit":
-			t.forceQuit = d.DecodeBool()
 		}
 	}
 	if err := d.Error(); err != nil {
@@ -103,16 +97,61 @@ func (t *typingEffect) DecodeMsgpack(dec *msgpack.Decoder) error {
 	return nil
 }
 
+const (
+	controlForceQuit = `\^`
+	controlWaitShort = `\.`
+	controlWaitLong  = `\|`
+)
+
+func visibleContent(content string) string {
+	c := content
+	if strings.Contains(c, controlForceQuit) {
+		c = c[:strings.Index(c, controlForceQuit)]
+	}
+	c = strings.Replace(c, controlWaitShort, "", -1)
+	c = strings.Replace(c, controlWaitLong, "", -1)
+	return c
+}
+
+func (t *typingEffect) visibleContent() []rune {
+	return []rune(visibleContent(string(t.content)))
+}
+
+func (t *typingEffect) visibleIndex() int {
+	i := t.index
+	i -= strings.Count(string(t.content[:t.index]), controlWaitShort) * len(controlWaitShort)
+	i -= strings.Count(string(t.content[:t.index]), controlWaitLong) * len(controlWaitLong)
+
+	max := len(t.visibleContent())
+	if i > max {
+		i = max
+	}
+	return i
+}
+
+func (t *typingEffect) forceQuit() bool {
+	return strings.Contains(string(t.content), controlForceQuit)
+}
+
 func (t *typingEffect) isAnimating() bool {
 	return t.delayCount > 0
 }
 
+func (t *typingEffect) lastIndex() int {
+	i := len(t.content)
+	c := string(t.content)
+	if strings.Contains(c, controlForceQuit) {
+		i = len([]rune(c[:strings.Index(c, controlForceQuit)]))
+	}
+	return i
+}
+
 func (t *typingEffect) shouldCloseWindow() bool {
-	return !t.isAnimating() && t.forceQuit
+	return t.index >= t.lastIndex() && t.forceQuit()
 }
 
 func (t *typingEffect) trySkipAnim() {
-	if t.forceQuit {
+	if t.forceQuit() {
 		return
 	}
 	t.delayCount = 0
@@ -120,13 +159,9 @@ func (t *typingEffect) trySkipAnim() {
 
 func (t *typingEffect) SetContent(content string) {
 	t.content = []rune(content)
-	if strings.Contains(content, `\^`) {
-		t.content = []rune(content[:strings.Index(content, `\^`)])
-		t.forceQuit = true
-	}
 	t.delayCount = t.delay
 	if t.delay == 0 {
-		t.index = len(t.content)
+		t.index = t.lastIndex()
 	}
 }
 
@@ -135,31 +170,57 @@ func (t *typingEffect) update() {
 		t.delayCount--
 	}
 	if t.delayCount == 0 {
-		if t.index < len(t.content) {
+		switch {
+		case t.hasControl([]rune(controlWaitShort)):
+			t.delayCount = 15
+			t.index += len(controlWaitShort)
+			return
+		case t.hasControl([]rune(controlWaitLong)):
+			t.delayCount = 60
+			t.index += len(controlWaitLong)
+			return
+		}
+
+		played := false
+		if t.index < t.lastIndex() {
 			t.index++
-			t.playSE()
+			if !t.isSEPlayedInPreviousFrame && !t.isLastRuneSpace() {
+				played = t.playSE()
+			}
 		}
-		if t.index < len(t.content) {
-			t.delayCount = t.delay
-		}
+		t.isSEPlayedInPreviousFrame = played
+		t.delayCount = t.delay
 	}
 }
 
-func (t *typingEffect) playSE() {
+func (t *typingEffect) isLastRuneSpace() bool {
+	if t.index == 0 {
+		return false
+	}
+	return t.content[t.index-1] == ' '
+}
+
+func (t *typingEffect) hasControl(control []rune) bool {
+	if t.index+len(control) > t.lastIndex() {
+		return false
+	}
+	if string(t.content[t.index:t.index+len(control)]) == string(control) {
+		return true
+	}
+	return false
+}
+
+func (t *typingEffect) playSE() bool {
 	if t.soundEffect == "" {
-		return
+		return false
 	}
-	if !t.isSEPlayedInPreviousFrame && t.content[t.index-1] != ' ' {
-		audio.PlaySE(t.soundEffect, 0.2)
-		t.isSEPlayedInPreviousFrame = true
-	} else {
-		t.isSEPlayedInPreviousFrame = false
-	}
+	audio.PlaySE(t.soundEffect, 0.2)
+	return true
 }
 
 func (t *typingEffect) draw(screen *ebiten.Image, x, y int, textScale int, textAlign data.TextAlign, textColor color.Color, edgeColor color.Color, shadowColor color.Color) {
-	i := t.index
-	str := string(t.content)
+	i := t.visibleIndex()
+	str := string(t.visibleContent())
 	if shadowColor != nil {
 		// Shadow
 		font.DrawText(screen, str, x+textScale*2, y, textScale, textAlign, shadowColor, i)
