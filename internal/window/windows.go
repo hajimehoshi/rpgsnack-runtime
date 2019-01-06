@@ -37,6 +37,7 @@ const (
 
 type Windows struct {
 	nextBalloon    *balloon
+	nextBanner     *banner
 	balloons       []*balloon // TODO: Rename?
 	choiceBalloons []*balloon
 	banner         *banner
@@ -57,6 +58,9 @@ func (w *Windows) EncodeMsgpack(enc *msgpack.Encoder) error {
 
 	e.EncodeString("nextBalloon")
 	e.EncodeInterface(w.nextBalloon)
+
+	e.EncodeString("nextBanner")
+	e.EncodeInterface(w.nextBanner)
 
 	e.EncodeString("balloons")
 	e.BeginArray()
@@ -104,6 +108,11 @@ func (w *Windows) DecodeMsgpack(dec *msgpack.Decoder) error {
 			if !d.SkipCodeIfNil() {
 				w.nextBalloon = &balloon{}
 				d.DecodeInterface(w.nextBalloon)
+			}
+		case "nextBanner":
+			if !d.SkipCodeIfNil() {
+				w.nextBanner = &banner{}
+				d.DecodeInterface(w.nextBanner)
 			}
 		case "balloons":
 			if !d.SkipCodeIfNil() {
@@ -165,15 +174,17 @@ func (w *Windows) HasChosenIndex() bool {
 
 func (w *Windows) ShowBalloon(contentID data.UUID, content string, balloonType data.BalloonType, eventID int, interpreterID int, messageStyle *data.MessageStyle) {
 	if w.nextBalloon != nil {
-		panic("not reach")
+		panic("not reached")
 	}
 	// TODO: How to call newBalloonCenter?
 	w.nextBalloon = newBalloonWithArrow(contentID, content, balloonType, eventID, interpreterID, messageStyle)
 }
 
 func (w *Windows) ShowMessage(contentID data.UUID, content string, eventID int, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign, interpreterID int, messageStyle *data.MessageStyle) {
-	w.banner = newBanner(contentID, content, eventID, background, positionType, textAlign, interpreterID, messageStyle)
-	w.banner.open()
+	if w.nextBanner != nil {
+		panic("not reached")
+	}
+	w.nextBanner = newBanner(contentID, content, eventID, background, positionType, textAlign, interpreterID, messageStyle)
 }
 
 func (w *Windows) ShowChoices(sceneManager *scene.Manager, choiceIDs []data.UUID, choices []string, interpreterID int) {
@@ -230,6 +241,9 @@ func (w *Windows) IsBusy(interpreterID int) bool {
 		return true
 	}
 	if w.nextBalloon != nil && (interpreterID == 0 || w.nextBalloon.interpreterID == interpreterID) {
+		return true
+	}
+	if w.nextBanner != nil && (interpreterID == 0 || w.nextBanner.interpreterID == interpreterID) {
 		return true
 	}
 	return false
@@ -356,6 +370,10 @@ func (w *Windows) Update(playerY int, sceneManager *scene.Manager, characters []
 			w.balloons = []*balloon{w.nextBalloon}
 			w.balloons[0].open()
 			w.nextBalloon = nil
+		} else if w.nextBanner != nil && !w.IsAnimating(0) && !w.isOpened(0) {
+			w.banner = w.nextBanner
+			w.banner.open()
+			w.nextBanner = nil
 		}
 	}
 	if w.chosenBalloonWaitingCount > 0 {
@@ -367,6 +385,9 @@ func (w *Windows) Update(playerY int, sceneManager *scene.Manager, characters []
 					continue
 				}
 				b.close()
+			}
+			if w.banner != nil {
+				w.banner.close()
 			}
 			w.hasChosenIndex = false
 		}
