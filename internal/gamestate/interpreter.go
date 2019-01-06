@@ -415,13 +415,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		}
 		// Advance command index first and check the next command.
 		i.commandIterator.Advance()
-		if !i.commandIterator.IsTerminated() {
-			if i.commandIterator.Command().Name != data.CommandNameShowChoices {
-				gameState.CloseAllWindows()
-			}
-		} else {
-			gameState.CloseAllWindows()
-		}
+		gameState.CloseAllWindows()
 		i.waitingCommand = false
 
 	case data.CommandNameShowHint:
