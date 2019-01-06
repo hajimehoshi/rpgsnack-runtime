@@ -69,7 +69,7 @@ func (m *Requester) RequestOpenLink(requestID int, linkType string, data string)
 	m.game.RespondOpenLink(requestID)
 }
 
-func (m *Requester) RequestShareImage(requestID int, title string, message string, image string) {
+func (m *Requester) RequestShareImage(requestID int, title string, message string, image []byte) {
 	log.Printf("request share image: requestID: %d, title: %s, message: %s, image: %s", requestID, title, message, image)
 	m.game.RespondShareImage(requestID)
 }

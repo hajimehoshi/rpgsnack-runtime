@@ -267,6 +267,12 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 			return err
 		}
 		c.Args = args
+	case CommandNameShare:
+		var args *CommandArgsShare
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	case CommandNameSendAnalytics:
 		var args *CommandArgsSendAnalytics
 		if err := unmarshalJSON(tmp.Args, &args); err != nil {
@@ -672,6 +678,12 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 			return err
 		}
 		c.Args = a
+	case CommandNameShare:
+		a := &CommandArgsShare{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
 	case CommandNameSendAnalytics:
 		a := &CommandArgsSendAnalytics{}
 		if err := msgpack.Unmarshal(argsBin, a); err != nil {
@@ -877,6 +889,7 @@ const (
 	CommandNamePurchase          CommandName = "start_iap"
 	CommandNameShowAds           CommandName = "show_ads"
 	CommandNameOpenLink          CommandName = "open_link"
+	CommandNameShare             CommandName = "share"
 	CommandNameRequestReview     CommandName = "request_review"
 	CommandNameSendAnalytics     CommandName = "send_analytics"
 	CommandNameShowShop          CommandName = "show_shop"
@@ -1230,6 +1243,11 @@ type CommandArgsShowAds struct {
 type CommandArgsOpenLink struct {
 	Type string `json:"type" msgpack:"type"`
 	Data string `json:"data" msgpack:"data"`
+}
+
+type CommandArgsShare struct {
+	TextID UUID   `json:"text" msgpack:"text"`
+	Image  string `json:"image" msgpack:"image"`
 }
 
 type CommandArgsSendAnalytics struct {
@@ -1813,5 +1831,4 @@ const (
 	OpenLinkTypeMore       OpenLinkType = "more"
 	OpenLinkTypeFacebook   OpenLinkType = "fb"
 	OpenLinkTypeTwitter    OpenLinkType = "twitter"
-	OpenLinkTypeShare      OpenLinkType = "share"
 )

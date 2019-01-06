@@ -24,6 +24,7 @@ import (
 
 	"github.com/vmihailenco/msgpack"
 
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/commanditerator"
@@ -691,16 +692,23 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 	case data.CommandNameOpenLink:
 		args := c.Args.(*data.CommandArgsOpenLink)
 		i.waitingRequestID = sceneManager.GenerateRequestID()
-		content := args.Data
-		if data.OpenLinkType(args.Type) == data.OpenLinkTypeShare {
-			uuid, err := data.UUIDFromString(args.Data)
-			if err != nil {
-				panic(err)
-			}
-			content = sceneManager.Game().Texts.Get(lang.Get(), uuid)
-		}
-		sceneManager.Requester().RequestOpenLink(i.waitingRequestID, args.Type, content)
+		sceneManager.Requester().RequestOpenLink(i.waitingRequestID, args.Type, args.Data)
 		return false, nil
+	case data.CommandNameShare:
+		args := c.Args.(*data.CommandArgsShare)
+		text := sceneManager.Game().Texts.Get(lang.Get(), args.TextID)
+
+		var image []byte
+		if args.Image != "" {
+			i := assets.GetLocalizedImagePngBytes("pictures/" + args.Image)
+			if i != nil {
+				image = i
+			}
+		}
+		i.waitingRequestID = sceneManager.GenerateRequestID()
+		sceneManager.Requester().RequestShareImage(i.waitingRequestID, "", text, image)
+		return false, nil
+
 	case data.CommandNameSendAnalytics:
 		args := c.Args.(*data.CommandArgsSendAnalytics)
 		sceneManager.Requester().RequestSendAnalytics(args.EventName, "")

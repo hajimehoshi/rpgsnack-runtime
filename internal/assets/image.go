@@ -36,6 +36,16 @@ func decodeImage(path string, bin []uint8) (*ebiten.Image, error) {
 	return eimg, nil
 }
 
+func GetLocalizedImagePngBytes(key string) []byte {
+	s := lang.Normalize(lang.Get()).String()
+	k := path.Join("images", key+"@"+s+".png")
+	if bin, ok := theAssets.assets[k]; ok {
+		return bin
+	}
+	k = path.Join("images", key+".png")
+	return GetResource(path.Join("images", key+".png"))
+}
+
 func GetLocalizedImage(key string) *ebiten.Image {
 	s := lang.Normalize(lang.Get()).String()
 	k := path.Join("images", key+"@"+s+".png")

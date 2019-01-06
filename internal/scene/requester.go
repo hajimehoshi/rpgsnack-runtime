@@ -23,7 +23,7 @@ type Requester interface {
 	RequestInterstitialAds(requestID int)
 	RequestRewardedAds(requestID int)
 	RequestOpenLink(requestID int, linkType string, data string)
-	RequestShareImage(requestID int, title string, message string, image string)
+	RequestShareImage(requestID int, title string, message string, image []byte)
 	RequestTerminateGame()
 	RequestChangeLanguage(requestID int, lang string)
 	RequestGetIAPPrices(requestID int)
