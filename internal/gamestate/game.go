@@ -653,14 +653,24 @@ func (g *Game) ShowMessage(sceneManager *scene.Manager, interpreterID, eventID i
 	g.windows.ShowMessage(contentID, content, eventID, background, positionType, textAlign, interpreterID, messageStyle)
 }
 
-func (g *Game) ShowChoices(sceneManager *scene.Manager, interpreterID int, choiceIDs []data.UUID) {
-	choices := []string{}
-	for _, id := range choiceIDs {
-		choice := sceneManager.Game().Texts.Get(lang.Get(), id)
-		choice = g.ParseMessageSyntax(choice)
+func (g *Game) ShowChoices(sceneManager *scene.Manager, interpreterID int, eventID int, choiceIDs []data.UUID, conditions []*data.ChoiceCondition) {
+	choices := []*window.Choice{}
+	for i, id := range choiceIDs {
+		t := sceneManager.Game().Texts.Get(lang.Get(), id)
+		t = g.ParseMessageSyntax(t)
+
+		choice := &window.Choice{ID: id, Text: t, Checked: false}
+		if i < len(conditions) && conditions[i].Check != nil {
+			m, err := g.MeetsCondition(conditions[i].Check, eventID)
+			if err != nil {
+				panic(err)
+			}
+			choice.Checked = m
+		}
+
 		choices = append(choices, choice)
 	}
-	g.windows.ShowChoices(sceneManager, choiceIDs, choices, interpreterID)
+	g.windows.ShowChoices(sceneManager, choices, interpreterID)
 }
 
 func (g *Game) SetSwitchValue(id int, value bool) {

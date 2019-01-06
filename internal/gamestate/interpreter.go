@@ -449,7 +449,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			if gameState.windows.IsBusyWithChoosing() {
 				return false, nil
 			}
-			gameState.ShowChoices(sceneManager, i.id, c.Args.(*data.CommandArgsShowChoices).ChoiceIDs)
+			gameState.ShowChoices(sceneManager, i.id, i.eventID, c.Args.(*data.CommandArgsShowChoices).ChoiceIDs, c.Args.(*data.CommandArgsShowChoices).Conditions)
 			i.waitingCommand = true
 			return false, nil
 		}

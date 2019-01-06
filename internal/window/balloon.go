@@ -57,6 +57,7 @@ type balloon struct {
 	balloonType    data.BalloonType
 	messageStyle   *data.MessageStyle
 	typingEffect   *typingEffect
+	checked        bool
 
 	offscreen *ebiten.Image
 }
@@ -116,6 +117,9 @@ func (b *balloon) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EncodeString("typingEffect")
 	e.EncodeInterface(b.typingEffect)
 
+	e.EncodeString("checked")
+	e.EncodeBool(b.checked)
+
 	e.EndMap()
 	return e.Flush()
 }
@@ -165,6 +169,8 @@ func (b *balloon) DecodeMsgpack(dec *msgpack.Decoder) error {
 				b.typingEffect = &typingEffect{}
 				d.DecodeInterface(b.typingEffect)
 			}
+		case "checked":
+			b.checked = d.DecodeBool()
 		}
 	}
 	if err := d.Error(); err != nil {
@@ -173,7 +179,7 @@ func (b *balloon) DecodeMsgpack(dec *msgpack.Decoder) error {
 	return nil
 }
 
-func newBalloon(x, y, width, height int, contentID data.UUID, content string, balloonType data.BalloonType, interpreterID int, messageStyle *data.MessageStyle) *balloon {
+func newBalloon(x, y, width, height int, contentID data.UUID, content string, balloonType data.BalloonType, interpreterID int, messageStyle *data.MessageStyle, checked bool) *balloon {
 	font.DrawTextToScratchPad(content, consts.TextScale, lang.Get())
 
 	b := &balloon{
@@ -184,6 +190,7 @@ func newBalloon(x, y, width, height int, contentID data.UUID, content string, ba
 		y:             y,
 		balloonType:   balloonType,
 		messageStyle:  messageStyle,
+		checked:       checked,
 	}
 	s := b.partSize()
 	b.width = ((width + (s - 1)) / s) * s
@@ -463,7 +470,20 @@ func (b *balloon) draw(screen *ebiten.Image, character *character.Character, off
 		op.GeoM.Translate(float64(tx), float64(ty))
 		op.GeoM.Concat(*g)
 		op.GeoM.Scale(consts.TileScale, consts.TileScale)
+		if b.checked {
+			op.ColorM.Scale(1.0, 1.0, 0.5, 1.0)
+		}
 		screen.DrawImage(b.offscreen, op)
+		if b.checked {
+			checkOp := &ebiten.DrawImageOptions{}
+			checkOp.GeoM.Translate(float64(tx), float64(ty))
+			checkOp.GeoM.Translate(float64(b.width-16), 4)
+			checkOp.GeoM.Concat(*g)
+			checkOp.GeoM.Scale(consts.TileScale, consts.TileScale)
+			r := image.Rect(12, 12, 24, 24)
+			screen.DrawImage(img.SubImage(r).(*ebiten.Image), checkOp)
+		}
+
 		if b.hasArrow && (b.balloonType == data.BalloonTypeNormal ||
 			b.balloonType == data.BalloonTypeThink) {
 			op := &ebiten.DrawImageOptions{}

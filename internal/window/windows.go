@@ -52,6 +52,12 @@ type Windows struct {
 	lastLang language.Tag
 }
 
+type Choice struct {
+	ID      data.UUID
+	Text    string
+	Checked bool
+}
+
 func (w *Windows) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e := easymsgpack.NewEncoder(enc)
 	e.BeginMap()
@@ -187,7 +193,7 @@ func (w *Windows) ShowMessage(contentID data.UUID, content string, eventID int, 
 	w.nextBanner = newBanner(contentID, content, eventID, background, positionType, textAlign, interpreterID, messageStyle)
 }
 
-func (w *Windows) ShowChoices(sceneManager *scene.Manager, choiceIDs []data.UUID, choices []string, interpreterID int) {
+func (w *Windows) ShowChoices(sceneManager *scene.Manager, choices []*Choice, interpreterID int) {
 	// TODO: w.chosenBalloonWaitingCount should be 0 here!
 	if w.chosenBalloonWaitingCount > 0 {
 		panic("not reach")
@@ -197,7 +203,7 @@ func (w *Windows) ShowChoices(sceneManager *scene.Manager, choiceIDs []data.UUID
 		x := 0
 		y := i * choiceBalloonHeight
 		width := consts.MapWidth
-		balloon := newBalloon(x, y, width, choiceBalloonHeight, choiceIDs[i], choice, data.BalloonTypeNormal, interpreterID, sceneManager.Game().CreateChoicesMessageStyle())
+		balloon := newBalloon(x, y, width, choiceBalloonHeight, choice.ID, choice.Text, data.BalloonTypeNormal, interpreterID, sceneManager.Game().CreateChoicesMessageStyle(), choice.Checked)
 		w.choiceBalloons = append(w.choiceBalloons, balloon)
 		balloon.open()
 	}

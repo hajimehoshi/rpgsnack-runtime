@@ -981,8 +981,14 @@ type CommandArgsShowMessage struct {
 	MessageStyleID int                 `json:"messageStyleId" msgpack:"messageStyleId"`
 }
 
+type ChoiceCondition struct {
+	Show  *Condition `json:"show" msgpack:"show"`
+	Check *Condition `json:"check" msgpack:"check"`
+}
+
 type CommandArgsShowChoices struct {
-	ChoiceIDs []UUID `json:"choices" msgpack:"choices"`
+	ChoiceIDs  []UUID             `json:"choices" msgpack:"choices"`
+	Conditions []*ChoiceCondition `json:"conditions" msgpack:"conditions"`
 }
 
 type CommandArgsSetSwitch struct {
