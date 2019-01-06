@@ -229,7 +229,7 @@ func (w *Windows) IsBusy(interpreterID int) bool {
 	if w.isOpened(interpreterID) {
 		return true
 	}
-	if w.nextBalloon != nil {
+	if w.nextBalloon != nil && (interpreterID == 0 || w.nextBalloon.interpreterID == interpreterID) {
 		return true
 	}
 	return false
@@ -301,6 +301,9 @@ func (w *Windows) IsAnimating(interpreterID int) bool {
 		}
 	}
 	if w.banner != nil {
+		if interpreterID > 0 && w.banner.interpreterID != interpreterID {
+			return false
+		}
 		if w.banner.isAnimating() {
 			return true
 		}
