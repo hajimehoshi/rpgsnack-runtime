@@ -982,8 +982,8 @@ type CommandArgsShowMessage struct {
 }
 
 type ChoiceCondition struct {
-	Show  *Condition `json:"show" msgpack:"show"`
-	Check *Condition `json:"check" msgpack:"check"`
+	Visible *Condition `json:"visible" msgpack:"visible"`
+	Checked *Condition `json:"checked" msgpack:"checked"`
 }
 
 type CommandArgsShowChoices struct {

@@ -660,8 +660,8 @@ func (g *Game) ShowChoices(sceneManager *scene.Manager, interpreterID int, event
 		t = g.ParseMessageSyntax(t)
 
 		choice := &window.Choice{ID: id, Text: t, Checked: false}
-		if i < len(conditions) && conditions[i].Check != nil {
-			m, err := g.MeetsCondition(conditions[i].Check, eventID)
+		if i < len(conditions) && conditions[i].Checked != nil {
+			m, err := g.MeetsCondition(conditions[i].Checked, eventID)
 			if err != nil {
 				panic(err)
 			}
