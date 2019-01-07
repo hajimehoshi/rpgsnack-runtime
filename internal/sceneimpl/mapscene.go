@@ -302,6 +302,10 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 				} else {
 					m.itemPreviewPopup.SetCombineItem(nil, nil)
 				}
+			} else {
+				m.gameState.Items().Activate(itemID)
+				m.gameState.Items().SetEventItem(itemID)
+				m.inventory.SetActiveItemID(itemID)
 			}
 		default:
 			panic("not reached")
