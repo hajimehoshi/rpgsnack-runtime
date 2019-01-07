@@ -457,6 +457,9 @@ func (w *Windows) Draw(screen *ebiten.Image, characters []*character.Character, 
 		}
 		b.draw(screen, w.findCharacterByEventID(characters, b.eventID), offsetX, offsetY)
 	}
+	if w.banner != nil {
+		w.banner.draw(screen, offsetX, 0)
+	}
 	_, sh := screen.Size()
 	for _, b := range w.choiceBalloons {
 		if b == nil {
@@ -465,7 +468,4 @@ func (w *Windows) Draw(screen *ebiten.Image, characters []*character.Character, 
 		b.draw(screen, nil, offsetX, sh/consts.TileScale-windowOffsetY-len(w.choiceBalloons)*choiceBalloonHeight)
 	}
 
-	if w.banner != nil {
-		w.banner.draw(screen, offsetX, 0)
-	}
 }
