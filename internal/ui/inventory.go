@@ -263,7 +263,7 @@ func (i *Inventory) Update(sceneManager *scene.Manager) {
 
 	i.infoButton.Update()
 	i.infoButton.disabled = false
-	if i.activeItemID == 0 || i.mode == PreviewMode {
+	if i.activeItemID == 0 {
 		i.infoButton.disabled = true
 	}
 	i.backButton.Update()
