@@ -281,25 +281,27 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 				m.gameState.Items().Activate(itemID)
 			}
 		case ui.PreviewMode:
-			combineItemID := 0
-			if m.gameState.Items().ActiveItem() > 0 && sceneManager.Game().IsCombineAvailable() {
-				if activeItemID != itemID {
-					combineItemID = itemID
+			if sceneManager.Game().IsCombineAvailable() {
+				combineItemID := 0
+				if m.gameState.Items().ActiveItem() > 0 {
+					if activeItemID != itemID {
+						combineItemID = itemID
+					}
+					m.gameState.Items().SetCombineItem(combineItemID)
 				}
-				m.gameState.Items().SetCombineItem(combineItemID)
-			}
-			var item *data.Item
-			for _, i := range sceneManager.Game().Items {
-				if i.ID == itemID {
-					item = i
-					break
+				var item *data.Item
+				for _, i := range sceneManager.Game().Items {
+					if i.ID == itemID {
+						item = i
+						break
+					}
 				}
-			}
-			if combineItemID != 0 {
-				c := sceneManager.Game().CreateCombine(activeItemID, item.ID)
-				m.itemPreviewPopup.SetCombineItem(item, c)
-			} else {
-				m.itemPreviewPopup.SetCombineItem(nil, nil)
+				if combineItemID != 0 {
+					c := sceneManager.Game().CreateCombine(activeItemID, item.ID)
+					m.itemPreviewPopup.SetCombineItem(item, c)
+				} else {
+					m.itemPreviewPopup.SetCombineItem(nil, nil)
+				}
 			}
 		default:
 			panic("not reached")
