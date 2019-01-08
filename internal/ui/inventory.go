@@ -77,7 +77,7 @@ const (
 
 	frameXMargin  = 34
 	frameYMargin  = 2
-	frameXPadding = 6
+	frameXPadding = 5
 	frameYPadding = 6
 
 	itemSize            = 19
@@ -323,7 +323,7 @@ func (i *Inventory) Draw(screen *ebiten.Image) {
 		tx := float64((i.x + frameXMargin + frameXPadding + index*itemSize) + (i.scrollX+i.dragX)/consts.TileScale)
 		ty := float64(i.y+frameYPadding) + 1
 
-		if tx < float64(i.x+frameXMargin) || tx > float64(i.x+frameXMargin+scrollBarWidth) {
+		if tx < float64(i.x) || tx > float64(i.x+frameXMargin+scrollBarWidth) {
 			continue
 		}
 
