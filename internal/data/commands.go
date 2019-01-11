@@ -1792,6 +1792,7 @@ const (
 	SystemVariableRewardedAdsLoaded     SystemVariableType = "rewarded_ads_loaded"
 	SystemVariableHintCount             SystemVariableType = "active_hint_count"
 	SystemVariableRoomID                SystemVariableType = "room_id"
+	SystemVariableCurrentTime           SystemVariableType = "current_time"
 )
 
 type MessagePositionType string

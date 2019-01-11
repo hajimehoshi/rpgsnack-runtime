@@ -842,6 +842,8 @@ func (g *Game) SetVariable(sceneManager *scene.Manager, variableID int, op data.
 			}
 		case data.SystemVariableRoomID:
 			rhs = roomID
+		case data.SystemVariableCurrentTime:
+			rhs = int(time.Now().Unix())
 		default:
 			return fmt.Errorf("gamestate: not implemented yet (set_variable): systemVariableType %s", systemVariableType)
 		}
