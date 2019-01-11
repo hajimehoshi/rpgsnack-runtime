@@ -151,7 +151,7 @@ func (t *typingEffect) trySkipAnim() {
 func (t *typingEffect) SetContent(content string) {
 	t.content = []rune(content)
 	t.delayCount = t.delay
-	if t.index > 0 {
+	if t.index > 0 || t.delay == 0 {
 		t.index = t.lastIndex()
 	}
 }
