@@ -679,6 +679,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 
 		sceneManager.Requester().RequestPurchase(i.waitingRequestID, key)
 		return false, nil
+
 	case data.CommandNameShowAds:
 		args := c.Args.(*data.CommandArgsShowAds)
 		i.waitingRequestID = sceneManager.GenerateRequestID()
@@ -689,11 +690,13 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			sceneManager.Requester().RequestInterstitialAds(i.waitingRequestID, args.ForceAds)
 		}
 		return false, nil
+
 	case data.CommandNameOpenLink:
 		args := c.Args.(*data.CommandArgsOpenLink)
 		i.waitingRequestID = sceneManager.GenerateRequestID()
 		sceneManager.Requester().RequestOpenLink(i.waitingRequestID, args.Type, args.Data)
 		return false, nil
+
 	case data.CommandNameShare:
 		args := c.Args.(*data.CommandArgsShare)
 		text := sceneManager.Game().Texts.Get(lang.Get(), args.TextID)
@@ -712,15 +715,20 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 	case data.CommandNameSendAnalytics:
 		args := c.Args.(*data.CommandArgsSendAnalytics)
 		sceneManager.Requester().RequestSendAnalytics(args.EventName, "")
+		// There is no need to wait for command. Proceed the command iterator.
 		i.commandIterator.Advance()
+
 	case data.CommandNameShowShop:
 		i.waitingRequestID = sceneManager.GenerateRequestID()
 		args := c.Args.(*data.CommandArgsShowShop)
 		sceneManager.Requester().RequestShowShop(i.waitingRequestID, string(sceneManager.GetShopProductsData(args.Products)))
 		return false, nil
+
 	case data.CommandNameRequestReview:
 		sceneManager.Requester().RequestReview()
+		// There is no need to wait for command. Proceed the command iterator.
 		i.commandIterator.Advance()
+
 	case data.CommandNameMoveCharacter:
 		if ch := gameState.Character(i.mapID, i.roomID, i.eventID); ch == nil {
 			i.commandIterator.Advance()
