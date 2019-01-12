@@ -684,9 +684,9 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		i.waitingRequestID = sceneManager.GenerateRequestID()
 		switch args.Type {
 		case data.ShowAdsTypeRewarded:
-			sceneManager.Requester().RequestRewardedAds(i.waitingRequestID)
+			sceneManager.Requester().RequestRewardedAds(i.waitingRequestID, args.ForceAds)
 		case data.ShowAdsTypeInterstitial:
-			sceneManager.Requester().RequestInterstitialAds(i.waitingRequestID)
+			sceneManager.Requester().RequestInterstitialAds(i.waitingRequestID, args.ForceAds)
 		}
 		return false, nil
 	case data.CommandNameOpenLink:

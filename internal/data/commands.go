@@ -1243,7 +1243,8 @@ type CommandArgsPurchase struct {
 }
 
 type CommandArgsShowAds struct {
-	Type ShowAdsType `json:"type" msgpack:"type"`
+	Type     ShowAdsType `json:"type" msgpack:"type"`
+	ForceAds bool        `json:"forceAds" msgpack:"forceAds"`
 }
 
 type CommandArgsOpenLink struct {

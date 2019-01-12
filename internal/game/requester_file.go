@@ -101,16 +101,16 @@ func (m *Requester) RequestRestorePurchases(requestID int) {
 	m.game.RespondRestorePurchases(requestID, true, nil)
 }
 
-func (m *Requester) RequestInterstitialAds(requestID int) {
-	log.Printf("request interstitial ads: requestID: %d", requestID)
+func (m *Requester) RequestInterstitialAds(requestID int, forceAds bool) {
+	log.Printf("request interstitial ads: requestID: %d", requestID, forceAds)
 	go func() {
 		time.Sleep(time.Second)
 		m.game.RespondInterstitialAds(requestID)
 	}()
 }
 
-func (m *Requester) RequestRewardedAds(requestID int) {
-	log.Printf("request rewarded ads: requestID: %d", requestID)
+func (m *Requester) RequestRewardedAds(requestID int, forceAds bool) {
+	log.Printf("request rewarded ads: requestID: %d force:%b", requestID, forceAds)
 	go func() {
 		time.Sleep(time.Second)
 		m.game.RespondRewardedAds(requestID, true)
