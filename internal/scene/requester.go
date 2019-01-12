@@ -29,6 +29,7 @@ type Requester interface {
 	RequestGetIAPPrices(requestID int)
 	RequestReview()
 	RequestSendAnalytics(eventName string, value string)
+	RequestVibration(vibrationType string)
 	RequestAsset(requestID int, key string)
 }
 

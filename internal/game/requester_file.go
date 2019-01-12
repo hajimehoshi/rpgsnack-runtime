@@ -164,6 +164,10 @@ func (m *Requester) RequestSendAnalytics(eventName string, value string) {
 	log.Printf("request to send an analytics event: %s value: %s", eventName, value)
 }
 
+func (m *Requester) RequestVibration(t string) {
+	log.Printf("request to vibrate type: %s ", t)
+}
+
 func (m *Requester) RequestAsset(requestID int, key string) {
 	// TODO: Implement this
 	log.Printf("request asset %s", key)

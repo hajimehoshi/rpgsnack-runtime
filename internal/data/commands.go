@@ -285,6 +285,12 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 			return err
 		}
 		c.Args = args
+	case CommandNameVibrate:
+		var args *CommandArgsVibrate
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	case CommandNameMoveCharacter:
 		var args *CommandArgsMoveCharacter
 		if err := unmarshalJSON(tmp.Args, &args); err != nil {
@@ -696,7 +702,12 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 			return err
 		}
 		c.Args = a
-
+	case CommandNameVibrate:
+		a := &CommandArgsVibrate{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
 	case CommandNameMoveCharacter:
 		a := &CommandArgsMoveCharacter{}
 		if err := msgpack.Unmarshal(argsBin, a); err != nil {
@@ -893,6 +904,7 @@ const (
 	CommandNameRequestReview     CommandName = "request_review"
 	CommandNameSendAnalytics     CommandName = "send_analytics"
 	CommandNameShowShop          CommandName = "show_shop"
+	CommandNameVibrate           CommandName = "vibrate"
 
 	CommandNameAddItem       CommandName = "add_item"
 	CommandNameRemoveItem    CommandName = "remove_item"
@@ -1263,6 +1275,10 @@ type CommandArgsSendAnalytics struct {
 
 type CommandArgsShowShop struct {
 	Products []int `json:"products" msgpack:"products"`
+}
+
+type CommandArgsVibrate struct {
+	Type string `json:"type" msgpack:"type"`
 }
 
 type CommandArgsAutoSave struct {

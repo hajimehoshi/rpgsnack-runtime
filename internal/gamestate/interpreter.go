@@ -723,7 +723,11 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		args := c.Args.(*data.CommandArgsShowShop)
 		sceneManager.Requester().RequestShowShop(i.waitingRequestID, string(sceneManager.GetShopProductsData(args.Products)))
 		return false, nil
-
+	case data.CommandNameVibrate:
+		args := c.Args.(*data.CommandArgsVibrate)
+		sceneManager.Requester().RequestVibration(args.Type)
+		// There is no need to wait for command. Proceed the command iterator.
+		i.commandIterator.Advance()
 	case data.CommandNameRequestReview:
 		sceneManager.Requester().RequestReview()
 		// There is no need to wait for command. Proceed the command iterator.
