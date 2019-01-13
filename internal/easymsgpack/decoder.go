@@ -95,6 +95,18 @@ func (d *Decoder) DecodeInt() int {
 	return v
 }
 
+func (d *Decoder) DecodeInt64() int64 {
+	if d.err != nil {
+		return 0
+	}
+	v, err := d.dec.DecodeInt64()
+	if err != nil {
+		d.err = err
+		return 0
+	}
+	return v
+}
+
 func (d *Decoder) DecodeFloat64() float64 {
 	if d.err != nil {
 		return 0

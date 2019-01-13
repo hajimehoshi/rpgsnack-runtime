@@ -47,7 +47,7 @@ func (a atFunc) At(x, y int) bool {
 
 type GameState interface {
 	MapPassableAt(through bool, x, y int, ignoreCharacters bool) bool
-	VariableValue(id int) int
+	VariableValue(id int) int64
 	RandomValue(min, max int) int
 	Character(mapID, roomID, eventID int) *character.Character
 }
@@ -75,7 +75,8 @@ func (s *State) moveTarget(gameState GameState) (int, int) {
 		panic("not reached")
 	}
 	if s.args.ValueType == data.ValueTypeVariable {
-		return gameState.VariableValue(s.args.X), gameState.VariableValue(s.args.Y)
+		x, y := gameState.VariableValue(s.args.X), gameState.VariableValue(s.args.Y)
+		return int(x), int(y)
 	}
 	return s.args.X, s.args.Y
 }

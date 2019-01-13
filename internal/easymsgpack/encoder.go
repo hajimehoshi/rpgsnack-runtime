@@ -26,6 +26,7 @@ const (
 	valueTypeNil valueType = iota
 	valueTypeBool
 	valueTypeInt
+	valueTypeInt64
 	valueTypeFloat64
 	valueTypeString
 	valueTypeBytes
@@ -72,6 +73,10 @@ func encodeValue(enc *msgpack.Encoder, val *value) error {
 		}
 	case valueTypeInt:
 		if err := enc.EncodeInt(val.intValue); err != nil {
+			return err
+		}
+	case valueTypeInt64:
+		if err := enc.EncodeInt64(val.intValue); err != nil {
 			return err
 		}
 	case valueTypeFloat64:
@@ -196,6 +201,14 @@ func (e *Encoder) EncodeInt(v int) {
 	e.vals = append(e.vals, &value{
 		valueType: valueTypeInt,
 		intValue:  int64(v),
+		indent:    e.indent,
+	})
+}
+
+func (e *Encoder) EncodeInt64(v int64) {
+	e.vals = append(e.vals, &value{
+		valueType: valueTypeInt64,
+		intValue:  v,
 		indent:    e.indent,
 	})
 }

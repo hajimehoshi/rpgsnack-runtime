@@ -503,9 +503,9 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			x := args.X
 			y := args.Y
 			if args.ValueType == data.ValueTypeVariable {
-				roomID = gameState.VariableValue(roomID)
-				x = gameState.VariableValue(x)
-				y = gameState.VariableValue(y)
+				roomID = int(gameState.VariableValue(roomID))
+				x = int(gameState.VariableValue(x))
+				y = int(gameState.VariableValue(y))
 			}
 
 			if args.Dir != data.DirNone {
@@ -532,9 +532,9 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			x := args.X
 			y := args.Y
 			if args.ValueType == data.ValueTypeVariable {
-				roomID = gameState.VariableValue(roomID)
-				x = gameState.VariableValue(x)
-				y = gameState.VariableValue(y)
+				roomID = int(gameState.VariableValue(roomID))
+				x = int(gameState.VariableValue(x))
+				y = int(gameState.VariableValue(y))
 			}
 			if args.Dir != data.DirNone {
 				gameState.SetPlayerDir(args.Dir)
@@ -959,11 +959,11 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		y := args.Y
 		id := args.ID
 		if args.IDValueType == data.ValueTypeVariable {
-			id = gameState.VariableValue(id)
+			id = int(gameState.VariableValue(id))
 		}
 		if args.PosValueType == data.ValueTypeVariable {
-			x = gameState.VariableValue(x)
-			y = gameState.VariableValue(y)
+			x = int(gameState.VariableValue(x))
+			y = int(gameState.VariableValue(y))
 		}
 		scaleX := float64(args.ScaleX) / 100
 		scaleY := float64(args.ScaleY) / 100
@@ -990,7 +990,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			for i := id1; i <= id2; i++ {
 				id := i
 				if args.IDValueType == data.ValueTypeVariable {
-					id = gameState.VariableValue(i)
+					id = int(gameState.VariableValue(i))
 				}
 				gameState.pictures.Remove(id)
 			}
@@ -1000,7 +1000,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 				return false, fmt.Errorf("gamestate: %v must be integer but not", args.ID)
 			}
 			if args.IDValueType == data.ValueTypeVariable {
-				id = gameState.VariableValue(id)
+				id = int(gameState.VariableValue(id))
 			}
 			gameState.pictures.Remove(id)
 		}
@@ -1011,13 +1011,13 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			args := c.Args.(*data.CommandArgsMovePicture)
 			id := args.ID
 			if args.IDValueType == data.ValueTypeVariable {
-				id = gameState.VariableValue(id)
+				id = int(gameState.VariableValue(id))
 			}
 			x := args.X
 			y := args.Y
 			if args.PosValueType == data.ValueTypeVariable {
-				x = gameState.VariableValue(x)
-				y = gameState.VariableValue(y)
+				x = int(gameState.VariableValue(x))
+				y = int(gameState.VariableValue(y))
 			}
 			gameState.pictures.MoveTo(id, x, y, args.Time*6)
 			if !args.Wait {
@@ -1040,14 +1040,14 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 
 			id := args.ID
 			if args.IDValueType == data.ValueTypeVariable {
-				id = gameState.VariableValue(id)
+				id = int(gameState.VariableValue(id))
 			}
 
 			tx := args.ScaleX
 			ty := args.ScaleY
 			if args.ScaleValueType == data.ValueTypeVariable {
-				tx = gameState.VariableValue(tx)
-				ty = gameState.VariableValue(ty)
+				tx = int(gameState.VariableValue(tx))
+				ty = int(gameState.VariableValue(ty))
 			}
 			scaleX := float64(tx) / 100
 			scaleY := float64(ty) / 100
@@ -1072,12 +1072,12 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 
 			id := args.ID
 			if args.IDValueType == data.ValueTypeVariable {
-				id = gameState.VariableValue(id)
+				id = int(gameState.VariableValue(id))
 			}
 
 			t := args.Angle
 			if args.AngleValueType == data.ValueTypeVariable {
-				t = gameState.VariableValue(t)
+				t = int(gameState.VariableValue(t))
 			}
 			angle := float64(t) * math.Pi / 180
 			gameState.pictures.Rotate(id, angle, args.Time*6)
@@ -1100,12 +1100,12 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			args := c.Args.(*data.CommandArgsFadePicture)
 			id := args.ID
 			if args.IDValueType == data.ValueTypeVariable {
-				id = gameState.VariableValue(id)
+				id = int(gameState.VariableValue(id))
 			}
 
 			opacity := args.Opacity
 			if args.OpacityValueType == data.ValueTypeVariable {
-				opacity = gameState.VariableValue(opacity)
+				opacity = int(gameState.VariableValue(opacity))
 			}
 			o := float64(opacity) / 255
 			gameState.pictures.Fade(id, o, args.Time*6)
@@ -1128,7 +1128,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			args := c.Args.(*data.CommandArgsTintPicture)
 			id := args.ID
 			if args.IDValueType == data.ValueTypeVariable {
-				id = gameState.VariableValue(id)
+				id = int(gameState.VariableValue(id))
 			}
 
 			r := float64(args.Red) / 255
@@ -1154,7 +1154,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		args := c.Args.(*data.CommandArgsChangePictureImage)
 		id := args.ID
 		if args.IDValueType == data.ValueTypeVariable {
-			id = gameState.VariableValue(id)
+			id = int(gameState.VariableValue(id))
 		}
 
 		gameState.pictures.ChangeImage(id, args.Image)

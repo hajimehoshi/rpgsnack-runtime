@@ -438,7 +438,7 @@ func (g *Game) ParseMessageSyntax(str string) string {
 			if err != nil {
 				return fmt.Sprintf("(error:%v)", part)
 			}
-			return strconv.Itoa(g.variables.VariableValue(id))
+			return fmt.Sprintf("%d", g.variables.VariableValue(id))
 		}
 		return str
 	})
@@ -467,36 +467,36 @@ func (g *Game) MeetsCondition(cond *data.Condition, eventID int) (bool, error) {
 	case data.ConditionTypeVariable:
 		id := cond.ID
 		v := g.variables.VariableValue(id)
-		rhs := 0
+		var rhs int64
 		// TODO: This is redundant: can we refactor them?
 		switch value := cond.Value.(type) {
 		case float32:
-			rhs = int(value)
+			rhs = int64(value)
 		case float64:
-			rhs = int(value)
+			rhs = int64(value)
 		case int:
-			rhs = value
+			rhs = int64(value)
 		case int8:
-			rhs = int(value)
+			rhs = int64(value)
 		case int16:
-			rhs = int(value)
+			rhs = int64(value)
 		case int32:
-			rhs = int(value)
+			rhs = int64(value)
 		case int64:
-			rhs = int(value)
+			rhs = value
 		case uint8:
-			rhs = int(value)
+			rhs = int64(value)
 		case uint16:
-			rhs = int(value)
+			rhs = int64(value)
 		case uint32:
-			rhs = int(value)
+			rhs = int64(value)
 		case uint64:
-			rhs = int(value)
+			rhs = int64(value)
 		}
 		switch cond.ValueType {
 		case data.ConditionValueTypeConstant:
 		case data.ConditionValueTypeVariable:
-			rhs = g.variables.VariableValue(rhs)
+			rhs = g.variables.VariableValue(int(rhs))
 		default:
 			return false, fmt.Errorf("gamestate: invalid value type: %v eventID %d", cond, eventID)
 		}
@@ -697,7 +697,7 @@ func (g *Game) SetSelfSwitchValue(eventID int, id int, value bool) {
 	g.variables.SetSelfSwitchValue(m, r, eventID, id, value)
 }
 
-func (g *Game) VariableValue(id int) int {
+func (g *Game) VariableValue(id int) int64 {
 	return g.variables.VariableValue(id)
 }
 
@@ -783,20 +783,20 @@ func (g *Game) RefreshEvents() error {
 }
 
 func (g *Game) SetVariable(sceneManager *scene.Manager, variableID int, op data.SetVariableOp, valueType data.SetVariableValueType, value interface{}, mapID, roomID, eventID int) error {
-	rhs := 0 // TODO: Use int64 here
+	var rhs int64
 	switch valueType {
 	case data.SetVariableValueTypeConstant:
 		switch value.(type) {
 		case int:
-			rhs = value.(int)
+			rhs = int64(value.(int))
 		case int64:
-			rhs = int(value.(int64))
+			rhs = value.(int64)
 		}
 	case data.SetVariableValueTypeVariable:
 		rhs = g.VariableValue(value.(int))
 	case data.SetVariableValueTypeRandom:
 		v := value.(*data.SetVariableValueRandom)
-		rhs = g.RandomValue(v.Begin, v.End+1)
+		rhs = int64(g.RandomValue(v.Begin, v.End+1))
 	case data.SetVariableValueTypeCharacter:
 		args := value.(*data.SetVariableCharacterArgs)
 		id := args.EventID
@@ -824,13 +824,17 @@ func (g *Game) SetVariable(sceneManager *scene.Manager, variableID int, op data.
 				panic("not reach")
 			}
 		case data.SetVariableCharacterTypeRoomX:
-			rhs, _ = ch.Position()
+			x, _ := ch.Position()
+			rhs = int64(x)
 		case data.SetVariableCharacterTypeRoomY:
-			_, rhs = ch.Position()
+			_, y := ch.Position()
+			rhs = int64(y)
 		case data.SetVariableCharacterTypeScreenX:
-			rhs, _ = ch.DrawPosition()
+			x, _ := ch.DrawPosition()
+			rhs = int64(x)
 		case data.SetVariableCharacterTypeScreenY:
-			_, rhs = ch.DrawPosition()
+			_, y := ch.DrawPosition()
+			rhs = int64(y)
 		case data.SetVariableCharacterTypeIsPressed:
 			x, y := ch.Position()
 			pressX, pressY := g.currentMap.GetPressedPosition()
@@ -851,7 +855,7 @@ func (g *Game) SetVariable(sceneManager *scene.Manager, variableID int, op data.
 		systemVariableType := value.(data.SystemVariableType)
 		switch systemVariableType {
 		case data.SystemVariableHintCount:
-			rhs = g.hints.ActiveHintCount()
+			rhs = int64(g.hints.ActiveHintCount())
 		case data.SystemVariableInterstitialAdsLoaded:
 			if sceneManager.InterstitialAdsLoaded() {
 				rhs = 1
@@ -861,9 +865,9 @@ func (g *Game) SetVariable(sceneManager *scene.Manager, variableID int, op data.
 				rhs = 1
 			}
 		case data.SystemVariableRoomID:
-			rhs = roomID
+			rhs = int64(roomID)
 		case data.SystemVariableCurrentTime:
-			rhs = int(time.Now().Unix())
+			rhs = time.Now().Unix()
 		default:
 			return fmt.Errorf("gamestate: not implemented yet (set_variable): systemVariableType %s", systemVariableType)
 		}

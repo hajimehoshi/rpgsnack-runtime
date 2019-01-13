@@ -29,7 +29,7 @@ const ReservedID = 4096
 type Variables struct {
 	switches     []bool
 	selfSwitches map[string][]bool
-	variables    []int
+	variables    []int64
 }
 
 func (v *Variables) EncodeMsgpack(enc *msgpack.Encoder) error {
@@ -58,7 +58,7 @@ func (v *Variables) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EncodeString("variables")
 	e.BeginArray()
 	for _, val := range v.variables {
-		e.EncodeInt(val)
+		e.EncodeInt64(val)
 	}
 	e.EndArray()
 
@@ -99,9 +99,9 @@ func (v *Variables) DecodeMsgpack(dec *msgpack.Decoder) error {
 		case "variables":
 			if !d.SkipCodeIfNil() {
 				n := d.DecodeArrayLen()
-				v.variables = make([]int, n)
+				v.variables = make([]int64, n)
 				for i := 0; i < n; i++ {
-					v.variables[i] = d.DecodeInt()
+					v.variables[i] = d.DecodeInt64()
 				}
 			}
 		case "innerVariables":
@@ -157,17 +157,17 @@ func (v *Variables) SetSelfSwitchValue(mapID, roomID, eventID int, id int, value
 	values[id] = value
 }
 
-func (v *Variables) VariableValue(id int) int {
+func (v *Variables) VariableValue(id int) int64 {
 	if len(v.variables) < id+1 {
-		zeros := make([]int, id+1-len(v.variables))
+		zeros := make([]int64, id+1-len(v.variables))
 		v.variables = append(v.variables, zeros...)
 	}
 	return v.variables[id]
 }
 
-func (v *Variables) SetVariableValue(id int, value int) {
+func (v *Variables) SetVariableValue(id int, value int64) {
 	if len(v.variables) < id+1 {
-		zeros := make([]int, id+1-len(v.variables))
+		zeros := make([]int64, id+1-len(v.variables))
 		v.variables = append(v.variables, zeros...)
 	}
 	v.variables[id] = value

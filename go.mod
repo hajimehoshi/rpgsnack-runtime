@@ -10,7 +10,7 @@ require (
 	github.com/hajimehoshi/ebiten v1.9.0-alpha.0.20190110142259-4a587f495dd9
 	github.com/hajimehoshi/go-mplusbitmap v1.0.1
 	github.com/hajimehoshi/oggloop v0.0.0-20180730010327-c7cf68761483
-	github.com/vmihailenco/msgpack v3.3.3+incompatible
+	github.com/vmihailenco/msgpack v4.0.1+incompatible
 	golang.org/x/image v0.0.0-20180926015637-991ec62608f3
 	golang.org/x/net v0.0.0-20180724234803-3673e40ba225 // indirect
 	golang.org/x/text v0.3.0
