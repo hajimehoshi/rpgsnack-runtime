@@ -44,6 +44,10 @@ func SavePath() string {
 	return filepath.Join(os.TempDir(), "save.msgpack")
 }
 
+func PermanentPath() string {
+	return filepath.Join(os.TempDir(), "permanent.msgpack")
+}
+
 func LanguagePath() string {
 	return filepath.Join(os.TempDir(), "language.json")
 }
@@ -122,6 +126,41 @@ func fetchProgress() <-chan []byte {
 	return ch
 }
 
+func fetchPermanent() <-chan []byte {
+	ch := make(chan []byte)
+	switch {
+	case runtime.GOARCH == "js":
+		go func() {
+			defer close(ch)
+
+			data := js.Global.Get("localStorage").Call("getItem", "permanent")
+			if data == nil {
+				return
+			}
+			b, err := base64.StdEncoding.DecodeString(data.String())
+			if err != nil {
+				log.Printf("localStroge's permanent is invalid: %v", err)
+				return
+			}
+			ch <- b
+		}()
+	default:
+		go func() {
+			defer close(ch)
+
+			permanent, err := ioutil.ReadFile(PermanentPath())
+			if err != nil {
+				if !os.IsNotExist(err) {
+					log.Printf("reading %s failed: %v", PermanentPath(), err)
+				}
+				return
+			}
+			ch <- permanent
+		}()
+	}
+	return ch
+}
+
 func fetchPurchases() <-chan []byte {
 	ch := make(chan []byte)
 	switch {
@@ -137,7 +176,7 @@ func fetchPurchases() <-chan []byte {
 			progress, err := ioutil.ReadFile(PurchasesPath())
 			if err != nil {
 				if !os.IsNotExist(err) {
-					log.Printf("reading %s failed: %v", SavePath(), err)
+					log.Printf("reading %s failed: %v", PurchasesPath(), err)
 				}
 				return
 			}
@@ -349,6 +388,7 @@ func loadRawData(projectLocation string, progress chan<- float64) (*rawData, err
 		ProjectJSON: projectJSON,
 		Assets:      [][]byte{assets},
 		Progress:    <-fetchProgress(),
+		Permanent:   <-fetchPermanent(),
 		Purchases:   <-fetchPurchases(),
 		Language:    langJSON,
 	}, nil

@@ -482,6 +482,20 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		}
 		i.commandIterator.Advance()
 
+	case data.CommandNameSavePermanent:
+		args := c.Args.(*data.CommandArgsSavePermanent)
+		i.waitingRequestID = sceneManager.GenerateRequestID()
+		gameState.RequestSavePermanentVariable(i.waitingRequestID, sceneManager, args.PermanentVariableID, args.VariableID)
+		return false, nil
+
+	case data.CommandNameLoadPermanent:
+		args := c.Args.(*data.CommandArgsLoadPermanent)
+		v := sceneManager.PermanentVariableValue(args.PermanentVariableID)
+		if err := gameState.SetVariable(sceneManager, args.VariableID, data.SetVariableOpAssign, data.SetVariableValueTypeConstant, v, i.mapID, i.roomID, i.eventID); err != nil {
+			return false, err
+		}
+		i.commandIterator.Advance()
+
 	case data.CommandNameTransfer:
 		args := c.Args.(*data.CommandArgsTransfer)
 		if args.Transition == data.TransferTransitionTypeNone {
@@ -619,6 +633,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		audio.StopBGM(args.FadeTime * 6)
 		i.commandIterator.Advance()
 	case data.CommandNameSave:
+		// Proceed the command iterator before saving so that the game resumes from the next command.
 		i.commandIterator.Advance()
 		gameState.RequestSave(sceneManager)
 	case data.CommandNameAutoSave:

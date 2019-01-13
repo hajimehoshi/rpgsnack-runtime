@@ -149,7 +149,7 @@ func (g *Game) update() error {
 			g.loadProgressCh = nil
 			da := d.LoadedData
 			assets.Set(da.Assets, da.AssetsMetadata)
-			g.sceneManager = scene.NewManager(g.width, g.height, g.requester, da.Game, da.Progress, da.Purchases, sceneimpl.FadingCount)
+			g.sceneManager = scene.NewManager(g.width, g.height, g.requester, da.Game, da.Progress, da.Permanent, da.Purchases, sceneimpl.FadingCount)
 			g.sceneManager.SetLanguage(da.Language)
 			s, err := sceneimpl.NewInitialScene(g.sceneManager)
 			if err != nil {
@@ -222,6 +222,10 @@ func (g *Game) RespondUnlockAchievement(id int) {
 
 func (g *Game) RespondSaveProgress(id int) {
 	g.sceneManager.RespondSaveProgress(id)
+}
+
+func (g *Game) RespondSavePermanent(id int) {
+	g.sceneManager.RespondSavePermanent(id)
 }
 
 func (g *Game) RespondPurchase(id int, success bool, purchases []uint8) {

@@ -408,6 +408,21 @@ func (g *Game) RequestSave(sceneManager *scene.Manager) bool {
 	return true
 }
 
+func (g *Game) RequestSavePermanentVariable(requestID int, sceneManager *scene.Manager, permanentVariableID, variableID int) bool {
+	// If there is an unfinished request, stop saving the progress.
+	if g.waitingRequestID != 0 {
+		// TODO: Not reached?
+		return false
+	}
+	if g.currentMap.waitingRequestResponse() {
+		// TODO: Not reached?
+		return false
+	}
+	v := int64(g.VariableValue(variableID))
+	sceneManager.RequestSavePermanentVariable(requestID, permanentVariableID, v)
+	return true
+}
+
 var reMessage = regexp.MustCompile(`\\([a-zA-Z])\[([^\]]+)\]`)
 
 func (g *Game) ParseMessageSyntax(str string) string {
@@ -768,10 +783,15 @@ func (g *Game) RefreshEvents() error {
 }
 
 func (g *Game) SetVariable(sceneManager *scene.Manager, variableID int, op data.SetVariableOp, valueType data.SetVariableValueType, value interface{}, mapID, roomID, eventID int) error {
-	rhs := 0
+	rhs := 0 // TODO: Use int64 here
 	switch valueType {
 	case data.SetVariableValueTypeConstant:
-		rhs = value.(int)
+		switch value.(type) {
+		case int:
+			rhs = value.(int)
+		case int64:
+			rhs = int(value.(int64))
+		}
 	case data.SetVariableValueTypeVariable:
 		rhs = g.VariableValue(value.(int))
 	case data.SetVariableValueTypeRandom:

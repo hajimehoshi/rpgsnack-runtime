@@ -33,6 +33,7 @@ import (
 var (
 	purchasesPath = flag.String("purchases-json-path", filepath.Join(".", "purchases.json"), "purchases path")
 	savePath      = flag.String("save-msgpack-path", filepath.Join(".", "save.msgpack"), "save path")
+	permanentPath = flag.String("permanent-msgpack-path", filepath.Join(".", "permanent.msgpack"), "permanent-save path")
 	languagePath  = flag.String("language-json-path", filepath.Join(".", "language.json"), "language path")
 )
 
@@ -46,6 +47,10 @@ func LanguagePath() string {
 
 func SavePath() string {
 	return *savePath
+}
+
+func PermanentPath() string {
+	return *permanentPath
 }
 
 func loadAssets(projectionLocation string) ([]byte, error) {
@@ -116,6 +121,13 @@ func loadRawData(projectionLocation string, progressCh chan<- float64) (*rawData
 		}
 		progress = nil
 	}
+	permanent, err := ioutil.ReadFile(*permanentPath)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			return nil, err
+		}
+		permanent = nil
+	}
 	assets, err := loadAssets(projectionLocation)
 	if err != nil {
 		return nil, err
@@ -141,6 +153,7 @@ func loadRawData(projectionLocation string, progressCh chan<- float64) (*rawData
 		ProjectJSON: projectJSON,
 		Assets:      [][]byte{assets},
 		Progress:    progress,
+		Permanent:   permanent,
 		Purchases:   purchases,
 		Language:    langData,
 	}, nil

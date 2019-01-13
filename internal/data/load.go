@@ -86,6 +86,7 @@ type rawData struct {
 	ProjectJSON []byte
 	Assets      [][]byte
 	Progress    []byte
+	Permanent   []byte
 	Purchases   []byte
 	Language    []byte
 }
@@ -99,6 +100,7 @@ type LoadedData struct {
 	Assets         map[string][]byte
 	AssetsMetadata map[string]*AssetMetadata
 	Progress       []byte
+	Permanent      []byte
 	Purchases      []string
 	Language       language.Tag
 }
@@ -192,7 +194,8 @@ func Load(projectionLocation string, progress chan<- LoadProgress) {
 	}()
 
 	loadedData := &LoadedData{
-		Progress: data.Progress,
+		Progress:  data.Progress,
+		Permanent: data.Permanent,
 	}
 
 	count := 0

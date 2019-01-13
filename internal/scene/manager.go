@@ -16,12 +16,13 @@ package scene
 
 import (
 	"encoding/json"
+	"fmt"
 	"image/color"
 	"log"
 
-	"golang.org/x/text/language"
-
 	"github.com/hajimehoshi/ebiten"
+	"github.com/vmihailenco/msgpack"
+	"golang.org/x/text/language"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
@@ -58,6 +59,7 @@ type Manager struct {
 	setPlatformDataCh     chan setPlatformDataArgs
 	game                  *data.Game
 	progress              []byte
+	permanent             *Permanent
 	purchases             []string
 	interstitialAdsLoaded bool
 	rewardedAdsLoaded     bool
@@ -74,7 +76,14 @@ const (
 	PlatformDataKeyBackButton            PlatformDataKey = "backbutton"
 )
 
-func NewManager(width, height int, requester Requester, game *data.Game, progress []byte, purchases []string, fadingInCount int) *Manager {
+func NewManager(width, height int, requester Requester, game *data.Game, progress []byte, permanent []byte, purchases []string, fadingInCount int) *Manager {
+	p := &Permanent{}
+	if len(permanent) > 0 {
+		if err := msgpack.Unmarshal(permanent, p); err != nil {
+			panic(fmt.Sprintf("scene: msgpack encoding error: %v", err))
+		}
+	}
+
 	m := &Manager{
 		width:             width,
 		height:            height,
@@ -84,6 +93,7 @@ func NewManager(width, height int, requester Requester, game *data.Game, progres
 		setPlatformDataCh: make(chan setPlatformDataArgs, 1),
 		game:              game,
 		progress:          progress,
+		permanent:         p,
 		purchases:         purchases,
 		fadingInCount:     fadingInCount,
 		fadingInCountMax:  fadingInCount,
@@ -405,6 +415,23 @@ func (m *Manager) ReceiveResultIfExists(id int) *RequestResult {
 	return nil
 }
 
+func (m *Manager) RequestSavePermanentVariable(requestID int, permanentVariableID int, value int64) {
+	if m.permanent.Variables == nil {
+		m.permanent.Variables = map[int]int64{}
+	}
+	m.permanent.Variables[permanentVariableID] = value
+
+	bytes, err := msgpack.Marshal(m.permanent)
+	if err != nil {
+		panic(fmt.Sprintf("scene: msgpack encoding error: %v", err))
+	}
+	m.Requester().RequestSavePermanent(requestID, bytes)
+}
+
+func (m *Manager) PermanentVariableValue(id int) int64 {
+	return m.permanent.Variables[id]
+}
+
 func (m *Manager) RespondUnlockAchievement(id int) {
 	m.resultCh <- RequestResult{
 		ID:   id,
@@ -416,6 +443,13 @@ func (m *Manager) RespondSaveProgress(id int) {
 	m.resultCh <- RequestResult{
 		ID:   id,
 		Type: RequestTypeSaveProgress,
+	}
+}
+
+func (m *Manager) RespondSavePermanent(id int) {
+	m.resultCh <- RequestResult{
+		ID:   id,
+		Type: RequestTypeSavePermanent,
 	}
 }
 

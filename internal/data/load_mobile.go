@@ -38,13 +38,17 @@ func SavePath() string {
 	return ""
 }
 
+func PermanentPath() string {
+	return ""
+}
+
 func loadRawData(projectionLocation string, progress chan<- float64) (*rawData, error) {
 	defer close(progress)
 
 	return <-dataCh, nil
 }
 
-func SetData(project []byte, assets [][]byte, progress []byte, purchases []byte, language string) {
+func SetData(project []byte, assets [][]byte, progress []byte, permanent []byte, purchases []byte, language string) {
 	l, err := json.Marshal(language)
 	if err != nil {
 		panic(err)
@@ -54,6 +58,7 @@ func SetData(project []byte, assets [][]byte, progress []byte, purchases []byte,
 		ProjectJSON: project,
 		Assets:      assets,
 		Progress:    progress,
+		Permanent:   permanent,
 		Purchases:   purchases,
 		Language:    l,
 	}

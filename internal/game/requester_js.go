@@ -38,6 +38,12 @@ func (m *Requester) RequestSaveProgress(requestID int, data []uint8) {
 	m.game.RespondSaveProgress(requestID)
 }
 
+func (m *Requester) RequestSavePermanent(requestID int, data []uint8) {
+	log.Printf("request save permanent: requestID: %d", requestID)
+	js.Global.Get("localStorage").Call("setItem", "permanent", base64.StdEncoding.EncodeToString(data))
+	m.game.RespondSavePermanent(requestID)
+}
+
 func (m *Requester) RequestPurchase(requestID int, productID string) {
 	log.Printf("request purchase: requestID: %d, productID: %s", requestID, productID)
 	m.game.RespondPurchase(requestID, true, nil)

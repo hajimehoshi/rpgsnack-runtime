@@ -17,6 +17,7 @@ package scene
 type Requester interface {
 	RequestUnlockAchievement(requestID int, achievementID int)
 	RequestSaveProgress(requestID int, data []byte)
+	RequestSavePermanent(requestID int, data []byte)
 	RequestPurchase(requestID int, productID string)
 	RequestShowShop(requestID int, data string)
 	RequestRestorePurchases(requestID int)
@@ -38,6 +39,7 @@ type RequestType int
 const (
 	RequestTypeUnlockAchievement RequestType = iota
 	RequestTypeSaveProgress
+	RequestTypeSavePermanent
 	RequestTypePurchase
 	RequestTypeShowShop
 	RequestTypeRestorePurchases
@@ -62,10 +64,25 @@ type requesterImpl struct {
 
 	// lastSaveData holds the last save data so as not to be GCed
 	// before processing on the mobile side finishes.
-	lastSaveData []byte
+	lastSaveData      []byte
+	lastSavePermanent []byte
+	lastShareImage    []byte
 }
 
 func (r *requesterImpl) RequestSaveProgress(requestID int, data []byte) {
 	r.lastSaveData = data
 	r.Requester.RequestSaveProgress(requestID, data)
+}
+
+func (r *requesterImpl) RequestSavePermanent(requestID int, data []byte) {
+	// Passing data causes "cgo argument has Go pointer to Go pointer" error. We don't know why.
+	bs := make([]byte, len(data))
+	copy(bs, data)
+	r.lastSavePermanent = bs
+	r.Requester.RequestSavePermanent(requestID, bs)
+}
+
+func (r *requesterImpl) RequestShareImage(requestID int, title string, message string, image []byte) {
+	r.lastShareImage = image
+	r.Requester.RequestShareImage(requestID, title, message, image)
 }

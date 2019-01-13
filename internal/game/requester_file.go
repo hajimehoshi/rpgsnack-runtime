@@ -54,6 +54,24 @@ func (m *Requester) RequestSaveProgress(requestID int, data []uint8) {
 	}()
 }
 
+func (m *Requester) RequestSavePermanent(requestID int, data []byte) {
+	log.Printf("request save permanent: requestID: %d", requestID)
+	go func() {
+		defer m.game.RespondSavePermanent(requestID)
+
+		f, err := os.Create(datapkg.PermanentPath())
+		if err != nil {
+			panic(err)
+		}
+		defer f.Close()
+
+		if _, err := f.Write(data); err != nil {
+			panic(err)
+			return
+		}
+	}()
+}
+
 func (m *Requester) RequestPurchase(requestID int, productID string) {
 	log.Printf("request purchase: requestID: %d, productID: %s", requestID, productID)
 	go func() {

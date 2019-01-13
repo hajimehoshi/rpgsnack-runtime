@@ -56,6 +56,23 @@ func RespondSaveProgress(id int) (err error) {
 	return nil
 }
 
+func RespondSavePermanent(id int) (err error) {
+	<-startCalled
+
+	defer func() {
+		if r := recover(); r != nil {
+			ok := false
+			err, ok = r.(error)
+			if !ok {
+				err = fmt.Errorf("error at RespondSavePermanent: %v", err)
+			}
+		}
+	}()
+
+	theGame.RespondSavePermanent(id)
+	return nil
+}
+
 func RespondPurchase(id int, success bool, purchases []uint8) (err error) {
 	<-startCalled
 

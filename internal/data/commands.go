@@ -169,6 +169,18 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 			return err
 		}
 		c.Args = args
+	case CommandNameSavePermanent:
+		var args *CommandArgsSavePermanent
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
+	case CommandNameLoadPermanent:
+		var args *CommandArgsLoadPermanent
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	case CommandNameTransfer:
 		var args *CommandArgsTransfer
 		if err := unmarshalJSON(tmp.Args, &args); err != nil {
@@ -586,6 +598,18 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 			return err
 		}
 		c.Args = a
+	case CommandNameSavePermanent:
+		a := &CommandArgsSavePermanent{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
+	case CommandNameLoadPermanent:
+		a := &CommandArgsLoadPermanent{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
 	case CommandNameTransfer:
 		a := &CommandArgsTransfer{}
 		if err := msgpack.Unmarshal(argsBin, a); err != nil {
@@ -881,6 +905,8 @@ const (
 	CommandNameSetSwitch         CommandName = "set_switch"
 	CommandNameSetSelfSwitch     CommandName = "set_self_switch"
 	CommandNameSetVariable       CommandName = "set_variable"
+	CommandNameSavePermanent     CommandName = "save_permanent"
+	CommandNameLoadPermanent     CommandName = "load_permanent"
 	CommandNameTransfer          CommandName = "transfer"
 	CommandNameSetRoute          CommandName = "set_route"
 	CommandNameTintScreen        CommandName = "tint_screen"
@@ -1189,6 +1215,16 @@ func (c *CommandArgsSetVariable) DecodeMsgpack(dec *msgpack.Decoder) error {
 		return fmt.Errorf("data: CommandArgsSetVariable.DecodeMsgpack: invalid type: %s", c.ValueType)
 	}
 	return nil
+}
+
+type CommandArgsSavePermanent struct {
+	VariableID          int `json:"variableId" msgpack:"variableId"`
+	PermanentVariableID int `json:"permanentVariableId" msgpack:"permanentVariableId"`
+}
+
+type CommandArgsLoadPermanent struct {
+	VariableID          int `json:"variableId" msgpack:"variableId"`
+	PermanentVariableID int `json:"permanentVariableId" msgpack:"permanentVariableId"`
 }
 
 type CommandArgsTransfer struct {
