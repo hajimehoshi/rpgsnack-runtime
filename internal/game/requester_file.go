@@ -76,7 +76,11 @@ func (m *Requester) RequestPurchase(requestID int, productID string) {
 	log.Printf("request purchase: requestID: %d, productID: %s", requestID, productID)
 	go func() {
 		result := ([]uint8)("[]")
-		defer m.game.RespondPurchase(requestID, true, result)
+		// In Go, arguments of the rightmost parenthesis are evaluated early.
+		// As result value can be changed later, unnonymous functions is needed here.
+		defer func() {
+			m.game.RespondPurchase(requestID, true, result)
+		}()
 
 		var purchases []string
 		b, err := ioutil.ReadFile(datapkg.PurchasesPath())
