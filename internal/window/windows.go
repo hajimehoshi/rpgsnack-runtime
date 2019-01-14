@@ -376,7 +376,8 @@ func (w *Windows) Update(playerY int, sceneManager *scene.Manager, characters []
 			w.balloons = []*balloon{w.nextBalloon}
 			w.balloons[0].open()
 			w.nextBalloon = nil
-		} else if w.nextBanner != nil && !w.IsAnimating(0) && !w.isOpened(0) {
+		}
+		if w.nextBanner != nil && !w.IsAnimating(0) && !w.isOpened(0) {
 			w.banner = w.nextBanner
 			w.banner.open()
 			w.nextBanner = nil
