@@ -77,7 +77,7 @@ func (m *Requester) RequestPurchase(requestID int, productID string) {
 	go func() {
 		result := ([]uint8)("[]")
 		// In Go, arguments of the rightmost parenthesis are evaluated early.
-		// As result value can be changed later, unnonymous functions is needed here.
+		// As result value can be changed later, annonymous functions is needed here.
 		defer func() {
 			m.game.RespondPurchase(requestID, true, result)
 		}()
