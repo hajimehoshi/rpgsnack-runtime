@@ -416,8 +416,9 @@ func (m *Manager) ReceiveResultIfExists(id int) *RequestResult {
 }
 
 func (m *Manager) RequestSavePermanentVariable(requestID int, permanentVariableID int, value int64) {
-	if m.permanent.Variables == nil {
-		m.permanent.Variables = map[int]int64{}
+	if len(m.permanent.Variables) < permanentVariableID+1 {
+		zeros := make([]int64, permanentVariableID+1-len(m.permanent.Variables))
+		m.permanent.Variables = append(m.permanent.Variables, zeros...)
 	}
 	m.permanent.Variables[permanentVariableID] = value
 
@@ -429,6 +430,10 @@ func (m *Manager) RequestSavePermanentVariable(requestID int, permanentVariableI
 }
 
 func (m *Manager) PermanentVariableValue(id int) int64 {
+	if len(m.permanent.Variables) < id+1 {
+		zeros := make([]int64, id+1-len(m.permanent.Variables))
+		m.permanent.Variables = append(m.permanent.Variables, zeros...)
+	}
 	return m.permanent.Variables[id]
 }
 

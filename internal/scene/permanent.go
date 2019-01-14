@@ -15,5 +15,5 @@
 package scene
 
 type Permanent struct {
-	Variables map[int]int64 `msgpack:"variables"`
+	Variables []int64 `msgpack:"variables"`
 }
