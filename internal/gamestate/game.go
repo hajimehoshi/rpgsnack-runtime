@@ -388,7 +388,7 @@ func (g *Game) IsPlayerControlEnabled() bool {
 // RequestSave requests to save the progress to the platform.
 //
 // If requestID is 0, this request automatically generates the requestID.
-func (g *Game) RequestSave(requestID int, sceneManager *scene.Manager) bool {
+func (g *Game) RequestSave(requestID int, interpreterID int, sceneManager *scene.Manager) bool {
 	if g.isTitle {
 		return false
 	}
@@ -396,7 +396,7 @@ func (g *Game) RequestSave(requestID int, sceneManager *scene.Manager) bool {
 	if g.waitingRequestID != 0 {
 		return false
 	}
-	if g.currentMap.waitingRequestResponse() {
+	if g.currentMap.waitingRequestResponse(interpreterID) {
 		return false
 	}
 
@@ -415,13 +415,13 @@ func (g *Game) RequestSave(requestID int, sceneManager *scene.Manager) bool {
 	return true
 }
 
-func (g *Game) RequestSavePermanentVariable(requestID int, sceneManager *scene.Manager, permanentVariableID, variableID int) bool {
+func (g *Game) RequestSavePermanentVariable(requestID int, interpreterID int, sceneManager *scene.Manager, permanentVariableID, variableID int) bool {
 	// If there is an unfinished request, stop saving the progress.
 	if g.waitingRequestID != 0 {
 		// TODO: Not reached?
 		return false
 	}
-	if g.currentMap.waitingRequestResponse() {
+	if g.currentMap.waitingRequestResponse(interpreterID) {
 		// TODO: Not reached?
 		return false
 	}

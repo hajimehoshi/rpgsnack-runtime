@@ -202,8 +202,11 @@ func (m *Map) addInterpreter(interpreter *Interpreter) {
 	m.interpreters[interpreter.id] = interpreter
 }
 
-func (m *Map) waitingRequestResponse() bool {
+func (m *Map) waitingRequestResponse(ignoringInterpreterID int) bool {
 	for _, i := range m.interpreters {
+		if i.id == ignoringInterpreterID {
+			continue
+		}
 		if i.waitingRequestResponse() {
 			return true
 		}
@@ -747,7 +750,7 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, gameState *G
 
 	// The player can move. Let's save the state here just before starting moving.
 	if gameState.IsAutoSaveEnabled() && !m.IsPlayerMovingByUserInput() {
-		gameState.RequestSave(0, sceneManager)
+		gameState.RequestSave(0, 0, sceneManager)
 	}
 
 	checkBottomEvent := false
