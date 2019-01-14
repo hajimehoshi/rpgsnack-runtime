@@ -446,6 +446,8 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 
 	case data.CommandNameShowChoices:
 		if !i.waitingCommand {
+			// Now there are other choice balloons. Let's wait.
+			// TODO: I guess this never happens any longer.
 			if gameState.windows.IsBusyWithChoosing() {
 				return false, nil
 			}
@@ -454,6 +456,9 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			return false, nil
 		}
 		if !gameState.HasChosenWindowIndex() {
+			return false, nil
+		}
+		if gameState.windows.IsBusy(i.id) {
 			return false, nil
 		}
 		i.commandIterator.Choose(gameState.ChosenWindowIndex())

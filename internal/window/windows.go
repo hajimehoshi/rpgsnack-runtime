@@ -170,6 +170,9 @@ func (w *Windows) DecodeMsgpack(dec *msgpack.Decoder) error {
 	return nil
 }
 
+// ChosenIndex returns the chosen index that are chosen lastly.
+// This value is valid even after the choosing windows are closed.
+// This value is invalidated when the new choosing windows are shown.
 func (w *Windows) ChosenIndex() int {
 	return w.chosenIndex
 }
@@ -210,6 +213,7 @@ func (w *Windows) ShowChoices(sceneManager *scene.Manager, choices []*Choice, in
 	w.chosenIndex = 0
 	w.choosing = true
 	w.choosingInterpreterID = interpreterID
+	w.hasChosenIndex = false
 }
 
 func (w *Windows) CloseAll() {
@@ -396,7 +400,6 @@ func (w *Windows) Update(playerY int, sceneManager *scene.Manager, characters []
 			if w.banner != nil {
 				w.banner.close()
 			}
-			w.hasChosenIndex = false
 		}
 	} else if w.choosing && w.isOpened(0) && input.Triggered() {
 		_, h := sceneManager.Size()
