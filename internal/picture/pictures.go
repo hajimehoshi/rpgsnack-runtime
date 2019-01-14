@@ -242,7 +242,9 @@ func (p *picture) DecodeMsgpack(dec *msgpack.Decoder) error {
 		switch k := d.DecodeString(); k {
 		case "imageName":
 			p.imageName = d.DecodeString()
-			p.image = assets.GetImage("pictures/" + p.imageName + ".png")
+			if p.imageName != "" {
+				p.image = assets.GetImage("pictures/" + p.imageName + ".png")
+			}
 		case "x":
 			p.x = &interpolation.I{}
 			d.DecodeInterface(p.x)
