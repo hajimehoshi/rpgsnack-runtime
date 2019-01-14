@@ -196,9 +196,10 @@ func (m *Manager) Update() error {
 				m.current = m.next
 				m.next = nil
 			}
-		}
-		if err := m.current.Update(m); err != nil {
-			return err
+		} else {
+			if err := m.current.Update(m); err != nil {
+				return err
+			}
 		}
 		if 0 < m.fadingOutCount {
 			m.fadingOutCount--
