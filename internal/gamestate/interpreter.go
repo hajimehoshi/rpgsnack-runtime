@@ -52,7 +52,9 @@ type Interpreter struct {
 	pageRoute          bool
 	routeSkip          bool
 	parallel           bool
-	waitingRequestID   int // Note: When this is not 0, the game state can't be saved.
+
+	// Not dumped.
+	waitingRequestID int
 }
 
 type InterpreterIDGenerator interface {
@@ -119,9 +121,6 @@ func (i *Interpreter) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EncodeString("parallel")
 	e.EncodeBool(i.parallel)
 
-	e.EncodeString("waitingRequestId")
-	e.EncodeInt(i.waitingRequestID)
-
 	e.EndMap()
 	return e.Flush()
 }
@@ -171,7 +170,7 @@ func (i *Interpreter) DecodeMsgpack(dec *msgpack.Decoder) error {
 		case "parallel":
 			i.parallel = d.DecodeBool()
 		case "waitingRequestId":
-			i.waitingRequestID = d.DecodeInt()
+			d.Skip()
 		default:
 			if err := d.Error(); err != nil {
 				return err
@@ -255,6 +254,8 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			} else {
 				i.commandIterator.Choose(1)
 			}
+		case scene.RequestTypeSaveProgress:
+			// The iterator is already proceeded.
 		default:
 			i.commandIterator.Advance()
 		}
@@ -640,7 +641,9 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 	case data.CommandNameSave:
 		// Proceed the command iterator before saving so that the game resumes from the next command.
 		i.commandIterator.Advance()
-		gameState.RequestSave(sceneManager)
+		i.waitingRequestID = sceneManager.GenerateRequestID()
+		gameState.RequestSave(i.waitingRequestID, sceneManager)
+		return false, nil
 	case data.CommandNameAutoSave:
 		args := c.Args.(*data.CommandArgsAutoSave)
 		gameState.SetAutoSaveEnabled(args.Enabled)
@@ -664,7 +667,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		args := c.Args.(*data.CommandArgsGotoTitle)
 		if args.Save {
 			i.commandIterator.Advance()
-			gameState.RequestSave(sceneManager)
+			gameState.RequestSave(0, sceneManager)
 		}
 		return false, GoToTitle
 	case data.CommandNameUnlockAchievement:

@@ -385,7 +385,10 @@ func (g *Game) IsPlayerControlEnabled() bool {
 	return g.playerControlEnabled
 }
 
-func (g *Game) RequestSave(sceneManager *scene.Manager) bool {
+// RequestSave requests to save the progress to the platform.
+//
+// If requestID is 0, this request automatically generates the requestID.
+func (g *Game) RequestSave(requestID int, sceneManager *scene.Manager) bool {
 	if g.isTitle {
 		return false
 	}
@@ -396,8 +399,12 @@ func (g *Game) RequestSave(sceneManager *scene.Manager) bool {
 	if g.currentMap.waitingRequestResponse() {
 		return false
 	}
-	id := sceneManager.GenerateRequestID()
-	g.waitingRequestID = id
+
+	id := requestID
+	if id == 0 {
+		id = sceneManager.GenerateRequestID()
+		g.waitingRequestID = id
+	}
 
 	m, err := msgpack.Marshal(g)
 	if err != nil {

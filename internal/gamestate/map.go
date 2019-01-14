@@ -747,7 +747,7 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, gameState *G
 
 	// The player can move. Let's save the state here just before starting moving.
 	if gameState.IsAutoSaveEnabled() && !m.IsPlayerMovingByUserInput() {
-		gameState.RequestSave(sceneManager)
+		gameState.RequestSave(0, sceneManager)
 	}
 
 	checkBottomEvent := false
