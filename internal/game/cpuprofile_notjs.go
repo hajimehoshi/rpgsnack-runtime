@@ -20,22 +20,26 @@ import (
 	"flag"
 	"log"
 	"os"
+	"runtime"
 	"runtime/pprof"
 	"runtime/trace"
 
 	"github.com/hajimehoshi/ebiten"
+	"github.com/hajimehoshi/ebiten/inpututil"
 )
 
 var (
 	cpuProfile     = flag.String("cpuprofile", "", "write cpu profile to file")
 	cpuProfileFile *os.File
 
+	memProfile = flag.String("memprofile", "", "write memory profile to file")
+
 	traceOut     = flag.String("trace", "", "write trace output to file")
 	traceOutFile *os.File
 )
 
 func takeCPUProfileIfAvailable() {
-	if ebiten.IsKeyPressed(ebiten.KeyP) {
+	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
 		if *cpuProfile != "" && cpuProfileFile == nil {
 			f, err := os.Create(*cpuProfile)
 			if err != nil {
@@ -55,12 +59,24 @@ func takeCPUProfileIfAvailable() {
 			log.Print("Start Tracing")
 		}
 	}
-	if ebiten.IsKeyPressed(ebiten.KeyQ) {
+	if inpututil.IsKeyJustPressed(ebiten.KeyQ) {
 		if cpuProfileFile != nil {
 			pprof.StopCPUProfile()
 			cpuProfileFile.Close()
 			cpuProfileFile = nil
 			log.Print("Stop CPU Profiling")
+		}
+		if *memProfile != "" {
+			f, err := os.Create(*memProfile)
+			if err != nil {
+				panic(err)
+			}
+			defer f.Close()
+			runtime.GC()
+			if err := pprof.WriteHeapProfile(f); err != nil {
+				panic(err)
+			}
+			log.Print("Memory Dumped")
 		}
 		if traceOutFile != nil {
 			trace.Stop()
