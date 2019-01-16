@@ -30,38 +30,16 @@ var (
 	bfFaces = map[int]font.Face{}
 	scFaces = map[int]font.Face{}
 	tcFaces = map[int]font.Face{}
+
+	loadChineseFontsOnce sync.Once
 )
-
-func init() {
-	startLoadingChineseFonts()
-
-	wg := sync.WaitGroup{}
-
-	wg.Add(1)
-	go func() {
-		face(1, language.English)
-		wg.Done()
-	}()
-
-	wg.Add(1)
-	go func() {
-		face(1, language.SimplifiedChinese)
-		wg.Done()
-	}()
-
-	wg.Add(1)
-	go func() {
-		face(1, language.TraditionalChinese)
-		wg.Done()
-	}()
-
-	wg.Wait()
-}
 
 func ensureSCTTF() *truetype.Font {
 	if scTTF != nil {
 		return scTTF
 	}
+
+	loadChineseFontsOnce.Do(startLoadingChineseFonts)
 
 	bs, err := getSCTTF()
 	if err != nil {
@@ -78,6 +56,8 @@ func ensureTCTTF() *truetype.Font {
 	if tcTTF != nil {
 		return tcTTF
 	}
+
+	loadChineseFontsOnce.Do(startLoadingChineseFonts)
 
 	bs, err := getTCTTF()
 	if err != nil {
