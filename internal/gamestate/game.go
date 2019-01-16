@@ -69,7 +69,7 @@ type Game struct {
 	// Fields that are not dumped
 	isTitle                bool
 	rand                   Rand
-	waitingRequestID       int
+	waitingRequestIDs      map[int]struct{}
 	prices                 map[string]string // TODO: We want to use https://godoc.org/golang.org/x/text/currency
 	weather                *weather.Weather
 	onShakeStartGameButton func()
@@ -325,9 +325,9 @@ func (g *Game) Update(sceneManager *scene.Manager) error {
 		g.lastPlayingBGMName = ""
 		g.lastPlayingBGMVolume = 0
 	}
-	if g.waitingRequestID != 0 {
-		if sceneManager.ReceiveResultIfExists(g.waitingRequestID) != nil {
-			g.waitingRequestID = 0
+	for id := range g.waitingRequestIDs {
+		if sceneManager.ReceiveResultIfExists(id) != nil {
+			delete(g.waitingRequestIDs, id)
 		}
 	}
 	g.weather.Update()
@@ -386,24 +386,18 @@ func (g *Game) IsPlayerControlEnabled() bool {
 }
 
 // RequestSave requests to save the progress to the platform.
-//
-// If requestID is 0, this request automatically generates the requestID.
-func (g *Game) RequestSave(requestID int, interpreterID int, sceneManager *scene.Manager) bool {
+func (g *Game) RequestSave(requestID int, sceneManager *scene.Manager) {
 	if g.isTitle {
-		return false
-	}
-	// If there is an unfinished request, stop saving the progress.
-	if g.waitingRequestID != 0 {
-		return false
-	}
-	if g.currentMap.waitingRequestResponse(interpreterID) {
-		return false
+		return
 	}
 
 	id := requestID
 	if id == 0 {
 		id = sceneManager.GenerateRequestID()
-		g.waitingRequestID = id
+		if g.waitingRequestIDs == nil {
+			g.waitingRequestIDs = map[int]struct{}{}
+		}
+		g.waitingRequestIDs[id] = struct{}{}
 	}
 
 	m, err := msgpack.Marshal(g)
@@ -412,19 +406,9 @@ func (g *Game) RequestSave(requestID int, interpreterID int, sceneManager *scene
 	}
 	sceneManager.Requester().RequestSaveProgress(id, m)
 	sceneManager.SetProgress(m)
-	return true
 }
 
-func (g *Game) RequestSavePermanentVariable(requestID int, interpreterID int, sceneManager *scene.Manager, permanentVariableID, variableID int) bool {
-	// If there is an unfinished request, stop saving the progress.
-	if g.waitingRequestID != 0 {
-		// TODO: Not reached?
-		return false
-	}
-	if g.currentMap.waitingRequestResponse(interpreterID) {
-		// TODO: Not reached?
-		return false
-	}
+func (g *Game) RequestSavePermanentVariable(requestID int, sceneManager *scene.Manager, permanentVariableID, variableID int) bool {
 	v := int64(g.VariableValue(variableID))
 	sceneManager.RequestSavePermanentVariable(requestID, permanentVariableID, v)
 	return true

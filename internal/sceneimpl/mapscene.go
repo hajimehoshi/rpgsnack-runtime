@@ -230,7 +230,7 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 
 	m.quitYesButton.SetOnPressed(func(_ *ui.Button) {
 		if m.gameState.IsAutoSaveEnabled() && !m.gameState.Map().IsBlockingEventExecuting() {
-			m.gameState.RequestSave(0, 0, sceneManager)
+			m.gameState.RequestSave(0, sceneManager)
 		}
 		audio.Stop()
 		g, err := savedGame(sceneManager)
@@ -555,7 +555,7 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 	}
 
 	if m.initialState && m.gameState.IsAutoSaveEnabled() {
-		m.gameState.RequestSave(0, 0, sceneManager)
+		m.gameState.RequestSave(0, sceneManager)
 	}
 	m.initialState = false
 	if err := m.gameState.Update(sceneManager); err != nil {

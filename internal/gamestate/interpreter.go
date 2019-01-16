@@ -491,7 +491,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 	case data.CommandNameSavePermanent:
 		args := c.Args.(*data.CommandArgsSavePermanent)
 		i.waitingRequestID = sceneManager.GenerateRequestID()
-		gameState.RequestSavePermanentVariable(i.waitingRequestID, i.id, sceneManager, args.PermanentVariableID, args.VariableID)
+		gameState.RequestSavePermanentVariable(i.waitingRequestID, sceneManager, args.PermanentVariableID, args.VariableID)
 		return false, nil
 
 	case data.CommandNameLoadPermanent:
@@ -642,7 +642,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		// Proceed the command iterator before saving so that the game resumes from the next command.
 		i.commandIterator.Advance()
 		i.waitingRequestID = sceneManager.GenerateRequestID()
-		gameState.RequestSave(i.waitingRequestID, i.id, sceneManager)
+		gameState.RequestSave(i.waitingRequestID, sceneManager)
 		return false, nil
 	case data.CommandNameAutoSave:
 		args := c.Args.(*data.CommandArgsAutoSave)
@@ -667,7 +667,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		args := c.Args.(*data.CommandArgsGotoTitle)
 		if args.Save {
 			i.commandIterator.Advance()
-			gameState.RequestSave(0, 0, sceneManager)
+			gameState.RequestSave(0, sceneManager)
 		}
 		return false, GoToTitle
 	case data.CommandNameUnlockAchievement:
