@@ -45,7 +45,7 @@ func setData(project []byte, assets [][]byte, progress []byte, permanent []byte,
 	var p2 []byte
 	if permanent != nil {
 		p2 = make([]byte, len(permanent))
-		copy(p1, permanent)
+		copy(p2, permanent)
 	}
 
 	var p3 []byte
