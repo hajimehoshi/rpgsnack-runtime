@@ -746,6 +746,11 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		args := c.Args.(*data.CommandArgsShowShop)
 		sceneManager.Requester().RequestShowShop(i.waitingRequestID, string(sceneManager.GetShopProductsData(args.Products)))
 		return false, nil
+
+	case data.CommandNameShowMinigame:
+		// TODO: Implement this
+		i.commandIterator.Choose(0)
+
 	case data.CommandNameVibrate:
 		args := c.Args.(*data.CommandArgsVibrate)
 		sceneManager.Requester().RequestVibration(args.Type)

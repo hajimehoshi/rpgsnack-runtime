@@ -297,6 +297,12 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 			return err
 		}
 		c.Args = args
+	case CommandNameShowMinigame:
+		var args *CommandArgsShowMinigame
+		if err := unmarshalJSON(tmp.Args, &args); err != nil {
+			return err
+		}
+		c.Args = args
 	case CommandNameVibrate:
 		var args *CommandArgsVibrate
 		if err := unmarshalJSON(tmp.Args, &args); err != nil {
@@ -726,6 +732,12 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 			return err
 		}
 		c.Args = a
+	case CommandNameShowMinigame:
+		a := &CommandArgsShowMinigame{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
 	case CommandNameVibrate:
 		a := &CommandArgsVibrate{}
 		if err := msgpack.Unmarshal(argsBin, a); err != nil {
@@ -930,6 +942,7 @@ const (
 	CommandNameRequestReview     CommandName = "request_review"
 	CommandNameSendAnalytics     CommandName = "send_analytics"
 	CommandNameShowShop          CommandName = "show_shop"
+	CommandNameShowMinigame      CommandName = "show_minigame"
 	CommandNameVibrate           CommandName = "vibrate"
 
 	CommandNameAddItem       CommandName = "add_item"
@@ -1311,6 +1324,11 @@ type CommandArgsSendAnalytics struct {
 
 type CommandArgsShowShop struct {
 	Products []int `json:"products" msgpack:"products"`
+}
+
+type CommandArgsShowMinigame struct {
+	ID       int `json:"id" msgpack:"id"`
+	ReqScore int `json:"reqScore" msgpack:"reqScore"`
 }
 
 type CommandArgsVibrate struct {
