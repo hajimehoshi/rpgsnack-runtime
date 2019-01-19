@@ -45,6 +45,8 @@ const (
 	TextIDQuitGame
 	TextIDStoreError
 	TextIDShop
+	TextIDMinigameWatchAds
+	TextIDMinigameProgress
 )
 
 func Text(lang language.Tag, id TextID) string {
@@ -88,6 +90,8 @@ go quit the game?`,
 		TextIDStoreError: `Failed to connect to the store.
 Please make sure to sign in
 and connect to the network.`,
+		TextIDMinigameWatchAds: "Watch ads to boost",
+		TextIDMinigameProgress: "Progress %d / %d",
 	},
 	language.German: {
 		TextIDNewGame:     "Neues Spiel",
@@ -122,6 +126,8 @@ das Spiel verlassen?`,
 		TextIDStoreError: `Verbindung mit dem Store nicht möglich.
 Stelle sicher, dass du angemeldet
 und mit dem Internet verbindet bist.`,
+		TextIDMinigameWatchAds: "Beschleunigen mit Ads",
+		TextIDMinigameProgress: "Fortschritt %d / %d",
 	},
 	language.Spanish: {
 		TextIDNewGame:     "Nuevo Juego",
@@ -154,6 +160,8 @@ e iniciar un nuevo juego?`,
 		TextIDStoreError: `Fallo al conectarse con la tienda. 
 Por favor asegúrate de iniciar 
 sesión y conectarse a internet`,
+		TextIDMinigameWatchAds: "¡Acelera viendo anuncios!",
+		TextIDMinigameProgress: "Progreso %d / %d",
 	},
 	language.Portuguese: {
 		TextIDNewGame:     "Novo Jogo",
@@ -187,6 +195,8 @@ e começar um novo jogo?`,
 armazenamento. 
 Por favor, certifique-se de fazer 
 o login e se conectar à internet`,
+		TextIDMinigameWatchAds: "Acelerar assistindo anúncios!",
+		TextIDMinigameProgress: "Progresso %d / %d",
 	},
 	language.Japanese: {
 		TextIDNewGame:     "はじめから",
@@ -219,6 +229,8 @@ o login e se conectar à internet`,
 		TextIDStoreError: `ストアへの接続に失敗しました。
 ネットワークに接続しているか
 確認してください`,
+		TextIDMinigameWatchAds: "広告を見てブースト！",
+		TextIDMinigameProgress: "進捗 %d / %d",
 	},
 	language.SimplifiedChinese: {
 		TextIDNewGame:     "新游戏",
@@ -250,6 +262,8 @@ o login e se conectar à internet`,
 		TextIDQuitGame:    "退出游戏?",
 		TextIDStoreError: `无法连接商店。
 请确定你已经登录并已连上网络`,
+		TextIDMinigameWatchAds: "通过观看广告加速！",
+		TextIDMinigameProgress: "进展 %d / %d",
 	},
 	language.TraditionalChinese: {
 		TextIDNewGame:     "新遊戲",
@@ -281,6 +295,8 @@ o login e se conectar à internet`,
 		TextIDQuitGame:    "退出遊戲?",
 		TextIDStoreError: `無法連接商店。
 請確定你已經登錄並已連上網絡`,
+		TextIDMinigameWatchAds: "通過觀看廣告加速！",
+		TextIDMinigameProgress: "進展 %d / %d",
 	},
 	language.Korean: {
 		TextIDNewGame:     "처음부터",
@@ -313,5 +329,7 @@ o login e se conectar à internet`,
 		TextIDStoreError: `스토어에 접속 실패했습니다.
 네트워크 접속이 되어있는지
 확인해주세요`,
+		TextIDMinigameWatchAds: "광고를보고 부스트!",
+		TextIDMinigameProgress: "진행 %d / %d",
 	},
 }
