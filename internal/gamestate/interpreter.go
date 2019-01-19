@@ -748,8 +748,40 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		return false, nil
 
 	case data.CommandNameShowMinigame:
-		// TODO: Implement this
-		i.commandIterator.Choose(0)
+		if !i.waitingCommand {
+			args := c.Args.(*data.CommandArgsShowMinigame)
+
+			score := 0
+			var lastActiveAt int64
+			if mg := sceneManager.PermanentMinigame(args.ID); mg != nil {
+				score = mg.Score
+				lastActiveAt = mg.LastActiveAt
+			}
+			// Resolve early in case minigame is already finished
+			if score >= args.ReqScore {
+				i.commandIterator.Choose(0)
+				return false, nil
+			}
+			gameState.InitMinigame(args.ID, args.ReqScore, score)
+			gameState.ShowMinigame(lastActiveAt)
+			// In order to take care a case when ads are removed,
+			// we have to notify the platform to initializing the ads here
+			sceneManager.Requester().RequestOpenLink(0, "initialize_ads", "")
+			i.waitingCommand = true
+		}
+
+		// TODO: Implement Minigame UI to call HideMinigame() at an approprite timing.
+		// if gameState.Minigame().Visible() {
+		//   return false, nil
+		// }
+
+		if gameState.Minigame().Success() {
+			i.commandIterator.Choose(0)
+		} else {
+			i.commandIterator.Choose(1)
+		}
+		i.waitingCommand = false
+		return false, nil
 
 	case data.CommandNameVibrate:
 		args := c.Args.(*data.CommandArgsVibrate)

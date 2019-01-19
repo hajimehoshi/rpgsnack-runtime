@@ -14,6 +14,12 @@
 
 package scene
 
+type MinigameData struct {
+	Score        int   `msgpack:"score"`
+	LastActiveAt int64 `msgpack:"lastActiveAt"`
+}
+
 type Permanent struct {
-	Variables []int64 `msgpack:"variables"`
+	Minigames []*MinigameData `msgpack:"minigame"`
+	Variables []int64         `msgpack:"variables"`
 }

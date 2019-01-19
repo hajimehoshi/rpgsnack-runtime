@@ -438,6 +438,27 @@ func (m *Manager) PermanentVariableValue(id int) int64 {
 	return m.permanent.Variables[id]
 }
 
+func (m *Manager) RequestSavePermanentMinigame(requestID int, minigameID, score int, lastActiveAt int64) {
+	if len(m.permanent.Minigames) < minigameID+1 {
+		zeros := make([]*MinigameData, minigameID+1-len(m.permanent.Minigames))
+		m.permanent.Minigames = append(m.permanent.Minigames, zeros...)
+	}
+	m.permanent.Minigames[minigameID] = &MinigameData{Score: score, LastActiveAt: lastActiveAt}
+
+	bytes, err := msgpack.Marshal(m.permanent)
+	if err != nil {
+		panic(fmt.Sprintf("scene: msgpack encoding error: %v", err))
+	}
+	m.Requester().RequestSavePermanent(requestID, bytes)
+}
+
+func (m *Manager) PermanentMinigame(id int) *MinigameData {
+	if len(m.permanent.Minigames) < id+1 {
+		return nil
+	}
+	return m.permanent.Minigames[id]
+}
+
 func (m *Manager) RespondUnlockAchievement(id int) {
 	m.resultCh <- RequestResult{
 		ID:   id,

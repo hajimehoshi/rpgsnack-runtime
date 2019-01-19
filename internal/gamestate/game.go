@@ -40,6 +40,52 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/window"
 )
 
+type Minigame struct {
+	score        int
+	lastActiveAt int64
+	visible      bool
+	id           int
+	reqScore     int
+}
+
+func (m *Minigame) Visible() bool {
+	if m == nil {
+		return false
+	}
+	return m.visible
+}
+
+func (m *Minigame) ID() int {
+	return m.id
+}
+
+func (m *Minigame) ReqScore() int {
+	return m.reqScore
+}
+
+func (m *Minigame) Score() int {
+	return m.score
+}
+
+func (m *Minigame) LastActiveAt() int64 {
+	return m.lastActiveAt
+}
+
+func (m *Minigame) MarkLastActive() {
+	m.lastActiveAt = time.Now().Unix()
+}
+
+func (m *Minigame) SetScore(score int) {
+	m.score = score
+}
+
+func (m *Minigame) Success() bool {
+	if m == nil {
+		return false
+	}
+	return m.score >= m.reqScore
+}
+
 type Rand interface {
 	Intn(n int) int
 }
@@ -56,6 +102,7 @@ type Game struct {
 	autoSaveEnabled      bool
 	playerControlEnabled bool
 	inventoryVisible     bool
+	minigame             *Minigame
 	weatherType          data.WeatherType
 	cleared              bool
 
@@ -369,6 +416,33 @@ func (g *Game) InventoryVisible() bool {
 	return g.inventoryVisible
 }
 
+func (g *Game) InitMinigame(id, reqScore, score int) {
+	g.minigame = &Minigame{
+		id:       id,
+		reqScore: reqScore,
+		score:    score,
+	}
+}
+
+func (g *Game) ShowMinigame(lastActiveAt int64) {
+	if g.minigame == nil {
+		panic("not reached")
+	}
+	g.minigame.visible = true
+	g.minigame.lastActiveAt = lastActiveAt
+}
+
+func (g *Game) HideMinigame() {
+	if g.minigame == nil {
+		return
+	}
+	g.minigame.visible = false
+}
+
+func (g *Game) Minigame() *Minigame {
+	return g.minigame
+}
+
 func (g *Game) SetAutoSaveEnabled(enabled bool) {
 	g.autoSaveEnabled = enabled
 }
@@ -411,6 +485,11 @@ func (g *Game) RequestSave(requestID int, sceneManager *scene.Manager) {
 func (g *Game) RequestSavePermanentVariable(requestID int, sceneManager *scene.Manager, permanentVariableID, variableID int) bool {
 	v := int64(g.VariableValue(variableID))
 	sceneManager.RequestSavePermanentVariable(requestID, permanentVariableID, v)
+	return true
+}
+
+func (g *Game) RequestSavePermanentMinigame(requestID int, sceneManager *scene.Manager, id, score int, lastActiveAt int64) bool {
+	sceneManager.RequestSavePermanentMinigame(requestID, id, score, lastActiveAt)
 	return true
 }
 
