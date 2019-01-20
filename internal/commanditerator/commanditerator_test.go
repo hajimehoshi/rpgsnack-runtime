@@ -41,7 +41,7 @@ func makeBranches(commands ...[]*data.Command) *data.Command {
 }
 
 func TestGoto(t *testing.T) {
-	commands := []*data.Command{
+	commands1 := []*data.Command{
 		makeLabelCommand("foo"),
 		makeLabelCommand("bar"),
 		makeBranches(
@@ -61,37 +61,64 @@ func TestGoto(t *testing.T) {
 				makeLabelCommand("corge"),
 			}),
 	}
-	it := New(commands)
+	commands2 := []*data.Command{
+		makeBranches(
+			[]*data.Command{
+				makeBranches(
+					[]*data.Command{
+						makeBranches(
+							[]*data.Command{
+								makeLabelCommand("foo"),
+							},
+							[]*data.Command{}),
+					},
+					[]*data.Command{}),
+			},
+			[]*data.Command{}),
+	}
 	cases := []struct {
-		In  string
-		Out string
+		Commands []*data.Command
+		In       string
+		Out      string
 	}{
 		{
-			In:  "foo",
-			Out: "foo",
+			Commands: commands1,
+			In:       "foo",
+			Out:      "foo",
 		},
 		{
-			In:  "bar",
-			Out: "bar",
+			Commands: commands1,
+			In:       "bar",
+			Out:      "bar",
 		},
 		{
-			In:  "baz",
-			Out: "baz",
+			Commands: commands1,
+			In:       "baz",
+			Out:      "baz",
 		},
 		{
-			In:  "qux",
-			Out: "qux",
+			Commands: commands1,
+			In:       "qux",
+			Out:      "qux",
 		},
 		{
-			In:  "quux",
-			Out: "quux",
+			Commands: commands1,
+			In:       "quux",
+			Out:      "quux",
 		},
 		{
-			In:  "corge",
-			Out: "corge",
+			Commands: commands1,
+			In:       "corge",
+			Out:      "corge",
+		},
+		{
+			Commands: commands2,
+			In:       "foo",
+			Out:      "foo",
 		},
 	}
 	for _, c := range cases {
+		it := New(c.Commands)
 		if !it.Goto(c.In) {
 			t.Errorf("goto failed")
 			continue

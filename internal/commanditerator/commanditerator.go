@@ -116,7 +116,11 @@ func (c *CommandIterator) recordLabel(commands []*data.Command, pointer []int) {
 			continue
 		}
 		for bi, b := range command.Branches {
-			c.recordLabel(b, append(p, bi))
+			// Copy the p once so that other slices referring the underlying array should not be affected.
+			pp := make([]int, len(p))
+			copy(pp, p)
+			pp = append(pp, bi)
+			c.recordLabel(b, pp)
 		}
 	}
 }
