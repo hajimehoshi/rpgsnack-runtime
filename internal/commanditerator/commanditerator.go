@@ -105,7 +105,10 @@ func (c *CommandIterator) DecodeMsgpack(dec *msgpack.Decoder) error {
 
 func (c *CommandIterator) recordLabel(commands []*data.Command, pointer []int) {
 	for ci, command := range commands {
-		p := append(pointer, ci)
+		// Copy the p once so that other slices referring the underlying array should not be affected.
+		p := make([]int, len(pointer))
+		copy(p, pointer)
+		p = append(p, ci)
 		if command.Name == data.CommandNameLabel {
 			label := command.Args.(*data.CommandArgsLabel).Name
 			if _, ok := c.labels[label]; !ok {
@@ -116,7 +119,6 @@ func (c *CommandIterator) recordLabel(commands []*data.Command, pointer []int) {
 			continue
 		}
 		for bi, b := range command.Branches {
-			// Copy the p once so that other slices referring the underlying array should not be affected.
 			pp := make([]int, len(p))
 			copy(pp, p)
 			pp = append(pp, bi)
