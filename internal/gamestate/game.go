@@ -43,16 +43,28 @@ import (
 type Minigame struct {
 	score        int
 	lastActiveAt int64
-	visible      bool
+	active       bool
 	id           int
 	reqScore     int
 }
 
-func (m *Minigame) Visible() bool {
+func (m *Minigame) Active() bool {
 	if m == nil {
 		return false
 	}
-	return m.visible
+	return m.active
+}
+
+func (m *Minigame) activate(lastActiveAt int64) {
+	m.active = true
+	m.lastActiveAt = lastActiveAt
+}
+
+func (m *Minigame) deactivate() {
+	if m == nil {
+		return
+	}
+	m.active = false
 }
 
 func (m *Minigame) ID() int {
@@ -75,8 +87,8 @@ func (m *Minigame) MarkLastActive() {
 	m.lastActiveAt = time.Now().Unix()
 }
 
-func (m *Minigame) SetScore(score int) {
-	m.score = score
+func (m *Minigame) AddScore(score int) {
+	m.score += score
 }
 
 func (m *Minigame) Success() bool {
@@ -425,18 +437,11 @@ func (g *Game) InitMinigame(id, reqScore, score int) {
 }
 
 func (g *Game) ShowMinigame(lastActiveAt int64) {
-	if g.minigame == nil {
-		panic("not reached")
-	}
-	g.minigame.visible = true
-	g.minigame.lastActiveAt = lastActiveAt
+	g.minigame.activate(lastActiveAt)
 }
 
 func (g *Game) HideMinigame() {
-	if g.minigame == nil {
-		return
-	}
-	g.minigame.visible = false
+	g.minigame.deactivate()
 }
 
 func (g *Game) Minigame() *Minigame {
