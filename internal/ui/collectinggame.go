@@ -224,7 +224,7 @@ func (c *collectingGame) DrawAsChild(screen *ebiten.Image, x, y int) {
 		actorImage = assets.GetImage("system/minigame/actor.png")
 	}
 	if c.collectTimer > 0 {
-		screen.DrawImage(assets.GetImage("system/minigame/actorGet.png"), op)
+		screen.DrawImage(assets.GetImage("system/minigame/actorCollect.png"), op)
 	} else {
 		screen.DrawImage(actorImage.SubImage(image.Rect(actorWidth*frame, 0, actorWidth*(frame+1), actorHeight)).(*ebiten.Image), op)
 	}
