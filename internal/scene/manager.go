@@ -416,6 +416,10 @@ func (m *Manager) ReceiveResultIfExists(id int) *RequestResult {
 	return nil
 }
 
+func (m *Manager) RequestRewardedAds(requestID int, forceAds bool) {
+	m.Requester().RequestRewardedAds(requestID, forceAds)
+}
+
 func (m *Manager) RequestSavePermanentVariable(requestID int, permanentVariableID int, value int64) {
 	if len(m.permanent.Variables) < permanentVariableID+1 {
 		zeros := make([]int64, permanentVariableID+1-len(m.permanent.Variables))

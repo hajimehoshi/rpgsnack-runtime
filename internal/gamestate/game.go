@@ -498,6 +498,11 @@ func (g *Game) RequestSavePermanentMinigame(requestID int, sceneManager *scene.M
 	return true
 }
 
+func (g *Game) RequestRewardedAds(requestID int, sceneManager *scene.Manager, forceAds bool) bool {
+	sceneManager.RequestRewardedAds(requestID, forceAds)
+	return true
+}
+
 var reMessage = regexp.MustCompile(`\\([a-zA-Z])\[([^\]]+)\]`)
 
 func (g *Game) ParseMessageSyntax(str string) string {

@@ -70,6 +70,7 @@ type MapScene struct {
 	removeAdsNoButton    *ui.Button
 	inventory            *ui.Inventory
 	itemPreviewPopup     *ui.ItemPreviewPopup
+	minigamePopup        *ui.MinigamePopup
 	titleView            *ui.TitleView
 	markerAnimationFrame int
 	waitingRequestID     int
@@ -79,6 +80,7 @@ type MapScene struct {
 	windowOffsetY        int
 	inventoryHeight      int
 	animation            animation
+	onRewarded           func(*scene.Manager)
 
 	err error
 }
@@ -223,7 +225,9 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	m.removeAdsDialog.AddChild(m.removeAdsNoButton)
 
 	m.inventory = ui.NewInventory(0, consts.CeilDiv(screenH-m.inventoryHeight, consts.TileScale), sceneManager.HasExtraBottomGrid())
-	m.itemPreviewPopup = ui.NewItemPreviewPopup(consts.CeilDiv(screenH, consts.TileScale) - m.inventoryHeight - itemPreviewPopupMargin)
+	ty := consts.CeilDiv(screenH, consts.TileScale) - m.inventoryHeight - itemPreviewPopupMargin
+	m.itemPreviewPopup = ui.NewItemPreviewPopup(ty)
+	m.minigamePopup = ui.NewMinigamePopup(ty)
 	m.quitDialog.AddChild(m.quitLabel)
 
 	m.removeAdsButton.Hide() // TODO: Clock of Atonement does not need this feature, so turn it off for now
@@ -318,6 +322,24 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 		m.gameState.Items().SetEventItem(0)
 		m.gameState.Items().SetCombineItem(0)
 	})
+	m.minigamePopup.SetOnClose(func() {
+		mg := m.gameState.Minigame()
+		m.gameState.RequestSavePermanentMinigame(0, sceneManager, mg.ID(), mg.Score(), mg.LastActiveAt())
+		m.gameState.HideMinigame()
+	})
+	m.minigamePopup.SetOnProgress(func(progress int) {
+		mg := m.gameState.Minigame()
+		sceneManager.Requester().RequestSendAnalytics(fmt.Sprintf("minigame%d_progress_%d", mg.ID(), progress), "")
+	})
+	m.minigamePopup.SetOnSave(func() {
+		mg := m.gameState.Minigame()
+		m.gameState.RequestSavePermanentMinigame(0, sceneManager, mg.ID(), mg.Score(), mg.LastActiveAt())
+	})
+	m.minigamePopup.SetOnRequestRewardeAds(func() {
+		m.waitingRequestID = sceneManager.GenerateRequestID()
+		m.gameState.RequestRewardedAds(m.waitingRequestID, sceneManager, true)
+		m.onRewarded = m.minigameRewarded
+	})
 	m.inventory.SetOnBackPressed(func(_ *ui.Inventory) {
 		m.gameState.Items().SetEventItem(0)
 		m.gameState.Items().SetCombineItem(0)
@@ -336,6 +358,11 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 			m.gameState.StartItemCommands(activeItemID)
 		}
 	})
+}
+func (m *MapScene) minigameRewarded(sceneManager *scene.Manager) {
+	mg := m.gameState.Minigame()
+	sceneManager.Requester().RequestSendAnalytics(fmt.Sprintf("minigame%d_reward", mg.ID()), "")
+	m.minigamePopup.ActivateBoostMode()
 }
 
 func (m *MapScene) updateItemPreviewPopupVisibility(sceneManager *scene.Manager) {
@@ -435,6 +462,15 @@ func (m *MapScene) receiveRequest(sceneManager *scene.Manager) bool {
 	}
 	m.waitingRequestID = 0
 	switch r.Type {
+	case scene.RequestTypeRewardedAds:
+		if r.Succeeded {
+			if m.onRewarded != nil {
+				mg := m.gameState.Minigame()
+				sceneManager.Requester().RequestSendAnalytics(fmt.Sprintf("minigame%d_reward", mg.ID()), "")
+				m.onRewarded(sceneManager)
+			}
+		}
+
 	case scene.RequestTypeIAPPrices:
 		if !r.Succeeded {
 			m.storeErrorDialog.Show()
@@ -521,6 +557,14 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 
 	// Event handling
 	m.updateItemPreviewPopupVisibility(sceneManager)
+
+	if m.gameState.Minigame().Active() {
+		m.minigamePopup.Show()
+	} else {
+		m.minigamePopup.Hide()
+	}
+	m.minigamePopup.Update(m.gameState.Minigame())
+	m.minigamePopup.SetAdsLoaded(sceneManager.RewardedAdsLoaded())
 
 	if m.titleView != nil {
 		m.titleView.Update(sceneManager)
@@ -772,6 +816,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	m.uiImage.Clear()
 
 	m.itemPreviewPopup.Draw(m.uiImage)
+	m.minigamePopup.Draw(m.uiImage)
 	m.inventory.Draw(m.uiImage)
 
 	m.cameraButton.Draw(m.uiImage)

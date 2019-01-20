@@ -770,10 +770,9 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			i.waitingCommand = true
 		}
 
-		// TODO: Implement Minigame UI to call HideMinigame() at an approprite timing.
-		// if gameState.Minigame().Visible() {
-		//   return false, nil
-		// }
+		if gameState.Minigame().Active() {
+			return false, nil
+		}
 
 		if gameState.Minigame().Success() {
 			i.commandIterator.Choose(0)
