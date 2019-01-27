@@ -132,6 +132,7 @@ type Game struct {
 	prices                 map[string]string // TODO: We want to use https://godoc.org/golang.org/x/text/currency
 	weather                *weather.Weather
 	onShakeStartGameButton func()
+	shouldShowCredits      bool
 }
 
 func generateDefaultRand() Rand {
@@ -1053,4 +1054,16 @@ func (g *Game) ShakeStartGameButton() {
 	if g.onShakeStartGameButton != nil {
 		g.onShakeStartGameButton()
 	}
+}
+
+func (g *Game) ShouldShowCredits() bool {
+	return g.shouldShowCredits
+}
+
+func (g *Game) ShowCredits() {
+	g.shouldShowCredits = true
+}
+
+func (g *Game) ShowedCredits() {
+	g.shouldShowCredits = false
 }

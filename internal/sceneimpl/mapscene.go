@@ -72,6 +72,7 @@ type MapScene struct {
 	itemPreviewPopup     *ui.ItemPreviewPopup
 	minigamePopup        *ui.MinigamePopup
 	titleView            *ui.TitleView
+	credits              *ui.Credits
 	markerAnimationFrame int
 	waitingRequestID     int
 	isAdsRemoved         bool
@@ -231,6 +232,8 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	m.quitDialog.AddChild(m.quitLabel)
 
 	m.removeAdsButton.Hide() // TODO: Clock of Atonement does not need this feature, so turn it off for now
+
+	m.credits = ui.NewCredits(false)
 
 	m.quitYesButton.SetOnPressed(func(_ *ui.Button) {
 		if m.gameState.IsAutoSaveEnabled() && !m.gameState.Map().IsBlockingEventExecuting() {
@@ -511,6 +514,9 @@ func (m *MapScene) isUIBusy() bool {
 	if m.screenShotDialog.Visible() {
 		return true
 	}
+	if m.credits.Visible() {
+		return true
+	}
 	return false
 }
 
@@ -569,11 +575,19 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 	if m.titleView != nil {
 		m.titleView.Update(sceneManager)
 	}
+
+	m.credits.Update()
 }
 
 func (m *MapScene) Update(sceneManager *scene.Manager) error {
 	if m.err != nil {
 		return m.err
+	}
+
+	if m.gameState.ShouldShowCredits() {
+		m.credits.SetData(sceneManager.Credits())
+		m.credits.Show()
+		m.gameState.ShowedCredits()
 	}
 
 	m.animation.Update()
@@ -736,6 +750,12 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	if !m.initialized {
 		return
 	}
+
+	if m.credits.Visible() {
+		m.credits.Draw(screen)
+		return
+	}
+
 	m.screenImage.Fill(color.Black)
 
 	if background := m.gameState.Map().Background(m.gameState); background != "" {

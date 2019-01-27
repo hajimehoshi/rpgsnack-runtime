@@ -716,8 +716,13 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 
 	case data.CommandNameOpenLink:
 		args := c.Args.(*data.CommandArgsOpenLink)
+		if args.Type == data.OpenLinkTypeShowCredit {
+			gameState.ShowCredits()
+			i.commandIterator.Advance()
+			return false, nil
+		}
 		i.waitingRequestID = sceneManager.GenerateRequestID()
-		sceneManager.Requester().RequestOpenLink(i.waitingRequestID, args.Type, args.Data)
+		sceneManager.Requester().RequestOpenLink(i.waitingRequestID, string(args.Type), args.Data)
 		return false, nil
 
 	case data.CommandNameShare:

@@ -74,7 +74,11 @@ type Credits struct {
 	finished    bool
 }
 
-func NewCredits() *Credits {
+func NewCredits(useCloseButton bool) *Credits {
+	if !useCloseButton {
+		return &Credits{}
+	}
+
 	closeButton := NewImageButton(
 		140,
 		4,
@@ -110,15 +114,27 @@ func (c *Credits) Hide() {
 	c.visible = false
 }
 
+func (c *Credits) dash() bool {
+	if !input.Pressed() {
+		return false
+	}
+	if c.closeButton == nil {
+		return true
+	}
+	return !c.closeButton.includesInput(0, 0)
+}
+
 func (c *Credits) Update() {
 	if !c.visible {
 		return
 	}
-	c.closeButton.UpdateAsChild(c.visible, 0, 0)
+	if c.closeButton != nil {
+		c.closeButton.UpdateAsChild(c.visible, 0, 0)
+	}
 	if c.finished {
 		c.Hide()
 	}
-	if !c.closeButton.includesInput(0, 0) && input.Pressed() {
+	if c.dash() {
 		c.scrollY += 8
 	} else {
 		c.scrollY++
@@ -217,5 +233,7 @@ func (c *Credits) Draw(screen *ebiten.Image) {
 	if y <= 0 {
 		c.finished = true
 	}
-	c.closeButton.DrawAsChild(screen, 0, 0)
+	if c.closeButton != nil {
+		c.closeButton.DrawAsChild(screen, 0, 0)
+	}
 }

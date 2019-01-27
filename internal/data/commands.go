@@ -1309,8 +1309,8 @@ type CommandArgsShowAds struct {
 }
 
 type CommandArgsOpenLink struct {
-	Type string `json:"type" msgpack:"type"`
-	Data string `json:"data" msgpack:"data"`
+	Type OpenLinkType `json:"type" msgpack:"type"`
+	Data string       `json:"data" msgpack:"data"`
 }
 
 type CommandArgsShare struct {
