@@ -15,9 +15,8 @@
 package sceneimpl
 
 import (
-	"golang.org/x/text/language/display"
-
 	"github.com/hajimehoshi/ebiten"
+	"golang.org/x/text/language/display"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
@@ -32,7 +31,7 @@ import (
 type SettingsScene struct {
 	settingsLabel          *ui.Label
 	languageButton         *ui.Button
-	creditButton           *ui.Button
+	creditsButton          *ui.Button
 	updateCreditsButton    *ui.Button
 	reviewThisAppButton    *ui.Button
 	restorePurchasesButton *ui.Button
@@ -48,6 +47,7 @@ type SettingsScene struct {
 	warningYesButton *ui.Button
 	warningNoButton  *ui.Button
 	waitingRequestID int
+	credits          *ui.Credits
 
 	initialized bool
 	baseX       int
@@ -77,7 +77,7 @@ func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
 	s.settingsLabel = ui.NewLabel(16, s.baseY+8)
 	s.languageButton = ui.NewButton(s.baseX, s.calcButtonY(1), 120, 20, "system/click")
 	s.shopButton = ui.NewButton(s.baseX, s.calcButtonY(2), 120, 20, "system/click")
-	s.creditButton = ui.NewButton(s.baseX, s.calcButtonY(2), 120, 20, "system/click")
+	s.creditsButton = ui.NewButton(s.baseX, s.calcButtonY(2), 120, 20, "system/click")
 	s.updateCreditsButton = ui.NewButton(s.baseX+80, s.calcButtonY(2), 40, 20, "system/click")
 	s.reviewThisAppButton = ui.NewButton(s.baseX, s.calcButtonY(3), 120, 20, "system/click")
 	s.restorePurchasesButton = ui.NewButton(s.baseX, s.calcButtonY(4), 120, 20, "system/click")
@@ -109,9 +109,9 @@ func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
 		s.languageDialog.Show()
 	})
 
-	s.creditButton.SetOnPressed(func(_ *ui.Button) {
-		s.waitingRequestID = sceneManager.GenerateRequestID()
-		sceneManager.Requester().RequestOpenLink(s.waitingRequestID, "show_credit", "menu")
+	s.creditsButton.SetOnPressed(func(_ *ui.Button) {
+		s.credits.SetData(sceneManager.Credits())
+		s.credits.Show()
 	})
 	s.updateCreditsButton.SetOnPressed(func(_ *ui.Button) {
 		s.waitingRequestID = sceneManager.GenerateRequestID()
@@ -163,13 +163,15 @@ func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
 		s.waitingRequestID = sceneManager.GenerateRequestID()
 		sceneManager.Requester().RequestShowShop(s.waitingRequestID, string(sceneManager.ShopProductsDataByShop(data.ShopTypeMain)))
 	})
+
+	s.credits = ui.NewCredits()
 }
 
 func (s *SettingsScene) updateButtonTexts() {
 	s.settingsLabel.Text = texts.Text(lang.Get(), texts.TextIDSettings)
 	s.languageButton.SetText(texts.Text(lang.Get(), texts.TextIDLanguage))
-	s.creditButton.SetText(texts.Text(lang.Get(), texts.TextIDCredit))
-	s.updateCreditsButton.SetText(texts.Text(lang.Get(), texts.TextIDCreditEntry))
+	s.creditsButton.SetText(texts.Text(lang.Get(), texts.TextIDCredits))
+	s.updateCreditsButton.SetText(texts.Text(lang.Get(), texts.TextIDCreditsEntry))
 	s.reviewThisAppButton.SetText(texts.Text(lang.Get(), texts.TextIDReviewThisApp))
 	s.restorePurchasesButton.SetText(texts.Text(lang.Get(), texts.TextIDRestorePurchases))
 	s.resetGameButton.SetText(texts.Text(lang.Get(), texts.TextIDResetGame))
@@ -199,10 +201,10 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 
 	if sceneManager.MaxPurchaseTier() > 0 {
 		s.updateCreditsButton.Show()
-		s.creditButton.SetWidth(76)
+		s.creditsButton.SetWidth(76)
 	} else {
 		s.updateCreditsButton.Hide()
-		s.creditButton.SetWidth(120)
+		s.creditsButton.SetWidth(120)
 	}
 
 	if s.waitingRequestID != 0 {
@@ -221,7 +223,7 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 		s.shopButton.Hide()
 	}
 
-	s.creditButton.SetY(s.calcButtonY(itemOffset + 2))
+	s.creditsButton.SetY(s.calcButtonY(itemOffset + 2))
 	s.updateCreditsButton.SetY(s.calcButtonY(itemOffset + 2))
 	s.reviewThisAppButton.SetY(s.calcButtonY(itemOffset + 3))
 	s.restorePurchasesButton.SetY(s.calcButtonY(itemOffset + 4))
@@ -237,10 +239,11 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 
 	s.languageDialog.Update()
 	s.warningDialog.Update()
-	if !s.languageDialog.Visible() && !s.warningDialog.Visible() {
+	s.credits.Update()
+	if !s.languageDialog.Visible() && !s.warningDialog.Visible() && !s.credits.Visible() {
 		s.languageButton.Update()
 		s.shopButton.Update()
-		s.creditButton.Update()
+		s.creditsButton.Update()
 		s.updateCreditsButton.Update()
 		s.reviewThisAppButton.Update()
 		s.restorePurchasesButton.Update()
@@ -263,6 +266,11 @@ func (s *SettingsScene) handleBackButton(sceneManager *scene.Manager) {
 		s.warningDialog.Hide()
 		return
 	}
+	if s.credits.Visible() {
+		audio.PlaySE("system/cancel", 1.0)
+		s.credits.Hide()
+		return
+	}
 
 	audio.PlaySE("system/cancel", 1.0)
 	g, err := savedGame(sceneManager)
@@ -280,7 +288,7 @@ func (s *SettingsScene) Draw(screen *ebiten.Image) {
 	s.settingsLabel.Draw(screen)
 	s.languageButton.Draw(screen)
 	s.shopButton.Draw(screen)
-	s.creditButton.Draw(screen)
+	s.creditsButton.Draw(screen)
 	s.updateCreditsButton.Draw(screen)
 	s.reviewThisAppButton.Draw(screen)
 	s.restorePurchasesButton.Draw(screen)
@@ -289,6 +297,7 @@ func (s *SettingsScene) Draw(screen *ebiten.Image) {
 	s.closeButton.Draw(screen)
 	s.languageDialog.Draw(screen)
 	s.warningDialog.Draw(screen)
+	s.credits.Draw(screen)
 }
 
 func (s *SettingsScene) Resize() {

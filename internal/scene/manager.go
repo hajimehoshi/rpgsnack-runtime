@@ -63,9 +63,11 @@ type Manager struct {
 	purchases             []string
 	interstitialAdsLoaded bool
 	rewardedAdsLoaded     bool
-	blackImage            *ebiten.Image
-	turbo                 bool
-	offscreen             *ebiten.Image
+	credits               *data.Credits
+
+	blackImage *ebiten.Image
+	turbo      bool
+	offscreen  *ebiten.Image
 }
 
 type PlatformDataKey string
@@ -74,6 +76,7 @@ const (
 	PlatformDataKeyInterstitialAdsLoaded PlatformDataKey = "interstitial_ads_loaded"
 	PlatformDataKeyRewardedAdsLoaded     PlatformDataKey = "rewarded_ads_loaded"
 	PlatformDataKeyBackButton            PlatformDataKey = "backbutton"
+	PlatformDataKeyCredits               PlatformDataKey = "credits"
 )
 
 func NewManager(width, height int, requester Requester, game *data.Game, progress []byte, permanent []byte, purchases []string, fadingInCount int) *Manager {
@@ -102,6 +105,36 @@ func NewManager(width, height int, requester Requester, game *data.Game, progres
 	m.blackImage.Fill(color.Black)
 	w, h := m.Size()
 	m.offscreen, _ = ebiten.NewImage(w, h, ebiten.FilterDefault)
+
+	m.credits = &data.Credits{
+		Sections: []data.CreditsSection{
+			{
+				Header: "AUTHOR",
+				Body:   []string{"???"},
+			},
+			{
+				Header:      "PLATINUM SPONSOR",
+				HeaderColor: "#bbaaee",
+				Body:        nil,
+			},
+			{
+				Header:      "GOLD SPONSOR",
+				HeaderColor: "#ffd700",
+				Body:        nil,
+			},
+			{
+				Header:      "SILVER SPONSOR",
+				HeaderColor: "#c0c0c0",
+				Body:        nil,
+			},
+			{
+				Header:      "BRONZE SPONSOR",
+				HeaderColor: "#cd7f32",
+				Body:        nil,
+			},
+		},
+	}
+
 	return m
 }
 
@@ -172,6 +205,12 @@ func (m *Manager) Update() error {
 			m.rewardedAdsLoaded = true
 		case PlatformDataKeyBackButton:
 			triggerBack = true
+		case PlatformDataKeyCredits:
+			var credits *data.Credits
+			if err := json.Unmarshal([]byte(a.value), &credits); err != nil {
+				return err
+			}
+			m.credits = credits
 		default:
 			log.Printf("platform data key not implemented: %s", a.key)
 		}
@@ -406,6 +445,10 @@ func (m *Manager) GoToWithFading(next Scene, fadingOutCount, fadingInCount int) 
 func (m *Manager) GenerateRequestID() int {
 	m.lastRequestID++
 	return m.lastRequestID
+}
+
+func (m *Manager) Credits() *data.Credits {
+	return m.credits
 }
 
 func (m *Manager) ReceiveResultIfExists(id int) *RequestResult {
