@@ -142,7 +142,6 @@ func init() {
 	w, h := font.MeasureSize(str)
 
 	creditsFont, _ = ebiten.NewImage(w*creditsFontScale, h*creditsFontScale, ebiten.FilterDefault)
-	creditsFont.Fill(color.Black) // TODO: Is this really needed?
 	font.DrawTextLang(creditsFont, str, 0, 0, creditsFontScale, data.TextAlignLeft, color.White, 128, language.English)
 }
 
@@ -159,10 +158,10 @@ func drawCreditsText(img *ebiten.Image, str string, x, y int, scale float64, clr
 	bf := 0.0
 	af := 0.0
 	if r, g, b, a := clr.RGBA(); a > 0 {
-		af = float64(a)
-		rf = float64(r) / af
-		gf = float64(g) / af
-		bf = float64(b) / af
+		af = float64(a) / 0xffff
+		rf = float64(r) / float64(a)
+		gf = float64(g) / float64(a)
+		bf = float64(b) / float64(a)
 	}
 	op.ColorM.Scale(rf, gf, bf, af)
 	op.Filter = ebiten.FilterLinear
