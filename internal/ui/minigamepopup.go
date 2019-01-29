@@ -29,7 +29,7 @@ import (
 
 const (
 	saveIntervalFrames = 5 * 60 // 5 sec
-	boostInterval      = 20     // 20 sec
+	boostInterval      = 10     // 10 sec
 )
 
 type MinigamePopup struct {
