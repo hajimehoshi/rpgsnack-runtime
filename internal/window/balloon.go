@@ -268,7 +268,7 @@ func (b *balloon) trySkipTypingAnim() {
 
 func (b *balloon) arrowPosition(screenWidth int, character *character.Character) (int, int) {
 	if !b.hasArrow {
-		panic("not reach")
+		panic("windows: hasArrow must be true at arrowPosition")
 	}
 	cx, cy := character.DrawPosition()
 	w, _ := character.Size()

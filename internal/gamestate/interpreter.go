@@ -870,7 +870,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			case data.DirLeft:
 				dirI = 3
 			default:
-				panic("not reach")
+				panic(fmt.Sprintf("gamestate: invalid character dir: %d at data.CommandNameRouteCharacter", ch.Dir()))
 			}
 			switch args.Angle {
 			case 0:
@@ -881,7 +881,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			case 270:
 				dirI += 3
 			default:
-				panic("not reach")
+				panic(fmt.Sprintf("gamestate: invalid angle: %d at data.CommandNameRouteCharacter", args.Angle))
 			}
 			dirI %= 4
 			var dir data.Dir
@@ -895,7 +895,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			case 3:
 				dir = data.DirLeft
 			default:
-				panic("not reach")
+				panic("not reached")
 			}
 			ch.Turn(dir)
 			i.waitingCommand = true

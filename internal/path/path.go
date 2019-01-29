@@ -15,6 +15,8 @@
 package path
 
 import (
+	"fmt"
+
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 )
 
@@ -87,7 +89,7 @@ func Calc(passable Passable, startX, startY, goalX, goalY int, mustReachGoal boo
 		case parent.Y == p.Y+1:
 			dirs = append(dirs, data.DirUp)
 		default:
-			panic("not reach")
+			panic(fmt.Sprintf("path: invalid position: parent: (%d, %d), p: (%d, %d)", parent.X, parent.Y, p.X, p.Y))
 		}
 		p = parent
 	}
@@ -103,7 +105,7 @@ func Calc(passable Passable, startX, startY, goalX, goalY int, mustReachGoal boo
 		case data.DirLeft:
 			path[len(dirs)-i-1] = RouteCommandMoveLeft
 		default:
-			panic("not reach")
+			panic(fmt.Sprintf("path: invalid dir: %d", d))
 		}
 	}
 	lastP := passable.At(goalX, goalY)
@@ -126,7 +128,7 @@ func Calc(passable Passable, startX, startY, goalX, goalY int, mustReachGoal boo
 			path[len(path)-1] = RouteCommandTurnLeft
 			lastX++
 		default:
-			panic("not reach")
+			panic(fmt.Sprintf("path: invalid command: %d at Calc", path[len(path)-1]))
 		}
 	}
 	return path, lastX, lastY
@@ -201,7 +203,7 @@ func RouteCommandsToEventCommands(path []RouteCommand) []*data.Command {
 				},
 			})
 		default:
-			panic("not reach")
+			panic(fmt.Sprintf("path: invalid command: %d at RouteCommandsToEventCommands", r))
 		}
 	}
 	return commands

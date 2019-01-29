@@ -199,7 +199,7 @@ func (w *Windows) ShowMessage(contentID data.UUID, content string, eventID int, 
 func (w *Windows) ShowChoices(sceneManager *scene.Manager, choices []*Choice, interpreterID int) {
 	// TODO: w.chosenBalloonWaitingCount should be 0 here!
 	if w.chosenBalloonWaitingCount > 0 {
-		panic("not reach")
+		panic("windows: chosenBalloonWaitingCount must be  > 0 at ShowChoices")
 	}
 	w.choiceBalloons = nil
 	for i, choice := range choices {

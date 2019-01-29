@@ -16,6 +16,7 @@ package data
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/vmihailenco/msgpack"
 )
@@ -178,7 +179,7 @@ func (s Speed) Frames() int {
 	case Speed6:
 		return 2
 	default:
-		panic("not reach")
+		panic(fmt.Sprintf("data: invalid speed: %d", s))
 	}
 }
 

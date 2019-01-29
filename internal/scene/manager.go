@@ -140,7 +140,7 @@ func NewManager(width, height int, requester Requester, game *data.Game, progres
 
 func (m *Manager) InitScene(scene Scene) {
 	if m.current != nil {
-		panic("not reach")
+		panic("scene: the current scene must not be nil")
 	}
 	m.current = scene
 }

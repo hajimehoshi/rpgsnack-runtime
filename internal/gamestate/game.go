@@ -902,7 +902,7 @@ func (g *Game) SetVariable(sceneManager *scene.Manager, variableID int, op data.
 			case data.DirLeft:
 				rhs = 3
 			default:
-				panic("not reach")
+				panic(fmt.Sprintf("gamestate: invalid dir: %d at data.SetVariableValueTypeCharacter", dir))
 			}
 		case data.SetVariableCharacterTypeRoomX:
 			x, _ := ch.Position()

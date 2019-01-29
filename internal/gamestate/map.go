@@ -1070,7 +1070,7 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, gameState *G
 			case ex == px && ey < py:
 				dir = data.DirDown
 			default:
-				panic("not reach")
+				panic(fmt.Sprintf("gamestate: invalid positions: event: (%d, %d), player: (%d, %d)", ex, ey, px, py))
 			}
 			if !event.DirFix() {
 				commands = append(commands,

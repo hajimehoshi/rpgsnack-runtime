@@ -367,7 +367,7 @@ func (c *Character) Size() (int, int) {
 
 		// Validate to see if the character size is valid
 		if c.sizeW == 0 || c.sizeH == 0 || c.imageW%c.sizeW != 0 || c.imageH%c.sizeH != 0 {
-			panic(fmt.Sprintf("Invalid format imageName:%s imageW:%d imageH:%d sizeW:%d sizeH:%d", c.imageName, c.imageW, c.imageH, c.sizeW, c.sizeH))
+			panic(fmt.Sprintf("character: invalid format imageName:%s imageW:%d imageH:%d sizeW:%d sizeH:%d", c.imageName, c.imageW, c.imageH, c.sizeW, c.sizeH))
 		}
 	}
 	return c.sizeW, c.sizeH
@@ -421,7 +421,7 @@ func (c *Character) Position() (int, int) {
 		case data.DirDown:
 			y++
 		default:
-			panic("not reach")
+			panic(fmt.Sprintf("character: invalid moveDir: %d at Position", c.moveDir))
 		}
 		return x, y
 	}
@@ -443,7 +443,7 @@ func (c *Character) DrawFootPosition() (int, int) {
 		case data.DirDown:
 			y += d
 		default:
-			panic("not reach")
+			panic(fmt.Sprintf("character: invalid moveDir: %d at DrawFootPosition", c.moveDir))
 		}
 	}
 	return x, y
@@ -661,7 +661,7 @@ func (c *Character) Update() {
 		case data.DirDown:
 			ny++
 		default:
-			panic("not reach")
+			panic(fmt.Sprintf("character: invalid moveDir: %d", c.moveDir))
 		}
 		c.x = nx
 		c.y = ny
@@ -710,7 +710,7 @@ func (c *Character) Draw(screen *ebiten.Image, offsetX, offsetY int) {
 	case 4:
 		sy = dirIndex * charH
 	default:
-		panic(fmt.Sprintf("not supported DirCount %s %d", c.imageName, c.DirCount()))
+		panic(fmt.Sprintf("character: not supported DirCount %s %d", c.imageName, c.DirCount()))
 	}
 
 	op := &ebiten.DrawImageOptions{}
