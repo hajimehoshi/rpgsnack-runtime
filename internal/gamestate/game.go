@@ -323,6 +323,7 @@ func (g *Game) DecodeMsgpack(dec *msgpack.Decoder) error {
 			g.playerSpeed = data.Speed(d.DecodeInt())
 			if g.playerSpeed == 0 {
 				// The save data might be created before playerSpeed was introduced. Let's fallback.
+				// (#843)
 				g.playerSpeed = data.Speed5
 			}
 		case "backgrounds":

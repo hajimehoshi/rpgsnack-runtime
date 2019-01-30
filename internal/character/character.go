@@ -211,7 +211,7 @@ func (c *Character) DecodeMsgpack(dec *msgpack.Decoder) error {
 			c.eventID = d.DecodeInt()
 		case "speed":
 			c.speed = data.Speed(d.DecodeInt())
-			// TODO: speed can be 0 on some old data. Should we fallback this?
+			// TODO: speed can be 0 on some old data. Should we rescue this?
 		case "imageName":
 			c.imageName = d.DecodeString()
 		case "imageType":
