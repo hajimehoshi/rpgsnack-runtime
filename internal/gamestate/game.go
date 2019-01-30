@@ -321,6 +321,10 @@ func (g *Game) DecodeMsgpack(dec *msgpack.Decoder) error {
 			g.lastPlayingBGMVolume = d.DecodeFloat64()
 		case "playerSpeed":
 			g.playerSpeed = data.Speed(d.DecodeInt())
+			if g.playerSpeed == 0 {
+				// The save data might be created before playerSpeed was introduced. Let's fallback.
+				g.playerSpeed = data.Speed5
+			}
 		case "backgrounds":
 			if !d.SkipCodeIfNil() {
 				n := d.DecodeMapLen()
@@ -1047,6 +1051,9 @@ func (g *Game) PlayerSpeed() data.Speed {
 }
 
 func (g *Game) SetPlayerSpeed(value data.Speed) {
+	if g.playerSpeed == 0 {
+		panic("gamestate: value must not be 0 at SetPlayerSpeed")
+	}
 	g.playerSpeed = value
 }
 
