@@ -1052,7 +1052,7 @@ func (g *Game) PlayerSpeed() data.Speed {
 }
 
 func (g *Game) SetPlayerSpeed(value data.Speed) {
-	if g.playerSpeed == 0 {
+	if value == 0 {
 		panic("gamestate: value must not be 0 at SetPlayerSpeed")
 	}
 	g.playerSpeed = value
