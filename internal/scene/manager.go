@@ -390,10 +390,6 @@ func (m *Manager) MaxPurchaseTier() int {
 	return maxTier
 }
 
-func (m *Manager) IsAdsRemovable() bool {
-	return m.game.GetIAPProductByType("ads_removal") != nil
-}
-
 func (m *Manager) IsAdsRemoved() bool {
 	for _, i := range m.game.IAPProducts {
 		if i.Type == "ads_removal" && m.IsPurchased(i.Key) {

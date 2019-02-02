@@ -196,7 +196,7 @@ func (t *TitleView) Update(sceneManager *scene.Manager) error {
 		t.moregamesButton.Update()
 	}
 
-	t.removeAdsButton.visible = sceneManager.IsAdsRemovable() && !sceneManager.IsAdsRemoved()
+	t.removeAdsButton.visible = sceneManager.Game().IsShopAvailable(data.ShopTypeHome) && !sceneManager.IsAdsRemoved()
 
 	x := t.startGameButtonX(sceneManager)
 	t.startGameButton.SetX(x)
