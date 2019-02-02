@@ -503,103 +503,129 @@ func (m *Manager) PermanentMinigame(id int) *MinigameData {
 }
 
 func (m *Manager) RespondUnlockAchievement(id int) {
-	m.resultCh <- RequestResult{
-		ID:   id,
-		Type: RequestTypeUnlockAchievement,
-	}
+	go func() {
+		m.resultCh <- RequestResult{
+			ID:   id,
+			Type: RequestTypeUnlockAchievement,
+		}
+	}()
 }
 
 func (m *Manager) RespondSaveProgress(id int) {
-	m.resultCh <- RequestResult{
-		ID:   id,
-		Type: RequestTypeSaveProgress,
-	}
+	go func() {
+		m.resultCh <- RequestResult{
+			ID:   id,
+			Type: RequestTypeSaveProgress,
+		}
+	}()
 }
 
 func (m *Manager) RespondSavePermanent(id int) {
-	m.resultCh <- RequestResult{
-		ID:   id,
-		Type: RequestTypeSavePermanent,
-	}
+	go func() {
+		m.resultCh <- RequestResult{
+			ID:   id,
+			Type: RequestTypeSavePermanent,
+		}
+	}()
 }
 
 func (m *Manager) RespondPurchase(id int, success bool, purchases []byte) {
-	m.resultCh <- RequestResult{
-		ID:        id,
-		Type:      RequestTypePurchase,
-		Succeeded: success,
-		Data:      purchases,
-	}
+	go func() {
+		m.resultCh <- RequestResult{
+			ID:        id,
+			Type:      RequestTypePurchase,
+			Succeeded: success,
+			Data:      purchases,
+		}
+	}()
 }
 
 func (m *Manager) RespondShowShop(id int, success bool, purchases []byte) {
-	m.resultCh <- RequestResult{
-		ID:        id,
-		Type:      RequestTypeShowShop,
-		Succeeded: success,
-		Data:      purchases,
-	}
+	go func() {
+		m.resultCh <- RequestResult{
+			ID:        id,
+			Type:      RequestTypeShowShop,
+			Succeeded: success,
+			Data:      purchases,
+		}
+	}()
 }
 
 func (m *Manager) RespondRestorePurchases(id int, success bool, purchases []byte) {
-	m.resultCh <- RequestResult{
-		ID:        id,
-		Type:      RequestTypeRestorePurchases,
-		Succeeded: success,
-		Data:      purchases,
-	}
+	go func() {
+		m.resultCh <- RequestResult{
+			ID:        id,
+			Type:      RequestTypeRestorePurchases,
+			Succeeded: success,
+			Data:      purchases,
+		}
+	}()
 }
 
 func (m *Manager) RespondInterstitialAds(id int) {
-	m.resultCh <- RequestResult{
-		ID:   id,
-		Type: RequestTypeInterstitialAds,
-	}
+	go func() {
+		m.resultCh <- RequestResult{
+			ID:   id,
+			Type: RequestTypeInterstitialAds,
+		}
+	}()
 }
 
 func (m *Manager) RespondRewardedAds(id int, success bool) {
-	m.resultCh <- RequestResult{
-		ID:        id,
-		Type:      RequestTypeRewardedAds,
-		Succeeded: success,
-	}
+	go func() {
+		m.resultCh <- RequestResult{
+			ID:        id,
+			Type:      RequestTypeRewardedAds,
+			Succeeded: success,
+		}
+	}()
 }
 
 func (m *Manager) RespondOpenLink(id int) {
-	m.resultCh <- RequestResult{
-		ID:   id,
-		Type: RequestTypeOpenLink,
-	}
+	go func() {
+		m.resultCh <- RequestResult{
+			ID:   id,
+			Type: RequestTypeOpenLink,
+		}
+	}()
 }
 
 func (m *Manager) RespondShareImage(id int) {
-	m.resultCh <- RequestResult{
-		ID:   id,
-		Type: RequestTypeShareImage,
-	}
+	go func() {
+		m.resultCh <- RequestResult{
+			ID:   id,
+			Type: RequestTypeShareImage,
+		}
+	}()
 }
 
 func (m *Manager) RespondChangeLanguage(id int) {
-	m.resultCh <- RequestResult{
-		ID:   id,
-		Type: RequestTypeChangeLanguage,
-	}
+	go func() {
+		m.resultCh <- RequestResult{
+			ID:   id,
+			Type: RequestTypeChangeLanguage,
+		}
+	}()
 }
 
 func (m *Manager) RespondGetIAPPrices(id int, success bool, prices []byte) {
-	m.resultCh <- RequestResult{
-		ID:        id,
-		Type:      RequestTypeIAPPrices,
-		Succeeded: success,
-		Data:      prices,
-	}
+	go func() {
+		m.resultCh <- RequestResult{
+			ID:        id,
+			Type:      RequestTypeIAPPrices,
+			Succeeded: success,
+			Data:      prices,
+		}
+	}()
 }
 
 func (m *Manager) SetPlatformData(key PlatformDataKey, value string) {
-	m.setPlatformDataCh <- setPlatformDataArgs{
-		key:   key,
-		value: value,
-	}
+	go func() {
+		m.setPlatformDataCh <- setPlatformDataArgs{
+			key:   key,
+			value: value,
+		}
+	}()
 }
 
 func (m *Manager) InterstitialAdsLoaded() bool {
@@ -611,10 +637,12 @@ func (m *Manager) RewardedAdsLoaded() bool {
 }
 
 func (m *Manager) RespondAsset(id int, success bool, data []byte) {
-	m.resultCh <- RequestResult{
-		ID:        id,
-		Type:      RequestTypeAsset,
-		Succeeded: success,
-		Data:      data,
-	}
+	go func() {
+		m.resultCh <- RequestResult{
+			ID:        id,
+			Type:      RequestTypeAsset,
+			Succeeded: success,
+			Data:      data,
+		}
+	}()
 }
