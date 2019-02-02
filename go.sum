@@ -15,12 +15,15 @@ github.com/gopherjs/gopherwasm v0.1.1/go.mod h1:kx4n9a+MzHH0BJJhvlsQ65hqLFXDO/m2
 github.com/gopherjs/gopherwasm v1.0.0/go.mod h1:SkZ8z7CWBz5VXbhJel8TxCmAcsQqzgWGR/8nMhyhZSI=
 github.com/gopherjs/gopherwasm v1.0.1 h1:Gmj9RMDjh+P9EFzzQltoCtjAxR5mUkaJqaNPfeaNe2I=
 github.com/gopherjs/gopherwasm v1.0.1/go.mod h1:SkZ8z7CWBz5VXbhJel8TxCmAcsQqzgWGR/8nMhyhZSI=
+github.com/gopherjs/gopherwasm v1.1.0/go.mod h1:SkZ8z7CWBz5VXbhJel8TxCmAcsQqzgWGR/8nMhyhZSI=
 github.com/hajimehoshi/bitmapfont v1.1.1 h1:H1wQ6QXA8kSp+plARsIMCTVb5iOZHq/OP3uyL5NzLuU=
 github.com/hajimehoshi/bitmapfont v1.1.1/go.mod h1:Hamfxgney7tDSmVOSDh2AWzoDH70OaC+P24zc02Gum4=
 github.com/hajimehoshi/chinesegamefonts v1.0.0 h1:/7JNFMh7pkaSl0Z5hEcq6yJFnVM490XPlBGLH6VBQqo=
 github.com/hajimehoshi/chinesegamefonts v1.0.0/go.mod h1:kRfzUo98u2nOoBUsTDUoYdIy22sINnditpMrchMtwc4=
 github.com/hajimehoshi/ebiten v1.9.0-alpha.0.20190115024631-f16f6cf4b945 h1:9hzA5KNwOxhrdga+cJncTfmYbgDkZSpW7aVndEpwnF0=
 github.com/hajimehoshi/ebiten v1.9.0-alpha.0.20190115024631-f16f6cf4b945/go.mod h1:s6IUGI12mUqIGq1Oo8OOP0W85LJuzrVVpkWjyOwHcfc=
+github.com/hajimehoshi/ebiten v1.9.0-alpha.0.20190202101903-b89602d90074 h1:pmO5jkgO9jFCv+QZY2ooZo692Aql1BKaf72ob/AS1rY=
+github.com/hajimehoshi/ebiten v1.9.0-alpha.0.20190202101903-b89602d90074/go.mod h1:QEJVvKf7bCP/2tqB8Wyi9MbsC4MAhJqH7f0xI/KHor4=
 github.com/hajimehoshi/go-mp3 v0.1.1 h1:Y33fAdTma70fkrxnc9u50Uq0lV6eZ+bkAlssdMmCwUc=
 github.com/hajimehoshi/go-mp3 v0.1.1/go.mod h1:4i+c5pDNKDrxl1iu9iG90/+fhP37lio6gNhjCx9WBJw=
 github.com/hajimehoshi/oggloop v0.0.0-20180730010327-c7cf68761483 h1:UNw0zKKVWvY+zhAUSoxLrd0ku5JBId99tfIKa/6wafY=
@@ -29,6 +32,8 @@ github.com/hajimehoshi/oto v0.1.1 h1:EG+WxxeAfde1mI0adhLYvGbKgDCxm7bCTd6g+JIA6vI
 github.com/hajimehoshi/oto v0.1.1/go.mod h1:hUiLWeBQnbDu4pZsAhOnGqMI1ZGibS6e2qhQdfpwz04=
 github.com/hajimehoshi/oto v0.2.2 h1:zxgxTpUtl5iXIG/i6mTPqq9nSDeqKORh+04bDY3IeBY=
 github.com/hajimehoshi/oto v0.2.2/go.mod h1:e9eTLBB9iZto045HLbzfHJIc+jP3xaKrjZTghvb6fdM=
+github.com/hajimehoshi/oto v0.3.0 h1:HX+K+raGB8L1b3UQAlUlYrHa2dj3jTHvahca5JGy10c=
+github.com/hajimehoshi/oto v0.3.0/go.mod h1:e9eTLBB9iZto045HLbzfHJIc+jP3xaKrjZTghvb6fdM=
 github.com/jakecoffman/cp v0.1.0/go.mod h1:a3xPx9N8RyFAACD644t2dj/nK4SuLg1v+jL61m2yVo4=
 github.com/jfreymuth/oggvorbis v1.0.0 h1:aOpiihGrFLXpsh2osOlEvTcg5/aluzGQeC7m3uYWOZ0=
 github.com/jfreymuth/oggvorbis v1.0.0/go.mod h1:abe6F9QRjuU9l+2jek3gj46lu40N4qlYxh2grqkLEDM=
@@ -62,6 +67,7 @@ golang.org/x/sys v0.0.0-20190109145017-48ac38b7c8cb/go.mod h1:STP8DvDyc/dI5b8T5h
 golang.org/x/text v0.3.0 h1:g61tztE5qeGQ89tm6NTjjM9VPIm088od1l6aSorWRWg=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/tools v0.0.0-20181023010539-40a48ad93fbe/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
+golang.org/x/tools v0.0.0-20190124215303-cc6a436ffe6b/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
 google.golang.org/appengine v1.1.0 h1:igQkv0AAhEIvTEpD5LIpAfav2eeVO9HBTjvKHVJPRSs=
 google.golang.org/appengine v1.1.0/go.mod h1:EbEs0AVv82hx2wNQdGPgUI5lhzA/G0D9YwlJXL52JkM=
 gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 h1:qIbj1fsPNlZgppZ+VLlY7N33q108Sa+fhmuc+sWQYwY=
