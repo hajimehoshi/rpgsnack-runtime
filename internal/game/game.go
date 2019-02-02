@@ -90,12 +90,13 @@ func NewWithDefaultRequester(width, height int) (*Game, error) {
 	p := projectLocation()
 
 	g := &Game{
-		projectLocation: p,
-		width:           width,
-		height:          height,
+		projectLocation:   p,
+		width:             width,
+		height:            height,
+		setPlatformDataCh: make(chan setPlatformDataArgs, 1),
 	}
 	g.loadGameData()
-	g.requester = &Requester{g}
+	g.requester = newRequester(g)
 	return g, nil
 }
 

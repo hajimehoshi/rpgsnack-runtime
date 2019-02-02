@@ -27,6 +27,10 @@ type Requester struct {
 	game *Game
 }
 
+func newRequester(game *Game) *Requester {
+	return &Requester{game}
+}
+
 func (m *Requester) RequestUnlockAchievement(requestID int, achievementID int) {
 	log.Printf("request unlock achievement: requestID: %d, achievementID: %d", requestID, achievementID)
 	m.game.RespondUnlockAchievement(requestID)

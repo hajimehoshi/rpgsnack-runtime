@@ -35,6 +35,9 @@ var (
 	savePath      = flag.String("save-msgpack-path", filepath.Join(".", "save.msgpack"), "save path")
 	permanentPath = flag.String("permanent-msgpack-path", filepath.Join(".", "permanent.msgpack"), "permanent-save path")
 	languagePath  = flag.String("language-json-path", filepath.Join(".", "language.json"), "language path")
+
+	// TODO: This data should be included in project.json
+	creditsPath = flag.String("credits-json-path", filepath.Join(".", "credits.json"), "credits path")
 )
 
 func PurchasesPath() string {
@@ -51,6 +54,10 @@ func SavePath() string {
 
 func PermanentPath() string {
 	return *permanentPath
+}
+
+func CreditsPath() string {
+	return *creditsPath
 }
 
 func loadAssets(projectionLocation string) ([]byte, error) {

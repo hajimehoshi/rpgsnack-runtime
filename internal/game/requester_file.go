@@ -30,6 +30,18 @@ type Requester struct {
 	game *Game
 }
 
+func newRequester(game *Game) *Requester {
+	r := &Requester{game}
+	go func() {
+		b, err := ioutil.ReadFile(datapkg.CreditsPath())
+		if err != nil && !os.IsNotExist(err) {
+			return
+		}
+		game.SetPlatformData("credits", string(b))
+	}()
+	return r
+}
+
 func (m *Requester) RequestUnlockAchievement(requestID int, achievementID int) {
 	log.Printf("request unlock achievement: requestID: %d, achievementID: %d", requestID, achievementID)
 	m.game.RespondUnlockAchievement(requestID)
