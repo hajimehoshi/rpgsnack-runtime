@@ -77,13 +77,13 @@ func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
 	s.settingsLabel = ui.NewLabel(16, s.baseY+8)
 	s.languageButton = ui.NewButton(s.baseX, s.calcButtonY(1), 120, 20, "system/click")
 	s.shopButton = ui.NewButton(s.baseX, s.calcButtonY(2), 120, 20, "system/click")
-	s.creditsButton = ui.NewButton(s.baseX, s.calcButtonY(2), 120, 20, "system/click")
-	s.updateCreditsButton = ui.NewButton(s.baseX+80, s.calcButtonY(2), 40, 20, "system/click")
-	s.reviewThisAppButton = ui.NewButton(s.baseX, s.calcButtonY(3), 120, 20, "system/click")
-	s.restorePurchasesButton = ui.NewButton(s.baseX, s.calcButtonY(4), 120, 20, "system/click")
-	s.resetGameButton = ui.NewButton(s.baseX, s.calcButtonY(5), 120, 20, "system/click")
-	s.privacyPolicyButton = ui.NewButton(s.baseX, s.calcButtonY(6), 120, 20, "system/click")
-	s.closeButton = ui.NewButton(s.baseX, s.calcButtonY(7), 120, 20, "system/cancel")
+	s.restorePurchasesButton = ui.NewButton(s.baseX, s.calcButtonY(3), 120, 20, "system/click")
+	s.creditsButton = ui.NewButton(s.baseX, s.calcButtonY(4), 120, 20, "system/click")
+	s.updateCreditsButton = ui.NewButton(s.baseX+80, s.calcButtonY(4), 40, 20, "system/click")
+	s.reviewThisAppButton = ui.NewButton(s.baseX, s.calcButtonY(5), 120, 20, "system/click")
+	s.resetGameButton = ui.NewButton(s.baseX, s.calcButtonY(6), 120, 20, "system/click")
+	s.privacyPolicyButton = ui.NewButton(s.baseX, s.calcButtonY(7), 120, 20, "system/click")
+	s.closeButton = ui.NewButton(s.baseX, s.calcButtonY(8), 120, 20, "system/cancel")
 
 	s.languageDialog = ui.NewDialog((w/consts.TileScale-160)/2+4, h/(2*consts.TileScale)-80, 152, 160)
 
@@ -216,20 +216,24 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 	}
 
 	itemOffset := 0
+	// TODO: For now if there is no shop, we hide RestorePurchase button
+	// But to implement this right, we should check whether the game contains
+	// any non-consumeable
 	if sceneManager.Game().IsShopAvailable(data.ShopTypeMain) {
 		s.shopButton.Show()
-		itemOffset = 1
+		s.restorePurchasesButton.Show()
+		itemOffset = 2
 	} else {
 		s.shopButton.Hide()
+		s.restorePurchasesButton.Hide()
 	}
 
 	s.creditsButton.SetY(s.calcButtonY(itemOffset + 2))
 	s.updateCreditsButton.SetY(s.calcButtonY(itemOffset + 2))
 	s.reviewThisAppButton.SetY(s.calcButtonY(itemOffset + 3))
-	s.restorePurchasesButton.SetY(s.calcButtonY(itemOffset + 4))
-	s.resetGameButton.SetY(s.calcButtonY(itemOffset + 5))
-	s.privacyPolicyButton.SetY(s.calcButtonY(itemOffset + 6))
-	s.closeButton.SetY(s.calcButtonY(itemOffset + 7))
+	s.resetGameButton.SetY(s.calcButtonY(itemOffset + 4))
+	s.privacyPolicyButton.SetY(s.calcButtonY(itemOffset + 5))
+	s.closeButton.SetY(s.calcButtonY(itemOffset + 6))
 
 	if sceneManager.HasProgress() {
 		s.resetGameButton.Enable()
