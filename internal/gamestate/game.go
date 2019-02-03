@@ -114,7 +114,6 @@ type Game struct {
 	autoSaveEnabled      bool
 	playerControlEnabled bool
 	inventoryVisible     bool
-	minigame             *Minigame
 	weatherType          data.WeatherType
 	cleared              bool
 
@@ -133,6 +132,7 @@ type Game struct {
 	weather                *weather.Weather
 	onShakeStartGameButton func()
 	shouldShowCredits      bool
+	minigame               *Minigame
 }
 
 func generateDefaultRand() Rand {
