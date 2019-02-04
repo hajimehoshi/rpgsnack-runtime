@@ -37,6 +37,9 @@ func newRequester(game *Game) *Requester {
 		if err != nil && !os.IsNotExist(err) {
 			return
 		}
+		if b == nil {
+			return
+		}
 		game.SetPlatformData("credits", string(b))
 	}()
 	return r
