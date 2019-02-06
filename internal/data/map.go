@@ -87,7 +87,7 @@ func (m *Map) ensureEncoded() error {
 		return nil
 	}
 
-	panic("not reached")
+	panic("data: the data format was not either Msgpack or JSON at (*Map).ensureEncoded")
 }
 
 type MapImpl struct {

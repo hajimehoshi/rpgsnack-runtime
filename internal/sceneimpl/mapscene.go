@@ -280,7 +280,7 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 		}
 		activeItemID := m.gameState.Items().ActiveItem()
 		itemID := m.gameState.Items().ItemIDAt(index)
-		switch m.inventory.Mode() {
+		switch mode := m.inventory.Mode(); mode {
 		case ui.DefaultMode:
 			if itemID == m.gameState.Items().ActiveItem() {
 				m.gameState.Items().Deactivate()
@@ -315,7 +315,7 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 				m.inventory.SetActiveItemID(itemID)
 			}
 		default:
-			panic("not reached")
+			panic(fmt.Sprintf("sceneimpl: invalid inventory mode: %d", m))
 		}
 	})
 	m.inventory.SetOnActiveItemPressed(func(_ *ui.Inventory) {
@@ -776,7 +776,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		case 2:
 			p = data.PriorityTop
 		default:
-			panic("not reached")
+			panic(fmt.Sprintf("sceneimpl: invalid priority: %d", k))
 		}
 
 		m.drawTiles(p)

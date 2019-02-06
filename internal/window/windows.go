@@ -183,7 +183,7 @@ func (w *Windows) HasChosenIndex() bool {
 
 func (w *Windows) ShowBalloon(contentID data.UUID, content string, balloonType data.BalloonType, eventID int, interpreterID int, messageStyle *data.MessageStyle) {
 	if w.nextBalloon != nil {
-		panic("not reached")
+		panic("window: nextBalloon must be nil at ShowBalloon")
 	}
 	// TODO: How to call newBalloonCenter?
 	w.nextBalloon = newBalloonWithArrow(contentID, content, balloonType, eventID, interpreterID, messageStyle)
@@ -191,7 +191,7 @@ func (w *Windows) ShowBalloon(contentID data.UUID, content string, balloonType d
 
 func (w *Windows) ShowMessage(contentID data.UUID, content string, eventID int, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign, interpreterID int, messageStyle *data.MessageStyle) {
 	if w.nextBanner != nil {
-		panic("not reached")
+		panic("window: nextBalloon must be nil at ShowMessage")
 	}
 	w.nextBanner = newBanner(contentID, content, eventID, background, positionType, textAlign, interpreterID, messageStyle)
 }
@@ -199,7 +199,7 @@ func (w *Windows) ShowMessage(contentID data.UUID, content string, eventID int, 
 func (w *Windows) ShowChoices(sceneManager *scene.Manager, choices []*Choice, interpreterID int) {
 	// TODO: w.chosenBalloonWaitingCount should be 0 here!
 	if w.chosenBalloonWaitingCount > 0 {
-		panic("windows: chosenBalloonWaitingCount must be  > 0 at ShowChoices")
+		panic("windows: chosenBalloonWaitingCount must be > 0 at ShowChoices")
 	}
 	w.choiceBalloons = nil
 	for i, choice := range choices {

@@ -277,7 +277,8 @@ var gameIDUrlRegexp = regexp.MustCompile(`\A/web/([0-9]+)\z`)
 
 func gameIDFromURL() (string, error) {
 	if runtime.GOARCH != "js" {
-		panic("not reached")
+		// TODO: Does this check really work? (On Wasm, GOARCH is wasm, not js)
+		panic("data: gameIDFromURL is implemented only for web")
 	}
 
 	href := js.Global.Get("window").Get("location").Get("href").String()
@@ -299,7 +300,7 @@ func gameIDFromURL() (string, error) {
 
 func isLoopback() bool {
 	if runtime.GOARCH != "js" {
-		panic("not reached")
+		panic("data: gameIDFromURL is implemented only for web")
 	}
 
 	href := js.Global.Get("window").Get("location").Get("href").String()

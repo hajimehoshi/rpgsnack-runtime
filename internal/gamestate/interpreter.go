@@ -895,7 +895,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			case 3:
 				dir = data.DirLeft
 			default:
-				panic("not reached")
+				panic(fmt.Sprintf("gamestate: invalid dir: %d at data.CommandNameRouteCharacter", dirI))
 			}
 			ch.Turn(dir)
 			i.waitingCommand = true
@@ -1245,7 +1245,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		}
 		page, pageIndex := gameState.currentMap.currentPage(e)
 		if page == nil {
-			panic("not reached")
+			panic("gamestate: no page was found at data.CommandNameExecEventHere")
 		}
 		c := page.Commands
 		i.sub = i.createChild(gameState, e.EventID(), pageIndex, c)
@@ -1258,7 +1258,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		i.commandIterator.Advance()
 
 	default:
-		return false, fmt.Errorf("interpreter: invalid command: %s", c.Name)
+		return false, fmt.Errorf("gamestate: invalid command: %s", c.Name)
 	}
 
 	// Continue

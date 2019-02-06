@@ -488,13 +488,13 @@ func (b *balloon) draw(screen *ebiten.Image, character *character.Character, off
 			b.balloonType == data.BalloonTypeThink) {
 			op := &ebiten.DrawImageOptions{}
 			var r image.Rectangle
-			switch b.balloonType {
+			switch t := b.balloonType; t {
 			case data.BalloonTypeNormal:
 				r = image.Rect(12, 0, 12+balloonArrowWidth, balloonArrowHeight)
 			case data.BalloonTypeThink:
 				r = image.Rect(18, 0, 18+balloonArrowWidth, balloonArrowHeight)
 			default:
-				panic("not reached")
+				panic(fmt.Sprintf("window: invalid balloon type: %d", t))
 			}
 			ax, ay := b.arrowPosition(sw, character)
 			tx := ax

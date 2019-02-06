@@ -15,6 +15,7 @@
 package easymsgpack
 
 import (
+	"fmt"
 	"reflect"
 
 	"github.com/vmihailenco/msgpack"
@@ -62,7 +63,7 @@ func NewEncoder(enc *msgpack.Encoder) *Encoder {
 }
 
 func encodeValue(enc *msgpack.Encoder, val *value) error {
-	switch val.valueType {
+	switch t := val.valueType; t {
 	case valueTypeNil:
 		if err := enc.EncodeNil(); err != nil {
 			return err
@@ -108,7 +109,7 @@ func encodeValue(enc *msgpack.Encoder, val *value) error {
 			return err
 		}
 	default:
-		panic("not reached")
+		panic(fmt.Sprintf("easymsgpack: invalid value type: %d", t))
 	}
 	return nil
 }

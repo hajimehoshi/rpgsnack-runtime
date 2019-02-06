@@ -142,7 +142,7 @@ func (d *Decoder) SkipCodeIfNil() bool {
 	}
 	if c == codes.Nil {
 		if err := d.dec.DecodeNil(); err != nil {
-			panic(fmt.Sprintf("not reached: %v", err))
+			panic(fmt.Sprintf("easymsgpack: DecodeNil failed: %v", err))
 		}
 		return true
 	}

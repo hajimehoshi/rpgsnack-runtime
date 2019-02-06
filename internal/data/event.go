@@ -84,7 +84,7 @@ func (e *Event) ensureEncoded() error {
 		return nil
 	}
 
-	panic("not reached")
+	panic("data: the data format was not either Msgpack or JSON at (*Event).ensureEncoded")
 }
 
 type EventImpl struct {

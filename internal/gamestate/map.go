@@ -305,7 +305,7 @@ func (m *Map) currentPage(event *character.Character) (*data.Page, int) {
 			return e.Pages()[i], i
 		}
 	}
-	panic("not reached")
+	panic(fmt.Sprintf("gamescene: no valid page was found"))
 }
 
 var GoToTitle = errors.New("go to title")

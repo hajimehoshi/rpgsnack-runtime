@@ -72,7 +72,7 @@ func (s *State) calcNextStepToMoveTarget(gameState GameState, x int, y int, igno
 
 func (s *State) moveTarget(gameState GameState) (int, int) {
 	if s.args.Type != data.MoveCharacterTypeTarget {
-		panic("not reached")
+		panic(fmt.Sprintf("movecharacterstate: the type must be MoveCharacterTypeTarget but %d", s.args.Type))
 	}
 	if s.args.ValueType == data.ValueTypeVariable {
 		x, y := gameState.VariableValue(s.args.X), gameState.VariableValue(s.args.Y)
@@ -115,7 +115,7 @@ func New(gameState GameState, mapID, roomID, eventID int, args *data.CommandArgs
 		s.distanceCount = s.args.Distance
 		s.dir = data.Dir(gameState.RandomValue(0, 4))
 	default:
-		panic("not reached")
+		panic(fmt.Sprintf("movecharacterstate: invalid type: %d", s.args.Type))
 	}
 
 	return s
@@ -251,7 +251,7 @@ func (s *State) Update(gameState GameState) {
 		dir := s.dir
 		switch s.args.Type {
 		case data.MoveCharacterTypeTarget:
-			switch s.path[len(s.path)-s.distanceCount] {
+			switch c := s.path[len(s.path)-s.distanceCount]; c {
 			case path.RouteCommandMoveUp:
 				dir = data.DirUp
 			case path.RouteCommandMoveRight:
@@ -273,7 +273,7 @@ func (s *State) Update(gameState GameState) {
 				dir = data.DirLeft
 				turnOnly = true
 			default:
-				panic("not reached")
+				panic(fmt.Sprintf("movecharacterstate: invalid command: %d", c))
 			}
 		}
 		switch dir {
@@ -286,7 +286,7 @@ func (s *State) Update(gameState GameState) {
 		case data.DirLeft:
 			dx--
 		default:
-			panic("not reached")
+			panic(fmt.Sprintf("movecharacterstate: invalid dir: %d", dir))
 		}
 		if turnOnly {
 			c.Turn(dir)

@@ -16,6 +16,7 @@ package ui
 
 import (
 	"encoding/hex"
+	"fmt"
 	"image"
 	"image/color"
 	"math"
@@ -43,7 +44,7 @@ func headerColor(c *data.CreditsSection) color.Color {
 	}
 	bin, err := hex.DecodeString(m[1])
 	if err != nil {
-		panic("not reached")
+		panic(fmt.Sprintf("ui: invalid color: %s", m[1]))
 	}
 
 	r := bin[0]

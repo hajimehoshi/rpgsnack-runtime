@@ -15,6 +15,7 @@
 package font
 
 import (
+	"fmt"
 	"image/color"
 	"strings"
 	"sync"
@@ -100,7 +101,7 @@ func DrawTextLang(screen *ebiten.Image, str string, ox, oy int, scale int, textA
 		case data.TextAlignRight:
 			x -= a.Ceil()
 		default:
-			panic("not reached")
+			panic(fmt.Sprintf("font: invalid text align: %d", textAlign))
 		}
 
 		text.Draw(screen, l, f, x, y, color)
