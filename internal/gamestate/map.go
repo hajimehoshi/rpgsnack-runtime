@@ -668,10 +668,21 @@ func (m *Map) GetPressedPosition() (int, int) {
 	return m.pressedMapX, m.pressedMapY
 }
 
+func (m *Map) abortPlayerInterpreter(gameState *Game) {
+	if _, ok := m.interpreters[m.playerInterpreterID]; ok {
+		delete(m.interpreters, m.playerInterpreterID)
+		ch := gameState.Character(m.mapID, m.roomID, character.PlayerEventID)
+		ch.SetSpeed(m.origSpeed)
+	}
+}
+
 func (m *Map) TryRunDirectEvent(gameState *Game, x, y int) bool {
 	if m.IsBlockingEventExecuting() {
 		return false
 	}
+
+	m.abortPlayerInterpreter(gameState)
+
 	es := m.eventsAt(x, y)
 	for _, e := range es {
 		page, pageIndex := m.currentPage(e)
@@ -743,15 +754,16 @@ func (m *Map) TryMovePlayerByUserInput(sceneManager *scene.Manager, gameState *G
 
 	checkBottomEvent := false
 	if _, ok := m.interpreters[m.playerInterpreterID]; ok {
-		delete(m.interpreters, m.playerInterpreterID)
+		m.abortPlayerInterpreter(gameState)
+
 		// As the last existing interpreter is aborted without checking the event existence,
 		// checking events is necessary before moving the player.
 		checkBottomEvent = true
-	} else {
-		// The player's speed is never changed by another events during the player walks
-		// by user input.
-		m.origSpeed = m.player.Speed()
 	}
+
+	// The player's speed is never changed by another events during the player walks
+	// by user input.
+	m.origSpeed = m.player.Speed()
 
 	// Set this true before executing other interpreters, or
 	// the calculated path can be invalidated.
