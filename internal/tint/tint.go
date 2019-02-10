@@ -67,7 +67,7 @@ func (t *Tint) DecodeMsgpack(dec *msgpack.Decoder) error {
 	return nil
 }
 
-func (t *Tint) isZero() bool {
+func (t *Tint) Zero() bool {
 	return t.red.Current() == 0 && t.green.Current() == 0 &&
 		t.blue.Current() == 0 && t.gray.Current() == 0
 }
@@ -91,7 +91,7 @@ func (t *Tint) Update() {
 }
 
 func (t *Tint) Apply(clr *ebiten.ColorM) {
-	if t.isZero() {
+	if t.Zero() {
 		return
 	}
 	if t.gray.Current() != 0 {

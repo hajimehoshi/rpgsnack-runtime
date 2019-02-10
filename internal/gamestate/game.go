@@ -664,6 +664,10 @@ func (g *Game) ApplyTintColor(c *ebiten.ColorM) {
 	g.screen.ApplyTintColor(c)
 }
 
+func (g *Game) ZeroTint() bool {
+	return g.screen.ZeroTint()
+}
+
 func (g *Game) ApplyShake(geo *ebiten.GeoM) {
 	g.screen.ApplyShake(geo)
 }

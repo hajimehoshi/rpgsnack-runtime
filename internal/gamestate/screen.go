@@ -218,6 +218,10 @@ func (s *Screen) ApplyTintColor(c *ebiten.ColorM) {
 	s.tint.Apply(c)
 }
 
+func (s *Screen) ZeroTint() bool {
+	return s.tint.Zero()
+}
+
 func (s *Screen) ApplyShake(g *ebiten.GeoM) {
 	if s.shakeCount == 0 {
 		return
