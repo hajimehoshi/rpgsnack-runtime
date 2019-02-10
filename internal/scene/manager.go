@@ -30,7 +30,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
 )
 
-var TierTypes = [...]string{"tier1_donation", "tier2_donation", "tier3_donation"}
+var TierTypes = [...]string{"tier1_donation", "tier2_donation", "tier3_donation", "tier4_donation"}
 
 type Scene interface {
 	Update(manager *Manager) error
