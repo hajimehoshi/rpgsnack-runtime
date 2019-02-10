@@ -315,7 +315,7 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 				m.inventory.SetActiveItemID(itemID)
 			}
 		default:
-			panic(fmt.Sprintf("sceneimpl: invalid inventory mode: %d", m))
+			panic(fmt.Sprintf("sceneimpl: invalid inventory mode: %d", mode))
 		}
 	})
 	m.inventory.SetOnActiveItemPressed(func(_ *ui.Inventory) {
