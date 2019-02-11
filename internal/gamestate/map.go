@@ -681,8 +681,6 @@ func (m *Map) TryRunDirectEvent(gameState *Game, x, y int) bool {
 		return false
 	}
 
-	m.abortPlayerInterpreter(gameState)
-
 	es := m.eventsAt(x, y)
 	for _, e := range es {
 		page, pageIndex := m.currentPage(e)
@@ -695,6 +693,7 @@ func (m *Map) TryRunDirectEvent(gameState *Game, x, y int) bool {
 		if page.Trigger != data.TriggerDirect {
 			continue
 		}
+		m.abortPlayerInterpreter(gameState)
 		i := NewInterpreter(gameState, m.mapID, m.roomID, e.EventID(), pageIndex, page.Commands)
 		m.addInterpreter(i)
 		return true
