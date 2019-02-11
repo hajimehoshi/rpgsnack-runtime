@@ -671,6 +671,7 @@ func (m *Map) GetPressedPosition() (int, int) {
 func (m *Map) abortPlayerInterpreter(gameState *Game) {
 	if _, ok := m.interpreters[m.playerInterpreterID]; ok {
 		delete(m.interpreters, m.playerInterpreterID)
+		// TODO: Use m.player
 		ch := gameState.Character(m.mapID, m.roomID, character.PlayerEventID)
 		ch.SetSpeed(m.origSpeed)
 	}
@@ -679,6 +680,14 @@ func (m *Map) abortPlayerInterpreter(gameState *Game) {
 func (m *Map) TryRunDirectEvent(gameState *Game, x, y int) bool {
 	if m.IsBlockingEventExecuting() {
 		return false
+	}
+
+	// If there is an executable event at the current player's position, don't fire the direct event in order
+	// not to skip the executable event.
+	if _, ok := m.interpreters[m.playerInterpreterID]; ok {
+		if m.executableEventAt(m.player.Position()) != nil {
+			return false
+		}
 	}
 
 	es := m.eventsAt(x, y)
