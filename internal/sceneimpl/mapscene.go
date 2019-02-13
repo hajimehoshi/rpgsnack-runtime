@@ -48,7 +48,6 @@ type MapScene struct {
 	moveDstY             int
 	screenImage          *ebiten.Image
 	tintScreenImage      *ebiten.Image
-	uiImage              *ebiten.Image
 	triggeringFailed     bool
 	initialState         bool
 	cameraButton         *ui.Button
@@ -184,7 +183,6 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 
 	m.screenImage, _ = ebiten.NewImage(consts.MapWidth, consts.CeilDiv(screenH, consts.TileScale), ebiten.FilterNearest)
 	m.tintScreenImage, _ = ebiten.NewImage(consts.MapWidth, consts.CeilDiv(screenH, consts.TileScale), ebiten.FilterDefault)
-	m.uiImage, _ = ebiten.NewImage(uiWidth*consts.TileScale, screenH, ebiten.FilterNearest)
 
 	screenShotImage, _ := ebiten.NewImage(480, 720, ebiten.FilterLinear)
 	camera, _ := ebiten.NewImage(12, 12, ebiten.FilterNearest)
@@ -839,27 +837,22 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		}
 	}
 
-	m.uiImage.Clear()
+	m.itemPreviewPopup.Draw(screen)
+	m.minigamePopup.Draw(screen)
+	m.inventory.Draw(screen)
 
-	m.itemPreviewPopup.Draw(m.uiImage)
-	m.minigamePopup.Draw(m.uiImage)
-	m.inventory.Draw(m.uiImage)
+	m.cameraButton.Draw(screen)
+	m.removeAdsButton.Draw(screen)
 
-	m.cameraButton.Draw(m.uiImage)
-	m.removeAdsButton.Draw(m.uiImage)
-
-	m.gameState.DrawWindows(m.uiImage, 0, m.offsetY/consts.TileScale, m.windowOffsetY/consts.TileScale)
+	m.gameState.DrawWindows(screen, 0, m.offsetY/consts.TileScale, m.windowOffsetY/consts.TileScale)
 	if m.gameHeader != nil {
-		m.gameHeader.Draw(m.uiImage)
+		m.gameHeader.Draw(screen)
 	}
 
-	m.screenShotDialog.Draw(m.uiImage)
-	m.quitDialog.Draw(m.uiImage)
-	m.storeErrorDialog.Draw(m.uiImage)
-	m.removeAdsDialog.Draw(m.uiImage)
-
-	op = &ebiten.DrawImageOptions{}
-	screen.DrawImage(m.uiImage, op)
+	m.screenShotDialog.Draw(screen)
+	m.quitDialog.Draw(screen)
+	m.storeErrorDialog.Draw(screen)
+	m.removeAdsDialog.Draw(screen)
 
 	if m.cameraTaking {
 		m.cameraTaking = false
@@ -868,7 +861,7 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		sw, _ := screen.Size()
 		w, _ := m.screenShotImage.Size()
 		op.GeoM.Translate((float64(w)-float64(sw))/2, 0)
-		m.screenShotImage.DrawImage(m.uiImage, nil)
+		m.screenShotImage.DrawImage(screen, nil)
 	}
 
 	if m.titleView != nil {
