@@ -756,6 +756,8 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		return
 	}
 
+	// Filling with black instead of clearing is necessary for tinting.
+	// See the change 701eb1105ec126f09680f6a185ed1b1bf5235950.
 	m.screenImage.Fill(color.Black)
 
 	if background := m.gameState.Map().Background(m.gameState); background != "" {
