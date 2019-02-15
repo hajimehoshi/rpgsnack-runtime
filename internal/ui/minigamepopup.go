@@ -140,7 +140,7 @@ func (m *MinigamePopup) Update(minigameState *gamestate.Minigame) {
 		m.prevScore = score
 	}
 
-	if m.minigame.Boosting() || !m.adsLoaded || time.Now().Unix()-m.lastBoostTime < boostInterval {
+	if !m.minigame.CanGetReward() || !m.adsLoaded || time.Now().Unix()-m.lastBoostTime < boostInterval {
 		m.rewardButton.Disable()
 	} else {
 		m.rewardButton.Enable()

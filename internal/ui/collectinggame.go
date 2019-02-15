@@ -49,6 +49,7 @@ const (
 	actorCollectTime = 6
 	inputHitRadius   = 16
 	tokenFallSpeed   = 3
+	maxTokenCount    = 300
 )
 
 func randomValue(min, max int) int {
@@ -143,7 +144,7 @@ func (c *collectingGame) ActivateBoostMode() {
 	c.boostTimer = boostTime
 }
 
-func (c *collectingGame) Boosting() bool {
+func (c *collectingGame) boosting() bool {
 	return c.boostTimer > 0
 }
 
@@ -152,6 +153,10 @@ func (c *collectingGame) spawnToken(animate bool) *token {
 		audio.PlaySE("system/minigamespawn", 1.0)
 	}
 	return newToken(randomValue(10, 130), randomValue(62, 100), actorPosX+actorWidth/2, actorPosY+actorHeight/2, animate)
+}
+
+func (c *collectingGame) CanGetReward() bool {
+	return len(c.tokens) < maxTokenCount && !c.boosting()
 }
 
 func (c *collectingGame) UpdateAsChild(minigame *gamestate.Minigame, x, y int) {
