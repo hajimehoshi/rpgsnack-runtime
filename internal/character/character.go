@@ -55,6 +55,7 @@ type StoredState struct {
 type Character struct {
 	eventID         int
 	speed           data.Speed
+	newSpeed        data.Speed
 	imageName       string
 	imageType       data.ImageType
 	dir             data.Dir
@@ -136,6 +137,9 @@ func (c *Character) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EncodeString("speed")
 	e.EncodeInt(int(c.speed))
 
+	e.EncodeString("newSpeed")
+	e.EncodeInt(int(c.newSpeed))
+
 	e.EncodeString("imageName")
 	e.EncodeString(c.imageName)
 
@@ -212,6 +216,8 @@ func (c *Character) DecodeMsgpack(dec *msgpack.Decoder) error {
 		case "speed":
 			c.speed = data.Speed(d.DecodeInt())
 			// TODO: speed can be 0 on some old data. Should we rescue this?
+		case "newSpeed":
+			c.newSpeed = data.Speed(d.DecodeInt())
 		case "imageName":
 			c.imageName = d.DecodeString()
 		case "imageType":
@@ -494,7 +500,12 @@ func (c *Character) SetSpeed(speed data.Speed) {
 	if speed == 0 {
 		panic("character: speed must not be 0 at SetSpeed")
 	}
-	c.speed = speed
+	if c.moveCount == 0 {
+		c.speed = speed
+	} else {
+		// The character is moving now. Let's delay updating its speed.
+		c.newSpeed = speed
+	}
 }
 
 func (c *Character) SetVisibility(visible bool) {
@@ -652,7 +663,9 @@ func (c *Character) Update() {
 	}
 
 	c.idleFrameCount = 0
-	c.moveCount--
+	if c.moveCount > 0 {
+		c.moveCount--
+	}
 	if c.moveCount == 0 {
 		nx, ny := c.x, c.y
 		switch c.moveDir {
@@ -669,6 +682,11 @@ func (c *Character) Update() {
 		}
 		c.x = nx
 		c.y = ny
+
+		if c.newSpeed != 0 {
+			c.speed = c.newSpeed
+			c.newSpeed = 0
+		}
 	}
 }
 
