@@ -485,6 +485,9 @@ func (c *Character) Turn(dir data.Dir) {
 }
 
 func (c *Character) Speed() data.Speed {
+	if c.newSpeed != 0 {
+		return c.newSpeed
+	}
 	return c.speed
 }
 
@@ -502,6 +505,7 @@ func (c *Character) SetSpeed(speed data.Speed) {
 	}
 	if c.moveCount == 0 {
 		c.speed = speed
+		c.newSpeed = 0
 	} else {
 		// The character is moving now. Let's delay updating its speed.
 		c.newSpeed = speed
