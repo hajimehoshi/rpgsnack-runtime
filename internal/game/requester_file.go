@@ -147,7 +147,7 @@ func (m *Requester) RequestInterstitialAds(requestID int, forceAds bool) {
 }
 
 func (m *Requester) RequestRewardedAds(requestID int, forceAds bool) {
-	log.Printf("request rewarded ads: requestID: %d force:%b", requestID, forceAds)
+	log.Printf("request rewarded ads: requestID: %d force: %t", requestID, forceAds)
 	go func() {
 		time.Sleep(time.Second)
 		m.game.RespondRewardedAds(requestID, true)

@@ -33,22 +33,22 @@ const (
 )
 
 type MinigamePopup struct {
-	y                   int
-	visible             bool
-	fadeImage           *ebiten.Image
-	nodes               []Node
-	rewardButton        *Button
-	closeButton         *Button
-	scoreLabel          *Label
-	prevScore           int
-	saveTimer           int
-	lastBoostTime       int64
-	adsLoaded           bool
-	minigame            *collectingGame
-	onSave              func()
-	onProgress          func(int)
-	onClose             func()
-	onRequestRewardeAds func()
+	y                    int
+	visible              bool
+	fadeImage            *ebiten.Image
+	nodes                []Node
+	rewardButton         *Button
+	closeButton          *Button
+	scoreLabel           *Label
+	prevScore            int
+	saveTimer            int
+	lastBoostTime        int64
+	adsLoaded            bool
+	minigame             *collectingGame
+	onSave               func()
+	onProgress           func(int)
+	onClose              func()
+	onRequestRewardedAds func()
 }
 
 func NewMinigamePopup(y int) *MinigamePopup {
@@ -80,6 +80,7 @@ func NewMinigamePopup(y int) *MinigamePopup {
 		scoreLabel:   scoreLabel,
 		saveTimer:    saveIntervalFrames,
 		visible:      true,
+		minigame:     newCollectingGame(),
 	}
 	rewardButton.SetOnPressed(func(_ *Button) {
 		m.showRewardedAds()
@@ -122,9 +123,6 @@ func (m *MinigamePopup) Update(minigameState *gamestate.Minigame) {
 		n.UpdateAsChild(m.visible, 0, m.y)
 	}
 
-	if m.minigame == nil {
-		m.minigame = newCollectingGame()
-	}
 	m.minigame.UpdateAsChild(minigameState, 0, m.y)
 
 	m.rewardButton.SetText(texts.Text(lang.Get(), texts.TextIDMinigameWatchAds))
@@ -158,7 +156,7 @@ func (m *MinigamePopup) ActivateBoostMode() {
 }
 
 func (m *MinigamePopup) showRewardedAds() {
-	m.onRequestRewardeAds()
+	m.onRequestRewardedAds()
 }
 
 func (m *MinigamePopup) Show() {
@@ -184,8 +182,8 @@ func (m *MinigamePopup) SetOnSave(f func()) {
 	m.onSave = f
 }
 
-func (m *MinigamePopup) SetOnRequestRewardeAds(f func()) {
-	m.onRequestRewardeAds = f
+func (m *MinigamePopup) SetOnRequestRewardedAds(f func()) {
+	m.onRequestRewardedAds = f
 }
 
 func (m *MinigamePopup) SetAdsLoaded(loaded bool) {

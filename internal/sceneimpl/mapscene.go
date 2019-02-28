@@ -80,7 +80,6 @@ type MapScene struct {
 	windowOffsetY        int
 	inventoryHeight      int
 	animation            animation
-	onRewarded           func(*scene.Manager)
 
 	err error
 }
@@ -336,10 +335,9 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 		mg := m.gameState.Minigame()
 		m.gameState.RequestSavePermanentMinigame(0, sceneManager, mg.ID(), mg.Score(), mg.LastActiveAt())
 	})
-	m.minigamePopup.SetOnRequestRewardeAds(func() {
+	m.minigamePopup.SetOnRequestRewardedAds(func() {
 		m.waitingRequestID = sceneManager.GenerateRequestID()
 		m.gameState.RequestRewardedAds(m.waitingRequestID, sceneManager, true)
-		m.onRewarded = m.minigameRewarded
 	})
 	m.inventory.SetOnBackPressed(func(_ *ui.Inventory) {
 		m.gameState.Items().SetEventItem(0)
@@ -359,11 +357,6 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 			m.gameState.StartItemCommands(activeItemID)
 		}
 	})
-}
-func (m *MapScene) minigameRewarded(sceneManager *scene.Manager) {
-	mg := m.gameState.Minigame()
-	sceneManager.Requester().RequestSendAnalytics(fmt.Sprintf("minigame%d_reward", mg.ID()), "")
-	m.minigamePopup.ActivateBoostMode()
 }
 
 func (m *MapScene) updateItemPreviewPopupVisibility(sceneManager *scene.Manager) {
@@ -465,11 +458,12 @@ func (m *MapScene) receiveRequest(sceneManager *scene.Manager) bool {
 	switch r.Type {
 	case scene.RequestTypeRewardedAds:
 		if r.Succeeded {
-			if m.onRewarded != nil {
-				mg := m.gameState.Minigame()
-				sceneManager.Requester().RequestSendAnalytics(fmt.Sprintf("minigame%d_reward", mg.ID()), "")
-				m.onRewarded(sceneManager)
-			}
+			// The mapstate emits rewarded-ad request only for the minigame so far. Handle the response
+			// for the minigame. When we add other types of request, we will need to detect the type
+			// here.
+			mg := m.gameState.Minigame()
+			sceneManager.Requester().RequestSendAnalytics(fmt.Sprintf("minigame%d_reward", mg.ID()), "")
+			m.minigamePopup.ActivateBoostMode()
 		}
 
 	case scene.RequestTypeIAPPrices:
