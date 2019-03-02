@@ -24,13 +24,15 @@ import (
 )
 
 type Items struct {
-	items       []int
-	activeItem  int
-	combineItem int
-	eventItem   int
-	activeGroup int
-	dataItems   []*data.Item // Do not save
-	activeItems []*data.Item // Do not save
+	items            []int
+	activeItem       int
+	combineItem      int
+	eventItem        int
+	activeGroup      int
+	choiceWait       bool         // Do not save
+	choiceCancelable bool         // Do not save
+	dataItems        []*data.Item // Do not save
+	activeItems      []*data.Item // Do not save
 }
 
 func NewItems(items []int, activeItem int) *Items {
@@ -217,4 +219,17 @@ func (i *Items) SetActiveItemGroup(group int) {
 		i.activeGroup = group
 		i.activeItems = nil
 	}
+}
+
+func (i *Items) SetChoiceMode(wait, cancelable bool) {
+	i.choiceWait = wait
+	i.choiceCancelable = cancelable
+}
+
+func (i *Items) ChoiceWait() bool {
+	return i.choiceWait
+}
+
+func (i *Items) ChoiceCancelable() bool {
+	return i.choiceCancelable
 }

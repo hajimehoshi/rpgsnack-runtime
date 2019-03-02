@@ -421,9 +421,10 @@ func (g *Game) SetBGM(bgm data.BGM) {
 	}
 }
 
-func (g *Game) ShowInventory(group int) {
+func (g *Game) ShowInventory(group int, wait bool, cancelable bool) {
 	g.inventoryVisible = true
 	g.items.SetActiveItemGroup(group)
+	g.items.SetChoiceMode(wait, cancelable)
 }
 
 func (g *Game) HideInventory() {

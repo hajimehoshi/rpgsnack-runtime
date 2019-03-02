@@ -1626,7 +1626,9 @@ type CommandArgsShowItem struct {
 }
 
 type CommandArgsShowInventory struct {
-	Group int `json:"group" msgpack:"group"`
+	Group      int  `json:"group" msgpack:"group"`
+	Wait       bool `json:"wait" msgpack:"wait"`
+	Cancelable bool `json:"cancelable" msgpack:"cancelable"`
 }
 
 type CommandArgsReplaceItem struct {

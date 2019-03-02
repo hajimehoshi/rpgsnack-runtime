@@ -54,6 +54,7 @@ type Inventory struct {
 	dragging            bool
 	scrolling           bool
 	autoScrolling       bool
+	prepareToCancel     bool
 	pageIndex           int
 	targetPageIndex     int
 	stashedActiveItemID int
@@ -68,7 +69,8 @@ type Inventory struct {
 	dot                 *ebiten.Image
 	mode                InventoryMode
 
-	onSlotPressed func(inventory *Inventory, index int)
+	onSlotPressed    func(inventory *Inventory, index int)
+	onOutsidePressed func(inventory *Inventory)
 }
 
 const (
@@ -147,6 +149,10 @@ func (i *Inventory) SetOnSlotPressed(f func(inventory *Inventory, index int)) {
 	i.onSlotPressed = f
 }
 
+func (i *Inventory) SetOnOutsidePressed(f func(inventory *Inventory)) {
+	i.onOutsidePressed = f
+}
+
 func (i *Inventory) Show() {
 	i.visible = true
 }
@@ -217,11 +223,26 @@ func (i *Inventory) Update(sceneManager *scene.Manager) {
 		i.itemLabel.Text = ""
 	}
 
+	touchX, touchY := input.Position()
+
+	if touchY < i.y*consts.TileScale {
+		if input.Triggered() {
+			i.prepareToCancel = true
+			return
+		}
+		if i.prepareToCancel && input.Released() && i.onOutsidePressed != nil {
+			i.onOutsidePressed(i)
+		}
+	}
+
+	if input.Released() {
+		i.prepareToCancel = false
+	}
+
 	if i.disabled {
 		return
 	}
 
-	touchX, touchY := input.Position()
 	if input.Triggered() && i.isTouchingScroll() {
 		i.pressStartX = touchX
 		i.pressStartY = touchY

@@ -315,8 +315,22 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 			panic(fmt.Sprintf("sceneimpl: invalid inventory mode: %d", mode))
 		}
 	})
+
+	m.inventory.SetOnOutsidePressed(func(_ *ui.Inventory) {
+		if m.gameState.Items().ChoiceCancelable() {
+			m.gameState.Items().Deactivate()
+			m.gameState.HideInventory()
+		}
+	})
+
 	m.inventory.SetOnActiveItemPressed(func(_ *ui.Inventory) {
-		m.gameState.Items().SetEventItem(m.gameState.Items().ActiveItem())
+		// If ChoiceWait is true,
+		// it is waiting for the item choice to be completed.
+		if m.gameState.Items().ChoiceWait() {
+			m.gameState.HideInventory()
+		} else {
+			m.gameState.Items().SetEventItem(m.gameState.Items().ActiveItem())
+		}
 	})
 	m.itemPreviewPopup.SetOnClosePressed(func(_ *ui.ItemPreviewPopup) {
 		m.gameState.Items().SetEventItem(0)
@@ -545,7 +559,7 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 	} else {
 		m.inventory.Hide()
 	}
-	m.inventory.SetDisabled(m.gameState.Map().IsBlockingEventExecuting())
+	m.inventory.SetDisabled(m.gameState.Map().IsBlockingEventExecuting() && !m.gameState.Items().ChoiceWait())
 	m.inventory.SetItems(m.gameState.Items().Items())
 	m.inventory.SetActiveItemID(m.gameState.Items().ActiveItem())
 	m.inventory.Update(sceneManager)
