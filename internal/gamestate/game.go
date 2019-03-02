@@ -933,7 +933,19 @@ func (g *Game) SetVariable(sceneManager *scene.Manager, variableID int, op data.
 				rhs = 1
 			}
 		default:
-			return fmt.Errorf("gamestate: not implemented yet (set_variable): type %s", args.Type)
+			return fmt.Errorf("gamestate: not implemented yet (set_variable)(character): type %s", args.Type)
+		}
+
+	case data.SetVariableValueTypeItemGroup:
+		args := value.(*data.SetVariableItemGroupArgs)
+		group := args.Group
+		switch args.Type {
+		case data.SetVariableItemGroupTypeOwned:
+			rhs = int64(g.items.ItemCount(group, true))
+		case data.SetVariableItemGroupTypeTotal:
+			rhs = int64(g.items.ItemCount(group, false))
+		default:
+			return fmt.Errorf("gamestate: not implemented yet (set_variable)(item_group): type %s", args.Type)
 		}
 	case data.SetVariableValueTypeIAPProduct:
 		rhs = 0

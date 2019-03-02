@@ -123,6 +123,31 @@ func (i *Items) SetEventItem(id int) {
 	i.eventItem = id
 }
 
+func (i *Items) ItemCount(group int, owns bool) int {
+	count := 0
+
+	if owns {
+		idToItem := map[int]*data.Item{}
+		for _, i := range i.dataItems {
+			idToItem[i.ID] = i
+		}
+		for _, id := range i.items {
+			item := idToItem[id]
+			if item != nil && item.Group == group {
+				count++
+			}
+		}
+		return count
+	}
+
+	for _, i := range i.dataItems {
+		if i.Group == group {
+			count++
+		}
+	}
+	return count
+}
+
 func (i *Items) Items() []*data.Item {
 	if i.activeItems == nil {
 		idToItem := map[int]*data.Item{}

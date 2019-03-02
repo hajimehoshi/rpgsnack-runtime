@@ -1140,6 +1140,12 @@ func (c *CommandArgsSetVariable) UnmarshalJSON(data []uint8) error {
 			return err
 		}
 		c.Value = v
+	case SetVariableValueTypeItemGroup:
+		var v *SetVariableItemGroupArgs
+		if err := unmarshalJSON(tmp.Value, &v); err != nil {
+			return err
+		}
+		c.Value = v
 	case SetVariableValueTypeIAPProduct:
 		v := 0
 		if err := unmarshalJSON(tmp.Value, &v); err != nil {
@@ -1212,6 +1218,12 @@ func (c *CommandArgsSetVariable) DecodeMsgpack(dec *msgpack.Decoder) error {
 		c.Value = v
 	case SetVariableValueTypeCharacter:
 		v := &SetVariableCharacterArgs{}
+		if err := msgpack.Unmarshal(valueBin, v); err != nil {
+			return err
+		}
+		c.Value = v
+	case SetVariableValueTypeItemGroup:
+		v := &SetVariableItemGroupArgs{}
 		if err := msgpack.Unmarshal(valueBin, v); err != nil {
 			return err
 		}
@@ -1765,6 +1777,7 @@ const (
 	SetVariableValueTypeVariable   SetVariableValueType = "variable"
 	SetVariableValueTypeRandom     SetVariableValueType = "random"
 	SetVariableValueTypeCharacter  SetVariableValueType = "character"
+	SetVariableValueTypeItemGroup  SetVariableValueType = "item_group"
 	SetVariableValueTypeIAPProduct SetVariableValueType = "iap_product"
 	SetVariableValueTypeSystem     SetVariableValueType = "system"
 )
@@ -1788,6 +1801,11 @@ type SetVariableCharacterArgs struct {
 	EventID int                      `json:"eventId" msgpack:"eventId"`
 }
 
+type SetVariableItemGroupArgs struct {
+	Type  SetVariableItemGroupType `json:"type" msgpack:"type"`
+	Group int                      `json:"group" msgpack:"group"`
+}
+
 type SetVariableSystem struct {
 	Type    SetVariableCharacterType `json:"type" msgpack:"type"`
 	EventID int                      `json:"eventId" msgpack:"eventId"`
@@ -1802,6 +1820,13 @@ const (
 	SetVariableCharacterTypeScreenX   SetVariableCharacterType = "screen_x"
 	SetVariableCharacterTypeScreenY   SetVariableCharacterType = "screen_y"
 	SetVariableCharacterTypeIsPressed SetVariableCharacterType = "pressed"
+)
+
+type SetVariableItemGroupType string
+
+const (
+	SetVariableItemGroupTypeOwned SetVariableItemGroupType = "owned"
+	SetVariableItemGroupTypeTotal SetVariableItemGroupType = "total"
 )
 
 type ShowAdsType string
