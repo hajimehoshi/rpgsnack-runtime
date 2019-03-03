@@ -17,7 +17,9 @@ package mobile
 import (
 	"fmt"
 	"math"
+	"sync"
 
+	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/mobile"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
@@ -28,6 +30,8 @@ var (
 	theGame *game.Game
 
 	startCalled = make(chan struct{})
+
+	gameM sync.Mutex
 )
 
 func setData(project []byte, assets [][]byte, progress []byte, permanent []byte, purchases []byte, language string) {
@@ -111,7 +115,16 @@ func Start(widthInDP int, heightInDP int, requester Requester, project []byte, p
 
 	width, height, scale := adjustScreenSize(widthInDP, heightInDP)
 	g := game.New(width, height, requester)
-	if err := mobile.Start(g.Update, width, height, scale, ""); err != nil {
+	update := func(screen *ebiten.Image) error {
+		gameM.Lock()
+		defer gameM.Unlock()
+
+		if err := g.Update(screen); err != nil {
+			return err
+		}
+		return nil
+	}
+	if err := mobile.Start(update, width, height, scale, ""); err != nil {
 		return err
 	}
 	theGame = g
@@ -119,6 +132,9 @@ func Start(widthInDP int, heightInDP int, requester Requester, project []byte, p
 }
 
 func SetScreenSize(widthInDP, heightInDP int) {
+	gameM.Lock()
+	defer gameM.Unlock()
+
 	width, height, scale := adjustScreenSize(widthInDP, heightInDP)
 	theGame.SetScreenSize(width, height, scale)
 }

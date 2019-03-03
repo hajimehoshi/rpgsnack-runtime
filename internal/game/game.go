@@ -19,7 +19,6 @@ import (
 	"image/color"
 	"net/url"
 	"runtime"
-	"sync"
 
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/hajimehoshi/ebiten"
@@ -45,8 +44,6 @@ type Game struct {
 	setPlatformDataCh chan setPlatformDataArgs
 	langs             []language.Tag
 	screenshots       *screenshots
-
-	m sync.Mutex
 }
 
 type setPlatformDataArgs struct {
@@ -104,9 +101,6 @@ func NewWithDefaultRequester(width, height int) (*Game, error) {
 }
 
 func (g *Game) SetScreenSize(width, height int, scale float64) {
-	g.m.Lock()
-	defer g.m.Unlock()
-
 	g.width = width
 	g.height = height
 	ebiten.SetScreenSize(width, height)
@@ -125,9 +119,6 @@ func (g *Game) loadGameData() {
 }
 
 func (g *Game) Update(screen *ebiten.Image) error {
-	g.m.Lock()
-	defer g.m.Unlock()
-
 	if err := g.update(); err != nil {
 		return err
 	}
