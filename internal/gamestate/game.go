@@ -885,6 +885,8 @@ func (g *Game) SetVariable(sceneManager *scene.Manager, variableID int, op data.
 		}
 	case data.SetVariableValueTypeVariable:
 		rhs = g.VariableValue(value.(int))
+	case data.SetVariableValueTypeVariableRef:
+		rhs = g.VariableValue(int(g.VariableValue(value.(int))))
 	case data.SetVariableValueTypeRandom:
 		v := value.(*data.SetVariableValueRandom)
 		rhs = int64(g.RandomValue(v.Begin, v.End+1))
