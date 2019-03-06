@@ -2,8 +2,58 @@
     "sections": [
         {
             "header": "AUTHORS",
-            "headerColor": "#ffffff",
-            "body":   ["Daigo"]
+            "headerColor": "#eeeeee",
+            "body":   ["Foo"]
+        },
+        {
+            "header": "ENGINEERING",
+            "headerColor": "#eeeeee",
+            "body":   ["Foo Bar", "Foo Bar"]
+        },
+        {
+            "header": "MUSIC",
+            "headerColor": "#eeeeee",
+            "body":   ["Foo Bar"]
+        },
+        {
+            "header": "ART",
+            "headerColor": "#eeeeee",
+            "body":   ["Foo Bar", "Foo Bar"]
+        },
+        {
+            "header": "ENGLISH TRANSLATION",
+            "headerColor": "#eeeeee",
+            "body":   ["Foo Bar", "Foo Bar"]
+        },
+        {
+            "header": "SPECIAL THANKS",
+            "headerColor": "#eeeeee",
+            "body":   ["Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar"]
+        },
+        {
+            "header": "POWERED BY",
+            "headerColor": "#eeeeee",
+            "body":   ["Ebiten"]
+        },
+        {
+            "header": "PLATINUM SPONSOR",
+            "headerColor": "#bbaaee",
+            "body":   ["Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar"]
+        },
+        {
+            "header": "GOLD SPONSOR",
+            "headerColor": "#ffd700",
+            "body":   ["Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar"]
+        },
+        {
+            "header": "SILVER SPONSOR",
+            "headerColor": "#c0c0c0",
+            "body":   ["Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar"]
+        },
+        {
+            "header": "BRONZE SPONSOR",
+            "headerColor": "#cd7f32",
+            "body":   ["Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar"]
         }
     ]
 }
