@@ -1618,11 +1618,12 @@ func (c *CommandArgsSetCharacterProperty) DecodeMsgpack(dec *msgpack.Decoder) er
 }
 
 type CommandArgsSetCharacterImage struct {
-	Image          string    `json:"image" msgpack:"image"`
-	ImageType      ImageType `json:"imageType" msgpack:"imageType"`
-	Frame          int       `json:"frame" msgpack:"frame"`
-	Dir            Dir       `json:"dir" msgpack:"dir"`
-	UseFrameAndDir bool      `json:"useFrameAndDir" msgpack:"useFrameAndDir"`
+	Type           SetCharacterImageType `json:"type" msgpack:"type"`
+	Image          string                `json:"image" msgpack:"image"`
+	ImageType      ImageType             `json:"imageType" msgpack:"imageType"`
+	Frame          int                   `json:"frame" msgpack:"frame"`
+	Dir            Dir                   `json:"dir" msgpack:"dir"`
+	UseFrameAndDir bool                  `json:"useFrameAndDir" msgpack:"useFrameAndDir"`
 }
 
 type CommandArgsAddItem struct {
@@ -1936,4 +1937,11 @@ const (
 	OpenLinkTypeMore       OpenLinkType = "more"
 	OpenLinkTypeFacebook   OpenLinkType = "fb"
 	OpenLinkTypeTwitter    OpenLinkType = "twitter"
+)
+
+type SetCharacterImageType string
+
+const (
+	SetCharacterImageTypeStatic  SetCharacterImageType = "static"
+	SetCharacterImageTypeDynamic SetCharacterImageType = "dynamic"
 )
