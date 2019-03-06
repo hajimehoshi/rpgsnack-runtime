@@ -934,12 +934,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			i.commandIterator.Advance()
 			return true, nil
 		}
-		image := args.Image
-		if args.Type == data.SetCharacterImageTypeDynamic {
-			image = gameState.ParseMessageSyntax(args.Image)
-		}
-
-		ch.SetImage(args.ImageType, image)
+		ch.SetImage(args.ImageType, args.Image)
 		if args.UseFrameAndDir {
 			ch.SetFrame(args.Frame)
 			ch.SetDir(args.Dir)
