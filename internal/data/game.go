@@ -35,6 +35,7 @@ const (
 type Game struct {
 	Maps          []*Map          `json:"maps" msgpack:"maps"`
 	Texts         *Texts          `json:"texts" msgpack:"texts"`
+	Tables        []*Table        `json:"tables" msgpack:"tables"`
 	TileSets      []*TileSet      `json:"tileSets" msgpack:"tileSets"`
 	Achievements  []*Achievement  `json:"achievements" msgpack:"achievements"`
 	Hints         []*Hint         `json:"hints" msgpack:"hints"`
@@ -45,6 +46,12 @@ type Game struct {
 	System        *System         `json:"system" msgpack:"system"`
 	MessageStyles []*MessageStyle `json:"messageStyles" msgpack:"messageStyles"`
 	Shops         []*Shop         `json:"shops" msgpack:"shops"`
+}
+
+type Table struct {
+	Name    string                    `json:"name" msgpack:"name"`
+	Schema  map[string]string         `json:"schema" msgpack:"schema"`
+	Records []*map[string]interface{} `json:"records" msgpack:"records"`
 }
 
 type MessageStyle struct {
