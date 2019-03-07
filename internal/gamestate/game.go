@@ -873,7 +873,7 @@ func (g *Game) RefreshEvents() error {
 	return g.currentMap.refreshEvents(g)
 }
 
-func (g *Game) SetVariable(sceneManager *scene.Manager, variableID int, op data.SetVariableOp, valueType data.SetVariableValueType, value interface{}, mapID, roomID, eventID int) error {
+func (g *Game) calcVariableRhs(sceneManager *scene.Manager, lhs int64, op data.SetVariableOp, valueType data.SetVariableValueType, value interface{}, mapID, roomID, eventID int) (int64, error) {
 	var rhs int64
 	switch valueType {
 	case data.SetVariableValueTypeConstant:
@@ -899,7 +899,7 @@ func (g *Game) SetVariable(sceneManager *scene.Manager, variableID int, op data.
 		ch := g.Character(mapID, roomID, id)
 		if ch == nil {
 			// TODO: return error?
-			return nil
+			return 0, nil
 		}
 		dir := ch.Dir()
 		switch args.Type {
@@ -935,7 +935,7 @@ func (g *Game) SetVariable(sceneManager *scene.Manager, variableID int, op data.
 				rhs = 1
 			}
 		default:
-			return fmt.Errorf("gamestate: not implemented yet (set_variable)(character): type %s", args.Type)
+			return 0, fmt.Errorf("gamestate: not implemented yet (set_variable)(character): type %s", args.Type)
 		}
 
 	case data.SetVariableValueTypeItemGroup:
@@ -947,7 +947,7 @@ func (g *Game) SetVariable(sceneManager *scene.Manager, variableID int, op data.
 		case data.SetVariableItemGroupTypeTotal:
 			rhs = int64(g.items.ItemCount(group, false))
 		default:
-			return fmt.Errorf("gamestate: not implemented yet (set_variable)(item_group): type %s", args.Type)
+			return 0, fmt.Errorf("gamestate: not implemented yet (set_variable)(item_group): type %s", args.Type)
 		}
 	case data.SetVariableValueTypeIAPProduct:
 		rhs = 0
@@ -974,25 +974,45 @@ func (g *Game) SetVariable(sceneManager *scene.Manager, variableID int, op data.
 		case data.SystemVariableCurrentTime:
 			rhs = time.Now().Unix()
 		default:
-			return fmt.Errorf("gamestate: not implemented yet (set_variable): systemVariableType %s", systemVariableType)
+			return 0, fmt.Errorf("gamestate: not implemented yet (set_variable): systemVariableType %s", systemVariableType)
 		}
 	}
 	switch op {
 	case data.SetVariableOpAssign:
 	case data.SetVariableOpAdd:
-		rhs = g.VariableValue(variableID) + rhs
+		rhs = lhs + rhs
 	case data.SetVariableOpSub:
-		rhs = g.VariableValue(variableID) - rhs
+		rhs = lhs - rhs
 	case data.SetVariableOpMul:
-		rhs = g.VariableValue(variableID) * rhs
+		rhs = lhs * rhs
 	case data.SetVariableOpDiv:
-		rhs = g.VariableValue(variableID) / rhs
+		rhs = lhs / rhs
 	case data.SetVariableOpMod:
-		rhs = g.VariableValue(variableID) % rhs
+		rhs = lhs % rhs
 	default:
-		return fmt.Errorf("gamestate: not implemented yet (set_variable): SetVariableOp %s", op)
+		return 0, fmt.Errorf("gamestate: not implemented yet (set_variable): SetVariableOp %s", op)
+	}
+	return rhs, nil
+}
+
+func (g *Game) SetVariable(sceneManager *scene.Manager, variableID int, op data.SetVariableOp, valueType data.SetVariableValueType, value interface{}, mapID, roomID, eventID int) error {
+	lhs := g.VariableValue(variableID)
+	rhs, err := g.calcVariableRhs(sceneManager, lhs, op, valueType, value, mapID, roomID, eventID)
+	if err != nil {
+		return err
 	}
 	g.variables.SetVariableValue(variableID, rhs)
+	return nil
+}
+
+func (g *Game) SetVariableRef(sceneManager *scene.Manager, variableID int, op data.SetVariableOp, valueType data.SetVariableValueType, value interface{}, mapID, roomID, eventID int) error {
+	lhs := g.VariableValue(int(g.VariableValue(variableID)))
+	rhs, err := g.calcVariableRhs(sceneManager, lhs, op, valueType, value, mapID, roomID, eventID)
+	if err != nil {
+		return err
+	}
+
+	g.variables.SetVariableValue(int(g.VariableValue(variableID)), rhs)
 	return nil
 }
 

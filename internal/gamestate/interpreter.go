@@ -483,9 +483,17 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		if args.ID >= variables.ReservedID && !args.Internal {
 			return false, fmt.Errorf("gamestate: the variable ID (%d) must be < %d", args.ID, variables.ReservedID)
 		}
-		if err := gameState.SetVariable(sceneManager, args.ID, args.Op, args.ValueType, args.Value, i.mapID, i.roomID, i.eventID); err != nil {
-			return false, err
+
+		if args.IDType == data.SetVariableIDTypeRef {
+			if err := gameState.SetVariableRef(sceneManager, args.ID, args.Op, args.ValueType, args.Value, i.mapID, i.roomID, i.eventID); err != nil {
+				return false, err
+			}
+		} else {
+			if err := gameState.SetVariable(sceneManager, args.ID, args.Op, args.ValueType, args.Value, i.mapID, i.roomID, i.eventID); err != nil {
+				return false, err
+			}
 		}
+
 		i.commandIterator.Advance()
 
 	case data.CommandNameSavePermanent:

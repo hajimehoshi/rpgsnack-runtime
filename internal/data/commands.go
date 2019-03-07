@@ -1055,6 +1055,7 @@ type CommandArgsSetSelfSwitch struct {
 
 type CommandArgsSetVariable struct {
 	ID        int                  `json:"id" msgpack:"id"`
+	IDType    SetVariableIDType    `json:"idType" msgpack:"idType"`
 	Op        SetVariableOp        `json:"op" msgpack:"op"`
 	ValueType SetVariableValueType `json:"valueType" msgpack:"valueType"`
 	Value     interface{}          `json:"value" msgpack:"value"`
@@ -1067,6 +1068,9 @@ func (c *CommandArgsSetVariable) EncodeMsgpack(enc *msgpack.Encoder) error {
 
 	e.EncodeString("id")
 	e.EncodeInt(c.ID)
+
+	e.EncodeString("idType")
+	e.EncodeString(string(c.IDType))
 
 	e.EncodeString("op")
 	e.EncodeString(string(c.Op))
@@ -1104,6 +1108,7 @@ func (c *CommandArgsSetVariable) EncodeMsgpack(enc *msgpack.Encoder) error {
 func (c *CommandArgsSetVariable) UnmarshalJSON(data []uint8) error {
 	type tmpCommandArgsSetVariable struct {
 		ID        int                  `json:"id"`
+		IDType    SetVariableIDType    `json:"idType"`
 		Op        SetVariableOp        `json:"op"`
 		ValueType SetVariableValueType `json:"valueType"`
 		Value     json.RawMessage      `json:"value"`
@@ -1114,6 +1119,7 @@ func (c *CommandArgsSetVariable) UnmarshalJSON(data []uint8) error {
 		return err
 	}
 	c.ID = tmp.ID
+	c.IDType = tmp.IDType
 	c.Op = tmp.Op
 	c.ValueType = tmp.ValueType
 	c.Internal = tmp.Internal
@@ -1180,6 +1186,8 @@ func (c *CommandArgsSetVariable) DecodeMsgpack(dec *msgpack.Decoder) error {
 		switch k := d.DecodeString(); k {
 		case "id":
 			c.ID = d.DecodeInt()
+		case "idType":
+			c.IDType = SetVariableIDType(d.DecodeString())
 		case "op":
 			c.Op = SetVariableOp(d.DecodeString())
 		case "valueType":
@@ -1795,6 +1803,13 @@ const (
 	SetVariableValueTypeItemGroup   SetVariableValueType = "item_group"
 	SetVariableValueTypeIAPProduct  SetVariableValueType = "iap_product"
 	SetVariableValueTypeSystem      SetVariableValueType = "system"
+)
+
+type SetVariableIDType string
+
+const (
+	SetVariableIDTypeVal SetVariableIDType = "val"
+	SetVariableIDTypeRef SetVariableIDType = "ref"
 )
 
 type TransferTransitionType string
