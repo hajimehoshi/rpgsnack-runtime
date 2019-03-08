@@ -470,7 +470,12 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		if args.ID >= variables.ReservedID && !args.Internal {
 			return false, fmt.Errorf("gamestate: the switch ID (%d) must be < %d", args.ID, variables.ReservedID)
 		}
-		gameState.SetSwitchValue(args.ID, args.Value)
+
+		if args.IDType == data.SetSwitchIDTypeRef {
+			gameState.SetSwitchRefValue(args.ID, args.Value)
+		} else {
+			gameState.SetSwitchValue(args.ID, args.Value)
+		}
 		i.commandIterator.Advance()
 
 	case data.CommandNameSetSelfSwitch:

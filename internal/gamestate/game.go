@@ -783,6 +783,10 @@ func (g *Game) SetSwitchValue(id int, value bool) {
 	g.variables.SetSwitchValue(id, value)
 }
 
+func (g *Game) SetSwitchRefValue(id int, value bool) {
+	g.variables.SetSwitchValue(int(g.VariableValue(id)), value)
+}
+
 func (g *Game) SetSelfSwitchValue(eventID int, id int, value bool) {
 	m, r := g.currentMap.mapID, g.currentMap.roomID
 	g.variables.SetSelfSwitchValue(m, r, eventID, id, value)

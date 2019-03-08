@@ -1043,9 +1043,10 @@ type CommandArgsShowChoices struct {
 }
 
 type CommandArgsSetSwitch struct {
-	ID       int  `json:"id" msgpack:"id"`
-	Value    bool `json:"value" msgpack:"value"`
-	Internal bool `json:"internal" msgpack:"internal"`
+	ID       int             `json:"id" msgpack:"id"`
+	IDType   SetSwitchIDType `json:"idType" msgpack:"idType"`
+	Value    bool            `json:"value" msgpack:"value"`
+	Internal bool            `json:"internal" msgpack:"internal"`
 }
 
 type CommandArgsSetSelfSwitch struct {
@@ -1840,6 +1841,13 @@ type SetVariableIDType string
 const (
 	SetVariableIDTypeVal SetVariableIDType = "val"
 	SetVariableIDTypeRef SetVariableIDType = "ref"
+)
+
+type SetSwitchIDType string
+
+const (
+	SetSwitchIDTypeVal SetSwitchIDType = "val"
+	SetSwitchIDTypeRef SetSwitchIDType = "ref"
 )
 
 type TransferTransitionType string
