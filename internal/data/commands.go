@@ -1086,6 +1086,10 @@ func (c *CommandArgsSetVariable) EncodeMsgpack(enc *msgpack.Encoder) error {
 		e.EncodeInt(c.Value.(int))
 	case SetVariableValueTypeVariableRef:
 		e.EncodeInt(c.Value.(int))
+	case SetVariableValueTypeSwitch:
+		e.EncodeInt(c.Value.(int))
+	case SetVariableValueTypeSwitchRef:
+		e.EncodeInt(c.Value.(int))
 	case SetVariableValueTypeRandom:
 		e.EncodeAny(c.Value)
 	case SetVariableValueTypeCharacter:
@@ -1137,6 +1141,18 @@ func (c *CommandArgsSetVariable) UnmarshalJSON(data []uint8) error {
 		}
 		c.Value = v
 	case SetVariableValueTypeVariableRef:
+		v := 0
+		if err := unmarshalJSON(tmp.Value, &v); err != nil {
+			return err
+		}
+		c.Value = v
+	case SetVariableValueTypeSwitch:
+		v := 0
+		if err := unmarshalJSON(tmp.Value, &v); err != nil {
+			return err
+		}
+		c.Value = v
+	case SetVariableValueTypeSwitchRef:
 		v := 0
 		if err := unmarshalJSON(tmp.Value, &v); err != nil {
 			return err
@@ -1227,6 +1243,18 @@ func (c *CommandArgsSetVariable) DecodeMsgpack(dec *msgpack.Decoder) error {
 		}
 		c.Value = v
 	case SetVariableValueTypeVariableRef:
+		v, ok := InterfaceToInt(value)
+		if !ok {
+			return fmt.Errorf("data: CommandArgsSetVariable.DecodeMsgpack: variable value must be an integer; got %v", value)
+		}
+		c.Value = v
+	case SetVariableValueTypeSwitch:
+		v, ok := InterfaceToInt(value)
+		if !ok {
+			return fmt.Errorf("data: CommandArgsSetVariable.DecodeMsgpack: variable value must be an integer; got %v", value)
+		}
+		c.Value = v
+	case SetVariableValueTypeSwitchRef:
 		v, ok := InterfaceToInt(value)
 		if !ok {
 			return fmt.Errorf("data: CommandArgsSetVariable.DecodeMsgpack: variable value must be an integer; got %v", value)
@@ -1798,6 +1826,8 @@ const (
 	SetVariableValueTypeConstant    SetVariableValueType = "constant"
 	SetVariableValueTypeVariable    SetVariableValueType = "variable"
 	SetVariableValueTypeVariableRef SetVariableValueType = "variable_ref"
+	SetVariableValueTypeSwitch      SetVariableValueType = "switch"
+	SetVariableValueTypeSwitchRef   SetVariableValueType = "switch_ref"
 	SetVariableValueTypeRandom      SetVariableValueType = "random"
 	SetVariableValueTypeCharacter   SetVariableValueType = "character"
 	SetVariableValueTypeItemGroup   SetVariableValueType = "item_group"

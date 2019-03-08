@@ -792,6 +792,14 @@ func (g *Game) VariableValue(id int) int64 {
 	return g.variables.VariableValue(id)
 }
 
+func (g *Game) SwitchValue(id int) int64 {
+	if g.variables.SwitchValue(id) {
+		return 1
+	} else {
+		return 0
+	}
+}
+
 func (g *Game) StartCombineCommands(combine *data.Combine) {
 	g.currentMap.StartCombineCommands(g, combine)
 }
@@ -887,6 +895,10 @@ func (g *Game) calcVariableRhs(sceneManager *scene.Manager, lhs int64, op data.S
 		rhs = g.VariableValue(value.(int))
 	case data.SetVariableValueTypeVariableRef:
 		rhs = g.VariableValue(int(g.VariableValue(value.(int))))
+	case data.SetVariableValueTypeSwitch:
+		rhs = g.SwitchValue(value.(int))
+	case data.SetVariableValueTypeSwitchRef:
+		rhs = g.SwitchValue(int(g.VariableValue(value.(int))))
 	case data.SetVariableValueTypeRandom:
 		v := value.(*data.SetVariableValueRandom)
 		rhs = int64(g.RandomValue(v.Begin, v.End+1))
