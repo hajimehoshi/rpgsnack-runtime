@@ -7,10 +7,10 @@ require (
 	github.com/gopherjs/gopherjs v0.0.0-20180825215210-0210a2f0f73c
 	github.com/hajimehoshi/bitmapfont v1.1.1
 	github.com/hajimehoshi/chinesegamefonts v1.0.0
-	github.com/hajimehoshi/ebiten v1.9.0-alpha.0.20190202101903-b89602d90074
+	github.com/hajimehoshi/ebiten v1.10.0-alpha.0.20190304165858-2d2d022b3d37
 	github.com/hajimehoshi/oggloop v0.0.0-20180730010327-c7cf68761483
 	github.com/vmihailenco/msgpack v4.0.1+incompatible
-	golang.org/x/image v0.0.0-20180926015637-991ec62608f3
+	golang.org/x/image v0.0.0-20190118043309-183bebdce1b2
 	golang.org/x/net v0.0.0-20180724234803-3673e40ba225 // indirect
 	golang.org/x/text v0.3.0
 	google.golang.org/appengine v1.1.0 // indirect
