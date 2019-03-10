@@ -89,37 +89,6 @@ func (t *Texts) DecodeMsgpack(dec *msgpack.Decoder) error {
 	return nil
 }
 
-func (t *Texts) UnmarshalJSON(data []uint8) error {
-	type TextData struct {
-		Data map[string]string `json:"data"`
-		// ignore "meta" key.
-	}
-	orig := map[UUID]TextData{}
-	if err := unmarshalJSON(data, &orig); err != nil {
-		return err
-	}
-	langs := map[Language]struct{}{}
-	t.languages = []Language{}
-	t.data = map[UUID]map[Language]string{}
-	for id, textData := range orig {
-		t.data[id] = map[Language]string{}
-		for langStr, text := range textData.Data {
-			lang, err := languagepkg.Parse(langStr)
-			if err != nil {
-				return err
-			}
-			l := Language(lang)
-			if _, ok := langs[l]; !ok {
-				t.languages = append(t.languages, l)
-				langs[l] = struct{}{}
-			}
-			t.data[id][l] = text
-		}
-	}
-	sortLanguages(t.languages)
-	return nil
-}
-
 func (t *Texts) Languages() []languagepkg.Tag {
 	ls := make([]languagepkg.Tag, len(t.languages))
 	for i, l := range t.languages {

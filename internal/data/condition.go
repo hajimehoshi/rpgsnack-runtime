@@ -15,11 +15,11 @@
 package data
 
 type Condition struct {
-	Type      ConditionType      `json:"type" msgpack:"type"`
-	ID        int                `json:"id" msgpack:"id"`
-	Comp      ConditionComp      `json:"comp" msgpack:"comp"`
-	ValueType ConditionValueType `json:"valueType" msgpack:"valueType"`
-	Value     interface{}        `json:"value" msgpack:"value"`
+	Type      ConditionType      `msgpack:"type"`
+	ID        int                `msgpack:"id"`
+	Comp      ConditionComp      `msgpack:"comp"`
+	ValueType ConditionValueType `msgpack:"valueType"`
+	Value     interface{}        `msgpack:"value"`
 }
 
 type ConditionType string

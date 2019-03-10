@@ -15,7 +15,6 @@
 package data
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/vmihailenco/msgpack"
@@ -27,7 +26,6 @@ const (
 
 type Event struct {
 	impl    *EventImpl
-	json    []byte
 	msgpack []byte
 }
 
@@ -50,11 +48,6 @@ func (e *Event) Pages() []*Page {
 		panic(err)
 	}
 	return e.impl.Pages
-}
-
-func (e *Event) UnmarshalJSON(data []byte) error {
-	e.json = data
-	return nil
 }
 
 func (e *Event) UnmarshalMsgpack(data []byte) error {
@@ -80,46 +73,38 @@ func (e *Event) ensureEncoded() error {
 		return nil
 	}
 
-	if e.json != nil {
-		if err := json.Unmarshal(e.json, &impl); err != nil {
-			return err
-		}
-		e.impl = impl
-		return nil
-	}
-
-	panic("data: the data format was not either Msgpack or JSON at (*Event).ensureEncoded")
+	panic("data: the data format was not either Msgpack  at (*Event).ensureEncoded")
 }
 
 type EventImpl struct {
-	ID    int     `json:"id" msgpack:"id"`
-	X     int     `json:"x" msgpack:"x"`
-	Y     int     `json:"y" msgpack:"y"`
-	Pages []*Page `json:"pages" msgpack:"pages"`
+	ID    int     `msgpack:"id"`
+	X     int     `msgpack:"x"`
+	Y     int     `msgpack:"y"`
+	Pages []*Page `msgpack:"pages"`
 }
 
 type CommonEvent struct {
-	ID       int        `json:"id" msgpack:"id"`
-	Name     string     `json:"name" msgpack:"name"`
-	Commands []*Command `json:"commands" msgpack:"commands"`
+	ID       int        `msgpack:"id"`
+	Name     string     `msgpack:"name"`
+	Commands []*Command `msgpack:"commands"`
 }
 
 type Page struct {
-	Conditions []*Condition         `json:"conditions" msgpack:"conditions"`
-	Image      string               `json:"image" msgpack:"image"`
-	ImageType  ImageType            `json:"imageType" msgpack:"imageType"`
-	Frame      int                  `json:"frame" msgpack:"frame"`
-	Dir        Dir                  `json:"dir" msgpack:"dir"`
-	DirFix     bool                 `json:"dirFix" msgpack:"dirFix"`
-	Walking    bool                 `json:"walking" msgpack:"walking"`
-	Stepping   bool                 `json:"stepping" msgpack:"stepping"`
-	Through    bool                 `json:"through" msgpack:"through"`
-	Priority   Priority             `json:"priority" msgpack:"priority"`
-	Speed      Speed                `json:"speed" msgpack:"speed"`
-	Trigger    Trigger              `json:"trigger" msgpack:"trigger"`
-	Opacity    int                  `json:"opacity" msgpack:"opacity"`
-	Route      *CommandArgsSetRoute `json:"route" msgpack:"route"`
-	Commands   []*Command           `json:"commands" msgpack:"commands"`
+	Conditions []*Condition         `msgpack:"conditions"`
+	Image      string               `msgpack:"image"`
+	ImageType  ImageType            `msgpack:"imageType"`
+	Frame      int                  `msgpack:"frame"`
+	Dir        Dir                  `msgpack:"dir"`
+	DirFix     bool                 `msgpack:"dirFix"`
+	Walking    bool                 `msgpack:"walking"`
+	Stepping   bool                 `msgpack:"stepping"`
+	Through    bool                 `msgpack:"through"`
+	Priority   Priority             `msgpack:"priority"`
+	Speed      Speed                `msgpack:"speed"`
+	Trigger    Trigger              `msgpack:"trigger"`
+	Opacity    int                  `msgpack:"opacity"`
+	Route      *CommandArgsSetRoute `msgpack:"route"`
+	Commands   []*Command           `msgpack:"commands"`
 }
 
 type Dir int

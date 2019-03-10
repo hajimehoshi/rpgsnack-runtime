@@ -15,7 +15,6 @@
 package data
 
 import (
-	"encoding/json"
 	"fmt"
 	"runtime"
 
@@ -62,408 +61,6 @@ func (c *Command) EncodeMsgpack(enc *msgpack.Encoder) error {
 }
 
 var commandUnmarshalingCount = 0
-
-func (c *Command) UnmarshalJSON(data []uint8) error {
-	type tmpCommand struct {
-		Name     CommandName     `json:"name"`
-		Branches [][]*Command    `json:"branches"`
-		Args     json.RawMessage `json:"args"`
-		IsFolded bool            `json:"isFolded"`
-	}
-	var tmp *tmpCommand
-	if err := unmarshalJSON(data, &tmp); err != nil {
-		return nil
-	}
-	c.Name = tmp.Name
-	c.Branches = tmp.Branches
-	c.IsFolded = tmp.IsFolded
-	switch c.Name {
-	case CommandNameNop:
-	case CommandNameMemo:
-		var args *CommandArgsMemo
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameIf:
-		var args *CommandArgsIf
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameGroup:
-		var args *CommandArgsGroup
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameLabel:
-		var args *CommandArgsLabel
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameGoto:
-		var args *CommandArgsGoto
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameGotoTitle:
-		var args *CommandArgsGotoTitle
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameCallEvent:
-		var args *CommandArgsCallEvent
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameCallCommonEvent:
-		var args *CommandArgsCallCommonEvent
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameReturn:
-	case CommandNameEraseEvent:
-	case CommandNameWait:
-		var args *CommandArgsWait
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameShowBalloon:
-		var args *CommandArgsShowBalloon
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameShowMessage:
-		var args *CommandArgsShowMessage
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		if args.TextAlign == "" {
-			args.TextAlign = TextAlignLeft
-		}
-		c.Args = args
-	case CommandNameShowHint:
-	case CommandNameShowChoices:
-		var args *CommandArgsShowChoices
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameSetSwitch:
-		var args *CommandArgsSetSwitch
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameSetSelfSwitch:
-		var args *CommandArgsSetSelfSwitch
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameSetVariable:
-		var args *CommandArgsSetVariable
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameSavePermanent:
-		var args *CommandArgsSavePermanent
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameLoadPermanent:
-		var args *CommandArgsLoadPermanent
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameTransfer:
-		var args *CommandArgsTransfer
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameSetRoute:
-		var args *CommandArgsSetRoute
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameShake:
-		var args *CommandArgsShake
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameTintScreen:
-		var args *CommandArgsTintScreen
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNamePlaySE:
-		var args *CommandArgsPlaySE
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNamePlayBGM:
-		var args *CommandArgsPlayBGM
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameStopBGM:
-		var args *CommandArgsStopBGM
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameSave:
-	case CommandNameRequestReview:
-	case CommandNameUnlockAchievement:
-		var args *CommandArgsUnlockAchievement
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameAutoSave:
-		var args *CommandArgsAutoSave
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNamePlayerControl:
-		var args *CommandArgsPlayerControl
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNamePlayerSpeed:
-		var args *CommandArgsPlayerSpeed
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameWeather:
-		var args *CommandArgsWeather
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameControlHint:
-		var args *CommandArgsControlHint
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNamePurchase:
-		var args *CommandArgsPurchase
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameShowAds:
-		var args *CommandArgsShowAds
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameOpenLink:
-		var args *CommandArgsOpenLink
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameShare:
-		var args *CommandArgsShare
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameSendAnalytics:
-		var args *CommandArgsSendAnalytics
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameShowShop:
-		var args *CommandArgsShowShop
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameShowMinigame:
-		var args *CommandArgsShowMinigame
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameVibrate:
-		var args *CommandArgsVibrate
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameMoveCharacter:
-		var args *CommandArgsMoveCharacter
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameTurnCharacter:
-		var args *CommandArgsTurnCharacter
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameRotateCharacter:
-		var args *CommandArgsRotateCharacter
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameSetCharacterProperty:
-		var args *CommandArgsSetCharacterProperty
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameSetCharacterImage:
-		var args *CommandArgsSetCharacterImage
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameSetCharacterOpacity:
-		var args *CommandArgsSetCharacterOpacity
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameAddItem:
-		var args *CommandArgsAddItem
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameRemoveItem:
-		var args *CommandArgsRemoveItem
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameShowInventory:
-		var args *CommandArgsShowInventory
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameHideInventory:
-	case CommandNameShowItem:
-		var args *CommandArgsShowItem
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameHideItem:
-	case CommandNameReplaceItem:
-		var args *CommandArgsReplaceItem
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameShowPicture:
-		var args *CommandArgsShowPicture
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		// TODO Implement Decoder
-		if args.Priority == "" {
-			args.Priority = PicturePriorityOverlay
-		}
-		c.Args = args
-	case CommandNameErasePicture:
-		var args *CommandArgsErasePicture
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameMovePicture:
-		var args *CommandArgsMovePicture
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameScalePicture:
-		var args *CommandArgsScalePicture
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameRotatePicture:
-		var args *CommandArgsRotatePicture
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameFadePicture:
-		var args *CommandArgsFadePicture
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameTintPicture:
-		var args *CommandArgsTintPicture
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameChangePictureImage:
-		var args *CommandArgsChangePictureImage
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameChangeBackground:
-		var args *CommandArgsChangeBackground
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameChangeForeground:
-		var args *CommandArgsChangeForeground
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	case CommandNameSpecial:
-		var args *CommandArgsSpecial
-		if err := unmarshalJSON(tmp.Args, &args); err != nil {
-			return err
-		}
-		c.Args = args
-	default:
-		return fmt.Errorf("data: invalid command: %s", c.Name)
-	}
-
-	// Force context switching to avoid freezing (#463)
-	commandUnmarshalingCount++
-	if commandUnmarshalingCount%8 == 0 {
-		runtime.Gosched()
-	}
-	return nil
-}
 
 func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 	d := easymsgpack.NewDecoder(dec)
@@ -988,88 +585,88 @@ const (
 )
 
 type CommandArgsMemo struct {
-	Content string `json:"content" msgpack:"content"`
-	Log     bool   `json:"log" msgpack:"log"`
+	Content string `msgpack:"content"`
+	Log     bool   `msgpack:"log"`
 }
 
 type CommandArgsIf struct {
-	Conditions []*Condition `json:"conditions" msgpack:"conditions"`
+	Conditions []*Condition `msgpack:"conditions"`
 }
 
 type CommandArgsGroup struct {
-	Name string `json:"name" msgpack:"name"`
+	Name string `msgpack:"name"`
 }
 
 type CommandArgsLabel struct {
-	Name string `json:"name" msgpack:"name"`
+	Name string `msgpack:"name"`
 }
 
 type CommandArgsGoto struct {
-	Label string `json:"label" msgpack:"label"`
+	Label string `msgpack:"label"`
 }
 
 type CommandArgsGotoTitle struct {
-	Save bool `json:"save" msgpack:"save"`
+	Save bool `msgpack:"save"`
 }
 
 type CommandArgsCallEvent struct {
-	EventID   int `json:"eventId" msgpack:"eventId"`
-	PageIndex int `json:"pageIndex" msgpack:"pageIndex"`
+	EventID   int `msgpack:"eventId"`
+	PageIndex int `msgpack:"pageIndex"`
 }
 
 type CommandArgsCallCommonEvent struct {
-	EventID int `json:"eventId" msgpack:"eventId"`
+	EventID int `msgpack:"eventId"`
 }
 
 type CommandArgsWait struct {
-	Time int `json:"time" msgpack:"time"`
+	Time int `msgpack:"time"`
 }
 
 type CommandArgsShowBalloon struct {
-	EventID        int         `json:"eventId" msgpack:"eventId"`
-	ContentID      UUID        `json:"content" msgpack:"content"`
-	BalloonType    BalloonType `json:"balloonType" msgpack:"balloonType"`
-	MessageStyleID int         `json:"messageStyleId" msgpack:"messageStyleId"`
+	EventID        int         `msgpack:"eventId"`
+	ContentID      UUID        `msgpack:"content"`
+	BalloonType    BalloonType `msgpack:"balloonType"`
+	MessageStyleID int         `msgpack:"messageStyleId"`
 }
 
 type CommandArgsShowMessage struct {
-	EventID        int                 `json:"eventId" msgpack:"eventId"`
-	ContentID      UUID                `json:"content" msgpack:"content"`
-	Background     MessageBackground   `json:"background" msgpack:"background"`
-	PositionType   MessagePositionType `json:"positionType" msgpack:"positionType"`
-	TextAlign      TextAlign           `json:"textAlign" msgpack:"textAlign"`
-	MessageStyleID int                 `json:"messageStyleId" msgpack:"messageStyleId"`
+	EventID        int                 `msgpack:"eventId"`
+	ContentID      UUID                `msgpack:"content"`
+	Background     MessageBackground   `msgpack:"background"`
+	PositionType   MessagePositionType `msgpack:"positionType"`
+	TextAlign      TextAlign           `msgpack:"textAlign"`
+	MessageStyleID int                 `msgpack:"messageStyleId"`
 }
 
 type ChoiceCondition struct {
-	Visible *Condition `json:"visible" msgpack:"visible"`
-	Checked *Condition `json:"checked" msgpack:"checked"`
+	Visible *Condition `msgpack:"visible"`
+	Checked *Condition `msgpack:"checked"`
 }
 
 type CommandArgsShowChoices struct {
-	ChoiceIDs  []UUID             `json:"choices" msgpack:"choices"`
-	Conditions []*ChoiceCondition `json:"conditions" msgpack:"conditions"`
+	ChoiceIDs  []UUID             `msgpack:"choices"`
+	Conditions []*ChoiceCondition `msgpack:"conditions"`
 }
 
 type CommandArgsSetSwitch struct {
-	ID       int             `json:"id" msgpack:"id"`
-	IDType   SetSwitchIDType `json:"idType" msgpack:"idType"`
-	Value    bool            `json:"value" msgpack:"value"`
-	Internal bool            `json:"internal" msgpack:"internal"`
+	ID       int             `msgpack:"id"`
+	IDType   SetSwitchIDType `msgpack:"idType"`
+	Value    bool            `msgpack:"value"`
+	Internal bool            `msgpack:"internal"`
 }
 
 type CommandArgsSetSelfSwitch struct {
-	ID    int  `json:"id" msgpack:"id"`
-	Value bool `json:"value" msgpack:"value"`
+	ID    int  `msgpack:"id"`
+	Value bool `msgpack:"value"`
 }
 
 type CommandArgsSetVariable struct {
-	ID        int                  `json:"id" msgpack:"id"`
-	IDType    SetVariableIDType    `json:"idType" msgpack:"idType"`
-	Op        SetVariableOp        `json:"op" msgpack:"op"`
-	ValueType SetVariableValueType `json:"valueType" msgpack:"valueType"`
-	Value     interface{}          `json:"value" msgpack:"value"`
-	Internal  bool                 `json:"internal" msgpack:"internal"`
+	ID        int                  `msgpack:"id"`
+	IDType    SetVariableIDType    `msgpack:"idType"`
+	Op        SetVariableOp        `msgpack:"op"`
+	ValueType SetVariableValueType `msgpack:"valueType"`
+	Value     interface{}          `msgpack:"value"`
+	Internal  bool                 `msgpack:"internal"`
 }
 
 func (c *CommandArgsSetVariable) EncodeMsgpack(enc *msgpack.Encoder) error {
@@ -1120,97 +717,6 @@ func (c *CommandArgsSetVariable) EncodeMsgpack(enc *msgpack.Encoder) error {
 
 	e.EndMap()
 	return e.Flush()
-}
-
-func (c *CommandArgsSetVariable) UnmarshalJSON(data []uint8) error {
-	type tmpCommandArgsSetVariable struct {
-		ID        int                  `json:"id"`
-		IDType    SetVariableIDType    `json:"idType"`
-		Op        SetVariableOp        `json:"op"`
-		ValueType SetVariableValueType `json:"valueType"`
-		Value     json.RawMessage      `json:"value"`
-		Internal  bool                 `json:"internal"`
-	}
-	var tmp *tmpCommandArgsSetVariable
-	if err := unmarshalJSON(data, &tmp); err != nil {
-		return err
-	}
-	c.ID = tmp.ID
-	c.IDType = tmp.IDType
-	c.Op = tmp.Op
-	c.ValueType = tmp.ValueType
-	c.Internal = tmp.Internal
-	switch c.ValueType {
-	case SetVariableValueTypeConstant:
-		v := 0
-		if err := unmarshalJSON(tmp.Value, &v); err != nil {
-			return err
-		}
-		c.Value = v
-	case SetVariableValueTypeVariable:
-		v := 0
-		if err := unmarshalJSON(tmp.Value, &v); err != nil {
-			return err
-		}
-		c.Value = v
-	case SetVariableValueTypeVariableRef:
-		v := 0
-		if err := unmarshalJSON(tmp.Value, &v); err != nil {
-			return err
-		}
-		c.Value = v
-	case SetVariableValueTypeSwitch:
-		v := 0
-		if err := unmarshalJSON(tmp.Value, &v); err != nil {
-			return err
-		}
-		c.Value = v
-	case SetVariableValueTypeSwitchRef:
-		v := 0
-		if err := unmarshalJSON(tmp.Value, &v); err != nil {
-			return err
-		}
-		c.Value = v
-	case SetVariableValueTypeRandom:
-		var v *SetVariableValueRandom
-		if err := unmarshalJSON(tmp.Value, &v); err != nil {
-			return err
-		}
-		c.Value = v
-	case SetVariableValueTypeCharacter:
-		var v *SetVariableCharacterArgs
-		if err := unmarshalJSON(tmp.Value, &v); err != nil {
-			return err
-		}
-		c.Value = v
-	case SetVariableValueTypeItemGroup:
-		var v *SetVariableItemGroupArgs
-		if err := unmarshalJSON(tmp.Value, &v); err != nil {
-			return err
-		}
-		c.Value = v
-	case SetVariableValueTypeIAPProduct:
-		v := 0
-		if err := unmarshalJSON(tmp.Value, &v); err != nil {
-			return err
-		}
-		c.Value = v
-	case SetVariableValueTypeSystem:
-		var v SystemVariableType
-		if err := unmarshalJSON(tmp.Value, &v); err != nil {
-			return err
-		}
-		c.Value = v
-	case SetVariableValueTypeTable:
-		var v *SetVariableTableArgs
-		if err := unmarshalJSON(tmp.Value, &v); err != nil {
-			return err
-		}
-		c.Value = v
-	default:
-		return fmt.Errorf("data: invalid type: %s", c.ValueType)
-	}
-	return nil
 }
 
 func (c *CommandArgsSetVariable) DecodeMsgpack(dec *msgpack.Decoder) error {
@@ -1318,124 +824,124 @@ func (c *CommandArgsSetVariable) DecodeMsgpack(dec *msgpack.Decoder) error {
 }
 
 type CommandArgsSavePermanent struct {
-	VariableID          int `json:"variableId" msgpack:"variableId"`
-	PermanentVariableID int `json:"permanentVariableId" msgpack:"permanentVariableId"`
+	VariableID          int `msgpack:"variableId"`
+	PermanentVariableID int `msgpack:"permanentVariableId"`
 }
 
 type CommandArgsLoadPermanent struct {
-	VariableID          int `json:"variableId" msgpack:"variableId"`
-	PermanentVariableID int `json:"permanentVariableId" msgpack:"permanentVariableId"`
+	VariableID          int `msgpack:"variableId"`
+	PermanentVariableID int `msgpack:"permanentVariableId"`
 }
 
 type CommandArgsTransfer struct {
-	ValueType  ValueType              `json:"valueType" msgpack:"valueType"`
-	RoomID     int                    `json:"roomId" msgpack:"roomId"`
-	X          int                    `json:"x" msgpack:"x"`
-	Y          int                    `json:"y" msgpack:"y"`
-	Dir        Dir                    `json:"dir" msgpack:"dir"`
-	Transition TransferTransitionType `json:"transition" msgpack:"transition"`
+	ValueType  ValueType              `msgpack:"valueType"`
+	RoomID     int                    `msgpack:"roomId"`
+	X          int                    `msgpack:"x"`
+	Y          int                    `msgpack:"y"`
+	Dir        Dir                    `msgpack:"dir"`
+	Transition TransferTransitionType `msgpack:"transition"`
 }
 
 type CommandArgsSetRoute struct {
-	EventID  int        `json:"eventId" msgpack:"eventId"`
-	Repeat   bool       `json:"repeat" msgpack:"repeat"`
-	Skip     bool       `json:"skip" msgpack:"skip"`
-	Wait     bool       `json:"wait" msgpack:"wait"`
-	Internal bool       `json:"internal" msgpack:"internal"`
-	Commands []*Command `json:"commands" msgpack:"commands"`
+	EventID  int        `msgpack:"eventId"`
+	Repeat   bool       `msgpack:"repeat"`
+	Skip     bool       `msgpack:"skip"`
+	Wait     bool       `msgpack:"wait"`
+	Internal bool       `msgpack:"internal"`
+	Commands []*Command `msgpack:"commands"`
 }
 
 type CommandArgsShake struct {
-	Power     int            `json:"power" msgpack:"power"`
-	Speed     int            `json:"speed" msgpack:"speed"`
-	Time      int            `json:"time" msgpack:"time"`
-	Wait      bool           `json:"wait" msgpack:"wait"`
-	Direction ShakeDirection `json:"direction" msgpack:"direction"`
+	Power     int            `msgpack:"power"`
+	Speed     int            `msgpack:"speed"`
+	Time      int            `msgpack:"time"`
+	Wait      bool           `msgpack:"wait"`
+	Direction ShakeDirection `msgpack:"direction"`
 }
 
 type CommandArgsTintScreen struct {
-	Red   int  `json:"red" msgpack:"red"`
-	Green int  `json:"green" msgpack:"green"`
-	Blue  int  `json:"blue" msgpack:"blue"`
-	Gray  int  `json:"gray" msgpack:"gray"`
-	Time  int  `json:"time" msgpack:"time"`
-	Wait  bool `json:"wait" msgpack:"wait"`
+	Red   int  `msgpack:"red"`
+	Green int  `msgpack:"green"`
+	Blue  int  `msgpack:"blue"`
+	Gray  int  `msgpack:"gray"`
+	Time  int  `msgpack:"time"`
+	Wait  bool `msgpack:"wait"`
 }
 
 type CommandArgsPlaySE struct {
-	Name   string `json:"name" msgpack:"name"`
-	Volume int    `json:"volume" msgpack:"volume"`
+	Name   string `msgpack:"name"`
+	Volume int    `msgpack:"volume"`
 }
 
 type CommandArgsPlayBGM struct {
-	Name     string `json:"name" msgpack:"name"`
-	Volume   int    `json:"volume" msgpack:"volume"`
-	FadeTime int    `json:"fadeTime" msgpack:"fadeTime"`
+	Name     string `msgpack:"name"`
+	Volume   int    `msgpack:"volume"`
+	FadeTime int    `msgpack:"fadeTime"`
 }
 
 type CommandArgsStopBGM struct {
-	FadeTime int `json:"fadeTime" msgpack:"fadeTime"`
+	FadeTime int `msgpack:"fadeTime"`
 }
 
 type CommandArgsUnlockAchievement struct {
-	ID int `json:"id" msgpack:"id"`
+	ID int `msgpack:"id"`
 }
 
 type CommandArgsControlHint struct {
-	ID   int             `json:"id" msgpack:"id"`
-	Type ControlHintType `json:"type" msgpack:"type"`
+	ID   int             `msgpack:"id"`
+	Type ControlHintType `msgpack:"type"`
 }
 
 type CommandArgsPurchase struct {
-	ID int `json:"id" msgpack:"id"`
+	ID int `msgpack:"id"`
 }
 
 type CommandArgsShowAds struct {
-	Type     ShowAdsType `json:"type" msgpack:"type"`
-	ForceAds bool        `json:"forceAds" msgpack:"forceAds"`
+	Type     ShowAdsType `msgpack:"type"`
+	ForceAds bool        `msgpack:"forceAds"`
 }
 
 type CommandArgsOpenLink struct {
-	Type OpenLinkType `json:"type" msgpack:"type"`
-	Data string       `json:"data" msgpack:"data"`
+	Type OpenLinkType `msgpack:"type"`
+	Data string       `msgpack:"data"`
 }
 
 type CommandArgsShare struct {
-	TextID UUID   `json:"text" msgpack:"text"`
-	Image  string `json:"image" msgpack:"image"`
+	TextID UUID   `msgpack:"text"`
+	Image  string `msgpack:"image"`
 }
 
 type CommandArgsSendAnalytics struct {
-	EventName string `json:"eventName" msgpack:"eventName"`
+	EventName string `msgpack:"eventName"`
 }
 
 type CommandArgsShowShop struct {
-	Products []int `json:"products" msgpack:"products"`
+	Products []int `msgpack:"products"`
 }
 
 type CommandArgsShowMinigame struct {
-	ID       int `json:"id" msgpack:"id"`
-	ReqScore int `json:"reqScore" msgpack:"reqScore"`
+	ID       int `msgpack:"id"`
+	ReqScore int `msgpack:"reqScore"`
 }
 
 type CommandArgsVibrate struct {
-	Type string `json:"type" msgpack:"type"`
+	Type string `msgpack:"type"`
 }
 
 type CommandArgsAutoSave struct {
-	Enabled bool `json:"enabled" msgpack:"enabled"`
+	Enabled bool `msgpack:"enabled"`
 }
 
 type CommandArgsPlayerControl struct {
-	Enabled bool `json:"enabled" msgpack:"enabled"`
+	Enabled bool `msgpack:"enabled"`
 }
 
 type CommandArgsPlayerSpeed struct {
-	Value Speed `json:"value" msgpack:"value"`
+	Value Speed `msgpack:"value"`
 }
 
 type CommandArgsWeather struct {
-	Type WeatherType `json:"type" msgpack:"type"`
+	Type WeatherType `msgpack:"type"`
 }
 
 type WeatherType string
@@ -1447,13 +953,13 @@ const (
 )
 
 type CommandArgsMoveCharacter struct {
-	Type             MoveCharacterType `json:"type" msgpack:"type"`
-	Dir              Dir               `json:"dir" msgpack:"dir"`
-	Distance         int               `json:"distance" msgpack:"distance"`
-	X                int               `json:"x" msgpack:"x"`
-	Y                int               `json:"y" msgpack:"y"`
-	ValueType        ValueType         `json:"valueType" msgpack:"valueType"`
-	IgnoreCharacters bool              `json:"ignoreCharacters" msgpack:"ignoreCharacters"`
+	Type             MoveCharacterType `msgpack:"type"`
+	Dir              Dir               `msgpack:"dir"`
+	Distance         int               `msgpack:"distance"`
+	X                int               `msgpack:"x"`
+	Y                int               `msgpack:"y"`
+	ValueType        ValueType         `msgpack:"valueType"`
+	IgnoreCharacters bool              `msgpack:"ignoreCharacters"`
 }
 
 func (c *CommandArgsMoveCharacter) EncodeMsgpack(enc *msgpack.Encoder) error {
@@ -1518,22 +1024,22 @@ func (c *CommandArgsMoveCharacter) DecodeMsgpack(dec *msgpack.Decoder) error {
 }
 
 type CommandArgsTurnCharacter struct {
-	Dir Dir `json:"dir" msgpack:"dir"`
+	Dir Dir `msgpack:"dir"`
 }
 
 type CommandArgsRotateCharacter struct {
-	Angle int `json:"angle" msgpack:"angle"`
+	Angle int `msgpack:"angle"`
 }
 
 type CommandArgsSetCharacterProperty struct {
-	Type  SetCharacterPropertyType `json:"type" msgpack:"type"`
-	Value interface{}              `json:"value" msgpack:"value"`
+	Type  SetCharacterPropertyType `msgpack:"type"`
+	Value interface{}              `msgpack:"value"`
 }
 
 type CommandArgsSetCharacterOpacity struct {
-	Opacity int  `json:"opacity" msgpack:"opacity"`
-	Time    int  `json:"time" msgpack:"time"`
-	Wait    bool `json:"wait" msgpack:"wait"`
+	Opacity int  `msgpack:"opacity"`
+	Time    int  `msgpack:"time"`
+	Wait    bool `msgpack:"wait"`
 }
 
 func (c *CommandArgsSetCharacterProperty) EncodeMsgpack(enc *msgpack.Encoder) error {
@@ -1561,59 +1067,6 @@ func (c *CommandArgsSetCharacterProperty) EncodeMsgpack(enc *msgpack.Encoder) er
 
 	e.EndMap()
 	return e.Flush()
-}
-
-func (c *CommandArgsSetCharacterProperty) UnmarshalJSON(data []uint8) error {
-	type tmpCommandArgsSetCharacterProperty struct {
-		Type  SetCharacterPropertyType `json:"type"`
-		Value json.RawMessage          `json:"value"`
-	}
-	var tmp *tmpCommandArgsSetCharacterProperty
-	if err := unmarshalJSON(data, &tmp); err != nil {
-		return err
-	}
-	c.Type = tmp.Type
-	switch c.Type {
-	case SetCharacterPropertyTypeVisibility:
-		v := false
-		if err := unmarshalJSON(tmp.Value, &v); err != nil {
-			return err
-		}
-		c.Value = v
-	case SetCharacterPropertyTypeDirFix:
-		v := false
-		if err := unmarshalJSON(tmp.Value, &v); err != nil {
-			return err
-		}
-		c.Value = v
-	case SetCharacterPropertyTypeStepping:
-		v := false
-		if err := unmarshalJSON(tmp.Value, &v); err != nil {
-			return err
-		}
-		c.Value = v
-	case SetCharacterPropertyTypeThrough:
-		v := false
-		if err := unmarshalJSON(tmp.Value, &v); err != nil {
-			return err
-		}
-		c.Value = v
-	case SetCharacterPropertyTypeWalking:
-		v := false
-		if err := unmarshalJSON(tmp.Value, &v); err != nil {
-			return err
-		}
-		c.Value = v
-	case SetCharacterPropertyTypeSpeed:
-		var v Speed
-		if err := unmarshalJSON(tmp.Value, &v); err != nil {
-			return err
-		}
-		c.Value = v
-	default:
-		return fmt.Errorf("data: invalid type: %s", c.Type)
-	}
-	return nil
 }
 
 func InterfaceToInt(v interface{}) (int, bool) {
@@ -1693,34 +1146,34 @@ func (c *CommandArgsSetCharacterProperty) DecodeMsgpack(dec *msgpack.Decoder) er
 }
 
 type CommandArgsSetCharacterImage struct {
-	Image          string    `json:"image" msgpack:"image"`
-	ImageType      ImageType `json:"imageType" msgpack:"imageType"`
-	Frame          int       `json:"frame" msgpack:"frame"`
-	Dir            Dir       `json:"dir" msgpack:"dir"`
-	UseFrameAndDir bool      `json:"useFrameAndDir" msgpack:"useFrameAndDir"`
+	Image          string    `msgpack:"image"`
+	ImageType      ImageType `msgpack:"imageType"`
+	Frame          int       `msgpack:"frame"`
+	Dir            Dir       `msgpack:"dir"`
+	UseFrameAndDir bool      `msgpack:"useFrameAndDir"`
 }
 
 type CommandArgsAddItem struct {
-	ID int `json:"id" msgpack:"id"`
+	ID int `msgpack:"id"`
 }
 
 type CommandArgsRemoveItem struct {
-	ID int `json:"id" msgpack:"id"`
+	ID int `msgpack:"id"`
 }
 
 type CommandArgsShowItem struct {
-	ID int `json:"id" msgpack:"id"`
+	ID int `msgpack:"id"`
 }
 
 type CommandArgsShowInventory struct {
-	Group      int  `json:"group" msgpack:"group"`
-	Wait       bool `json:"wait" msgpack:"wait"`
-	Cancelable bool `json:"cancelable" msgpack:"cancelable"`
+	Group      int  `msgpack:"group"`
+	Wait       bool `msgpack:"wait"`
+	Cancelable bool `msgpack:"cancelable"`
 }
 
 type CommandArgsReplaceItem struct {
-	ID         int   `json:"id" msgpack:"id"`
-	ReplaceIDs []int `json:"replaceIds" msgpack:"replaceIds"`
+	ID         int   `msgpack:"id"`
+	ReplaceIDs []int `msgpack:"replaceIds"`
 }
 
 type ValueType string
@@ -1745,93 +1198,93 @@ const (
 )
 
 type CommandArgsShowPicture struct {
-	ID           int                  `json:"id" msgpack:"id"`
-	IDValueType  ValueType            `json:"idValueType" msgpack:"idValueType"`
-	Image        string               `json:"image" msgpack:"image"`
-	OriginX      float64              `json:"originX" msgpack:"originX"`
-	OriginY      float64              `json:"originY" msgpack:"originY"`
-	X            int                  `json:"x" msgpack:"x"`
-	Y            int                  `json:"y" msgpack:"y"`
-	PosValueType ValueType            `json:"posValueType" msgpack:"posValueType"`
-	ScaleX       int                  `json:"scaleX" msgpack:"scaleX"`
-	ScaleY       int                  `json:"scaleY" msgpack:"scaleY"`
-	Angle        int                  `json:"angle" msgpack:"angle"`
-	Opacity      int                  `json:"opacity" msgpack:"opacity"`
-	Priority     PicturePriorityType  `json:"priority" msgpack:"priority"`
-	BlendType    ShowPictureBlendType `json:"blendType" msgpack:"blendType"`
+	ID           int                  `msgpack:"id"`
+	IDValueType  ValueType            `msgpack:"idValueType"`
+	Image        string               `msgpack:"image"`
+	OriginX      float64              `msgpack:"originX"`
+	OriginY      float64              `msgpack:"originY"`
+	X            int                  `msgpack:"x"`
+	Y            int                  `msgpack:"y"`
+	PosValueType ValueType            `msgpack:"posValueType"`
+	ScaleX       int                  `msgpack:"scaleX"`
+	ScaleY       int                  `msgpack:"scaleY"`
+	Angle        int                  `msgpack:"angle"`
+	Opacity      int                  `msgpack:"opacity"`
+	Priority     PicturePriorityType  `msgpack:"priority"`
+	BlendType    ShowPictureBlendType `msgpack:"blendType"`
 }
 
 type CommandArgsErasePicture struct {
-	ID          interface{} `json:"id" msgpack:"id"`
-	IDValueType ValueType   `json:"idValueType" msgpack:"idValueType"`
-	SelectType  SelectType  `json:"selectType" msgpack:"selectType"`
+	ID          interface{} `msgpack:"id"`
+	IDValueType ValueType   `msgpack:"idValueType"`
+	SelectType  SelectType  `msgpack:"selectType"`
 }
 
 type CommandArgsMovePicture struct {
-	ID           int       `json:"id" msgpack:"id"`
-	IDValueType  ValueType `json:"idValueType" msgpack:"idValueType"`
-	X            int       `json:"x" msgpack:"x"`
-	Y            int       `json:"y" msgpack:"y"`
-	PosValueType ValueType `json:"posValueType" msgpack:"posValueType"`
-	Time         int       `json:"time" msgpack:"time"`
-	Wait         bool      `json:"wait" msgpack:"wait"`
+	ID           int       `msgpack:"id"`
+	IDValueType  ValueType `msgpack:"idValueType"`
+	X            int       `msgpack:"x"`
+	Y            int       `msgpack:"y"`
+	PosValueType ValueType `msgpack:"posValueType"`
+	Time         int       `msgpack:"time"`
+	Wait         bool      `msgpack:"wait"`
 }
 
 type CommandArgsScalePicture struct {
-	ID             int       `json:"id" msgpack:"id"`
-	IDValueType    ValueType `json:"idValueType" msgpack:"idValueType"`
-	ScaleX         int       `json:"scaleX" msgpack:"scaleX"`
-	ScaleY         int       `json:"scaleY" msgpack:"scaleY"`
-	ScaleValueType ValueType `json:"scaleValueType" msgpack:"scaleValueType"`
-	Time           int       `json:"time" msgpack:"time"`
-	Wait           bool      `json:"wait" msgpack:"wait"`
+	ID             int       `msgpack:"id"`
+	IDValueType    ValueType `msgpack:"idValueType"`
+	ScaleX         int       `msgpack:"scaleX"`
+	ScaleY         int       `msgpack:"scaleY"`
+	ScaleValueType ValueType `msgpack:"scaleValueType"`
+	Time           int       `msgpack:"time"`
+	Wait           bool      `msgpack:"wait"`
 }
 
 type CommandArgsRotatePicture struct {
-	ID             int       `json:"id" msgpack:"id"`
-	IDValueType    ValueType `json:"idValueType" msgpack:"idValueType"`
-	Angle          int       `json:"angle" msgpack:"angle"`
-	AngleValueType ValueType `json:"angleValueType" msgpack:"angleValueType"`
-	Time           int       `json:"time" msgpack:"time"`
-	Wait           bool      `json:"wait" msgpack:"wait"`
+	ID             int       `msgpack:"id"`
+	IDValueType    ValueType `msgpack:"idValueType"`
+	Angle          int       `msgpack:"angle"`
+	AngleValueType ValueType `msgpack:"angleValueType"`
+	Time           int       `msgpack:"time"`
+	Wait           bool      `msgpack:"wait"`
 }
 
 type CommandArgsFadePicture struct {
-	ID               int       `json:"id" msgpack:"id"`
-	IDValueType      ValueType `json:"idValueType" msgpack:"idValueType"`
-	Opacity          int       `json:"opacity" msgpack:"opacity"`
-	OpacityValueType ValueType `json:"opacityValueType" msgpack:"opacityValueType"`
-	Time             int       `json:"time" msgpack:"time"`
-	Wait             bool      `json:"wait" msgpack:"wait"`
+	ID               int       `msgpack:"id"`
+	IDValueType      ValueType `msgpack:"idValueType"`
+	Opacity          int       `msgpack:"opacity"`
+	OpacityValueType ValueType `msgpack:"opacityValueType"`
+	Time             int       `msgpack:"time"`
+	Wait             bool      `msgpack:"wait"`
 }
 
 type CommandArgsTintPicture struct {
-	ID          int       `json:"id" msgpack:"id"`
-	IDValueType ValueType `json:"idValueType" msgpack:"idValueType"`
-	Red         int       `json:"red" msgpack:"red"`
-	Green       int       `json:"green" msgpack:"green"`
-	Blue        int       `json:"blue" msgpack:"blue"`
-	Gray        int       `json:"gray" msgpack:"gray"`
-	Time        int       `json:"time" msgpack:"time"`
-	Wait        bool      `json:"wait" msgpack:"wait"`
+	ID          int       `msgpack:"id"`
+	IDValueType ValueType `msgpack:"idValueType"`
+	Red         int       `msgpack:"red"`
+	Green       int       `msgpack:"green"`
+	Blue        int       `msgpack:"blue"`
+	Gray        int       `msgpack:"gray"`
+	Time        int       `msgpack:"time"`
+	Wait        bool      `msgpack:"wait"`
 }
 
 type CommandArgsChangePictureImage struct {
-	ID          int       `json:"id" msgpack:"id"`
-	IDValueType ValueType `json:"idValueType" msgpack:"idValueType"`
-	Image       string    `json:"image" msgpack:"image"`
+	ID          int       `msgpack:"id"`
+	IDValueType ValueType `msgpack:"idValueType"`
+	Image       string    `msgpack:"image"`
 }
 
 type CommandArgsChangeBackground struct {
-	Image string `json:"image" msgpack:"image"`
+	Image string `msgpack:"image"`
 }
 
 type CommandArgsChangeForeground struct {
-	Image string `json:"image" msgpack:"image"`
+	Image string `msgpack:"image"`
 }
 
 type CommandArgsSpecial struct {
-	Content string `json:"content" msgpack:"content"`
+	Content string `msgpack:"content"`
 }
 
 type SetVariableOp string
@@ -1884,24 +1337,24 @@ const (
 )
 
 type SetVariableValueRandom struct {
-	Begin int `json:"begin" msgpack:"begin"`
-	End   int `json:"end" msgpack:"end"`
+	Begin int `msgpack:"begin"`
+	End   int `msgpack:"end"`
 }
 
 // TODO: Rename?
 type SetVariableCharacterArgs struct {
-	Type    SetVariableCharacterType `json:"type" msgpack:"type"`
-	EventID int                      `json:"eventId" msgpack:"eventId"`
+	Type    SetVariableCharacterType `msgpack:"type"`
+	EventID int                      `msgpack:"eventId"`
 }
 
 type SetVariableItemGroupArgs struct {
-	Type  SetVariableItemGroupType `json:"type" msgpack:"type"`
-	Group int                      `json:"group" msgpack:"group"`
+	Type  SetVariableItemGroupType `msgpack:"type"`
+	Group int                      `msgpack:"group"`
 }
 
 type SetVariableSystem struct {
-	Type    SetVariableCharacterType `json:"type" msgpack:"type"`
-	EventID int                      `json:"eventId" msgpack:"eventId"`
+	Type    SetVariableCharacterType `msgpack:"type"`
+	EventID int                      `msgpack:"eventId"`
 }
 
 type SetVariableTableArgs struct {

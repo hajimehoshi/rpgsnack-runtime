@@ -93,7 +93,7 @@ type rawData struct {
 }
 
 type Project struct {
-	Data *Game `json:"data" msgpack:"data"`
+	Data *Game `msgpack:"data"`
 }
 
 type LoadedData struct {
@@ -161,12 +161,6 @@ func Load(projectionLocation string, progress chan<- LoadProgress) {
 		if data.Project != nil {
 			if err := msgpack.Unmarshal(data.Project, &project); err != nil {
 				errCh <- fmt.Errorf("data: parsing project data failed (Msgpack): %s", err.Error())
-				return
-			}
-		}
-		if project == nil && data.ProjectJSON != nil {
-			if err := unmarshalJSON(data.ProjectJSON, &project); err != nil {
-				errCh <- fmt.Errorf("data: parsing project data failed (JSON): %s", err.Error())
 				return
 			}
 		}

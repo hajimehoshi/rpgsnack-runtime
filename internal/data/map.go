@@ -15,8 +15,6 @@
 package data
 
 import (
-	"encoding/json"
-
 	"github.com/vmihailenco/msgpack"
 )
 
@@ -30,7 +28,6 @@ const (
 
 type Map struct {
 	impl    *MapImpl
-	json    []byte
 	msgpack []byte
 }
 
@@ -55,11 +52,6 @@ func (m *Map) Rooms() []*Room {
 	return m.impl.Rooms
 }
 
-func (m *Map) UnmarshalJSON(data []byte) error {
-	m.json = data
-	return nil
-}
-
 func (m *Map) UnmarshalMsgpack(data []byte) error {
 	m.msgpack = data
 	return nil
@@ -79,39 +71,31 @@ func (m *Map) ensureEncoded() error {
 		return nil
 	}
 
-	if m.json != nil {
-		if err := json.Unmarshal(m.json, &impl); err != nil {
-			return err
-		}
-		m.impl = impl
-		return nil
-	}
-
-	panic("data: the data format was not either Msgpack or JSON at (*Map).ensureEncoded")
+	panic("data: the data format was not either Msgpack at (*Map).ensureEncoded")
 }
 
 type MapImpl struct {
-	ID    int     `json:"id" msgpack:"id"`
-	Name  string  `json:"name" msgpack:"name"`
-	Rooms []*Room `json:"rooms" msgpack:"rooms"`
+	ID    int     `msgpack:"id"`
+	Name  string  `msgpack:"name"`
+	Rooms []*Room `msgpack:"rooms"`
 }
 
 type Room struct {
-	ID                   int            `json:"id" msgpack:"id"`
-	X                    int            `json:"x" msgpack:"x"`
-	Y                    int            `json:"y" msgpack:"y"`
-	Tiles                [][]int        `json:"tiles" msgpack:"tiles"`
-	Events               []*Event       `json:"events" msgpack:"events"`
-	Background           MapSprite      `json:"background" msgpack:"background"`
-	Foreground           MapSprite      `json:"foreground" msgpack:"foreground"`
-	PassageTypeOverrides []PassageType  `json:"passageTypeOverrides" msgpack:"passageTypeOverrides"`
-	AutoBGM              bool           `json:"autoBGM" msgpack:"autoBGM"`
-	BGM                  BGM            `json:"bgm" msgpack:"bgm"`
-	LayoutMode           RoomLayoutMode `json:"layoutMode" msgpack:"layoutMode"`
+	ID                   int            `msgpack:"id"`
+	X                    int            `msgpack:"x"`
+	Y                    int            `msgpack:"y"`
+	Tiles                [][]int        `msgpack:"tiles"`
+	Events               []*Event       `msgpack:"events"`
+	Background           MapSprite      `msgpack:"background"`
+	Foreground           MapSprite      `msgpack:"foreground"`
+	PassageTypeOverrides []PassageType  `msgpack:"passageTypeOverrides"`
+	AutoBGM              bool           `msgpack:"autoBGM"`
+	BGM                  BGM            `msgpack:"bgm"`
+	LayoutMode           RoomLayoutMode `msgpack:"layoutMode"`
 }
 
 type MapSprite struct {
-	Name    string `json:"name" msgpack:"name"`
-	ScrollX int    `json:"scrollX" msgpack:"scrollX"`
-	ScrollY int    `json:"scrollY" msgpack:"scrollY"`
+	Name    string `msgpack:"name"`
+	ScrollX int    `msgpack:"scrollX"`
+	ScrollY int    `msgpack:"scrollY"`
 }

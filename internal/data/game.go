@@ -43,38 +43,38 @@ const (
 )
 
 type Game struct {
-	Maps          []*Map          `json:"maps" msgpack:"maps"`
-	Texts         *Texts          `json:"texts" msgpack:"texts"`
-	Tables        []*Table        `json:"tables" msgpack:"tables"`
-	TileSets      []*TileSet      `json:"tileSets" msgpack:"tileSets"`
-	Achievements  []*Achievement  `json:"achievements" msgpack:"achievements"`
-	Hints         []*Hint         `json:"hints" msgpack:"hints"`
-	IAPProducts   []*IAPProduct   `json:"iapProducts" msgpack:"iapProducts"`
-	Items         []*Item         `json:"items" msgpack:"items"`
-	Combines      []*Combine      `json:"combines" msgpack:"combines"`
-	CommonEvents  []*CommonEvent  `json:"commonEvents" msgpack:"commonEvents"`
-	System        *System         `json:"system" msgpack:"system"`
-	MessageStyles []*MessageStyle `json:"messageStyles" msgpack:"messageStyles"`
-	Shops         []*Shop         `json:"shops" msgpack:"shops"`
+	Maps          []*Map          `msgpack:"maps"`
+	Texts         *Texts          `msgpack:"texts"`
+	Tables        []*Table        `msgpack:"tables"`
+	TileSets      []*TileSet      `msgpack:"tileSets"`
+	Achievements  []*Achievement  `msgpack:"achievements"`
+	Hints         []*Hint         `msgpack:"hints"`
+	IAPProducts   []*IAPProduct   `msgpack:"iapProducts"`
+	Items         []*Item         `msgpack:"items"`
+	Combines      []*Combine      `msgpack:"combines"`
+	CommonEvents  []*CommonEvent  `msgpack:"commonEvents"`
+	System        *System         `msgpack:"system"`
+	MessageStyles []*MessageStyle `msgpack:"messageStyles"`
+	Shops         []*Shop         `msgpack:"shops"`
 }
 
 type Table struct {
-	Name    string                    `json:"name" msgpack:"name"`
-	Schema  map[string]TableValueType `json:"schema" msgpack:"schema"`
-	Records []*map[string]interface{} `json:"records" msgpack:"records"`
+	Name    string                    `msgpack:"name"`
+	Schema  map[string]TableValueType `msgpack:"schema"`
+	Records []*map[string]interface{} `msgpack:"records"`
 }
 
 type MessageStyle struct {
-	ID                int            `json:"id" msgpack:"id"`
-	Name              UUID           `json:"name" msgpack:"name"`
-	TypingEffectDelay int            `json:"typingEffectDelay" msgpack:"typingEffectDelay"`
-	SoundEffect       string         `json:"soundEffect" msgpack:"soundEffect"`
-	CharacterAnim     *CharacterAnim `json:"characterAnim" msgpack:"characterAnim"`
+	ID                int            `msgpack:"id"`
+	Name              UUID           `msgpack:"name"`
+	TypingEffectDelay int            `msgpack:"typingEffectDelay"`
+	SoundEffect       string         `msgpack:"soundEffect"`
+	CharacterAnim     *CharacterAnim `msgpack:"characterAnim"`
 }
 
 type AssetMetadata struct {
-	PassageTypes []PassageType `json:"passageTypes" msgpack:"passageTypes"`
-	IsAutoTile   bool          `json:"isAutoTile" msgpack:"isAutoTile"`
+	PassageTypes []PassageType `msgpack:"passageTypes"`
+	IsAutoTile   bool          `msgpack:"isAutoTile"`
 }
 
 type FinishTriggerType string
@@ -86,68 +86,68 @@ const (
 )
 
 type CharacterAnim struct {
-	Image         string            `json:"image" msgpack:"image"`
-	ImageType     ImageType         `json:"imageType" msgpack:"imageType"`
-	Speed         Speed             `json:"speed" msgpack:"speed"`
-	FinishTrigger FinishTriggerType `json:"finishTrigger" msgpack:"finishTrigger"`
+	Image         string            `msgpack:"image"`
+	ImageType     ImageType         `msgpack:"imageType"`
+	Speed         Speed             `msgpack:"speed"`
+	FinishTrigger FinishTriggerType `msgpack:"finishTrigger"`
 }
 
 type BGM struct {
-	Name   string `json:"name" msgpack:"name"`
-	Volume int    `json:"volume" msgpack:"volume"`
+	Name   string `msgpack:"name"`
+	Volume int    `msgpack:"volume"`
 }
 
 type Achievement struct {
-	ID    int    `json:"id" msgpack:"id"`
-	Name  UUID   `json:"name" msgpack:"name"`
-	Desc  UUID   `json:"desc" msgpack:"desc"`
-	Image string `json:"image" msgpack:"image"`
+	ID    int    `msgpack:"id"`
+	Name  UUID   `msgpack:"name"`
+	Desc  UUID   `msgpack:"desc"`
+	Image string `msgpack:"image"`
 }
 
 type Hint struct {
-	ID       int        `json:"id" msgpack:"id"`
-	Commands []*Command `json:"commands" msgpack:"commands"`
+	ID       int        `msgpack:"id"`
+	Commands []*Command `msgpack:"commands"`
 }
 
 type IAPProduct struct {
-	ID      int    `json:"id" msgpack:"id"`
-	Bundles []int  `json:"bundles" msgpack:"bundles"`
-	Key     string `json:"key" msgpack:"key"`
-	Name    UUID   `json:"name" msgpack:"name"`
-	Desc    UUID   `json:"desc" msgpack:"desc"`
-	Details UUID   `json:"details" msgpack:"details"`
-	Type    string `json:"type" msgpack:"type"`
+	ID      int    `msgpack:"id"`
+	Bundles []int  `msgpack:"bundles"`
+	Key     string `msgpack:"key"`
+	Name    UUID   `msgpack:"name"`
+	Desc    UUID   `msgpack:"desc"`
+	Details UUID   `msgpack:"details"`
+	Type    string `msgpack:"type"`
 }
 
 type Item struct {
-	ID       int        `json:"id" msgpack:"id"`
-	Group    int        `json:"group" msgpack:"group"`
-	Name     UUID       `json:"name" msgpack:"name"`
-	Icon     string     `json:"icon" msgpack:"icon"`
-	Commands []*Command `json:"commands" msgpack:"commands"`
+	ID       int        `msgpack:"id"`
+	Group    int        `msgpack:"group"`
+	Name     UUID       `msgpack:"name"`
+	Icon     string     `msgpack:"icon"`
+	Commands []*Command `msgpack:"commands"`
 }
 
 type Combine struct {
-	ID       int         `json:"id" msgpack:"id"`
-	Item1    int         `json:"item1" msgpack:"item1"`
-	Item2    int         `json:"item2" msgpack:"item2"`
-	Type     CombineType `json:"type" msgpack:"type"`
-	Commands []*Command  `json:"commands" msgpack:"commands"`
+	ID       int         `msgpack:"id"`
+	Item1    int         `msgpack:"item1"`
+	Item2    int         `msgpack:"item2"`
+	Type     CombineType `msgpack:"type"`
+	Commands []*Command  `msgpack:"commands"`
 }
 
 type Shop struct {
-	Name     ShopType `json:"name" msgpack:"name"`
-	Products []int    `json:"products" msgpack:"products"`
+	Name     ShopType `msgpack:"name"`
+	Products []int    `msgpack:"products"`
 }
 
 type ShopProduct struct {
-	ID       int    `json:"id" msgpack:"id"`
-	Key      string `json:"key" msgpack:"key"`
-	Name     string `json:"name" msgpack:"name"`
-	Desc     string `json:"desc" msgpack:"desc"`
-	Details  string `json:"details" msgpack:"details"`
-	Type     string `json:"type" msgpack:"type"`
-	Unlocked bool   `json:"unlocked" msgpack:"unlocked"`
+	ID       int    `msgpack:"id"`
+	Key      string `msgpack:"key"`
+	Name     string `msgpack:"name"`
+	Desc     string `msgpack:"desc"`
+	Details  string `msgpack:"details"`
+	Type     string `msgpack:"type"`
+	Unlocked bool   `msgpack:"unlocked"`
 }
 
 func (g *Game) CreateCombine(itemID1, itemID2 int) *Combine {

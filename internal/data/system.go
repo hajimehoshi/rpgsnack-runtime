@@ -14,13 +14,9 @@
 
 package data
 
-import (
-	"golang.org/x/text/language"
-)
-
 type Title struct {
-	MapID  int `json:"mapId" msgpack:"mapId"`
-	RoomID int `json:"roomId" msgpack:"roomId"`
+	MapID  int `msgpack:"mapId"`
+	RoomID int `msgpack:"roomId"`
 }
 
 type System struct {
@@ -32,35 +28,11 @@ type System struct {
 	TitleTextColor     string              `msgpack:"titleTextColor"`
 }
 
-func (s *System) UnmarshalJSON(data []uint8) error {
-	type tmpSystem struct {
-		Title              *Title              `json:"title"`
-		InitialPlayerState *InitialPlayerState `json:"player"`
-		DefualtLanguage    string              `json:"defaultLanguage"`
-		TitleBGM           BGM                 `json:"titleBgm"`
-		TitleTextColor     string              `json:"titleTextColor"`
-	}
-	var tmp *tmpSystem
-	if err := unmarshalJSON(data, &tmp); err != nil {
-		return err
-	}
-	s.Title = tmp.Title
-	s.InitialPlayerState = tmp.InitialPlayerState
-	s.TitleBGM = tmp.TitleBGM
-	s.TitleTextColor = tmp.TitleTextColor
-	l, err := language.Parse(tmp.DefualtLanguage)
-	if err != nil {
-		return err
-	}
-	s.DefaultLanguage = Language(l)
-	return nil
-}
-
 type InitialPlayerState struct {
-	Image     string    `json:"image" msgpack:"image"`
-	ImageType ImageType `json:"imageType" msgpack:"imageType"`
-	MapID     int       `json:"mapId" msgpack:"mapId"`
-	RoomID    int       `json:"roomId" msgpack:"roomId"`
-	X         int       `json:"x" msgpack:"x"`
-	Y         int       `json:"y" msgpack:"y"`
+	Image     string    `msgpack:"image"`
+	ImageType ImageType `msgpack:"imageType"`
+	MapID     int       `msgpack:"mapId"`
+	RoomID    int       `msgpack:"roomId"`
+	X         int       `msgpack:"x"`
+	Y         int       `msgpack:"y"`
 }

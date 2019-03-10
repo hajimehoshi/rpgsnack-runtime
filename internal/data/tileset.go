@@ -23,6 +23,6 @@ const (
 )
 
 type TileSet struct {
-	ID   int    `json:"id" msgpack:"id"`
-	Name string `json:"name" msgpack:"name"`
+	ID   int    `msgpack:"id"`
+	Name string `msgpack:"name"`
 }

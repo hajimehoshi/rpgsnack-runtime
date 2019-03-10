@@ -1320,7 +1320,7 @@ func (i *Interpreter) Update(sceneManager *scene.Manager, gameState *Game) error
 }
 
 type ShopProduct struct {
-	Key  string `json:"key" msgpack:"key"`
-	Name string `json:"name" msgpack:"name"`
-	Desc string `json:"desc" msgpack:"desc"`
+	Key  string `msgpack:"key"`
+	Name string `msgpack:"name"`
+	Desc string `msgpack:"desc"`
 }
