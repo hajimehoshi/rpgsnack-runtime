@@ -28,6 +28,7 @@ type Command struct {
 	Name     CommandName
 	Args     CommandArgs
 	Branches [][]*Command
+	IsFolded bool
 }
 
 type CommandArgs interface{}
@@ -53,6 +54,9 @@ func (c *Command) EncodeMsgpack(enc *msgpack.Encoder) error {
 	}
 	e.EndArray()
 
+	e.EncodeString("isFolded")
+	e.EncodeBool(c.IsFolded)
+
 	e.EndMap()
 	return e.Flush()
 }
@@ -64,6 +68,7 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 		Name     CommandName     `json:"name"`
 		Branches [][]*Command    `json:"branches"`
 		Args     json.RawMessage `json:"args"`
+		IsFolded bool            `json:"isFolded"`
 	}
 	var tmp *tmpCommand
 	if err := unmarshalJSON(data, &tmp); err != nil {
@@ -71,6 +76,7 @@ func (c *Command) UnmarshalJSON(data []uint8) error {
 	}
 	c.Name = tmp.Name
 	c.Branches = tmp.Branches
+	c.IsFolded = tmp.IsFolded
 	switch c.Name {
 	case CommandNameNop:
 	case CommandNameMemo:
@@ -489,6 +495,9 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 					d.DecodeInterface(c.Branches[i][j])
 				}
 			}
+		case "isFolded":
+			d.DecodeBool()
+
 		default:
 			if err := d.Error(); err != nil {
 				return fmt.Errorf("data: Command.DecodeMsgpack failed: %v", err)
