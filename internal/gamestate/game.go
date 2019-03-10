@@ -510,10 +510,14 @@ func (g *Game) RequestRewardedAds(requestID int, sceneManager *scene.Manager, fo
 	return true
 }
 
-var reMessage = regexp.MustCompile(`\\([a-zA-Z])\[([^\]]+)\]`)
+var (
+	reMessageCommand = regexp.MustCompile(`\\([a-zA-Z])\[([^\\]+)\]`)
+	reMessageTable   = regexp.MustCompile(`([^:]+):([^:]+):([^:]+)`)
+	reMessageTableID = regexp.MustCompile(`v\[([0-9]+)\]`)
+)
 
-func (g *Game) ParseMessageSyntax(str string) string {
-	return reMessage.ReplaceAllStringFunc(str, func(part string) string {
+func (g *Game) ParseMessageSyntax(sceneManager *scene.Manager, str string) string {
+	return reMessageCommand.ReplaceAllStringFunc(str, func(part string) string {
 		name := strings.ToLower(part[1:2])
 		args := part[3 : len(part)-1]
 
@@ -526,6 +530,28 @@ func (g *Game) ParseMessageSyntax(str string) string {
 				return fmt.Sprintf("(error:%v)", part)
 			}
 			return fmt.Sprintf("%d", g.variables.VariableValue(id))
+		case "t":
+			if m1 := reMessageTable.FindStringSubmatch(args); m1 != nil {
+				tableName := m1[1]
+				m2 := reMessageTableID.FindStringSubmatch(m1[2])
+				recordID := 0
+				if m2 != nil {
+					varID, err := strconv.Atoi(m2[1])
+					if err != nil {
+						return fmt.Sprintf("(error:subGroup:%v)", m2[1])
+					}
+					recordID = int(g.VariableValue(varID))
+				} else {
+					var err error
+					recordID, err = strconv.Atoi(m1[2])
+					if err != nil {
+						return fmt.Sprintf("(error:group:%v)", m1[2])
+					}
+				}
+				attrName := m1[3]
+
+				return g.GetTableValueString(sceneManager, tableName, recordID, attrName)
+			}
 		}
 		return str
 	})
@@ -748,14 +774,14 @@ func (g *Game) ShowBalloon(sceneManager *scene.Manager, interpreterID, mapID, ro
 	}
 
 	content := sceneManager.Game().Texts.Get(lang.Get(), contentID)
-	content = g.ParseMessageSyntax(content)
+	content = g.ParseMessageSyntax(sceneManager, content)
 	g.windows.ShowBalloon(contentID, content, balloonType, eventID, interpreterID, messageStyle)
 	return true
 }
 
 func (g *Game) ShowMessage(sceneManager *scene.Manager, interpreterID, eventID int, contentID data.UUID, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign, messageStyle *data.MessageStyle) {
 	content := sceneManager.Game().Texts.Get(lang.Get(), contentID)
-	content = g.ParseMessageSyntax(content)
+	content = g.ParseMessageSyntax(sceneManager, content)
 	g.windows.ShowMessage(contentID, content, eventID, background, positionType, textAlign, interpreterID, messageStyle)
 }
 
@@ -763,7 +789,7 @@ func (g *Game) ShowChoices(sceneManager *scene.Manager, interpreterID int, event
 	choices := []*window.Choice{}
 	for i, id := range choiceIDs {
 		t := sceneManager.Game().Texts.Get(lang.Get(), id)
-		t = g.ParseMessageSyntax(t)
+		t = g.ParseMessageSyntax(sceneManager, t)
 
 		choice := &window.Choice{ID: id, Text: t, Checked: false}
 		if i < len(conditions) && conditions[i].Checked != nil {
@@ -883,6 +909,35 @@ func (g *Game) IsChangingTint() bool {
 
 func (g *Game) RefreshEvents() error {
 	return g.currentMap.refreshEvents(g)
+}
+
+func (g *Game) GetTableValueString(sceneManager *scene.Manager, tableName string, recordID int, attrName string) string {
+	t := sceneManager.Game().GetTableValueType(tableName, attrName)
+	v := sceneManager.Game().GetTableValue(tableName, recordID, attrName)
+	r := ""
+	switch t {
+	case data.TableValueTypeUUID:
+		key, err := data.UUIDFromString(v.(string))
+		if err != nil {
+			panic(fmt.Sprintf("GetTableValueString: invalid UUID %v", v))
+		}
+		r = sceneManager.Game().Texts.Get(lang.Get(), key)
+
+	case data.TableValueTypeInt:
+		i, ok := data.InterfaceToInt(v)
+		if !ok {
+			panic(fmt.Sprintf("GetTableValueString: v isn't an integer %s:%d:%s", tableName, recordID, attrName))
+		}
+		r = fmt.Sprintf("%d", i)
+
+	case data.TableValueTypeString:
+		r = v.(string)
+
+	default:
+		panic(fmt.Sprintf("GetTableValueString: invalid valueType %s", t))
+	}
+
+	return r
 }
 
 func (g *Game) calcVariableRhs(sceneManager *scene.Manager, lhs int64, op data.SetVariableOp, valueType data.SetVariableValueType, value interface{}, mapID, roomID, eventID int) (int64, error) {

@@ -15,7 +15,17 @@
 package data
 
 import (
+	"fmt"
+
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
+)
+
+type TableValueType string
+
+const (
+	TableValueTypeInt    TableValueType = "int"
+	TableValueTypeString TableValueType = "string"
+	TableValueTypeUUID   TableValueType = "uuid"
 )
 
 type ShopType string
@@ -50,7 +60,7 @@ type Game struct {
 
 type Table struct {
 	Name    string                    `json:"name" msgpack:"name"`
-	Schema  map[string]string         `json:"schema" msgpack:"schema"`
+	Schema  map[string]TableValueType `json:"schema" msgpack:"schema"`
 	Records []*map[string]interface{} `json:"records" msgpack:"records"`
 }
 
@@ -220,4 +230,30 @@ func (g *Game) IsShopAvailable(name ShopType) bool {
 
 func (g *Game) IsCombineAvailable() bool {
 	return len(g.Combines) > 0
+}
+
+func (g *Game) GetTableValueType(tableName string, attrName string) TableValueType {
+	for _, t := range g.Tables {
+		if t.Name != tableName {
+			continue
+		}
+		return t.Schema[attrName]
+	}
+	panic(fmt.Sprintf("GetTableValueType: could not find a schema type %s:%s", tableName, attrName))
+}
+
+func (g *Game) GetTableValue(tableName string, recordID int, attrName string) interface{} {
+	id := float64(recordID)
+	for _, t := range g.Tables {
+		if t.Name != tableName {
+			continue
+		}
+		for _, r := range t.Records {
+			if (*r)["id"].(float64) == id {
+				return (*r)[attrName]
+			}
+		}
+	}
+
+	panic(fmt.Sprintf("GetTableValue: could not find a value %s:%d:%s", tableName, recordID, attrName))
 }
