@@ -58,8 +58,8 @@ func SetData(project []byte, assets [][]byte, progress []byte, permanent []byte,
 		panic(err)
 	}
 	dataCh <- &rawData{
-		Project:     nil, // TODO: Implement msgpack version
-		ProjectJSON: project,
+		Project:     project,
+		ProjectJSON: nil,
 		Assets:      assets,
 		Progress:    progress,
 		Permanent:   permanent,
