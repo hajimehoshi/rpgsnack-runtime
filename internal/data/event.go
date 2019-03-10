@@ -59,6 +59,10 @@ func (e *Event) UnmarshalJSON(data []byte) error {
 
 func (e *Event) UnmarshalMsgpack(data []byte) error {
 	e.msgpack = data
+
+	if !isEventLazilyParsed() {
+		e.ensureEncoded()
+	}
 	return nil
 }
 
