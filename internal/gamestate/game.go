@@ -1047,6 +1047,21 @@ func (g *Game) calcVariableRhs(sceneManager *scene.Manager, lhs int64, op data.S
 		default:
 			return 0, fmt.Errorf("gamestate: not implemented yet (set_variable): systemVariableType %s", systemVariableType)
 		}
+	case data.SetVariableValueTypeTable:
+		args := value.(*data.SetVariableTableArgs)
+
+		id := args.ID
+		if args.Type == data.ValueTypeVariable {
+			id = int(g.VariableValue(id))
+		}
+
+		v := sceneManager.Game().GetTableValue(args.Name, id, args.Attr)
+		i, ok := data.InterfaceToInt(v)
+		if !ok {
+			return 0, fmt.Errorf("gamestate: table value isn't an integer %s:%d:%s", args.Name, args.ID, args.Name)
+		}
+
+		rhs = int64(i)
 	}
 	switch op {
 	case data.SetVariableOpAssign:

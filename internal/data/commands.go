@@ -1108,6 +1108,9 @@ func (c *CommandArgsSetVariable) EncodeMsgpack(enc *msgpack.Encoder) error {
 		e.EncodeInt(c.Value.(int))
 	case SetVariableValueTypeSystem:
 		e.EncodeString(string(c.Value.(SystemVariableType)))
+	case SetVariableValueTypeTable:
+		e.EncodeAny(c.Value)
+
 	default:
 		return fmt.Errorf("data: CommandArgsSetVariable.EncodeMsgpack: invalid type: %s", c.ValueType)
 	}
@@ -1194,6 +1197,12 @@ func (c *CommandArgsSetVariable) UnmarshalJSON(data []uint8) error {
 		c.Value = v
 	case SetVariableValueTypeSystem:
 		var v SystemVariableType
+		if err := unmarshalJSON(tmp.Value, &v); err != nil {
+			return err
+		}
+		c.Value = v
+	case SetVariableValueTypeTable:
+		var v *SetVariableTableArgs
 		if err := unmarshalJSON(tmp.Value, &v); err != nil {
 			return err
 		}
@@ -1296,6 +1305,12 @@ func (c *CommandArgsSetVariable) DecodeMsgpack(dec *msgpack.Decoder) error {
 		c.Value = v
 	case SetVariableValueTypeSystem:
 		c.Value = SystemVariableType(value.(string))
+	case SetVariableValueTypeTable:
+		v := &SetVariableTableArgs{}
+		if err := msgpack.Unmarshal(valueBin, v); err != nil {
+			return err
+		}
+		c.Value = v
 	default:
 		return fmt.Errorf("data: CommandArgsSetVariable.DecodeMsgpack: invalid type: %s", c.ValueType)
 	}
@@ -1843,6 +1858,7 @@ const (
 	SetVariableValueTypeItemGroup   SetVariableValueType = "item_group"
 	SetVariableValueTypeIAPProduct  SetVariableValueType = "iap_product"
 	SetVariableValueTypeSystem      SetVariableValueType = "system"
+	SetVariableValueTypeTable       SetVariableValueType = "table"
 )
 
 type SetVariableIDType string
@@ -1886,6 +1902,13 @@ type SetVariableItemGroupArgs struct {
 type SetVariableSystem struct {
 	Type    SetVariableCharacterType `json:"type" msgpack:"type"`
 	EventID int                      `json:"eventId" msgpack:"eventId"`
+}
+
+type SetVariableTableArgs struct {
+	Type ValueType `json:"type" msgpack:"type"`
+	Name string    `json:"name" msgpack:"name"`
+	ID   int       `json:"id" msgpack:"id"`
+	Attr string    `json:"attr" msgpack:"attr"`
 }
 
 type SetVariableCharacterType string
