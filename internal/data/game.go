@@ -243,13 +243,17 @@ func (g *Game) GetTableValueType(tableName string, attrName string) TableValueTy
 }
 
 func (g *Game) GetTableValue(tableName string, recordID int, attrName string) interface{} {
-	id := float64(recordID)
+	id := recordID
 	for _, t := range g.Tables {
 		if t.Name != tableName {
 			continue
 		}
 		for _, r := range t.Records {
-			if (*r)["id"].(float64) == id {
+			i, ok := InterfaceToInt((*r)["id"])
+			if !ok {
+				panic(fmt.Sprintf("GetTableValue: failed to convert ID %v", (*r)["id"]))
+			}
+			if i == id {
 				return (*r)[attrName]
 			}
 		}
