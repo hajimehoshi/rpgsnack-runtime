@@ -1444,6 +1444,8 @@ const (
 	SystemVariableHintCount             SystemVariableType = "active_hint_count"
 	SystemVariableRoomID                SystemVariableType = "room_id"
 	SystemVariableCurrentTime           SystemVariableType = "current_time"
+	SystemVariableActiveItemID          SystemVariableType = "active_item_id"
+	SystemVariableEventItemID           SystemVariableType = "event_item_id"
 )
 
 type MessagePositionType string

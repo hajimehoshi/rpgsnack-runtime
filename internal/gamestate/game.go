@@ -1044,6 +1044,10 @@ func (g *Game) calcVariableRhs(sceneManager *scene.Manager, lhs int64, op data.S
 			rhs = int64(roomID)
 		case data.SystemVariableCurrentTime:
 			rhs = time.Now().Unix()
+		case data.SystemVariableActiveItemID:
+			rhs = int64(g.items.ActiveItem())
+		case data.SystemVariableEventItemID:
+			rhs = int64(g.items.EventItem())
 		default:
 			return 0, fmt.Errorf("gamestate: not implemented yet (set_variable): systemVariableType %s", systemVariableType)
 		}
