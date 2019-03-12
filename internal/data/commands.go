@@ -1365,11 +1365,149 @@ type CommandArgsChangePictureImage struct {
 }
 
 type CommandArgsChangeBackground struct {
-	Image string `msgpack:"image"`
+	Image          interface{}
+	ImageValueType FileValueType
+}
+
+func (c *CommandArgsChangeBackground) EncodeMsgpack(enc *msgpack.Encoder) error {
+	// Default value
+	if c.ImageValueType == "" {
+		c.ImageValueType = FileValueTypeConstant
+	}
+
+	e := easymsgpack.NewEncoder(enc)
+	e.BeginMap()
+
+	e.EncodeString("imageValueType")
+	e.EncodeString(string(c.ImageValueType))
+
+	e.EncodeString("image")
+	e.EncodeAny(c.Image)
+
+	e.EndMap()
+	return e.Flush()
+}
+
+func (c *CommandArgsChangeBackground) DecodeMsgpack(dec *msgpack.Decoder) error {
+	// Default value
+	if c.ImageValueType == "" {
+		c.ImageValueType = FileValueTypeConstant
+	}
+
+	d := easymsgpack.NewDecoder(dec)
+	n := d.DecodeMapLen()
+	var imageValue interface{}
+	for i := 0; i < n; i++ {
+		switch k := d.DecodeString(); k {
+		case "image":
+			d.DecodeAny(&imageValue)
+		case "imageValueType":
+			c.ImageValueType = FileValueType(d.DecodeString())
+		default:
+			if err := d.Error(); err != nil {
+				return fmt.Errorf("data: CommandArgsChangeBackground.DecodeMsgpack failed: %v", err)
+			}
+			return fmt.Errorf("data: CommandArgsChangeBackground.DecodeMsgpack: invalid argument: %s", k)
+		}
+	}
+	if err := d.Error(); err != nil {
+		return fmt.Errorf("data: CommandArgsChangeBackground.DecodeMsgpack failed: %v", err)
+	}
+
+	// TODO: Avoid re-encoding the arg
+	valueBin, err := msgpack.Marshal(imageValue)
+	if err != nil {
+		return err
+	}
+
+	switch c.ImageValueType {
+	case FileValueTypeConstant:
+		if imageValue != nil {
+			c.Image = imageValue.(string)
+		}
+	case FileValueTypeTable:
+		v := &TableValueArgs{}
+		if err := msgpack.Unmarshal(valueBin, v); err != nil {
+			return err
+		}
+		c.Image = v
+	default:
+		return fmt.Errorf("data: CommandArgsChangeBackground.DecodeMsgpack: invalid type: %s for image: %v", c.ImageValueType, imageValue)
+	}
+	return nil
 }
 
 type CommandArgsChangeForeground struct {
-	Image string `msgpack:"image"`
+	Image          interface{}
+	ImageValueType FileValueType
+}
+
+func (c *CommandArgsChangeForeground) EncodeMsgpack(enc *msgpack.Encoder) error {
+	// Default value
+	if c.ImageValueType == "" {
+		c.ImageValueType = FileValueTypeConstant
+	}
+
+	e := easymsgpack.NewEncoder(enc)
+	e.BeginMap()
+
+	e.EncodeString("imageValueType")
+	e.EncodeString(string(c.ImageValueType))
+
+	e.EncodeString("image")
+	e.EncodeAny(c.Image)
+
+	e.EndMap()
+	return e.Flush()
+}
+
+func (c *CommandArgsChangeForeground) DecodeMsgpack(dec *msgpack.Decoder) error {
+	// Default value
+	if c.ImageValueType == "" {
+		c.ImageValueType = FileValueTypeConstant
+	}
+
+	d := easymsgpack.NewDecoder(dec)
+	n := d.DecodeMapLen()
+	var imageValue interface{}
+	for i := 0; i < n; i++ {
+		switch k := d.DecodeString(); k {
+		case "image":
+			d.DecodeAny(&imageValue)
+		case "imageValueType":
+			c.ImageValueType = FileValueType(d.DecodeString())
+		default:
+			if err := d.Error(); err != nil {
+				return fmt.Errorf("data: CommandArgsChangeForeground.DecodeMsgpack failed: %v", err)
+			}
+			return fmt.Errorf("data: CommandArgsChangeForeground.DecodeMsgpack: invalid argument: %s", k)
+		}
+	}
+	if err := d.Error(); err != nil {
+		return fmt.Errorf("data: CommandArgsChangeForeground.DecodeMsgpack failed: %v", err)
+	}
+
+	// TODO: Avoid re-encoding the arg
+	valueBin, err := msgpack.Marshal(imageValue)
+	if err != nil {
+		return err
+	}
+
+	switch c.ImageValueType {
+	case FileValueTypeConstant:
+		if imageValue != nil {
+			c.Image = imageValue.(string)
+		}
+	case FileValueTypeTable:
+		v := &TableValueArgs{}
+		if err := msgpack.Unmarshal(valueBin, v); err != nil {
+			return err
+		}
+		c.Image = v
+	default:
+		return fmt.Errorf("data: CommandArgsChangeForeground.DecodeMsgpack: invalid type: %s for image: %v", c.ImageValueType, imageValue)
+	}
+	return nil
 }
 
 type CommandArgsSpecial struct {

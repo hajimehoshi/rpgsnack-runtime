@@ -72,6 +72,13 @@ func NewInterpreter(idGen InterpreterIDGenerator, mapID, roomID, eventID, pageIn
 	}
 }
 
+func fileValue(sceneManager *scene.Manager, gameState *Game, valueType data.FileValueType, value interface{}) string {
+	if valueType == data.FileValueTypeTable {
+		return gameState.InterfaceToTableValue(sceneManager, value).(string)
+	}
+	return value.(string)
+}
+
 func (i *Interpreter) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e := easymsgpack.NewEncoder(enc)
 	e.BeginMap()
@@ -948,12 +955,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			return true, nil
 		}
 
-		var image string
-		if args.ImageValueType == data.FileValueTypeTable {
-			image = gameState.InterfaceToTableValue(sceneManager, args.Image).(string)
-		} else {
-			image = args.Image.(string)
-		}
+		image := fileValue(sceneManager, gameState, args.ImageValueType, args.Image)
 
 		ch.SetImage(args.ImageType, image)
 		if args.UseFrameAndDir {
@@ -1246,12 +1248,18 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 
 	case data.CommandNameChangeBackground:
 		args := c.Args.(*data.CommandArgsChangeBackground)
-		gameState.SetBackground(i.mapID, i.roomID, args.Image)
+
+		image := fileValue(sceneManager, gameState, args.ImageValueType, args.Image)
+
+		gameState.SetBackground(i.mapID, i.roomID, image)
 		i.commandIterator.Advance()
 
 	case data.CommandNameChangeForeground:
 		args := c.Args.(*data.CommandArgsChangeForeground)
-		gameState.SetForeground(i.mapID, i.roomID, args.Image)
+
+		image := fileValue(sceneManager, gameState, args.ImageValueType, args.Image)
+
+		gameState.SetForeground(i.mapID, i.roomID, image)
 		i.commandIterator.Advance()
 
 	case data.CommandNameSpecial:
