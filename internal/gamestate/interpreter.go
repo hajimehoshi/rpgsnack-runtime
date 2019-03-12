@@ -1243,7 +1243,9 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			id = int(gameState.VariableValue(id))
 		}
 
-		gameState.pictures.ChangeImage(id, args.Image)
+		image := fileValue(sceneManager, gameState, args.ImageValueType, args.Image)
+
+		gameState.pictures.ChangeImage(id, image)
 		i.commandIterator.Advance()
 
 	case data.CommandNameChangeBackground:

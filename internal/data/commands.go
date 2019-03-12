@@ -1359,9 +1359,88 @@ type CommandArgsTintPicture struct {
 }
 
 type CommandArgsChangePictureImage struct {
-	ID          int       `msgpack:"id"`
-	IDValueType ValueType `msgpack:"idValueType"`
-	Image       string    `msgpack:"image"`
+	ID             int
+	IDValueType    ValueType
+	Image          interface{}
+	ImageValueType FileValueType
+}
+
+func (c *CommandArgsChangePictureImage) EncodeMsgpack(enc *msgpack.Encoder) error {
+	// Default value
+	if c.ImageValueType == "" {
+		c.ImageValueType = FileValueTypeConstant
+	}
+
+	e := easymsgpack.NewEncoder(enc)
+	e.BeginMap()
+
+	e.EncodeString("id")
+	e.EncodeInt(c.ID)
+
+	e.EncodeString("idValueType")
+	e.EncodeString(string(c.IDValueType))
+
+	e.EncodeString("imageValueType")
+	e.EncodeString(string(c.ImageValueType))
+
+	e.EncodeString("image")
+	e.EncodeAny(c.Image)
+
+	e.EndMap()
+	return e.Flush()
+}
+
+func (c *CommandArgsChangePictureImage) DecodeMsgpack(dec *msgpack.Decoder) error {
+	// Default value
+	if c.ImageValueType == "" {
+		c.ImageValueType = FileValueTypeConstant
+	}
+
+	d := easymsgpack.NewDecoder(dec)
+	n := d.DecodeMapLen()
+	var imageValue interface{}
+	for i := 0; i < n; i++ {
+		switch k := d.DecodeString(); k {
+		case "id":
+			c.ID = d.DecodeInt()
+		case "image":
+			d.DecodeAny(&imageValue)
+		case "idValueType":
+			c.IDValueType = ValueType(d.DecodeString())
+		case "imageValueType":
+			c.ImageValueType = FileValueType(d.DecodeString())
+		default:
+			if err := d.Error(); err != nil {
+				return fmt.Errorf("data: CommandArgsChangePictureImage.DecodeMsgpack failed: %v", err)
+			}
+			return fmt.Errorf("data: CommandArgsChangePictureImage.DecodeMsgpack: invalid argument: %s", k)
+		}
+	}
+	if err := d.Error(); err != nil {
+		return fmt.Errorf("data: CommandArgsChangePictureImage.DecodeMsgpack failed: %v", err)
+	}
+
+	// TODO: Avoid re-encoding the arg
+	valueBin, err := msgpack.Marshal(imageValue)
+	if err != nil {
+		return err
+	}
+
+	switch c.ImageValueType {
+	case FileValueTypeConstant:
+		if imageValue != nil {
+			c.Image = imageValue.(string)
+		}
+	case FileValueTypeTable:
+		v := &TableValueArgs{}
+		if err := msgpack.Unmarshal(valueBin, v); err != nil {
+			return err
+		}
+		c.Image = v
+	default:
+		return fmt.Errorf("data: CommandArgsChangePictureImage.DecodeMsgpack: invalid type: %s for image: %v", c.ImageValueType, imageValue)
+	}
+	return nil
 }
 
 type CommandArgsChangeBackground struct {
