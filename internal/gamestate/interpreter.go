@@ -947,7 +947,15 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			i.commandIterator.Advance()
 			return true, nil
 		}
-		ch.SetImage(args.ImageType, args.Image)
+
+		var image string
+		if args.ImageValueType == data.FileValueTypeTable {
+			image = gameState.InterfaceToTableValue(sceneManager, args.Image).(string)
+		} else {
+			image = args.Image.(string)
+		}
+
+		ch.SetImage(args.ImageType, image)
 		if args.UseFrameAndDir {
 			ch.SetFrame(args.Frame)
 			ch.SetDir(args.Dir)

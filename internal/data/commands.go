@@ -812,7 +812,7 @@ func (c *CommandArgsSetVariable) DecodeMsgpack(dec *msgpack.Decoder) error {
 	case SetVariableValueTypeSystem:
 		c.Value = SystemVariableType(value.(string))
 	case SetVariableValueTypeTable:
-		v := &SetVariableTableArgs{}
+		v := &TableValueArgs{}
 		if err := msgpack.Unmarshal(valueBin, v); err != nil {
 			return err
 		}
@@ -1146,11 +1146,100 @@ func (c *CommandArgsSetCharacterProperty) DecodeMsgpack(dec *msgpack.Decoder) er
 }
 
 type CommandArgsSetCharacterImage struct {
-	Image          string    `msgpack:"image"`
-	ImageType      ImageType `msgpack:"imageType"`
-	Frame          int       `msgpack:"frame"`
-	Dir            Dir       `msgpack:"dir"`
-	UseFrameAndDir bool      `msgpack:"useFrameAndDir"`
+	Image          interface{}
+	ImageType      ImageType
+	ImageValueType FileValueType
+	Frame          int
+	Dir            Dir
+	UseFrameAndDir bool
+}
+
+func (c *CommandArgsSetCharacterImage) EncodeMsgpack(enc *msgpack.Encoder) error {
+	// Default value
+	if c.ImageValueType == "" {
+		c.ImageValueType = FileValueTypeConstant
+	}
+
+	e := easymsgpack.NewEncoder(enc)
+	e.BeginMap()
+
+	e.EncodeString("imageType")
+	e.EncodeString(string(c.ImageType))
+
+	e.EncodeString("imageValueType")
+	e.EncodeString(string(c.ImageValueType))
+
+	e.EncodeString("frame")
+	e.EncodeInt(int(c.Frame))
+
+	e.EncodeString("dir")
+	e.EncodeInt(int(c.Dir))
+
+	e.EncodeString("useFrameAndDir")
+	e.EncodeBool(c.UseFrameAndDir)
+
+	e.EncodeString("image")
+	e.EncodeAny(c.Image)
+
+	e.EndMap()
+	return e.Flush()
+}
+
+func (c *CommandArgsSetCharacterImage) DecodeMsgpack(dec *msgpack.Decoder) error {
+	// Default value
+	if c.ImageValueType == "" {
+		c.ImageValueType = FileValueTypeConstant
+	}
+
+	d := easymsgpack.NewDecoder(dec)
+	n := d.DecodeMapLen()
+	var imageValue interface{}
+	for i := 0; i < n; i++ {
+		switch k := d.DecodeString(); k {
+		case "imageType":
+			c.ImageType = ImageType(d.DecodeString())
+		case "image":
+			d.DecodeAny(&imageValue)
+		case "imageValueType":
+			c.ImageValueType = FileValueType(d.DecodeString())
+		case "frame":
+			c.Frame = d.DecodeInt()
+		case "dir":
+			c.Dir = Dir(d.DecodeInt())
+		case "useFrameAndDir":
+			c.UseFrameAndDir = d.DecodeBool()
+		default:
+			if err := d.Error(); err != nil {
+				return fmt.Errorf("data: CommandArgsSetCharacterImage.DecodeMsgpack failed: %v", err)
+			}
+			return fmt.Errorf("data: CommandArgsSetCharacterImage.DecodeMsgpack: invalid argument: %s", k)
+		}
+	}
+	if err := d.Error(); err != nil {
+		return fmt.Errorf("data: CommandArgsSetCharacterImage.DecodeMsgpack failed: %v", err)
+	}
+
+	// TODO: Avoid re-encoding the arg
+	valueBin, err := msgpack.Marshal(imageValue)
+	if err != nil {
+		return err
+	}
+
+	switch c.ImageValueType {
+	case FileValueTypeConstant:
+		if imageValue != nil {
+			c.Image = imageValue.(string)
+		}
+	case FileValueTypeTable:
+		v := &TableValueArgs{}
+		if err := msgpack.Unmarshal(valueBin, v); err != nil {
+			return err
+		}
+		c.Image = v
+	default:
+		return fmt.Errorf("data: CommandArgsSetCharacterImage.DecodeMsgpack: invalid type: %s for image: %v", c.ImageValueType, imageValue)
+	}
+	return nil
 }
 
 type CommandArgsAddItem struct {
@@ -1357,7 +1446,7 @@ type SetVariableSystem struct {
 	EventID int                      `msgpack:"eventId"`
 }
 
-type SetVariableTableArgs struct {
+type TableValueArgs struct {
 	Type ValueType `json:"type" msgpack:"type"`
 	Name string    `json:"name" msgpack:"name"`
 	ID   int       `json:"id" msgpack:"id"`
@@ -1491,4 +1580,11 @@ const (
 	OpenLinkTypeMore       OpenLinkType = "more"
 	OpenLinkTypeFacebook   OpenLinkType = "fb"
 	OpenLinkTypeTwitter    OpenLinkType = "twitter"
+)
+
+type FileValueType string
+
+const (
+	FileValueTypeConstant FileValueType = "constant"
+	FileValueTypeTable    FileValueType = "table"
 )

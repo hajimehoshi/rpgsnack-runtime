@@ -911,6 +911,15 @@ func (g *Game) RefreshEvents() error {
 	return g.currentMap.refreshEvents(g)
 }
 
+func (g *Game) InterfaceToTableValue(sceneManager *scene.Manager, v interface{}) interface{} {
+	a := v.(*data.TableValueArgs)
+	id := a.ID
+	if a.Type == data.ValueTypeVariable {
+		id = int(g.VariableValue(id))
+	}
+	return sceneManager.Game().GetTableValue(a.Name, id, a.Attr)
+}
+
 func (g *Game) GetTableValueString(sceneManager *scene.Manager, tableName string, recordID int, attrName string) string {
 	t := sceneManager.Game().GetTableValueType(tableName, attrName)
 	v := sceneManager.Game().GetTableValue(tableName, recordID, attrName)
@@ -1052,17 +1061,10 @@ func (g *Game) calcVariableRhs(sceneManager *scene.Manager, lhs int64, op data.S
 			return 0, fmt.Errorf("gamestate: not implemented yet (set_variable): systemVariableType %s", systemVariableType)
 		}
 	case data.SetVariableValueTypeTable:
-		args := value.(*data.SetVariableTableArgs)
-
-		id := args.ID
-		if args.Type == data.ValueTypeVariable {
-			id = int(g.VariableValue(id))
-		}
-
-		v := sceneManager.Game().GetTableValue(args.Name, id, args.Attr)
+		v := g.InterfaceToTableValue(sceneManager, value)
 		i, ok := data.InterfaceToInt(v)
 		if !ok {
-			return 0, fmt.Errorf("gamestate: table value isn't an integer %s:%d:%s", args.Name, args.ID, args.Name)
+			return 0, fmt.Errorf("gamestate: table value isn't an integer v", v)
 		}
 
 		rhs = int64(i)
