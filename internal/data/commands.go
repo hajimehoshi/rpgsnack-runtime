@@ -874,9 +874,88 @@ type CommandArgsPlaySE struct {
 }
 
 type CommandArgsPlayBGM struct {
-	Name     string `msgpack:"name"`
-	Volume   int    `msgpack:"volume"`
-	FadeTime int    `msgpack:"fadeTime"`
+	Name          interface{}
+	NameValueType FileValueType
+	Volume        int
+	FadeTime      int
+}
+
+func (c *CommandArgsPlayBGM) EncodeMsgpack(enc *msgpack.Encoder) error {
+	// Default value
+	if c.NameValueType == "" {
+		c.NameValueType = FileValueTypeConstant
+	}
+
+	e := easymsgpack.NewEncoder(enc)
+	e.BeginMap()
+
+	e.EncodeString("nameValueType")
+	e.EncodeString(string(c.NameValueType))
+
+	e.EncodeString("volume")
+	e.EncodeInt(c.FadeTime)
+
+	e.EncodeString("fadeTime")
+	e.EncodeInt(c.FadeTime)
+
+	e.EncodeString("name")
+	e.EncodeAny(c.Name)
+
+	e.EndMap()
+	return e.Flush()
+}
+
+func (c *CommandArgsPlayBGM) DecodeMsgpack(dec *msgpack.Decoder) error {
+	// Default value
+	if c.NameValueType == "" {
+		c.NameValueType = FileValueTypeConstant
+	}
+
+	d := easymsgpack.NewDecoder(dec)
+	n := d.DecodeMapLen()
+	var nameValue interface{}
+	for i := 0; i < n; i++ {
+		switch k := d.DecodeString(); k {
+		case "nameValueType":
+			c.NameValueType = FileValueType(d.DecodeString())
+		case "name":
+			d.DecodeAny(&nameValue)
+		case "volume":
+			c.Volume = d.DecodeInt()
+		case "fadeTime":
+			c.FadeTime = d.DecodeInt()
+		default:
+			if err := d.Error(); err != nil {
+				return fmt.Errorf("data: CommandArgsPlayBGM.DecodeMsgpack failed: %v", err)
+			}
+			return fmt.Errorf("data: CommandArgsPlayBGM.DecodeMsgpack: invalid argument: %s", k)
+		}
+	}
+	if err := d.Error(); err != nil {
+		return fmt.Errorf("data: CommandArgsPlayBGM.DecodeMsgpack failed: %v", err)
+	}
+
+	// TODO: Avoid re-encoding the arg
+	valueBin, err := msgpack.Marshal(nameValue)
+	if err != nil {
+		return err
+	}
+
+	switch c.NameValueType {
+	case FileValueTypeConstant:
+		if nameValue != nil {
+			c.Name = nameValue.(string)
+		}
+	case FileValueTypeTable:
+		v := &TableValueArgs{}
+		if err := msgpack.Unmarshal(valueBin, v); err != nil {
+			return err
+		}
+		c.Name = v
+	default:
+		return fmt.Errorf("data: CommandArgsPlayBGM.DecodeMsgpack: invalid type: %s for image: %v", c.NameValueType, nameValue)
+	}
+	return nil
 }
 
 type CommandArgsStopBGM struct {

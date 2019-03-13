@@ -652,7 +652,10 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 	case data.CommandNamePlayBGM:
 		args := c.Args.(*data.CommandArgsPlayBGM)
 		v := float64(args.Volume) / data.MaxVolume
-		audio.PlayBGM(args.Name, v, args.FadeTime*6)
+
+		name := fileValue(sceneManager, gameState, args.NameValueType, args.Name)
+
+		audio.PlayBGM(name, v, args.FadeTime*6)
 		i.commandIterator.Advance()
 	case data.CommandNameStopBGM:
 		args := c.Args.(*data.CommandArgsStopBGM)
