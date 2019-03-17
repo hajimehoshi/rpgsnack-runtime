@@ -1214,7 +1214,7 @@ func (g *Game) ShowedCredits() {
 }
 
 func (g *Game) touchingPictureID(x, y int) int {
-	return g.pictures.touchingPictureID(x, y)
+	return g.pictures.TouchingPictureID(x, y)
 }
 
 // UpdatePictureTouch updates the picture touch states
