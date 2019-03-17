@@ -1058,7 +1058,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		scaleY := float64(args.ScaleY) / 100
 		angle := float64(args.Angle) * math.Pi / 180
 		opacity := float64(args.Opacity) / 255
-		gameState.pictures.Add(id, args.Image, x, y, scaleX, scaleY, angle, opacity, args.OriginX, args.OriginY, args.BlendType, args.Priority)
+		gameState.pictures.Add(id, args.Image, x, y, scaleX, scaleY, angle, opacity, args.OriginX, args.OriginY, args.BlendType, args.Priority, args.Touchable)
 		i.commandIterator.Advance()
 
 	case data.CommandNameErasePicture:

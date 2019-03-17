@@ -1380,6 +1380,7 @@ type CommandArgsShowPicture struct {
 	Opacity      int                  `msgpack:"opacity"`
 	Priority     PicturePriorityType  `msgpack:"priority"`
 	BlendType    ShowPictureBlendType `msgpack:"blendType"`
+	Touchable    bool                 `msgpack:"touchable"`
 }
 
 type CommandArgsErasePicture struct {

@@ -171,7 +171,7 @@ func (p *Pictures) Draw(screen *ebiten.Image, offsetX, offsetY int, priority dat
 	}
 }
 
-func (p *Pictures) Add(id int, name string, x, y int, scaleX, scaleY, angle, opacity float64, originX, originY float64, blendType data.ShowPictureBlendType, priority data.PicturePriorityType) {
+func (p *Pictures) Add(id int, name string, x, y int, scaleX, scaleY, angle, opacity float64, originX, originY float64, blendType data.ShowPictureBlendType, priority data.PicturePriorityType, touchable bool) {
 	p.ensurePictures(id)
 	var image *ebiten.Image
 	if name != "" {
@@ -190,6 +190,7 @@ func (p *Pictures) Add(id int, name string, x, y int, scaleX, scaleY, angle, opa
 		originY:   originY,
 		blendType: blendType,
 		priority:  priority,
+		touchable: touchable,
 	}
 }
 
