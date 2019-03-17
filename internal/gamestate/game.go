@@ -1063,6 +1063,12 @@ func (g *Game) calcVariableRhs(sceneManager *scene.Manager, lhs int64, op data.S
 			rhs = int64(g.items.ActiveItem())
 		case data.SystemVariableEventItemID:
 			rhs = int64(g.items.EventItem())
+		case data.SystemVariableTriggeredPictureID:
+			rhs = int64(g.triggeredPictureID)
+		case data.SystemVariablePressedPictureID:
+			rhs = int64(g.pressedPictureID)
+		case data.SystemVariableReleasedPictureID:
+			rhs = int64(g.releasedPictureID)
 		default:
 			return 0, fmt.Errorf("gamestate: not implemented yet (set_variable): systemVariableType %s", systemVariableType)
 		}

@@ -1832,6 +1832,9 @@ const (
 	SystemVariableCurrentTime           SystemVariableType = "current_time"
 	SystemVariableActiveItemID          SystemVariableType = "active_item_id"
 	SystemVariableEventItemID           SystemVariableType = "event_item_id"
+	SystemVariableTriggeredPictureID    SystemVariableType = "triggered_picture_id"
+	SystemVariablePressedPictureID      SystemVariableType = "pressed_picture_id"
+	SystemVariableReleasedPictureID     SystemVariableType = "released_picture_id"
 )
 
 type MessagePositionType string
