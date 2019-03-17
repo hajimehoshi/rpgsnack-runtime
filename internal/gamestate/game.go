@@ -28,9 +28,11 @@ import (
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/hints"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/items"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/picture"
@@ -125,6 +127,9 @@ type Game struct {
 	playerSpeed data.Speed
 
 	// Fields that are not dumped
+	pressedPictureID       int
+	releasedPictureID      int
+	triggeredPictureID     int
 	isTitle                bool
 	rand                   Rand
 	waitingRequestIDs      map[int]struct{}
@@ -403,6 +408,7 @@ func (g *Game) Update(sceneManager *scene.Manager) error {
 	}
 	g.windows.Update(playerY, sceneManager, g.createCharacterList())
 	g.pictures.Update()
+
 	if err := g.currentMap.Update(sceneManager, g); err != nil {
 		return err
 	}
@@ -1205,4 +1211,42 @@ func (g *Game) ShowCredits() {
 
 func (g *Game) ShowedCredits() {
 	g.shouldShowCredits = false
+}
+
+func (g *Game) touchingPictureID(x, y int) int {
+	return g.pictures.touchingPictureID(x, y)
+}
+
+// UpdatePictureTouch updates the picture touch states
+// and reports whether one of the pictures is touched.
+func (g *Game) UpdatePictureTouch(offsetY int) bool {
+	g.resetPictureIDs()
+	if !g.Map().IsBlockingEventExecuting() && !g.Map().IsPlayerMovingByUserInput() {
+		x, y := input.Position()
+		sx := x / consts.TileScale
+		sy := (y - offsetY) / consts.TileScale
+		if g.updatePictureIDs(sx, sy) {
+			return true
+		}
+	}
+	return false
+}
+
+func (g *Game) resetPictureIDs() {
+	g.triggeredPictureID = 0
+	g.pressedPictureID = 0
+	g.releasedPictureID = 0
+}
+
+func (g *Game) updatePictureIDs(x, y int) bool {
+	if input.Triggered() {
+		g.triggeredPictureID = g.touchingPictureID(x, y)
+	}
+	if input.Pressed() {
+		g.pressedPictureID = g.touchingPictureID(x, y)
+	}
+	if input.Released() {
+		g.releasedPictureID = g.touchingPictureID(x, y)
+	}
+	return g.triggeredPictureID > 0 || g.releasedPictureID > 0 || g.releasedPictureID > 0
 }

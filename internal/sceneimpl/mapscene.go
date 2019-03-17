@@ -424,9 +424,9 @@ func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) {
 	if x < 0 || y < 0 {
 		return
 	}
+
 	tx := x / consts.TileSize / consts.TileScale
 	ty := y / consts.TileSize / consts.TileScale
-
 	if input.Pressed() {
 		m.gameState.Map().SetPressedPosition(tx, ty)
 	}
@@ -630,7 +630,12 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 		return err
 	}
 
-	m.runEventIfNeeded(sceneManager)
+	// If any touchable picture is touched,
+	// do not propagate the touch to activate events
+	if !m.gameState.UpdatePictureTouch(m.offsetY) {
+		m.runEventIfNeeded(sceneManager)
+	}
+
 	m.updateOffsetY(sceneManager)
 	return nil
 }

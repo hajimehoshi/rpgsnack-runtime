@@ -79,6 +79,30 @@ func (p *Pictures) ensurePictures(id int) {
 	}
 }
 
+func (p *Pictures) TouchingPictureID(x, y int) int {
+	tx := float64(x)
+	ty := float64(y)
+	for i, _ := range p.pictures {
+		id := len(p.pictures) - 1 - i
+		pic := p.pictures[id]
+		if pic == nil || pic.image == nil || !pic.touchable {
+			continue
+		}
+		sx, sy := pic.image.Size()
+		var m ebiten.GeoM
+		m.Translate(-pic.x.Current(), -pic.y.Current())
+		m.Rotate(-pic.angle.Current())
+		m.Scale(1.0/pic.scaleX.Current(), 1.0/pic.scaleY.Current())
+		m.Translate(math.Floor(((1+pic.originX)*float64(sx))/2), math.Floor(((1+pic.originY)*float64(sy))/2))
+
+		nx, ny := m.Apply(tx, ty)
+		if 0 <= nx && nx <= float64(sx) && 0 <= ny && ny <= float64(sy) {
+			return id
+		}
+	}
+	return 0
+}
+
 func (p *Pictures) MoveTo(id int, x, y int, count int) {
 	p.ensurePictures(id)
 	if p.pictures[id] == nil {
@@ -188,6 +212,7 @@ type picture struct {
 	originY   float64
 	blendType data.ShowPictureBlendType
 	priority  data.PicturePriorityType
+	touchable bool
 }
 
 func (p *picture) EncodeMsgpack(enc *msgpack.Encoder) error {
@@ -229,6 +254,9 @@ func (p *picture) EncodeMsgpack(enc *msgpack.Encoder) error {
 
 	e.EncodeString("priority")
 	e.EncodeString(string(p.priority))
+
+	e.EncodeString("touchable")
+	e.EncodeBool(p.touchable)
 
 	e.EndMap()
 	return e.Flush()
@@ -273,6 +301,8 @@ func (p *picture) DecodeMsgpack(dec *msgpack.Decoder) error {
 			p.blendType = data.ShowPictureBlendType(d.DecodeString())
 		case "priority":
 			p.priority = data.PicturePriorityType(d.DecodeString())
+		case "touchable":
+			p.touchable = d.DecodeBool()
 		}
 	}
 
