@@ -533,6 +533,7 @@ func (c *Character) SetThrough(through bool) {
 }
 
 func (c *Character) SetImage(imageType data.ImageType, imageName string) {
+	prevFrameCount := c.FrameCount()
 	c.imageName = imageName
 	c.imageType = imageType
 	c.imageW = 0
@@ -543,6 +544,10 @@ func (c *Character) SetImage(imageType data.ImageType, imageName string) {
 	c.frameCount = 0
 	c.steppingDir = 1
 	c.imageInfoCache = nil
+
+	if prevFrameCount != c.FrameCount() {
+		c.frame = c.BaseFrame()
+	}
 }
 
 func (c *Character) SetFrame(frame int) {
