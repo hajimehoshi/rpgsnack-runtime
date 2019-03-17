@@ -26,6 +26,8 @@ type System struct {
 	TitleBGM           BGM                 `msgpack:"titleBgm"`
 	GameName           UUID                `msgpack:"gameName"`
 	TitleTextColor     string              `msgpack:"titleTextColor"`
+	Switches           []*VariableData     `msgpack:"switches"`
+	Variables          []*VariableData     `msgpack:"variables"`
 }
 
 type InitialPlayerState struct {
@@ -35,4 +37,16 @@ type InitialPlayerState struct {
 	RoomID    int       `msgpack:"roomId"`
 	X         int       `msgpack:"x"`
 	Y         int       `msgpack:"y"`
+}
+
+type VariableData struct {
+	ID       int             `msgpack:"id"`
+	Name     string          `msgpack:"name"`
+	Items    []*VariableItem `msgpack:"items"`
+	IsFolded bool            `msgpack:"isFolded"`
+}
+
+type VariableItem struct {
+	ID   int    `msgpack:"id"`
+	Name string `msgpack:"name"`
 }
