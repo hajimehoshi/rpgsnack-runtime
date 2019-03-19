@@ -29,12 +29,20 @@ type input struct {
 	prevPressCount int
 }
 
+func IsSwitchDebugButtonTriggered() bool {
+	return inpututil.IsKeyJustPressed(ebiten.KeyS)
+}
+
+func IsVariableDebugButtonTriggered() bool {
+	return inpututil.IsKeyJustPressed(ebiten.KeyV)
+}
+
 func IsTurboButtonTriggered() bool {
 	return inpututil.IsKeyJustPressed(ebiten.KeyT)
 }
 
 func IsScreenshotButtonTriggered() bool {
-	return inpututil.IsKeyJustPressed(ebiten.KeyS)
+	return inpututil.IsKeyJustPressed(ebiten.KeyP)
 }
 
 func Update(scaleX, scaleY float64) {

@@ -26,6 +26,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/debug"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/font"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/gamestate"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
@@ -81,12 +82,16 @@ type MapScene struct {
 	inventoryHeight      int
 	animation            animation
 
+	activeDebugPanel *debug.DebugPanel
+	debugPanels      map[debug.DebugPanelType]*debug.DebugPanel
+
 	err error
 }
 
 func NewMapScene() *MapScene {
 	m := &MapScene{
 		gameState:    gamestate.NewGame(),
+		debugPanels:  make(map[debug.DebugPanelType]*debug.DebugPanel, 2),
 		initialState: true,
 	}
 	return m
@@ -585,15 +590,38 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 	m.credits.Update()
 }
 
+func (m *MapScene) DebugPanel(entityType debug.DebugPanelType) *debug.DebugPanel {
+	panel, ok := m.debugPanels[entityType]
+	if !ok {
+		panel = debug.NewDebugPanel(m.gameState, entityType)
+	}
+	return panel
+}
+
 func (m *MapScene) Update(sceneManager *scene.Manager) error {
 	if m.err != nil {
 		return m.err
 	}
 
-	if m.gameState.ShouldShowCredits() {
-		m.credits.SetData(sceneManager.Credits())
-		m.credits.Show()
-		m.gameState.ShowedCredits()
+	if input.IsSwitchDebugButtonTriggered() {
+		if m.activeDebugPanel == nil {
+			m.activeDebugPanel = m.DebugPanel(debug.DebugPanelTypeSwitch)
+		} else {
+			m.activeDebugPanel = nil
+		}
+	}
+
+	if input.IsVariableDebugButtonTriggered() {
+		if m.activeDebugPanel == nil {
+			m.activeDebugPanel = m.DebugPanel(debug.DebugPanelTypeVariable)
+		} else {
+			m.activeDebugPanel = nil
+		}
+	}
+
+	if m.activeDebugPanel != nil {
+		m.activeDebugPanel.Update(sceneManager)
+		return nil
 	}
 
 	m.animation.Update()
@@ -756,6 +784,11 @@ func (m *MapScene) drawTiles(priority data.Priority) {
 }
 
 func (m *MapScene) Draw(screen *ebiten.Image) {
+	if m.activeDebugPanel != nil {
+		m.activeDebugPanel.Draw(screen)
+		return
+	}
+
 	const mapWidth = consts.MapWidth
 
 	if !m.initialized {
