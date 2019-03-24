@@ -517,9 +517,10 @@ func (g *Game) RequestRewardedAds(requestID int, sceneManager *scene.Manager, fo
 }
 
 var (
-	reMessageCommand = regexp.MustCompile(`\\([a-zA-Z])\[([^\\]+)\]`)
-	reMessageTable   = regexp.MustCompile(`([^:]+):([^:]+):([^:]+)`)
-	reMessageTableID = regexp.MustCompile(`v\[([0-9]+)\]`)
+	reMessageCommand  = regexp.MustCompile(`\\([a-zA-Z])\[([^\\]+)\]`)
+	reMessageItem     = regexp.MustCompile(`([^:]+):name`)
+	reMessageTable    = regexp.MustCompile(`([^:]+):([^:]+):([^:]+)`)
+	reMessageVariable = regexp.MustCompile(`v\[([0-9]+)\]`)
 )
 
 func (g *Game) ParseMessageSyntax(sceneManager *scene.Manager, str string) string {
@@ -530,6 +531,26 @@ func (g *Game) ParseMessageSyntax(sceneManager *scene.Manager, str string) strin
 		switch name {
 		case "p":
 			return g.price(args)
+		case "i":
+			if m1 := reMessageItem.FindStringSubmatch(args); m1 != nil {
+				m2 := reMessageVariable.FindStringSubmatch(m1[1])
+				itemID := 0
+				if m2 != nil {
+					varID, err := strconv.Atoi(m2[1])
+					if err != nil {
+						return fmt.Sprintf("gamestate: strconv.Atoi failed1: %v", m2[1])
+					}
+					itemID = int(g.VariableValue(varID))
+				} else {
+					var err error
+					itemID, err = strconv.Atoi(m1[1])
+					if err != nil {
+						return fmt.Sprintf("gamestate: strconv.Atoi failed2: %v", m1[1])
+					}
+				}
+
+				return g.GetItemValueString(sceneManager, itemID)
+			}
 		case "v":
 			id, err := strconv.Atoi(args)
 			if err != nil {
@@ -539,7 +560,7 @@ func (g *Game) ParseMessageSyntax(sceneManager *scene.Manager, str string) strin
 		case "t":
 			if m1 := reMessageTable.FindStringSubmatch(args); m1 != nil {
 				tableName := m1[1]
-				m2 := reMessageTableID.FindStringSubmatch(m1[2])
+				m2 := reMessageVariable.FindStringSubmatch(m1[2])
 				recordID := 0
 				if m2 != nil {
 					varID, err := strconv.Atoi(m2[1])
@@ -924,6 +945,14 @@ func (g *Game) InterfaceToTableValue(sceneManager *scene.Manager, v interface{})
 		id = int(g.VariableValue(id))
 	}
 	return sceneManager.Game().GetTableValue(a.Name, id, a.Attr)
+}
+
+func (g *Game) GetItemValueString(sceneManager *scene.Manager, itemID int) string {
+	i := g.items.Item(itemID)
+	if i == nil {
+		panic(fmt.Sprintf("gamestate: GetItemValueString: invalid itemID %d", itemID))
+	}
+	return sceneManager.Game().Texts.Get(lang.Get(), i.Name)
 }
 
 func (g *Game) GetTableValueString(sceneManager *scene.Manager, tableName string, recordID int, attrName string) string {

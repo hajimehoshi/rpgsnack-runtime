@@ -98,7 +98,6 @@ func (i *Items) index(id int) int {
 	if i.items == nil {
 		return -1
 	}
-
 	for index, itemId := range i.items {
 		if itemId == id {
 			return index
@@ -164,6 +163,15 @@ func (i *Items) Items() []*data.Item {
 		i.activeItems = is
 	}
 	return i.activeItems
+}
+
+func (i *Items) Item(id int) *data.Item {
+	for _, i := range i.dataItems {
+		if i.ID == id {
+			return i
+		}
+	}
+	return nil
 }
 
 func (i *Items) ItemIDAt(index int) int {
