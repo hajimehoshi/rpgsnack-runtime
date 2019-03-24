@@ -91,7 +91,6 @@ type MapScene struct {
 func NewMapScene() *MapScene {
 	m := &MapScene{
 		gameState:    gamestate.NewGame(),
-		debugPanels:  make(map[debug.DebugPanelType]*debug.DebugPanel, 2),
 		initialState: true,
 	}
 	return m
@@ -591,9 +590,13 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 }
 
 func (m *MapScene) DebugPanel(entityType debug.DebugPanelType) *debug.DebugPanel {
+	if m.debugPanels == nil {
+		m.debugPanels = map[debug.DebugPanelType]*debug.DebugPanel{}
+	}
 	panel, ok := m.debugPanels[entityType]
 	if !ok {
 		panel = debug.NewDebugPanel(m.gameState, entityType)
+		m.debugPanels[entityType] = panel
 	}
 	return panel
 }

@@ -57,7 +57,7 @@ func (n *NumberInput) Update() {
 		}
 
 		if '0' <= c && c <= '9' {
-			v := strconv.Itoa(int(c[0] - '0'))
+			v := strconv.Itoa(int(c - '0'))
 			if n.waitForNextChar {
 				n.editingText += v
 			} else {
