@@ -990,12 +990,20 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 
 	case data.CommandNameAddItem:
 		args := c.Args.(*data.CommandArgsAddItem)
-		gameState.AddItem(args.ID)
+		id := args.ID
+		if args.IDValueType == data.ValueTypeVariable {
+			id = int(gameState.VariableValue(id))
+		}
+		gameState.AddItem(id)
 		i.commandIterator.Advance()
 
 	case data.CommandNameRemoveItem:
 		args := c.Args.(*data.CommandArgsRemoveItem)
-		gameState.RemoveItem(args.ID)
+		id := args.ID
+		if args.IDValueType == data.ValueTypeVariable {
+			id = int(gameState.VariableValue(id))
+		}
+		gameState.RemoveItem(id)
 		i.commandIterator.Advance()
 
 	case data.CommandNameShowInventory:
@@ -1023,9 +1031,13 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 
 	case data.CommandNameShowItem:
 		args := c.Args.(*data.CommandArgsShowItem)
-		gameState.SetEventItem(args.ID)
-		if gameState.Items().Includes(args.ID) {
-			gameState.Items().Activate(args.ID)
+		id := args.ID
+		if args.IDValueType == data.ValueTypeVariable {
+			id = int(gameState.VariableValue(id))
+		}
+		gameState.SetEventItem(id)
+		if gameState.Items().Includes(id) {
+			gameState.Items().Activate(id)
 			gameState.Items().SetCombineItem(0)
 		}
 		i.commandIterator.Advance()

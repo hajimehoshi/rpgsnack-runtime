@@ -1322,15 +1322,18 @@ func (c *CommandArgsSetCharacterImage) DecodeMsgpack(dec *msgpack.Decoder) error
 }
 
 type CommandArgsAddItem struct {
-	ID int `msgpack:"id"`
+	ID          int       `msgpack:"id"`
+	IDValueType ValueType `msgpack:"idValueType"`
 }
 
 type CommandArgsRemoveItem struct {
-	ID int `msgpack:"id"`
+	ID          int       `msgpack:"id"`
+	IDValueType ValueType `msgpack:"idValueType"`
 }
 
 type CommandArgsShowItem struct {
-	ID int `msgpack:"id"`
+	ID          int       `msgpack:"id"`
+	IDValueType ValueType `msgpack:"idValueType"`
 }
 
 type CommandArgsShowInventory struct {
