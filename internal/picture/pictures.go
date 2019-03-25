@@ -272,7 +272,7 @@ func (p *picture) DecodeMsgpack(dec *msgpack.Decoder) error {
 		case "imageName":
 			p.imageName = d.DecodeString()
 			if p.imageName != "" {
-				p.image = assets.GetImage("pictures/" + p.imageName + ".png")
+				p.image = assets.GetLocalizedImage("pictures/" + p.imageName)
 			}
 		case "x":
 			p.x = &interpolation.I{}
@@ -345,7 +345,7 @@ func (p *picture) changeImage(imageName string) {
 	if imageName == "" {
 		p.image = nil
 	} else {
-		p.image = assets.GetImage("pictures/" + p.imageName + ".png")
+		p.image = assets.GetLocalizedImage("pictures/" + p.imageName)
 	}
 }
 
