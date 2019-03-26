@@ -141,13 +141,13 @@ type Shop struct {
 }
 
 type ShopProduct struct {
-	ID       int    `msgpack:"id"`
-	Key      string `msgpack:"key"`
-	Name     string `msgpack:"name"`
-	Desc     string `msgpack:"desc"`
-	Details  string `msgpack:"details"`
-	Type     string `msgpack:"type"`
-	Unlocked bool   `msgpack:"unlocked"`
+	ID       int    `json:"id"`
+	Key      string `json:"key"`
+	Name     string `json:"name"`
+	Desc     string `json:"desc"`
+	Details  string `json:"details"`
+	Type     string `json:"type"`
+	Unlocked bool   `json:"unlocked"`
 }
 
 func (g *Game) CreateCombine(itemID1, itemID2 int) *Combine {
