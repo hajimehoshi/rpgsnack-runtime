@@ -31,6 +31,7 @@ func face(scale int, lang language.Tag) font.Face {
 	case language.SimplifiedChinese:
 		f, ok := scFaces[scale]
 		if !ok {
+			ensureChineseFonts()
 			f = scaleFont(gothic12r_sc, scale)
 			scFaces[scale] = f
 		}
@@ -38,6 +39,7 @@ func face(scale int, lang language.Tag) font.Face {
 	case language.TraditionalChinese:
 		f, ok := tcFaces[scale]
 		if !ok {
+			ensureChineseFonts()
 			f = scaleFont(gothic12r_tc, scale)
 			tcFaces[scale] = f
 		}

@@ -1,4 +1,4 @@
-// Copyright 2019 Hajime Hoshi
+// Copyright 2019 The RPGSnack Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import (
 	"image"
 	"image/color"
 	"io/ioutil"
+	"sync"
 
 	"github.com/hajimehoshi/bitmapfont"
 	"golang.org/x/image/font"
@@ -89,23 +90,27 @@ type zhBitmap struct {
 var (
 	gothic12r_sc *zhBitmap
 	gothic12r_tc *zhBitmap
+
+	onceChineseFonts sync.Once
 )
 
-func init() {
-	s, err := gzip.NewReader(bytes.NewReader(zhglyphs))
-	if err != nil {
-		panic(err)
-	}
-	defer s.Close()
+func ensureChineseFonts() {
+	onceChineseFonts.Do(func() {
+		s, err := gzip.NewReader(bytes.NewReader(zhglyphs))
+		if err != nil {
+			panic(err)
+		}
+		defer s.Close()
 
-	bits, err := ioutil.ReadAll(s)
-	if err != nil {
-		panic(err)
-	}
+		bits, err := ioutil.ReadAll(s)
+		if err != nil {
+			panic(err)
+		}
 
-	img := newBinaryImage(bits, 12*256, 16*256)
-	gothic12r_sc = &zhBitmap{tagZhHans, img}
-	gothic12r_tc = &zhBitmap{tagZhHant, img}
+		img := newBinaryImage(bits, 12*256, 16*256)
+		gothic12r_sc = &zhBitmap{tagZhHans, img}
+		gothic12r_tc = &zhBitmap{tagZhHant, img}
+	})
 }
 
 func (z *zhBitmap) Glyph(dot fixed.Point26_6, r rune) (dr image.Rectangle, mask image.Image, maskp image.Point, advance fixed.Int26_6, ok bool) {
