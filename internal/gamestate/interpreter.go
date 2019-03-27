@@ -73,6 +73,9 @@ func NewInterpreter(idGen InterpreterIDGenerator, mapID, roomID, eventID, pageIn
 }
 
 func fileValue(sceneManager *scene.Manager, gameState *Game, valueType data.FileValueType, value interface{}) string {
+	if value == nil {
+		return ""
+	}
 	if valueType == data.FileValueTypeTable {
 		return gameState.InterfaceToTableValue(sceneManager, value).(string)
 	}
