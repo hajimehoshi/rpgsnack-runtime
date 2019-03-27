@@ -161,7 +161,7 @@ func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
 	})
 	s.shopButton.SetOnPressed(func(_ *ui.Button) {
 		s.waitingRequestID = sceneManager.GenerateRequestID()
-		sceneManager.Requester().RequestShowShop(s.waitingRequestID, string(sceneManager.ShopProductsDataByShop(data.ShopTypeMain)))
+		sceneManager.Requester().RequestShowShop(s.waitingRequestID, string(sceneManager.ShopData(data.ShopTypeMain, []bool{true, true, true, true})))
 	})
 
 	s.credits = ui.NewCredits(true)

@@ -338,6 +338,12 @@ func (c *Command) DecodeMsgpack(dec *msgpack.Decoder) error {
 			return err
 		}
 		c.Args = a
+	case CommandNameShowMainShop:
+		a := &CommandArgsShowMainShop{}
+		if err := msgpack.Unmarshal(argsBin, a); err != nil {
+			return err
+		}
+		c.Args = a
 	case CommandNameShowMinigame:
 		a := &CommandArgsShowMinigame{}
 		if err := msgpack.Unmarshal(argsBin, a); err != nil {
@@ -548,6 +554,7 @@ const (
 	CommandNameRequestReview     CommandName = "request_review"
 	CommandNameSendAnalytics     CommandName = "send_analytics"
 	CommandNameShowShop          CommandName = "show_shop"
+	CommandNameShowMainShop      CommandName = "show_main_shop"
 	CommandNameShowMinigame      CommandName = "show_minigame"
 	CommandNameVibrate           CommandName = "vibrate"
 
@@ -996,6 +1003,10 @@ type CommandArgsSendAnalytics struct {
 
 type CommandArgsShowShop struct {
 	Products []int `msgpack:"products"`
+}
+
+type CommandArgsShowMainShop struct {
+	Tabs []bool `msgpack:"tabs"`
 }
 
 type CommandArgsShowMinigame struct {

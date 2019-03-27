@@ -347,15 +347,44 @@ func (m *Manager) IsAvailable(id int) bool {
 	return true
 }
 
-func (m *Manager) ShopProductsDataByShop(name data.ShopType) []byte {
-	shop := m.Game().GetShop(name)
-	if shop == nil {
-		return nil
+func (m *Manager) ShopData(name data.ShopType, tabs []bool) []byte {
+	p := &data.ShopPopup{}
+	for i, t := range tabs {
+		if !t {
+			continue
+		}
+		shop := m.Game().GetShop(name, i)
+		if shop == nil || len(shop.Products) == 0 {
+			continue
+		}
+		p.Tabs = append(p.Tabs, &data.ShopPopupTab{
+			Name:     m.game.Texts.Get(lang.Get(), shop.TabName),
+			Products: m.getShopProducts(shop.Products),
+		})
 	}
-	return m.GetShopProductsData(shop.Products)
+
+	b, err := json.Marshal(p)
+	if err != nil {
+		panic(err)
+	}
+	return b
 }
 
-func (m *Manager) GetShopProductsData(products []int) []byte {
+func (m *Manager) DynamicShopData(products []int) []byte {
+	p := &data.ShopPopup{}
+	p.Tabs = append(p.Tabs, &data.ShopPopupTab{
+		Name:     "",
+		Products: m.getShopProducts(products),
+	})
+
+	b, err := json.Marshal(p)
+	if err != nil {
+		panic(err)
+	}
+	return b
+}
+
+func (m *Manager) getShopProducts(products []int) []*data.ShopProduct {
 	data := []*data.ShopProduct{}
 	shopProducts := m.Game().GetShopProducts(products)
 	for _, shopProduct := range shopProducts {
@@ -365,11 +394,7 @@ func (m *Manager) GetShopProductsData(products []int) []byte {
 		}
 	}
 
-	b, err := json.Marshal(data)
-	if err != nil {
-		panic(err)
-	}
-	return b
+	return data
 }
 
 func (m *Manager) MaxPurchaseTier() int {

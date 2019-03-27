@@ -137,7 +137,18 @@ type Combine struct {
 
 type Shop struct {
 	Name     ShopType `msgpack:"name"`
+	Tab      int      `msgpack:"tab"`
+	TabName  UUID     `msgpack:"tabName"`
 	Products []int    `msgpack:"products"`
+}
+
+type ShopPopupTab struct {
+	Name     string         `json:"name"`
+	Products []*ShopProduct `json:"products"`
+}
+
+type ShopPopup struct {
+	Tabs []*ShopPopupTab `json:"tabs"`
 }
 
 type ShopProduct struct {
@@ -215,9 +226,9 @@ func (g *Game) GetShopProducts(products []int) []*ShopProduct {
 	return shopProducts
 }
 
-func (g *Game) GetShop(name ShopType) *Shop {
+func (g *Game) GetShop(name ShopType, tab int) *Shop {
 	for _, shop := range g.Shops {
-		if shop.Name == name {
+		if shop.Name == name && shop.Tab == tab {
 			return shop
 		}
 	}
@@ -225,7 +236,11 @@ func (g *Game) GetShop(name ShopType) *Shop {
 }
 
 func (g *Game) IsShopAvailable(name ShopType) bool {
-	return g.GetShop(name) != nil
+	shop := g.GetShop(name, 0)
+	if shop == nil {
+		return false
+	}
+	return len(shop.Products) > 0
 }
 
 func (g *Game) IsCombineAvailable() bool {

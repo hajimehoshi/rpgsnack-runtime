@@ -772,7 +772,13 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 	case data.CommandNameShowShop:
 		i.waitingRequestID = sceneManager.GenerateRequestID()
 		args := c.Args.(*data.CommandArgsShowShop)
-		sceneManager.Requester().RequestShowShop(i.waitingRequestID, string(sceneManager.GetShopProductsData(args.Products)))
+		sceneManager.Requester().RequestShowShop(i.waitingRequestID, string(sceneManager.DynamicShopData(args.Products)))
+		return false, nil
+
+	case data.CommandNameShowMainShop:
+		i.waitingRequestID = sceneManager.GenerateRequestID()
+		args := c.Args.(*data.CommandArgsShowMainShop)
+		sceneManager.Requester().RequestShowShop(i.waitingRequestID, string(sceneManager.ShopData(data.ShopTypeMain, args.Tabs)))
 		return false, nil
 
 	case data.CommandNameShowMinigame:
