@@ -50,7 +50,7 @@ func (n *NumberInput) Text() string {
 
 func (n *NumberInput) Update() {
 	chars := ebiten.InputChars()
-	for c := range chars {
+	for _, c := range chars {
 		if c == '-' {
 			n.editingText = "-"
 			n.waitForNextChar = true
