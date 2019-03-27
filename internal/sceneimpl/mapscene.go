@@ -627,6 +627,12 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 		return nil
 	}
 
+	if m.gameState.ShouldShowCredits() {
+		m.credits.SetData(sceneManager.Credits())
+		m.credits.Show()
+		m.gameState.ShowedCredits()
+	}
+
 	m.animation.Update()
 
 	if !m.initialized {
