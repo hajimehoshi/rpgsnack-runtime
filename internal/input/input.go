@@ -54,7 +54,7 @@ func Pressed() bool {
 }
 
 func BackButtonPressed() bool {
-	return theInput.BackButtonPressed()
+	return inpututil.IsKeyJustPressed(ebiten.KeyB) || theInput.BackButtonPressed()
 }
 
 func TriggerBackButton() {
