@@ -688,10 +688,6 @@ func (m *MapScene) goToTitle(sceneManager *scene.Manager) {
 }
 
 func (m *MapScene) handleBackButton() {
-	if m.gameState.Map().IsBlockingEventExecuting() {
-		return
-	}
-
 	if m.storeErrorDialog.Visible() {
 		audio.PlaySE("system/cancel", 1.0)
 		m.storeErrorDialog.Hide()
