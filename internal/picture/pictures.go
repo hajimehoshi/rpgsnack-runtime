@@ -82,7 +82,7 @@ func (p *Pictures) ensurePictures(id int) {
 func (p *Pictures) TouchingPictureID(x, y int) int {
 	tx := float64(x)
 	ty := float64(y)
-	for i, _ := range p.pictures {
+	for i := range p.pictures {
 		id := len(p.pictures) - 1 - i
 		pic := p.pictures[id]
 		if pic == nil || pic.image == nil || !pic.touchable {

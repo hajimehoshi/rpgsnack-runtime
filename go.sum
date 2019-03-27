@@ -21,6 +21,8 @@ github.com/gopherjs/gopherwasm v1.0.1/go.mod h1:SkZ8z7CWBz5VXbhJel8TxCmAcsQqzgWG
 github.com/gopherjs/gopherwasm v1.1.0/go.mod h1:SkZ8z7CWBz5VXbhJel8TxCmAcsQqzgWGR/8nMhyhZSI=
 github.com/hajimehoshi/bitmapfont v1.1.1 h1:H1wQ6QXA8kSp+plARsIMCTVb5iOZHq/OP3uyL5NzLuU=
 github.com/hajimehoshi/bitmapfont v1.1.1/go.mod h1:Hamfxgney7tDSmVOSDh2AWzoDH70OaC+P24zc02Gum4=
+github.com/hajimehoshi/bitmapfont v1.1.2-0.20190326162219-f5d264253747 h1:MBcg3B/HON0d52egjLuPc8xkPRk+XJ28BsWnoBDZBy4=
+github.com/hajimehoshi/bitmapfont v1.1.2-0.20190326162219-f5d264253747/go.mod h1:9Ffm60E56Nr/DlcPX/BLxEHjSwht0hkMvn8WWtmUCyA=
 github.com/hajimehoshi/chinesegamefonts v1.0.0 h1:/7JNFMh7pkaSl0Z5hEcq6yJFnVM490XPlBGLH6VBQqo=
 github.com/hajimehoshi/chinesegamefonts v1.0.0/go.mod h1:kRfzUo98u2nOoBUsTDUoYdIy22sINnditpMrchMtwc4=
 github.com/hajimehoshi/ebiten v1.9.0-alpha.0.20190115024631-f16f6cf4b945 h1:9hzA5KNwOxhrdga+cJncTfmYbgDkZSpW7aVndEpwnF0=
@@ -51,6 +53,7 @@ github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORN
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0 h1:45sCR5RtlFHMR4UwH9sdQ5TC8v0qDQCHnXt+kaKSTVE=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
+github.com/pkg/browser v0.0.0-20180916011732-0a3d74bf9ce4/go.mod h1:4OwLy04Bl9Ef3GJJCoec+30X3LQs/0/m4HFRt/2LUSA=
 github.com/theckman/go-flock v0.6.0 h1:hOL3E/2/pQv7uPUt/V6zLN3UC+n5dWmA2fR1nyc0BFM=
 github.com/theckman/go-flock v0.6.0/go.mod h1:kjuth3y9VJ2aNlkNEO99G/8lp9fMIKaGyBmh84IBheM=
 github.com/vmihailenco/msgpack v4.0.1+incompatible h1:RMF1enSPeKTlXrXdOcqjFUElywVZjjC6pqse21bKbEU=

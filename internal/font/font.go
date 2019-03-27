@@ -31,8 +31,10 @@ import (
 
 const (
 	renderingLineHeight = 18
-	mplusDotY           = 12
-	notoDotY            = 11
+
+	// These values are copied from github.com/hajimehoshi/bitmap's private values.
+	mplusDotX = 4
+	mplusDotY = 12
 )
 
 func MeasureSize(text string) (int, int) {
@@ -51,15 +53,6 @@ func MeasureSize(text string) (int, int) {
 
 func DrawText(screen *ebiten.Image, str string, ox, oy int, scale int, textAlign data.TextAlign, color color.Color, displayTextRuneCount int) {
 	DrawTextLang(screen, str, ox, oy, scale, textAlign, color, displayTextRuneCount, lang.Get())
-}
-
-func dotY(lang language.Tag) int {
-	switch lang {
-	case language.SimplifiedChinese, language.TraditionalChinese:
-		return notoDotY
-	default:
-		return mplusDotY
-	}
 }
 
 var scratchPad *ebiten.Image
@@ -91,7 +84,7 @@ func DrawTextLang(screen *ebiten.Image, str string, ox, oy int, scale int, textA
 
 	for i, l := range linesToShow {
 		x := ox + dotX
-		y := oy + dotY(lang)*scale
+		y := oy + mplusDotY*scale
 		_, a := boundString(f, lines[i])
 		switch textAlign {
 		case data.TextAlignLeft:

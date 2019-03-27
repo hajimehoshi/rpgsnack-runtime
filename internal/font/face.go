@@ -15,84 +15,30 @@
 package font
 
 import (
-	"sync"
-
-	"github.com/golang/freetype/truetype"
 	"github.com/hajimehoshi/bitmapfont"
 	"golang.org/x/image/font"
 	"golang.org/x/text/language"
 )
 
 var (
-	scTTF *truetype.Font
-	tcTTF *truetype.Font
-
 	bfFaces = map[int]font.Face{}
 	scFaces = map[int]font.Face{}
 	tcFaces = map[int]font.Face{}
-
-	loadChineseFontsOnce sync.Once
 )
 
-func ensureSCTTF() *truetype.Font {
-	if scTTF != nil {
-		return scTTF
-	}
-
-	loadChineseFontsOnce.Do(startLoadingChineseFonts)
-
-	bs, err := getSCTTF()
-	if err != nil {
-		panic(err)
-	}
-	scTTF, err = truetype.Parse(bs)
-	if err != nil {
-		panic(err)
-	}
-	return scTTF
-}
-
-func ensureTCTTF() *truetype.Font {
-	if tcTTF != nil {
-		return tcTTF
-	}
-
-	loadChineseFontsOnce.Do(startLoadingChineseFonts)
-
-	bs, err := getTCTTF()
-	if err != nil {
-		panic(err)
-	}
-	tcTTF, err = truetype.Parse(bs)
-	if err != nil {
-		panic(err)
-	}
-	return tcTTF
-}
-
 func face(scale int, lang language.Tag) font.Face {
-	const dpi = 72
-
 	switch lang {
 	case language.SimplifiedChinese:
 		f, ok := scFaces[scale]
 		if !ok {
-			f = truetype.NewFace(ensureSCTTF(), &truetype.Options{
-				Size:    12 * float64(scale),
-				DPI:     dpi,
-				Hinting: font.HintingFull,
-			})
+			f = scaleFont(gothic12r_sc, scale)
 			scFaces[scale] = f
 		}
 		return f
 	case language.TraditionalChinese:
 		f, ok := tcFaces[scale]
 		if !ok {
-			f = truetype.NewFace(ensureTCTTF(), &truetype.Options{
-				Size:    12 * float64(scale),
-				DPI:     dpi,
-				Hinting: font.HintingFull,
-			})
+			f = scaleFont(gothic12r_tc, scale)
 			tcFaces[scale] = f
 		}
 		return f

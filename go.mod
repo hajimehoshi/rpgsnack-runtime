@@ -5,7 +5,7 @@ require (
 	github.com/golang/protobuf v1.1.0 // indirect
 	github.com/google/uuid v0.0.0-20171129191014-dec09d789f3d
 	github.com/gopherjs/gopherjs v0.0.0-20180825215210-0210a2f0f73c
-	github.com/hajimehoshi/bitmapfont v1.1.1
+	github.com/hajimehoshi/bitmapfont v1.1.2-0.20190326162219-f5d264253747
 	github.com/hajimehoshi/chinesegamefonts v1.0.0
 	github.com/hajimehoshi/ebiten v1.10.0-alpha.0.20190304165858-2d2d022b3d37
 	github.com/hajimehoshi/oggloop v0.0.0-20180730010327-c7cf68761483
