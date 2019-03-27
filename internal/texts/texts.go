@@ -300,8 +300,8 @@ o login e se conectar à internet`,
 	},
 	language.Korean: {
 		TextIDNewGame:      "처음부터",
-		TextIDResetGame:    "게임 다시 설정", // TODO Review
-		TextIDResumeGame:   "이어서",
+		TextIDResetGame:    "게임리셋",
+		TextIDResumeGame:   "이어하기",
 		TextIDYes:          "네",
 		TextIDNo:           "아니오",
 		TextIDOK:           "OK",
@@ -313,7 +313,7 @@ o login e se conectar à internet`,
 		TextIDRemoveAds:    "광고 제거",
 		TextIDRemoveAdsDesc: `%s를 지불하고, 
 광고를 제거하시겠습니까?`,
-		TextIDReviewThisApp:    "이 앱을 리뷰한다",
+		TextIDReviewThisApp:    "리뷰하기",
 		TextIDRestorePurchases: "구입정보 복구",
 		TextIDMoreGames:        "다른 게임",
 		TextIDPrivacyPolicy:    "개인 정보 정책",
@@ -329,7 +329,7 @@ o login e se conectar à internet`,
 		TextIDStoreError: `스토어에 접속 실패했습니다.
 네트워크 접속이 되어있는지
 확인해주세요`,
-		TextIDMinigameWatchAds: "광고를보고 부스트!",
+		TextIDMinigameWatchAds: "광고를 보고 부스트!",
 		TextIDMinigameProgress: "진행 %d / %d",
 	},
 }
