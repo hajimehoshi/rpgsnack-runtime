@@ -64,6 +64,14 @@ func GetLocalizedImage(key string) *ebiten.Image {
 	if img, ok := theAssets.images[k]; ok {
 		return img
 	}
+	if bin, ok := theAssets.assets[k]; ok {
+		img, err := decodeImage(k, bin)
+		if err != nil {
+			panic(fmt.Sprintf("assets: image decode error: %s, %v", k, err))
+		}
+		theAssets.images[k] = img
+		return img
+	}
 
 	// If not fallback to the base (ex: zh.png)
 	t, _ := l.Base()
