@@ -79,7 +79,7 @@ func NewMinigamePopup(y int) *MinigamePopup {
 		rewardButton: rewardButton,
 		scoreLabel:   scoreLabel,
 		saveTimer:    saveIntervalFrames,
-		visible:      true,
+		visible:      false,
 		minigame:     newCollectingGame(),
 	}
 	rewardButton.SetOnPressed(func(_ *Button) {
