@@ -36,6 +36,10 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 )
 
+func isLazilyDecoded() bool {
+	return true
+}
+
 func PurchasesPath() string {
 	return filepath.Join(os.TempDir(), "purchases.json")
 }

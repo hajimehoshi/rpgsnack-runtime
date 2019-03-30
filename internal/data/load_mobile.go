@@ -26,6 +26,10 @@ var (
 	dataCh = make(chan *rawData, 1)
 )
 
+func isLazilyDecoded() bool {
+	return true
+}
+
 func PurchasesPath() string {
 	return ""
 }

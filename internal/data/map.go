@@ -54,6 +54,10 @@ func (m *Map) Rooms() []*Room {
 
 func (m *Map) UnmarshalMsgpack(data []byte) error {
 	m.msgpack = data
+
+	if !isLazilyDecoded() {
+		m.ensureDecoded()
+	}
 	return nil
 }
 

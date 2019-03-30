@@ -38,7 +38,16 @@ var (
 
 	// TODO: This data should be included in project.json
 	creditsPath = flag.String("credits-json-path", filepath.Join(".", "credits.json"), "credits path")
+
+	forceEagerDecoding = flag.Bool("force-eager-decoding", false, "whether to force decoding maps and events eagerly")
 )
+
+func isLazilyDecoded() bool {
+	if *forceEagerDecoding {
+		return false
+	}
+	return true
+}
 
 func PurchasesPath() string {
 	return *purchasesPath

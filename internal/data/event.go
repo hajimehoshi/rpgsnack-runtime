@@ -53,7 +53,7 @@ func (e *Event) Pages() []*Page {
 func (e *Event) UnmarshalMsgpack(data []byte) error {
 	e.msgpack = data
 
-	if !isEventLazilyParsed() {
+	if !isLazilyDecoded() {
 		e.ensureDecoded()
 	}
 	return nil
