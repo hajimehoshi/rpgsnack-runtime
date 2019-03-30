@@ -30,21 +30,21 @@ type Event struct {
 }
 
 func (e *Event) ID() int {
-	if err := e.ensureEncoded(); err != nil {
+	if err := e.ensureDecoded(); err != nil {
 		panic(err)
 	}
 	return e.impl.ID
 }
 
 func (e *Event) Position() (int, int) {
-	if err := e.ensureEncoded(); err != nil {
+	if err := e.ensureDecoded(); err != nil {
 		panic(err)
 	}
 	return e.impl.X, e.impl.Y
 }
 
 func (e *Event) Pages() []*Page {
-	if err := e.ensureEncoded(); err != nil {
+	if err := e.ensureDecoded(); err != nil {
 		panic(err)
 	}
 	return e.impl.Pages
@@ -54,12 +54,12 @@ func (e *Event) UnmarshalMsgpack(data []byte) error {
 	e.msgpack = data
 
 	if !isEventLazilyParsed() {
-		e.ensureEncoded()
+		e.ensureDecoded()
 	}
 	return nil
 }
 
-func (e *Event) ensureEncoded() error {
+func (e *Event) ensureDecoded() error {
 	if e.impl != nil {
 		return nil
 	}
@@ -73,7 +73,7 @@ func (e *Event) ensureEncoded() error {
 		return nil
 	}
 
-	panic("data: the data format was not either Msgpack  at (*Event).ensureEncoded")
+	panic("data: the data format was not either Msgpack  at (*Event).ensureDecoded")
 }
 
 type EventImpl struct {

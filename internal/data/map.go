@@ -32,21 +32,21 @@ type Map struct {
 }
 
 func (m *Map) ID() int {
-	if err := m.ensureEncoded(); err != nil {
+	if err := m.ensureDecoded(); err != nil {
 		panic(err)
 	}
 	return m.impl.ID
 }
 
 func (m *Map) Name() string {
-	if err := m.ensureEncoded(); err != nil {
+	if err := m.ensureDecoded(); err != nil {
 		panic(err)
 	}
 	return m.impl.Name
 }
 
 func (m *Map) Rooms() []*Room {
-	if err := m.ensureEncoded(); err != nil {
+	if err := m.ensureDecoded(); err != nil {
 		panic(err)
 	}
 	return m.impl.Rooms
@@ -57,7 +57,7 @@ func (m *Map) UnmarshalMsgpack(data []byte) error {
 	return nil
 }
 
-func (m *Map) ensureEncoded() error {
+func (m *Map) ensureDecoded() error {
 	if m.impl != nil {
 		return nil
 	}
@@ -71,7 +71,7 @@ func (m *Map) ensureEncoded() error {
 		return nil
 	}
 
-	panic("data: the data format was not either Msgpack at (*Map).ensureEncoded")
+	panic("data: the data format was not either Msgpack at (*Map).ensureDecoded")
 }
 
 type MapImpl struct {
