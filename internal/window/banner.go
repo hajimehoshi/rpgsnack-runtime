@@ -317,7 +317,7 @@ func (b *banner) draw(screen *ebiten.Image, offsetX, offsetY int) {
 		_, th := font.MeasureSize(b.content)
 		x, y := b.position(screen)
 		x = (x + bannerPaddingX) * consts.TileScale
-		y = y*consts.TileScale + (bannerHeight*consts.TileScale-th*textScale)/2
+		y = (y + (bannerHeight-th*textScale/consts.TileScale)/2) * consts.TileScale
 		switch b.textAlign {
 		case data.TextAlignLeft:
 		case data.TextAlignCenter:
