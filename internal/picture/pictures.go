@@ -16,6 +16,7 @@ package picture
 
 import (
 	"fmt"
+	"image/color"
 	"math"
 
 	"github.com/hajimehoshi/ebiten"
@@ -24,6 +25,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/font"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/interpolation"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/tint"
 )
@@ -171,27 +173,25 @@ func (p *Pictures) Draw(screen *ebiten.Image, offsetX, offsetY int, priority dat
 	}
 }
 
-func (p *Pictures) Add(id int, name string, x, y int, scaleX, scaleY, angle, opacity float64, originX, originY float64, blendType data.ShowPictureBlendType, priority data.PicturePriorityType, touchable bool) {
+func (p *Pictures) Add(id int, text string, stype data.PictureSourceType, x, y int, scaleX, scaleY, angle, opacity float64, originX, originY float64, blendType data.ShowPictureBlendType, priority data.PicturePriorityType, touchable bool) {
 	p.ensurePictures(id)
-	var image *ebiten.Image
-	if name != "" {
-		image = assets.GetLocalizedImage("pictures/" + name)
+	pic := &picture{
+		imageName:  text,
+		sourceType: stype,
+		x:          interpolation.New(float64(x)),
+		y:          interpolation.New(float64(y)),
+		scaleX:     interpolation.New(scaleX),
+		scaleY:     interpolation.New(scaleY),
+		angle:      interpolation.New(angle),
+		opacity:    interpolation.New(opacity),
+		originX:    originX,
+		originY:    originY,
+		blendType:  blendType,
+		priority:   priority,
+		touchable:  touchable,
 	}
-	p.pictures[id] = &picture{
-		imageName: name,
-		image:     image,
-		x:         interpolation.New(float64(x)),
-		y:         interpolation.New(float64(y)),
-		scaleX:    interpolation.New(scaleX),
-		scaleY:    interpolation.New(scaleY),
-		angle:     interpolation.New(angle),
-		opacity:   interpolation.New(opacity),
-		originX:   originX,
-		originY:   originY,
-		blendType: blendType,
-		priority:  priority,
-		touchable: touchable,
-	}
+	pic.loadImage()
+	p.pictures[id] = pic
 }
 
 func (p *Pictures) Remove(id int) {
@@ -200,20 +200,42 @@ func (p *Pictures) Remove(id int) {
 }
 
 type picture struct {
-	imageName string
-	image     *ebiten.Image
-	x         *interpolation.I
-	y         *interpolation.I
-	scaleX    *interpolation.I
-	scaleY    *interpolation.I
-	angle     *interpolation.I
-	opacity   *interpolation.I
-	tint      tint.Tint
-	originX   float64
-	originY   float64
-	blendType data.ShowPictureBlendType
-	priority  data.PicturePriorityType
-	touchable bool
+	imageName  string
+	sourceType data.PictureSourceType
+	image      *ebiten.Image
+	x          *interpolation.I
+	y          *interpolation.I
+	scaleX     *interpolation.I
+	scaleY     *interpolation.I
+	angle      *interpolation.I
+	opacity    *interpolation.I
+	tint       tint.Tint
+	originX    float64
+	originY    float64
+	blendType  data.ShowPictureBlendType
+	priority   data.PicturePriorityType
+	touchable  bool
+}
+
+func (p *picture) loadImage() {
+	text := p.imageName
+
+	var image *ebiten.Image
+	switch p.sourceType {
+	case data.PictureSourceTypeImage:
+		if text != "" {
+			image = assets.GetLocalizedImage("pictures/" + text)
+		}
+	case data.PictureSourceTypeText:
+		if text != "" {
+			w, h := font.MeasureSize(text)
+			image, _ = ebiten.NewImage(w, h, ebiten.FilterDefault)
+			font.DrawText(image, text, 0, 0, 1, data.TextAlignLeft, color.White, len([]rune(text)))
+		}
+	default:
+		panic(fmt.Sprintf("picture: invalid source type: %d", p.sourceType))
+	}
+	p.image = image
 }
 
 func (p *picture) EncodeMsgpack(enc *msgpack.Encoder) error {
@@ -222,6 +244,9 @@ func (p *picture) EncodeMsgpack(enc *msgpack.Encoder) error {
 
 	e.EncodeString("imageName")
 	e.EncodeString(p.imageName)
+
+	e.EncodeString("sourceType")
+	e.EncodeString(string(p.sourceType))
 
 	e.EncodeString("x")
 	e.EncodeInterface(p.x)
@@ -271,8 +296,10 @@ func (p *picture) DecodeMsgpack(dec *msgpack.Decoder) error {
 		switch k := d.DecodeString(); k {
 		case "imageName":
 			p.imageName = d.DecodeString()
-			if p.imageName != "" {
-				p.image = assets.GetLocalizedImage("pictures/" + p.imageName)
+		case "sourceType":
+			p.sourceType = data.PictureSourceType(d.DecodeString())
+			if p.sourceType == "" {
+				p.sourceType = data.PictureSourceTypeImage
 			}
 		case "x":
 			p.x = &interpolation.I{}
@@ -315,6 +342,9 @@ func (p *picture) DecodeMsgpack(dec *msgpack.Decoder) error {
 	if err := d.Error(); err != nil {
 		return fmt.Errorf("pictures: picture.DecodeMsgpack failed: %v", err)
 	}
+
+	p.loadImage()
+
 	return nil
 }
 
@@ -342,11 +372,7 @@ func (p *picture) setTint(red, green, blue, gray float64, count int) {
 
 func (p *picture) changeImage(imageName string) {
 	p.imageName = imageName
-	if imageName == "" {
-		p.image = nil
-	} else {
-		p.image = assets.GetLocalizedImage("pictures/" + p.imageName)
-	}
+	p.loadImage()
 }
 
 func (p *picture) update() {

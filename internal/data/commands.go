@@ -1365,6 +1365,13 @@ const (
 	ValueTypeVariable ValueType = "variable"
 )
 
+type PictureSourceType string
+
+const (
+	PictureSourceTypeImage PictureSourceType = "image"
+	PictureSourceTypeText  PictureSourceType = "text"
+)
+
 type SelectType string
 
 const (
@@ -1383,6 +1390,7 @@ type CommandArgsShowPicture struct {
 	ID           int                  `msgpack:"id"`
 	IDValueType  ValueType            `msgpack:"idValueType"`
 	Image        string               `msgpack:"image"`
+	SourceType   PictureSourceType    `msgpack:"sourceType"`
 	OriginX      float64              `msgpack:"originX"`
 	OriginY      float64              `msgpack:"originY"`
 	X            int                  `msgpack:"x"`
