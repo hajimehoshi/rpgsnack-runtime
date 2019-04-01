@@ -558,16 +558,6 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 	}
 	m.removeAdsButton.Update()
 
-	if m.gameState.InventoryVisible() {
-		m.inventory.Show()
-	} else {
-		m.inventory.Hide()
-	}
-	m.inventory.SetDisabled(m.gameState.Map().IsBlockingEventExecuting() && !m.gameState.Items().ChoiceWait())
-	m.inventory.SetItems(m.gameState.Items().Items())
-	m.inventory.SetActiveItemID(m.gameState.Items().ActiveItem())
-	m.inventory.Update(sceneManager)
-
 	m.itemPreviewPopup.Update(l)
 	m.itemPreviewPopup.SetEnabled(!m.gameState.Map().IsBlockingEventExecuting())
 
@@ -587,6 +577,18 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 	}
 
 	m.credits.Update()
+}
+
+func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
+	if m.gameState.InventoryVisible() {
+		m.inventory.Show()
+	} else {
+		m.inventory.Hide()
+	}
+	m.inventory.SetDisabled(m.gameState.Map().IsBlockingEventExecuting() && !m.gameState.Items().ChoiceWait())
+	m.inventory.SetItems(m.gameState.Items().Items())
+	m.inventory.SetActiveItemID(m.gameState.Items().ActiveItem())
+	m.inventory.Update(sceneManager)
 }
 
 func (m *MapScene) DebugPanel(entityType debug.DebugPanelType) *debug.DebugPanel {
@@ -654,6 +656,8 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 	if m.isUIBusy() {
 		return nil
 	}
+
+	m.updateInventory(sceneManager)
 
 	if m.initialState && m.gameState.IsAutoSaveEnabled() {
 		m.gameState.RequestSave(0, sceneManager)
