@@ -159,6 +159,10 @@ func (m *MinigamePopup) showRewardedAds() {
 	m.onRequestRewardedAds()
 }
 
+func (m *MinigamePopup) Visible() bool {
+	return m.visible
+}
+
 func (m *MinigamePopup) Show() {
 	m.visible = true
 }

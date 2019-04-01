@@ -171,6 +171,17 @@ func (m *MapScene) updateOffsetY(sceneManager *scene.Manager) {
 	m.windowOffsetY = 0
 }
 
+func (m *MapScene) closeItemPreviewPopup() {
+	m.gameState.Items().SetEventItem(0)
+	m.gameState.Items().SetCombineItem(0)
+}
+
+func (m *MapScene) closeMinigamePopup(sceneManager *scene.Manager) {
+	mg := m.gameState.Minigame()
+	m.gameState.RequestSavePermanentMinigame(0, sceneManager, mg.ID(), mg.Score(), mg.LastActiveAt())
+	m.gameState.HideMinigame()
+}
+
 func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	const (
 		uiWidth = consts.MapWidth
@@ -337,8 +348,7 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 		}
 	})
 	m.itemPreviewPopup.SetOnClosePressed(func(_ *ui.ItemPreviewPopup) {
-		m.gameState.Items().SetEventItem(0)
-		m.gameState.Items().SetCombineItem(0)
+		m.closeItemPreviewPopup()
 	})
 	m.minigamePopup.SetOnClose(func() {
 		mg := m.gameState.Minigame()
@@ -649,7 +659,7 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 	}
 
 	if input.BackButtonPressed() {
-		m.handleBackButton()
+		m.handleBackButton(sceneManager)
 	}
 
 	m.updateUI(sceneManager)
@@ -691,7 +701,11 @@ func (m *MapScene) goToTitle(sceneManager *scene.Manager) {
 	sceneManager.GoToWithFading(NewTitleMapScene(g), FadingCount, FadingCount)
 }
 
-func (m *MapScene) handleBackButton() {
+func (m *MapScene) handleBackButton(sceneManager *scene.Manager) {
+	if m.credits.Visible() {
+		return
+	}
+
 	if m.storeErrorDialog.Visible() {
 		audio.PlaySE("system/cancel", 1.0)
 		m.storeErrorDialog.Hide()
@@ -701,6 +715,20 @@ func (m *MapScene) handleBackButton() {
 	if m.quitDialog.Visible() {
 		audio.PlaySE("system/cancel", 1.0)
 		m.quitDialog.Hide()
+		return
+	}
+
+	if m.itemPreviewPopup.Visible() {
+		if m.itemPreviewPopup.CloseButtonEnabled() {
+			audio.PlaySE("system/cancel", 1.0)
+			m.closeItemPreviewPopup()
+			return
+		}
+	}
+
+	if m.minigamePopup.Visible() {
+		audio.PlaySE("system/cancel", 1.0)
+		m.closeMinigamePopup(sceneManager)
 		return
 	}
 
