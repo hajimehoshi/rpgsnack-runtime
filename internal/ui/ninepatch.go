@@ -20,7 +20,7 @@ import (
 	"github.com/hajimehoshi/ebiten"
 )
 
-func drawNinePatches(dst, src *ebiten.Image, width, height int, geoM *ebiten.GeoM, colorM *ebiten.ColorM) {
+func DrawNinePatches(dst, src *ebiten.Image, width, height int, geoM *ebiten.GeoM, colorM *ebiten.ColorM) {
 	const partSize = 4
 
 	parts := make([]*ebiten.Image, 9)

@@ -211,7 +211,7 @@ func (m *MinigamePopup) Draw(screen *ebiten.Image) {
 	geoM := &ebiten.GeoM{}
 	geoM.Translate(6, float64(m.y))
 	geoM.Scale(consts.TileScale, consts.TileScale)
-	drawNinePatches(screen, assets.GetImage("system/common/9patch_frame_off.png"), 140, 140, geoM, nil)
+	DrawNinePatches(screen, assets.GetImage("system/common/9patch_frame_off.png"), 140, 140, geoM, nil)
 
 	for _, n := range m.nodes {
 		n.DrawAsChild(screen, 0, m.y)

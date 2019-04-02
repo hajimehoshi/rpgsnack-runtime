@@ -49,6 +49,10 @@ func Update(scaleX, scaleY float64) {
 	theInput.Update(scaleX, scaleY)
 }
 
+func Wheel() (xoff, yoff float64) {
+	return ebiten.Wheel()
+}
+
 func Pressed() bool {
 	return theInput.Pressed()
 }

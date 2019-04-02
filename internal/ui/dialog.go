@@ -80,7 +80,7 @@ func (d *Dialog) Draw(screen *ebiten.Image) {
 	geoM := &ebiten.GeoM{}
 	geoM.Translate(float64(d.x), float64(d.y))
 	geoM.Scale(consts.TileScale, consts.TileScale)
-	drawNinePatches(screen, assets.GetImage("system/common/9patch_frame_off.png"), d.width, d.height, geoM, nil)
+	DrawNinePatches(screen, assets.GetImage("system/common/9patch_frame_off.png"), d.width, d.height, geoM, nil)
 
 	for _, n := range d.nodes {
 		n.DrawAsChild(screen, d.x, d.y)

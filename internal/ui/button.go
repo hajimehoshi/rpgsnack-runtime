@@ -229,7 +229,7 @@ func (b *Button) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 				op.ColorM.ChangeHSV(0, 0, 1)
 				op.ColorM.Scale(0.5, 0.5, 0.5, 1)
 			}
-			drawNinePatches(screen, img, b.width, b.height, &op.GeoM, &op.ColorM)
+			DrawNinePatches(screen, img, b.width, b.height, &op.GeoM, &op.ColorM)
 		}
 	} else {
 		if b.pressing {

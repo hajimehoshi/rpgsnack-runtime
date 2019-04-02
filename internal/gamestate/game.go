@@ -845,6 +845,10 @@ func (g *Game) SetSelfSwitchValue(eventID int, id int, value bool) {
 	g.variables.SetSelfSwitchValue(m, r, eventID, id, value)
 }
 
+func (g *Game) SetVariableValue(id int, value int64) {
+	g.variables.SetVariableValue(id, value)
+}
+
 func (g *Game) VariableValue(id int) int64 {
 	return g.variables.VariableValue(id)
 }
