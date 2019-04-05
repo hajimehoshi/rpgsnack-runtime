@@ -15,7 +15,6 @@
 package sceneimpl
 
 import (
-	"encoding/json"
 	"fmt"
 	"image"
 	"image/color"
@@ -63,11 +62,6 @@ type MapScene struct {
 	storeErrorDialog     *ui.Dialog
 	storeErrorLabel      *ui.Label
 	storeErrorOkButton   *ui.Button
-	removeAdsButton      *ui.Button
-	removeAdsDialog      *ui.Dialog
-	removeAdsLabel       *ui.Label
-	removeAdsYesButton   *ui.Button
-	removeAdsNoButton    *ui.Button
 	inventory            *ui.Inventory
 	itemPreviewPopup     *ui.ItemPreviewPopup
 	minigamePopup        *ui.MinigamePopup
@@ -75,7 +69,6 @@ type MapScene struct {
 	credits              *ui.Credits
 	markerAnimationFrame int
 	waitingRequestID     int
-	isAdsRemoved         bool
 	initialized          bool
 	offsetY              int
 	windowOffsetY        int
@@ -228,22 +221,11 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	m.storeErrorDialog.AddChild(m.storeErrorLabel)
 	m.storeErrorDialog.AddChild(m.storeErrorOkButton)
 
-	m.removeAdsButton = ui.NewButton(104, 8, 52, 12, "system/click")
-	m.removeAdsDialog = ui.NewDialog((uiWidth-160)/2+4, 64, 152, 124)
-	m.removeAdsLabel = ui.NewLabel(16, 8)
-	m.removeAdsYesButton = ui.NewButton((152-120)/2, 72, 120, 20, "system/click")
-	m.removeAdsNoButton = ui.NewButton((152-120)/2, 96, 120, 20, "system/cancel")
-	m.removeAdsDialog.AddChild(m.removeAdsLabel)
-	m.removeAdsDialog.AddChild(m.removeAdsYesButton)
-	m.removeAdsDialog.AddChild(m.removeAdsNoButton)
-
 	m.inventory = ui.NewInventory(0, consts.CeilDiv(screenH-m.inventoryHeight, consts.TileScale), sceneManager.HasExtraBottomGrid())
 	ty := consts.CeilDiv(screenH, consts.TileScale) - m.inventoryHeight - itemPreviewPopupMargin
 	m.itemPreviewPopup = ui.NewItemPreviewPopup(ty)
 	m.minigamePopup = ui.NewMinigamePopup(ty)
 	m.quitDialog.AddChild(m.quitLabel)
-
-	m.removeAdsButton.Hide() // TODO: Clock of Atonement does not need this feature, so turn it off for now
 
 	m.credits = ui.NewCredits(false)
 
@@ -269,17 +251,6 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	}
 	m.storeErrorOkButton.SetOnPressed(func(_ *ui.Button) {
 		m.storeErrorDialog.Hide()
-	})
-	m.removeAdsButton.SetOnPressed(func(_ *ui.Button) {
-		m.waitingRequestID = sceneManager.GenerateRequestID()
-		sceneManager.Requester().RequestGetIAPPrices(m.waitingRequestID)
-	})
-	m.removeAdsYesButton.SetOnPressed(func(_ *ui.Button) {
-		m.waitingRequestID = sceneManager.GenerateRequestID()
-		sceneManager.Requester().RequestPurchase(m.waitingRequestID, "ads_removal")
-	})
-	m.removeAdsNoButton.SetOnPressed(func(_ *ui.Button) {
-		m.removeAdsDialog.Hide()
 	})
 	m.cameraButton.SetOnPressed(func(_ *ui.Button) {
 		m.cameraTaking = true
@@ -410,10 +381,6 @@ func (m *MapScene) updateItemPreviewPopupVisibility(sceneManager *scene.Manager)
 	}
 }
 
-func (m *MapScene) updatePurchasesState(sceneManager *scene.Manager) {
-	m.isAdsRemoved = sceneManager.IsPurchased("ads_removal")
-}
-
 func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) {
 	if m.itemPreviewPopup.Visible() {
 		m.triggeringFailed = false
@@ -493,30 +460,6 @@ func (m *MapScene) receiveRequest(sceneManager *scene.Manager) bool {
 			sceneManager.Requester().RequestSendAnalytics(fmt.Sprintf("minigame%d_reward", mg.ID()), "")
 			m.minigamePopup.ActivateBoostMode()
 		}
-
-	case scene.RequestTypeIAPPrices:
-		if !r.Succeeded {
-			m.storeErrorDialog.Show()
-			break
-		}
-		priceText := "???"
-		var prices map[string]string
-		if err := json.Unmarshal(r.Data, &prices); err != nil {
-			panic(err)
-		}
-		text := texts.Text(lang.Get(), texts.TextIDRemoveAdsDesc)
-		if _, ok := prices["ads_removal"]; ok {
-			priceText = prices["ads_removal"]
-		}
-		m.removeAdsLabel.Text = fmt.Sprintf(text, priceText)
-		m.removeAdsDialog.Show()
-	case scene.RequestTypePurchase, scene.RequestTypeShowShop:
-		// Note: Ideally we should show a notification toast to notify users about the result
-		// For now, the notifications are handled on the native platform side
-		if r.Succeeded {
-			m.updatePurchasesState(sceneManager)
-		}
-		m.removeAdsDialog.Hide()
 	}
 	return false
 }
@@ -526,9 +469,6 @@ func (m *MapScene) isUIBusy() bool {
 		return true
 	}
 	if m.storeErrorDialog.Visible() {
-		return true
-	}
-	if m.removeAdsDialog.Visible() {
 		return true
 	}
 	if m.screenShotDialog.Visible() {
@@ -547,26 +487,15 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 	m.quitNoButton.SetText(texts.Text(l, texts.TextIDNo))
 	m.storeErrorLabel.Text = texts.Text(l, texts.TextIDStoreError)
 	m.storeErrorOkButton.SetText(texts.Text(l, texts.TextIDOK))
-	m.removeAdsYesButton.SetText(texts.Text(l, texts.TextIDYes))
-	m.removeAdsNoButton.SetText(texts.Text(l, texts.TextIDNo))
-	m.removeAdsButton.SetText(texts.Text(l, texts.TextIDRemoveAds))
 
 	m.quitDialog.Update()
 	m.screenShotDialog.Update()
 	m.storeErrorDialog.Update()
-	m.removeAdsDialog.Update()
 
 	m.cameraButton.Update()
 	if m.gameHeader != nil {
 		m.gameHeader.Update(m.quitDialog.Visible())
 	}
-
-	if m.gameState.Map().IsBlockingEventExecuting() {
-		m.removeAdsButton.Disable()
-	} else {
-		m.removeAdsButton.Enable()
-	}
-	m.removeAdsButton.Update()
 
 	m.itemPreviewPopup.Update(l)
 	m.itemPreviewPopup.SetEnabled(!m.gameState.Map().IsBlockingEventExecuting())
@@ -651,8 +580,6 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 		m.initUI(sceneManager)
 		m.initialized = true
 	}
-
-	m.updatePurchasesState(sceneManager)
 
 	if ok := m.receiveRequest(sceneManager); !ok {
 		return nil
@@ -925,7 +852,6 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	m.inventory.Draw(screen)
 
 	m.cameraButton.Draw(screen)
-	m.removeAdsButton.Draw(screen)
 
 	m.gameState.DrawWindows(screen, 0, m.offsetY/consts.TileScale, m.windowOffsetY/consts.TileScale)
 	if m.gameHeader != nil {
@@ -935,7 +861,6 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	m.screenShotDialog.Draw(screen)
 	m.quitDialog.Draw(screen)
 	m.storeErrorDialog.Draw(screen)
-	m.removeAdsDialog.Draw(screen)
 
 	if m.cameraTaking {
 		m.cameraTaking = false
