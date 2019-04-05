@@ -184,11 +184,6 @@ func (m *Requester) RequestChangeLanguage(requestID int, lang string) {
 	}()
 }
 
-func (m *Requester) RequestGetIAPPrices(requestID int) {
-	log.Printf("request IAP prices: requestID: %d", requestID)
-	m.game.RespondGetIAPPrices(requestID, true, []byte("{\"ads_removal\": \"$0.99\"}"))
-}
-
 func (m *Requester) RequestTerminateGame() {
 	log.Printf("request terminate game")
 }

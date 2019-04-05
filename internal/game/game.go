@@ -253,10 +253,6 @@ func (g *Game) RespondChangeLanguage(id int) {
 	g.sceneManager.RespondChangeLanguage(id)
 }
 
-func (g *Game) RespondGetIAPPrices(id int, success bool, prices []uint8) {
-	g.sceneManager.RespondGetIAPPrices(id, success, prices)
-}
-
 func (g *Game) RespondAsset(id int, success bool, data []byte) {
 	g.sceneManager.RespondAsset(id, success, data)
 }

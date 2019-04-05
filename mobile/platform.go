@@ -224,28 +224,6 @@ func RespondChangeLanguage(id int) (err error) {
 	return nil
 }
 
-func RespondGetIAPPrices(id int, success bool, prices []uint8) (err error) {
-	<-startCalled
-
-	defer func() {
-		if r := recover(); r != nil {
-			ok := false
-			err, ok = r.(error)
-			if !ok {
-				err = fmt.Errorf("error at RespondGetIAPPrices: %v", err)
-			}
-		}
-	}()
-
-	var p []uint8
-	if prices != nil {
-		p = make([]uint8, len(prices))
-		copy(p, prices)
-	}
-	theGame.RespondGetIAPPrices(id, success, p)
-	return nil
-}
-
 func SetPlatformData(key string, value string) (err error) {
 	<-startCalled
 

@@ -27,7 +27,6 @@ type Requester interface {
 	RequestShareImage(requestID int, title string, message string, image []byte)
 	RequestTerminateGame()
 	RequestChangeLanguage(requestID int, lang string)
-	RequestGetIAPPrices(requestID int)
 	RequestReview()
 	RequestSendAnalytics(eventName string, value string)
 	RequestVibration(vibrationType string)
@@ -48,7 +47,6 @@ const (
 	RequestTypeOpenLink
 	RequestTypeShareImage
 	RequestTypeChangeLanguage
-	RequestTypeIAPPrices
 	RequestTypeAsset
 )
 

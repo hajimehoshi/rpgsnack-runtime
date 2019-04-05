@@ -253,17 +253,6 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			} else {
 				i.commandIterator.Choose(1)
 			}
-		case scene.RequestTypeIAPPrices:
-			if r.Succeeded {
-				var prices map[string]string
-				if err := json.Unmarshal(r.Data, &prices); err != nil {
-					return false, err
-				}
-				gameState.SetPrices(prices)
-				i.commandIterator.Choose(0)
-			} else {
-				i.commandIterator.Choose(1)
-			}
 		case scene.RequestTypeSaveProgress:
 			// The iterator is already proceeded.
 		default:

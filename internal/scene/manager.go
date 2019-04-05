@@ -633,17 +633,6 @@ func (m *Manager) RespondChangeLanguage(id int) {
 	}()
 }
 
-func (m *Manager) RespondGetIAPPrices(id int, success bool, prices []byte) {
-	go func() {
-		m.resultCh <- RequestResult{
-			ID:        id,
-			Type:      RequestTypeIAPPrices,
-			Succeeded: success,
-			Data:      prices,
-		}
-	}()
-}
-
 func (m *Manager) SetPlatformData(key PlatformDataKey, value string) {
 	go func() {
 		m.setPlatformDataCh <- setPlatformDataArgs{
