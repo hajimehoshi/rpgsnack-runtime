@@ -1349,9 +1349,3 @@ func (i *Interpreter) Update(sceneManager *scene.Manager, gameState *Game) error
 	}
 	return nil
 }
-
-type ShopProduct struct {
-	Key  string `msgpack:"key"`
-	Name string `msgpack:"name"`
-	Desc string `msgpack:"desc"`
-}
