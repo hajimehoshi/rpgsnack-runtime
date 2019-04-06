@@ -52,6 +52,7 @@ type Interpreter struct {
 	pageRoute          bool
 	routeSkip          bool
 	parallel           bool
+	isSub              bool
 
 	// Not dumped.
 	waitingRequestID int
@@ -131,6 +132,9 @@ func (i *Interpreter) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EncodeString("parallel")
 	e.EncodeBool(i.parallel)
 
+	e.EncodeString("isSub")
+	e.EncodeBool(i.isSub)
+
 	e.EndMap()
 	return e.Flush()
 }
@@ -179,6 +183,8 @@ func (i *Interpreter) DecodeMsgpack(dec *msgpack.Decoder) error {
 			i.routeSkip = d.DecodeBool()
 		case "parallel":
 			i.parallel = d.DecodeBool()
+		case "isSub":
+			i.isSub = d.DecodeBool()
 		case "waitingRequestId":
 			d.Skip()
 		default:
@@ -202,11 +208,12 @@ func (i *Interpreter) IsExecuting() bool {
 	return i.commandIterator != nil
 }
 
-func (i *Interpreter) createChild(gameState InterpreterIDGenerator, eventID int, pageIndex int, commands []*data.Command) *Interpreter {
-	child := NewInterpreter(gameState, i.mapID, i.roomID, eventID, pageIndex, commands)
-	child.route = i.route
-	child.pageRoute = i.pageRoute
-	return child
+func (i *Interpreter) createSub(gameState InterpreterIDGenerator, eventID int, pageIndex int, commands []*data.Command) *Interpreter {
+	sub := NewInterpreter(gameState, i.mapID, i.roomID, eventID, pageIndex, commands)
+	sub.route = i.route
+	sub.pageRoute = i.pageRoute
+	sub.isSub = true
+	return sub
 }
 
 func (i *Interpreter) findMessageStyle(sceneManager *scene.Manager, messageStyleID int) *data.MessageStyle {
@@ -326,7 +333,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		}
 		page := event.Pages()[args.PageIndex]
 		commands := page.Commands
-		i.sub = i.createChild(gameState, eventID, args.PageIndex, commands)
+		i.sub = i.createSub(gameState, eventID, args.PageIndex, commands)
 
 	case data.CommandNameCallCommonEvent:
 		args := c.Args.(*data.CommandArgsCallCommonEvent)
@@ -342,7 +349,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			return false, fmt.Errorf("invalid common event ID: %d", eventID)
 		}
 		// TODO: Is this correct to the pass event id and the page index here?
-		i.sub = i.createChild(gameState, i.eventID, i.pageIndex, c.Commands)
+		i.sub = i.createSub(gameState, i.eventID, i.pageIndex, c.Commands)
 
 	case data.CommandNameReturn:
 		i.commandIterator.Terminate()
@@ -434,7 +441,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		for _, h := range sceneManager.Game().Hints {
 			if h.ID == hintId {
 				c := h.Commands
-				i.sub = i.createChild(gameState, i.eventID, i.pageIndex, c)
+				i.sub = i.createSub(gameState, i.eventID, i.pageIndex, c)
 				hasHint = true
 				break
 			}
@@ -576,7 +583,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		if id == 0 {
 			id = i.eventID
 		}
-		sub := i.createChild(gameState, id, i.pageIndex, args.Commands)
+		sub := i.createSub(gameState, id, i.pageIndex, args.Commands)
 		sub.repeat = args.Repeat
 		sub.routeSkip = args.Skip
 
@@ -1306,7 +1313,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			panic("gamestate: no page was found at data.CommandNameExecEventHere")
 		}
 		c := page.Commands
-		i.sub = i.createChild(gameState, e.EventID(), pageIndex, c)
+		i.sub = i.createSub(gameState, e.EventID(), pageIndex, c)
 
 	case data.CommandNameMemo:
 		args := c.Args.(*data.CommandArgsMemo)
@@ -1341,7 +1348,9 @@ func (i *Interpreter) Update(sceneManager *scene.Manager, gameState *Game) error
 			i.commandIterator.Rewind()
 			return nil
 		}
-		if gameState.windows.IsBusy(i.id) {
+		// If the interpreter is not a sub interpreter, the player will be movable again after its
+		// termination. In this case, don't stop execution until the windows become static.
+		if gameState.windows.IsBusy(i.id) && !i.isSub {
 			return nil
 		}
 		i.commandIterator = nil
