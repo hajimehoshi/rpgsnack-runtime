@@ -233,8 +233,8 @@ func (g *Game) RespondRestorePurchases(id int, success bool, purchases []uint8) 
 	g.sceneManager.RespondRestorePurchases(id, success, purchases)
 }
 
-func (g *Game) RespondInterstitialAds(id int) {
-	g.sceneManager.RespondInterstitialAds(id)
+func (g *Game) RespondInterstitialAds(id int, success bool) {
+	g.sceneManager.RespondInterstitialAds(id, success)
 }
 
 func (g *Game) RespondRewardedAds(id int, success bool) {

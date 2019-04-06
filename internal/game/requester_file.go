@@ -142,7 +142,7 @@ func (m *Requester) RequestInterstitialAds(requestID int, forceAds bool) {
 	log.Printf("request interstitial ads: requestID: %d", requestID, forceAds)
 	go func() {
 		time.Sleep(time.Second)
-		m.game.RespondInterstitialAds(requestID)
+		m.game.RespondInterstitialAds(requestID, true)
 	}()
 }
 

@@ -260,6 +260,12 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			} else {
 				i.commandIterator.Choose(1)
 			}
+		case scene.RequestTypeInterstitialAds:
+			if r.Succeeded {
+				i.commandIterator.Choose(0)
+			} else {
+				i.commandIterator.Advance()
+			}
 		case scene.RequestTypeSaveProgress:
 			// The iterator is already proceeded.
 		default:

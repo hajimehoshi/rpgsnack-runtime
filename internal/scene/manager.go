@@ -587,11 +587,12 @@ func (m *Manager) RespondRestorePurchases(id int, success bool, purchases []byte
 	}()
 }
 
-func (m *Manager) RespondInterstitialAds(id int) {
+func (m *Manager) RespondInterstitialAds(id int, success bool) {
 	go func() {
 		m.resultCh <- RequestResult{
-			ID:   id,
-			Type: RequestTypeInterstitialAds,
+			ID:        id,
+			Type:      RequestTypeInterstitialAds,
+			Succeeded: success,
 		}
 	}()
 }

@@ -139,7 +139,7 @@ func RespondRestorePurchases(id int, success bool, purchases []uint8) (err error
 	return nil
 }
 
-func RespondInterstitialAds(id int) (err error) {
+func RespondInterstitialAds(id int, success bool) (err error) {
 	<-startCalled
 
 	defer func() {
@@ -152,7 +152,7 @@ func RespondInterstitialAds(id int) (err error) {
 		}
 	}()
 
-	theGame.RespondInterstitialAds(id)
+	theGame.RespondInterstitialAds(id, success)
 	return nil
 }
 
