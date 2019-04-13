@@ -44,6 +44,9 @@ type Game struct {
 	setPlatformDataCh chan setPlatformDataArgs
 	langs             []language.Tag
 	screenshots       *screenshots
+
+	pseudoScreen *ebiten.Image
+	frozenScreen *ebiten.Image
 }
 
 type setPlatformDataArgs struct {
@@ -98,6 +101,27 @@ func NewWithDefaultRequester(width, height int) (*Game, error) {
 	g.loadGameData()
 	g.requester = newRequester(g)
 	return g, nil
+}
+
+func (g *Game) SetPseudoScreen(screen *ebiten.Image) {
+	if g.loadProgressCh != nil {
+		panic("game: a pseudo screen is not available during loading")
+	}
+
+	if g.frozenScreen == nil {
+		g.frozenScreen, _ = ebiten.NewImage(g.width, g.height, ebiten.FilterDefault)
+		g.sceneManager.Draw(g.frozenScreen)
+	}
+
+	g.pseudoScreen = screen
+	g.sceneManager.SetScreenSize(g.pseudoScreen.Size())
+}
+
+func (g *Game) ResetPseudoScreen() {
+	g.pseudoScreen = nil
+	g.frozenScreen.Dispose()
+	g.frozenScreen = nil
+	g.sceneManager.SetScreenSize(g.width, g.height)
 }
 
 func (g *Game) SetScreenSize(width, height int, scale float64) {
@@ -171,7 +195,7 @@ func (g *Game) update() error {
 	takeCPUProfileIfAvailable()
 
 	if g.screenshots == nil && input.IsScreenshotButtonTriggered() {
-		g.screenshots = newScreenshots(g.width, g.height, g.langs)
+		g.screenshots = newScreenshots(g.langs)
 	}
 	if g.screenshots != nil {
 		g.screenshots.update(g)
@@ -199,10 +223,16 @@ func (g *Game) draw(screen *ebiten.Image) error {
 		}
 		return nil
 	}
-	g.sceneManager.Draw(screen)
+	if g.pseudoScreen != nil {
+		g.pseudoScreen.Clear()
+		g.sceneManager.Draw(g.pseudoScreen)
+		screen.DrawImage(g.frozenScreen, nil)
+	} else {
+		g.sceneManager.Draw(screen)
+	}
 
 	if g.screenshots != nil {
-		if err := g.screenshots.tryDumpScreenshots(screen); err != nil {
+		if err := g.screenshots.tryDumpScreenshots(); err != nil {
 			return err
 		}
 	}

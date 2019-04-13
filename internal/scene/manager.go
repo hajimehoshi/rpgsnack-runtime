@@ -67,7 +67,8 @@ type Manager struct {
 
 	blackImage *ebiten.Image
 	turbo      bool
-	offscreen  *ebiten.Image
+
+	offscreen *ebiten.Image
 }
 
 type PlatformDataKey string
@@ -103,8 +104,6 @@ func NewManager(width, height int, requester Requester, game *data.Game, progres
 	}
 	m.blackImage, _ = ebiten.NewImage(16, 16, ebiten.FilterDefault)
 	m.blackImage.Fill(color.Black)
-	w, h := m.Size()
-	m.offscreen, _ = ebiten.NewImage(w, h, ebiten.FilterDefault)
 
 	m.credits = &data.Credits{
 		Sections: []data.CreditsSection{
@@ -154,9 +153,6 @@ func (m *Manager) SetScreenSize(width, height int) {
 	if m.width != width || m.height != height {
 		m.width = width
 		m.height = height
-		m.offscreen.Dispose()
-		w, h := m.Size()
-		m.offscreen, _ = ebiten.NewImage(w, h, ebiten.FilterDefault)
 		m.current.Resize()
 	}
 }
@@ -250,21 +246,31 @@ func (m *Manager) Update() error {
 }
 
 func (m *Manager) widthScale() float64 {
-	ow, _ := m.offscreen.Size()
+	ow, _ := m.Size()
 	return float64(m.width) / float64(ow)
 }
 
 func (m *Manager) Draw(screen *ebiten.Image) {
-	s := m.widthScale()
-	if s == 1 {
+	if m.widthScale() == 1 {
 		m.drawImpl(screen)
 		return
+	}
+
+	if m.offscreen != nil {
+		w, h := m.offscreen.Size()
+		if cw, ch := m.Size(); w != cw || h != ch {
+			m.offscreen.Dispose()
+			m.offscreen, _ = ebiten.NewImage(cw, ch, ebiten.FilterDefault)
+		}
+	} else {
+		w, h := m.Size()
+		m.offscreen, _ = ebiten.NewImage(w, h, ebiten.FilterDefault)
 	}
 
 	m.offscreen.Clear()
 	m.drawImpl(m.offscreen)
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(s, 1)
+	op.GeoM.Scale(m.widthScale(), 1)
 	op.Filter = ebiten.FilterLinear
 	screen.DrawImage(m.offscreen, op)
 }

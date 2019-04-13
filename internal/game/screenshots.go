@@ -39,17 +39,14 @@ type screenshots struct {
 	currentScreenshot *screenshotData
 	screenshotDir     string
 	screenshotCount   int
-	origWidth         int
-	origHeight        int
 	origLang          language.Tag
 	finished          bool
+	pseudoScreen      *ebiten.Image
 }
 
-func newScreenshots(width, height int, langs []language.Tag) *screenshots {
+func newScreenshots(langs []language.Tag) *screenshots {
 	s := &screenshots{
 		screenshotDir: filepath.Join("screenshots", time.Now().Format("20060102_030405")),
-		origWidth:     width,
-		origHeight:    height,
 		origLang:      lang.Get(),
 	}
 	for _, sc := range []struct {
@@ -84,7 +81,7 @@ func newScreenshots(width, height int, langs []language.Tag) *screenshots {
 func (s *screenshots) update(game *Game) {
 	if len(s.screenshots) == 0 {
 		if !s.finished {
-			game.SetScreenSize(s.origWidth, s.origHeight, ebiten.ScreenScale())
+			game.ResetPseudoScreen()
 			game.sceneManager.SetLanguage(s.origLang)
 			s.finished = true
 		}
@@ -92,7 +89,12 @@ func (s *screenshots) update(game *Game) {
 	}
 
 	if sc := s.screenshots[0]; sc != s.currentScreenshot {
-		game.SetScreenSize(sc.width, sc.height, ebiten.ScreenScale())
+		if s.pseudoScreen != nil {
+			s.pseudoScreen.Dispose()
+			s.pseudoScreen = nil
+		}
+		s.pseudoScreen, _ = ebiten.NewImage(sc.width, sc.height, ebiten.FilterDefault)
+		game.SetPseudoScreen(s.pseudoScreen)
 		game.sceneManager.SetLanguage(sc.lang)
 		s.screenshotCount = 0
 		s.currentScreenshot = sc
@@ -104,7 +106,7 @@ func (s *screenshots) isFinished() bool {
 	return s.finished
 }
 
-func (s *screenshots) tryDumpScreenshots(screen *ebiten.Image) error {
+func (s *screenshots) tryDumpScreenshots() error {
 	// s.screenshotCount >= 2 is necessary to assure that update is done.
 	// >= 1 is not enough for some mysterious reason.
 	if len(s.screenshots) == 0 || s.screenshotCount < 2 {
@@ -126,9 +128,10 @@ func (s *screenshots) tryDumpScreenshots(screen *ebiten.Image) error {
 	}
 	defer f.Close()
 
+	// Make the background black.
 	img, _ := ebiten.NewImage(sc.width, sc.height, ebiten.FilterDefault)
 	img.Fill(color.Black)
-	img.DrawImage(screen, nil)
+	img.DrawImage(s.pseudoScreen, nil)
 
 	if err := png.Encode(f, img); err != nil {
 		return err
