@@ -589,7 +589,6 @@ const (
 )
 
 func (g *Game) MeetsCondition(cond *data.Condition, eventID int) (bool, error) {
-	// TODO: Is it OK to allow null conditions?
 	if cond == nil {
 		return true, nil
 	}
@@ -819,17 +818,49 @@ func (g *Game) ShowChoices(sceneManager *scene.Manager, interpreterID int, event
 		t = g.ParseMessageSyntax(sceneManager, t)
 
 		choice := &window.Choice{ID: id, Text: t, Checked: false}
-		if i < len(conditions) && conditions[i].Checked != nil {
-			m, err := g.MeetsCondition(conditions[i].Checked, eventID)
+
+		var err error
+		m := true
+		if i < len(conditions) {
+			m, err = g.MeetsCondition(conditions[i].Visible, eventID)
 			if err != nil {
 				panic(err)
 			}
-			choice.Checked = m
 		}
 
-		choices = append(choices, choice)
+		if m {
+			if i < len(conditions) && conditions[i].Checked != nil {
+				m, err := g.MeetsCondition(conditions[i].Checked, eventID)
+				if err != nil {
+					panic(err)
+				}
+				choice.Checked = m
+			}
+			choices = append(choices, choice)
+		}
 	}
 	g.windows.ShowChoices(sceneManager, choices, interpreterID)
+}
+
+func (g *Game) RealChoiceIndex(sceneManager *scene.Manager, index int, eventID int, conditions []*data.ChoiceCondition) int {
+	if len(conditions) == 0 {
+		return index
+	}
+	j := 0
+	for i, condition := range conditions {
+		m, err := g.MeetsCondition(condition.Visible, eventID)
+		if err != nil {
+			panic(err)
+		}
+		if !m {
+			continue
+		}
+		if j == index {
+			return i
+		}
+		j++
+	}
+	return -1
 }
 
 func (g *Game) SetSwitchValue(id int, value bool) {

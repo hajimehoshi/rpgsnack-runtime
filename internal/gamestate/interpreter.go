@@ -474,7 +474,13 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		if gameState.windows.IsBusy(i.id) {
 			return false, nil
 		}
-		i.commandIterator.Choose(gameState.ChosenWindowIndex())
+
+		idx := gameState.RealChoiceIndex(sceneManager, gameState.ChosenWindowIndex(), i.eventID, c.Args.(*data.CommandArgsShowChoices).Conditions)
+		if idx >= 0 {
+			i.commandIterator.Choose(idx)
+		} else {
+			i.commandIterator.Advance()
+		}
 		i.waitingCommand = false
 
 	case data.CommandNameSetSwitch:
