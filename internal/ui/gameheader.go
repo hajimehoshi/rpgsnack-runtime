@@ -18,6 +18,7 @@ import (
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
@@ -52,10 +53,7 @@ func NewGameHeader() *GameHeader {
 	titleButton.text = texts.Text(l, texts.TextIDMenu)
 	titleButton.disabled = true
 
-	// TODO: Replace the camera image
-	camera, _ := ebiten.NewImage(12, 12, ebiten.FilterNearest)
-	camera.Fill(color.RGBA{0xff, 0, 0, 0xff})
-	cameraButton := NewImageButton(160-12-2, 2, camera, camera, "system/click")
+	cameraButton := NewImageButton(142, 0, assets.GetImage("system/common/camera_off.png"), assets.GetImage("system/common/camera_on.png"), "system/click")
 
 	blackImage, _ := ebiten.NewImage(16, 16, ebiten.FilterNearest)
 	blackImage.Fill(color.Black)
