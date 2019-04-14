@@ -18,7 +18,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"image/color"
+	"io/ioutil"
 	"log"
+	"os"
+	"path/filepath"
+	"time"
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/vmihailenco/msgpack"
@@ -28,6 +32,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/screenshot"
 )
 
 var TierTypes = [...]string{"tier1_donation", "tier2_donation", "tier3_donation", "tier4_donation"}
@@ -68,6 +73,14 @@ type Manager struct {
 	blackImage *ebiten.Image
 	turbo      bool
 
+	screenshot    *screenshot.Screenshot
+	screenshotDir string
+	pseudoScreen  *ebiten.Image
+	frozenScreen  *ebiten.Image
+	origWidth     int
+	origHeight    int
+
+	// offscreen is for scaling.
 	offscreen *ebiten.Image
 }
 
@@ -172,6 +185,29 @@ func (m *Manager) Requester() Requester {
 	return m.requester
 }
 
+func (m *Manager) SetPseudoScreen(screen *ebiten.Image) {
+	if m.origWidth == 0 || m.origHeight == 0 {
+		m.origWidth = m.width
+		m.origHeight = m.height
+	}
+	if m.frozenScreen == nil {
+		m.frozenScreen, _ = ebiten.NewImage(m.width, m.height, ebiten.FilterDefault)
+		m.Draw(m.frozenScreen)
+	}
+
+	m.pseudoScreen = screen
+	m.SetScreenSize(m.pseudoScreen.Size())
+}
+
+func (m *Manager) ResetPseudoScreen() {
+	m.pseudoScreen = nil
+	m.frozenScreen.Dispose()
+	m.frozenScreen = nil
+	m.SetScreenSize(m.origWidth, m.origHeight)
+	m.origWidth = 0
+	m.origHeight = 0
+}
+
 func (m *Manager) Update() error {
 	triggerBack := false
 	select {
@@ -213,6 +249,31 @@ func (m *Manager) Update() error {
 	default:
 	}
 
+	if m.screenshot == nil && input.IsScreenshotButtonTriggered() {
+		sizes := []screenshot.Size{
+			{
+				Width:  480, // 1242
+				Height: 720, // 2208
+			},
+			{
+				Width:  480, // 2048
+				Height: 854, // 2732
+			},
+			{
+				Width:  480,  // 1125
+				Height: 1040, // 2436
+			},
+		}
+		m.screenshot = screenshot.New(sizes, m.game.Texts.Languages())
+		m.screenshotDir = filepath.Join("screenshots", time.Now().Format("20060102_030405"))
+	}
+	if m.screenshot != nil {
+		m.screenshot.Update(m)
+		if m.screenshot.IsFinished() {
+			m.screenshot = nil
+		}
+	}
+
 	if input.IsTurboButtonTriggered() {
 		m.turbo = !m.turbo
 	}
@@ -250,7 +311,33 @@ func (m *Manager) widthScale() float64 {
 	return float64(m.width) / float64(ow)
 }
 
-func (m *Manager) Draw(screen *ebiten.Image) {
+func (m *Manager) Draw(screen *ebiten.Image) error {
+	if m.pseudoScreen != nil {
+		screen.DrawImage(m.frozenScreen, nil)
+		m.pseudoScreen.Clear()
+		screen = m.pseudoScreen
+	}
+
+	m.drawWithScale(screen)
+
+	if m.screenshot != nil {
+		img, size, lang, err := m.screenshot.TryDump()
+		if err != nil {
+			return err
+		}
+		if img != nil {
+			if err := os.MkdirAll(m.screenshotDir, 0755); err != nil {
+				return err
+			}
+			fn := filepath.Join(m.screenshotDir, fmt.Sprintf("%d-%d-%s.png", size.Width, size.Height, lang))
+			fmt.Println(fn)
+			ioutil.WriteFile(fn, img, 0666)
+		}
+	}
+	return nil
+}
+
+func (m *Manager) drawWithScale(screen *ebiten.Image) {
 	if m.widthScale() == 1 {
 		m.drawImpl(screen)
 		return

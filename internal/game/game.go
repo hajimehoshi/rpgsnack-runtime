@@ -16,27 +16,19 @@ package game
 
 import (
 	"flag"
-	"fmt"
 	"image/color"
-	"io/ioutil"
 	"net/url"
-	"os"
-	"path/filepath"
 	"runtime"
-	"time"
 
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
-	"golang.org/x/text/language"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/sceneimpl"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/screenshot"
 )
 
 type Game struct {
@@ -48,12 +40,6 @@ type Game struct {
 	loadProgressCh    chan data.LoadProgress
 	loadProgressRate  float64
 	setPlatformDataCh chan setPlatformDataArgs
-	langs             []language.Tag
-	screenshot        *screenshot.Screenshot
-	screenshotDir     string
-
-	pseudoScreen *ebiten.Image
-	frozenScreen *ebiten.Image
 }
 
 type setPlatformDataArgs struct {
@@ -110,27 +96,6 @@ func NewWithDefaultRequester(width, height int) (*Game, error) {
 	return g, nil
 }
 
-func (g *Game) SetPseudoScreen(screen *ebiten.Image) {
-	if g.loadProgressCh != nil {
-		panic("game: a pseudo screen is not available during loading")
-	}
-
-	if g.frozenScreen == nil {
-		g.frozenScreen, _ = ebiten.NewImage(g.width, g.height, ebiten.FilterDefault)
-		g.sceneManager.Draw(g.frozenScreen)
-	}
-
-	g.pseudoScreen = screen
-	g.sceneManager.SetScreenSize(g.pseudoScreen.Size())
-}
-
-func (g *Game) ResetPseudoScreen() {
-	g.pseudoScreen = nil
-	g.frozenScreen.Dispose()
-	g.frozenScreen = nil
-	g.sceneManager.SetScreenSize(g.width, g.height)
-}
-
 func (g *Game) SetScreenSize(width, height int, scale float64) {
 	g.width = width
 	g.height = height
@@ -184,7 +149,6 @@ func (g *Game) update() error {
 				return err
 			}
 			g.sceneManager.InitScene(s)
-			g.langs = da.Game.Texts.Languages()
 		default:
 			return nil
 		}
@@ -200,31 +164,6 @@ func (g *Game) update() error {
 		return err
 	}
 	takeCPUProfileIfAvailable()
-
-	if g.screenshot == nil && input.IsScreenshotButtonTriggered() {
-		sizes := []screenshot.Size{
-			{
-				Width:  480, // 1242
-				Height: 720, // 2208
-			},
-			{
-				Width:  480, // 2048
-				Height: 854, // 2732
-			},
-			{
-				Width:  480,  // 1125
-				Height: 1040, // 2436
-			},
-		}
-		g.screenshot = screenshot.New(sizes, g.langs)
-		g.screenshotDir = filepath.Join("screenshots", time.Now().Format("20060102_030405"))
-	}
-	if g.screenshot != nil {
-		g.screenshot.Update(g, g.sceneManager)
-		if g.screenshot.IsFinished() {
-			g.screenshot = nil
-		}
-	}
 
 	if err := g.sceneManager.Update(); err != nil {
 		return err
@@ -245,27 +184,8 @@ func (g *Game) draw(screen *ebiten.Image) error {
 		}
 		return nil
 	}
-	if g.pseudoScreen != nil {
-		g.pseudoScreen.Clear()
-		g.sceneManager.Draw(g.pseudoScreen)
-		screen.DrawImage(g.frozenScreen, nil)
-	} else {
-		g.sceneManager.Draw(screen)
-	}
-
-	if g.screenshot != nil {
-		img, size, lang, err := g.screenshot.TryDump()
-		if err != nil {
-			return err
-		}
-		if img != nil {
-			if err := os.MkdirAll(g.screenshotDir, 0755); err != nil {
-				return err
-			}
-			fn := filepath.Join(g.screenshotDir, fmt.Sprintf("%d-%d-%s.png", size.Width, size.Height, lang))
-			fmt.Println(fn)
-			ioutil.WriteFile(fn, img, 0666)
-		}
+	if err := g.sceneManager.Draw(screen); err != nil {
+		return err
 	}
 	return nil
 }

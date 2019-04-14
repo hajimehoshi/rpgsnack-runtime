@@ -23,7 +23,6 @@ import (
 	"golang.org/x/text/language"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
 
 type screenshotData struct {
@@ -63,15 +62,16 @@ func New(sizes []Size, langs []language.Tag) *Screenshot {
 	return s
 }
 
-type Game interface {
+type SceneManager interface {
 	ResetPseudoScreen()
 	SetPseudoScreen(screen *ebiten.Image)
+	SetLanguage(lang language.Tag) language.Tag
 }
 
-func (s *Screenshot) Update(game Game, sceneManager *scene.Manager) {
+func (s *Screenshot) Update(sceneManager SceneManager) {
 	if len(s.screenshots) == 0 {
 		if !s.finished {
-			game.ResetPseudoScreen()
+			sceneManager.ResetPseudoScreen()
 			sceneManager.SetLanguage(s.origLang)
 			s.finished = true
 		}
@@ -84,7 +84,7 @@ func (s *Screenshot) Update(game Game, sceneManager *scene.Manager) {
 			s.pseudoScreen = nil
 		}
 		s.pseudoScreen, _ = ebiten.NewImage(sc.width, sc.height, ebiten.FilterDefault)
-		game.SetPseudoScreen(s.pseudoScreen)
+		sceneManager.SetPseudoScreen(s.pseudoScreen)
 		sceneManager.SetLanguage(sc.lang)
 		s.screenshotCount = 0
 		s.currentScreenshot = sc
