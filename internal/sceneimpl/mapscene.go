@@ -236,8 +236,8 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 			m.quitDialog.Show()
 		})
 		m.gameHeader.SetOnCameraButtonPressed(func() {
-			// TODO: Implement
-			// Take the screenshot without the title bar
+			// TODO: Hide the game header
+			sceneManager.ShareScreenshot()
 		})
 	}
 	m.storeErrorOkButton.SetOnPressed(func(_ *ui.Button) {

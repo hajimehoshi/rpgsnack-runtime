@@ -54,6 +54,7 @@ func NewGameHeader() *GameHeader {
 	titleButton.disabled = true
 
 	cameraButton := NewImageButton(142, 0, assets.GetImage("system/common/camera_off.png"), assets.GetImage("system/common/camera_on.png"), "system/click")
+	cameraButton.disabled = true
 
 	blackImage, _ := ebiten.NewImage(16, 16, ebiten.FilterNearest)
 	blackImage.Fill(color.Black)

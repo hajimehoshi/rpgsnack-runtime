@@ -80,6 +80,8 @@ type Manager struct {
 	origWidth     int
 	origHeight    int
 
+	needsSharingScreenshot bool
+
 	// offscreen is for scaling.
 	offscreen *ebiten.Image
 }
@@ -249,23 +251,32 @@ func (m *Manager) Update() error {
 	default:
 	}
 
-	if m.screenshot == nil && input.IsScreenshotButtonTriggered() {
-		sizes := []screenshot.Size{
-			{
-				Width:  480, // 1242
-				Height: 720, // 2208
-			},
-			{
-				Width:  480, // 2048
-				Height: 854, // 2732
-			},
-			{
-				Width:  480,  // 1125
-				Height: 1040, // 2436
-			},
+	if m.screenshot == nil {
+		if input.IsScreenshotButtonTriggered() {
+			sizes := []screenshot.Size{
+				{
+					Width:  480, // 1242
+					Height: 720, // 2208
+				},
+				{
+					Width:  480, // 2048
+					Height: 854, // 2732
+				},
+				{
+					Width:  480,  // 1125
+					Height: 1040, // 2436
+				},
+			}
+			m.screenshot = screenshot.New(sizes, m.game.Texts.Languages())
+			m.screenshotDir = filepath.Join("screenshots", time.Now().Format("20060102_030405"))
+		} else if m.needsSharingScreenshot {
+			m.screenshot = screenshot.New([]screenshot.Size{
+				{
+					Width:  480,  // 1125
+					Height: 1040, // 2436
+				},
+			}, []language.Tag{lang.Get()})
 		}
-		m.screenshot = screenshot.New(sizes, m.game.Texts.Languages())
-		m.screenshotDir = filepath.Join("screenshots", time.Now().Format("20060102_030405"))
 	}
 	if m.screenshot != nil {
 		m.screenshot.Update(m)
@@ -306,6 +317,10 @@ func (m *Manager) Update() error {
 	return nil
 }
 
+func (m *Manager) ShareScreenshot() {
+	m.needsSharingScreenshot = true
+}
+
 func (m *Manager) widthScale() float64 {
 	ow, _ := m.Size()
 	return float64(m.width) / float64(ow)
@@ -326,12 +341,17 @@ func (m *Manager) Draw(screen *ebiten.Image) error {
 			return err
 		}
 		if img != nil {
-			if err := os.MkdirAll(m.screenshotDir, 0755); err != nil {
-				return err
+			if m.needsSharingScreenshot {
+				m.Requester().RequestShareImage(m.GenerateRequestID(), "Screenshot", "Title", img)
+				m.needsSharingScreenshot = false
+			} else {
+				if err := os.MkdirAll(m.screenshotDir, 0755); err != nil {
+					return err
+				}
+				fn := filepath.Join(m.screenshotDir, fmt.Sprintf("%d-%d-%s.png", size.Width, size.Height, lang))
+				fmt.Println(fn)
+				ioutil.WriteFile(fn, img, 0666)
 			}
-			fn := filepath.Join(m.screenshotDir, fmt.Sprintf("%d-%d-%s.png", size.Width, size.Height, lang))
-			fmt.Println(fn)
-			ioutil.WriteFile(fn, img, 0666)
 		}
 	}
 	return nil
