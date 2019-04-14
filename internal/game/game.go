@@ -16,9 +16,14 @@ package game
 
 import (
 	"flag"
+	"fmt"
 	"image/color"
+	"io/ioutil"
 	"net/url"
+	"os"
+	"path/filepath"
 	"runtime"
+	"time"
 
 	"github.com/gopherjs/gopherjs/js"
 	"github.com/hajimehoshi/ebiten"
@@ -31,6 +36,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/sceneimpl"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/screenshot"
 )
 
 type Game struct {
@@ -43,7 +49,8 @@ type Game struct {
 	loadProgressRate  float64
 	setPlatformDataCh chan setPlatformDataArgs
 	langs             []language.Tag
-	screenshots       *screenshots
+	screenshot        *screenshot.Screenshot
+	screenshotDir     string
 
 	pseudoScreen *ebiten.Image
 	frozenScreen *ebiten.Image
@@ -194,13 +201,28 @@ func (g *Game) update() error {
 	}
 	takeCPUProfileIfAvailable()
 
-	if g.screenshots == nil && input.IsScreenshotButtonTriggered() {
-		g.screenshots = newScreenshots(g.langs)
+	if g.screenshot == nil && input.IsScreenshotButtonTriggered() {
+		sizes := []screenshot.Size{
+			{
+				Width:  480, // 1242
+				Height: 720, // 2208
+			},
+			{
+				Width:  480, // 2048
+				Height: 854, // 2732
+			},
+			{
+				Width:  480,  // 1125
+				Height: 1040, // 2436
+			},
+		}
+		g.screenshot = screenshot.New(sizes, g.langs)
+		g.screenshotDir = filepath.Join("screenshots", time.Now().Format("20060102_030405"))
 	}
-	if g.screenshots != nil {
-		g.screenshots.update(g)
-		if g.screenshots.isFinished() {
-			g.screenshots = nil
+	if g.screenshot != nil {
+		g.screenshot.Update(g, g.sceneManager)
+		if g.screenshot.IsFinished() {
+			g.screenshot = nil
 		}
 	}
 
@@ -231,9 +253,18 @@ func (g *Game) draw(screen *ebiten.Image) error {
 		g.sceneManager.Draw(screen)
 	}
 
-	if g.screenshots != nil {
-		if err := g.screenshots.tryDumpScreenshots(); err != nil {
+	if g.screenshot != nil {
+		img, size, lang, err := g.screenshot.TryDump()
+		if err != nil {
 			return err
+		}
+		if img != nil {
+			if err := os.MkdirAll(g.screenshotDir, 0755); err != nil {
+				return err
+			}
+			fn := filepath.Join(g.screenshotDir, fmt.Sprintf("%d-%d-%s.png", size.Width, size.Height, lang))
+			fmt.Println(fn)
+			ioutil.WriteFile(fn, img, 0666)
 		}
 	}
 	return nil

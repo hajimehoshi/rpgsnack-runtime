@@ -12,20 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package game
+package screenshot
 
 import (
-	"fmt"
+	"bytes"
 	"image/color"
 	"image/png"
-	"os"
-	"path/filepath"
-	"time"
 
 	"github.com/hajimehoshi/ebiten"
 	"golang.org/x/text/language"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
 
 type screenshotData struct {
@@ -34,43 +32,30 @@ type screenshotData struct {
 	lang   language.Tag
 }
 
-type screenshots struct {
+type Screenshot struct {
 	screenshots       []*screenshotData
 	currentScreenshot *screenshotData
-	screenshotDir     string
 	screenshotCount   int
 	origLang          language.Tag
 	finished          bool
 	pseudoScreen      *ebiten.Image
 }
 
-func newScreenshots(langs []language.Tag) *screenshots {
-	s := &screenshots{
-		screenshotDir: filepath.Join("screenshots", time.Now().Format("20060102_030405")),
-		origLang:      lang.Get(),
+type Size struct {
+	Width  int
+	Height int
+}
+
+func New(sizes []Size, langs []language.Tag) *Screenshot {
+	s := &Screenshot{
+		origLang: lang.Get(),
 	}
-	for _, sc := range []struct {
-		width  int
-		height int
-	}{
-		{
-			width:  480, // 1242
-			height: 720, // 2208
-		},
-		{
-			width:  480, // 2048
-			height: 854, // 2732
-		},
-		{
-			width:  480,  // 1125
-			height: 1040, // 2436
-		},
-	} {
+	for _, size := range sizes {
 		for _, l := range langs {
 			s.screenshots = append(s.screenshots,
 				&screenshotData{
-					width:  sc.width,
-					height: sc.height,
+					width:  size.Width,
+					height: size.Height,
 					lang:   l,
 				})
 		}
@@ -78,11 +63,16 @@ func newScreenshots(langs []language.Tag) *screenshots {
 	return s
 }
 
-func (s *screenshots) update(game *Game) {
+type Game interface {
+	ResetPseudoScreen()
+	SetPseudoScreen(screen *ebiten.Image)
+}
+
+func (s *Screenshot) Update(game Game, sceneManager *scene.Manager) {
 	if len(s.screenshots) == 0 {
 		if !s.finished {
 			game.ResetPseudoScreen()
-			game.sceneManager.SetLanguage(s.origLang)
+			sceneManager.SetLanguage(s.origLang)
 			s.finished = true
 		}
 		return
@@ -95,48 +85,36 @@ func (s *screenshots) update(game *Game) {
 		}
 		s.pseudoScreen, _ = ebiten.NewImage(sc.width, sc.height, ebiten.FilterDefault)
 		game.SetPseudoScreen(s.pseudoScreen)
-		game.sceneManager.SetLanguage(sc.lang)
+		sceneManager.SetLanguage(sc.lang)
 		s.screenshotCount = 0
 		s.currentScreenshot = sc
 	}
 	s.screenshotCount++
 }
 
-func (s *screenshots) isFinished() bool {
+func (s *Screenshot) IsFinished() bool {
 	return s.finished
 }
 
-func (s *screenshots) tryDumpScreenshots() error {
+func (s *Screenshot) TryDump() ([]byte, Size, language.Tag, error) {
 	// s.screenshotCount >= 2 is necessary to assure that update is done.
 	// >= 1 is not enough for some mysterious reason.
 	if len(s.screenshots) == 0 || s.screenshotCount < 2 {
-		return nil
+		return nil, Size{}, language.Tag{}, nil
 	}
 
 	sc := s.screenshots[0]
-
-	if err := os.MkdirAll(s.screenshotDir, 0755); err != nil {
-		return err
-	}
-
-	fn := filepath.Join(s.screenshotDir, fmt.Sprintf("%d-%d-%s.png", sc.width, sc.height, sc.lang))
-	fmt.Println(fn)
-
-	f, err := os.Create(fn)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
 
 	// Make the background black.
 	img, _ := ebiten.NewImage(sc.width, sc.height, ebiten.FilterDefault)
 	img.Fill(color.Black)
 	img.DrawImage(s.pseudoScreen, nil)
 
-	if err := png.Encode(f, img); err != nil {
-		return err
+	buf := &bytes.Buffer{}
+	if err := png.Encode(buf, img); err != nil {
+		return nil, Size{}, language.Tag{}, err
 	}
 
 	s.screenshots = s.screenshots[1:]
-	return nil
+	return buf.Bytes(), Size{sc.width, sc.height}, sc.lang, nil
 }
