@@ -50,8 +50,6 @@ type MapScene struct {
 	tintScreenImage      *ebiten.Image
 	triggeringFailed     bool
 	initialState         bool
-	cameraButton         *ui.Button
-	cameraTaking         bool
 	gameHeader           *ui.GameHeader
 	screenShotImage      *ebiten.Image
 	screenShotDialog     *ui.Dialog
@@ -191,20 +189,9 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	m.screenImage, _ = ebiten.NewImage(consts.MapWidth, consts.CeilDiv(screenH, consts.TileScale), ebiten.FilterNearest)
 	m.tintScreenImage, _ = ebiten.NewImage(consts.MapWidth, consts.CeilDiv(screenH, consts.TileScale), ebiten.FilterDefault)
 
-	screenShotImage, _ := ebiten.NewImage(480, 720, ebiten.FilterLinear)
-	camera, _ := ebiten.NewImage(12, 12, ebiten.FilterNearest)
-	camera.Fill(color.RGBA{0xff, 0, 0, 0xff})
-	m.cameraButton = ui.NewImageButton(0, 0, camera, camera, "system/click")
-	m.screenShotImage = screenShotImage
-	m.screenShotDialog = ui.NewDialog((uiWidth-160)/2+4, 4, 152, 232)
-	m.screenShotDialog.AddChild(ui.NewImageView(8, 8, 1.0/consts.TileScale/2, m.screenShotImage))
-
 	if m.titleView == nil {
 		m.gameHeader = ui.NewGameHeader()
 	}
-
-	// TODO: Implement the camera functionality later
-	m.cameraButton.Hide()
 
 	m.quitDialog = ui.NewDialog((uiWidth-160)/2+4, screenH/(2*consts.TileScale)-64, 152, 124)
 	m.quitLabel = ui.NewLabel(16, 8)
@@ -245,16 +232,16 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 		m.quitDialog.Hide()
 	})
 	if m.gameHeader != nil {
-		m.gameHeader.SetOnTitlePressed(func() {
+		m.gameHeader.SetOnTitleButtonPressed(func() {
 			m.quitDialog.Show()
+		})
+		m.gameHeader.SetOnCameraButtonPressed(func() {
+			// TODO: Implement
+			// Take the screenshot without the title bar
 		})
 	}
 	m.storeErrorOkButton.SetOnPressed(func(_ *ui.Button) {
 		m.storeErrorDialog.Hide()
-	})
-	m.cameraButton.SetOnPressed(func(_ *ui.Button) {
-		m.cameraTaking = true
-		m.screenShotDialog.Show()
 	})
 
 	m.inventory.SetOnSlotPressed(func(_ *ui.Inventory, index int) {
@@ -471,9 +458,6 @@ func (m *MapScene) isUIBusy() bool {
 	if m.storeErrorDialog.Visible() {
 		return true
 	}
-	if m.screenShotDialog.Visible() {
-		return true
-	}
 	if m.credits.Visible() {
 		return true
 	}
@@ -489,10 +473,9 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 	m.storeErrorOkButton.SetText(texts.Text(l, texts.TextIDOK))
 
 	m.quitDialog.Update()
-	m.screenShotDialog.Update()
+
 	m.storeErrorDialog.Update()
 
-	m.cameraButton.Update()
 	if m.gameHeader != nil {
 		m.gameHeader.Update(m.quitDialog.Visible())
 	}
@@ -851,26 +834,13 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	m.minigamePopup.Draw(screen)
 	m.inventory.Draw(screen)
 
-	m.cameraButton.Draw(screen)
-
 	m.gameState.DrawWindows(screen, 0, m.offsetY/consts.TileScale, m.windowOffsetY/consts.TileScale)
 	if m.gameHeader != nil {
 		m.gameHeader.Draw(screen)
 	}
 
-	m.screenShotDialog.Draw(screen)
 	m.quitDialog.Draw(screen)
 	m.storeErrorDialog.Draw(screen)
-
-	if m.cameraTaking {
-		m.cameraTaking = false
-		m.screenShotImage.Clear()
-		op := &ebiten.DrawImageOptions{}
-		sw, _ := screen.Size()
-		w, _ := m.screenShotImage.Size()
-		op.GeoM.Translate((float64(w)-float64(sw))/2, 0)
-		m.screenShotImage.DrawImage(screen, nil)
-	}
 
 	if m.titleView != nil {
 		m.titleView.Draw(screen)

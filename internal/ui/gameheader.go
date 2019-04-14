@@ -18,6 +18,7 @@ import (
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/texts"
@@ -25,7 +26,7 @@ import (
 
 const (
 	revealFrames          = 16
-	headerHeight          = 12
+	headerHeight          = 16 * consts.TileScale
 	closeFrames           = 100
 	HeaderTouchAreaHeight = 48
 )
@@ -34,13 +35,15 @@ type GameHeader struct {
 	x              int
 	y              int
 	titleButton    *Button
+	cameraButton   *Button
 	blackImage     *ebiten.Image
 	isClosing      bool
 	isOpening      bool
 	revealRatio    float64
 	autoCloseTimer int
 
-	onTitlePressed func()
+	onTitleButtonPressed  func()
+	onCameraButtonPressed func()
 }
 
 func NewGameHeader() *GameHeader {
@@ -49,6 +52,11 @@ func NewGameHeader() *GameHeader {
 	titleButton.text = texts.Text(l, texts.TextIDMenu)
 	titleButton.disabled = true
 
+	// TODO: Replace the camera image
+	camera, _ := ebiten.NewImage(12, 12, ebiten.FilterNearest)
+	camera.Fill(color.RGBA{0xff, 0, 0, 0xff})
+	cameraButton := NewImageButton(160-12-2, 2, camera, camera, "system/click")
+
 	blackImage, _ := ebiten.NewImage(16, 16, ebiten.FilterNearest)
 	blackImage.Fill(color.Black)
 
@@ -56,6 +64,7 @@ func NewGameHeader() *GameHeader {
 		x:              0,
 		y:              0,
 		titleButton:    titleButton,
+		cameraButton:   cameraButton,
 		blackImage:     blackImage,
 		isOpening:      false,
 		isClosing:      false,
@@ -64,18 +73,26 @@ func NewGameHeader() *GameHeader {
 	}
 
 	titleButton.SetOnPressed(func(_ *Button) {
-		g.onTitlePressed()
+		g.onTitleButtonPressed()
+	})
+	cameraButton.SetOnPressed(func(_ *Button) {
+		g.onCameraButtonPressed()
 	})
 
 	return g
 }
 
-func (g *GameHeader) SetOnTitlePressed(f func()) {
-	g.onTitlePressed = f
+func (g *GameHeader) SetOnTitleButtonPressed(f func()) {
+	g.onTitleButtonPressed = f
+}
+
+func (g *GameHeader) SetOnCameraButtonPressed(f func()) {
+	g.onCameraButtonPressed = f
 }
 
 func (g *GameHeader) Open() {
 	g.titleButton.disabled = true
+	g.cameraButton.disabled = true
 	g.isOpening = true
 	g.isClosing = false
 	g.autoCloseTimer = 0
@@ -83,6 +100,7 @@ func (g *GameHeader) Open() {
 
 func (g *GameHeader) Close() {
 	g.titleButton.disabled = true
+	g.cameraButton.disabled = true
 	g.isOpening = false
 	g.isClosing = true
 	g.autoCloseTimer = 0
@@ -94,6 +112,7 @@ func (g *GameHeader) Update(paused bool) {
 	}
 
 	g.titleButton.UpdateAsChild(true, g.x, g.y)
+	g.cameraButton.UpdateAsChild(true, g.x, g.y)
 
 	if g.isOpening {
 		g.revealRatio += 1 / float64(revealFrames)
@@ -101,6 +120,7 @@ func (g *GameHeader) Update(paused bool) {
 			g.revealRatio = 1.0
 			g.isOpening = false
 			g.titleButton.disabled = false
+			g.cameraButton.disabled = false
 		}
 	}
 	if g.isClosing {
@@ -127,14 +147,14 @@ func (g *GameHeader) Update(paused bool) {
 }
 
 func (g *GameHeader) Draw(screen *ebiten.Image) {
-
-	dy := int((1.0 - g.revealRatio) * float64(headerHeight))
 	sw, _ := screen.Size()
 	w, h := g.blackImage.Size()
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(float64(sw)/float64(w), float64(headerHeight*4)/float64(h))
-	op.GeoM.Translate(float64(0), float64(-dy*4))
+	op.GeoM.Scale(float64(sw)/float64(w), float64(headerHeight)/float64(h))
+	dy := int((1.0 - g.revealRatio) * float64(headerHeight))
+	op.GeoM.Translate(float64(0), float64(-dy))
 	screen.DrawImage(g.blackImage, op)
 
 	g.titleButton.DrawAsChild(screen, g.x, g.y-dy)
+	g.cameraButton.DrawAsChild(screen, g.x, g.y-dy)
 }
