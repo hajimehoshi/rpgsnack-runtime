@@ -130,10 +130,9 @@ func (g *GameHeader) Update(paused bool) {
 		}
 	}
 
+	_, iy := input.Position()
 	if g.revealRatio == 0 && input.Pressed() {
-		_, iy := input.Position()
 		if iy < HeaderTouchAreaHeight {
-			input.Cancel()
 			g.Open()
 		}
 	}
@@ -143,6 +142,10 @@ func (g *GameHeader) Update(paused bool) {
 		if g.autoCloseTimer > closeFrames {
 			g.Close()
 		}
+	}
+
+	if iy < HeaderTouchAreaHeight {
+		input.Cancel()
 	}
 }
 
