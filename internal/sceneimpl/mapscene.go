@@ -452,10 +452,6 @@ func (m *MapScene) receiveRequest(sceneManager *scene.Manager) bool {
 }
 
 func (m *MapScene) isUIBusy() bool {
-	if m.gameHeader != nil && m.gameHeader.Visible() {
-		return true
-	}
-
 	if m.quitDialog.Visible() {
 		return true
 	}

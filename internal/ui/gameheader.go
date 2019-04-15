@@ -105,10 +105,6 @@ func (g *GameHeader) Close() {
 	g.autoCloseTimer = 0
 }
 
-func (g *GameHeader) Visible() bool {
-	return g.isOpening || g.isClosing || g.revealRatio > 0
-}
-
 func (g *GameHeader) Update(paused bool) {
 	if paused {
 		return
