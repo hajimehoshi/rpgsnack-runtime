@@ -53,7 +53,7 @@ func NewGameHeader() *GameHeader {
 	titleButton.text = texts.Text(l, texts.TextIDMenu)
 	titleButton.disabled = true
 
-	cameraButton := NewImageButton(142, 0, assets.GetImage("system/common/camera_off.png"), assets.GetImage("system/common/camera_on.png"), "system/click")
+	cameraButton := NewImageButton(142, 0, assets.GetImage("system/common/camera_off.png"), assets.GetImage("system/common/camera_on.png"), "system/camera")
 	cameraButton.disabled = true
 
 	blackImage, _ := ebiten.NewImage(16, 16, ebiten.FilterNearest)
