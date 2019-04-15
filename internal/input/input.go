@@ -27,6 +27,7 @@ type input struct {
 	y              int
 	backPressCount int
 	prevPressCount int
+	canceled       bool
 }
 
 func IsSwitchDebugButtonTriggered() bool {
@@ -43,6 +44,10 @@ func IsTurboButtonTriggered() bool {
 
 func IsScreenshotButtonTriggered() bool {
 	return inpututil.IsKeyJustPressed(ebiten.KeyP)
+}
+
+func Cancel() {
+	theInput.Cancel()
 }
 
 func Update(scaleX, scaleY float64) {
@@ -102,17 +107,31 @@ func (i *input) Update(scaleX, scaleY float64) {
 	if i.backPressCount > 0 {
 		i.backPressCount--
 	}
+	i.canceled = false
+}
+
+func (i *input) Cancel() {
+	i.canceled = true
 }
 
 func (i *input) Pressed() bool {
+	if i.canceled {
+		return false
+	}
 	return i.pressCount > 0
 }
 
 func (i *input) Released() bool {
+	if i.canceled {
+		return false
+	}
 	return i.pressCount == 0 && i.prevPressCount > 0
 }
 
 func (i *input) Triggered() bool {
+	if i.canceled {
+		return false
+	}
 	return i.pressCount == 1
 }
 
