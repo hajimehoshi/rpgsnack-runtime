@@ -25,6 +25,7 @@ type System struct {
 	DefaultLanguage    Language            `msgpack:"defaultLanguage"`
 	TitleBGM           BGM                 `msgpack:"titleBgm"`
 	GameName           UUID                `msgpack:"gameName"`
+	ScreenshotMessage  UUID                `msgpack:"screenshotMessage"`
 	TitleTextColor     string              `msgpack:"titleTextColor"`
 	Switches           []*VariableData     `msgpack:"switches"`
 	Variables          []*VariableData     `msgpack:"variables"`

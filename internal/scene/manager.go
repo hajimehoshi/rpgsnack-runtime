@@ -336,19 +336,21 @@ func (m *Manager) Draw(screen *ebiten.Image) error {
 	m.drawWithScale(screen)
 
 	if m.screenshot != nil {
-		img, size, lang, err := m.screenshot.TryDump()
+		img, size, l, err := m.screenshot.TryDump()
 		if err != nil {
 			return err
 		}
 		if img != nil {
 			if m.needsSharingScreenshot {
-				m.Requester().RequestShareImage(m.GenerateRequestID(), "Screenshot", "Title", img)
+				subject := m.game.Texts.Get(lang.Get(), m.game.System.GameName)
+				body := m.game.Texts.Get(lang.Get(), m.game.System.ScreenshotMessage)
+				m.Requester().RequestShareImage(m.GenerateRequestID(), subject, body, img)
 				m.needsSharingScreenshot = false
 			} else {
 				if err := os.MkdirAll(m.screenshotDir, 0755); err != nil {
 					return err
 				}
-				fn := filepath.Join(m.screenshotDir, fmt.Sprintf("%d-%d-%s.png", size.Width, size.Height, lang))
+				fn := filepath.Join(m.screenshotDir, fmt.Sprintf("%d-%d-%s.png", size.Width, size.Height, l))
 				fmt.Println(fn)
 				ioutil.WriteFile(fn, img, 0666)
 			}
