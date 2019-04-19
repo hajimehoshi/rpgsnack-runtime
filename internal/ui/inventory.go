@@ -413,6 +413,12 @@ func (i *Inventory) SetMode(mode InventoryMode) {
 }
 
 func (i *Inventory) SetItems(items []*data.Item) {
+	c := i.pageIndex * itemPerPageCount
+	if c >= len(items) || (c < len(i.items) && items[c].ID != i.items[c].ID) {
+		i.pageIndex = 0
+		i.targetPageIndex = 0
+		i.scrollX = 0
+	}
 	i.items = items
 }
 
