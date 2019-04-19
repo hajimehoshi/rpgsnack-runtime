@@ -221,11 +221,16 @@ func (m *Map) setRoomID(gameState *Game, id int, interpreter *Interpreter) error
 	sort.Slice(m.events, func(i, j int) bool {
 		return m.events[i].EventID() < m.events[j].EventID()
 	})
-	m.interpreters = map[int]*Interpreter{}
+	m.resetInterpreters(gameState)
 	if interpreter != nil {
 		m.addInterpreter(interpreter)
 	}
 	return nil
+}
+
+func (m *Map) resetInterpreters(gameState *Game) {
+	m.abortPlayerInterpreter(gameState)
+	m.interpreters = map[int]*Interpreter{}
 }
 
 func (m *Map) IsBlockingEventExecuting() bool {
