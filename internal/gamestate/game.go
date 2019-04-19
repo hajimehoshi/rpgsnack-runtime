@@ -388,6 +388,15 @@ func (g *Game) MapPassableAt(through bool, x, y int, ignoreCharacters bool) bool
 	return g.currentMap.Passable(through, x, y, ignoreCharacters)
 }
 
+type messageSyntaxParser struct {
+	game         *Game
+	sceneManager *scene.Manager
+}
+
+func (m *messageSyntaxParser) ParseMessageSyntax(content string) string {
+	return m.game.ParseMessageSyntax(m.sceneManager, content)
+}
+
 func (g *Game) Update(sceneManager *scene.Manager) error {
 	g.items.SetDataItems(sceneManager.Game().Items)
 	if g.lastPlayingBGMName != "" {
@@ -406,7 +415,7 @@ func (g *Game) Update(sceneManager *scene.Manager) error {
 	if g.currentMap.player != nil {
 		_, playerY = g.currentMap.player.DrawPosition()
 	}
-	g.windows.Update(playerY, sceneManager, g.createCharacterList())
+	g.windows.Update(playerY, &messageSyntaxParser{g, sceneManager}, sceneManager, g.createCharacterList())
 	g.pictures.Update()
 
 	if err := g.currentMap.Update(sceneManager, g); err != nil {

@@ -35,6 +35,10 @@ const (
 	chosenBalloonWaitingFrames = 5
 )
 
+type MessageSyntaxParser interface {
+	ParseMessageSyntax(content string) string
+}
+
 type Windows struct {
 	nextBalloon    *balloon
 	nextBanner     *banner
@@ -186,6 +190,7 @@ func (w *Windows) ShowBalloon(contentID data.UUID, content string, balloonType d
 		panic("window: nextBalloon must be nil at ShowBalloon")
 	}
 	// TODO: How to call newBalloonCenter?
+	// TODO: content should be parsed here based on the ID.
 	w.nextBalloon = newBalloonWithArrow(contentID, content, balloonType, eventID, interpreterID, messageStyle)
 }
 
@@ -193,6 +198,7 @@ func (w *Windows) ShowMessage(contentID data.UUID, content string, eventID int, 
 	if w.nextBanner != nil {
 		panic("window: nextBalloon must be nil at ShowMessage")
 	}
+	// TODO: content should be parsed here based on the ID.
 	w.nextBanner = newBanner(contentID, content, eventID, background, positionType, textAlign, interpreterID, messageStyle)
 }
 
@@ -350,7 +356,7 @@ func (w *Windows) findCharacterByEventID(characters []*character.Character, even
 	return c
 }
 
-func (w *Windows) Update(playerY int, sceneManager *scene.Manager, characters []*character.Character) {
+func (w *Windows) Update(playerY int, parser MessageSyntaxParser, sceneManager *scene.Manager, characters []*character.Character) {
 	if w.lastLang == language.Und {
 		w.lastLang = lang.Get()
 	}
@@ -361,6 +367,7 @@ func (w *Windows) Update(playerY int, sceneManager *scene.Manager, characters []
 				continue
 			}
 			content := sceneManager.Game().Texts.Get(lang.Get(), b.contentID)
+			content = parser.ParseMessageSyntax(content)
 			b.setContent(content)
 		}
 		for _, b := range w.choiceBalloons {
@@ -368,10 +375,12 @@ func (w *Windows) Update(playerY int, sceneManager *scene.Manager, characters []
 				continue
 			}
 			content := sceneManager.Game().Texts.Get(lang.Get(), b.contentID)
+			content = parser.ParseMessageSyntax(content)
 			b.setContent(content)
 		}
 		if w.banner != nil {
 			content := sceneManager.Game().Texts.Get(lang.Get(), w.banner.contentID)
+			content = parser.ParseMessageSyntax(content)
 			w.banner.setContent(content)
 		}
 		w.lastLang = lang.Get()
