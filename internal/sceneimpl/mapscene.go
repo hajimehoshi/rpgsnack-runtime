@@ -379,6 +379,10 @@ func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) {
 		return
 	}
 
+	if m.gameState.IsWindowBusy() {
+		return
+	}
+
 	x, y := input.Position()
 	if y < ui.HeaderTouchAreaHeight {
 		return

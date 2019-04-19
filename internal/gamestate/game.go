@@ -777,6 +777,10 @@ func (g *Game) CanWindowProceed(interpreterID int) bool {
 	return g.windows.CanProceed(interpreterID)
 }
 
+func (g *Game) IsWindowBusy() bool {
+	return g.windows.IsBusy(0)
+}
+
 func (g *Game) IsWindowAnimating(interpreterID int) bool {
 	return g.windows.IsAnimating(interpreterID)
 }

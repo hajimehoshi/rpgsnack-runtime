@@ -238,6 +238,8 @@ func (w *Windows) IsBusyWithChoosing() bool {
 	return w.choosing || w.chosenBalloonWaitingCount > 0
 }
 
+// IsAnimating reports whether some of windows are busy (animating or opened).
+// If interpreterID is non 0, checking the window related to the interpreter is skipped.
 func (w *Windows) IsBusy(interpreterID int) bool {
 	if w.IsAnimating(interpreterID) {
 		return true
@@ -301,6 +303,8 @@ func (w *Windows) isOpened(interpreterID int) bool {
 	return false
 }
 
+// IsAnimating reports whether some of windows are animating.
+// If interpreterID is non 0, checking the window related to the interpreter is skipped.
 func (w *Windows) IsAnimating(interpreterID int) bool {
 	for _, b := range w.balloons {
 		if b == nil {
