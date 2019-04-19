@@ -671,6 +671,7 @@ func (m *Map) GetPressedPosition() (int, int) {
 func (m *Map) abortPlayerInterpreter(gameState *Game) {
 	if _, ok := m.interpreters[m.playerInterpreterID]; ok {
 		delete(m.interpreters, m.playerInterpreterID)
+		m.FinishPlayerMovingByUserInput()
 		// TODO: Use m.player
 		ch := gameState.Character(m.mapID, m.roomID, character.PlayerEventID)
 		ch.SetSpeed(m.origSpeed)
