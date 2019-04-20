@@ -18,6 +18,7 @@ package game
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -162,6 +163,13 @@ func (m *Requester) RequestOpenLink(requestID int, linkType string, data string)
 func (m *Requester) RequestShareImage(requestID int, title string, message string, image []byte) {
 	log.Printf("request share image: requestID: %d, title: %s, message: %s", requestID, title, message)
 	m.game.RespondShareImage(requestID)
+	go func() {
+		fn := fmt.Sprintf("shareimage_%s.png", time.Now().Format("2006010203040506"))
+		log.Printf("saved shareimage as %s", fn)
+		if err := ioutil.WriteFile(fn, image, 0666); err != nil {
+			panic(err)
+		}
+	}()
 }
 
 func (m *Requester) RequestChangeLanguage(requestID int, lang string) {
