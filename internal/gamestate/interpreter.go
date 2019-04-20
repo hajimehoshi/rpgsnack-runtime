@@ -1330,7 +1330,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 	case data.CommandNameMemo:
 		args := c.Args.(*data.CommandArgsMemo)
 		if args.Log {
-			log.Print(gameState.ParseMessageSyntax(sceneManager, args.Content))
+			log.Print(gameState.parseMessageSyntax(sceneManager, args.Content))
 		}
 		i.commandIterator.Advance()
 

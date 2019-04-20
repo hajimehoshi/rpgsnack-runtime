@@ -58,8 +58,12 @@ type Windows struct {
 
 type Choice struct {
 	ID      data.UUID
-	Text    string
 	Checked bool
+}
+
+func (c *Choice) Text(parser MessageSyntaxParser, game *data.Game) string {
+	content := game.Texts.Get(lang.Get(), c.ID)
+	return parser.ParseMessageSyntax(content)
 }
 
 func (w *Windows) EncodeMsgpack(enc *msgpack.Encoder) error {
@@ -185,24 +189,27 @@ func (w *Windows) HasChosenIndex() bool {
 	return w.hasChosenIndex
 }
 
-func (w *Windows) ShowBalloon(contentID data.UUID, content string, balloonType data.BalloonType, eventID int, interpreterID int, messageStyle *data.MessageStyle) {
+func (w *Windows) ShowBalloon(contentID data.UUID, parser MessageSyntaxParser, game *data.Game, balloonType data.BalloonType, eventID int, interpreterID int, messageStyle *data.MessageStyle) {
 	if w.nextBalloon != nil {
 		panic("window: nextBalloon must be nil at ShowBalloon")
 	}
 	// TODO: How to call newBalloonCenter?
-	// TODO: content should be parsed here based on the ID.
+	content := game.Texts.Get(lang.Get(), contentID)
+	content = parser.ParseMessageSyntax(content)
 	w.nextBalloon = newBalloonWithArrow(contentID, content, balloonType, eventID, interpreterID, messageStyle)
 }
 
-func (w *Windows) ShowMessage(contentID data.UUID, content string, eventID int, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign, interpreterID int, messageStyle *data.MessageStyle) {
+func (w *Windows) ShowMessage(contentID data.UUID, parser MessageSyntaxParser, game *data.Game, eventID int, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign, interpreterID int, messageStyle *data.MessageStyle) {
 	if w.nextBanner != nil {
 		panic("window: nextBalloon must be nil at ShowMessage")
 	}
 	// TODO: content should be parsed here based on the ID.
+	content := game.Texts.Get(lang.Get(), contentID)
+	content = parser.ParseMessageSyntax(content)
 	w.nextBanner = newBanner(contentID, content, eventID, background, positionType, textAlign, interpreterID, messageStyle)
 }
 
-func (w *Windows) ShowChoices(sceneManager *scene.Manager, choices []*Choice, interpreterID int) {
+func (w *Windows) ShowChoices(parser MessageSyntaxParser, game *data.Game, choices []*Choice, interpreterID int) {
 	// TODO: w.chosenBalloonWaitingCount should be 0 here!
 	if w.chosenBalloonWaitingCount > 0 {
 		panic("windows: chosenBalloonWaitingCount must be > 0 at ShowChoices")
@@ -212,7 +219,7 @@ func (w *Windows) ShowChoices(sceneManager *scene.Manager, choices []*Choice, in
 		x := 0
 		y := i * choiceBalloonHeight
 		width := consts.MapWidth
-		balloon := newBalloon(x, y, width, choiceBalloonHeight, choice.ID, choice.Text, data.BalloonTypeNormal, interpreterID, sceneManager.Game().CreateChoicesMessageStyle(), choice.Checked)
+		balloon := newBalloon(x, y, width, choiceBalloonHeight, choice.ID, choice.Text(parser, game), data.BalloonTypeNormal, interpreterID, game.CreateChoicesMessageStyle(), choice.Checked)
 		w.choiceBalloons = append(w.choiceBalloons, balloon)
 		balloon.open()
 	}

@@ -394,7 +394,7 @@ type messageSyntaxParser struct {
 }
 
 func (m *messageSyntaxParser) ParseMessageSyntax(content string) string {
-	return m.game.ParseMessageSyntax(m.sceneManager, content)
+	return m.game.parseMessageSyntax(m.sceneManager, content)
 }
 
 func (g *Game) Update(sceneManager *scene.Manager) error {
@@ -532,7 +532,7 @@ var (
 	reMessageVariable = regexp.MustCompile(`v\[([0-9]+)\]`)
 )
 
-func (g *Game) ParseMessageSyntax(sceneManager *scene.Manager, str string) string {
+func (g *Game) parseMessageSyntax(sceneManager *scene.Manager, str string) string {
 	return reMessageCommand.ReplaceAllStringFunc(str, func(part string) string {
 		name := strings.ToLower(part[1:2])
 		args := part[3 : len(part)-1]
@@ -812,25 +812,18 @@ func (g *Game) ShowBalloon(sceneManager *scene.Manager, interpreterID, mapID, ro
 		return false
 	}
 
-	content := sceneManager.Game().Texts.Get(lang.Get(), contentID)
-	content = g.ParseMessageSyntax(sceneManager, content)
-	g.windows.ShowBalloon(contentID, content, balloonType, eventID, interpreterID, messageStyle)
+	g.windows.ShowBalloon(contentID, &messageSyntaxParser{g, sceneManager}, sceneManager.Game(), balloonType, eventID, interpreterID, messageStyle)
 	return true
 }
 
 func (g *Game) ShowMessage(sceneManager *scene.Manager, interpreterID, eventID int, contentID data.UUID, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign, messageStyle *data.MessageStyle) {
-	content := sceneManager.Game().Texts.Get(lang.Get(), contentID)
-	content = g.ParseMessageSyntax(sceneManager, content)
-	g.windows.ShowMessage(contentID, content, eventID, background, positionType, textAlign, interpreterID, messageStyle)
+	g.windows.ShowMessage(contentID, &messageSyntaxParser{g, sceneManager}, sceneManager.Game(), eventID, background, positionType, textAlign, interpreterID, messageStyle)
 }
 
 func (g *Game) ShowChoices(sceneManager *scene.Manager, interpreterID int, eventID int, choiceIDs []data.UUID, conditions []*data.ChoiceCondition) {
 	choices := []*window.Choice{}
 	for i, id := range choiceIDs {
-		t := sceneManager.Game().Texts.Get(lang.Get(), id)
-		t = g.ParseMessageSyntax(sceneManager, t)
-
-		choice := &window.Choice{ID: id, Text: t, Checked: false}
+		choice := &window.Choice{ID: id, Checked: false}
 
 		var err error
 		m := true
@@ -852,7 +845,7 @@ func (g *Game) ShowChoices(sceneManager *scene.Manager, interpreterID int, event
 			choices = append(choices, choice)
 		}
 	}
-	g.windows.ShowChoices(sceneManager, choices, interpreterID)
+	g.windows.ShowChoices(&messageSyntaxParser{g, sceneManager}, sceneManager.Game(), choices, interpreterID)
 }
 
 func (g *Game) RealChoiceIndex(sceneManager *scene.Manager, index int, eventID int, conditions []*data.ChoiceCondition) int {
