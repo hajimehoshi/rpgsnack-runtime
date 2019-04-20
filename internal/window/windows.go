@@ -274,6 +274,16 @@ func (w *Windows) IsBusy(interpreterID int) bool {
 	return false
 }
 
+func inputTriggered() bool {
+	if _, y := input.Position(); y < consts.HeaderHeight {
+		return false
+	}
+	if !input.Triggered() {
+		return false
+	}
+	return true
+}
+
 func (w *Windows) CanProceed(interpreterID int) bool {
 	if !w.IsBusy(interpreterID) {
 		return true
@@ -281,10 +291,7 @@ func (w *Windows) CanProceed(interpreterID int) bool {
 	if !w.isOpened(interpreterID) {
 		return false
 	}
-	if !input.Triggered() {
-		return false
-	}
-	return true
+	return inputTriggered()
 }
 
 func (w *Windows) isOpened(interpreterID int) bool {
@@ -421,7 +428,7 @@ func (w *Windows) Update(playerY int, parser MessageSyntaxParser, sceneManager *
 				w.banner.close()
 			}
 		}
-	} else if w.choosing && w.isOpened(0) && input.Triggered() {
+	} else if w.choosing && w.isOpened(0) && inputTriggered() {
 		_, h := sceneManager.Size()
 		ymax := h / consts.TileScale
 		ymin := ymax - len(w.choiceBalloons)*choiceBalloonHeight
@@ -449,7 +456,7 @@ func (w *Windows) Update(playerY int, parser MessageSyntaxParser, sceneManager *
 			continue
 		}
 		b.update(w.findCharacterByEventID(characters, b.eventID))
-		if b.isAnimating() && input.Triggered() {
+		if b.isAnimating() && inputTriggered() {
 			b.trySkipTypingAnim()
 		} else if b.isClosed() {
 			w.balloons[i] = nil
@@ -466,7 +473,7 @@ func (w *Windows) Update(playerY int, parser MessageSyntaxParser, sceneManager *
 	}
 	if w.banner != nil {
 		w.banner.update(playerY, w.findCharacterByEventID(characters, w.banner.eventID))
-		if w.banner.isAnimating() && input.Triggered() {
+		if w.banner.isAnimating() && inputTriggered() {
 			w.banner.trySkipTypingAnim()
 		} else if w.banner.isClosed() {
 			w.banner = nil

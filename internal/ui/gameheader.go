@@ -26,10 +26,9 @@ import (
 )
 
 const (
-	revealFrames          = 16
-	headerHeight          = 16 * consts.TileScale
-	closeFrames           = 100
-	HeaderTouchAreaHeight = 48
+	revealFrames = 16
+	headerHeight = 16 * consts.TileScale
+	closeFrames  = 100
 )
 
 type GameHeader struct {
@@ -132,7 +131,7 @@ func (g *GameHeader) Update(paused bool) {
 
 	if g.revealRatio == 0 && input.Pressed() {
 		_, iy := input.Position()
-		if iy < HeaderTouchAreaHeight {
+		if iy < consts.HeaderHeight {
 			g.Open()
 		}
 	}

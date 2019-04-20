@@ -384,7 +384,7 @@ func (m *MapScene) runEventIfNeeded(sceneManager *scene.Manager) {
 	}
 
 	x, y := input.Position()
-	if y < ui.HeaderTouchAreaHeight {
+	if y < consts.HeaderHeight {
 		return
 	}
 

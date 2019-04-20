@@ -1297,8 +1297,11 @@ func (g *Game) touchingPictureID(x, y int) int {
 // and reports whether one of the pictures is touched.
 func (g *Game) UpdatePictureTouch(offsetY int) bool {
 	g.resetPictureIDs()
+	x, y := input.Position()
+	if y < consts.HeaderHeight {
+		return false
+	}
 	if !g.Map().IsBlockingEventExecuting() && !g.Map().IsPlayerMovingByUserInput() {
-		x, y := input.Position()
 		sx := x / consts.TileScale
 		sy := (y - offsetY) / consts.TileScale
 		if g.updatePictureIDs(sx, sy) {
