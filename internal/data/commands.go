@@ -1849,6 +1849,7 @@ const (
 	SystemVariableTriggeredPictureID    SystemVariableType = "triggered_picture_id"
 	SystemVariablePressedPictureID      SystemVariableType = "pressed_picture_id"
 	SystemVariableReleasedPictureID     SystemVariableType = "released_picture_id"
+	SystemVariableSponsorTier           SystemVariableType = "sponsor_tier"
 )
 
 type MessagePositionType string

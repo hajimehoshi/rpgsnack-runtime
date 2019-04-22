@@ -199,7 +199,7 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 
 	s.updateButtonTexts()
 
-	if sceneManager.MaxPurchaseTier() > 0 {
+	if sceneManager.SponsorTier() > 0 {
 		s.updateCreditsButton.Show()
 		s.creditsButton.SetWidth(76)
 	} else {

@@ -512,7 +512,7 @@ func (m *Manager) getShopProducts(products []int) []*data.ShopProduct {
 	return data
 }
 
-func (m *Manager) MaxPurchaseTier() int {
+func (m *Manager) SponsorTier() int {
 	maxTier := 0
 	for _, p := range m.purchases {
 		iap := m.Game().GetIAPProduct(p)
