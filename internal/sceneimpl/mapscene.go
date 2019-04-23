@@ -217,7 +217,7 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	m.credits = ui.NewCredits(false)
 
 	m.quitYesButton.SetOnPressed(func(_ *ui.Button) {
-		if m.gameState.IsAutoSaveEnabled() && !m.gameState.Map().IsBlockingEventExecuting() {
+		if m.gameState.IsAutoSaveEnabled() && !m.gameState.Map().IsBlockingEventExecuting() && !m.gameState.Map().IsPlayerMovingByUserInput() {
 			m.gameState.RequestSave(0, sceneManager)
 		}
 		audio.Stop()
