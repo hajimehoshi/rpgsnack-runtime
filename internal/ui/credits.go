@@ -143,12 +143,13 @@ func (c *Credits) Update() {
 }
 
 const creditsFontScale = 3
+const maxCharCodePoint = 256
 
 var creditsFont *ebiten.Image
 
 func init() {
 	var rs []rune
-	for i := rune(0); i < 128; i++ {
+	for i := rune(0); i < maxCharCodePoint; i++ {
 		if !unicode.IsPrint(i) {
 			rs = append(rs, ' ')
 		} else {
@@ -159,7 +160,7 @@ func init() {
 	w, h := font.MeasureSize(str)
 
 	creditsFont, _ = ebiten.NewImage(w*creditsFontScale, h*creditsFontScale, ebiten.FilterDefault)
-	font.DrawTextLang(creditsFont, str, 0, 0, creditsFontScale, data.TextAlignLeft, color.White, 128, language.English)
+	font.DrawTextLang(creditsFont, str, 0, 0, creditsFontScale, data.TextAlignLeft, color.White, maxCharCodePoint, language.English)
 }
 
 func drawCreditsText(img *ebiten.Image, str string, x, y int, scale float64, clr color.Color) {
@@ -184,6 +185,9 @@ func drawCreditsText(img *ebiten.Image, str string, x, y int, scale float64, clr
 	op.Filter = ebiten.FilterLinear
 	for i, r := range str {
 		if !unicode.IsPrint(r) {
+			continue
+		}
+		if r >= maxCharCodePoint {
 			continue
 		}
 		op.GeoM.Reset()
