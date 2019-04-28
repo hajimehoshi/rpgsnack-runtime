@@ -30,7 +30,7 @@ import (
 )
 
 const (
-	renderingLineHeight = 18
+	RenderingLineHeight = 18
 
 	// These values are copied from github.com/hajimehoshi/bitmap's private values.
 	mplusDotX = 4
@@ -46,7 +46,7 @@ func MeasureSize(text string) (int, int) {
 		if nw > w {
 			w = nw
 		}
-		h += fixed.I(renderingLineHeight)
+		h += fixed.I(RenderingLineHeight)
 	}
 	return w.Ceil(), h.Ceil()
 }
@@ -73,7 +73,7 @@ func DrawTextToScratchPad(str string, scale int, lang language.Tag) {
 func DrawTextLang(screen *ebiten.Image, str string, ox, oy int, scale int, textAlign data.TextAlign, color color.Color, displayTextRuneCount int, lang language.Tag) {
 	f := face(scale, lang)
 	m := f.Metrics()
-	oy += (renderingLineHeight*scale - m.Height.Round()) / 2
+	oy += (RenderingLineHeight*scale - m.Height.Round()) / 2
 
 	b, _, _ := f.GlyphBounds('.')
 	dotX := (-b.Min.X).Floor()
@@ -98,6 +98,6 @@ func DrawTextLang(screen *ebiten.Image, str string, ox, oy int, scale int, textA
 		}
 
 		text.Draw(screen, l, f, x, y, color)
-		oy += renderingLineHeight * scale
+		oy += RenderingLineHeight * scale
 	}
 }

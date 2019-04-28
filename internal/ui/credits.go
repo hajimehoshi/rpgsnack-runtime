@@ -143,6 +143,7 @@ func (c *Credits) Update() {
 }
 
 const creditsFontScale = 3
+const numCharPerLine = 128
 const maxCharCodePoint = 256
 
 var creditsFont *ebiten.Image
@@ -155,6 +156,9 @@ func init() {
 		} else {
 			rs = append(rs, i)
 		}
+		if (i+1)%numCharPerLine == 0 {
+			rs = append(rs, '\n')
+		}
 	}
 	str := string(rs)
 	w, h := font.MeasureSize(str)
@@ -166,7 +170,7 @@ func init() {
 func drawCreditsText(img *ebiten.Image, str string, x, y int, scale float64, clr color.Color) {
 	const (
 		w = 6
-		h = 16
+		h = font.RenderingLineHeight
 	)
 
 	op := &ebiten.DrawImageOptions{}
@@ -183,7 +187,7 @@ func drawCreditsText(img *ebiten.Image, str string, x, y int, scale float64, clr
 	}
 	op.ColorM.Scale(rf, gf, bf, af)
 	op.Filter = ebiten.FilterLinear
-	for i, r := range str {
+	for i, r := range ([]rune)(str) {
 		if !unicode.IsPrint(r) {
 			continue
 		}
@@ -193,7 +197,10 @@ func drawCreditsText(img *ebiten.Image, str string, x, y int, scale float64, clr
 		op.GeoM.Reset()
 		op.GeoM.Scale(scale/creditsFontScale, scale/creditsFontScale)
 		op.GeoM.Translate(float64(x)+float64(i)*w*scale, float64(y))
-		img.DrawImage(creditsFont.SubImage(image.Rect(int(r)*w*creditsFontScale, 0, int(r+1)*w*creditsFontScale, h*creditsFontScale)).(*ebiten.Image), op)
+		x := int(r%numCharPerLine) * w * creditsFontScale
+		y := int(r/numCharPerLine) * h * creditsFontScale
+		rect := image.Rect(x, y, x+w*creditsFontScale, y+h*creditsFontScale)
+		img.DrawImage(creditsFont.SubImage(rect).(*ebiten.Image), op)
 	}
 }
 
