@@ -29,6 +29,10 @@ type input struct {
 	prevPressCount int
 }
 
+func IsMuteButtonTriggered() bool {
+	return inpututil.IsKeyJustPressed(ebiten.KeyM)
+}
+
 func IsSwitchDebugButtonTriggered() bool {
 	return inpututil.IsKeyJustPressed(ebiten.KeyS)
 }

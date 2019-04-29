@@ -28,6 +28,7 @@ import (
 	"github.com/vmihailenco/msgpack"
 	"golang.org/x/text/language"
 
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
@@ -249,6 +250,10 @@ func (m *Manager) Update() error {
 			log.Printf("platform data key not implemented: %s", a.key)
 		}
 	default:
+	}
+
+	if input.IsMuteButtonTriggered() {
+		audio.ToggleMute()
 	}
 
 	if m.screenshot == nil {

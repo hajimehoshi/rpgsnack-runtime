@@ -14,4 +14,16 @@
 
 package audio
 
-const volumeBias = 0.8
+var volumeBias float64 = 0.8
+
+func setMasterVolume(v float64) {
+	volumeBias = v
+}
+
+func ToggleMute() {
+	if volumeBias == 0 {
+		setMasterVolume(0.8)
+		return
+	}
+	setMasterVolume(0)
+}
