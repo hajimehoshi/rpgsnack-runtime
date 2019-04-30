@@ -751,7 +751,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 	case data.CommandNameOpenLink:
 		args := c.Args.(*data.CommandArgsOpenLink)
 		if args.Type == data.OpenLinkTypeShowCredit {
-			gameState.ShowCredits()
+			gameState.ShowCredits(args.Data == "true")
 			i.commandIterator.Advance()
 			return false, nil
 		}

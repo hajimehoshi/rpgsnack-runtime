@@ -127,17 +127,18 @@ type Game struct {
 	playerSpeed data.Speed
 
 	// Fields that are not dumped
-	pressedPictureID       int
-	releasedPictureID      int
-	triggeredPictureID     int
-	isTitle                bool
-	rand                   Rand
-	waitingRequestIDs      map[int]struct{}
-	prices                 map[string]string // TODO: We want to use https://godoc.org/golang.org/x/text/currency
-	weather                *weather.Weather
-	onShakeStartGameButton func()
-	shouldShowCredits      bool
-	minigame               *Minigame
+	pressedPictureID             int
+	releasedPictureID            int
+	triggeredPictureID           int
+	isTitle                      bool
+	rand                         Rand
+	waitingRequestIDs            map[int]struct{}
+	prices                       map[string]string // TODO: We want to use https://godoc.org/golang.org/x/text/currency
+	weather                      *weather.Weather
+	onShakeStartGameButton       func()
+	shouldShowCredits            bool
+	shouldShowCreditsCloseButton bool
+	minigame                     *Minigame
 }
 
 func generateDefaultRand() Rand {
@@ -1283,8 +1284,13 @@ func (g *Game) ShouldShowCredits() bool {
 	return g.shouldShowCredits
 }
 
-func (g *Game) ShowCredits() {
+func (g *Game) ShouldShowCreditsCloseButton() bool {
+	return g.shouldShowCreditsCloseButton
+}
+
+func (g *Game) ShowCredits(shouldShowCreditsCloseButton bool) {
 	g.shouldShowCredits = true
+	g.shouldShowCreditsCloseButton = shouldShowCreditsCloseButton
 }
 
 func (g *Game) ShowedCredits() {

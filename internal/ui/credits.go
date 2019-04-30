@@ -75,11 +75,7 @@ type Credits struct {
 	finished    bool
 }
 
-func NewCredits(useCloseButton bool) *Credits {
-	if !useCloseButton {
-		return &Credits{}
-	}
-
+func NewCredits() *Credits {
 	closeButton := NewImageButton(
 		140,
 		4,
@@ -123,6 +119,10 @@ func (c *Credits) dash() bool {
 		return true
 	}
 	return !c.closeButton.includesInput(0, 0)
+}
+
+func (c *Credits) SetCloseButtonVisible(visible bool) {
+	c.closeButton.visible = visible
 }
 
 func (c *Credits) Update() {

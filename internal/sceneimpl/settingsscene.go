@@ -164,7 +164,8 @@ func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
 		sceneManager.Requester().RequestShowShop(s.waitingRequestID, string(sceneManager.ShopData(data.ShopTypeMain, []bool{true, true, true, true})))
 	})
 
-	s.credits = ui.NewCredits(true)
+	s.credits = ui.NewCredits()
+	s.credits.SetCloseButtonVisible(true)
 }
 
 func (s *SettingsScene) updateButtonTexts() {

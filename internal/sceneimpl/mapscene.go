@@ -214,7 +214,7 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 	m.minigamePopup = ui.NewMinigamePopup(ty)
 	m.quitDialog.AddChild(m.quitLabel)
 
-	m.credits = ui.NewCredits(false)
+	m.credits = ui.NewCredits()
 
 	m.quitYesButton.SetOnPressed(func(_ *ui.Button) {
 		if m.gameState.IsAutoSaveEnabled() && !m.gameState.Map().IsBlockingEventExecuting() && !m.gameState.Map().IsPlayerMovingByUserInput() {
@@ -503,6 +503,7 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 	}
 
 	m.credits.Update()
+	m.credits.SetCloseButtonVisible(m.gameState.ShouldShowCreditsCloseButton())
 }
 
 func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
