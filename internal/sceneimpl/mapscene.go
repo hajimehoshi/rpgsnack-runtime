@@ -481,7 +481,7 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 	m.storeErrorDialog.Update()
 
 	if m.gameHeader != nil {
-		m.gameHeader.Update(m.quitDialog.Visible())
+		m.gameHeader.Update(m.quitDialog.Visible() || m.credits.Visible())
 	}
 
 	m.itemPreviewPopup.Update(l)
