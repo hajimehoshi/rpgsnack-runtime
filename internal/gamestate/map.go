@@ -208,11 +208,16 @@ func (m *Map) setRoomID(gameState *Game, id int, interpreter *Interpreter) error
 	m.events = nil
 	m.eventPageIndices = map[int]int{}
 
-	if m.CurrentRoom().AutoBGM {
-		gameState.SetBGM(m.CurrentRoom().BGM)
+	room := m.CurrentRoom()
+	if room == nil {
+		panic(fmt.Sprintf("gamescene: invalid room ID (%d) at setRoomID", m.roomID))
 	}
 
-	for _, e := range m.CurrentRoom().Events {
+	if room.AutoBGM {
+		gameState.SetBGM(room.BGM)
+	}
+
+	for _, e := range room.Events {
 		x, y := e.Position()
 		event := character.NewEvent(e.ID(), x, y)
 		m.events = append(m.events, event)
