@@ -35,6 +35,10 @@ type AdvancedSettingsScene struct {
 	settingsLabel    *ui.Label
 	languageButton   *ui.Button
 	resetGameButton  *ui.Button
+	bgmLabel         *ui.Label
+	bgmSlider        *ui.Slider
+	seLabel          *ui.Label
+	seSlider         *ui.Slider
 	closeButton      *ui.Button
 	warningDialog    *ui.Dialog
 	warningLabel     *ui.Label
@@ -60,7 +64,11 @@ func (s *AdvancedSettingsScene) initUI(sceneManager *scene.Manager) {
 
 	s.settingsLabel = ui.NewLabel(16, s.baseY+8)
 	s.languageButton = ui.NewButton(s.baseX, s.calcButtonY(1), 120, 20, "system/click")
-	s.resetGameButton = ui.NewButton(s.baseX, s.calcButtonY(2), 120, 20, "system/click")
+	s.bgmLabel = ui.NewLabel(s.baseX, s.calcButtonY(2)+4)
+	s.bgmSlider = ui.NewSlider(s.baseX+48, s.calcButtonY(2), 50, 0, 100)
+	s.seLabel = ui.NewLabel(s.baseX, s.calcButtonY(3)+4)
+	s.seSlider = ui.NewSlider(s.baseX+48, s.calcButtonY(3), 50, 0, 100)
+	s.resetGameButton = ui.NewButton(s.baseX, s.calcButtonY(4), 120, 20, "system/click")
 	s.closeButton = ui.NewButton(s.baseX, s.calcButtonY(8), 120, 20, "system/cancel")
 
 	s.languageDialog = ui.NewDialog((w/consts.TileScale-160)/2+4, h/(2*consts.TileScale)-80, 152, 160)
@@ -85,6 +93,14 @@ func (s *AdvancedSettingsScene) initUI(sceneManager *scene.Manager) {
 
 	s.languageButton.SetOnPressed(func(_ *ui.Button) {
 		s.languageDialog.Show()
+	})
+
+	s.bgmSlider.SetOnValueChanged(func(slider *ui.Slider, value int) {
+		// TODO set bgm volume
+	})
+
+	s.seSlider.SetOnValueChanged(func(slider *ui.Slider, value int) {
+		// TODO set SE volume
 	})
 
 	s.resetGameButton.SetOnPressed(func(_ *ui.Button) {
@@ -117,6 +133,8 @@ func (s *AdvancedSettingsScene) initUI(sceneManager *scene.Manager) {
 func (s *AdvancedSettingsScene) updateButtonTexts() {
 	s.settingsLabel.Text = texts.Text(lang.Get(), texts.TextIDAdvancedSettings)
 	s.languageButton.SetText(texts.Text(lang.Get(), texts.TextIDLanguage))
+	s.bgmLabel.Text = texts.Text(lang.Get(), texts.TextIDBGMVolume)
+	s.seLabel.Text = texts.Text(lang.Get(), texts.TextIDSEVolume)
 	s.closeButton.SetText(texts.Text(lang.Get(), texts.TextIDBack))
 	s.resetGameButton.SetText(texts.Text(lang.Get(), texts.TextIDResetGame))
 	s.warningLabel.Text = texts.Text(lang.Get(), texts.TextIDNewGameWarning)
@@ -149,6 +167,10 @@ func (s *AdvancedSettingsScene) Update(sceneManager *scene.Manager) error {
 		s.languageButton.Update()
 		s.closeButton.Update()
 		s.resetGameButton.Update()
+		s.bgmLabel.Update()
+		s.bgmSlider.Update()
+		s.seLabel.Update()
+		s.seSlider.Update()
 	}
 
 	if sceneManager.HasProgress() {
@@ -182,6 +204,10 @@ func (s *AdvancedSettingsScene) Draw(screen *ebiten.Image) {
 	s.settingsLabel.Draw(screen)
 	s.languageButton.Draw(screen)
 	s.resetGameButton.Draw(screen)
+	s.bgmLabel.Draw(screen)
+	s.bgmSlider.Draw(screen)
+	s.seLabel.Draw(screen)
+	s.seSlider.Draw(screen)
 	s.warningDialog.Draw(screen)
 	s.languageDialog.Draw(screen)
 	s.closeButton.Draw(screen)

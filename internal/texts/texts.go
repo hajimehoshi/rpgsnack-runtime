@@ -39,6 +39,8 @@ const (
 	TextIDMoreGames
 	TextIDPrivacyPolicy
 	TextIDMenu
+	TextIDBGMVolume
+	TextIDSEVolume
 	TextIDAdvancedSettings
 	TextIDBackToTitle
 	TextIDBack
@@ -83,7 +85,8 @@ from the game for %s?`,
 		TextIDClose:            "Close",
 		TextIDItemCheck:        "Check",
 		TextIDMenu:             "Menu",
-
+		TextIDBGMVolume:        "BGM",
+		TextIDSEVolume:         "SE",
 		TextIDNewGameWarning: `You have on-going game data.
 Do you want to reset your
 progress and start a new game?`,
@@ -229,7 +232,8 @@ o login e se conectar à internet`,
 		TextIDClose:            "閉じる",
 		TextIDItemCheck:        "チェック",
 		TextIDMenu:             "タイトル",
-
+		TextIDBGMVolume:        "BGM音量",
+		TextIDSEVolume:         "SE音量",
 		TextIDNewGameWarning: `進行中のゲームデータがあります。
 進行中のゲームデータを消して、
 新しいゲームを開始しますか?`,
