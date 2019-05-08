@@ -15,6 +15,24 @@
 package audio
 
 var volumeBias float64 = 0.8
+var seVolumeBias float64 = 1.0
+var bgmVolumeBias float64 = 1.0
+
+func SetSEVolume(v float64) {
+	seVolumeBias = v
+}
+
+func SetBGMVolume(v float64) {
+	bgmVolumeBias = v
+}
+
+func SEVolume() float64 {
+	return seVolumeBias
+}
+
+func BGMVolume() float64 {
+	return bgmVolumeBias
+}
 
 func setMasterVolume(v float64) {
 	volumeBias = v

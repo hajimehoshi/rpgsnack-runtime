@@ -604,6 +604,16 @@ func (m *Manager) RequestRewardedAds(requestID int, forceAds bool) {
 	m.Requester().RequestRewardedAds(requestID, forceAds)
 }
 
+func (m *Manager) RequestSaveVolume(requestID int, seVolume int, bgmVolume int) {
+	m.permanent.SEMute = 100 - seVolume
+	m.permanent.BGMMute = 100 - bgmVolume
+	bytes, err := msgpack.Marshal(m.permanent)
+	if err != nil {
+		panic(fmt.Sprintf("scene: msgpack encoding error: %v", err))
+	}
+	m.Requester().RequestSavePermanent(requestID, bytes)
+}
+
 func (m *Manager) RequestSavePermanentVariable(requestID int, permanentVariableID int, value int64) {
 	if len(m.permanent.Variables) < permanentVariableID+1 {
 		zeros := make([]int64, permanentVariableID+1-len(m.permanent.Variables))
@@ -624,6 +634,14 @@ func (m *Manager) PermanentVariableValue(id int) int64 {
 		m.permanent.Variables = append(m.permanent.Variables, zeros...)
 	}
 	return m.permanent.Variables[id]
+}
+
+func (m *Manager) BGMVolume() int {
+	return 100 - m.permanent.BGMMute
+}
+
+func (m *Manager) SEVolume() int {
+	return 100 - m.permanent.SEMute
 }
 
 func (m *Manager) RequestSavePermanentMinigame(requestID int, minigameID, score int, lastActiveAt int64) {

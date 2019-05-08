@@ -22,4 +22,6 @@ type MinigameData struct {
 type Permanent struct {
 	Minigames []*MinigameData `msgpack:"minigame"`
 	Variables []int64         `msgpack:"variables"`
+	BGMMute   int             `msgpack:"bgm_mute"`
+	SEMute    int             `msgpack:"se_mute"`
 }

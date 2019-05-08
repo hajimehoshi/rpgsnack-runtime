@@ -114,7 +114,7 @@ func (a *audio) Update() error {
 		a.bgmVolume.Update()
 	}
 	if a.playing != nil {
-		a.playing.SetVolume(a.bgmVolume.Current() * volumeBias)
+		a.playing.SetVolume(a.bgmVolume.Current() * volumeBias * bgmVolumeBias)
 	}
 	if a.toStopBGM && !a.bgmVolume.IsChanging() {
 		a.playing.Close()
@@ -221,7 +221,7 @@ func (a *audio) PlaySE(name string, volume float64) {
 		a.err = err
 		return
 	}
-	p.SetVolume(volume * volumeBias)
+	p.SetVolume(volume * volumeBias * seVolumeBias)
 	p.Play()
 	a.sePlayers[p] = struct{}{}
 }
@@ -246,7 +246,7 @@ func (a *audio) PlayBGM(name string, volume float64, fadeTimeInFrames int) {
 		p = player
 	}
 	if a.playingBGMName == name {
-		p.SetVolume(a.bgmVolume.Current() * volumeBias)
+		p.SetVolume(a.bgmVolume.Current() * volumeBias * bgmVolumeBias)
 		p.Play()
 		return
 	}
@@ -259,7 +259,7 @@ func (a *audio) PlayBGM(name string, volume float64, fadeTimeInFrames int) {
 	}
 
 	p.Play()
-	p.SetVolume(a.bgmVolume.Current() * volumeBias)
+	p.SetVolume(a.bgmVolume.Current() * volumeBias * bgmVolumeBias)
 	a.playing = p
 	a.playingBGMName = name
 }

@@ -42,16 +42,17 @@ type Slider struct {
 	dragging bool
 
 	onValueChanged func(slider *Slider, value int)
+	onReleased     func(slider *Slider, value int)
 }
 
-func NewSlider(x, y, width, min, max int) *Slider {
+func NewSlider(x, y, width, min, max, value int) *Slider {
 	return &Slider{
 		x:     x,
 		y:     y + 6,
 		width: width,
 		min:   min,
 		max:   max,
-		value: max,
+		value: value,
 	}
 }
 
@@ -61,6 +62,10 @@ func (s *Slider) Value() int {
 
 func (s *Slider) SetOnValueChanged(onValueChanged func(slider *Slider, value int)) {
 	s.onValueChanged = onValueChanged
+}
+
+func (s *Slider) SetOnReleased(onReleased func(slider *Slider, value int)) {
+	s.onReleased = onReleased
 }
 
 func (s *Slider) touchingHandle(offsetX, offsetY int) bool {
@@ -109,11 +114,20 @@ func (s *Slider) update(visible bool, offsetX, offsetY int) {
 			s.dragging = false
 		} else {
 			s.value = v
+			if s.onValueChanged != nil {
+				s.onValueChanged(s, s.value)
+			}
 		}
 		return
 	}
 	if input.Triggered() {
 		s.dragging = s.touchingHandle(offsetX, offsetY)
+		return
+	}
+	if input.Released() && s.dragging {
+		if s.onReleased != nil {
+			s.onReleased(s, s.value)
+		}
 		return
 	}
 

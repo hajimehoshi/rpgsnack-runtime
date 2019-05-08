@@ -67,10 +67,9 @@ func (s *AdvancedSettingsScene) initUI(sceneManager *scene.Manager) {
 	s.settingsLabel = ui.NewLabel(16, s.baseY+8)
 	s.languageButton = ui.NewButton(s.baseX, s.calcButtonY(1), 120, 20, "system/click")
 	s.bgmLabel = ui.NewLabel(s.baseX, s.calcButtonY(2)+4)
-	s.bgmSlider = ui.NewSlider(s.baseX+48, s.calcButtonY(2), 50, 0, 100)
+	s.bgmSlider = ui.NewSlider(s.baseX+48, s.calcButtonY(2), 50, 0, 100, sceneManager.BGMVolume())
 	s.seLabel = ui.NewLabel(s.baseX, s.calcButtonY(3)+4)
-	s.seSlider = ui.NewSlider(s.baseX+48, s.calcButtonY(3), 50, 0, 100)
-	s.resetGameButton = ui.NewButton(s.baseX, s.calcButtonY(4), 120, 20, "system/click")
+	s.seSlider = ui.NewSlider(s.baseX+48, s.calcButtonY(3), 50, 0, 100, sceneManager.SEVolume())
 	s.vibrationLabel = ui.NewLabel(s.baseX, s.calcButtonY(4)+4)
 	s.vibrationButton = ui.NewSwitchButton(s.baseX+72, s.calcButtonY(4))
 	s.resetGameButton = ui.NewButton(s.baseX, s.calcButtonY(5), 120, 20, "system/click")
@@ -100,16 +99,21 @@ func (s *AdvancedSettingsScene) initUI(sceneManager *scene.Manager) {
 		s.languageDialog.Show()
 	})
 
-	s.vibrationButton.SetOnToggled(func(_ *ui.SwitchButton, value bool) {
-		// TODO ON/OFF vibration
+	s.bgmSlider.SetOnValueChanged(func(slider *ui.Slider, value int) {
+		audio.SetBGMVolume(float64(value) / 100.0)
 	})
 
-	s.bgmSlider.SetOnValueChanged(func(slider *ui.Slider, value int) {
-		// TODO set bgm volume
+	s.bgmSlider.SetOnReleased(func(slider *ui.Slider, value int) {
+		// TODO Not 100% confident about saving at this timing, we should revisit here later
+		s.saveVolume(sceneManager)
 	})
 
 	s.seSlider.SetOnValueChanged(func(slider *ui.Slider, value int) {
-		// TODO set SE volume
+		audio.SetSEVolume(float64(value) / 100.0)
+	})
+
+	s.seSlider.SetOnReleased(func(slider *ui.Slider, value int) {
+		s.saveVolume(sceneManager)
 	})
 
 	s.resetGameButton.SetOnPressed(func(_ *ui.Button) {
@@ -152,6 +156,11 @@ func (s *AdvancedSettingsScene) updateButtonTexts() {
 	s.warningNoButton.SetText(texts.Text(lang.Get(), texts.TextIDNo))
 }
 
+func (s *AdvancedSettingsScene) saveVolume(sceneManager *scene.Manager) {
+	s.waitingRequestID = sceneManager.GenerateRequestID()
+	sceneManager.RequestSaveVolume(s.waitingRequestID, s.seSlider.Value(), s.bgmSlider.Value())
+}
+
 func (s *AdvancedSettingsScene) Update(sceneManager *scene.Manager) error {
 	if s.waitingRequestID != 0 {
 		r := sceneManager.ReceiveResultIfExists(s.waitingRequestID)
@@ -173,6 +182,7 @@ func (s *AdvancedSettingsScene) Update(sceneManager *scene.Manager) error {
 	s.updateButtonTexts()
 
 	s.languageDialog.Update()
+	s.warningDialog.Update()
 	if !s.languageDialog.Visible() && !s.warningDialog.Visible() {
 		s.languageButton.Update()
 		s.closeButton.Update()
@@ -220,11 +230,11 @@ func (s *AdvancedSettingsScene) Draw(screen *ebiten.Image) {
 	s.bgmSlider.Draw(screen)
 	s.seLabel.Draw(screen)
 	s.seSlider.Draw(screen)
-	s.warningDialog.Draw(screen)
 	s.languageDialog.Draw(screen)
 	s.closeButton.Draw(screen)
 	s.vibrationLabel.Draw(screen)
 	s.vibrationButton.Draw(screen)
+	s.warningDialog.Draw(screen)
 }
 
 func (s *AdvancedSettingsScene) Resize() {
