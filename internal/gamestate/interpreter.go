@@ -829,7 +829,9 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 
 	case data.CommandNameVibrate:
 		args := c.Args.(*data.CommandArgsVibrate)
-		sceneManager.Requester().RequestVibration(args.Type)
+		if sceneManager.VibrationEnabled() {
+			sceneManager.Requester().RequestVibration(args.Type)
+		}
 		// There is no need to wait for command. Proceed the command iterator.
 		i.commandIterator.Advance()
 	case data.CommandNameRequestReview:

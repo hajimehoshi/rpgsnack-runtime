@@ -1,4 +1,4 @@
-// Copyright 2019 Hajime Hoshi
+// Copyright 2019 The RPGSnack Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,17 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package scene
+package ui
 
-type MinigameData struct {
-	Score        int   `msgpack:"score"`
-	LastActiveAt int64 `msgpack:"lastActiveAt"`
-}
+import (
+	"image/color"
 
-type Permanent struct {
-	Minigames         []*MinigameData `msgpack:"minigame"`
-	Variables         []int64         `msgpack:"variables"`
-	BGMMute           int             `msgpack:"bgm_mute"`
-	SEMute            int             `msgpack:"se_mute"`
-	VibrationDisabled bool            `msgpack:"vibrationDisabled"`
+	"github.com/hajimehoshi/ebiten"
+)
+
+var pixelImage *ebiten.Image
+
+func init() {
+	pixelImage, _ = ebiten.NewImage(1, 1, ebiten.FilterDefault)
+	pixelImage.ReplacePixel([]byte{0xff, 0xff, 0xff, 0xff})
 }

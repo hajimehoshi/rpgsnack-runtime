@@ -71,7 +71,7 @@ func (s *AdvancedSettingsScene) initUI(sceneManager *scene.Manager) {
 	s.seLabel = ui.NewLabel(s.baseX, s.calcButtonY(3)+4)
 	s.seSlider = ui.NewSlider(s.baseX+48, s.calcButtonY(3), 50, 0, 100, sceneManager.SEVolume())
 	s.vibrationLabel = ui.NewLabel(s.baseX, s.calcButtonY(4)+4)
-	s.vibrationButton = ui.NewSwitchButton(s.baseX+72, s.calcButtonY(4))
+	s.vibrationButton = ui.NewSwitchButton(s.baseX+72, s.calcButtonY(4), sceneManager.VibrationEnabled())
 	s.resetGameButton = ui.NewButton(s.baseX, s.calcButtonY(5), 120, 20, "system/click")
 	s.closeButton = ui.NewButton(s.baseX, s.calcButtonY(8), 120, 20, "system/cancel")
 
@@ -97,6 +97,11 @@ func (s *AdvancedSettingsScene) initUI(sceneManager *scene.Manager) {
 
 	s.languageButton.SetOnPressed(func(_ *ui.Button) {
 		s.languageDialog.Show()
+	})
+
+	s.vibrationButton.SetOnToggled(func(_ *ui.SwitchButton, value bool) {
+		s.waitingRequestID = sceneManager.GenerateRequestID()
+		sceneManager.RequestSaveVibrationEnabled(s.waitingRequestID, value)
 	})
 
 	s.bgmSlider.SetOnValueChanged(func(slider *ui.Slider, value int) {

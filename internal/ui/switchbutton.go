@@ -34,18 +34,18 @@ const (
 )
 
 type SwitchButton struct {
-	x       int
-	y       int
-	enabled bool
+	x  int
+	y  int
+	on bool
 
 	onToggled func(SwitchButton *SwitchButton, value bool)
 }
 
-func NewSwitchButton(x, y int) *SwitchButton {
+func NewSwitchButton(x, y int, on bool) *SwitchButton {
 	return &SwitchButton{
-		x:       x,
-		y:       y + 2,
-		enabled: false,
+		x:  x,
+		y:  y + 2,
+		on: on,
 	}
 }
 
@@ -57,12 +57,12 @@ func (s *SwitchButton) SetY(y int) {
 	s.y = y
 }
 
-func (s *SwitchButton) SetEnabled(enabled bool) {
-	s.enabled = enabled
+func (s *SwitchButton) SetOn(on bool) {
+	s.on = on
 }
 
-func (s *SwitchButton) Enabled() bool {
-	return s.enabled
+func (s *SwitchButton) On() bool {
+	return s.on
 }
 
 func (s *SwitchButton) SetOnToggled(onToggled func(SwitchButton *SwitchButton, value bool)) {
@@ -94,8 +94,11 @@ func (s *SwitchButton) update(visible bool, offsetX, offsetY int) {
 
 	if input.Triggered() {
 		if s.includesInput(offsetX, offsetY) {
-			s.enabled = !s.enabled
-			audio.PlaySE("system/cancel", 1.0)
+			s.on = !s.on
+			audio.PlaySE("system/click", 1.0)
+			if s.onToggled != nil {
+				s.onToggled(s, s.on)
+			}
 		}
 		return
 	}
@@ -120,8 +123,19 @@ func (s *SwitchButton) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 	img := assets.GetImage("system/common/9patch_frame_off.png")
 	DrawNinePatches(screen, img, switchButtonWidth, switchButtonHeight, &op.GeoM, &op.ColorM)
 
+	op = &ebiten.DrawImageOptions{}
+	op.GeoM.Scale(switchButtonWidth-2, switchButtonHeight-2)
+	op.GeoM.Translate(float64(s.x+offsetX+1), float64(s.y+offsetY+1))
+	op.GeoM.Scale(consts.TileScale, consts.TileScale)
+	if s.on {
+		op.ColorM.Scale(0.1, 0.8, 0.1, 1)
+	} else {
+		op.ColorM.Scale(0.1, 0.1, 0.1, 1)
+	}
+	screen.DrawImage(pixelImage, op)
+
 	hx := 0
-	if s.enabled {
+	if s.on {
 		hx += switchButtonWidth - switchHandleWidth
 	}
 	hy := 0
@@ -132,7 +146,7 @@ func (s *SwitchButton) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 	DrawNinePatches(screen, img, switchHandleWidth, switchButtonHeight, &op.GeoM, &op.ColorM)
 
 	ty := (s.y + offsetY + 2) * consts.TileScale
-	if s.enabled {
+	if s.on {
 		tx := (s.x + offsetX + 6) * consts.TileScale
 		text := "ON"
 		font.DrawText(screen, text, tx, ty, consts.TextScale, data.TextAlignLeft, color.White, len([]rune(text)))

@@ -628,12 +628,25 @@ func (m *Manager) RequestSavePermanentVariable(requestID int, permanentVariableI
 	m.Requester().RequestSavePermanent(requestID, bytes)
 }
 
+func (m *Manager) RequestSaveVibrationEnabled(requestID int, vibrationEnabled bool) {
+	m.permanent.VibrationDisabled = !vibrationEnabled
+	bytes, err := msgpack.Marshal(m.permanent)
+	if err != nil {
+		panic(fmt.Sprintf("scene: msgpack encoding error: %v", err))
+	}
+	m.Requester().RequestSavePermanent(requestID, bytes)
+}
+
 func (m *Manager) PermanentVariableValue(id int) int64 {
 	if len(m.permanent.Variables) < id+1 {
 		zeros := make([]int64, id+1-len(m.permanent.Variables))
 		m.permanent.Variables = append(m.permanent.Variables, zeros...)
 	}
 	return m.permanent.Variables[id]
+}
+
+func (m *Manager) VibrationEnabled() bool {
+	return !m.permanent.VibrationDisabled
 }
 
 func (m *Manager) BGMVolume() int {
