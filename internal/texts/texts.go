@@ -51,6 +51,7 @@ const (
 	TextIDShop
 	TextIDMinigameWatchAds
 	TextIDMinigameProgress
+	TextIDVibration
 )
 
 func Text(lang language.Tag, id TextID) string {
@@ -99,6 +100,7 @@ Please make sure to sign in
 and connect to the network.`,
 		TextIDMinigameWatchAds: "Watch ads to boost",
 		TextIDMinigameProgress: "Progress %d / %d",
+		TextIDVibration:        "Vibration",
 	},
 	language.German: {
 		TextIDNewGame:      "Neues Spiel",

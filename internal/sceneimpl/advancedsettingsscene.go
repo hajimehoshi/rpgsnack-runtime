@@ -34,6 +34,8 @@ import (
 type AdvancedSettingsScene struct {
 	settingsLabel    *ui.Label
 	languageButton   *ui.Button
+	vibrationLabel   *ui.Label
+	vibrationButton  *ui.SwitchButton
 	resetGameButton  *ui.Button
 	bgmLabel         *ui.Label
 	bgmSlider        *ui.Slider
@@ -69,6 +71,9 @@ func (s *AdvancedSettingsScene) initUI(sceneManager *scene.Manager) {
 	s.seLabel = ui.NewLabel(s.baseX, s.calcButtonY(3)+4)
 	s.seSlider = ui.NewSlider(s.baseX+48, s.calcButtonY(3), 50, 0, 100)
 	s.resetGameButton = ui.NewButton(s.baseX, s.calcButtonY(4), 120, 20, "system/click")
+	s.vibrationLabel = ui.NewLabel(s.baseX, s.calcButtonY(4)+4)
+	s.vibrationButton = ui.NewSwitchButton(s.baseX+72, s.calcButtonY(4))
+	s.resetGameButton = ui.NewButton(s.baseX, s.calcButtonY(5), 120, 20, "system/click")
 	s.closeButton = ui.NewButton(s.baseX, s.calcButtonY(8), 120, 20, "system/cancel")
 
 	s.languageDialog = ui.NewDialog((w/consts.TileScale-160)/2+4, h/(2*consts.TileScale)-80, 152, 160)
@@ -93,6 +98,10 @@ func (s *AdvancedSettingsScene) initUI(sceneManager *scene.Manager) {
 
 	s.languageButton.SetOnPressed(func(_ *ui.Button) {
 		s.languageDialog.Show()
+	})
+
+	s.vibrationButton.SetOnToggled(func(_ *ui.SwitchButton, value bool) {
+		// TODO ON/OFF vibration
 	})
 
 	s.bgmSlider.SetOnValueChanged(func(slider *ui.Slider, value int) {
@@ -132,6 +141,7 @@ func (s *AdvancedSettingsScene) initUI(sceneManager *scene.Manager) {
 
 func (s *AdvancedSettingsScene) updateButtonTexts() {
 	s.settingsLabel.Text = texts.Text(lang.Get(), texts.TextIDAdvancedSettings)
+	s.vibrationLabel.Text = texts.Text(lang.Get(), texts.TextIDVibration)
 	s.languageButton.SetText(texts.Text(lang.Get(), texts.TextIDLanguage))
 	s.bgmLabel.Text = texts.Text(lang.Get(), texts.TextIDBGMVolume)
 	s.seLabel.Text = texts.Text(lang.Get(), texts.TextIDSEVolume)
@@ -167,6 +177,8 @@ func (s *AdvancedSettingsScene) Update(sceneManager *scene.Manager) error {
 		s.languageButton.Update()
 		s.closeButton.Update()
 		s.resetGameButton.Update()
+		s.vibrationLabel.Update()
+		s.vibrationButton.Update()
 		s.bgmLabel.Update()
 		s.bgmSlider.Update()
 		s.seLabel.Update()
@@ -211,6 +223,8 @@ func (s *AdvancedSettingsScene) Draw(screen *ebiten.Image) {
 	s.warningDialog.Draw(screen)
 	s.languageDialog.Draw(screen)
 	s.closeButton.Draw(screen)
+	s.vibrationLabel.Draw(screen)
+	s.vibrationButton.Draw(screen)
 }
 
 func (s *AdvancedSettingsScene) Resize() {
