@@ -121,6 +121,9 @@ func NewManager(width, height int, requester Requester, game *data.Game, progres
 	m.blackImage, _ = ebiten.NewImage(16, 16, ebiten.FilterDefault)
 	m.blackImage.Fill(color.Black)
 
+	audio.SetBGMVolume(float64(m.BGMVolume()) / 100.0)
+	audio.SetSEVolume(float64(m.SEVolume()) / 100.0)
+
 	m.credits = &data.Credits{
 		Sections: []data.CreditsSection{
 			{
