@@ -34,18 +34,20 @@ const (
 )
 
 type SwitchButton struct {
-	x  int
-	y  int
-	on bool
+	x       int
+	y       int
+	on      bool
+	visible bool
 
 	onToggled func(SwitchButton *SwitchButton, value bool)
 }
 
 func NewSwitchButton(x, y int, on bool) *SwitchButton {
 	return &SwitchButton{
-		x:  x,
-		y:  y + 2,
-		on: on,
+		x:       x,
+		y:       y + 2,
+		on:      on,
+		visible: true,
 	}
 }
 
@@ -55,6 +57,14 @@ func (s *SwitchButton) SetX(x int) {
 
 func (s *SwitchButton) SetY(y int) {
 	s.y = y
+}
+
+func (s *SwitchButton) Show() {
+	s.visible = true
+}
+
+func (s *SwitchButton) Hide() {
+	s.visible = false
 }
 
 func (s *SwitchButton) SetOn(on bool) {
@@ -91,6 +101,9 @@ func (s *SwitchButton) update(visible bool, offsetX, offsetY int) {
 	if !visible {
 		return
 	}
+	if !s.visible {
+		return
+	}
 
 	if input.Triggered() {
 		if s.includesInput(offsetX, offsetY) {
@@ -117,6 +130,10 @@ func (s *SwitchButton) Draw(screen *ebiten.Image) {
 }
 
 func (s *SwitchButton) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
+	if !s.visible {
+		return
+	}
+
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(s.x+offsetX), float64(s.y+offsetY))
 	op.GeoM.Scale(consts.TileScale, consts.TileScale)

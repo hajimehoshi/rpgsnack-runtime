@@ -29,6 +29,7 @@ type System struct {
 	TitleTextColor     string              `msgpack:"titleTextColor"`
 	Switches           []*VariableData     `msgpack:"switches"`
 	Variables          []*VariableData     `msgpack:"variables"`
+	Vibration          bool                `msgpack:"vibration"`
 }
 
 type InitialPlayerState struct {

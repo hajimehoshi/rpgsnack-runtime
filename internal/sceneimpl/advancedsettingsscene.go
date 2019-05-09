@@ -146,6 +146,15 @@ func (s *AdvancedSettingsScene) initUI(sceneManager *scene.Manager) {
 	s.warningNoButton.SetOnPressed(func(_ *ui.Button) {
 		s.warningDialog.Hide()
 	})
+
+	if !sceneManager.Game().System.Vibration {
+		s.vibrationLabel.Hide()
+		s.vibrationButton.Hide()
+	}
+
+	if !sceneManager.Game().System.Vibration {
+		s.resetGameButton.SetY(s.calcButtonY(4))
+	}
 }
 
 func (s *AdvancedSettingsScene) updateButtonTexts() {

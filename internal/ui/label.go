@@ -31,6 +31,7 @@ type Label struct {
 	Scale     float64
 	Color     color.Color
 	TextAlign data.TextAlign
+	visible   bool
 }
 
 func NewLabel(x, y int) *Label {
@@ -40,7 +41,16 @@ func NewLabel(x, y int) *Label {
 		Color:     color.White,
 		Scale:     1.0,
 		TextAlign: data.TextAlignLeft,
+		visible:   true,
 	}
+}
+
+func (l *Label) Show() {
+	l.visible = true
+}
+
+func (l *Label) Hide() {
+	l.visible = false
 }
 
 func (l *Label) Update() {
@@ -54,6 +64,10 @@ func (l *Label) Draw(screen *ebiten.Image) {
 }
 
 func (l *Label) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
+	if !l.visible {
+		return
+	}
+
 	tx := (l.x + offsetX) * consts.TileScale
 	ty := (l.y + offsetY) * consts.TileScale
 	font.DrawText(screen, l.Text, tx, ty, int(float64(consts.TextScale)*l.Scale), l.TextAlign, l.Color, len([]rune(l.Text)))
