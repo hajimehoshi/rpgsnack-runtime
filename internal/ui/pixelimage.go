@@ -15,8 +15,6 @@
 package ui
 
 import (
-	"image/color"
-
 	"github.com/hajimehoshi/ebiten"
 )
 
@@ -24,5 +22,5 @@ var pixelImage *ebiten.Image
 
 func init() {
 	pixelImage, _ = ebiten.NewImage(1, 1, ebiten.FilterDefault)
-	pixelImage.ReplacePixel([]byte{0xff, 0xff, 0xff, 0xff})
+	pixelImage.ReplacePixels([]byte{0xff, 0xff, 0xff, 0xff})
 }
