@@ -235,10 +235,10 @@ func (s *AdvancedSettingsScene) Draw(screen *ebiten.Image) {
 	s.bgmSlider.Draw(screen)
 	s.seLabel.Draw(screen)
 	s.seSlider.Draw(screen)
-	s.languageDialog.Draw(screen)
 	s.closeButton.Draw(screen)
 	s.vibrationLabel.Draw(screen)
 	s.vibrationButton.Draw(screen)
+	s.languageDialog.Draw(screen)
 	s.warningDialog.Draw(screen)
 }
 
