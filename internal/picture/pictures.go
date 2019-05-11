@@ -16,6 +16,7 @@ package picture
 
 import (
 	"fmt"
+	"image"
 	"math"
 
 	"github.com/hajimehoshi/ebiten"
@@ -27,6 +28,18 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/interpolation"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/tint"
 )
+
+type tintImageCacheKey struct {
+	picture *picture
+
+	// colorM represents color matrix value.
+	// ebiten.ColorM cannot be used as a key directly so far.
+	// See https://github.com/hajimehoshi/ebiten/issues/866
+	colorM [20]float64
+}
+
+// tintImageCache is an image cache with color matrix information to reduce graphics operations.
+var tintImageCache = map[tintImageCacheKey]*ebiten.Image{}
 
 type Pictures struct {
 	pictures []*picture
@@ -347,6 +360,11 @@ func (p *picture) changeImage(imageName string) {
 	} else {
 		p.image = assets.GetLocalizedImage("pictures/" + p.imageName)
 	}
+	for k := range tintImageCache {
+		if k.picture == p {
+			delete(tintImageCache, k)
+		}
+	}
 }
 
 func (p *picture) update() {
@@ -377,6 +395,13 @@ func (p *picture) draw(screen *ebiten.Image, offsetX, offsetY int) {
 	if p.opacity.Current() < 1 {
 		op.ColorM.Scale(1, 1, 1, p.opacity.Current())
 	}
+
+	img := p.image
+	if !isDiagonal(op.ColorM) && !p.tint.IsChanging() {
+		img = p.getCachedImage(op.ColorM)
+		op.ColorM = ebiten.ColorM{}
+	}
+
 	switch p.blendType {
 	case data.ShowPictureBlendTypeNormal:
 		// Use default
@@ -384,5 +409,59 @@ func (p *picture) draw(screen *ebiten.Image, offsetX, offsetY int) {
 		op.CompositeMode = ebiten.CompositeModeLighter
 	}
 
-	screen.DrawImage(p.image, op)
+	screen.DrawImage(img, op)
+}
+
+func (p *picture) getCachedImage(cm ebiten.ColorM) *ebiten.Image {
+	if p.image == nil {
+		return nil
+	}
+
+	k := tintImageCacheKey{
+		picture: p,
+		colorM:  colorMToFloats(cm),
+	}
+	if img, ok := tintImageCache[k]; ok {
+		return img
+	}
+
+	img, _ := ebiten.NewImageFromImage(applyColorM(p.image, cm), ebiten.FilterDefault)
+	tintImageCache[k] = img
+	// TODO: Now there is no restriction on the size of tintImageCache. Adjust this if needed.
+	return img
+}
+
+func isDiagonal(cm ebiten.ColorM) bool {
+	for i := 0; i < 4; i++ {
+		for j := 0; j < 5; j++ {
+			if i == j {
+				continue
+			}
+			if cm.Element(i, j) != 0 {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+func applyColorM(img image.Image, cm ebiten.ColorM) *image.RGBA {
+	newImg := image.NewRGBA(img.Bounds())
+	b := img.Bounds()
+	for j := b.Min.Y; j < b.Max.Y; j++ {
+		for i := b.Min.X; i < b.Max.X; i++ {
+			c := img.At(i, j)
+			newImg.Set(i, j, cm.Apply(c))
+		}
+	}
+	return newImg
+}
+
+func colorMToFloats(cm ebiten.ColorM) (es [20]float64) {
+	for i := 0; i < 4; i++ {
+		for j := 0; j < 5; j++ {
+			es[i*5+j] = cm.Element(i, j)
+		}
+	}
+	return
 }
