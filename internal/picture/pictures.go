@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/golang/groupcache/lru"
 	"github.com/hajimehoshi/ebiten"
 	"github.com/vmihailenco/msgpack"
 
@@ -27,6 +28,24 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/interpolation"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/tint"
 )
+
+type tintingImageCacheKey struct {
+	picture *picture
+
+	// colorM represents color matrix value.
+	// ebiten.ColorM cannot be used as a key directly so far.
+	// See https://github.com/hajimehoshi/ebiten/issues/866
+	colorM [20]float64
+}
+
+// tintingImageCache is an image cache with color matrix information to reduce graphics operations.
+var tintingImageCache = lru.New(100)
+
+func init() {
+	tintingImageCache.OnEvicted = func(key lru.Key, value interface{}) {
+		key.(tintingImageCacheKey).picture.onKeyEvicted(key)
+	}
+}
 
 type Pictures struct {
 	pictures []*picture
@@ -214,6 +233,9 @@ type picture struct {
 	blendType data.ShowPictureBlendType
 	priority  data.PicturePriorityType
 	touchable bool
+
+	// Do not dump
+	keys map[lru.Key]struct{}
 }
 
 func (p *picture) EncodeMsgpack(enc *msgpack.Encoder) error {
@@ -315,6 +337,7 @@ func (p *picture) DecodeMsgpack(dec *msgpack.Decoder) error {
 	if err := d.Error(); err != nil {
 		return fmt.Errorf("pictures: picture.DecodeMsgpack failed: %v", err)
 	}
+
 	return nil
 }
 
@@ -347,6 +370,19 @@ func (p *picture) changeImage(imageName string) {
 	} else {
 		p.image = assets.GetLocalizedImage("pictures/" + p.imageName)
 	}
+	if p.keys == nil {
+		return
+	}
+	for k := range p.keys {
+		tintingImageCache.Remove(k)
+	}
+}
+
+func (p *picture) onKeyEvicted(key lru.Key) {
+	if p.keys == nil {
+		return
+	}
+	delete(p.keys, key)
 }
 
 func (p *picture) update() {
@@ -377,6 +413,13 @@ func (p *picture) draw(screen *ebiten.Image, offsetX, offsetY int) {
 	if p.opacity.Current() < 1 {
 		op.ColorM.Scale(1, 1, 1, p.opacity.Current())
 	}
+
+	img := p.image
+	if !isDiagonal(op.ColorM) && !p.tint.IsChanging() {
+		img = p.getCachedImage(op.ColorM)
+		op.ColorM = ebiten.ColorM{}
+	}
+
 	switch p.blendType {
 	case data.ShowPictureBlendTypeNormal:
 		// Use default
@@ -384,5 +427,66 @@ func (p *picture) draw(screen *ebiten.Image, offsetX, offsetY int) {
 		op.CompositeMode = ebiten.CompositeModeLighter
 	}
 
-	screen.DrawImage(p.image, op)
+	screen.DrawImage(img, op)
+}
+
+func (p *picture) getCachedImage(cm ebiten.ColorM) *ebiten.Image {
+	if p.image == nil {
+		return nil
+	}
+
+	k := tintingImageCacheKey{
+		picture: p,
+		colorM:  colorMToFloats(cm),
+	}
+	if img, ok := tintingImageCache.Get(k); ok {
+		return img.(*ebiten.Image)
+	}
+
+	img := applyColorM(p.image, cm)
+	tintingImageCache.Add(k, img)
+	if p.keys == nil {
+		p.keys = map[lru.Key]struct{}{}
+	}
+	p.keys[k] = struct{}{}
+	return img
+}
+
+func isDiagonal(cm ebiten.ColorM) bool {
+	for i := 0; i < 4; i++ {
+		for j := 0; j < 5; j++ {
+			if i == j {
+				continue
+			}
+			if cm.Element(i, j) != 0 {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+func applyColorM(img *ebiten.Image, cm ebiten.ColorM) *ebiten.Image {
+	w, h := img.Size()
+	newImg, _ := ebiten.NewImage(w, h, ebiten.FilterDefault)
+	defer newImg.Dispose()
+
+	op := &ebiten.DrawImageOptions{}
+	op.ColorM = cm
+	newImg.DrawImage(img, op)
+
+	// This is a little tricky: an image rendered with DrawImage never shares textures.
+	// Then, we need to 'copy' the image without using DrawImage.
+	// The latest Ebiten doesn't cause this problem.
+	newImg2, _ := ebiten.NewImageFromImage(newImg, ebiten.FilterDefault)
+	return newImg2
+}
+
+func colorMToFloats(cm ebiten.ColorM) (es [20]float64) {
+	for i := 0; i < 4; i++ {
+		for j := 0; j < 5; j++ {
+			es[i*5+j] = cm.Element(i, j)
+		}
+	}
+	return
 }
