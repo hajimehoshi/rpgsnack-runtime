@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/golang/groupcache/lru"
 	"github.com/hajimehoshi/ebiten"
 	"github.com/vmihailenco/msgpack"
 
@@ -38,7 +39,7 @@ type tintingImageCacheKey struct {
 }
 
 // tintingImageCache is an image cache with color matrix information to reduce graphics operations.
-var tintingImageCache = map[tintingImageCacheKey]*ebiten.Image{}
+var tintingImageCache = lru.New(16)
 
 type Pictures struct {
 	pictures []*picture
@@ -226,6 +227,9 @@ type picture struct {
 	blendType data.ShowPictureBlendType
 	priority  data.PicturePriorityType
 	touchable bool
+
+	// Do not dump
+	keys []lru.Key
 }
 
 func (p *picture) EncodeMsgpack(enc *msgpack.Encoder) error {
@@ -359,11 +363,10 @@ func (p *picture) changeImage(imageName string) {
 	} else {
 		p.image = assets.GetLocalizedImage("pictures/" + p.imageName)
 	}
-	for k := range tintingImageCache {
-		if k.picture == p {
-			delete(tintingImageCache, k)
-		}
+	for _, k := range p.keys {
+		tintingImageCache.Remove(k)
 	}
+	p.keys = nil
 }
 
 func (p *picture) update() {
@@ -420,13 +423,13 @@ func (p *picture) getCachedImage(cm ebiten.ColorM) *ebiten.Image {
 		picture: p,
 		colorM:  colorMToFloats(cm),
 	}
-	if img, ok := tintingImageCache[k]; ok {
-		return img
+	if img, ok := tintingImageCache.Get(k); ok {
+		return img.(*ebiten.Image)
 	}
 
 	img := applyColorM(p.image, cm)
-	tintingImageCache[k] = img
-	// TODO: Now there is no restriction on the size of tintingImageCache. Adjust this if needed.
+	tintingImageCache.Add(k, img)
+	p.keys = append(p.keys, k)
 	return img
 }
 
@@ -447,10 +450,17 @@ func isDiagonal(cm ebiten.ColorM) bool {
 func applyColorM(img *ebiten.Image, cm ebiten.ColorM) *ebiten.Image {
 	w, h := img.Size()
 	newImg, _ := ebiten.NewImage(w, h, ebiten.FilterDefault)
+	defer newImg.Dispose()
+
 	op := &ebiten.DrawImageOptions{}
 	op.ColorM = cm
 	newImg.DrawImage(img, op)
-	return newImg
+
+	// This is a little tricky: an image rendered with DrawImage never shares textures.
+	// Then, we need to 'copy' the image without using DrawImage.
+	// The latest Ebiten doesn't cause this problem.
+	newImg2, _ := ebiten.NewImageFromImage(newImg, ebiten.FilterDefault)
+	return newImg2
 }
 
 func colorMToFloats(cm ebiten.ColorM) (es [20]float64) {
