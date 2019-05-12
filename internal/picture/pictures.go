@@ -28,7 +28,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/tint"
 )
 
-type tintImageCacheKey struct {
+type tintingImageCacheKey struct {
 	picture *picture
 
 	// colorM represents color matrix value.
@@ -37,8 +37,8 @@ type tintImageCacheKey struct {
 	colorM [20]float64
 }
 
-// tintImageCache is an image cache with color matrix information to reduce graphics operations.
-var tintImageCache = map[tintImageCacheKey]*ebiten.Image{}
+// tintingImageCache is an image cache with color matrix information to reduce graphics operations.
+var tintingImageCache = map[tintingImageCacheKey]*ebiten.Image{}
 
 type Pictures struct {
 	pictures []*picture
@@ -359,9 +359,9 @@ func (p *picture) changeImage(imageName string) {
 	} else {
 		p.image = assets.GetLocalizedImage("pictures/" + p.imageName)
 	}
-	for k := range tintImageCache {
+	for k := range tintingImageCache {
 		if k.picture == p {
-			delete(tintImageCache, k)
+			delete(tintingImageCache, k)
 		}
 	}
 }
@@ -416,17 +416,17 @@ func (p *picture) getCachedImage(cm ebiten.ColorM) *ebiten.Image {
 		return nil
 	}
 
-	k := tintImageCacheKey{
+	k := tintingImageCacheKey{
 		picture: p,
 		colorM:  colorMToFloats(cm),
 	}
-	if img, ok := tintImageCache[k]; ok {
+	if img, ok := tintingImageCache[k]; ok {
 		return img
 	}
 
 	img := applyColorM(p.image, cm)
-	tintImageCache[k] = img
-	// TODO: Now there is no restriction on the size of tintImageCache. Adjust this if needed.
+	tintingImageCache[k] = img
+	// TODO: Now there is no restriction on the size of tintingImageCache. Adjust this if needed.
 	return img
 }
 
