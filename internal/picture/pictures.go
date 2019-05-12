@@ -39,7 +39,7 @@ type tintingImageCacheKey struct {
 }
 
 // tintingImageCache is an image cache with color matrix information to reduce graphics operations.
-var tintingImageCache = lru.New(16)
+var tintingImageCache = lru.New(100)
 
 func init() {
 	tintingImageCache.OnEvicted = func(key lru.Key, value interface{}) {
