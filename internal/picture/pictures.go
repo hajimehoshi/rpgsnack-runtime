@@ -469,17 +469,12 @@ func isDiagonal(cm ebiten.ColorM) bool {
 func applyColorM(img *ebiten.Image, cm ebiten.ColorM) *ebiten.Image {
 	w, h := img.Size()
 	newImg, _ := ebiten.NewImage(w, h, ebiten.FilterDefault)
-	defer newImg.Dispose()
 
 	op := &ebiten.DrawImageOptions{}
 	op.ColorM = cm
 	newImg.DrawImage(img, op)
 
-	// This is a little tricky: an image rendered with DrawImage never shares textures.
-	// Then, we need to 'copy' the image without using DrawImage.
-	// The latest Ebiten doesn't cause this problem.
-	newImg2, _ := ebiten.NewImageFromImage(newImg, ebiten.FilterDefault)
-	return newImg2
+	return newImg
 }
 
 func colorMToFloats(cm ebiten.ColorM) (es [20]float64) {
