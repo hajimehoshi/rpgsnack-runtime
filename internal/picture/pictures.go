@@ -41,6 +41,12 @@ type tintingImageCacheKey struct {
 // tintingImageCache is an image cache with color matrix information to reduce graphics operations.
 var tintingImageCache = lru.New(16)
 
+func init() {
+	tintingImageCache.OnEvicted = func(key lru.Key, value interface{}) {
+		key.(tintingImageCacheKey).picture.onKeyEvicted(key)
+	}
+}
+
 type Pictures struct {
 	pictures []*picture
 }
@@ -229,7 +235,7 @@ type picture struct {
 	touchable bool
 
 	// Do not dump
-	keys []lru.Key
+	keys map[lru.Key]struct{}
 }
 
 func (p *picture) EncodeMsgpack(enc *msgpack.Encoder) error {
@@ -331,6 +337,7 @@ func (p *picture) DecodeMsgpack(dec *msgpack.Decoder) error {
 	if err := d.Error(); err != nil {
 		return fmt.Errorf("pictures: picture.DecodeMsgpack failed: %v", err)
 	}
+
 	return nil
 }
 
@@ -363,10 +370,19 @@ func (p *picture) changeImage(imageName string) {
 	} else {
 		p.image = assets.GetLocalizedImage("pictures/" + p.imageName)
 	}
-	for _, k := range p.keys {
+	if p.keys == nil {
+		return
+	}
+	for k := range p.keys {
 		tintingImageCache.Remove(k)
 	}
-	p.keys = nil
+}
+
+func (p *picture) onKeyEvicted(key lru.Key) {
+	if p.keys == nil {
+		return
+	}
+	delete(p.keys, key)
 }
 
 func (p *picture) update() {
@@ -429,7 +445,10 @@ func (p *picture) getCachedImage(cm ebiten.ColorM) *ebiten.Image {
 
 	img := applyColorM(p.image, cm)
 	tintingImageCache.Add(k, img)
-	p.keys = append(p.keys, k)
+	if p.keys == nil {
+		p.keys = map[lru.Key]struct{}{}
+	}
+	p.keys[k] = struct{}{}
 	return img
 }
 
