@@ -16,7 +16,6 @@ package picture
 
 import (
 	"fmt"
-	"image"
 	"math"
 
 	"github.com/hajimehoshi/ebiten"
@@ -425,7 +424,7 @@ func (p *picture) getCachedImage(cm ebiten.ColorM) *ebiten.Image {
 		return img
 	}
 
-	img, _ := ebiten.NewImageFromImage(applyColorM(p.image, cm), ebiten.FilterDefault)
+	img := applyColorM(p.image, cm)
 	tintImageCache[k] = img
 	// TODO: Now there is no restriction on the size of tintImageCache. Adjust this if needed.
 	return img
@@ -445,15 +444,12 @@ func isDiagonal(cm ebiten.ColorM) bool {
 	return true
 }
 
-func applyColorM(img image.Image, cm ebiten.ColorM) *image.RGBA {
-	newImg := image.NewRGBA(img.Bounds())
-	b := img.Bounds()
-	for j := b.Min.Y; j < b.Max.Y; j++ {
-		for i := b.Min.X; i < b.Max.X; i++ {
-			c := img.At(i, j)
-			newImg.Set(i, j, cm.Apply(c))
-		}
-	}
+func applyColorM(img *ebiten.Image, cm ebiten.ColorM) *ebiten.Image {
+	w, h := img.Size()
+	newImg, _ := ebiten.NewImage(w, h, ebiten.FilterDefault)
+	op := &ebiten.DrawImageOptions{}
+	op.ColorM = cm
+	newImg.DrawImage(img, op)
 	return newImg
 }
 
