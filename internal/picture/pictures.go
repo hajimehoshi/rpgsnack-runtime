@@ -30,7 +30,7 @@ import (
 )
 
 type tintingImageCacheKey struct {
-	picture *picture
+	imageName string
 
 	// colorM represents color matrix value.
 	// ebiten.ColorM cannot be used as a key directly so far.
@@ -40,12 +40,6 @@ type tintingImageCacheKey struct {
 
 // tintingImageCache is an image cache with color matrix information to reduce graphics operations.
 var tintingImageCache = lru.New(100)
-
-func init() {
-	tintingImageCache.OnEvicted = func(key lru.Key, value interface{}) {
-		key.(tintingImageCacheKey).picture.onKeyEvicted(key)
-	}
-}
 
 type Pictures struct {
 	pictures []*picture
@@ -233,9 +227,6 @@ type picture struct {
 	blendType data.ShowPictureBlendType
 	priority  data.PicturePriorityType
 	touchable bool
-
-	// Do not dump
-	keys map[lru.Key]struct{}
 }
 
 func (p *picture) EncodeMsgpack(enc *msgpack.Encoder) error {
@@ -370,19 +361,6 @@ func (p *picture) changeImage(imageName string) {
 	} else {
 		p.image = assets.GetLocalizedImage("pictures/" + p.imageName)
 	}
-	if p.keys == nil {
-		return
-	}
-	for k := range p.keys {
-		tintingImageCache.Remove(k)
-	}
-}
-
-func (p *picture) onKeyEvicted(key lru.Key) {
-	if p.keys == nil {
-		return
-	}
-	delete(p.keys, key)
 }
 
 func (p *picture) update() {
@@ -436,8 +414,8 @@ func (p *picture) getCachedImage(cm ebiten.ColorM) *ebiten.Image {
 	}
 
 	k := tintingImageCacheKey{
-		picture: p,
-		colorM:  colorMToFloats(cm),
+		imageName: p.imageName,
+		colorM:    colorMToFloats(cm),
 	}
 	if img, ok := tintingImageCache.Get(k); ok {
 		return img.(*ebiten.Image)
@@ -445,10 +423,6 @@ func (p *picture) getCachedImage(cm ebiten.ColorM) *ebiten.Image {
 
 	img := applyColorM(p.image, cm)
 	tintingImageCache.Add(k, img)
-	if p.keys == nil {
-		p.keys = map[lru.Key]struct{}{}
-	}
-	p.keys[k] = struct{}{}
 	return img
 }
 
