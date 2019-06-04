@@ -173,7 +173,7 @@ func RespondRewardedAds(id int, success bool) (err error) {
 	return nil
 }
 
-func RespondOpenLink(id int) (err error) {
+func RespondOpenURL(id int) (err error) {
 	<-startCalled
 
 	defer func() {
@@ -186,7 +186,58 @@ func RespondOpenLink(id int) (err error) {
 		}
 	}()
 
-	theGame.RespondOpenLink(id)
+	theGame.RespondOpenURL(id)
+	return nil
+}
+
+func RespondOpenApp(id int) (err error) {
+	<-startCalled
+
+	defer func() {
+		if r := recover(); r != nil {
+			ok := false
+			err, ok = r.(error)
+			if !ok {
+				err = fmt.Errorf("error at RespondOpenApp: %v", err)
+			}
+		}
+	}()
+
+	theGame.RespondOpenApp(id)
+	return nil
+}
+
+func RespondOpenNews(id int) (err error) {
+	<-startCalled
+
+	defer func() {
+		if r := recover(); r != nil {
+			ok := false
+			err, ok = r.(error)
+			if !ok {
+				err = fmt.Errorf("error at RespondOpenNews: %v", err)
+			}
+		}
+	}()
+
+	theGame.RespondOpenNews(id)
+	return nil
+}
+
+func RespondOpenReview(id int) (err error) {
+	<-startCalled
+
+	defer func() {
+		if r := recover(); r != nil {
+			ok := false
+			err, ok = r.(error)
+			if !ok {
+				err = fmt.Errorf("error at RespondOpenReview: %v", err)
+			}
+		}
+	}()
+
+	theGame.RespondOpenReview(id)
 	return nil
 }
 

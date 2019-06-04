@@ -127,8 +127,8 @@ func NewTitleMapScene(sceneManager *scene.Manager, savedGame *gamestate.Game) *M
 		sceneManager.GoTo(NewSettingsScene())
 	})
 	m.titleView.SetOnMoreGames(func() {
-		m.titleView.SetWaitingRequestID(sceneManager.GenerateRequestID())
-		sceneManager.Requester().RequestOpenLink(m.titleView.WaitingRequestID(), "more", "")
+		// TODO: Open 'More Games' popup.
+		panic("sceneimpl: not implemented: open more should show a popup")
 	})
 	return m
 }

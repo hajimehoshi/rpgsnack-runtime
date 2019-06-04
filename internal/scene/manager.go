@@ -791,11 +791,38 @@ func (m *Manager) RespondRewardedAds(id int, success bool) {
 	}()
 }
 
-func (m *Manager) RespondOpenLink(id int) {
+func (m *Manager) RespondOpenURL(id int) {
 	go func() {
 		m.resultCh <- RequestResult{
 			ID:   id,
-			Type: RequestTypeOpenLink,
+			Type: RequestTypeOpenURL,
+		}
+	}()
+}
+
+func (m *Manager) RespondOpenApp(id int) {
+	go func() {
+		m.resultCh <- RequestResult{
+			ID:   id,
+			Type: RequestTypeOpenApp,
+		}
+	}()
+}
+
+func (m *Manager) RespondOpenNews(id int) {
+	go func() {
+		m.resultCh <- RequestResult{
+			ID:   id,
+			Type: RequestTypeOpenNews,
+		}
+	}()
+}
+
+func (m *Manager) RespondOpenReview(id int) {
+	go func() {
+		m.resultCh <- RequestResult{
+			ID:   id,
+			Type: RequestTypeOpenReview,
 		}
 	}()
 }

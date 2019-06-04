@@ -794,13 +794,42 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 
 	case data.CommandNameOpenLink:
 		args := c.Args.(*data.CommandArgsOpenLink)
-		if args.Type == data.OpenLinkTypeShowCredit {
+		i.waitingRequestID = sceneManager.GenerateRequestID()
+
+		switch args.Type {
+		case data.OpenLinkTypeShowCredit:
 			gameState.ShowCredits(args.Data == "true")
 			i.commandIterator.Advance()
-			return false, nil
+		case data.OpenLinkTypePostCredit:
+			// TODO
+			panic("gamestate: not implemented: data.OpenLinkTypePostCredit")
+			break
+		case data.OpenLinkTypeApp:
+			i.waitingRequestID = sceneManager.GenerateRequestID()
+			sceneManager.Requester().RequestOpenNews(i.waitingRequestID, args.Data)
+			break
+		case data.OpenLinkTypeURL:
+			i.waitingRequestID = sceneManager.GenerateRequestID()
+			sceneManager.Requester().RequestOpenURL(i.waitingRequestID, args.Data)
+			break
+		case data.OpenLinkTypeReview:
+			i.waitingRequestID = sceneManager.GenerateRequestID()
+			sceneManager.Requester().RequestOpenReview(i.waitingRequestID)
+			break
+		case data.OpenLinkTypeMore:
+			// TODO
+			panic("gamestate: not implemented: data.OpenLinkTypeMore")
+			break
+		case data.OpenLinkTypeFacebook:
+			i.waitingRequestID = sceneManager.GenerateRequestID()
+			sceneManager.Requester().RequestOpenApp(i.waitingRequestID, "facebook", args.Data)
+			break
+		case data.OpenLinkTypeTwitter:
+			i.waitingRequestID = sceneManager.GenerateRequestID()
+			sceneManager.Requester().RequestOpenApp(i.waitingRequestID, "twitter", args.Data)
+			break
 		}
-		i.waitingRequestID = sceneManager.GenerateRequestID()
-		sceneManager.Requester().RequestOpenLink(i.waitingRequestID, string(args.Type), args.Data)
+
 		return false, nil
 
 	case data.CommandNameShare:
@@ -855,7 +884,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			gameState.ShowMinigame(lastActiveAt)
 			// In order to take care a case when ads are removed,
 			// we have to notify the platform to initializing the ads here
-			sceneManager.Requester().RequestOpenLink(0, "initialize_ads", "")
+			sceneManager.Requester().RequestAdsInitialize()
 			i.waitingCommand = true
 		}
 

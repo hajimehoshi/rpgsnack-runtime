@@ -86,11 +86,12 @@ func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
 	})
 	s.updateCreditsButton.SetOnPressed(func(_ *ui.Button) {
 		s.waitingRequestID = sceneManager.GenerateRequestID()
-		sceneManager.Requester().RequestOpenLink(s.waitingRequestID, "post_credit", "")
+		// TODO
+		panic("post credit is not implemented")
 	})
 	s.reviewThisAppButton.SetOnPressed(func(_ *ui.Button) {
 		s.waitingRequestID = sceneManager.GenerateRequestID()
-		sceneManager.Requester().RequestOpenLink(s.waitingRequestID, "review", "")
+		sceneManager.Requester().RequestOpenReview(s.waitingRequestID)
 	})
 	s.restorePurchasesButton.SetOnPressed(func(_ *ui.Button) {
 		s.waitingRequestID = sceneManager.GenerateRequestID()
@@ -99,7 +100,8 @@ func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
 
 	s.privacyPolicyButton.SetOnPressed(func(_ *ui.Button) {
 		s.waitingRequestID = sceneManager.GenerateRequestID()
-		sceneManager.Requester().RequestOpenLink(s.waitingRequestID, "privacy", "")
+		url := "" // TODO get privacy policy URL
+		sceneManager.Requester().RequestOpenURL(s.waitingRequestID, url)
 	})
 	s.closeButton.SetOnPressed(func(_ *ui.Button) {
 		g, err := savedGame(sceneManager)

@@ -222,8 +222,20 @@ func (g *Game) RespondRewardedAds(id int, success bool) {
 	g.sceneManager.RespondRewardedAds(id, success)
 }
 
-func (g *Game) RespondOpenLink(id int) {
-	g.sceneManager.RespondOpenLink(id)
+func (g *Game) RespondOpenURL(id int) {
+	g.sceneManager.RespondOpenURL(id)
+}
+
+func (g *Game) RespondOpenApp(id int) {
+	g.sceneManager.RespondOpenApp(id)
+}
+
+func (g *Game) RespondOpenNews(id int) {
+	g.sceneManager.RespondOpenNews(id)
+}
+
+func (g *Game) RespondOpenReview(id int) {
+	g.sceneManager.RespondOpenReview(id)
 }
 
 func (g *Game) RespondShareImage(id int) {

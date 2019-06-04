@@ -166,9 +166,28 @@ func (m *Requester) RequestRewardedAds(requestID int, forceAds bool) {
 	}()
 }
 
-func (m *Requester) RequestOpenLink(requestID int, linkType string, data string) {
-	log.Printf("request open link: requestID: %d %s %s", requestID, linkType, data)
-	m.game.RespondOpenLink(requestID)
+func (m *Requester) RequestOpenURL(requestID int, url string) {
+	log.Printf("request open url: requestID: %d %s", requestID, url)
+	m.game.RespondOpenURL(requestID)
+}
+
+func (m *Requester) RequestOpenApp(requestID int, appName string, appData string) {
+	log.Printf("request open app: requestID: %d %s %s", requestID, appName, appData)
+	m.game.RespondOpenApp(requestID)
+}
+
+func (m *Requester) RequestOpenNews(requestID int, appID string) {
+	log.Printf("request open news: requestID: %d %s", requestID, appID)
+	m.game.RespondOpenNews(requestID)
+}
+
+func (m *Requester) RequestOpenReview(requestID int) {
+	log.Printf("request open review: requestID: %d", requestID)
+	m.game.RespondOpenReview(requestID)
+}
+
+func (m *Requester) RequestAdsInitialize() {
+	log.Printf("request ads initialize")
 }
 
 func (m *Requester) RequestShareImage(requestID int, title string, message string, image []byte) {

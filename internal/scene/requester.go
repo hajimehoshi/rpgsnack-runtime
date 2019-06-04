@@ -23,7 +23,11 @@ type Requester interface {
 	RequestRestorePurchases(requestID int)
 	RequestInterstitialAds(requestID int, forceAds bool)
 	RequestRewardedAds(requestID int, forceAds bool)
-	RequestOpenLink(requestID int, linkType string, data string)
+	RequestOpenURL(requestID int, url string)
+	RequestOpenApp(requestID int, appName string, appData string)
+	RequestOpenNews(requestID int, appID string)
+	RequestOpenReview(requestID int)
+	RequestAdsInitialize()
 	RequestShareImage(requestID int, title string, message string, image []byte)
 	RequestTerminateGame()
 	RequestChangeLanguage(requestID int, lang string)
@@ -45,7 +49,10 @@ const (
 	RequestTypeRestorePurchases
 	RequestTypeInterstitialAds
 	RequestTypeRewardedAds
-	RequestTypeOpenLink
+	RequestTypeOpenURL
+	RequestTypeOpenApp
+	RequestTypeOpenNews
+	RequestTypeOpenReview
 	RequestTypeShareImage
 	RequestTypeChangeLanguage
 	RequestTypeAsset
