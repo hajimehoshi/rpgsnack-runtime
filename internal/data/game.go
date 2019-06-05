@@ -179,32 +179,29 @@ func (g *Game) CreateChoicesMessageStyle() *MessageStyle {
 }
 
 func (g *Game) GetIAPProduct(key string) *IAPProduct {
-	var iap *IAPProduct
 	for _, p := range g.IAPProducts {
 		if p.Key == key {
-			iap = p
+			return p
 		}
 	}
-	return iap
+	return nil
 }
 
 func (g *Game) GetIAPProductByType(t string) *IAPProduct {
-	for _, iapProduct := range g.IAPProducts {
-		if iapProduct.Type == t {
-			return iapProduct
+	for _, p := range g.IAPProducts {
+		if p.Type == t {
+			return p
 		}
 	}
-
 	return nil
 }
 
 func (g *Game) IAPProductByID(id int) *IAPProduct {
-	for _, iapProduct := range g.IAPProducts {
-		if iapProduct.ID == id {
-			return iapProduct
+	for _, p := range g.IAPProducts {
+		if p.ID == id {
+			return p
 		}
 	}
-
 	return nil
 }
 
