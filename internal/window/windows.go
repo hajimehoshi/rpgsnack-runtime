@@ -229,6 +229,30 @@ func (w *Windows) ShowChoices(parser MessageSyntaxParser, game *data.Game, choic
 	w.hasChosenIndex = false
 }
 
+func (w *Windows) CloseImmediatelyForInterpreter(interpreterID int) {
+	for _, b := range w.balloons {
+		if b == nil {
+			continue
+		}
+		if b.interpreterID != interpreterID {
+			continue
+		}
+		b.closeImmediately()
+	}
+	for _, b := range w.choiceBalloons {
+		if b == nil {
+			continue
+		}
+		if b.interpreterID != interpreterID {
+			continue
+		}
+		b.closeImmediately()
+	}
+	if w.banner != nil && w.banner.interpreterID == interpreterID {
+		w.banner.closeImmediately()
+	}
+}
+
 func (w *Windows) CloseAll() {
 	for _, b := range w.balloons {
 		if b == nil {

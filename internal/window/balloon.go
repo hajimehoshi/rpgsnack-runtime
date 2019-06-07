@@ -315,6 +315,12 @@ func (b *balloon) close() {
 	b.closingCount = balloonMaxCount
 }
 
+func (b *balloon) closeImmediately() {
+	b.opened = false
+	b.openingCount = 0
+	b.closingCount = 0
+}
+
 func (b *balloon) partSize() int {
 	return balloonPartSize(b.balloonType)
 }

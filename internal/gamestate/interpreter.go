@@ -1372,3 +1372,25 @@ func (i *Interpreter) Update(sceneManager *scene.Manager, gameState *Game) error
 	}
 	return nil
 }
+
+// Abort aborts the interpreter. If Abort is called, the interpreter terminates after the current command finishes.
+//
+// Abort is typically called when transferring the player.
+func (i *Interpreter) Abort(gameState *Game) {
+	if i.sub != nil {
+		i.sub.Abort(gameState)
+	}
+
+	// As balloons and banners are bound to events, they cannot continue when transferring.
+	// Close immediately without any animations.
+	gameState.windows.CloseImmediatelyForInterpreter(i.id)
+
+	// Note: Executing route event commands should be terminated gracefully because:
+	// 1) Even if an event command to move a character is executed, gameState.Character returns nil and this is
+	// safe.
+	// 2) Changing properties for the player must be finished completely.
+
+	// Terminate the interpreter gracefully. For example, fading must be finished gracefully or the screen state
+	// will be stale.
+	i.commandIterator.TerminateGracefully()
+}

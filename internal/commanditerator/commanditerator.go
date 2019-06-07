@@ -29,6 +29,8 @@ type CommandIterator struct {
 
 	// Field that is not dumped
 	labels map[string][]int
+
+	terminating bool
 }
 
 func New(commands []*data.Command) *CommandIterator {
@@ -134,6 +136,14 @@ func (c *CommandIterator) Rewind() {
 
 func (c *CommandIterator) Terminate() {
 	c.indices = []int{}
+	c.terminating = false
+}
+
+func (c *CommandIterator) TerminateGracefully() {
+	if c.IsTerminated() {
+		return
+	}
+	c.terminating = true
 }
 
 func (c *CommandIterator) IsTerminated() bool {
@@ -171,16 +181,29 @@ func (c *CommandIterator) Command() *data.Command {
 }
 
 func (c *CommandIterator) Advance() {
+	if c.terminating {
+		c.Terminate()
+		return
+	}
 	c.indices[len(c.indices)-1]++
 	c.unindentIfNeeded()
 }
 
 func (c *CommandIterator) Choose(branchIndex int) {
+	if c.terminating {
+		c.Terminate()
+		return
+	}
 	c.indices = append(c.indices, branchIndex, 0)
 	c.unindentIfNeeded()
 }
 
 func (c *CommandIterator) Goto(label string) bool {
+	if c.terminating {
+		c.Terminate()
+		return false
+	}
+
 	p, ok := c.labels[label]
 	if !ok {
 		// TODO: log error?

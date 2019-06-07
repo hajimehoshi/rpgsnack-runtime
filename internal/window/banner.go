@@ -191,6 +191,12 @@ func (b *banner) close() {
 	b.closingCount = bannerMaxCount
 }
 
+func (b *banner) closeImmediately() {
+	b.opened = false
+	b.openingCount = 0
+	b.closingCount = 0
+}
+
 func (b *banner) characterAnimFinishTrigger() data.FinishTriggerType {
 	if b.messageStyle.CharacterAnim == nil {
 		return data.FinishTriggerTypeNone

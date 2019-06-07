@@ -226,16 +226,39 @@ func (m *Map) setRoomID(gameState *Game, id int, interpreter *Interpreter) error
 	sort.Slice(m.events, func(i, j int) bool {
 		return m.events[i].EventID() < m.events[j].EventID()
 	})
-	m.resetInterpreters(gameState)
-	if interpreter != nil {
-		m.addInterpreter(interpreter)
-	}
+
+	m.resetInterpreters(gameState, interpreter)
 	return nil
 }
 
-func (m *Map) resetInterpreters(gameState *Game) {
+func (m *Map) resetInterpreters(gameState *Game, interpreter *Interpreter) {
+	// Create a set of interpreter to finish the current command.
+	var is []*Interpreter
+
+	// The given interpreter is an exception and this is not aborted.
+	if interpreter != nil {
+		is = append(is, interpreter)
+	}
+
+	for id, i := range m.interpreters {
+		if id == m.playerInterpreterID {
+			continue
+		}
+		if i == interpreter {
+			continue
+		}
+		i.Abort(gameState)
+		is = append(is, i)
+	}
+
+	// The player interpreter requires a special process to abort.
 	m.abortPlayerInterpreter(gameState)
+
 	m.interpreters = map[int]*Interpreter{}
+
+	for _, i := range is {
+		m.addInterpreter(i)
+	}
 }
 
 func (m *Map) IsBlockingEventExecuting() bool {
