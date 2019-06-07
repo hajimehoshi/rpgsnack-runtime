@@ -384,14 +384,15 @@ func (w *Windows) IsAnimating(interpreterID int) bool {
 }
 
 func (w *Windows) findCharacterByEventID(characters []*character.Character, eventID int) *character.Character {
-	var c *character.Character
-	for _, cc := range characters {
-		if cc.EventID() == eventID {
-			c = cc
-			break
+	// TODO: To find a character, an event ID is not enough. A map ID and a room ID should be specified.
+	// Or, it is theoretically possible to indicate a different event that has a same event ID.
+
+	for _, c := range characters {
+		if c.EventID() == eventID {
+			return c
 		}
 	}
-	return c
+	return nil
 }
 
 func (w *Windows) Update(playerY int, parser MessageSyntaxParser, sceneManager *scene.Manager, characters []*character.Character) {
