@@ -65,13 +65,14 @@ func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
 	s.baseX = (w/consts.TileScale - 120) / 2
 	s.baseY = (h - 640) / (2 * consts.TileScale)
 
+	// The buttons that Y is 0 are adjusted later.
 	s.advancedButton = ui.NewButton(s.baseX, s.calcButtonY(1), 120, 20, "system/click")
 	s.shopButton = ui.NewButton(s.baseX, s.calcButtonY(2), 120, 20, "system/click")
 	s.restorePurchasesButton = ui.NewButton(s.baseX, s.calcButtonY(3), 120, 20, "system/click")
-	s.creditsButton = ui.NewButton(s.baseX, s.calcButtonY(4), 120, 20, "system/click")
-	s.updateCreditsButton = ui.NewButton(s.baseX+80, s.calcButtonY(4), 40, 20, "system/click")
-	s.reviewThisAppButton = ui.NewButton(s.baseX, s.calcButtonY(5), 120, 20, "system/click")
-	s.privacyPolicyButton = ui.NewButton(s.baseX, s.calcButtonY(6), 120, 20, "system/click")
+	s.creditsButton = ui.NewButton(s.baseX, 0, 120, 20, "system/click")
+	s.updateCreditsButton = ui.NewButton(s.baseX+80, 0, 40, 20, "system/click")
+	s.reviewThisAppButton = ui.NewButton(s.baseX, 0, 120, 20, "system/click")
+	s.privacyPolicyButton = ui.NewButton(s.baseX, 0, 120, 20, "system/click")
 	s.closeButton = ui.NewButton(s.baseX, s.calcButtonY(8), 120, 20, "system/cancel")
 
 	s.advancedButton.SetOnPressed(func(_ *ui.Button) {
@@ -177,7 +178,6 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 	s.updateCreditsButton.SetY(s.calcButtonY(itemOffset + 2))
 	s.reviewThisAppButton.SetY(s.calcButtonY(itemOffset + 3))
 	s.privacyPolicyButton.SetY(s.calcButtonY(itemOffset + 4))
-	s.closeButton.SetY(s.calcButtonY(itemOffset + 6))
 
 	s.credits.Update()
 	if !s.credits.Visible() {
