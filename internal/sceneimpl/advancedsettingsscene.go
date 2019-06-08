@@ -42,12 +42,12 @@ type AdvancedSettingsScene struct {
 	seLabel          *ui.Label
 	seSlider         *ui.Slider
 	closeButton      *ui.Button
-	warningDialog    *ui.Dialog
+	warningPopup     *ui.Popup
 	warningLabel     *ui.Label
 	warningYesButton *ui.Button
 	warningNoButton  *ui.Button
 	waitingRequestID int
-	languageDialog   *ui.Dialog
+	languagePopup    *ui.Popup
 	languageButtons  []*ui.Button
 
 	initialized bool
@@ -75,7 +75,7 @@ func (s *AdvancedSettingsScene) initUI(sceneManager *scene.Manager) {
 	s.resetGameButton = ui.NewButton(s.baseX, s.calcButtonY(5), 120, 20, "system/click")
 	s.closeButton = ui.NewButton(s.baseX, s.calcButtonY(8), 120, 20, "system/cancel")
 
-	s.languageDialog = ui.NewDialog((w/consts.TileScale-160)/2+4, h/(2*consts.TileScale)-80, 152, 160)
+	s.languagePopup = ui.NewPopup((w/consts.TileScale-160)/2+4, h/(2*consts.TileScale)-80, 152, 160)
 
 	for i, l := range sceneManager.Game().Texts.Languages() {
 		i := i // i is captured by the below closure and it is needed to copy here.
@@ -83,10 +83,10 @@ func (s *AdvancedSettingsScene) initUI(sceneManager *scene.Manager) {
 		b := ui.NewButton((152-120)/2, 8+i*buttonDeltaY, 120, 20, "system/click")
 		b.SetText(n)
 		b.Lang = l
-		s.languageDialog.AddChild(b)
+		s.languagePopup.AddChild(b)
 		s.languageButtons = append(s.languageButtons, b)
 		b.SetOnPressed(func(_ *ui.Button) {
-			s.languageDialog.Hide()
+			s.languagePopup.Hide()
 			lang := sceneManager.Game().Texts.Languages()[i]
 			lang = sceneManager.SetLanguage(lang)
 			s.waitingRequestID = sceneManager.GenerateRequestID()
@@ -96,7 +96,7 @@ func (s *AdvancedSettingsScene) initUI(sceneManager *scene.Manager) {
 	}
 
 	s.languageButton.SetOnPressed(func(_ *ui.Button) {
-		s.languageDialog.Show()
+		s.languagePopup.Show()
 	})
 
 	s.vibrationButton.SetOnToggled(func(_ *ui.SwitchButton, value bool) {
@@ -122,29 +122,29 @@ func (s *AdvancedSettingsScene) initUI(sceneManager *scene.Manager) {
 	})
 
 	s.resetGameButton.SetOnPressed(func(_ *ui.Button) {
-		s.warningDialog.Show()
+		s.warningPopup.Show()
 	})
 
 	s.closeButton.SetOnPressed(func(_ *ui.Button) {
 		sceneManager.GoTo(NewSettingsScene())
 	})
 
-	s.warningDialog = ui.NewDialog((w/consts.TileScale-160)/2+4, (h)/(2*consts.TileScale)-64, 152, 124)
+	s.warningPopup = ui.NewPopup((w/consts.TileScale-160)/2+4, (h)/(2*consts.TileScale)-64, 152, 124)
 	s.warningLabel = ui.NewLabel(16, 8)
 	s.warningYesButton = ui.NewButton((152-120)/2, 72, 120, 20, "system/click")
 	s.warningNoButton = ui.NewButton((152-120)/2, 96, 120, 20, "system/cancel")
-	s.warningDialog.AddChild(s.warningLabel)
-	s.warningDialog.AddChild(s.warningYesButton)
-	s.warningDialog.AddChild(s.warningNoButton)
+	s.warningPopup.AddChild(s.warningLabel)
+	s.warningPopup.AddChild(s.warningYesButton)
+	s.warningPopup.AddChild(s.warningNoButton)
 	s.warningYesButton.SetOnPressed(func(_ *ui.Button) {
 		id := sceneManager.GenerateRequestID()
 		s.waitingRequestID = id
 		sceneManager.Requester().RequestSaveProgress(id, nil)
 		sceneManager.SetProgress(nil)
-		s.warningDialog.Hide()
+		s.warningPopup.Hide()
 	})
 	s.warningNoButton.SetOnPressed(func(_ *ui.Button) {
-		s.warningDialog.Hide()
+		s.warningPopup.Hide()
 	})
 
 	if !sceneManager.Game().System.Vibration {
@@ -195,9 +195,9 @@ func (s *AdvancedSettingsScene) Update(sceneManager *scene.Manager) error {
 
 	s.updateButtonTexts()
 
-	s.languageDialog.Update()
-	s.warningDialog.Update()
-	if !s.languageDialog.Visible() && !s.warningDialog.Visible() {
+	s.languagePopup.Update()
+	s.warningPopup.Update()
+	if !s.languagePopup.Visible() && !s.warningPopup.Visible() {
 		s.languageButton.Update()
 		s.closeButton.Update()
 		s.resetGameButton.Update()
@@ -219,14 +219,14 @@ func (s *AdvancedSettingsScene) Update(sceneManager *scene.Manager) error {
 }
 
 func (s *AdvancedSettingsScene) handleBackButton(sceneManager *scene.Manager) {
-	if s.languageDialog.Visible() {
+	if s.languagePopup.Visible() {
 		audio.PlaySE("system/cancel", 1.0)
-		s.languageDialog.Hide()
+		s.languagePopup.Hide()
 		return
 	}
-	if s.warningDialog.Visible() {
+	if s.warningPopup.Visible() {
 		audio.PlaySE("system/cancel", 1.0)
-		s.warningDialog.Hide()
+		s.warningPopup.Hide()
 		return
 	}
 
@@ -247,8 +247,8 @@ func (s *AdvancedSettingsScene) Draw(screen *ebiten.Image) {
 	s.closeButton.Draw(screen)
 	s.vibrationLabel.Draw(screen)
 	s.vibrationButton.Draw(screen)
-	s.languageDialog.Draw(screen)
-	s.warningDialog.Draw(screen)
+	s.languagePopup.Draw(screen)
+	s.warningPopup.Draw(screen)
 }
 
 func (s *AdvancedSettingsScene) Resize() {

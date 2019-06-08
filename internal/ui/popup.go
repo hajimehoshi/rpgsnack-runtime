@@ -26,7 +26,7 @@ type Node interface {
 	DrawAsChild(screen *ebiten.Image, offsetX, offsetY int)
 }
 
-type Dialog struct {
+type Popup struct {
 	x       int
 	y       int
 	width   int
@@ -35,8 +35,8 @@ type Dialog struct {
 	nodes   []Node
 }
 
-func NewDialog(x, y, width, height int) *Dialog {
-	return &Dialog{
+func NewPopup(x, y, width, height int) *Popup {
+	return &Popup{
 		x:      x,
 		y:      y,
 		width:  width,
@@ -44,45 +44,45 @@ func NewDialog(x, y, width, height int) *Dialog {
 	}
 }
 
-func (d *Dialog) Visible() bool {
-	return d.visible
+func (p *Popup) Visible() bool {
+	return p.visible
 }
 
-func (d *Dialog) Show() {
-	d.visible = true
+func (p *Popup) Show() {
+	p.visible = true
 }
 
-func (d *Dialog) Hide() {
-	d.visible = false
+func (p *Popup) Hide() {
+	p.visible = false
 }
 
-func (d *Dialog) AddChild(node Node) {
-	d.nodes = append(d.nodes, node)
+func (p *Popup) AddChild(node Node) {
+	p.nodes = append(p.nodes, node)
 }
 
-func (d *Dialog) Update() {
-	if !d.visible {
+func (p *Popup) Update() {
+	if !p.visible {
 		return
 	}
-	for _, n := range d.nodes {
-		n.UpdateAsChild(d.visible, d.x, d.y)
+	for _, n := range p.nodes {
+		n.UpdateAsChild(p.visible, p.x, p.y)
 	}
 }
 
-func (d *Dialog) Draw(screen *ebiten.Image) {
-	if !d.visible {
+func (p *Popup) Draw(screen *ebiten.Image) {
+	if !p.visible {
 		return
 	}
-	if d.width == 0 || d.height == 0 {
+	if p.width == 0 || p.height == 0 {
 		return
 	}
 
 	geoM := &ebiten.GeoM{}
-	geoM.Translate(float64(d.x), float64(d.y))
+	geoM.Translate(float64(p.x), float64(p.y))
 	geoM.Scale(consts.TileScale, consts.TileScale)
-	DrawNinePatches(screen, assets.GetImage("system/common/9patch_frame_off.png"), d.width, d.height, geoM, nil)
+	DrawNinePatches(screen, assets.GetImage("system/common/9patch_frame_off.png"), p.width, p.height, geoM, nil)
 
-	for _, n := range d.nodes {
-		n.DrawAsChild(screen, d.x, d.y)
+	for _, n := range p.nodes {
+		n.DrawAsChild(screen, p.x, p.y)
 	}
 }

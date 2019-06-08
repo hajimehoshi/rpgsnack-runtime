@@ -52,12 +52,12 @@ type MapScene struct {
 	initialState         bool
 	gameHeader           *ui.GameHeader
 	screenShotImage      *ebiten.Image
-	screenShotDialog     *ui.Dialog
-	quitDialog           *ui.Dialog
+	screenShotPopup      *ui.Popup
+	quitPopup            *ui.Popup
 	quitLabel            *ui.Label
 	quitYesButton        *ui.Button
 	quitNoButton         *ui.Button
-	storeErrorDialog     *ui.Dialog
+	storeErrorPopup      *ui.Popup
 	storeErrorLabel      *ui.Label
 	storeErrorOkButton   *ui.Button
 	inventory            *ui.Inventory
@@ -193,26 +193,26 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 		m.gameHeader = ui.NewGameHeader()
 	}
 
-	m.quitDialog = ui.NewDialog((uiWidth-160)/2+4, screenH/(2*consts.TileScale)-64, 152, 124)
+	m.quitPopup = ui.NewPopup((uiWidth-160)/2+4, screenH/(2*consts.TileScale)-64, 152, 124)
 	m.quitLabel = ui.NewLabel(16, 8)
 	m.quitYesButton = ui.NewButton((152-120)/2, 72, 120, 20, "")
 	m.quitNoButton = ui.NewButton((152-120)/2, 96, 120, 20, "system/cancel")
 
-	m.quitDialog.AddChild(m.quitLabel)
-	m.quitDialog.AddChild(m.quitYesButton)
-	m.quitDialog.AddChild(m.quitNoButton)
+	m.quitPopup.AddChild(m.quitLabel)
+	m.quitPopup.AddChild(m.quitYesButton)
+	m.quitPopup.AddChild(m.quitNoButton)
 
-	m.storeErrorDialog = ui.NewDialog((uiWidth-160)/2+4, 64, 152, 124)
+	m.storeErrorPopup = ui.NewPopup((uiWidth-160)/2+4, 64, 152, 124)
 	m.storeErrorLabel = ui.NewLabel(16, 8)
 	m.storeErrorOkButton = ui.NewButton((152-120)/2, 96, 120, 20, "system/click")
-	m.storeErrorDialog.AddChild(m.storeErrorLabel)
-	m.storeErrorDialog.AddChild(m.storeErrorOkButton)
+	m.storeErrorPopup.AddChild(m.storeErrorLabel)
+	m.storeErrorPopup.AddChild(m.storeErrorOkButton)
 
 	m.inventory = ui.NewInventory(0, consts.CeilDiv(screenH-m.inventoryHeight, consts.TileScale), sceneManager.HasExtraBottomGrid())
 	ty := consts.CeilDiv(screenH, consts.TileScale) - m.inventoryHeight - itemPreviewPopupMargin
 	m.itemPreviewPopup = ui.NewItemPreviewPopup(ty)
 	m.minigamePopup = ui.NewMinigamePopup(ty)
-	m.quitDialog.AddChild(m.quitLabel)
+	m.quitPopup.AddChild(m.quitLabel)
 
 	m.credits = ui.NewCredits()
 
@@ -229,11 +229,11 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 		sceneManager.GoToWithFading(NewTitleMapScene(g), FadingCount, FadingCount)
 	})
 	m.quitNoButton.SetOnPressed(func(_ *ui.Button) {
-		m.quitDialog.Hide()
+		m.quitPopup.Hide()
 	})
 	if m.gameHeader != nil {
 		m.gameHeader.SetOnTitleButtonPressed(func() {
-			m.quitDialog.Show()
+			m.quitPopup.Show()
 		})
 		m.gameHeader.SetOnCameraButtonPressed(func() {
 			// TODO: Hide the game header
@@ -241,7 +241,7 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 		})
 	}
 	m.storeErrorOkButton.SetOnPressed(func(_ *ui.Button) {
-		m.storeErrorDialog.Hide()
+		m.storeErrorPopup.Hide()
 	})
 
 	m.inventory.SetOnSlotPressed(func(_ *ui.Inventory, index int) {
@@ -456,10 +456,10 @@ func (m *MapScene) receiveRequest(sceneManager *scene.Manager) bool {
 }
 
 func (m *MapScene) isUIBusy() bool {
-	if m.quitDialog.Visible() {
+	if m.quitPopup.Visible() {
 		return true
 	}
-	if m.storeErrorDialog.Visible() {
+	if m.storeErrorPopup.Visible() {
 		return true
 	}
 	if m.credits.Visible() {
@@ -476,12 +476,12 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 	m.storeErrorLabel.Text = texts.Text(l, texts.TextIDStoreError)
 	m.storeErrorOkButton.SetText(texts.Text(l, texts.TextIDOK))
 
-	m.quitDialog.Update()
+	m.quitPopup.Update()
 
-	m.storeErrorDialog.Update()
+	m.storeErrorPopup.Update()
 
 	if m.gameHeader != nil {
-		m.gameHeader.Update(m.quitDialog.Visible() || m.credits.Visible())
+		m.gameHeader.Update(m.quitPopup.Visible() || m.credits.Visible())
 	}
 
 	m.itemPreviewPopup.Update(l)
@@ -621,15 +621,15 @@ func (m *MapScene) handleBackButton(sceneManager *scene.Manager) {
 		return
 	}
 
-	if m.storeErrorDialog.Visible() {
+	if m.storeErrorPopup.Visible() {
 		audio.PlaySE("system/cancel", 1.0)
-		m.storeErrorDialog.Hide()
+		m.storeErrorPopup.Hide()
 		return
 	}
 
-	if m.quitDialog.Visible() {
+	if m.quitPopup.Visible() {
 		audio.PlaySE("system/cancel", 1.0)
-		m.quitDialog.Hide()
+		m.quitPopup.Hide()
 		return
 	}
 
@@ -648,7 +648,7 @@ func (m *MapScene) handleBackButton(sceneManager *scene.Manager) {
 	}
 
 	audio.PlaySE("system/click", 1.0)
-	m.quitDialog.Show()
+	m.quitPopup.Show()
 }
 
 func (m *MapScene) drawTileLayer(layer int, priority data.Priority) {
@@ -844,8 +844,8 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 		m.gameHeader.Draw(screen)
 	}
 
-	m.quitDialog.Draw(screen)
-	m.storeErrorDialog.Draw(screen)
+	m.quitPopup.Draw(screen)
+	m.storeErrorPopup.Draw(screen)
 
 	if m.titleView != nil {
 		m.titleView.Draw(screen)

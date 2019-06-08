@@ -44,7 +44,7 @@ type TitleView struct {
 	removeAdsButton  *Button
 	settingsButton   *Button
 	moregamesButton  *Button
-	quitDialog       *Dialog
+	quitPopup        *Popup
 	quitLabel        *Label
 	quitYesButton    *Button
 	quitNoButton     *Button
@@ -100,19 +100,19 @@ func (t *TitleView) initUI(sceneManager *scene.Manager) {
 	t.moregamesButton = NewImageButton(12, h/consts.TileScale-by, moreGamesIcon, moreGamesIcon, "system/click")
 	t.moregamesButton.touchExpand = 10
 
-	t.quitDialog = NewDialog((w/consts.TileScale-160)/2+4, (h)/(2*consts.TileScale)-64, 152, 124)
+	t.quitPopup = NewPopup((w/consts.TileScale-160)/2+4, (h)/(2*consts.TileScale)-64, 152, 124)
 	t.quitLabel = NewLabel(16, 8)
 	t.quitYesButton = NewButton((152-120)/2, 72, 120, 20, "system/click")
 	t.quitNoButton = NewButton((152-120)/2, 96, 120, 20, "system/cancel")
-	t.quitDialog.AddChild(t.quitLabel)
-	t.quitDialog.AddChild(t.quitYesButton)
-	t.quitDialog.AddChild(t.quitNoButton)
+	t.quitPopup.AddChild(t.quitLabel)
+	t.quitPopup.AddChild(t.quitYesButton)
+	t.quitPopup.AddChild(t.quitNoButton)
 
 	t.quitYesButton.SetOnPressed(func(_ *Button) {
 		sceneManager.Requester().RequestTerminateGame()
 	})
 	t.quitNoButton.SetOnPressed(func(_ *Button) {
-		t.quitDialog.Hide()
+		t.quitPopup.Hide()
 	})
 	t.startGameButton.SetOnPressed(func(_ *Button) {
 		audio.Stop()
@@ -188,8 +188,8 @@ func (t *TitleView) Update(sceneManager *scene.Manager) error {
 	t.quitYesButton.text = texts.Text(lang.Get(), texts.TextIDYes)
 	t.quitNoButton.text = texts.Text(lang.Get(), texts.TextIDNo)
 
-	t.quitDialog.Update()
-	if !t.quitDialog.Visible() {
+	t.quitPopup.Update()
+	if !t.quitPopup.Visible() {
 		t.startGameButton.Update()
 		t.removeAdsButton.Update()
 		t.settingsButton.Update()
@@ -218,14 +218,14 @@ func (t *TitleView) Update(sceneManager *scene.Manager) error {
 }
 
 func (t *TitleView) handleBackButton() {
-	if t.quitDialog.Visible() {
+	if t.quitPopup.Visible() {
 		audio.PlaySE("system/cancel", 1.0)
-		t.quitDialog.Hide()
+		t.quitPopup.Hide()
 		return
 	}
 
 	audio.PlaySE("system/click", 1.0)
-	t.quitDialog.Show()
+	t.quitPopup.Show()
 }
 
 func (t *TitleView) drawFooter(screen *ebiten.Image) {
@@ -259,14 +259,14 @@ func (t *TitleView) Draw(screen *ebiten.Image) {
 	t.drawFooter(screen)
 	t.drawTitle(screen)
 
-	// TODO: hide buttons to avoid visual conflicts between the dialog and the buttons
-	if !t.quitDialog.Visible() {
+	// TODO: hide buttons to avoid visual conflicts between the popup and the buttons
+	if !t.quitPopup.Visible() {
 		t.startGameButton.Draw(screen)
 		t.removeAdsButton.Draw(screen)
 		t.settingsButton.Draw(screen)
 		t.moregamesButton.Draw(screen)
 	}
-	t.quitDialog.Draw(screen)
+	t.quitPopup.Draw(screen)
 }
 
 func (t *TitleView) Resize() {
