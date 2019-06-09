@@ -24,7 +24,6 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/gamestate"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 )
 
@@ -135,7 +134,18 @@ func newCollectingGame() *collectingGame {
 	}
 }
 
-func (c *collectingGame) collect(minigame *gamestate.Minigame) {
+type Minigame interface {
+	ID() int
+	Score() int
+	ReqScore() int
+	AddScore(score int)
+	Active() bool
+	LastActiveAt() int64
+	MarkLastActive()
+	Success() bool
+}
+
+func (c *collectingGame) collect(minigame Minigame) {
 	c.collectTimer = actorCollectTime
 	minigame.AddScore(1)
 }
@@ -159,7 +169,7 @@ func (c *collectingGame) CanGetReward() bool {
 	return len(c.tokens) < maxTokenCount && !c.boosting()
 }
 
-func (c *collectingGame) UpdateAsChild(minigame *gamestate.Minigame, x, y int) {
+func (c *collectingGame) UpdateAsChild(minigame Minigame, x, y int) {
 	if !minigame.Active() {
 		return
 	}

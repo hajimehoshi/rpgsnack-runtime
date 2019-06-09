@@ -22,7 +22,6 @@ import (
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/gamestate"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/texts"
 )
@@ -112,7 +111,7 @@ func (m *MinigamePopup) checkProgress(score, reqScore int) {
 	}
 }
 
-func (m *MinigamePopup) Update(minigameState *gamestate.Minigame) {
+func (m *MinigamePopup) Update(minigameState Minigame) {
 	if !m.visible || minigameState == nil {
 		return
 	}
