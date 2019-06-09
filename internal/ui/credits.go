@@ -118,7 +118,7 @@ func (c *Credits) dash() bool {
 	if c.closeButton == nil {
 		return true
 	}
-	return !c.closeButton.includesInput(0, 0)
+	return !includesInput(0, 0, c.closeButton.region())
 }
 
 func (c *Credits) SetCloseButtonVisible(visible bool) {

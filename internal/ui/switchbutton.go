@@ -15,8 +15,10 @@
 package ui
 
 import (
-	"github.com/hajimehoshi/ebiten"
+	"image"
 	"image/color"
+
+	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
@@ -79,22 +81,8 @@ func (s *SwitchButton) SetOnToggled(onToggled func(SwitchButton *SwitchButton, v
 	s.onToggled = onToggled
 }
 
-func (s *SwitchButton) includesInput(offsetX, offsetY int) bool {
-	x, y := input.Position()
-	x = int(float64(x) / consts.TileScale)
-	y = int(float64(y) / consts.TileScale)
-	x -= offsetX
-	y -= offsetY
-
-	buttonWidth := switchButtonWidth + switchTouchExpand*2
-	buttonHeight := switchButtonHeight + switchTouchExpand*2
-	buttonX := s.x - switchTouchExpand
-	buttonY := s.y - switchTouchExpand
-
-	if buttonX <= x && x < buttonX+buttonWidth && buttonY <= y && y < buttonY+buttonHeight {
-		return true
-	}
-	return false
+func (s *SwitchButton) region() image.Rectangle {
+	return image.Rect(s.x-switchTouchExpand, s.y-switchTouchExpand, s.x+switchButtonWidth+switchTouchExpand, s.y+switchButtonHeight+switchTouchExpand)
 }
 
 func (s *SwitchButton) update(visible bool, offsetX, offsetY int) {
@@ -106,7 +94,7 @@ func (s *SwitchButton) update(visible bool, offsetX, offsetY int) {
 	}
 
 	if input.Triggered() {
-		if s.includesInput(offsetX, offsetY) {
+		if includesInput(offsetX, offsetY, s.region()) {
 			s.on = !s.on
 			audio.PlaySE("system/click", 1.0)
 			if s.onToggled != nil {

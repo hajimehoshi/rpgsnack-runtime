@@ -15,6 +15,7 @@
 package ui
 
 import (
+	"image"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten"
@@ -133,22 +134,8 @@ func (b *Button) SetOnPressed(onPressed func(button *Button)) {
 	b.onPressed = onPressed
 }
 
-func (b *Button) includesInput(offsetX, offsetY int) bool {
-	x, y := input.Position()
-	x = int(float64(x) / consts.TileScale)
-	y = int(float64(y) / consts.TileScale)
-	x -= offsetX
-	y -= offsetY
-
-	buttonWidth := b.width + b.touchExpand*2
-	buttonHeight := b.height + b.touchExpand*2
-	buttonX := b.x - b.touchExpand
-	buttonY := b.y - b.touchExpand
-
-	if buttonX <= x && x < buttonX+buttonWidth && buttonY <= y && y < buttonY+buttonHeight {
-		return true
-	}
-	return false
+func (b *Button) region() image.Rectangle {
+	return image.Rect(b.x-b.touchExpand, b.y-b.touchExpand, b.x+b.width+b.touchExpand, b.y+b.height+b.touchExpand)
 }
 
 func (b *Button) update(visible bool, offsetX, offsetY int) {
@@ -176,7 +163,7 @@ func (b *Button) update(visible bool, offsetX, offsetY int) {
 		}
 		return
 	}
-	b.pressing = b.includesInput(offsetX, offsetY)
+	b.pressing = includesInput(offsetX, offsetY, b.region())
 }
 
 func (b *Button) Update() {

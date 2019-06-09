@@ -16,6 +16,7 @@ package ui
 
 import (
 	"fmt"
+	"image"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten"
@@ -68,25 +69,20 @@ func (s *Slider) SetOnReleased(onReleased func(slider *Slider, value int)) {
 	s.onReleased = onReleased
 }
 
-func (s *Slider) touchingHandle(offsetX, offsetY int) bool {
-	x, y := input.Position()
-	x = int(float64(x) / consts.TileScale)
-	y = int(float64(y) / consts.TileScale)
-	x -= offsetX
-	y -= offsetY
+func (s *Slider) region() image.Rectangle {
+	const (
+		w = sliderHandleSize
+		h = sliderHandleSize
+	)
+	x := s.x
+	y := s.y
 	hx := s.width*s.value/(s.max-s.min) - sliderHandleSize/2
-	x -= hx
-	y += sliderHandleSize / 4
-	w := sliderHandleSize
-	h := sliderHandleSize
-
-	if s.x <= x && x < s.x+w && s.y <= y && y < s.y+h {
-		return true
-	}
-	return false
+	x += hx
+	y -= sliderHandleSize / 4
+	return image.Rect(x, y, x+w, y+h)
 }
 
-func (s *Slider) touchingControl(offsetX, offsetY int) int {
+func (s *Slider) valueFromInput(offsetX, offsetY int) int {
 	x, y := input.Position()
 	x = int(float64(x) / consts.TileScale)
 	y = int(float64(y) / consts.TileScale)
@@ -100,8 +96,7 @@ func (s *Slider) touchingControl(offsetX, offsetY int) int {
 	if t >= s.width {
 		return s.max
 	}
-	v := t * (s.max - s.min) / s.width
-	return v
+	return t * (s.max - s.min) / s.width
 }
 
 func (s *Slider) update(visible bool, offsetX, offsetY int) {
@@ -109,8 +104,7 @@ func (s *Slider) update(visible bool, offsetX, offsetY int) {
 		return
 	}
 	if input.Pressed() && s.dragging {
-		v := s.touchingControl(offsetX, offsetY)
-		if v < 0 {
+		if v := s.valueFromInput(offsetX, offsetY); v < 0 {
 			s.dragging = false
 		} else {
 			s.value = v
@@ -121,7 +115,7 @@ func (s *Slider) update(visible bool, offsetX, offsetY int) {
 		return
 	}
 	if input.Triggered() {
-		s.dragging = s.touchingHandle(offsetX, offsetY)
+		s.dragging = includesInput(offsetX, offsetY, s.region())
 		return
 	}
 	if input.Released() && s.dragging {
