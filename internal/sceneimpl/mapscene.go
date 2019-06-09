@@ -191,10 +191,6 @@ func (m *MapScene) closeMinigamePopup(sceneManager *scene.Manager) {
 }
 
 func (m *MapScene) initUI(sceneManager *scene.Manager) {
-	const (
-		uiWidth = consts.MapWidth
-	)
-
 	if sceneManager.HasExtraBottomGrid() {
 		m.inventoryHeight = 49 * consts.TileScale
 	} else {
@@ -210,18 +206,18 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 		m.gameHeader = ui.NewGameHeader()
 	}
 
-	m.quitPopup = ui.NewPopup((uiWidth-160)/2+4, screenH/(2*consts.TileScale)-64, 152, 124)
+	m.quitPopup = ui.NewPopup(screenH/(2*consts.TileScale)-64, 124)
 	m.quitLabel = ui.NewLabel(16, 8)
-	m.quitYesButton = ui.NewButton((152-120)/2, 72, 120, 20, "")
-	m.quitNoButton = ui.NewButton((152-120)/2, 96, 120, 20, "system/cancel")
+	m.quitYesButton = ui.NewButton((ui.PopupWidth-120)/2, 72, 120, 20, "")
+	m.quitNoButton = ui.NewButton((ui.PopupWidth-120)/2, 96, 120, 20, "system/cancel")
 
 	m.quitPopup.AddChild(m.quitLabel)
 	m.quitPopup.AddChild(m.quitYesButton)
 	m.quitPopup.AddChild(m.quitNoButton)
 
-	m.storeErrorPopup = ui.NewPopup((uiWidth-160)/2+4, 64, 152, 124)
+	m.storeErrorPopup = ui.NewPopup(64, 124)
 	m.storeErrorLabel = ui.NewLabel(16, 8)
-	m.storeErrorOkButton = ui.NewButton((152-120)/2, 96, 120, 20, "system/click")
+	m.storeErrorOkButton = ui.NewButton((ui.PopupWidth-120)/2, 96, 120, 20, "system/click")
 	m.storeErrorPopup.AddChild(m.storeErrorLabel)
 	m.storeErrorPopup.AddChild(m.storeErrorOkButton)
 

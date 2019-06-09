@@ -117,10 +117,10 @@ func (t *TitleView) initUI() {
 	t.moregamesButton = NewImageButton(12, h/consts.TileScale-by, moreGamesIcon, moreGamesIcon, "system/click")
 	t.moregamesButton.touchExpand = 10
 
-	t.quitPopup = NewPopup((w/consts.TileScale-160)/2+4, (h)/(2*consts.TileScale)-64, 152, 124)
+	t.quitPopup = NewPopup(h/(2*consts.TileScale)-64, 124)
 	t.quitLabel = NewLabel(16, 8)
-	t.quitYesButton = NewButton((152-120)/2, 72, 120, 20, "system/click")
-	t.quitNoButton = NewButton((152-120)/2, 96, 120, 20, "system/cancel")
+	t.quitYesButton = NewButton((PopupWidth-120)/2, 72, 120, 20, "system/click")
+	t.quitNoButton = NewButton((PopupWidth-120)/2, 96, 120, 20, "system/cancel")
 	t.quitPopup.AddChild(t.quitLabel)
 	t.quitPopup.AddChild(t.quitYesButton)
 	t.quitPopup.AddChild(t.quitNoButton)

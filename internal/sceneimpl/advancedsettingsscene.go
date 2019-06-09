@@ -75,12 +75,12 @@ func (s *AdvancedSettingsScene) initUI(sceneManager *scene.Manager) {
 	s.resetGameButton = ui.NewButton(s.baseX, s.calcButtonY(5), 120, 20, "system/click")
 	s.closeButton = ui.NewButton(s.baseX, s.calcButtonY(8), 120, 20, "system/cancel")
 
-	s.languagePopup = ui.NewPopup((w/consts.TileScale-160)/2+4, h/(2*consts.TileScale)-80, 152, 160)
+	s.languagePopup = ui.NewPopup(h/(2*consts.TileScale)-80, 160)
 
 	for i, l := range sceneManager.Game().Texts.Languages() {
 		i := i // i is captured by the below closure and it is needed to copy here.
 		n := display.Self.Name(l)
-		b := ui.NewButton((152-120)/2, 8+i*buttonDeltaY, 120, 20, "system/click")
+		b := ui.NewButton((ui.PopupWidth-120)/2, 8+i*buttonDeltaY, 120, 20, "system/click")
 		b.SetText(n)
 		b.Lang = l
 		s.languagePopup.AddChild(b)
@@ -129,10 +129,10 @@ func (s *AdvancedSettingsScene) initUI(sceneManager *scene.Manager) {
 		sceneManager.GoTo(NewSettingsScene())
 	})
 
-	s.warningPopup = ui.NewPopup((w/consts.TileScale-160)/2+4, (h)/(2*consts.TileScale)-64, 152, 124)
+	s.warningPopup = ui.NewPopup(h/(2*consts.TileScale)-64, 124)
 	s.warningLabel = ui.NewLabel(16, 8)
-	s.warningYesButton = ui.NewButton((152-120)/2, 72, 120, 20, "system/click")
-	s.warningNoButton = ui.NewButton((152-120)/2, 96, 120, 20, "system/cancel")
+	s.warningYesButton = ui.NewButton((ui.PopupWidth-120)/2, 72, 120, 20, "system/click")
+	s.warningNoButton = ui.NewButton((ui.PopupWidth-120)/2, 96, 120, 20, "system/cancel")
 	s.warningPopup.AddChild(s.warningLabel)
 	s.warningPopup.AddChild(s.warningYesButton)
 	s.warningPopup.AddChild(s.warningNoButton)

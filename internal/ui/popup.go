@@ -21,6 +21,11 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 )
 
+const (
+	popupMargin = 4
+	PopupWidth  = 160 - popupMargin*2
+)
+
 type Node interface {
 	UpdateAsChild(visible bool, offsetX, offsetY int)
 	DrawAsChild(screen *ebiten.Image, offsetX, offsetY int)
@@ -35,11 +40,11 @@ type Popup struct {
 	nodes   []Node
 }
 
-func NewPopup(x, y, width, height int) *Popup {
+func NewPopup(y, height int) *Popup {
 	return &Popup{
-		x:      x,
+		x:      popupMargin,
 		y:      y,
-		width:  width,
+		width:  PopupWidth,
 		height: height,
 	}
 }
