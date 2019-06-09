@@ -30,10 +30,17 @@ const (
 	TextScale                  = 2
 	BigTextScale               = 3
 	MaxFullscreenImageSize     = 304
-	SuperLargeScreenHeight     = (TileYNum - 1) * TileSize * TileScale // For devices like iPhoneX
 	HeaderHeight               = 16 * TileScale
 )
 
 func CeilDiv(x, y int) int {
 	return (x-1)/y + 1
+}
+
+// HasExtraBottomGrid reports whether the screen has an extra bottom grid due to the screen is too large or not.
+//
+// HasExtraBottomGrid return true on devices like iPhone X.
+func HasExtraBottomGrid(screenHeight int) bool {
+	const superLargeScreenHeight = (TileYNum - 1) * TileSize * TileScale
+	return screenHeight > superLargeScreenHeight
 }

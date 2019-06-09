@@ -107,7 +107,7 @@ func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
 			s.err = err
 			return
 		}
-		sceneManager.GoTo(NewTitleMapScene(g))
+		sceneManager.GoTo(NewTitleMapScene(sceneManager, g))
 	})
 	s.shopButton.SetOnPressed(func(_ *ui.Button) {
 		s.waitingRequestID = sceneManager.GenerateRequestID()
@@ -207,7 +207,7 @@ func (s *SettingsScene) handleBackButton(sceneManager *scene.Manager) {
 		s.err = err
 		return
 	}
-	sceneManager.GoTo(NewTitleMapScene(g))
+	sceneManager.GoTo(NewTitleMapScene(sceneManager, g))
 }
 
 func (s *SettingsScene) Draw(screen *ebiten.Image) {
@@ -225,6 +225,6 @@ func (s *SettingsScene) Draw(screen *ebiten.Image) {
 	s.credits.Draw(screen)
 }
 
-func (s *SettingsScene) Resize() {
+func (s *SettingsScene) Resize(width, height int) {
 	s.initialized = false
 }

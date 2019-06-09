@@ -28,7 +28,7 @@ import (
 type Scene interface {
 	Update(sceneManager *scene.Manager) error
 	Draw(screen *ebiten.Image)
-	Resize()
+	Resize(width, height int)
 }
 
 func NewInitialScene(sceneManager *scene.Manager) (Scene, error) {
@@ -39,7 +39,7 @@ func NewInitialScene(sceneManager *scene.Manager) (Scene, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewTitleMapScene(g), nil
+	return NewTitleMapScene(sceneManager, g), nil
 }
 
 const FadingCount = 30
@@ -77,7 +77,7 @@ func (s *SplashScene) Update(sceneManager *scene.Manager) error {
 	}
 
 	if s.count == 0 {
-		sceneManager.GoToWithFading(NewTitleMapScene(g), FadingCount, FadingCount)
+		sceneManager.GoToWithFading(NewTitleMapScene(sceneManager, g), FadingCount, FadingCount)
 	}
 	return nil
 }
@@ -94,5 +94,5 @@ func (s *SplashScene) Draw(screen *ebiten.Image) {
 	screen.DrawImage(img, op)
 }
 
-func (s *SplashScene) Resize() {
+func (s *SplashScene) Resize(width, height int) {
 }

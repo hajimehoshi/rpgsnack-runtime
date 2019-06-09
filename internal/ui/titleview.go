@@ -19,27 +19,19 @@ import (
 	"math/rand"
 
 	"github.com/hajimehoshi/ebiten"
-	"github.com/vmihailenco/msgpack"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/gamestate"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/texts"
 )
 
-type SceneMaker interface {
-	NewMapScene() scene.Scene
-	NewMapSceneWithGame(*gamestate.Game) scene.Scene
-	NewSettingsScene() scene.Scene
-}
-
 type TitleView struct {
-	init             bool
+	initialized      bool
+	initializedUI    bool
 	startGameButton  *Button
 	removeAdsButton  *Button
 	settingsButton   *Button
@@ -48,51 +40,76 @@ type TitleView struct {
 	quitLabel        *Label
 	quitYesButton    *Button
 	quitNoButton     *Button
-	waitingRequestID int
-	initialized      bool
+	waitingRequestID int // TODO: Can we remove this?
 	bgImage          *ebiten.Image
 	footerOffset     int
-	err              error
 
-	sceneMaker SceneMaker
+	sceneWidth  int
+	sceneHeight int
 
 	shakeStartGameButtonCount int
+
+	onQuit      func()
+	onStartGame func()
+	onRemoveAds func()
+	onSettings  func()
+	onMoreGames func()
 }
 
 const (
 	footerHeight = 192
 )
 
-func NewTitleView(sceneMaker SceneMaker) *TitleView {
+func NewTitleView(sceneWidth, sceneHeight int) *TitleView {
 	t := &TitleView{
-		sceneMaker: sceneMaker,
+		sceneWidth:  sceneWidth,
+		sceneHeight: sceneHeight,
 	}
 	return t
 }
 
-func (t *TitleView) startGameButtonX(sceneManager *scene.Manager) int {
-	w, _ := sceneManager.Size()
-	return (w/consts.TileScale - 120) / 2
+func (t *TitleView) SetOnQuit(f func()) {
+	t.onQuit = f
+}
+
+func (t *TitleView) SetOnStartGame(f func()) {
+	t.onStartGame = f
+}
+
+func (t *TitleView) SetOnRemoveAds(f func()) {
+	t.onRemoveAds = f
+}
+
+func (t *TitleView) SetOnSettings(f func()) {
+	t.onSettings = f
+}
+
+func (t *TitleView) SetOnMoreGames(f func()) {
+	t.onMoreGames = f
+}
+
+func (t *TitleView) startGameButtonX() int {
+	return (t.sceneWidth/consts.TileScale - 120) / 2
 }
 
 const (
 	shakeFrame = 15
 )
 
-func (t *TitleView) initUI(sceneManager *scene.Manager) {
-	w, h := sceneManager.Size()
+func (t *TitleView) initUI() {
+	w, h := t.sceneWidth, t.sceneHeight
 
 	settingsIcon := assets.GetImage("system/common/icon_settings.png")
 	moreGamesIcon := assets.GetImage("system/common/icon_moregames.png")
 
 	by := 16
 	t.footerOffset = 0
-	if sceneManager.HasExtraBottomGrid() {
+	if consts.HasExtraBottomGrid(t.sceneHeight) {
 		by = 36
 		t.footerOffset = 48
 	}
 
-	t.startGameButton = NewTextButton(t.startGameButtonX(sceneManager), h/consts.TileScale-by-32, 120, 20, "system/start")
+	t.startGameButton = NewTextButton(t.startGameButtonX(), h/consts.TileScale-by-32, 120, 20, "system/start")
 	t.removeAdsButton = NewTextButton((w/consts.TileScale-120)/2+20, h/consts.TileScale-by-4, 80, 20, "system/click")
 	t.removeAdsButton.textColor = color.RGBA{0xc8, 0xc8, 0xc8, 0xff}
 	t.settingsButton = NewImageButton(w/consts.TileScale-24, h/consts.TileScale-by, settingsIcon, settingsIcon, "system/click")
@@ -109,75 +126,72 @@ func (t *TitleView) initUI(sceneManager *scene.Manager) {
 	t.quitPopup.AddChild(t.quitNoButton)
 
 	t.quitYesButton.SetOnPressed(func(_ *Button) {
-		sceneManager.Requester().RequestTerminateGame()
+		if t.onQuit != nil {
+			t.onQuit()
+		}
 	})
 	t.quitNoButton.SetOnPressed(func(_ *Button) {
 		t.quitPopup.Hide()
 	})
 	t.startGameButton.SetOnPressed(func(_ *Button) {
-		audio.Stop()
-		if sceneManager.HasProgress() {
-			// TODO: Remove this logic from UI.
-			var game *gamestate.Game
-			if err := msgpack.Unmarshal(sceneManager.Progress(), &game); err != nil {
-				t.err = err
-				return
-			}
-			sceneManager.GoToWithFading(t.sceneMaker.NewMapSceneWithGame(game), 30, 30)
-		} else {
-			sceneManager.GoToWithFading(t.sceneMaker.NewMapScene(), 30, 30)
+		if t.onStartGame != nil {
+			t.onStartGame()
 		}
 	})
 	t.removeAdsButton.SetOnPressed(func(_ *Button) {
-		if sceneManager.Game().IsShopAvailable(data.ShopTypeHome) {
-			sceneManager.Requester().RequestShowShop(t.waitingRequestID, string(sceneManager.ShopData(data.ShopTypeHome, []bool{true})))
+		if t.onRemoveAds != nil {
+			t.onRemoveAds()
 		}
 	})
 	t.settingsButton.SetOnPressed(func(_ *Button) {
-		sceneManager.GoTo(t.sceneMaker.NewSettingsScene())
+		if t.onSettings != nil {
+			t.onSettings()
+		}
 	})
 	t.moregamesButton.SetOnPressed(func(_ *Button) {
-		t.waitingRequestID = sceneManager.GenerateRequestID()
-		sceneManager.Requester().RequestOpenLink(t.waitingRequestID, "more", "")
+		if t.onMoreGames != nil {
+			t.onMoreGames()
+		}
 	})
 }
 
-func (t *TitleView) Update(sceneManager *scene.Manager) error {
-	if t.err != nil {
-		return t.err
-	}
-	if !t.initialized {
-		t.initUI(sceneManager)
-		t.initialized = true
-	}
-	if t.waitingRequestID != 0 {
-		r := sceneManager.ReceiveResultIfExists(t.waitingRequestID)
-		if r != nil {
-			t.waitingRequestID = 0
-		}
-		return nil
+func (t *TitleView) WaitingRequestID() int {
+	return t.waitingRequestID
+}
+
+func (t *TitleView) SetWaitingRequestID(id int) {
+	t.waitingRequestID = id
+}
+
+func (t *TitleView) ResetWaitingRequestID() {
+	t.waitingRequestID = 0
+}
+
+func (t *TitleView) Update(game *data.Game, hasProgress bool, isAdsRemoved bool) error {
+	if !t.initializedUI {
+		t.initUI()
+		t.initializedUI = true
 	}
 
-	if !t.init {
-		var titleBGM = sceneManager.Game().System.TitleBGM
-		if titleBGM.Name == "" {
+	if !t.initialized {
+		if titleBGM := game.System.TitleBGM; titleBGM.Name == "" {
 			audio.StopBGM(0)
 		} else {
 			audio.PlayBGM(titleBGM.Name, float64(titleBGM.Volume)/100, 0)
 		}
-		t.init = true
+		t.initialized = true
 	}
 
 	if input.BackButtonPressed() {
 		t.handleBackButton()
 	}
 
-	if sceneManager.HasProgress() {
+	if hasProgress {
 		t.startGameButton.text = texts.Text(lang.Get(), texts.TextIDResumeGame)
 	} else {
 		t.startGameButton.text = texts.Text(lang.Get(), texts.TextIDNewGame)
 	}
-	if sceneManager.Game().System.TitleTextColor == "black" {
+	if game.System.TitleTextColor == "black" {
 		t.startGameButton.textColor = color.Black
 	} else {
 		t.startGameButton.textColor = color.White
@@ -196,9 +210,9 @@ func (t *TitleView) Update(sceneManager *scene.Manager) error {
 		t.moregamesButton.Update()
 	}
 
-	t.removeAdsButton.visible = sceneManager.Game().IsShopAvailable(data.ShopTypeHome) && !sceneManager.IsAdsRemoved()
+	t.removeAdsButton.visible = game.IsShopAvailable(data.ShopTypeHome) && !isAdsRemoved
 
-	x := t.startGameButtonX(sceneManager)
+	x := t.startGameButtonX()
 	t.startGameButton.SetX(x)
 	if t.shakeStartGameButtonCount > 0 {
 		tx := 0
@@ -252,7 +266,7 @@ func (t *TitleView) drawTitle(screen *ebiten.Image) {
 }
 
 func (t *TitleView) Draw(screen *ebiten.Image) {
-	if !t.initialized {
+	if !t.initializedUI {
 		return
 	}
 
@@ -269,8 +283,10 @@ func (t *TitleView) Draw(screen *ebiten.Image) {
 	t.quitPopup.Draw(screen)
 }
 
-func (t *TitleView) Resize() {
-	t.initialized = false
+func (t *TitleView) Resize(sceneWidth, sceneHeight int) {
+	t.initializedUI = false
+	t.sceneWidth = sceneWidth
+	t.sceneHeight = sceneHeight
 }
 
 func (t *TitleView) ShakeStartGameButton() {

@@ -24,7 +24,6 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
 
 type InventoryMode int
@@ -211,14 +210,14 @@ func (i *Inventory) isTouchingScroll() bool {
 	return sx <= touchX && touchX < sx+scrollBarWidth*consts.TileScale && sy <= touchY && touchY < sy+scrollBarHeight*consts.TileScale
 }
 
-func (i *Inventory) Update(sceneManager *scene.Manager) {
+func (i *Inventory) Update(texts *data.Texts) {
 	if !i.visible {
 		return
 	}
 
 	activeItem := i.activeItem()
 	if i.showItemName && activeItem != nil {
-		i.itemLabel.Text = sceneManager.Game().Texts.Get(lang.Get(), activeItem.Name)
+		i.itemLabel.Text = texts.Get(lang.Get(), activeItem.Name)
 	} else {
 		i.itemLabel.Text = ""
 	}

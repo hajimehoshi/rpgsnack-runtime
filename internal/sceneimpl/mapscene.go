@@ -20,6 +20,7 @@ import (
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten"
+	"github.com/vmihailenco/msgpack"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
@@ -94,35 +95,51 @@ func NewMapSceneWithGame(game *gamestate.Game) *MapScene {
 	return m
 }
 
-type sceneMaker struct{}
-
-func (s *sceneMaker) NewMapScene() scene.Scene {
-	return NewMapScene()
-}
-
-func (s *sceneMaker) NewMapSceneWithGame(game *gamestate.Game) scene.Scene {
-	return NewMapSceneWithGame(game)
-}
-
-func (s *sceneMaker) NewSettingsScene() scene.Scene {
-	return NewSettingsScene()
-}
-
-func NewTitleMapScene(savedGame *gamestate.Game) *MapScene {
+func NewTitleMapScene(sceneManager *scene.Manager, savedGame *gamestate.Game) *MapScene {
+	w, h := sceneManager.Size()
 	m := &MapScene{
-		titleView: ui.NewTitleView(&sceneMaker{}),
+		titleView: ui.NewTitleView(w, h),
 	}
 	m.gameState = gamestate.NewTitleGame(savedGame, m.shakeStartGameButton)
+
+	m.titleView.SetOnQuit(func() {
+		sceneManager.Requester().RequestTerminateGame()
+	})
+	m.titleView.SetOnStartGame(func() {
+		audio.Stop()
+		if sceneManager.HasProgress() {
+			var game *gamestate.Game
+			if err := msgpack.Unmarshal(sceneManager.Progress(), &game); err != nil {
+				m.err = err
+				return
+			}
+			sceneManager.GoToWithFading(NewMapSceneWithGame(game), 30, 30)
+		} else {
+			sceneManager.GoToWithFading(NewMapScene(), 30, 30)
+		}
+	})
+	m.titleView.SetOnRemoveAds(func() {
+		if sceneManager.Game().IsShopAvailable(data.ShopTypeHome) {
+			sceneManager.Requester().RequestShowShop(m.titleView.WaitingRequestID(), string(sceneManager.ShopData(data.ShopTypeHome, []bool{true})))
+		}
+	})
+	m.titleView.SetOnSettings(func() {
+		sceneManager.GoTo(NewSettingsScene())
+	})
+	m.titleView.SetOnMoreGames(func() {
+		m.titleView.SetWaitingRequestID(sceneManager.GenerateRequestID())
+		sceneManager.Requester().RequestOpenLink(m.titleView.WaitingRequestID(), "more", "")
+	})
 	return m
 }
 
 func (m *MapScene) updateOffsetY(sceneManager *scene.Manager) {
 	_, sh := sceneManager.Size()
 
-	// In case the device is super large (iPhoneX),
+	// In case the device is super large (e.g., iPhone X),
 	// we do not do any of the layout work here
-	// as we are always going to show the fullscreen
-	if sh >= consts.SuperLargeScreenHeight {
+	// as we are always going to show the fullscreen.
+	if consts.HasExtraBottomGrid(sh) {
 		m.offsetY = 0
 		m.windowOffsetY = sceneManager.BottomOffset()
 		return
@@ -226,7 +243,7 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 			m.err = err
 			return
 		}
-		sceneManager.GoToWithFading(NewTitleMapScene(g), FadingCount, FadingCount)
+		sceneManager.GoToWithFading(NewTitleMapScene(sceneManager, g), FadingCount, FadingCount)
 	})
 	m.quitNoButton.SetOnPressed(func(_ *ui.Button) {
 		m.quitPopup.Hide()
@@ -499,7 +516,13 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 	m.minigamePopup.SetAdsLoaded(sceneManager.RewardedAdsLoaded())
 
 	if m.titleView != nil {
-		m.titleView.Update(sceneManager)
+		if id := m.titleView.WaitingRequestID(); id != 0 {
+			if sceneManager.ReceiveResultIfExists(id) != nil {
+				m.titleView.ResetWaitingRequestID()
+			}
+		} else {
+			m.titleView.Update(sceneManager.Game(), sceneManager.HasProgress(), sceneManager.IsAdsRemoved())
+		}
 	}
 
 	m.credits.Update()
@@ -515,7 +538,7 @@ func (m *MapScene) updateInventory(sceneManager *scene.Manager) {
 	m.inventory.SetDisabled(m.gameState.Map().IsBlockingEventExecuting() && !m.gameState.Items().ChoiceWait())
 	m.inventory.SetItems(m.gameState.Items().Items())
 	m.inventory.SetActiveItemID(m.gameState.Items().ActiveItem())
-	m.inventory.Update(sceneManager)
+	m.inventory.Update(sceneManager.Game().Texts)
 }
 
 func (m *MapScene) DebugPanel(entityType debug.DebugPanelType) *debug.DebugPanel {
@@ -613,7 +636,7 @@ func (m *MapScene) goToTitle(sceneManager *scene.Manager) {
 		m.err = err
 		return
 	}
-	sceneManager.GoToWithFading(NewTitleMapScene(g), FadingCount, FadingCount)
+	sceneManager.GoToWithFading(NewTitleMapScene(sceneManager, g), FadingCount, FadingCount)
 }
 
 func (m *MapScene) handleBackButton(sceneManager *scene.Manager) {
@@ -856,10 +879,10 @@ func (m *MapScene) Draw(screen *ebiten.Image) {
 	font.DrawText(screen, msg, 160, 8, consts.TextScale, data.TextAlignLeft, color.White, len([]rune(msg)))
 }
 
-func (m *MapScene) Resize() {
+func (m *MapScene) Resize(width, height int) {
 	m.initialized = false
 	if m.titleView != nil {
-		m.titleView.Resize()
+		m.titleView.Resize(width, height)
 	}
 }
 

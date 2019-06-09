@@ -41,7 +41,7 @@ var TierTypes = [...]string{"tier1_donation", "tier2_donation", "tier3_donation"
 type Scene interface {
 	Update(manager *Manager) error
 	Draw(screen *ebiten.Image)
-	Resize()
+	Resize(width, height int)
 }
 
 type setPlatformDataArgs struct {
@@ -172,12 +172,12 @@ func (m *Manager) SetScreenSize(width, height int) {
 	if m.width != width || m.height != height {
 		m.width = width
 		m.height = height
-		m.current.Resize()
+		m.current.Resize(width, height)
 	}
 }
 
 func (m *Manager) BottomOffset() int {
-	if m.height > consts.SuperLargeScreenHeight {
+	if consts.HasExtraBottomGrid(m.height) {
 		return consts.TileSize * consts.TileScale
 	}
 	return 0

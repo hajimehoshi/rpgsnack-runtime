@@ -251,6 +251,6 @@ func (s *AdvancedSettingsScene) Draw(screen *ebiten.Image) {
 	s.warningPopup.Draw(screen)
 }
 
-func (s *AdvancedSettingsScene) Resize() {
+func (s *AdvancedSettingsScene) Resize(width, height int) {
 	s.initialized = false
 }
