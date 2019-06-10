@@ -109,8 +109,8 @@ func (g *GameHeader) Update(paused bool) {
 		return
 	}
 
-	g.titleButton.UpdateAsChild(true, g.x, g.y)
-	g.cameraButton.UpdateAsChild(true, g.x, g.y)
+	g.titleButton.UpdateAsChild(g.x, g.y)
+	g.cameraButton.UpdateAsChild(g.x, g.y)
 
 	if g.isOpening {
 		g.revealRatio += 1 / float64(revealFrames)

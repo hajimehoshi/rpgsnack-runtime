@@ -56,7 +56,7 @@ func (l *Label) Hide() {
 func (l *Label) Update() {
 }
 
-func (l *Label) UpdateAsChild(visible bool, offsetX, offsetY int) {
+func (l *Label) UpdateAsChild(offsetX, offsetY int) {
 }
 
 func (l *Label) Draw(screen *ebiten.Image) {

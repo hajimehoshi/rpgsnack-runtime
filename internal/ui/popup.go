@@ -27,7 +27,7 @@ const (
 )
 
 type Node interface {
-	UpdateAsChild(visible bool, offsetX, offsetY int)
+	UpdateAsChild(offsetX, offsetY int)
 	DrawAsChild(screen *ebiten.Image, offsetX, offsetY int)
 }
 
@@ -70,7 +70,7 @@ func (p *Popup) Update() {
 		return
 	}
 	for _, n := range p.nodes {
-		n.UpdateAsChild(p.visible, p.x, p.y)
+		n.UpdateAsChild(p.x, p.y)
 	}
 }
 

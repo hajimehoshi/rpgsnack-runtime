@@ -130,7 +130,7 @@ func (c *Credits) Update() {
 		return
 	}
 	if c.closeButton != nil {
-		c.closeButton.UpdateAsChild(c.visible, 0, 0)
+		c.closeButton.UpdateAsChild(0, 0)
 	}
 	if c.finished {
 		c.Hide()

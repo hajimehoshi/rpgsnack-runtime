@@ -81,7 +81,7 @@ func (i *ItemPreviewPopup) Update(lang language.Tag) {
 		return
 	}
 	for _, n := range i.nodes {
-		n.UpdateAsChild(i.visible, 0, i.y)
+		n.UpdateAsChild(0, i.y)
 	}
 	i.actionButton.text = texts.Text(lang, texts.TextIDItemCheck)
 }

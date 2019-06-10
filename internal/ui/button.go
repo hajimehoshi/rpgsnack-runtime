@@ -138,10 +138,7 @@ func (b *Button) region() image.Rectangle {
 	return image.Rect(b.x-b.touchExpand, b.y-b.touchExpand, b.x+b.width+b.touchExpand, b.y+b.height+b.touchExpand)
 }
 
-func (b *Button) update(visible bool, offsetX, offsetY int) {
-	if !visible {
-		return
-	}
+func (b *Button) update(offsetX, offsetY int) {
 	if !b.visible {
 		return
 	}
@@ -167,11 +164,11 @@ func (b *Button) update(visible bool, offsetX, offsetY int) {
 }
 
 func (b *Button) Update() {
-	b.update(true, 0, 0)
+	b.update(0, 0)
 }
 
-func (b *Button) UpdateAsChild(visible bool, offsetX, offsetY int) {
-	b.update(visible, offsetX, offsetY)
+func (b *Button) UpdateAsChild(offsetX, offsetY int) {
+	b.update(offsetX, offsetY)
 }
 
 func (b *Button) Draw(screen *ebiten.Image) {

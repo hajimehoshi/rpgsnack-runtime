@@ -119,7 +119,7 @@ func (m *MinigamePopup) Update(minigameState Minigame) {
 	m.scoreLabel.Text = fmt.Sprintf(texts.Text(lang.Get(), texts.TextIDMinigameProgress), minigameState.Score(), minigameState.ReqScore())
 
 	for _, n := range m.nodes {
-		n.UpdateAsChild(m.visible, 0, m.y)
+		n.UpdateAsChild(0, m.y)
 	}
 
 	m.minigame.UpdateAsChild(minigameState, 0, m.y)
