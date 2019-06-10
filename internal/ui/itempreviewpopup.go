@@ -77,13 +77,20 @@ func (i *ItemPreviewPopup) Update(lang language.Tag) {
 		return
 	}
 	i.actionButton.text = texts.Text(lang, texts.TextIDItemCheck)
+}
 
-	if i.closeButton.HandleInput(0, i.y) {
-		return
+func (i *ItemPreviewPopup) HandleInput(offsetX, offsetY int) bool {
+	if !i.visible {
+		return false
 	}
-	if i.actionButton.HandleInput(0, i.y) {
-		return
+	if i.closeButton.HandleInput(0+offsetX, i.y+offsetY) {
+		return true
 	}
+	if i.actionButton.HandleInput(0+offsetX, i.y+offsetY) {
+		return true
+	}
+	// If a popup is visible, do not propagate any input handling to parents.
+	return true
 }
 
 func (i *ItemPreviewPopup) Show() {

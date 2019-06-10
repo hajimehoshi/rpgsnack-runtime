@@ -73,11 +73,19 @@ func (p *Popup) Update() {
 	for _, n := range p.nodes {
 		n.Update()
 	}
+}
+
+func (p *Popup) HandleInput(offsetX, offsetY int) bool {
+	if !p.visible {
+		return false
+	}
 	for _, n := range p.nodes {
-		if n.HandleInput(p.x, p.y) {
-			return
+		if n.HandleInput(p.x+offsetX, p.y+offsetY) {
+			return true
 		}
 	}
+	// If a popup is visible, do not propagate any input handling to parents.
+	return true
 }
 
 func (p *Popup) Draw(screen *ebiten.Image) {

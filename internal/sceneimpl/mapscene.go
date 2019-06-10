@@ -490,7 +490,6 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 	m.storeErrorOkButton.SetText(texts.Text(l, texts.TextIDOK))
 
 	m.quitPopup.Update()
-
 	m.storeErrorPopup.Update()
 
 	if m.gameHeader != nil {
@@ -523,6 +522,19 @@ func (m *MapScene) updateUI(sceneManager *scene.Manager) {
 
 	m.credits.Update()
 	m.credits.SetCloseButtonVisible(m.gameState.ShouldShowCreditsCloseButton())
+
+	if m.quitPopup.HandleInput(0, 0) {
+		return
+	}
+	if m.storeErrorPopup.HandleInput(0, 0) {
+		return
+	}
+	if m.itemPreviewPopup.HandleInput(0, 0) {
+		return
+	}
+	if m.minigamePopup.HandleInput(0, 0) {
+		return
+	}
 }
 
 func (m *MapScene) updateInventory(sceneManager *scene.Manager) {

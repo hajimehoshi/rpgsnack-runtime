@@ -198,10 +198,6 @@ func (s *AdvancedSettingsScene) Update(sceneManager *scene.Manager) error {
 	s.languagePopup.Update()
 	s.warningPopup.Update()
 	if !s.languagePopup.Visible() && !s.warningPopup.Visible() {
-		// TODO: This function should return immediately when input is handled.
-		s.languageButton.HandleInput(0, 0)
-		s.closeButton.HandleInput(0, 0)
-		s.resetGameButton.HandleInput(0, 0)
 		s.vibrationLabel.Update()
 		s.vibrationButton.Update()
 		s.bgmLabel.Update()
@@ -214,6 +210,24 @@ func (s *AdvancedSettingsScene) Update(sceneManager *scene.Manager) error {
 		s.resetGameButton.Enable()
 	} else {
 		s.resetGameButton.Disable()
+	}
+
+	// Handle input at the popups first for the correct propagation.
+	if s.languagePopup.HandleInput(0, 0) {
+		return nil
+	}
+	if s.warningPopup.HandleInput(0, 0) {
+		return nil
+	}
+
+	if s.languageButton.HandleInput(0, 0) {
+		return nil
+	}
+	if s.closeButton.HandleInput(0, 0) {
+		return nil
+	}
+	if s.resetGameButton.HandleInput(0, 0) {
+		return nil
 	}
 
 	return nil

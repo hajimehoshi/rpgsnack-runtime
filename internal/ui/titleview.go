@@ -203,13 +203,6 @@ func (t *TitleView) Update(game *data.Game, hasProgress bool, isAdsRemoved bool)
 	t.quitNoButton.text = texts.Text(lang.Get(), texts.TextIDNo)
 
 	t.quitPopup.Update()
-	if !t.quitPopup.Visible() {
-		// TODO: This function should return immediately when input is handled.
-		t.startGameButton.HandleInput(0, 0)
-		t.removeAdsButton.HandleInput(0, 0)
-		t.settingsButton.HandleInput(0, 0)
-		t.moregamesButton.HandleInput(0, 0)
-	}
 
 	t.removeAdsButton.visible = game.IsShopAvailable(data.ShopTypeHome) && !isAdsRemoved
 
@@ -227,6 +220,24 @@ func (t *TitleView) Update(game *data.Game, hasProgress bool, isAdsRemoved bool)
 		}
 		t.startGameButton.SetX(x + tx)
 		t.shakeStartGameButtonCount--
+	}
+
+	// Handle input at the popup first for the correct propagation.
+	if t.quitPopup.HandleInput(0, 0) {
+		return nil
+	}
+
+	if t.startGameButton.HandleInput(0, 0) {
+		return nil
+	}
+	if t.removeAdsButton.HandleInput(0, 0) {
+		return nil
+	}
+	if t.settingsButton.HandleInput(0, 0) {
+		return nil
+	}
+	if t.moregamesButton.HandleInput(0, 0) {
+		return nil
 	}
 
 	return nil

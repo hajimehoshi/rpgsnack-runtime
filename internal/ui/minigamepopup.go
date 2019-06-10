@@ -114,10 +114,7 @@ func (m *MinigamePopup) Update(minigameState Minigame) {
 
 	m.scoreLabel.Text = fmt.Sprintf(texts.Text(lang.Get(), texts.TextIDMinigameProgress), minigameState.Score(), minigameState.ReqScore())
 
-	// TODO: If inputing is handled at buttons, this function should return.
-	m.closeButton.HandleInput(0, m.y)
-	m.rewardButton.HandleInput(0, m.y)
-
+	// TODO: Separate this into Update and HandleInput
 	m.minigame.UpdateAsChild(minigameState, 0, m.y)
 
 	m.rewardButton.SetText(texts.Text(lang.Get(), texts.TextIDMinigameWatchAds))
@@ -143,6 +140,20 @@ func (m *MinigamePopup) Update(minigameState Minigame) {
 		m.onProgress(100)
 		m.onClose()
 	}
+}
+
+func (m *MinigamePopup) HandleInput(offsetX, offsetY int) bool {
+	if !m.visible {
+		return false
+	}
+	if m.closeButton.HandleInput(0+offsetX, m.y+offsetY) {
+		return true
+	}
+	if m.rewardButton.HandleInput(0+offsetX, m.y+offsetY) {
+		return true
+	}
+	// If a popup is visible, do not propagate any input handling to parents.
+	return true
 }
 
 func (m *MinigamePopup) ActivateBoostMode() {
