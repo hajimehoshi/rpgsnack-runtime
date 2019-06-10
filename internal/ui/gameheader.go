@@ -109,8 +109,9 @@ func (g *GameHeader) Update(paused bool) {
 		return
 	}
 
-	g.titleButton.UpdateAsChild(g.x, g.y)
-	g.cameraButton.UpdateAsChild(g.x, g.y)
+	// TODO: This function should return immediately when input is handled.
+	g.titleButton.HandleInput(g.x, g.y)
+	g.cameraButton.HandleInput(g.x, g.y)
 
 	if g.isOpening {
 		g.revealRatio += 1 / float64(revealFrames)

@@ -181,14 +181,30 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 
 	s.credits.Update()
 	if !s.credits.Visible() {
-		s.shopButton.Update()
-		s.creditsButton.Update()
-		s.updateCreditsButton.Update()
-		s.reviewThisAppButton.Update()
-		s.restorePurchasesButton.Update()
-		s.privacyPolicyButton.Update()
-		s.closeButton.Update()
-		s.advancedButton.Update()
+		if s.shopButton.HandleInput(0, 0) {
+			return nil
+		}
+		if s.creditsButton.HandleInput(0, 0) {
+			return nil
+		}
+		if s.updateCreditsButton.HandleInput(0, 0) {
+			return nil
+		}
+		if s.reviewThisAppButton.HandleInput(0, 0) {
+			return nil
+		}
+		if s.restorePurchasesButton.HandleInput(0, 0) {
+			return nil
+		}
+		if s.privacyPolicyButton.HandleInput(0, 0) {
+			return nil
+		}
+		if s.closeButton.HandleInput(0, 0) {
+			return nil
+		}
+		if s.advancedButton.HandleInput(0, 0) {
+			return nil
+		}
 	}
 
 	return nil

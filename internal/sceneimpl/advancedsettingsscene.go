@@ -198,9 +198,10 @@ func (s *AdvancedSettingsScene) Update(sceneManager *scene.Manager) error {
 	s.languagePopup.Update()
 	s.warningPopup.Update()
 	if !s.languagePopup.Visible() && !s.warningPopup.Visible() {
-		s.languageButton.Update()
-		s.closeButton.Update()
-		s.resetGameButton.Update()
+		// TODO: This function should return immediately when input is handled.
+		s.languageButton.HandleInput(0, 0)
+		s.closeButton.HandleInput(0, 0)
+		s.resetGameButton.HandleInput(0, 0)
 		s.vibrationLabel.Update()
 		s.vibrationButton.Update()
 		s.bgmLabel.Update()

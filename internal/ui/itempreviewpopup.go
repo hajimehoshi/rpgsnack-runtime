@@ -33,7 +33,6 @@ type ItemPreviewPopup struct {
 	fadeImage       *ebiten.Image
 	frameImage      *ebiten.Image
 	previewBoxImage *ebiten.Image
-	nodes           []Node
 	closeButton     *Button
 	previewButton   *Button
 	actionButton    *Button
@@ -58,8 +57,6 @@ func NewItemPreviewPopup(y int) *ItemPreviewPopup {
 	frameImage := assets.GetImage("system/itempreview/details.png")
 	previewBoxImage := assets.GetImage("system/itempreview/preview_box.png")
 
-	nodes := []Node{closeButton, actionButton}
-
 	fadeImage, err := ebiten.NewImage(16, 16, ebiten.FilterNearest)
 	if err != nil {
 		panic(err)
@@ -70,7 +67,6 @@ func NewItemPreviewPopup(y int) *ItemPreviewPopup {
 		fadeImage:       fadeImage,
 		frameImage:      frameImage,
 		previewBoxImage: previewBoxImage,
-		nodes:           nodes,
 		closeButton:     closeButton,
 		actionButton:    actionButton,
 	}
@@ -80,10 +76,14 @@ func (i *ItemPreviewPopup) Update(lang language.Tag) {
 	if !i.visible {
 		return
 	}
-	for _, n := range i.nodes {
-		n.UpdateAsChild(0, i.y)
-	}
 	i.actionButton.text = texts.Text(lang, texts.TextIDItemCheck)
+
+	if i.closeButton.HandleInput(0, i.y) {
+		return
+	}
+	if i.actionButton.HandleInput(0, i.y) {
+		return
+	}
 }
 
 func (i *ItemPreviewPopup) Show() {
@@ -174,7 +174,6 @@ func (i *ItemPreviewPopup) Draw(screen *ebiten.Image) {
 		i.drawItem(screen, 54, float64(i.y)+28, i.item.Icon)
 	}
 
-	for _, n := range i.nodes {
-		n.DrawAsChild(screen, 0, i.y)
-	}
+	i.closeButton.DrawAsChild(screen, 0, i.y)
+	i.actionButton.DrawAsChild(screen, 0, i.y)
 }

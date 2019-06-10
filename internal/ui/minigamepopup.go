@@ -35,7 +35,6 @@ type MinigamePopup struct {
 	y                    int
 	visible              bool
 	fadeImage            *ebiten.Image
-	nodes                []Node
 	rewardButton         *Button
 	closeButton          *Button
 	scoreLabel           *Label
@@ -63,8 +62,6 @@ func NewMinigamePopup(y int) *MinigamePopup {
 
 	scoreLabel := NewLabel(16, 8)
 
-	nodes := []Node{closeButton, rewardButton, scoreLabel}
-
 	fadeImage, err := ebiten.NewImage(16, 16, ebiten.FilterNearest)
 	if err != nil {
 		panic(err)
@@ -73,7 +70,6 @@ func NewMinigamePopup(y int) *MinigamePopup {
 	m := &MinigamePopup{
 		y:            y,
 		fadeImage:    fadeImage,
-		nodes:        nodes,
 		closeButton:  closeButton,
 		rewardButton: rewardButton,
 		scoreLabel:   scoreLabel,
@@ -118,9 +114,9 @@ func (m *MinigamePopup) Update(minigameState Minigame) {
 
 	m.scoreLabel.Text = fmt.Sprintf(texts.Text(lang.Get(), texts.TextIDMinigameProgress), minigameState.Score(), minigameState.ReqScore())
 
-	for _, n := range m.nodes {
-		n.UpdateAsChild(0, m.y)
-	}
+	// TODO: If inputing is handled at buttons, this function should return.
+	m.closeButton.HandleInput(0, m.y)
+	m.rewardButton.HandleInput(0, m.y)
 
 	m.minigame.UpdateAsChild(minigameState, 0, m.y)
 
@@ -212,9 +208,9 @@ func (m *MinigamePopup) Draw(screen *ebiten.Image) {
 	geoM.Scale(consts.TileScale, consts.TileScale)
 	DrawNinePatches(screen, assets.GetImage("system/common/9patch_frame_off.png"), 140, 140, geoM, nil)
 
-	for _, n := range m.nodes {
-		n.DrawAsChild(screen, 0, m.y)
-	}
+	m.closeButton.DrawAsChild(screen, 0, m.y)
+	m.rewardButton.DrawAsChild(screen, 0, m.y)
+	m.scoreLabel.DrawAsChild(screen, 0, m.y)
 
 	if m.minigame != nil {
 		m.minigame.DrawAsChild(screen, 0, m.y)

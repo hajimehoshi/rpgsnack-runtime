@@ -281,12 +281,12 @@ func (i *Inventory) Update(texts *data.Texts) {
 		i.dragging = false
 	}
 
-	i.infoButton.Update()
+	i.infoButton.HandleInput(0, 0)
 	i.infoButton.disabled = false
 	if i.activeItemID == 0 {
 		i.infoButton.disabled = true
 	}
-	i.backButton.Update()
+	i.backButton.HandleInput(0, 0)
 	i.backButton.disabled = false
 	if i.mode == DefaultMode {
 		i.backButton.disabled = true

@@ -204,10 +204,11 @@ func (t *TitleView) Update(game *data.Game, hasProgress bool, isAdsRemoved bool)
 
 	t.quitPopup.Update()
 	if !t.quitPopup.Visible() {
-		t.startGameButton.Update()
-		t.removeAdsButton.Update()
-		t.settingsButton.Update()
-		t.moregamesButton.Update()
+		// TODO: This function should return immediately when input is handled.
+		t.startGameButton.HandleInput(0, 0)
+		t.removeAdsButton.HandleInput(0, 0)
+		t.settingsButton.HandleInput(0, 0)
+		t.moregamesButton.HandleInput(0, 0)
 	}
 
 	t.removeAdsButton.visible = game.IsShopAvailable(data.ShopTypeHome) && !isAdsRemoved

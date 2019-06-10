@@ -59,6 +59,10 @@ func (l *Label) Update() {
 func (l *Label) UpdateAsChild(offsetX, offsetY int) {
 }
 
+func (l *Label) HandleInput(offsetX, offsetY int) bool {
+	return false
+}
+
 func (l *Label) Draw(screen *ebiten.Image) {
 	l.DrawAsChild(screen, 0, 0)
 }

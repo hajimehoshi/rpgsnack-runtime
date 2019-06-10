@@ -130,7 +130,8 @@ func (c *Credits) Update() {
 		return
 	}
 	if c.closeButton != nil {
-		c.closeButton.UpdateAsChild(0, 0)
+		// TODO: This function should return immediately when input is handled.
+		c.closeButton.HandleInput(0, 0)
 	}
 	if c.finished {
 		c.Hide()

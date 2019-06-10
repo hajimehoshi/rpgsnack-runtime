@@ -138,16 +138,19 @@ func (b *Button) region() image.Rectangle {
 	return image.Rect(b.x-b.touchExpand, b.y-b.touchExpand, b.x+b.width+b.touchExpand, b.y+b.height+b.touchExpand)
 }
 
-func (b *Button) update(offsetX, offsetY int) {
+func (b *Button) UpdateAsChild(offsetX, offsetY int) {
+}
+
+func (b *Button) HandleInput(offsetX, offsetY int) bool {
 	if !b.visible {
-		return
+		return false
 	}
 	if b.disabled {
-		return
+		return false
 	}
 	if !b.pressing {
 		if !input.Triggered() {
-			return
+			return false
 		}
 	}
 	if !input.Pressed() {
@@ -158,17 +161,10 @@ func (b *Button) update(offsetX, offsetY int) {
 		if b.soundName != "" {
 			audio.PlaySE(b.soundName, 1.0)
 		}
-		return
+		return true
 	}
 	b.pressing = includesInput(offsetX, offsetY, b.region())
-}
-
-func (b *Button) Update() {
-	b.update(0, 0)
-}
-
-func (b *Button) UpdateAsChild(offsetX, offsetY int) {
-	b.update(offsetX, offsetY)
+	return b.pressing
 }
 
 func (b *Button) Draw(screen *ebiten.Image) {
