@@ -28,7 +28,7 @@ const (
 
 type Node interface {
 	HandleInput(offsetX, offsetY int) bool
-	UpdateAsChild(offsetX, offsetY int) // TODO: Remove the arguments.
+	Update()
 	DrawAsChild(screen *ebiten.Image, offsetX, offsetY int)
 }
 
@@ -71,7 +71,7 @@ func (p *Popup) Update() {
 		return
 	}
 	for _, n := range p.nodes {
-		n.UpdateAsChild(p.x, p.y)
+		n.Update()
 	}
 	for _, n := range p.nodes {
 		if n.HandleInput(p.x, p.y) {

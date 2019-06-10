@@ -56,9 +56,6 @@ func (l *Label) Hide() {
 func (l *Label) Update() {
 }
 
-func (l *Label) UpdateAsChild(offsetX, offsetY int) {
-}
-
 func (l *Label) HandleInput(offsetX, offsetY int) bool {
 	return false
 }

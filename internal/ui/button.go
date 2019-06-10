@@ -138,7 +138,7 @@ func (b *Button) region() image.Rectangle {
 	return image.Rect(b.x-b.touchExpand, b.y-b.touchExpand, b.x+b.width+b.touchExpand, b.y+b.height+b.touchExpand)
 }
 
-func (b *Button) UpdateAsChild(offsetX, offsetY int) {
+func (b *Button) Update() {
 }
 
 func (b *Button) HandleInput(offsetX, offsetY int) bool {
