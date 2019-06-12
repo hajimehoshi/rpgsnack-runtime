@@ -805,8 +805,9 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			panic("gamestate: not implemented: data.OpenLinkTypePostCredit")
 			break
 		case data.OpenLinkTypeApp:
-			i.waitingRequestID = sceneManager.GenerateRequestID()
-			sceneManager.Requester().RequestOpenNews(i.waitingRequestID, args.Data)
+			// TODO
+			// This should show the news popup
+			panic("gamestate: not implemented: data.OpenLinkTypeApp")
 			break
 		case data.OpenLinkTypeURL:
 			i.waitingRequestID = sceneManager.GenerateRequestID()

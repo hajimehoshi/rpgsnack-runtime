@@ -84,11 +84,6 @@ func (m *Requester) RequestOpenApp(requestID int, appName string, appData string
 	m.game.RespondOpenApp(requestID)
 }
 
-func (m *Requester) RequestOpenNews(requestID int, appID string) {
-	log.Printf("request open news: requestID: %d %s", requestID, appID)
-	m.game.RespondOpenNews(requestID)
-}
-
 func (m *Requester) RequestOpenReview(requestID int) {
 	log.Printf("request open review: requestID: %d", requestID)
 	m.game.RespondOpenReview(requestID)
