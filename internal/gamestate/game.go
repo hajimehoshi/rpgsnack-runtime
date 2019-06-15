@@ -373,6 +373,14 @@ func (g *Game) DecodeMsgpack(dec *msgpack.Decoder) error {
 	if err := d.Error(); err != nil {
 		return fmt.Errorf("gamestate: Game.DecodeMsgpack failed: %v", err)
 	}
+
+	// Rescue old save data that might have frozen windows.
+	var ids []int
+	for id := range g.currentMap.interpreters {
+		ids = append(ids, id)
+	}
+	g.windows.GC(ids)
+
 	return nil
 }
 

@@ -229,6 +229,40 @@ func (w *Windows) ShowChoices(parser MessageSyntaxParser, game *data.Game, choic
 	w.hasChosenIndex = false
 }
 
+// GC closes windows immediately if its interpreter ID is not in the given interpreter ID set.
+//
+// GC aims to rescue old save data.
+func (w *Windows) GC(interpreterIDs []int) {
+	ids := map[int]struct{}{}
+	for _, id := range interpreterIDs {
+		ids[id] = struct{}{}
+	}
+
+	for _, b := range w.balloons {
+		if b == nil {
+			continue
+		}
+		if _, ok := ids[b.interpreterID]; ok {
+			continue
+		}
+		b.closeImmediately()
+	}
+	for _, b := range w.choiceBalloons {
+		if b == nil {
+			continue
+		}
+		if _, ok := ids[b.interpreterID]; ok {
+			continue
+		}
+		b.closeImmediately()
+	}
+	if w.banner != nil {
+		if _, ok := ids[w.banner.interpreterID]; !ok {
+			w.banner.closeImmediately()
+		}
+	}
+}
+
 func (w *Windows) CloseImmediatelyForInterpreter(interpreterID int) {
 	for _, b := range w.balloons {
 		if b == nil {
