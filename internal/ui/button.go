@@ -148,13 +148,15 @@ func (b *Button) HandleInput(offsetX, offsetY int) bool {
 	if b.disabled {
 		return false
 	}
-	if !b.pressing {
-		if !input.Triggered() {
+
+	if input.Released() {
+		if !b.pressing {
 			return false
 		}
-	}
-	if !input.Pressed() {
 		b.pressing = false
+		if !includesInput(offsetX, offsetY, b.region()) {
+			return false
+		}
 		if b.onPressed != nil {
 			b.onPressed(b)
 		}
@@ -163,7 +165,14 @@ func (b *Button) HandleInput(offsetX, offsetY int) bool {
 		}
 		return true
 	}
-	b.pressing = includesInput(offsetX, offsetY, b.region())
+
+	if !input.Pressed() {
+		return false
+	}
+
+	if input.Triggered() {
+		b.pressing = includesInput(offsetX, offsetY, b.region())
+	}
 	return b.pressing
 }
 
