@@ -14,6 +14,9 @@
 
 package consts
 
+// InterpreterID represents a unique identifier of interpreters
+type InterpreterID int
+
 const (
 	PaletteWidth               = 10
 	TileSize                   = 16

@@ -40,7 +40,7 @@ const (
 )
 
 type balloon struct {
-	interpreterID  int
+	interpreterID  consts.InterpreterID
 	x              int
 	y              int
 	width          int
@@ -67,7 +67,7 @@ func (b *balloon) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.BeginMap()
 
 	e.EncodeString("interpreterId")
-	e.EncodeInt(b.interpreterID)
+	e.EncodeInt(int(b.interpreterID))
 
 	e.EncodeString("x")
 	e.EncodeInt(b.x)
@@ -130,7 +130,7 @@ func (b *balloon) DecodeMsgpack(dec *msgpack.Decoder) error {
 	for i := 0; i < n; i++ {
 		switch d.DecodeString() {
 		case "interpreterId":
-			b.interpreterID = d.DecodeInt()
+			b.interpreterID = consts.InterpreterID(d.DecodeInt())
 		case "x":
 			b.x = d.DecodeInt()
 		case "y":
@@ -179,7 +179,7 @@ func (b *balloon) DecodeMsgpack(dec *msgpack.Decoder) error {
 	return nil
 }
 
-func newBalloon(x, y, width, height int, contentID data.UUID, content string, balloonType data.BalloonType, interpreterID int, messageStyle *data.MessageStyle, checked bool) *balloon {
+func newBalloon(x, y, width, height int, contentID data.UUID, content string, balloonType data.BalloonType, interpreterID consts.InterpreterID, messageStyle *data.MessageStyle, checked bool) *balloon {
 	font.DrawTextToScratchPad(content, consts.TextScale, lang.Get())
 
 	b := &balloon{
@@ -232,7 +232,7 @@ func balloonSizeFromContent(content string, balloonType data.BalloonType) (int, 
 	return w, h, contentOffsetX, contentOffsetY
 }
 
-func newBalloonWithArrow(contentID data.UUID, content string, balloonType data.BalloonType, eventID int, interpreterID int, messageStyle *data.MessageStyle) *balloon {
+func newBalloonWithArrow(contentID data.UUID, content string, balloonType data.BalloonType, eventID int, interpreterID consts.InterpreterID, messageStyle *data.MessageStyle) *balloon {
 	font.DrawTextToScratchPad(content, consts.TextScale, lang.Get())
 
 	b := &balloon{

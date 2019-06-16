@@ -50,8 +50,8 @@ type Map struct {
 	events                      []*character.Character
 	eventPageIndices            map[int]int
 	executingEventIDByUserInput int
-	interpreters                map[int]*Interpreter
-	playerInterpreterID         int
+	interpreters                map[consts.InterpreterID]*Interpreter
+	playerInterpreterID         consts.InterpreterID
 	itemInterpreter             *Interpreter
 
 	// Fields that are not dumped
@@ -66,7 +66,7 @@ type Map struct {
 func NewMap() *Map {
 	return &Map{
 		mapID:        1,
-		interpreters: map[int]*Interpreter{},
+		interpreters: map[consts.InterpreterID]*Interpreter{},
 		pressedMapX:  -1,
 		pressedMapY:  -1,
 	}
@@ -112,13 +112,13 @@ func (m *Map) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EncodeString("interpreters")
 	e.BeginMap()
 	for k, v := range m.interpreters {
-		e.EncodeInt(k)
+		e.EncodeInt(int(k))
 		e.EncodeInterface(v)
 	}
 	e.EndMap()
 
 	e.EncodeString("playerInterpreterId")
-	e.EncodeInt(m.playerInterpreterID)
+	e.EncodeInt(int(m.playerInterpreterID))
 
 	e.EncodeString("itemInterpreter")
 	e.EncodeInterface(m.itemInterpreter)
@@ -168,9 +168,9 @@ func (m *Map) DecodeMsgpack(dec *msgpack.Decoder) error {
 		case "interpreters":
 			if !d.SkipCodeIfNil() {
 				n := d.DecodeMapLen()
-				m.interpreters = map[int]*Interpreter{}
+				m.interpreters = map[consts.InterpreterID]*Interpreter{}
 				for i := 0; i < n; i++ {
-					k := d.DecodeInt()
+					k := consts.InterpreterID(d.DecodeInt())
 					m.interpreters[k] = nil
 					if !d.SkipCodeIfNil() {
 						m.interpreters[k] = &Interpreter{}
@@ -179,7 +179,7 @@ func (m *Map) DecodeMsgpack(dec *msgpack.Decoder) error {
 				}
 			}
 		case "playerInterpreterId":
-			m.playerInterpreterID = d.DecodeInt()
+			m.playerInterpreterID = consts.InterpreterID(d.DecodeInt())
 		case "itemInterpreter":
 			if !d.SkipCodeIfNil() {
 				m.itemInterpreter = &Interpreter{}
@@ -245,7 +245,7 @@ func (m *Map) allInterpreters() []*Interpreter {
 }
 
 // rootAncestor returns the root of the given interpreter ID.
-func (m *Map) rootAncestor(id int) int {
+func (m *Map) rootAncestor(id consts.InterpreterID) consts.InterpreterID {
 	for _, i := range m.allInterpreters() {
 		if i.sub == nil {
 			continue
@@ -266,7 +266,7 @@ func (m *Map) resetInterpreters(gameState *Game, interpreter *Interpreter) {
 	// Create a set of interpreter to finish the current command.
 	var is []*Interpreter
 
-	rootID := 0
+	var rootID consts.InterpreterID
 	if interpreter != nil {
 		rootID = m.rootAncestor(interpreter.id)
 	}
@@ -286,7 +286,7 @@ func (m *Map) resetInterpreters(gameState *Game, interpreter *Interpreter) {
 	// The player interpreter requires a special process to abort.
 	m.abortPlayerInterpreter(gameState)
 
-	m.interpreters = map[int]*Interpreter{}
+	m.interpreters = map[consts.InterpreterID]*Interpreter{}
 
 	for _, i := range is {
 		m.addInterpreter(i)
@@ -376,7 +376,7 @@ func (m *Map) currentPage(event *character.Character) (*data.Page, int) {
 var GoToTitle = errors.New("go to title")
 
 func (m *Map) removeNonPageRoutes(eventID int) {
-	ids := []int{}
+	ids := []consts.InterpreterID{}
 	for _, i := range m.interpreters {
 		if i.eventID != eventID {
 			continue
@@ -391,7 +391,7 @@ func (m *Map) removeNonPageRoutes(eventID int) {
 }
 
 func (m *Map) removeRoutes(eventID int) {
-	ids := []int{}
+	ids := []consts.InterpreterID{}
 	for id, i := range m.interpreters {
 		if i.route && i.eventID == eventID {
 			ids = append(ids, id)
@@ -567,7 +567,7 @@ func (m *Map) tryRunParallelEvent(gameState *Game) {
 		//    interpreter stops.
 		// 3) Otherwise, the new interpreter starts and the existing interpreter continues.
 		id := e.EventID()
-		interpreterToRemove := -1
+		interpreterToRemove := consts.InterpreterID(-1)
 		alreadyExecuting := false
 		for _, i := range m.interpreters {
 			if !i.parallel {

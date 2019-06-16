@@ -39,7 +39,7 @@ const (
 )
 
 type banner struct {
-	interpreterID int
+	interpreterID consts.InterpreterID
 	contentID     data.UUID
 	content       string
 	openingCount  int
@@ -59,7 +59,7 @@ func (b *banner) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.BeginMap()
 
 	e.EncodeString("interpreterId")
-	e.EncodeInt(b.interpreterID)
+	e.EncodeInt(int(b.interpreterID))
 
 	e.EncodeString("contentID")
 	e.EncodeInterface(&b.contentID)
@@ -104,7 +104,7 @@ func (b *banner) DecodeMsgpack(dec *msgpack.Decoder) error {
 	for i := 0; i < n; i++ {
 		switch d.DecodeString() {
 		case "interpreterId":
-			b.interpreterID = d.DecodeInt()
+			b.interpreterID = consts.InterpreterID(d.DecodeInt())
 		case "contentID":
 			d.DecodeInterface(&b.contentID)
 		case "content":
@@ -143,7 +143,7 @@ func (b *banner) DecodeMsgpack(dec *msgpack.Decoder) error {
 	return nil
 }
 
-func newBanner(contentID data.UUID, content string, eventID int, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign, interpreterID int, messageStyle *data.MessageStyle) *banner {
+func newBanner(contentID data.UUID, content string, eventID int, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign, interpreterID consts.InterpreterID, messageStyle *data.MessageStyle) *banner {
 	font.DrawTextToScratchPad(content, consts.TextScale, lang.Get())
 
 	b := &banner{

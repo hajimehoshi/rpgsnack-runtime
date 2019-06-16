@@ -48,7 +48,7 @@ type Windows struct {
 
 	chosenIndex               int
 	choosing                  bool
-	choosingInterpreterID     int
+	choosingInterpreterID     consts.InterpreterID
 	chosenBalloonWaitingCount int
 	hasChosenIndex            bool
 
@@ -100,7 +100,7 @@ func (w *Windows) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EncodeBool(w.choosing)
 
 	e.EncodeString("choosingInterpreterId")
-	e.EncodeInt(w.choosingInterpreterID)
+	e.EncodeInt(int(w.choosingInterpreterID))
 
 	e.EncodeString("chosenBalloonWaitingCount")
 	e.EncodeInt(w.chosenBalloonWaitingCount)
@@ -160,7 +160,7 @@ func (w *Windows) DecodeMsgpack(dec *msgpack.Decoder) error {
 		case "choosing":
 			w.choosing = d.DecodeBool()
 		case "choosingInterpreterId":
-			w.choosingInterpreterID = d.DecodeInt()
+			w.choosingInterpreterID = consts.InterpreterID(d.DecodeInt())
 		case "chosenBalloonWaitingCount":
 			w.chosenBalloonWaitingCount = d.DecodeInt()
 		case "hasChosenIndex":
@@ -189,7 +189,7 @@ func (w *Windows) HasChosenIndex() bool {
 	return w.hasChosenIndex
 }
 
-func (w *Windows) ShowBalloon(contentID data.UUID, parser MessageSyntaxParser, game *data.Game, balloonType data.BalloonType, eventID int, interpreterID int, messageStyle *data.MessageStyle) {
+func (w *Windows) ShowBalloon(contentID data.UUID, parser MessageSyntaxParser, game *data.Game, balloonType data.BalloonType, eventID int, interpreterID consts.InterpreterID, messageStyle *data.MessageStyle) {
 	if w.nextBalloon != nil {
 		panic("window: nextBalloon must be nil at ShowBalloon")
 	}
@@ -199,7 +199,7 @@ func (w *Windows) ShowBalloon(contentID data.UUID, parser MessageSyntaxParser, g
 	w.nextBalloon = newBalloonWithArrow(contentID, content, balloonType, eventID, interpreterID, messageStyle)
 }
 
-func (w *Windows) ShowMessage(contentID data.UUID, parser MessageSyntaxParser, game *data.Game, eventID int, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign, interpreterID int, messageStyle *data.MessageStyle) {
+func (w *Windows) ShowMessage(contentID data.UUID, parser MessageSyntaxParser, game *data.Game, eventID int, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign, interpreterID consts.InterpreterID, messageStyle *data.MessageStyle) {
 	if w.nextBanner != nil {
 		panic("window: nextBalloon must be nil at ShowMessage")
 	}
@@ -209,7 +209,7 @@ func (w *Windows) ShowMessage(contentID data.UUID, parser MessageSyntaxParser, g
 	w.nextBanner = newBanner(contentID, content, eventID, background, positionType, textAlign, interpreterID, messageStyle)
 }
 
-func (w *Windows) ShowChoices(parser MessageSyntaxParser, game *data.Game, choices []*Choice, interpreterID int) {
+func (w *Windows) ShowChoices(parser MessageSyntaxParser, game *data.Game, choices []*Choice, interpreterID consts.InterpreterID) {
 	// TODO: w.chosenBalloonWaitingCount should be 0 here!
 	if w.chosenBalloonWaitingCount > 0 {
 		panic("windows: chosenBalloonWaitingCount must be > 0 at ShowChoices")
@@ -232,8 +232,8 @@ func (w *Windows) ShowChoices(parser MessageSyntaxParser, game *data.Game, choic
 // GC closes windows immediately if its interpreter ID is not in the given interpreter ID set.
 //
 // GC aims to rescue old save data.
-func (w *Windows) GC(interpreterIDs []int) {
-	ids := map[int]struct{}{}
+func (w *Windows) GC(interpreterIDs []consts.InterpreterID) {
+	ids := map[consts.InterpreterID]struct{}{}
 	for _, id := range interpreterIDs {
 		ids[id] = struct{}{}
 	}
@@ -263,7 +263,7 @@ func (w *Windows) GC(interpreterIDs []int) {
 	}
 }
 
-func (w *Windows) CloseImmediatelyForInterpreter(interpreterID int) {
+func (w *Windows) CloseImmediatelyForInterpreter(interpreterID consts.InterpreterID) {
 	for _, b := range w.balloons {
 		if b == nil {
 			continue
@@ -311,7 +311,7 @@ func (w *Windows) IsBusyWithChoosing() bool {
 
 // IsAnimating reports whether some of windows are busy (animating or opened).
 // If interpreterID is non 0, checking the window related to the interpreter is skipped.
-func (w *Windows) IsBusy(interpreterID int) bool {
+func (w *Windows) IsBusy(interpreterID consts.InterpreterID) bool {
 	if w.IsAnimating(interpreterID) {
 		return true
 	}
@@ -342,7 +342,7 @@ func inputTriggered() bool {
 	return true
 }
 
-func (w *Windows) CanProceed(interpreterID int) bool {
+func (w *Windows) CanProceed(interpreterID consts.InterpreterID) bool {
 	if !w.IsBusy(interpreterID) {
 		return true
 	}
@@ -352,7 +352,7 @@ func (w *Windows) CanProceed(interpreterID int) bool {
 	return inputTriggered()
 }
 
-func (w *Windows) isOpened(interpreterID int) bool {
+func (w *Windows) isOpened(interpreterID consts.InterpreterID) bool {
 	for _, b := range w.balloons {
 		if b == nil {
 			continue
@@ -383,7 +383,7 @@ func (w *Windows) isOpened(interpreterID int) bool {
 
 // IsAnimating reports whether some of windows are animating.
 // If interpreterID is non 0, checking the window related to the interpreter is skipped.
-func (w *Windows) IsAnimating(interpreterID int) bool {
+func (w *Windows) IsAnimating(interpreterID consts.InterpreterID) bool {
 	for _, b := range w.balloons {
 		if b == nil {
 			continue

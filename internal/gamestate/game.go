@@ -112,7 +112,7 @@ type Game struct {
 	windows              *window.Windows
 	pictures             *picture.Pictures
 	currentMap           *Map
-	lastInterpreterID    int
+	lastInterpreterID    consts.InterpreterID
 	autoSaveEnabled      bool
 	playerControlEnabled bool
 	inventoryVisible     bool
@@ -212,7 +212,7 @@ func (g *Game) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.EncodeInterface(g.currentMap)
 
 	e.EncodeString("lastInterpreterId")
-	e.EncodeInt(g.lastInterpreterID)
+	e.EncodeInt(int(g.lastInterpreterID))
 
 	e.EncodeString("autoSaveEnabled")
 	e.EncodeBool(g.autoSaveEnabled)
@@ -310,7 +310,7 @@ func (g *Game) DecodeMsgpack(dec *msgpack.Decoder) error {
 				d.DecodeInterface(g.currentMap)
 			}
 		case "lastInterpreterId":
-			g.lastInterpreterID = d.DecodeInt()
+			g.lastInterpreterID = consts.InterpreterID(d.DecodeInt())
 		case "autoSaveEnabled":
 			g.autoSaveEnabled = d.DecodeBool()
 		case "playerControlEnabled":
@@ -375,7 +375,7 @@ func (g *Game) DecodeMsgpack(dec *msgpack.Decoder) error {
 	}
 
 	// Rescue old save data that might have frozen windows.
-	var ids []int
+	var ids []consts.InterpreterID
 	for _, i := range g.currentMap.allInterpreters() {
 		ids = append(ids, i.id)
 	}
@@ -714,7 +714,7 @@ func (g *Game) MeetsCondition(cond *data.Condition, eventID int) (bool, error) {
 	return false, nil
 }
 
-func (g *Game) GenerateInterpreterID() int {
+func (g *Game) GenerateInterpreterID() consts.InterpreterID {
 	g.lastInterpreterID++
 	return g.lastInterpreterID
 }
@@ -791,7 +791,7 @@ func (g *Game) SetPrices(p map[string]string) {
 	g.prices = p
 }
 
-func (g *Game) CanWindowProceed(interpreterID int) bool {
+func (g *Game) CanWindowProceed(interpreterID consts.InterpreterID) bool {
 	return g.windows.CanProceed(interpreterID)
 }
 
@@ -799,7 +799,7 @@ func (g *Game) IsWindowBusy() bool {
 	return g.windows.IsBusy(0)
 }
 
-func (g *Game) IsWindowAnimating(interpreterID int) bool {
+func (g *Game) IsWindowAnimating(interpreterID consts.InterpreterID) bool {
 	return g.windows.IsAnimating(interpreterID)
 }
 
@@ -815,7 +815,7 @@ func (g *Game) ChosenWindowIndex() int {
 	return g.windows.ChosenIndex()
 }
 
-func (g *Game) ShowBalloon(sceneManager *scene.Manager, interpreterID, mapID, roomID, eventID int, contentID data.UUID, balloonType data.BalloonType, messageStyle *data.MessageStyle) bool {
+func (g *Game) ShowBalloon(sceneManager *scene.Manager, interpreterID consts.InterpreterID, mapID, roomID, eventID int, contentID data.UUID, balloonType data.BalloonType, messageStyle *data.MessageStyle) bool {
 	ch := g.Character(mapID, roomID, eventID)
 	if ch == nil {
 		return false
@@ -825,11 +825,11 @@ func (g *Game) ShowBalloon(sceneManager *scene.Manager, interpreterID, mapID, ro
 	return true
 }
 
-func (g *Game) ShowMessage(sceneManager *scene.Manager, interpreterID, eventID int, contentID data.UUID, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign, messageStyle *data.MessageStyle) {
+func (g *Game) ShowMessage(sceneManager *scene.Manager, interpreterID consts.InterpreterID, eventID int, contentID data.UUID, background data.MessageBackground, positionType data.MessagePositionType, textAlign data.TextAlign, messageStyle *data.MessageStyle) {
 	g.windows.ShowMessage(contentID, &messageSyntaxParser{g, sceneManager}, sceneManager.Game(), eventID, background, positionType, textAlign, interpreterID, messageStyle)
 }
 
-func (g *Game) ShowChoices(sceneManager *scene.Manager, interpreterID int, eventID int, choiceIDs []data.UUID, conditions []*data.ChoiceCondition) {
+func (g *Game) ShowChoices(sceneManager *scene.Manager, interpreterID consts.InterpreterID, eventID int, choiceIDs []data.UUID, conditions []*data.ChoiceCondition) {
 	choices := []*window.Choice{}
 	for i, id := range choiceIDs {
 		choice := &window.Choice{ID: id, Checked: false}

@@ -28,6 +28,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/character"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/commanditerator"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/easymsgpack"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
@@ -37,7 +38,7 @@ import (
 )
 
 type Interpreter struct {
-	id                 int
+	id                 consts.InterpreterID
 	mapID              int // Note: This doesn't make sense when eventID == PlayerEventID
 	roomID             int // Note: This doesn't make sense when eventID == PlayerEventID
 	eventID            int
@@ -59,7 +60,7 @@ type Interpreter struct {
 }
 
 type InterpreterIDGenerator interface {
-	GenerateInterpreterID() int
+	GenerateInterpreterID() consts.InterpreterID
 }
 
 func NewInterpreter(idGen InterpreterIDGenerator, mapID, roomID, eventID, pageIndex int, commands []*data.Command) *Interpreter {
@@ -88,7 +89,7 @@ func (i *Interpreter) EncodeMsgpack(enc *msgpack.Encoder) error {
 	e.BeginMap()
 
 	e.EncodeString("id")
-	e.EncodeInt(i.id)
+	e.EncodeInt(int(i.id))
 
 	e.EncodeString("mapId")
 	e.EncodeInt(i.mapID)
@@ -145,7 +146,7 @@ func (i *Interpreter) DecodeMsgpack(dec *msgpack.Decoder) error {
 	for j := 0; j < n; j++ {
 		switch k := d.DecodeString(); k {
 		case "id":
-			i.id = d.DecodeInt()
+			i.id = consts.InterpreterID(d.DecodeInt())
 		case "mapId":
 			i.mapID = d.DecodeInt()
 		case "roomId":
