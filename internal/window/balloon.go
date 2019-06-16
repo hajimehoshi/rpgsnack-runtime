@@ -243,11 +243,15 @@ func newBalloonWithArrow(contentID data.UUID, content string, balloonType data.B
 		balloonType:   balloonType,
 		messageStyle:  messageStyle,
 	}
-	b.setContent(content)
+	b.setContent(content, false)
 	return b
 }
 
-func (b *balloon) setContent(content string) {
+func (b *balloon) overwriteContent(content string) {
+	b.setContent(content, true)
+}
+
+func (b *balloon) setContent(content string, overwrite bool) {
 	b.content = content
 	if b.hasArrow {
 		w, h, contentOffsetX, contentOffsetY := balloonSizeFromContent(visibleContent(b.content), b.balloonType)
@@ -257,7 +261,7 @@ func (b *balloon) setContent(content string) {
 		b.contentOffsetY = contentOffsetY
 	}
 	if b.typingEffect != nil {
-		b.typingEffect.SetContent(b.content)
+		b.typingEffect.SetContent(b.content, overwrite)
 	}
 	b.offscreen = nil
 }

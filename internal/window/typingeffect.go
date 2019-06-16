@@ -44,7 +44,7 @@ func newTypingEffect(content string, delay int, soundEffect string) *typingEffec
 		soundEffect: soundEffect,
 		delay:       delay,
 	}
-	t.SetContent(content)
+	t.SetContent(content, false)
 	return t
 }
 
@@ -82,7 +82,7 @@ func (t *typingEffect) DecodeMsgpack(dec *msgpack.Decoder) error {
 	if err := d.Error(); err != nil {
 		return fmt.Errorf("window: typingEffect.DecodeMsgpack failed: %v", err)
 	}
-	t.SetContent(content)
+	t.SetContent(content, false)
 	return nil
 }
 
@@ -148,10 +148,10 @@ func (t *typingEffect) trySkipAnim() {
 	t.index = t.lastIndex()
 }
 
-func (t *typingEffect) SetContent(content string) {
+func (t *typingEffect) SetContent(content string, overwrite bool) {
 	t.content = []rune(content)
 	t.delayCount = t.delay
-	if t.index > 0 || t.delay == 0 {
+	if t.index > 0 || t.delay == 0 || overwrite {
 		t.index = t.lastIndex()
 	}
 }

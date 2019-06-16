@@ -441,7 +441,7 @@ func (w *Windows) Update(playerY int, parser MessageSyntaxParser, sceneManager *
 			}
 			content := sceneManager.Game().Texts.Get(lang.Get(), b.contentID)
 			content = parser.ParseMessageSyntax(content)
-			b.setContent(content)
+			b.overwriteContent(content)
 		}
 		for _, b := range w.choiceBalloons {
 			if b == nil {
@@ -449,12 +449,12 @@ func (w *Windows) Update(playerY int, parser MessageSyntaxParser, sceneManager *
 			}
 			content := sceneManager.Game().Texts.Get(lang.Get(), b.contentID)
 			content = parser.ParseMessageSyntax(content)
-			b.setContent(content)
+			b.overwriteContent(content)
 		}
 		if w.banner != nil {
 			content := sceneManager.Game().Texts.Get(lang.Get(), w.banner.contentID)
 			content = parser.ParseMessageSyntax(content)
-			w.banner.setContent(content)
+			w.banner.overwriteContent(content)
 		}
 		w.lastLang = lang.Get()
 	}
