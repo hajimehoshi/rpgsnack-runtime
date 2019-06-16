@@ -228,26 +228,58 @@ func (m *Map) setRoomID(gameState *Game, id int, interpreter *Interpreter) error
 	})
 
 	m.resetInterpreters(gameState, interpreter)
+
 	return nil
+}
+
+// allInterpreters returns the current active interpreters and their sub interpreters.
+func (m *Map) allInterpreters() []*Interpreter {
+	var is []*Interpreter
+	for _, i := range m.interpreters {
+		is = append(is, i)
+		for sub := i; sub != nil; sub = sub.sub {
+			is = append(is, sub)
+		}
+	}
+	return is
+}
+
+// rootAncestor returns the root of the given interpreter ID.
+func (m *Map) rootAncestor(id int) int {
+	for _, i := range m.allInterpreters() {
+		if i.sub == nil {
+			continue
+		}
+		if i.sub.id != id {
+			continue
+		}
+
+		// The parent is found.
+		return m.rootAncestor(i.id)
+	}
+
+	// The parent is not found. Return itself.
+	return id
 }
 
 func (m *Map) resetInterpreters(gameState *Game, interpreter *Interpreter) {
 	// Create a set of interpreter to finish the current command.
 	var is []*Interpreter
 
-	// The given interpreter is an exception and this is not aborted.
+	rootID := 0
 	if interpreter != nil {
-		is = append(is, interpreter)
+		rootID = m.rootAncestor(interpreter.id)
 	}
 
 	for id, i := range m.interpreters {
 		if id == m.playerInterpreterID {
 			continue
 		}
-		if i == interpreter {
-			continue
+		// As the given interpreter is an interpreter to continue even after transferring, do not abort this.
+		// As m.interpreters inclues only 'root' IDs, comparing with the root ID is enough.
+		if id != rootID {
+			i.Abort(gameState)
 		}
-		i.Abort(gameState)
 		is = append(is, i)
 	}
 
