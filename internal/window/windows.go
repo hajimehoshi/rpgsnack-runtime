@@ -232,9 +232,9 @@ func (w *Windows) ShowChoices(parser MessageSyntaxParser, game *data.Game, choic
 // GC closes windows immediately if its interpreter ID is not in the given interpreter ID set.
 //
 // GC aims to rescue old save data.
-func (w *Windows) GC(interpreterIDs []consts.InterpreterID) {
+func (w *Windows) GC(excludes []consts.InterpreterID) {
 	ids := map[consts.InterpreterID]struct{}{}
-	for _, id := range interpreterIDs {
+	for _, id := range excludes {
 		ids[id] = struct{}{}
 	}
 
