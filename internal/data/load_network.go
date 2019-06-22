@@ -17,6 +17,7 @@
 package data
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
@@ -32,6 +33,7 @@ import (
 	"sync"
 
 	"github.com/vmihailenco/msgpack"
+	"golang.org/x/sync/semaphore"
 
 	"github.com/gopherjs/gopherjs/js"
 )
@@ -73,10 +75,20 @@ type fetchResult struct {
 	Err  error
 }
 
+var fetchSemaphore = semaphore.NewWeighted(32)
+
 func fetch(path string) <-chan fetchResult {
 	ch := make(chan fetchResult)
 	go func() {
 		defer close(ch)
+
+		if err := fetchSemaphore.Acquire(context.Background(), 1); err != nil {
+			ch <- fetchResult{
+				nil, err,
+			}
+			return
+		}
+		defer fetchSemaphore.Release(1)
 
 		res, err := http.Get(path)
 		if err != nil {

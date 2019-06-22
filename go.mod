@@ -12,6 +12,8 @@ require (
 	github.com/hajimehoshi/oggloop v0.0.0-20180730010327-c7cf68761483
 	github.com/vmihailenco/msgpack v4.0.1+incompatible
 	golang.org/x/image v0.0.0-20190227222117-0694c2d4d067
+	golang.org/x/net v0.0.0-20190620200207-3b0461eec859 // indirect
+	golang.org/x/sync v0.0.0-20190423024810-112230192c58
 	golang.org/x/text v0.3.0
 	google.golang.org/appengine v1.1.0 // indirect
 )
