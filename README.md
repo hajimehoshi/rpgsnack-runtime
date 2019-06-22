@@ -5,11 +5,7 @@ RPGSnack Runtime
 1. Install [Go](https://golang.org/)
 2. Run `go get -u github.com/hajimehoshi/rpgsnack-runtime/...`
 3. Run `cd ~/go/src/github.com/hajimehoshi/rpgsnack-runtime`
-4. Run `go run main.go`
-
-## How to specify a JSON file to run
-
-Run `go run main.go /path/to/json/file`
+4. Run `go run . /path/to/project`
 
 ## How to run on Android (for testing)
 
@@ -51,9 +47,3 @@ If you find some crashes, try
 ```
 rm -rf ~/go/pkg/*_js
 ```
-
-## How to test msgpack version of the project
-
-1. Install `json2msgpack` (via Homebrew)
-2. Run `json2msgpack -i project.json -o project.msgpack` at the project server
-3. Run the test server (`go run ~/go/src/github.com/hajimehoshi/rpgsnack-runtime/tools/testserver/main.go -http=:7800 -basepath=<project local location>`).
