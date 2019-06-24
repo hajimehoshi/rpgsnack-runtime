@@ -17,11 +17,10 @@ package ui
 import (
 	"encoding/hex"
 	"fmt"
-	"image"
 	"image/color"
 	"math"
 	"regexp"
-	"unicode"
+	"strings"
 
 	"github.com/hajimehoshi/ebiten"
 	"golang.org/x/text/language"
@@ -111,7 +110,7 @@ func (c *Credits) Hide() {
 	c.visible = false
 }
 
-func (c *Credits) dash() bool {
+func (c *Credits) boost() bool {
 	if !input.Pressed() {
 		return false
 	}
@@ -136,72 +135,10 @@ func (c *Credits) Update() {
 	if c.finished {
 		c.Hide()
 	}
-	if c.dash() {
+	if c.boost() {
 		c.scrollY += 8
 	} else {
 		c.scrollY++
-	}
-}
-
-const creditsFontScale = 3
-const numCharPerLine = 128
-const maxCharCodePoint = 256
-
-var creditsFont *ebiten.Image
-
-func init() {
-	var rs []rune
-	for i := rune(0); i < maxCharCodePoint; i++ {
-		if !unicode.IsPrint(i) {
-			rs = append(rs, ' ')
-		} else {
-			rs = append(rs, i)
-		}
-		if (i+1)%numCharPerLine == 0 {
-			rs = append(rs, '\n')
-		}
-	}
-	str := string(rs)
-	w, h := font.MeasureSize(str)
-
-	creditsFont, _ = ebiten.NewImage(w*creditsFontScale, h*creditsFontScale, ebiten.FilterDefault)
-	font.DrawTextLang(creditsFont, str, 0, 0, creditsFontScale, data.TextAlignLeft, color.White, maxCharCodePoint, language.English)
-}
-
-func drawCreditsText(img *ebiten.Image, str string, x, y int, scale float64, clr color.Color) {
-	const (
-		w = 6
-		h = font.RenderingLineHeight
-	)
-
-	op := &ebiten.DrawImageOptions{}
-
-	rf := 0.0
-	gf := 0.0
-	bf := 0.0
-	af := 0.0
-	if r, g, b, a := clr.RGBA(); a > 0 {
-		af = float64(a) / 0xffff
-		rf = float64(r) / float64(a)
-		gf = float64(g) / float64(a)
-		bf = float64(b) / float64(a)
-	}
-	op.ColorM.Scale(rf, gf, bf, af)
-	op.Filter = ebiten.FilterLinear
-	for i, r := range ([]rune)(str) {
-		if !unicode.IsPrint(r) {
-			continue
-		}
-		if r >= maxCharCodePoint {
-			continue
-		}
-		op.GeoM.Reset()
-		op.GeoM.Scale(scale/creditsFontScale, scale/creditsFontScale)
-		op.GeoM.Translate(float64(x)+float64(i)*w*scale, float64(y))
-		x := int(r%numCharPerLine) * w * creditsFontScale
-		y := int(r/numCharPerLine) * h * creditsFontScale
-		rect := image.Rect(x, y, x+w*creditsFontScale, y+h*creditsFontScale)
-		img.DrawImage(creditsFont.SubImage(rect).(*ebiten.Image), op)
 	}
 }
 
@@ -213,35 +150,37 @@ func (c *Credits) Draw(screen *ebiten.Image) {
 
 	_, sy := screen.Size()
 	const (
-		sx         = 480 - 32
-		ox         = 16
-		oy         = 16
-		baseScale  = 2
-		lineHeight = 16
+		sx        = 480 - 32
+		ox        = 16
+		oy        = 16
+		baseScale = 2
 	)
 	x := ox
 	y := oy + sy - c.scrollY
 	for _, s := range c.data.Sections {
 		x = ox
-		if -lineHeight*baseScale <= y && y < sy {
-			drawCreditsText(screen, s.Header, x, y, baseScale, headerColor(&s))
+		h := font.RenderingLineHeight * baseScale
+		if -h <= y && y < sy {
+			font.DrawTextLang(screen, s.Header, x, y, baseScale, data.TextAlignLeft, headerColor(&s), len([]rune(s.Header)), language.English)
 		}
-		y += lineHeight * baseScale
-		x = ox
-		for i, l := range s.Body {
-			x = ox + (sx/columnNum(&s))*(i%columnNum(&s))
-			if -lineHeight*baseScale <= y && y < sy {
-				drawCreditsText(screen, l, x, y, fontScale(&s), color.White)
-			}
-			if i%columnNum(&s) == columnNum(&s)-1 || i == len(s.Body)-1 {
-				if fontScale(&s) > 1 {
-					y += int(math.Ceil(lineHeight * fontScale(&s)))
-				} else {
-					y += lineHeight + 2
+		y += h
+
+		n := ((len(s.Body)-1)/columnNum(&s) + 1)
+		h = int(math.Ceil(float64(n) * font.RenderingLineHeight * fontScale(&s)))
+		if -h <= y && y < sy {
+			for i := 0; i < columnNum(&s); i++ {
+				var body []string
+				for j := i; j < len(s.Body); j += columnNum(&s) {
+					body = append(body, s.Body[j])
 				}
+				x = ox + i*(sx/columnNum(&s))
+				str := strings.Join(body, "\n")
+				font.DrawTextLang(screen, str, x, y, fontScale(&s), data.TextAlignLeft, color.White, len([]rune(str)), language.English)
 			}
 		}
-		y += lineHeight * baseScale / 2
+
+		y += h
+		y += font.RenderingLineHeight * baseScale / 2
 	}
 	if y <= 0 {
 		c.finished = true

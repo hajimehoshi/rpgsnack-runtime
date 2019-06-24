@@ -38,7 +38,11 @@
         {
             "header": "PLATINUM SPONSOR",
             "headerColor": "#bbaaee",
-            "body":   ["Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar"]
+            "body":   ["Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar",
+                       "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar",
+                       "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar",
+                       "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar",
+                      "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar", "Foo Bar"]
         },
         {
             "header": "GOLD SPONSOR",

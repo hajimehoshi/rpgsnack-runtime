@@ -17,6 +17,7 @@ package font
 import (
 	"fmt"
 	"image/color"
+	"math"
 	"strings"
 	"sync"
 
@@ -51,7 +52,7 @@ func MeasureSize(text string) (int, int) {
 	return w.Ceil(), h.Ceil()
 }
 
-func DrawText(screen *ebiten.Image, str string, ox, oy int, scale int, textAlign data.TextAlign, color color.Color, displayTextRuneCount int) {
+func DrawText(screen *ebiten.Image, str string, ox, oy int, scale float64, textAlign data.TextAlign, color color.Color, displayTextRuneCount int) {
 	DrawTextLang(screen, str, ox, oy, scale, textAlign, color, displayTextRuneCount, lang.Get())
 }
 
@@ -63,14 +64,52 @@ func init() {
 
 var scratchPadM sync.Mutex
 
-func DrawTextToScratchPad(str string, scale int, lang language.Tag) {
+func DrawTextToScratchPad(str string, scale float64, lang language.Tag) {
 	scratchPadM.Lock()
-	f := face(scale, lang)
+	f := face(int(math.Ceil(scale)), lang)
 	text.Draw(scratchPad, str, f, 0, 0, color.White)
 	scratchPadM.Unlock()
 }
 
-func DrawTextLang(screen *ebiten.Image, str string, ox, oy int, scale int, textAlign data.TextAlign, color color.Color, displayTextRuneCount int, lang language.Tag) {
+func isInteger(x float64) bool {
+	return x == math.Floor(x)
+}
+
+var textOffscreen *ebiten.Image
+
+func DrawTextLang(screen *ebiten.Image, str string, ox, oy int, scale float64, textAlign data.TextAlign, color color.Color, displayTextRuneCount int, lang language.Tag) {
+	if isInteger(scale) {
+		drawTextLangIntScale(screen, str, ox, oy, int(scale), textAlign, color, displayTextRuneCount, lang)
+		return
+	}
+	drawTextLangFloatScale(screen, str, ox, oy, scale, textAlign, color, displayTextRuneCount, lang)
+}
+
+func drawTextLangFloatScale(screen *ebiten.Image, str string, ox, oy int, scale float64, textAlign data.TextAlign, color color.Color, displayTextRuneCount int, lang language.Tag) {
+	is := int(math.Ceil(scale))
+	w, h := MeasureSize(str)
+	w *= is
+	h *= is
+	if textOffscreen != nil {
+		if tw, th := textOffscreen.Size(); tw < w || th < h {
+			textOffscreen.Dispose()
+			textOffscreen = nil
+		} else {
+			textOffscreen.Clear()
+		}
+	}
+	if textOffscreen == nil {
+		textOffscreen, _ = ebiten.NewImage(w, h, ebiten.FilterDefault)
+	}
+	drawTextLangIntScale(textOffscreen, str, 0, 0, is, textAlign, color, displayTextRuneCount, lang)
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Scale(scale/float64(is), scale/float64(is))
+	op.GeoM.Translate(float64(ox), float64(oy))
+	op.Filter = ebiten.FilterLinear
+	screen.DrawImage(textOffscreen, op)
+}
+
+func drawTextLangIntScale(screen *ebiten.Image, str string, ox, oy int, scale int, textAlign data.TextAlign, color color.Color, displayTextRuneCount int, lang language.Tag) {
 	f := face(scale, lang)
 	m := f.Metrics()
 	oy += (RenderingLineHeight*scale - m.Height.Round()) / 2

@@ -214,22 +214,23 @@ func (t *typingEffect) playSE() bool {
 func (t *typingEffect) draw(screen *ebiten.Image, x, y int, textScale int, textAlign data.TextAlign, textColor color.Color, edgeColor color.Color, shadowColor color.Color) {
 	i := t.visibleIndex()
 	str := string(t.visibleContent())
+	s := float64(textScale)
 	if shadowColor != nil {
 		// Shadow
-		font.DrawText(screen, str, x+textScale*2, y, textScale, textAlign, shadowColor, i)
-		font.DrawText(screen, str, x-textScale*2, y, textScale, textAlign, shadowColor, i)
-		font.DrawText(screen, str, x, y+textScale*2, textScale, textAlign, shadowColor, i)
-		font.DrawText(screen, str, x, y-textScale*2, textScale, textAlign, shadowColor, i)
-		font.DrawText(screen, str, x+textScale, y+textScale, textScale, textAlign, shadowColor, i)
-		font.DrawText(screen, str, x-textScale, y+textScale, textScale, textAlign, shadowColor, i)
-		font.DrawText(screen, str, x+textScale, y-textScale, textScale, textAlign, shadowColor, i)
-		font.DrawText(screen, str, x-textScale, y-textScale, textScale, textAlign, shadowColor, i)
+		font.DrawText(screen, str, x+textScale*2, y, s, textAlign, shadowColor, i)
+		font.DrawText(screen, str, x-textScale*2, y, s, textAlign, shadowColor, i)
+		font.DrawText(screen, str, x, y+textScale*2, s, textAlign, shadowColor, i)
+		font.DrawText(screen, str, x, y-textScale*2, s, textAlign, shadowColor, i)
+		font.DrawText(screen, str, x+textScale, y+textScale, s, textAlign, shadowColor, i)
+		font.DrawText(screen, str, x-textScale, y+textScale, s, textAlign, shadowColor, i)
+		font.DrawText(screen, str, x+textScale, y-textScale, s, textAlign, shadowColor, i)
+		font.DrawText(screen, str, x-textScale, y-textScale, s, textAlign, shadowColor, i)
 
 		// Edge
-		font.DrawText(screen, str, x+textScale, y, textScale, textAlign, edgeColor, i)
-		font.DrawText(screen, str, x-textScale, y, textScale, textAlign, edgeColor, i)
-		font.DrawText(screen, str, x, y+textScale, textScale, textAlign, edgeColor, i)
-		font.DrawText(screen, str, x, y-textScale, textScale, textAlign, edgeColor, i)
+		font.DrawText(screen, str, x+textScale, y, s, textAlign, edgeColor, i)
+		font.DrawText(screen, str, x-textScale, y, s, textAlign, edgeColor, i)
+		font.DrawText(screen, str, x, y+textScale, s, textAlign, edgeColor, i)
+		font.DrawText(screen, str, x, y-textScale, s, textAlign, edgeColor, i)
 	}
-	font.DrawText(screen, str, x, y, textScale, textAlign, textColor, i)
+	font.DrawText(screen, str, x, y, s, textAlign, textColor, i)
 }

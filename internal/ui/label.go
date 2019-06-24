@@ -71,5 +71,5 @@ func (l *Label) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 
 	tx := (l.x + offsetX) * consts.TileScale
 	ty := (l.y + offsetY) * consts.TileScale
-	font.DrawText(screen, l.Text, tx, ty, int(float64(consts.TextScale)*l.Scale), l.TextAlign, l.Color, len([]rune(l.Text)))
+	font.DrawText(screen, l.Text, tx, ty, float64(consts.TextScale)*l.Scale, l.TextAlign, l.Color, len([]rune(l.Text)))
 }
