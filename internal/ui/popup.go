@@ -15,11 +15,22 @@
 package ui
 
 import (
+	"image/color"
+
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 )
+
+// TODO: Unify similar usages of empty images for tinting the screen.
+
+var shadowImage *ebiten.Image
+
+func init() {
+	shadowImage, _ = ebiten.NewImage(1, 1, ebiten.FilterDefault)
+	shadowImage.Fill(color.RGBA{0, 0, 0, 0x80})
+}
 
 const (
 	popupMargin = 4
@@ -95,6 +106,12 @@ func (p *Popup) Draw(screen *ebiten.Image) {
 	if p.width == 0 || p.height == 0 {
 		return
 	}
+
+	op := &ebiten.DrawImageOptions{}
+	w, h := shadowImage.Size()
+	sw, sh := screen.Size()
+	op.GeoM.Scale(float64(sw)/float64(w), float64(sh)/float64(h))
+	screen.DrawImage(shadowImage, op)
 
 	geoM := &ebiten.GeoM{}
 	geoM.Translate(float64(p.x), float64(p.y))
