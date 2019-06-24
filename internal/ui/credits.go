@@ -26,6 +26,7 @@ import (
 	"golang.org/x/text/language"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/font"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
@@ -150,18 +151,17 @@ func (c *Credits) Draw(screen *ebiten.Image) {
 
 	_, sy := screen.Size()
 	const (
-		sx        = 480 - 32
-		ox        = 16
-		oy        = 16
-		baseScale = 2
+		sx = 480 - 32
+		ox = 16
+		oy = 16
 	)
 	x := ox
 	y := oy + sy - c.scrollY
 	for _, s := range c.data.Sections {
 		x = ox
-		h := font.RenderingLineHeight * baseScale
+		h := font.RenderingLineHeight * consts.TextScale
 		if -h <= y && y < sy {
-			font.DrawTextLang(screen, s.Header, x, y, baseScale, data.TextAlignLeft, headerColor(&s), len([]rune(s.Header)), language.English)
+			font.DrawTextLang(screen, s.Header, x, y, consts.TextScale, data.TextAlignLeft, headerColor(&s), len([]rune(s.Header)), language.English)
 		}
 		y += h
 
@@ -180,7 +180,7 @@ func (c *Credits) Draw(screen *ebiten.Image) {
 		}
 
 		y += h
-		y += font.RenderingLineHeight * baseScale / 2
+		y += font.RenderingLineHeight * consts.TextScale / 2
 	}
 	if y <= 0 {
 		c.finished = true
