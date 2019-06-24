@@ -21,6 +21,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/golang/groupcache/lru"
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/text"
 	"golang.org/x/image/math/fixed"
@@ -29,6 +30,16 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
 )
+
+type floatScaleImageCacheKey struct {
+	text  string
+	scale float64
+	color color.Color
+	lang  language.Tag
+}
+
+// floatScaleImageCache is an image cache with scales and its text.
+var floatScaleImageCache = lru.New(10)
 
 const (
 	RenderingLineHeight = 18
@@ -75,8 +86,6 @@ func isInteger(x float64) bool {
 	return x == math.Floor(x)
 }
 
-var textOffscreen *ebiten.Image
-
 func DrawTextLang(screen *ebiten.Image, str string, ox, oy int, scale float64, textAlign data.TextAlign, color color.Color, displayTextRuneCount int, lang language.Tag) {
 	if isInteger(scale) {
 		drawTextLangIntScale(screen, str, ox, oy, int(scale), textAlign, color, displayTextRuneCount, lang)
@@ -86,27 +95,37 @@ func DrawTextLang(screen *ebiten.Image, str string, ox, oy int, scale float64, t
 }
 
 func drawTextLangFloatScale(screen *ebiten.Image, str string, ox, oy int, scale float64, textAlign data.TextAlign, color color.Color, displayTextRuneCount int, lang language.Tag) {
-	is := int(math.Ceil(scale))
+	k := floatScaleImageCacheKey{
+		text:  str,
+		scale: scale,
+		color: color,
+		lang:  lang,
+	}
+	if img, ok := floatScaleImageCache.Get(k); ok {
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(float64(ox), float64(oy))
+		screen.DrawImage(img.(*ebiten.Image), op)
+		return
+	}
+
+	scalei := int(math.Ceil(scale))
 	w, h := MeasureSize(str)
-	w *= is
-	h *= is
-	if textOffscreen != nil {
-		if tw, th := textOffscreen.Size(); tw < w || th < h {
-			textOffscreen.Dispose()
-			textOffscreen = nil
-		} else {
-			textOffscreen.Clear()
-		}
-	}
-	if textOffscreen == nil {
-		textOffscreen, _ = ebiten.NewImage(w, h, ebiten.FilterDefault)
-	}
-	drawTextLangIntScale(textOffscreen, str, 0, 0, is, textAlign, color, displayTextRuneCount, lang)
+
+	// src is an image that has texts scaled by `ceil(scale)`.
+	src, _ := ebiten.NewImage(w*scalei, h*scalei, ebiten.FilterDefault)
+	drawTextLangIntScale(src, str, 0, 0, scalei, textAlign, color, displayTextRuneCount, lang)
+
+	// dst is an image that has texts scaled by `scale`.
+	dst, _ := ebiten.NewImage(int(math.Ceil(float64(w)*scale)), int(math.Ceil(float64(h)*scale)), ebiten.FilterDefault)
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(scale/float64(is), scale/float64(is))
-	op.GeoM.Translate(float64(ox), float64(oy))
+	op.GeoM.Scale(scale/float64(scalei), scale/float64(scalei))
 	op.Filter = ebiten.FilterLinear
-	screen.DrawImage(textOffscreen, op)
+	dst.DrawImage(src, op)
+	floatScaleImageCache.Add(k, dst)
+
+	op = &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(float64(ox), float64(oy))
+	screen.DrawImage(dst, op)
 }
 
 func drawTextLangIntScale(screen *ebiten.Image, str string, ox, oy int, scale int, textAlign data.TextAlign, color color.Color, displayTextRuneCount int, lang language.Tag) {
