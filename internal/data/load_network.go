@@ -62,6 +62,10 @@ func CreditsPath() string {
 	return filepath.Join(os.TempDir(), "credits.json")
 }
 
+func PricesPath() string {
+	return filepath.Join(os.TempDir(), "prices.json")
+}
+
 type manifestBody struct {
 	Manifest map[string][]string `json:"manifest" msgpack:"manifest"`
 }

@@ -70,6 +70,7 @@ type Manager struct {
 	interstitialAdsLoaded bool
 	rewardedAdsLoaded     bool
 	credits               *data.Credits
+	prices                map[string]string
 
 	blackImage *ebiten.Image
 	turbo      bool
@@ -94,6 +95,7 @@ const (
 	PlatformDataKeyRewardedAdsLoaded     PlatformDataKey = "rewarded_ads_loaded"
 	PlatformDataKeyBackButton            PlatformDataKey = "backbutton"
 	PlatformDataKeyCredits               PlatformDataKey = "credits"
+	PlatformDataKeyPrices                PlatformDataKey = "prices"
 )
 
 func NewManager(width, height int, requester Requester, game *data.Game, progress []byte, permanent []byte, purchases []string, fadingInCount int) *Manager {
@@ -249,6 +251,12 @@ func (m *Manager) Update() error {
 				return err
 			}
 			m.credits = credits
+		case PlatformDataKeyPrices:
+			var prices map[string]string
+			if err := json.Unmarshal([]byte(a.value), &prices); err != nil {
+				return err
+			}
+			m.prices = prices
 		default:
 			log.Printf("platform data key not implemented: %s", a.key)
 		}
@@ -593,6 +601,13 @@ func (m *Manager) GenerateRequestID() int {
 
 func (m *Manager) Credits() *data.Credits {
 	return m.credits
+}
+
+func (m *Manager) Price(key string) string {
+	if m.prices == nil {
+		return ""
+	}
+	return m.prices[key]
 }
 
 func (m *Manager) ReceiveResultIfExists(id int) *RequestResult {

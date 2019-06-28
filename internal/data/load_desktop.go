@@ -38,6 +38,7 @@ var (
 
 	// TODO: This data should be included in project.json
 	creditsPath = flag.String("credits-json-path", filepath.Join(".", "credits.json"), "credits path")
+	pricesPath  = flag.String("prices-json-path", filepath.Join(".", "prices.json"), "prices path")
 
 	forceEagerDecoding = flag.Bool("force-eager-decoding", false, "whether to force decoding maps and events eagerly")
 )
@@ -67,6 +68,10 @@ func PermanentPath() string {
 
 func CreditsPath() string {
 	return *creditsPath
+}
+
+func PricesPath() string {
+	return *pricesPath
 }
 
 func loadAssets(projectionLocation string) ([]byte, error) {

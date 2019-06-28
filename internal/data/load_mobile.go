@@ -50,6 +50,10 @@ func CreditsPath() string {
 	return ""
 }
 
+func PricesPath() string {
+	return ""
+}
+
 func loadRawData(projectionLocation string, progress chan<- float64) (*rawData, error) {
 	defer close(progress)
 

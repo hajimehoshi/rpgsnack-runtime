@@ -25,6 +25,7 @@ import (
 	"time"
 
 	datapkg "github.com/hajimehoshi/rpgsnack-runtime/internal/data"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/scene"
 )
 
 type Requester struct {
@@ -41,7 +42,17 @@ func newRequester(game *Game) *Requester {
 		if b == nil {
 			return
 		}
-		game.SetPlatformData("credits", string(b))
+		game.SetPlatformData(scene.PlatformDataKeyCredits, string(b))
+	}()
+	go func() {
+		b, err := ioutil.ReadFile(datapkg.PricesPath())
+		if err != nil && !os.IsNotExist(err) {
+			return
+		}
+		if b == nil {
+			return
+		}
+		game.SetPlatformData(scene.PlatformDataKeyPrices, string(b))
 	}()
 	return r
 }
