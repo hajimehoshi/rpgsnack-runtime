@@ -35,6 +35,7 @@ type Button struct {
 	y             int
 	width         int
 	height        int
+	scale         float64
 	touchExpand   int
 	visible       bool
 	text          string
@@ -58,6 +59,7 @@ func NewButton(x, y, width, height int, soundName string) *Button {
 		y:          y,
 		width:      width,
 		height:     height,
+		scale:      1,
 		visible:    true,
 		soundName:  soundName,
 		dropShadow: false,
@@ -72,6 +74,7 @@ func NewTextButton(x, y, width, height int, soundName string) *Button {
 		y:          y,
 		width:      width,
 		height:     height,
+		scale:      1,
 		visible:    true,
 		soundName:  soundName,
 		dropShadow: false,
@@ -87,6 +90,7 @@ func NewImageButton(x, y int, image *ebiten.Image, pressedImage *ebiten.Image, s
 		y:             y,
 		width:         w,
 		height:        h,
+		scale:         1,
 		visible:       true,
 		Image:         image,
 		PressedImage:  pressedImage,
@@ -112,6 +116,14 @@ func (b *Button) SetWidth(width int) {
 
 func (b *Button) SetText(text string) {
 	b.text = text
+}
+
+func (b *Button) SetScale(scale float64) {
+	b.scale = scale
+}
+
+func (b *Button) SetColor(clr color.Color) {
+	b.textColor = clr
 }
 
 func (b *Button) Show() {
@@ -231,7 +243,7 @@ func (b *Button) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 	tx += b.width * consts.TileScale / 2
 
 	ty := (b.y + offsetY) * consts.TileScale
-	ty += (b.height*consts.TileScale - th*consts.TextScale) / 2
+	ty += (b.height*consts.TileScale - int(float64(th)*consts.TextScale*b.scale)) / 2
 
 	cr, cg, cb, ca := b.textColor.RGBA()
 	r8 := uint8(cr >> 8)
@@ -247,7 +259,7 @@ func (b *Button) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 		l = lang.Get()
 	}
 	if b.dropShadow {
-		font.DrawTextLang(screen, b.text, tx+consts.TextScale, ty+consts.TextScale, consts.TextScale, data.TextAlignCenter, color.Black, len([]rune(b.text)), l)
+		font.DrawTextLang(screen, b.text, tx+int(consts.TextScale*b.scale), ty+int(consts.TextScale*b.scale), consts.TextScale*b.scale, data.TextAlignCenter, color.Black, len([]rune(b.text)), l)
 	}
-	font.DrawTextLang(screen, b.text, tx, ty, consts.TextScale, data.TextAlignCenter, c, len([]rune(b.text)), l)
+	font.DrawTextLang(screen, b.text, tx, ty, consts.TextScale*b.scale, data.TextAlignCenter, c, len([]rune(b.text)), l)
 }
