@@ -21,10 +21,11 @@ import (
 )
 
 type ImageView struct {
-	x     int
-	y     int
-	scale float64
-	image *ebiten.Image
+	x      int
+	y      int
+	scale  float64
+	image  *ebiten.Image
+	filter ebiten.Filter
 }
 
 func NewImageView(x, y int, scale float64, image *ebiten.Image) *ImageView {
@@ -36,10 +37,15 @@ func NewImageView(x, y int, scale float64, image *ebiten.Image) *ImageView {
 	}
 }
 
+func (i *ImageView) SetFilter(filter ebiten.Filter) {
+	i.filter = filter
+}
+
 func (i *ImageView) Update() {
 }
 
-func (i *ImageView) UpdateAsChild(visible bool, offsetX, offsetY int) {
+func (i *ImageView) HandleInput(offsetX, offsetY int) bool {
+	return false
 }
 
 func (i *ImageView) Draw(screen *ebiten.Image) {
@@ -51,5 +57,6 @@ func (i *ImageView) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 	op.GeoM.Scale(i.scale, i.scale)
 	op.GeoM.Translate(float64(i.x+offsetX), float64(i.y+offsetY))
 	op.GeoM.Scale(consts.TileScale, consts.TileScale)
+	op.Filter = i.filter
 	screen.DrawImage(i.image, op)
 }
