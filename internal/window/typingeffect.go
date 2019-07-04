@@ -149,7 +149,7 @@ func (t *typingEffect) trySkipAnim() {
 }
 
 func (t *typingEffect) SetContent(content string, overwrite bool) {
-	t.content = []rune(content)
+	t.content = []rune(font.ToValidContent(content))
 	t.delayCount = t.delay
 	if t.index > 0 || t.delay == 0 || overwrite {
 		t.index = t.lastIndex()

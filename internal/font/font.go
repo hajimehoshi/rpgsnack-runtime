@@ -31,6 +31,10 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
 )
 
+func ToValidContent(str string) string {
+	return strings.Replace(str, "\r\n", "\n", -1)
+}
+
 type floatScaleImageCacheKey struct {
 	text  string
 	scale float64
@@ -156,7 +160,7 @@ func drawTextLangIntScale(screen *ebiten.Image, str string, ox, oy int, scale in
 	b, _, _ := f.GlyphBounds('.')
 	dotX := (-b.Min.X).Floor()
 
-	str = strings.Replace(str, "\r\n", "\n", -1)
+	str = ToValidContent(str)
 	lines := strings.Split(str, "\n")
 	linesToShow := strings.Split(string([]rune(str)[:displayTextRuneCount]), "\n")
 
