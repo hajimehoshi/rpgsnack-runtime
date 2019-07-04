@@ -149,6 +149,7 @@ func (t *typingEffect) trySkipAnim() {
 }
 
 func (t *typingEffect) SetContent(content string, overwrite bool) {
+	// TODO: Do not call ToValidContent. This is a strange dependency.
 	t.content = []rune(font.ToValidContent(content))
 	t.delayCount = t.delay
 	if t.index > 0 || t.delay == 0 || overwrite {
@@ -215,22 +216,34 @@ func (t *typingEffect) draw(screen *ebiten.Image, x, y int, textScale int, textA
 	i := t.visibleIndex()
 	str := string(t.visibleContent())
 	s := float64(textScale)
+
+	op := &font.DrawTextOptions{
+		Scale:        s,
+		TextAlign:    textAlign,
+		UseRuneCount: true,
+		RuneCount:    i,
+	}
+
 	if shadowColor != nil {
 		// Shadow
-		font.DrawText(screen, str, x+textScale*2, y, s, textAlign, shadowColor, i)
-		font.DrawText(screen, str, x-textScale*2, y, s, textAlign, shadowColor, i)
-		font.DrawText(screen, str, x, y+textScale*2, s, textAlign, shadowColor, i)
-		font.DrawText(screen, str, x, y-textScale*2, s, textAlign, shadowColor, i)
-		font.DrawText(screen, str, x+textScale, y+textScale, s, textAlign, shadowColor, i)
-		font.DrawText(screen, str, x-textScale, y+textScale, s, textAlign, shadowColor, i)
-		font.DrawText(screen, str, x+textScale, y-textScale, s, textAlign, shadowColor, i)
-		font.DrawText(screen, str, x-textScale, y-textScale, s, textAlign, shadowColor, i)
+		op.Color = shadowColor
+		font.DrawText(screen, str, x+textScale*2, y, op)
+		font.DrawText(screen, str, x-textScale*2, y, op)
+		font.DrawText(screen, str, x, y+textScale*2, op)
+		font.DrawText(screen, str, x, y-textScale*2, op)
+		font.DrawText(screen, str, x+textScale, y+textScale, op)
+		font.DrawText(screen, str, x-textScale, y+textScale, op)
+		font.DrawText(screen, str, x+textScale, y-textScale, op)
+		font.DrawText(screen, str, x-textScale, y-textScale, op)
 
 		// Edge
-		font.DrawText(screen, str, x+textScale, y, s, textAlign, edgeColor, i)
-		font.DrawText(screen, str, x-textScale, y, s, textAlign, edgeColor, i)
-		font.DrawText(screen, str, x, y+textScale, s, textAlign, edgeColor, i)
-		font.DrawText(screen, str, x, y-textScale, s, textAlign, edgeColor, i)
+		op.Color = edgeColor
+		font.DrawText(screen, str, x+textScale, y, op)
+		font.DrawText(screen, str, x-textScale, y, op)
+		font.DrawText(screen, str, x, y+textScale, op)
+		font.DrawText(screen, str, x, y-textScale, op)
 	}
-	font.DrawText(screen, str, x, y, s, textAlign, textColor, i)
+
+	op.Color = textColor
+	font.DrawText(screen, str, x, y, op)
 }

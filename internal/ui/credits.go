@@ -161,7 +161,11 @@ func (c *Credits) Draw(screen *ebiten.Image) {
 		x = ox
 		h := font.RenderingLineHeight * consts.TextScale
 		if -h <= y && y < sy {
-			font.DrawTextLang(screen, s.Header, x, y, consts.TextScale, data.TextAlignLeft, headerColor(&s), len([]rune(s.Header)), language.English)
+			op := &font.DrawTextOptions{
+				Color:    headerColor(&s),
+				Language: language.English,
+			}
+			font.DrawText(screen, s.Header, x, y, op)
 		}
 		y += h
 
@@ -175,7 +179,12 @@ func (c *Credits) Draw(screen *ebiten.Image) {
 				}
 				x = ox + i*(sx/columnNum(&s))
 				str := strings.Join(body, "\n")
-				font.DrawTextLang(screen, str, x, y, fontScale(&s), data.TextAlignLeft, color.White, len([]rune(str)), language.English)
+				op := &font.DrawTextOptions{
+					Scale:    fontScale(&s),
+					Color:    color.White,
+					Language: language.English,
+				}
+				font.DrawText(screen, str, x, y, op)
 			}
 		}
 

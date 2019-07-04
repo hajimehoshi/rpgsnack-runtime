@@ -27,7 +27,6 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/font"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
 )
 
 type Button struct {
@@ -254,12 +253,16 @@ func (b *Button) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 	if b.disabled {
 		c = color.RGBA{r8, g8, b8, uint8(uint16(a8) * uint16(opacity) / (2 * 255))}
 	}
-	l := b.Lang
-	if l == language.Und {
-		l = lang.Get()
+
+	dtop := &font.DrawTextOptions{
+		Scale:     consts.TextScale * b.scale,
+		TextAlign: data.TextAlignCenter,
+		Language:  b.Lang,
 	}
 	if b.dropShadow {
-		font.DrawTextLang(screen, b.text, tx+int(consts.TextScale*b.scale), ty+int(consts.TextScale*b.scale), consts.TextScale*b.scale, data.TextAlignCenter, color.Black, len([]rune(b.text)), l)
+		dtop.Color = color.Black
+		font.DrawText(screen, b.text, tx+int(consts.TextScale*b.scale), ty+int(consts.TextScale*b.scale), dtop)
 	}
-	font.DrawTextLang(screen, b.text, tx, ty, consts.TextScale*b.scale, data.TextAlignCenter, c, len([]rune(b.text)), l)
+	dtop.Color = c
+	font.DrawText(screen, b.text, tx, ty, dtop)
 }

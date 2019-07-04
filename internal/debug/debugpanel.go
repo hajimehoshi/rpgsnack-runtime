@@ -260,7 +260,11 @@ func (d *DebugPanel) DrawBox(screen *ebiten.Image, padding, x, y, w, h int, text
 
 	ui.DrawNinePatches(screen, assets.GetImage(s), w, h, geoM, colorM)
 
-	font.DrawText(screen, text, int(padding+x), int(y+10), 1, data.TextAlignLeft, color.White, len([]rune(text)))
+	op := &font.DrawTextOptions{
+		Scale: 1,
+		Color: color.White,
+	}
+	font.DrawText(screen, text, int(padding+x), int(y+10), op)
 }
 
 func (d *DebugPanel) renderValue(screen *ebiten.Image, i *data.VariableItem, y int) {

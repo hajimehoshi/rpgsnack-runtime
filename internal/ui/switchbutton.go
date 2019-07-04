@@ -23,7 +23,6 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/audio"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/font"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 )
@@ -154,10 +153,16 @@ func (s *SwitchButton) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 	if s.on {
 		tx := (s.x + offsetX + 6) * consts.TileScale
 		text := "ON"
-		font.DrawText(screen, text, tx, ty, consts.TextScale, data.TextAlignLeft, color.White, len([]rune(text)))
+		op := &font.DrawTextOptions{
+			Color: color.White,
+		}
+		font.DrawText(screen, text, tx, ty, op)
 	} else {
 		tx := (s.x + switchButtonWidth + offsetX - 18) * consts.TileScale
 		text := "OFF"
-		font.DrawText(screen, text, tx, ty, consts.TextScale, data.TextAlignLeft, color.White, len([]rune(text)))
+		op := &font.DrawTextOptions{
+			Color: color.White,
+		}
+		font.DrawText(screen, text, tx, ty, op)
 	}
 }

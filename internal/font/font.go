@@ -27,6 +27,7 @@ import (
 	"golang.org/x/image/math/fixed"
 	"golang.org/x/text/language"
 
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
 )
@@ -68,10 +69,6 @@ func MeasureSize(text string) (int, int) {
 	return w.Ceil(), h.Ceil()
 }
 
-func DrawText(screen *ebiten.Image, str string, ox, oy int, scale float64, textAlign data.TextAlign, color color.Color, displayTextRuneCount int) {
-	DrawTextLang(screen, str, ox, oy, scale, textAlign, color, displayTextRuneCount, lang.Get())
-}
-
 var scratchPad *ebiten.Image
 
 func init() {
@@ -91,12 +88,43 @@ func isInteger(x float64) bool {
 	return x == math.Floor(x)
 }
 
-func DrawTextLang(screen *ebiten.Image, str string, ox, oy int, scale float64, textAlign data.TextAlign, color color.Color, displayTextRuneCount int, lang language.Tag) {
+type DrawTextOptions struct {
+	Scale        float64
+	TextAlign    data.TextAlign
+	Color        color.Color
+	UseRuneCount bool
+	RuneCount    int
+	Language     language.Tag
+}
+
+func DrawText(screen *ebiten.Image, str string, ox, oy int, op *DrawTextOptions) {
+	scale := op.Scale
+	if scale == 0 {
+		scale = consts.TextScale
+	}
+
+	str = ToValidContent(str)
+
+	ta := op.TextAlign
+	if ta == *new(data.TextAlign) {
+		ta = data.TextAlignLeft
+	}
+
+	c := op.RuneCount
+	if !op.UseRuneCount {
+		c = len([]rune(str))
+	}
+
+	l := op.Language
+	if l == language.Und {
+		l = lang.Get()
+	}
+
 	if isInteger(scale) {
-		drawTextLangIntScale(screen, str, ox, oy, int(scale), textAlign, color, displayTextRuneCount, lang)
+		drawTextLangIntScale(screen, str, ox, oy, int(scale), ta, op.Color, c, l)
 		return
 	}
-	drawTextLangFloatScale(screen, str, ox, oy, scale, textAlign, color, displayTextRuneCount, lang)
+	drawTextLangFloatScale(screen, str, ox, oy, scale, ta, op.Color, c, l)
 }
 
 func drawTextLangFloatScale(screen *ebiten.Image, str string, ox, oy int, scale float64, textAlign data.TextAlign, color color.Color, displayTextRuneCount int, lang language.Tag) {
@@ -160,7 +188,6 @@ func drawTextLangIntScale(screen *ebiten.Image, str string, ox, oy int, scale in
 	b, _, _ := f.GlyphBounds('.')
 	dotX := (-b.Min.X).Floor()
 
-	str = ToValidContent(str)
 	lines := strings.Split(str, "\n")
 	linesToShow := strings.Split(string([]rune(str)[:displayTextRuneCount]), "\n")
 

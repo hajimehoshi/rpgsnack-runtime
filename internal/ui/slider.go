@@ -23,7 +23,6 @@ import (
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/assets"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
-	"github.com/hajimehoshi/rpgsnack-runtime/internal/data"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/font"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 )
@@ -161,5 +160,9 @@ func (s *Slider) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 	tx := (s.x + s.width + offsetX + offsetY + 8) * consts.TileScale
 	ty := (s.y + offsetY - 2) * consts.TileScale
 	text := fmt.Sprintf("%d%%", s.value)
-	font.DrawText(screen, text, tx, ty, consts.TextScale, data.TextAlignLeft, color.White, len([]rune(text)))
+
+	dtop := &font.DrawTextOptions{
+		Color: color.White,
+	}
+	font.DrawText(screen, text, tx, ty, dtop)
 }
