@@ -8,7 +8,7 @@ require (
 	github.com/google/uuid v0.0.0-20171129191014-dec09d789f3d
 	github.com/gopherjs/gopherjs v0.0.0-20180825215210-0210a2f0f73c
 	github.com/hajimehoshi/bitmapfont v1.1.2-0.20190326162219-f5d264253747
-	github.com/hajimehoshi/ebiten v1.10.0-alpha.0.20190625160513-f40798b5869c
+	github.com/hajimehoshi/ebiten v1.10.0-alpha.0.20190703165704-5ec2f6652466
 	github.com/hajimehoshi/oggloop v0.0.0-20180730010327-c7cf68761483
 	github.com/vmihailenco/msgpack v4.0.1+incompatible
 	golang.org/x/image v0.0.0-20190227222117-0694c2d4d067
