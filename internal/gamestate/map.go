@@ -283,11 +283,7 @@ func (m *Map) resetInterpreters(gameState *Game, interpreter *Interpreter) {
 		is = append(is, i)
 	}
 
-	// The player interpreter requires a special process to abort.
-	m.abortPlayerInterpreter(gameState)
-
 	m.interpreters = map[consts.InterpreterID]*Interpreter{}
-
 	for _, i := range is {
 		m.addInterpreter(i)
 	}
