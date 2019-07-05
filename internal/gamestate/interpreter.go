@@ -604,19 +604,26 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 			gameState.Map().removeNonPageRoutes(id)
 		}
 
-		if !args.Wait {
-			if id != character.PlayerEventID {
-				// Set 'route' true so that the new route command does not
-				// block the player's move (#380).
-				sub.route = true
-			}
-
-			gameState.Map().addInterpreter(sub)
-			i.commandIterator.Advance()
+		if args.Wait {
+			i.sub = sub
 			return true, nil
 		}
 
-		i.sub = sub
+		// Spawn the interpreter. This works as a route event if the character is not a player.
+		// The new interpter is no longer a sub interpreter.
+		//
+		// TODO: The new interpreter should be created with NewInterpreter instead of createSub.
+		sub.isSub = false
+
+		if id != character.PlayerEventID {
+			// Set 'route' true so that the new route command does not
+			// block the player's move (#380).
+			sub.route = true
+		}
+
+		gameState.Map().addInterpreter(sub)
+		i.commandIterator.Advance()
+
 	case data.CommandNameShake:
 		if !i.waitingCommand {
 			args := c.Args.(*data.CommandArgsShake)
