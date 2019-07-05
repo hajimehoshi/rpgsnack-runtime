@@ -272,9 +272,9 @@ func (m *Map) resetInterpreters(gameState *Game, interpreter *Interpreter) {
 	}
 
 	for id, i := range m.interpreters {
-		if id == m.playerInterpreterID {
-			continue
-		}
+		// Even if id is m.playerInterpreterID, this should be continued. In this case, the player
+		// interpreter calls an events, and then terminates almost immediately.
+
 		// As the given interpreter is an interpreter to continue even after transferring, do not abort this.
 		// As m.interpreters inclues only 'root' IDs, comparing with the root ID is enough.
 		if id != rootID {
