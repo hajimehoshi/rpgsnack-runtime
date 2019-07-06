@@ -931,7 +931,7 @@ func (g *Game) SetWeather(weatherType data.WeatherType) {
 	g.weather = weather.New(weatherType)
 }
 
-func (g *Game) TransferPlayerImmediately(roomID, x, y int, interpreter *Interpreter) {
+func (g *Game) TransferPlayerImmediately(roomID, x, y int, interpreter InterpreterInterface) {
 	g.currentMap.transferPlayerImmediately(g, roomID, x, y, interpreter)
 }
 
