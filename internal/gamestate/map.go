@@ -43,6 +43,10 @@ func (p *passableOnMap) At(x, y int) bool {
 	return p.m.Passable(p.through, x, y, p.ignoreCharacters)
 }
 
+type Aborter interface {
+	AbortForInterpreter(consts.InterpreterID)
+}
+
 type InterpreterInterface interface {
 	msgpack.CustomEncoder
 	msgpack.CustomDecoder
@@ -58,7 +62,7 @@ type InterpreterInterface interface {
 	Parallel() bool
 
 	Update(sceneManager *scene.Manager, gameState *Game) error
-	Abort(gameState *Game)
+	Abort(Aborter)
 	IsExecuting() bool
 }
 

@@ -48,7 +48,7 @@ type Interpreter struct {
 	waitingCommand     bool
 	moveCharacterState *movecharacterstate.State
 	repeat             bool
-	sub                *Interpreter
+	sub                InterpreterInterface
 	route              bool // True when used for event routing property.
 	pageRoute          bool
 	routeSkip          bool
@@ -1420,14 +1420,12 @@ func (i *Interpreter) Update(sceneManager *scene.Manager, gameState *Game) error
 // Abort aborts the interpreter. If Abort is called, the interpreter terminates after the current command finishes.
 //
 // Abort is typically called when transferring the player.
-func (i *Interpreter) Abort(gameState *Game) {
+func (i *Interpreter) Abort(aborter Aborter) {
 	if i.sub != nil {
-		i.sub.Abort(gameState)
+		i.sub.Abort(aborter)
 	}
 
-	// As balloons and banners are bound to events, they cannot continue when transferring.
-	// Close immediately without any animations.
-	gameState.windows.CloseImmediatelyForInterpreter(i.id)
+	aborter.AbortForInterpreter(i.id)
 
 	// Note: Executing route event commands should be terminated gracefully because:
 	// 1) Even if an event command to move a character is executed, gameState.Character returns nil and this is

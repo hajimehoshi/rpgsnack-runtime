@@ -1345,3 +1345,9 @@ func (g *Game) updatePictureIDs(x, y int) bool {
 	}
 	return g.triggeredPictureID > 0 || g.releasedPictureID > 0 || g.releasedPictureID > 0
 }
+
+func (g *Game) AbortForInterpreter(id consts.InterpreterID) {
+	// As balloons and banners are bound to events, they cannot continue when transferring.
+	// Close immediately without any animations.
+	g.windows.CloseImmediatelyForInterpreter(id)
+}
