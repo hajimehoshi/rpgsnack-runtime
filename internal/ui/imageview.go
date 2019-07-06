@@ -15,6 +15,9 @@
 package ui
 
 import (
+	"image"
+	"math"
+
 	"github.com/hajimehoshi/ebiten"
 
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/consts"
@@ -39,6 +42,11 @@ func NewImageView(x, y int, scale float64, image *ebiten.Image) *ImageView {
 
 func (i *ImageView) SetFilter(filter ebiten.Filter) {
 	i.filter = filter
+}
+
+func (i *ImageView) Region() image.Rectangle {
+	w, h := i.image.Size()
+	return image.Rect(i.x, i.y, i.x+int(math.Ceil(float64(w)*i.scale)), i.y+int(math.Ceil(float64(h)*i.scale)))
 }
 
 func (i *ImageView) Update() {

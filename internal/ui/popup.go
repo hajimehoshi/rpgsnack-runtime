@@ -15,6 +15,7 @@
 package ui
 
 import (
+	"image"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten"
@@ -41,6 +42,7 @@ type Node interface {
 	HandleInput(offsetX, offsetY int) bool
 	Update()
 	DrawAsChild(screen *ebiten.Image, offsetX, offsetY int)
+	Region() image.Rectangle
 }
 
 type Popup struct {

@@ -15,6 +15,7 @@
 package ui
 
 import (
+	"image"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten"
@@ -53,6 +54,18 @@ func (l *Label) Hide() {
 	l.visible = false
 }
 
+func (l *Label) Region() image.Rectangle {
+	w, h := font.MeasureSize(l.Text)
+	wf, hf := float64(w), float64(h)
+	wf *= l.Scale
+	hf *= l.Scale
+	wf *= consts.TextScale
+	hf *= consts.TextScale
+	wf /= consts.TileScale
+	hf /= consts.TileScale
+	return image.Rect(l.x, l.y, l.x+int(wf), l.y+int(hf))
+}
+
 func (l *Label) Update() {
 }
 
@@ -72,7 +85,7 @@ func (l *Label) DrawAsChild(screen *ebiten.Image, offsetX, offsetY int) {
 	tx := (l.x + offsetX) * consts.TileScale
 	ty := (l.y + offsetY) * consts.TileScale
 	op := &font.DrawTextOptions{
-		Scale:     float64(consts.TextScale) * l.Scale,
+		Scale:     consts.TextScale * l.Scale,
 		TextAlign: l.TextAlign,
 		Color:     l.Color,
 	}

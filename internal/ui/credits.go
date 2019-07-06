@@ -118,7 +118,7 @@ func (c *Credits) boost() bool {
 	if c.closeButton == nil {
 		return true
 	}
-	return !includesInput(0, 0, c.closeButton.region())
+	return !includesInput(0, 0, c.closeButton.Region())
 }
 
 func (c *Credits) SetCloseButtonVisible(visible bool) {

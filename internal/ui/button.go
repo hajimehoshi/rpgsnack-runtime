@@ -145,7 +145,7 @@ func (b *Button) SetOnPressed(onPressed func(button *Button)) {
 	b.onPressed = onPressed
 }
 
-func (b *Button) region() image.Rectangle {
+func (b *Button) Region() image.Rectangle {
 	return image.Rect(b.x-b.touchExpand, b.y-b.touchExpand, b.x+b.width+b.touchExpand, b.y+b.height+b.touchExpand)
 }
 
@@ -165,7 +165,7 @@ func (b *Button) HandleInput(offsetX, offsetY int) bool {
 			return false
 		}
 		b.pressing = false
-		if !includesInput(offsetX, offsetY, b.region()) {
+		if !includesInput(offsetX, offsetY, b.Region()) {
 			return false
 		}
 		if b.onPressed != nil {
@@ -182,7 +182,7 @@ func (b *Button) HandleInput(offsetX, offsetY int) bool {
 	}
 
 	if input.Triggered() {
-		b.pressing = includesInput(offsetX, offsetY, b.region())
+		b.pressing = includesInput(offsetX, offsetY, b.Region())
 	}
 	return b.pressing
 }
