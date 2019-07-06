@@ -43,6 +43,25 @@ func (p *passableOnMap) At(x, y int) bool {
 	return p.m.Passable(p.through, x, y, p.ignoreCharacters)
 }
 
+type InterpreterInterface interface {
+	msgpack.CustomEncoder
+	msgpack.CustomDecoder
+
+	ID() consts.InterpreterID
+	MapID() int
+	RoomID() int
+	EventID() int
+	Sub() InterpreterInterface // TODO: Remove this
+	Route() bool
+	PageRoute() bool
+	PageIndex() int
+	Parallel() bool
+
+	Update(sceneManager *scene.Manager, gameState *Game) error
+	Abort(gameState *Game)
+	IsExecuting() bool
+}
+
 type Map struct {
 	player                      *character.Character
 	mapID                       int
@@ -50,9 +69,9 @@ type Map struct {
 	events                      []*character.Character
 	eventPageIndices            map[int]int
 	executingEventIDByUserInput int
-	interpreters                map[consts.InterpreterID]*Interpreter
+	interpreters                map[consts.InterpreterID]InterpreterInterface
 	playerInterpreterID         consts.InterpreterID
-	itemInterpreter             *Interpreter
+	itemInterpreter             InterpreterInterface
 
 	// Fields that are not dumped
 	isTitle                   bool
@@ -66,7 +85,7 @@ type Map struct {
 func NewMap() *Map {
 	return &Map{
 		mapID:        1,
-		interpreters: map[consts.InterpreterID]*Interpreter{},
+		interpreters: map[consts.InterpreterID]InterpreterInterface{},
 		pressedMapX:  -1,
 		pressedMapY:  -1,
 	}
@@ -168,7 +187,7 @@ func (m *Map) DecodeMsgpack(dec *msgpack.Decoder) error {
 		case "interpreters":
 			if !d.SkipCodeIfNil() {
 				n := d.DecodeMapLen()
-				m.interpreters = map[consts.InterpreterID]*Interpreter{}
+				m.interpreters = map[consts.InterpreterID]InterpreterInterface{}
 				for i := 0; i < n; i++ {
 					k := consts.InterpreterID(d.DecodeInt())
 					m.interpreters[k] = nil
@@ -198,11 +217,11 @@ func (m *Map) DecodeMsgpack(dec *msgpack.Decoder) error {
 	return nil
 }
 
-func (m *Map) addInterpreter(interpreter *Interpreter) {
-	m.interpreters[interpreter.id] = interpreter
+func (m *Map) addInterpreter(interpreter InterpreterInterface) {
+	m.interpreters[interpreter.ID()] = interpreter
 }
 
-func (m *Map) setRoomID(gameState *Game, id int, interpreter *Interpreter) error {
+func (m *Map) setRoomID(gameState *Game, id int, interpreter InterpreterInterface) error {
 	m.roomID = id
 	m.executingEventIDByUserInput = 0
 	m.events = nil
@@ -233,11 +252,11 @@ func (m *Map) setRoomID(gameState *Game, id int, interpreter *Interpreter) error
 }
 
 // allInterpreters returns the current active interpreters and their sub interpreters.
-func (m *Map) allInterpreters() []*Interpreter {
-	var is []*Interpreter
+func (m *Map) allInterpreters() []InterpreterInterface {
+	var is []InterpreterInterface
 	for _, i := range m.interpreters {
 		is = append(is, i)
-		for sub := i; sub != nil; sub = sub.sub {
+		for sub := i; sub != nil; sub = sub.Sub() {
 			is = append(is, sub)
 		}
 	}
@@ -247,28 +266,28 @@ func (m *Map) allInterpreters() []*Interpreter {
 // rootAncestor returns the root of the given interpreter ID.
 func (m *Map) rootAncestor(id consts.InterpreterID) consts.InterpreterID {
 	for _, i := range m.allInterpreters() {
-		if i.sub == nil {
+		if i.Sub() == nil {
 			continue
 		}
-		if i.sub.id != id {
+		if i.Sub().ID() != id {
 			continue
 		}
 
 		// The parent is found.
-		return m.rootAncestor(i.id)
+		return m.rootAncestor(i.ID())
 	}
 
 	// The parent is not found. Return itself.
 	return id
 }
 
-func (m *Map) resetInterpreters(gameState *Game, interpreter *Interpreter) {
+func (m *Map) resetInterpreters(gameState *Game, interpreter InterpreterInterface) {
 	// Create a set of interpreter to finish the current command.
-	var is []*Interpreter
+	var is []InterpreterInterface
 
 	var rootID consts.InterpreterID
 	if interpreter != nil {
-		rootID = m.rootAncestor(interpreter.id)
+		rootID = m.rootAncestor(interpreter.ID())
 	}
 
 	for id, i := range m.interpreters {
@@ -283,7 +302,7 @@ func (m *Map) resetInterpreters(gameState *Game, interpreter *Interpreter) {
 		is = append(is, i)
 	}
 
-	m.interpreters = map[consts.InterpreterID]*Interpreter{}
+	m.interpreters = map[consts.InterpreterID]InterpreterInterface{}
 	for _, i := range is {
 		m.addInterpreter(i)
 	}
@@ -291,17 +310,17 @@ func (m *Map) resetInterpreters(gameState *Game, interpreter *Interpreter) {
 
 func (m *Map) IsBlockingEventExecuting() bool {
 	for _, i := range m.interpreters {
-		if i.id == m.playerInterpreterID {
+		if i.ID() == m.playerInterpreterID {
 			if m.IsPlayerMovingByUserInput() {
 				continue
 			} else if i.IsExecuting() {
 				return true
 			}
 		}
-		if i.route {
+		if i.Route() {
 			continue
 		}
-		if i.parallel {
+		if i.Parallel() {
 			continue
 		}
 		if i.IsExecuting() {
@@ -374,11 +393,11 @@ var GoToTitle = errors.New("go to title")
 func (m *Map) removeNonPageRoutes(eventID int) {
 	ids := []consts.InterpreterID{}
 	for _, i := range m.interpreters {
-		if i.eventID != eventID {
+		if i.EventID() != eventID {
 			continue
 		}
-		if i.route && !i.pageRoute {
-			ids = append(ids, i.id)
+		if i.Route() && !i.PageRoute() {
+			ids = append(ids, i.ID())
 		}
 	}
 	for _, id := range ids {
@@ -389,7 +408,7 @@ func (m *Map) removeNonPageRoutes(eventID int) {
 func (m *Map) removeRoutes(eventID int) {
 	ids := []consts.InterpreterID{}
 	for id, i := range m.interpreters {
-		if i.route && i.eventID == eventID {
+		if i.Route() && i.EventID() == eventID {
 			ids = append(ids, id)
 		}
 	}
@@ -438,28 +457,28 @@ func (m *Map) Update(sceneManager *scene.Manager, gameState *Game) error {
 	}
 
 	if m.itemInterpreter == nil {
-		is := []*Interpreter{}
+		is := []InterpreterInterface{}
 
-		adoptedRoutes := map[int]*Interpreter{}
+		adoptedRoutes := map[int]InterpreterInterface{}
 		for _, i := range m.interpreters {
-			if i.route {
-				oldInt, ok := adoptedRoutes[i.eventID]
+			if i.Route() {
+				oldInt, ok := adoptedRoutes[i.EventID()]
 				// Prefer non-page-route.
-				if !ok || (oldInt.pageRoute && !i.pageRoute) {
-					adoptedRoutes[i.eventID] = i
+				if !ok || (oldInt.PageRoute() && !i.PageRoute()) {
+					adoptedRoutes[i.EventID()] = i
 				}
 			}
 			is = append(is, i)
 		}
 		sort.Slice(is, func(i, j int) bool {
-			return is[i].id < is[j].id
+			return is[i].ID() < is[j].ID()
 		})
 		for _, i := range is {
-			if i.route {
-				if i.pageRoute && m.executingEventIDByUserInput == i.eventID {
+			if i.Route() {
+				if i.PageRoute() && m.executingEventIDByUserInput == i.EventID() {
 					continue
 				}
-				if adoptedRoutes[i.eventID] != i {
+				if adoptedRoutes[i.EventID()] != i {
 					continue
 				}
 			}
@@ -467,10 +486,10 @@ func (m *Map) Update(sceneManager *scene.Manager, gameState *Game) error {
 				return err
 			}
 			if !i.IsExecuting() {
-				if i.id == m.playerInterpreterID {
+				if i.ID() == m.playerInterpreterID {
 					m.executingEventIDByUserInput = 0
 				}
-				delete(m.interpreters, i.id)
+				delete(m.interpreters, i.ID())
 			}
 		}
 	} else {
@@ -566,16 +585,16 @@ func (m *Map) tryRunParallelEvent(gameState *Game) {
 		interpreterToRemove := consts.InterpreterID(-1)
 		alreadyExecuting := false
 		for _, i := range m.interpreters {
-			if !i.parallel {
+			if !i.Parallel() {
 				continue
 			}
-			if i.mapID == m.mapID && i.roomID == m.roomID && i.eventID == id {
-				if page != nil && i.pageIndex == pageIndex {
+			if i.MapID() == m.mapID && i.RoomID() == m.roomID && i.EventID() == id {
+				if page != nil && i.PageIndex() == pageIndex {
 					alreadyExecuting = true
 					break
 				}
-				if page == nil || i.pageIndex != pageIndex {
-					interpreterToRemove = i.id
+				if page == nil || i.PageIndex() != pageIndex {
+					interpreterToRemove = i.ID()
 					break
 				}
 			}
@@ -619,7 +638,7 @@ func (m *Map) tryRunAutoEvent(gameState *Game) {
 	}
 }
 
-func (m *Map) transferPlayerImmediately(gameState *Game, roomID, x, y int, interpreter *Interpreter) {
+func (m *Map) transferPlayerImmediately(gameState *Game, roomID, x, y int, interpreter InterpreterInterface) {
 	m.player.TransferImmediately(x, y)
 	m.setRoomID(gameState, roomID, interpreter)
 }

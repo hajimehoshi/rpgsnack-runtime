@@ -377,7 +377,7 @@ func (g *Game) DecodeMsgpack(dec *msgpack.Decoder) error {
 	// Rescue old save data that might have frozen windows.
 	var ids []consts.InterpreterID
 	for _, i := range g.currentMap.allInterpreters() {
-		ids = append(ids, i.id)
+		ids = append(ids, i.ID())
 	}
 	g.windows.GC(ids)
 

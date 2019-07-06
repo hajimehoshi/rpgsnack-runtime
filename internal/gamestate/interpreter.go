@@ -140,6 +140,42 @@ func (i *Interpreter) EncodeMsgpack(enc *msgpack.Encoder) error {
 	return e.Flush()
 }
 
+func (i *Interpreter) ID() consts.InterpreterID {
+	return i.id
+}
+
+func (i *Interpreter) MapID() int {
+	return i.mapID
+}
+
+func (i *Interpreter) RoomID() int {
+	return i.roomID
+}
+
+func (i *Interpreter) EventID() int {
+	return i.eventID
+}
+
+func (i *Interpreter) Sub() InterpreterInterface {
+	return i.sub
+}
+
+func (i *Interpreter) Route() bool {
+	return i.route
+}
+
+func (i *Interpreter) PageRoute() bool {
+	return i.pageRoute
+}
+
+func (i *Interpreter) PageIndex() int {
+	return i.pageIndex
+}
+
+func (i *Interpreter) Parallel() bool {
+	return i.parallel
+}
+
 func (i *Interpreter) DecodeMsgpack(dec *msgpack.Decoder) error {
 	d := easymsgpack.NewDecoder(dec)
 	n := d.DecodeMapLen()
