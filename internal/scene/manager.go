@@ -360,7 +360,7 @@ func (m *Manager) Draw(screen *ebiten.Image) error {
 			if m.needsSharingScreenshot {
 				subject := m.game.Texts.Get(lang.Get(), m.game.System.GameName)
 				body := m.game.Texts.Get(lang.Get(), m.game.System.ScreenshotMessage)
-				m.Requester().RequestShareImage(m.GenerateRequestID(), subject, body, img)
+				m.Requester().RequestShareImage(0, subject, body, img)
 				m.needsSharingScreenshot = false
 			} else {
 				if err := os.MkdirAll(m.screenshotDir, 0755); err != nil {
