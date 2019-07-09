@@ -224,7 +224,10 @@ func (s *Screen) ZeroTint() bool {
 
 func (s *Screen) ApplyShake(g *ebiten.GeoM) {
 	if s.shakeCount == 0 {
-		return
+		if s.shakeMaxCount != infiniteCount {
+			return
+		}
+		s.shakeCount = s.shakeMaxCount
 	}
 
 	duration := s.shakeMaxCount - s.shakeCount + 1
@@ -248,9 +251,6 @@ func (s *Screen) ApplyShake(g *ebiten.GeoM) {
 		g.Translate(0, float64(delta))
 	} else {
 		g.Translate(float64(delta), 0)
-	}
-	if s.shakeMaxCount == infiniteCount && delta == 0 {
-		s.shakeCount = s.shakeMaxCount
 	}
 }
 
