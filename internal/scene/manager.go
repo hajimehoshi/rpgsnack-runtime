@@ -72,6 +72,7 @@ type Manager struct {
 	rewardedAdsLoaded     bool
 	credits               *data.Credits
 	prices                map[string]string
+	news                  []*data.News
 	popupNewsID           int64
 
 	blackImage *ebiten.Image
@@ -98,6 +99,7 @@ const (
 	PlatformDataKeyBackButton            PlatformDataKey = "backbutton"
 	PlatformDataKeyCredits               PlatformDataKey = "credits"
 	PlatformDataKeyPrices                PlatformDataKey = "prices"
+	PlatformDataKeyNews                  PlatformDataKey = "news"
 	PlatformDataKeyPopupNewsID           PlatformDataKey = "popup_news_id"
 )
 
@@ -260,6 +262,12 @@ func (m *Manager) Update() error {
 				return err
 			}
 			m.prices = prices
+		case PlatformDataKeyNews:
+			var news []*data.News
+			if err := json.Unmarshal([]byte(a.value), &news); err != nil {
+				return err
+			}
+			m.news = news
 		case PlatformDataKeyPopupNewsID:
 			i, err := strconv.ParseInt(a.value, 10, 64)
 			if err != nil {
