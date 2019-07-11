@@ -22,6 +22,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	"github.com/hajimehoshi/ebiten"
@@ -72,6 +73,7 @@ type Manager struct {
 	credits               *data.Credits
 	prices                map[string]string
 	news                  []*data.News
+	popupNewsID           int64
 
 	blackImage *ebiten.Image
 	turbo      bool
@@ -98,6 +100,7 @@ const (
 	PlatformDataKeyCredits               PlatformDataKey = "credits"
 	PlatformDataKeyPrices                PlatformDataKey = "prices"
 	PlatformDataKeyNews                  PlatformDataKey = "news"
+	PlatformDataKeyPopupNewsID           PlatformDataKey = "popup_news_id"
 )
 
 func NewManager(width, height int, requester Requester, game *data.Game, progress []byte, permanent []byte, purchases []string, fadingInCount int) *Manager {
@@ -265,6 +268,12 @@ func (m *Manager) Update() error {
 				return err
 			}
 			m.news = news
+		case PlatformDataKeyPopupNewsID:
+			i, err := strconv.ParseInt(a.value, 10, 64)
+			if err != nil {
+				return err
+			}
+			m.popupNewsID = i
 		default:
 			log.Printf("platform data key not implemented: %s", a.key)
 		}
