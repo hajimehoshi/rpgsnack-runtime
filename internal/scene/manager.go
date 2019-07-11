@@ -71,6 +71,7 @@ type Manager struct {
 	rewardedAdsLoaded     bool
 	credits               *data.Credits
 	prices                map[string]string
+	news                  []*data.News
 
 	blackImage *ebiten.Image
 	turbo      bool
@@ -96,6 +97,7 @@ const (
 	PlatformDataKeyBackButton            PlatformDataKey = "backbutton"
 	PlatformDataKeyCredits               PlatformDataKey = "credits"
 	PlatformDataKeyPrices                PlatformDataKey = "prices"
+	PlatformDataKeyNews                  PlatformDataKey = "news"
 )
 
 func NewManager(width, height int, requester Requester, game *data.Game, progress []byte, permanent []byte, purchases []string, fadingInCount int) *Manager {
@@ -257,6 +259,12 @@ func (m *Manager) Update() error {
 				return err
 			}
 			m.prices = prices
+		case PlatformDataKeyNews:
+			var news []*data.News
+			if err := json.Unmarshal([]byte(a.value), &news); err != nil {
+				return err
+			}
+			m.news = news
 		default:
 			log.Printf("platform data key not implemented: %s", a.key)
 		}
