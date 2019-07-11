@@ -31,6 +31,7 @@ type Requester interface {
 	RequestSendAnalytics(eventName string, value string)
 	RequestVibration(vibrationType string)
 	RequestAsset(requestID int, key string)
+	RequestMarkNewsRead(newsID int64)
 }
 
 type RequestType int

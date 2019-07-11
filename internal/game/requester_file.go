@@ -226,3 +226,7 @@ func (m *Requester) RequestAsset(requestID int, key string) {
 		m.game.RespondAsset(requestID, true, []byte{})
 	}()
 }
+
+func (m *Requester) RequestMarkNewsRead(newsId int64) {
+	log.Printf("request mark news %d read", newsId)
+}
