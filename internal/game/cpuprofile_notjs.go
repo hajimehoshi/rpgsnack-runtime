@@ -39,7 +39,7 @@ var (
 )
 
 func takeCPUProfileIfAvailable() {
-	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
+	if inpututil.IsKeyJustPressed(ebiten.KeyQ) {
 		if *cpuProfile != "" && cpuProfileFile == nil {
 			f, err := os.Create(*cpuProfile)
 			if err != nil {
@@ -59,7 +59,7 @@ func takeCPUProfileIfAvailable() {
 			log.Print("Start Tracing")
 		}
 	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyQ) {
+	if inpututil.IsKeyJustPressed(ebiten.KeyW) {
 		if cpuProfileFile != nil {
 			pprof.StopCPUProfile()
 			cpuProfileFile.Close()
