@@ -604,7 +604,7 @@ func (m *MapScene) Update(sceneManager *scene.Manager) error {
 		return nil
 	}
 
-	if input.BackButtonPressed() {
+	if input.BackButtonTriggered() {
 		m.handleBackButton(sceneManager)
 	}
 

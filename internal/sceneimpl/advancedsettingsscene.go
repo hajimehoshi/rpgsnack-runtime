@@ -189,7 +189,7 @@ func (s *AdvancedSettingsScene) Update(sceneManager *scene.Manager) error {
 		s.initialized = true
 	}
 
-	if input.BackButtonPressed() {
+	if input.BackButtonTriggered() {
 		s.handleBackButton(sceneManager)
 	}
 

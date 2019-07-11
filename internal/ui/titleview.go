@@ -182,7 +182,7 @@ func (t *TitleView) Update(game *data.Game, hasProgress bool, isAdsRemoved bool)
 		t.initialized = true
 	}
 
-	if input.BackButtonPressed() {
+	if input.BackButtonTriggered() {
 		t.handleBackButton()
 	}
 

@@ -217,7 +217,7 @@ func (m *Manager) ResetPseudoScreen() {
 }
 
 func (m *Manager) Update() error {
-	triggerBack := false
+	backPressed := false
 	select {
 	case r := <-m.resultCh:
 		m.results[r.ID] = &r
@@ -244,7 +244,7 @@ func (m *Manager) Update() error {
 		case PlatformDataKeyRewardedAdsLoaded:
 			m.rewardedAdsLoaded = true
 		case PlatformDataKeyBackButton:
-			triggerBack = true
+			backPressed = true
 		case PlatformDataKeyCredits:
 			var credits *data.Credits
 			if err := json.Unmarshal([]byte(a.value), &credits); err != nil {
@@ -310,9 +310,9 @@ func (m *Manager) Update() error {
 	}
 	for i := 0; i < n; i++ {
 		input.Update(m.widthScale(), 1)
-		if triggerBack {
-			input.TriggerBackButton()
-			triggerBack = false
+		if backPressed {
+			input.PressBackButton()
+			backPressed = false
 		}
 		if m.next != nil {
 			if m.fadingOutCount == 0 {

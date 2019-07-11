@@ -23,10 +23,12 @@ var theInput = &input{}
 
 type input struct {
 	pressCount     int
+	prevPressCount int
 	x              int
 	y              int
-	backPressCount int
-	prevPressCount int
+
+	backPressCount    int
+	backButtonPressed bool
 }
 
 func IsMuteButtonTriggered() bool {
@@ -61,12 +63,12 @@ func Pressed() bool {
 	return theInput.Pressed()
 }
 
-func BackButtonPressed() bool {
-	return inpututil.IsKeyJustPressed(ebiten.KeyB) || theInput.BackButtonPressed()
+func BackButtonTriggered() bool {
+	return inpututil.IsKeyJustPressed(ebiten.KeyB) || theInput.BackButtonTriggered()
 }
 
-func TriggerBackButton() {
-	theInput.TriggerBackButton()
+func PressBackButton() {
+	theInput.PressBackButton()
 }
 
 func Triggered() bool {
@@ -103,9 +105,12 @@ func (i *input) updatePointerDevices(scaleX, scaleY float64) {
 func (i *input) Update(scaleX, scaleY float64) {
 	i.prevPressCount = i.pressCount
 	i.updatePointerDevices(scaleX, scaleY)
-	if i.backPressCount > 0 {
-		i.backPressCount--
+	if i.backButtonPressed {
+		i.backPressCount++
+	} else {
+		i.backPressCount = 0
 	}
+	i.backButtonPressed = false
 }
 
 func (i *input) Pressed() bool {
@@ -124,10 +129,10 @@ func (i *input) Position() (int, int) {
 	return i.x, i.y
 }
 
-func (i *input) BackButtonPressed() bool {
-	return i.backPressCount > 0
+func (i *input) BackButtonTriggered() bool {
+	return i.backPressCount == 1
 }
 
-func (i *input) TriggerBackButton() {
-	i.backPressCount = 1
+func (i *input) PressBackButton() {
+	i.backButtonPressed = true
 }
