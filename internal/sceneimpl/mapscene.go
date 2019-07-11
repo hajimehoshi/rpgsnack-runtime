@@ -678,8 +678,10 @@ func (m *MapScene) handleBackButton(sceneManager *scene.Manager) {
 		return
 	}
 
-	audio.PlaySE("system/click", 1.0)
-	m.quitPopup.Show()
+	if m.titleView == nil {
+		audio.PlaySE("system/click", 1.0)
+		m.quitPopup.Show()
+	}
 }
 
 func (m *MapScene) drawTileLayer(layer int, priority data.Priority) {
