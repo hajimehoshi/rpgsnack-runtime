@@ -37,8 +37,6 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/screenshot"
 )
 
-var TierTypes = [...]string{"tier1_donation", "tier2_donation", "tier3_donation", "tier4_donation"}
-
 type Scene interface {
 	Update(manager *Manager) error
 	Draw(screen *ebiten.Image)
@@ -552,12 +550,12 @@ func (m *Manager) SponsorTier() int {
 		if iap == nil {
 			continue
 		}
-		for i, tierType := range TierTypes {
-			if iap.Type == tierType {
-				if maxTier < i+1 {
-					maxTier = i + 1
-				}
-			}
+		s := consts.SponsorTierType(iap.Type)
+		if !s.IsValid() {
+			continue
+		}
+		if maxTier < s.Level() {
+			maxTier = s.Level()
 		}
 	}
 	return maxTier

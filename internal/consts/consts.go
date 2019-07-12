@@ -14,6 +14,11 @@
 
 package consts
 
+import (
+	"fmt"
+	"image/color"
+)
+
 // InterpreterID represents a unique identifier of interpreters
 type InterpreterID int
 
@@ -46,4 +51,51 @@ func CeilDiv(x, y int) int {
 func HasExtraBottomGrid(screenHeight int) bool {
 	const superLargeScreenHeight = (TileYNum - 1) * TileSize * TileScale
 	return screenHeight > superLargeScreenHeight
+}
+
+type SponsorTierType string
+
+const (
+	SponsorTierType_1_Donation SponsorTierType = "tier1_donation"
+	SponsorTierType_2_Donation SponsorTierType = "tier2_donation"
+	SponsorTierType_3_Donation SponsorTierType = "tier3_donation"
+	SponsorTierType_4_Donation SponsorTierType = "tier4_donation"
+)
+
+func (t SponsorTierType) IsValid() bool {
+	switch t {
+	case SponsorTierType_1_Donation, SponsorTierType_2_Donation, SponsorTierType_3_Donation, SponsorTierType_4_Donation:
+		return true
+	}
+	return false
+}
+
+func (t SponsorTierType) Level() int {
+	switch t {
+	case SponsorTierType_1_Donation:
+		return 1
+	case SponsorTierType_2_Donation:
+		return 2
+	case SponsorTierType_3_Donation:
+		return 3
+	case SponsorTierType_4_Donation:
+		return 4
+	default:
+		panic(fmt.Sprintf("consts: invalid sponsor tier type: %s", t))
+	}
+}
+
+func (t SponsorTierType) Color() color.Color {
+	switch t {
+	case SponsorTierType_1_Donation:
+		return color.RGBA{0xcd, 0x7f, 0x32, 0xff} // bronze
+	case SponsorTierType_2_Donation:
+		return color.RGBA{0xc0, 0xc0, 0xc0, 0xff} // silver
+	case SponsorTierType_3_Donation:
+		return color.RGBA{0xff, 0xd7, 0x00, 0xff} // gold
+	case SponsorTierType_4_Donation:
+		return color.RGBA{0xee, 0xee, 0xee, 0xff} // platinum
+	default:
+		panic(fmt.Sprintf("consts: invalid sponsor tier type: %s", t))
+	}
 }
