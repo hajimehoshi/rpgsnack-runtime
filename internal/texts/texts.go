@@ -52,6 +52,9 @@ const (
 	TextIDMinigameWatchAds
 	TextIDMinigameProgress
 	TextIDVibration
+	TextIDBuy
+	TextIDPurchased
+	TextIDDetails
 )
 
 func Text(lang language.Tag, id TextID) string {
@@ -101,6 +104,9 @@ Please make sure to sign in
 and connect to the network.`,
 		TextIDMinigameWatchAds: "Watch ads to boost",
 		TextIDMinigameProgress: "Progress %d / %d",
+		TextIDBuy:              "Buy",
+		TextIDPurchased:        "Purchased",
+		TextIDDetails:          "Details",
 	},
 	language.German: {
 		TextIDNewGame:      "Neues Spiel",
@@ -141,6 +147,9 @@ Stelle sicher, dass du angemeldet
 und mit dem Internet verbindet bist.`,
 		TextIDMinigameWatchAds: "Beschleunigen mit Ads",
 		TextIDMinigameProgress: "Fortschritt %d / %d",
+		TextIDBuy:              "Kaufen",
+		TextIDPurchased:        "Gekauft",
+		TextIDDetails:          "Details",
 	},
 	language.Spanish: {
 		TextIDNewGame:      "Nuevo Juego",
@@ -179,6 +188,9 @@ Por favor asegúrate de iniciar
 sesión y conectarse a internet`,
 		TextIDMinigameWatchAds: "¡Acelera viendo anuncios!",
 		TextIDMinigameProgress: "Progreso %d / %d",
+		TextIDBuy:              "Compar",
+		TextIDPurchased:        "Comprado",
+		TextIDDetails:          "Detalles",
 	},
 	language.Portuguese: {
 		TextIDNewGame:      "Novo Jogo",
@@ -219,6 +231,9 @@ Por favor, certifique-se de fazer
 o login e se conectar à internet`,
 		TextIDMinigameWatchAds: "Acelerar assistindo anúncios!",
 		TextIDMinigameProgress: "Progresso %d / %d",
+		TextIDBuy:              "Compar",
+		TextIDPurchased:        "Comprado",
+		TextIDDetails:          "Detalhes",
 	},
 	language.Japanese: {
 		TextIDNewGame:      "はじめから",
@@ -257,6 +272,9 @@ o login e se conectar à internet`,
 確認してください`,
 		TextIDMinigameWatchAds: "広告を見てブースト！",
 		TextIDMinigameProgress: "進捗 %d / %d",
+		TextIDBuy:              "購入する",
+		TextIDPurchased:        "購入済み",
+		TextIDDetails:          "詳細",
 	},
 	language.SimplifiedChinese: {
 		TextIDNewGame:      "新游戏",
@@ -294,6 +312,9 @@ o login e se conectar à internet`,
 请确定你已经登录并已连上网络`,
 		TextIDMinigameWatchAds: "通过观看广告加速！",
 		TextIDMinigameProgress: "进展 %d / %d",
+		TextIDBuy:              "购买",
+		TextIDPurchased:        "已购买",
+		TextIDDetails:          "更多细节",
 	},
 	language.TraditionalChinese: {
 		TextIDNewGame:      "新遊戲",
@@ -331,6 +352,9 @@ o login e se conectar à internet`,
 請確定你已經登錄並已連上網絡`,
 		TextIDMinigameWatchAds: "通過觀看廣告加速！",
 		TextIDMinigameProgress: "進展 %d / %d",
+		TextIDBuy:              "購買",
+		TextIDPurchased:        "已購買",
+		TextIDDetails:          "更多細節",
 	},
 	language.Korean: {
 		TextIDNewGame:      "처음부터",
@@ -369,5 +393,8 @@ o login e se conectar à internet`,
 확인해주세요`,
 		TextIDMinigameWatchAds: "광고를 보고 부스트!",
 		TextIDMinigameProgress: "진행 %d / %d",
+		TextIDBuy:              "구매하기",
+		TextIDPurchased:        "구입 완료",
+		TextIDDetails:          "자세히",
 	},
 }
