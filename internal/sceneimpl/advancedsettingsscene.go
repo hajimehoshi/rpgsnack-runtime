@@ -75,7 +75,7 @@ func (s *AdvancedSettingsScene) initUI(sceneManager *scene.Manager) {
 	s.resetGameButton = ui.NewButton(s.baseX, s.calcButtonY(5), 120, 20, "system/click")
 	s.closeButton = ui.NewButton(s.baseX, s.calcButtonY(8), 120, 20, "system/cancel")
 
-	s.languagePopup = ui.NewPopup(h/(2*consts.TileScale)-80, 160)
+	s.languagePopup = ui.NewPopup((h/consts.TileScale-160)/2, 160)
 
 	for i, l := range sceneManager.Game().Texts.Languages() {
 		i := i // i is captured by the below closure and it is needed to copy here.
@@ -91,7 +91,7 @@ func (s *AdvancedSettingsScene) initUI(sceneManager *scene.Manager) {
 			lang = sceneManager.SetLanguage(lang)
 			s.waitingRequestID = sceneManager.GenerateRequestID()
 			sceneManager.Requester().RequestChangeLanguage(s.waitingRequestID, lang.String())
-			s.updateButtonTexts()
+			s.updateTexts()
 		})
 	}
 
@@ -129,7 +129,7 @@ func (s *AdvancedSettingsScene) initUI(sceneManager *scene.Manager) {
 		sceneManager.GoTo(NewSettingsScene())
 	})
 
-	s.warningPopup = ui.NewPopup(h/(2*consts.TileScale)-64, 124)
+	s.warningPopup = ui.NewPopup((h/consts.TileScale-128)/2, 128)
 	s.warningLabel = ui.NewLabel(16, 8)
 	s.warningYesButton = ui.NewButton((ui.PopupWidth-120)/2, 72, 120, 20, "system/click")
 	s.warningNoButton = ui.NewButton((ui.PopupWidth-120)/2, 96, 120, 20, "system/cancel")
@@ -157,7 +157,7 @@ func (s *AdvancedSettingsScene) initUI(sceneManager *scene.Manager) {
 	}
 }
 
-func (s *AdvancedSettingsScene) updateButtonTexts() {
+func (s *AdvancedSettingsScene) updateTexts() {
 	s.settingsLabel.Text = texts.Text(lang.Get(), texts.TextIDAdvancedSettings)
 	s.vibrationLabel.Text = texts.Text(lang.Get(), texts.TextIDVibration)
 	s.languageButton.SetText(texts.Text(lang.Get(), texts.TextIDLanguage))
@@ -193,7 +193,7 @@ func (s *AdvancedSettingsScene) Update(sceneManager *scene.Manager) error {
 		s.handleBackButton(sceneManager)
 	}
 
-	s.updateButtonTexts()
+	s.updateTexts()
 
 	s.languagePopup.Update()
 	s.warningPopup.Update()

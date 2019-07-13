@@ -206,7 +206,7 @@ func (m *MapScene) initUI(sceneManager *scene.Manager) {
 		m.gameHeader = ui.NewGameHeader()
 	}
 
-	m.quitPopup = ui.NewPopup(screenH/(2*consts.TileScale)-64, 124)
+	m.quitPopup = ui.NewPopup((screenH/consts.TileScale-128)/2, 128)
 	m.quitLabel = ui.NewLabel(16, 8)
 	m.quitYesButton = ui.NewButton((ui.PopupWidth-120)/2, 72, 120, 20, "")
 	m.quitNoButton = ui.NewButton((ui.PopupWidth-120)/2, 96, 120, 20, "system/cancel")

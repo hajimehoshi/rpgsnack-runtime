@@ -118,7 +118,7 @@ func (s *SettingsScene) initUI(sceneManager *scene.Manager) {
 	s.credits.SetCloseButtonVisible(true)
 }
 
-func (s *SettingsScene) updateButtonTexts() {
+func (s *SettingsScene) updateTexts() {
 	s.advancedButton.SetText(texts.Text(lang.Get(), texts.TextIDAdvancedSettings))
 	s.creditsButton.SetText(texts.Text(lang.Get(), texts.TextIDCredits))
 	s.updateCreditsButton.SetText(texts.Text(lang.Get(), texts.TextIDCreditsEntry))
@@ -143,7 +143,7 @@ func (s *SettingsScene) Update(sceneManager *scene.Manager) error {
 		s.handleBackButton(sceneManager)
 	}
 
-	s.updateButtonTexts()
+	s.updateTexts()
 
 	if sceneManager.SponsorTier() > 0 {
 		s.updateCreditsButton.Show()
