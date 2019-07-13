@@ -95,28 +95,6 @@ func RespondPurchase(id int, success bool, purchases []uint8) (err error) {
 	return nil
 }
 
-func RespondShowShop(id int, success bool, purchases []uint8) (err error) {
-	<-startCalled
-
-	defer func() {
-		if r := recover(); r != nil {
-			ok := false
-			err, ok = r.(error)
-			if !ok {
-				err = fmt.Errorf("error at RespondShowShop: %v", err)
-			}
-		}
-	}()
-
-	var p []uint8
-	if purchases != nil {
-		p = make([]uint8, len(purchases))
-		copy(p, purchases)
-	}
-	theGame.RespondShowShop(id, success, p)
-	return nil
-}
-
 func RespondRestorePurchases(id int, success bool, purchases []uint8) (err error) {
 	<-startCalled
 

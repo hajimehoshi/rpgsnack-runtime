@@ -106,6 +106,7 @@ func (m *Requester) RequestPurchase(requestID int, productID string) {
 		// In Go, arguments of the rightmost parenthesis are evaluated early.
 		// As result value can be changed later, annonymous functions is needed here.
 		defer func() {
+			time.Sleep(3 * time.Second)
 			m.game.RespondPurchase(requestID, true, result)
 		}()
 
@@ -137,12 +138,6 @@ func (m *Requester) RequestPurchase(requestID int, productID string) {
 			panic(err)
 		}
 	}()
-}
-
-func (m *Requester) RequestShowShop(requestID int, data string) {
-	log.Printf("request to ShowShop data:%s", data)
-	//TODO Mock purchase selection
-	m.game.RespondShowShop(requestID, true, []byte("[\"bronze_support\"]"))
 }
 
 func (m *Requester) RequestRestorePurchases(requestID int) {

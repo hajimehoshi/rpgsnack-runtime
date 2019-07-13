@@ -142,15 +142,6 @@ type Shop struct {
 	Products []int    `msgpack:"products"`
 }
 
-type ShopPopupTab struct {
-	Name     string         `json:"name"`
-	Products []*ShopProduct `json:"products"`
-}
-
-type ShopPopup struct {
-	Tabs []*ShopPopupTab `json:"tabs"`
-}
-
 type ShopProduct struct {
 	ID       int    `json:"id"`
 	Key      string `json:"key"`

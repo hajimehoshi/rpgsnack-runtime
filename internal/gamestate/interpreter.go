@@ -291,7 +291,7 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		}
 		i.waitingRequestID = 0
 		switch r.Type {
-		case scene.RequestTypePurchase, scene.RequestTypeRewardedAds, scene.RequestTypeShowShop:
+		case scene.RequestTypePurchase, scene.RequestTypeRewardedAds:
 			if r.Succeeded {
 				i.commandIterator.Choose(0)
 			} else {
@@ -855,15 +855,17 @@ func (i *Interpreter) doOneCommand(sceneManager *scene.Manager, gameState *Game)
 		i.commandIterator.Advance()
 
 	case data.CommandNameShowShop:
-		i.waitingRequestID = sceneManager.GenerateRequestID()
 		args := c.Args.(*data.CommandArgsShowShop)
-		sceneManager.Requester().RequestShowShop(i.waitingRequestID, string(sceneManager.DynamicShopData(args.Products)))
+		sceneManager.ShowShopDynamicData(args.Products)
+		i.commandIterator.Advance()
+		// Advance the iterator, but wait for the shopping finished.
 		return false, nil
 
 	case data.CommandNameShowMainShop:
-		i.waitingRequestID = sceneManager.GenerateRequestID()
 		args := c.Args.(*data.CommandArgsShowMainShop)
-		sceneManager.Requester().RequestShowShop(i.waitingRequestID, string(sceneManager.ShopData(data.ShopTypeMain, args.Tabs)))
+		sceneManager.ShowShop(data.ShopTypeMain, args.Tabs)
+		i.commandIterator.Advance()
+		// Advance the iterator, but wait for the shopping finished.
 		return false, nil
 
 	case data.CommandNameShowMinigame:

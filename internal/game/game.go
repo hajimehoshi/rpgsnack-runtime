@@ -206,10 +206,6 @@ func (g *Game) RespondPurchase(id int, success bool, purchases []uint8) {
 	g.sceneManager.RespondPurchase(id, success, purchases)
 }
 
-func (g *Game) RespondShowShop(id int, success bool, purchases []uint8) {
-	g.sceneManager.RespondShowShop(id, success, purchases)
-}
-
 func (g *Game) RespondRestorePurchases(id int, success bool, purchases []uint8) {
 	g.sceneManager.RespondRestorePurchases(id, success, purchases)
 }

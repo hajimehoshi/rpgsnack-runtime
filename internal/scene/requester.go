@@ -19,7 +19,6 @@ type Requester interface {
 	RequestSaveProgress(requestID int, data []byte)
 	RequestSavePermanent(requestID int, data []byte)
 	RequestPurchase(requestID int, productID string)
-	RequestShowShop(requestID int, data string)
 	RequestRestorePurchases(requestID int)
 	RequestInterstitialAds(requestID int, forceAds bool)
 	RequestRewardedAds(requestID int, forceAds bool)
@@ -44,7 +43,6 @@ const (
 	RequestTypeSaveProgress
 	RequestTypeSavePermanent
 	RequestTypePurchase
-	RequestTypeShowShop
 	RequestTypeRestorePurchases
 	RequestTypeInterstitialAds
 	RequestTypeRewardedAds

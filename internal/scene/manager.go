@@ -35,6 +35,7 @@ import (
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/input"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/lang"
 	"github.com/hajimehoshi/rpgsnack-runtime/internal/screenshot"
+	"github.com/hajimehoshi/rpgsnack-runtime/internal/ui2"
 )
 
 type Scene interface {
@@ -87,6 +88,8 @@ type Manager struct {
 
 	// offscreen is for scaling.
 	offscreen *ebiten.Image
+
+	shopPopup *ui2.ShopPopup
 }
 
 type PlatformDataKey string
@@ -229,13 +232,17 @@ func (m *Manager) Update() error {
 			m.interstitialAdsLoaded = false
 		case RequestTypeRewardedAds:
 			m.rewardedAdsLoaded = false
-		case RequestTypePurchase, RequestTypeRestorePurchases, RequestTypeShowShop:
+		case RequestTypePurchase, RequestTypeRestorePurchases:
 			if r.Succeeded {
 				var purchases []string
 				if err := json.Unmarshal(r.Data, &purchases); err != nil {
 					return err
 				}
 				m.purchases = purchases
+			}
+
+			if m.shopPopup != nil && m.shopPopup.Visible() {
+				m.shopPopup.OnPurchased(r.Succeeded)
 			}
 		default:
 			// There is no action here. It's ok to ignore.
@@ -329,14 +336,24 @@ func (m *Manager) Update() error {
 			input.PressBackButton()
 			backPressed = false
 		}
+
 		if m.next != nil {
 			if m.fadingOutCount == 0 {
 				m.current = m.next
 				m.next = nil
 			}
 		} else {
-			if err := m.current.Update(m); err != nil {
-				return err
+			if m.shopPopup != nil {
+				m.shopPopup.HandleInput(0, 0)
+				// shopPopup might be closed after handling input. Check this again.
+				if m.shopPopup != nil {
+					m.shopPopup.Update(m.prices, m)
+				}
+			}
+			if m.shopPopup == nil || !m.shopPopup.Visible() {
+				if err := m.current.Update(m); err != nil {
+					return err
+				}
 			}
 		}
 		if 0 < m.fadingOutCount {
@@ -417,6 +434,9 @@ func (m *Manager) drawWithScale(screen *ebiten.Image) {
 
 func (m *Manager) drawImpl(screen *ebiten.Image) {
 	m.current.Draw(screen)
+	if m.shopPopup != nil {
+		m.shopPopup.Draw(screen)
+	}
 	if 0 < m.fadingInCount || 0 < m.fadingOutCount {
 		alpha := 0.0
 		if 0 < m.fadingOutCount {
@@ -491,43 +511,6 @@ func (m *Manager) IsAvailable(id int) bool {
 	}
 
 	return true
-}
-
-func (m *Manager) ShopData(name data.ShopType, tabs []bool) []byte {
-	p := &data.ShopPopup{}
-	for i, t := range tabs {
-		if !t {
-			continue
-		}
-		shop := m.Game().GetShop(name, i)
-		if shop == nil || len(shop.Products) == 0 {
-			continue
-		}
-		p.Tabs = append(p.Tabs, &data.ShopPopupTab{
-			Name:     m.game.Texts.Get(lang.Get(), shop.TabName),
-			Products: m.getShopProducts(shop.Products),
-		})
-	}
-
-	b, err := json.Marshal(p)
-	if err != nil {
-		panic(err)
-	}
-	return b
-}
-
-func (m *Manager) DynamicShopData(products []int) []byte {
-	p := &data.ShopPopup{}
-	p.Tabs = append(p.Tabs, &data.ShopPopupTab{
-		Name:     "",
-		Products: m.getShopProducts(products),
-	})
-
-	b, err := json.Marshal(p)
-	if err != nil {
-		panic(err)
-	}
-	return b
 }
 
 func (m *Manager) getShopProducts(products []int) []*data.ShopProduct {
@@ -618,13 +601,6 @@ func (m *Manager) Credits() *data.Credits {
 	return m.credits
 }
 
-func (m *Manager) Price(key string) string {
-	if m.prices == nil {
-		return ""
-	}
-	return m.prices[key]
-}
-
 func (m *Manager) ReceiveResultIfExists(id int) *RequestResult {
 	if r, ok := m.results[id]; ok {
 		delete(m.results, id)
@@ -670,6 +646,10 @@ func (m *Manager) RequestSaveVibrationEnabled(requestID int, vibrationEnabled bo
 	m.Requester().RequestSavePermanent(requestID, bytes)
 }
 
+func (m *Manager) RequestPurchase(key string) {
+	m.Requester().RequestPurchase(0, key)
+}
+
 func (m *Manager) PermanentVariableValue(id int) int64 {
 	if len(m.permanent.Variables) < id+1 {
 		zeros := make([]int64, id+1-len(m.permanent.Variables))
@@ -711,6 +691,43 @@ func (m *Manager) PermanentMinigame(id int) *MinigameData {
 	return m.permanent.Minigames[id]
 }
 
+func (m *Manager) ShowShop(name data.ShopType, tabs []bool) {
+	p := &ui2.ShopPopupData{}
+	for i, t := range tabs {
+		if !t {
+			continue
+		}
+		shop := m.Game().GetShop(name, i)
+		if shop == nil || len(shop.Products) == 0 {
+			continue
+		}
+		p.Tabs = append(p.Tabs, &ui2.ShopPopupTab{
+			ID:       i,
+			Name:     m.game.Texts.Get(lang.Get(), shop.TabName),
+			Products: m.getShopProducts(shop.Products),
+		})
+	}
+	m.showShopPopup(p)
+}
+
+func (m *Manager) ShowShopDynamicData(products []int) {
+	p := &ui2.ShopPopupData{}
+	p.Tabs = append(p.Tabs, &ui2.ShopPopupTab{
+		ID:       ui2.ShopPopupTabInvalidID,
+		Name:     "",
+		Products: m.getShopProducts(products),
+	})
+	m.showShopPopup(p)
+}
+
+func (m *Manager) showShopPopup(shopData *ui2.ShopPopupData) {
+	if m.shopPopup == nil {
+		m.shopPopup = ui2.NewShopPopup(m.height)
+	}
+	m.shopPopup.SetShopData(shopData, m)
+	m.shopPopup.Show()
+}
+
 func (m *Manager) RespondUnlockAchievement(id int) {
 	go func() {
 		m.resultCh <- RequestResult{
@@ -743,17 +760,6 @@ func (m *Manager) RespondPurchase(id int, success bool, purchases []byte) {
 		m.resultCh <- RequestResult{
 			ID:        id,
 			Type:      RequestTypePurchase,
-			Succeeded: success,
-			Data:      purchases,
-		}
-	}()
-}
-
-func (m *Manager) RespondShowShop(id int, success bool, purchases []byte) {
-	go func() {
-		m.resultCh <- RequestResult{
-			ID:        id,
-			Type:      RequestTypeShowShop,
 			Succeeded: success,
 			Data:      purchases,
 		}

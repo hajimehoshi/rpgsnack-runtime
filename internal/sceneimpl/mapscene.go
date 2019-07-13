@@ -120,7 +120,7 @@ func NewTitleMapScene(sceneManager *scene.Manager, savedGame *gamestate.Game) *M
 	})
 	m.titleView.SetOnRemoveAds(func() {
 		if sceneManager.Game().IsShopAvailable(data.ShopTypeHome) {
-			sceneManager.Requester().RequestShowShop(m.titleView.WaitingRequestID(), string(sceneManager.ShopData(data.ShopTypeHome, []bool{true})))
+			sceneManager.ShowShop(data.ShopTypeHome, []bool{true})
 		}
 	})
 	m.titleView.SetOnSettings(func() {

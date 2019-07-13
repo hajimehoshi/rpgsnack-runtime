@@ -45,7 +45,7 @@ type floatScaleImageCacheKey struct {
 }
 
 // floatScaleImageCache is an image cache with scales and its text.
-var floatScaleImageCache = lru.New(10)
+var floatScaleImageCache = lru.New(20)
 
 const (
 	RenderingLineHeight = 18
@@ -137,6 +137,9 @@ func drawTextLangFloatScale(screen *ebiten.Image, str string, ox, oy int, scale 
 	}
 	var img *ebiten.Image
 	w, h := MeasureSize(str)
+	if w == 0 || h == 0 {
+		return
+	}
 	if cached, ok := floatScaleImageCache.Get(k); ok {
 		img = cached.(*ebiten.Image)
 	} else {
@@ -209,4 +212,64 @@ func drawTextLangIntScale(screen *ebiten.Image, str string, ox, oy int, scale in
 		text.Draw(screen, l, f, x, y, color)
 		oy += RenderingLineHeight * scale
 	}
+}
+
+// forbidAtLineStart reports whether the r is forbidden to come to the start of a line.
+//
+// https://en.wikipedia.org/wiki/Line_breaking_rules_in_East_Asian_languages
+func forbidAtLineStart(r rune, lang language.Tag) bool {
+	switch lang {
+	case language.SimplifiedChinese:
+		return strings.ContainsRune("!%),.:;?]}¢°·’\"†‡›℃∶、。〃〆〕〗〞﹚﹜！＂％＇），．：；？！］｝～", r)
+	case language.TraditionalChinese:
+		return strings.ContainsRune("!),.:;?]}¢·–— ’\"• 、。〆〞〕〉》」︰︱︲︳﹐﹑﹒﹓﹔﹕﹖﹘﹚﹜！），．：；？︶︸︺︼︾﹀﹂﹗］｜｝､", r)
+	case language.Japanese:
+		const runes = ")]｝〕〉》」』】〙〗〟’\"｠»" +
+			"ヽヾーァィゥェォッャュョヮヵヶぁぃぅぇぉっゃゅょゎゕゖㇰㇱㇲㇳㇴㇵㇶㇷㇸㇹㇺㇻㇼㇽㇾㇿ々〻" +
+			"‐゠–〜" +
+			"?!‼⁇⁈⁉" +
+			"・、:;," +
+			"。." +
+			"？！”" // Zenkaku characters
+		if strings.ContainsRune(runes, r) {
+			return true
+		}
+		return false
+	default:
+		return false
+	}
+}
+
+// InsertNewLines inserts new lines characters to the given text so that the text width fits with the width.
+func InsertNewLines(text string, width int, lang language.Tag) string {
+	var sep string
+	var units []string
+	switch lang {
+	case language.Japanese, language.SimplifiedChinese, language.TraditionalChinese:
+		// TODO: Finish implementation.
+		for _, r := range text {
+			units = append(units, string(r))
+		}
+		sep = ""
+	default:
+		units = strings.Split(text, " ")
+		sep = " "
+	}
+
+	var lines []string
+	for _, u := range units {
+		if len(u) == 0 {
+			continue
+		}
+		if len(lines) == 0 {
+			lines = append(lines, u)
+			continue
+		}
+		if w, _ := MeasureSize(lines[len(lines)-1] + sep + u); w <= width {
+			lines[len(lines)-1] += sep + u
+		} else {
+			lines = append(lines, u)
+		}
+	}
+	return strings.Join(lines, "\n")
 }
